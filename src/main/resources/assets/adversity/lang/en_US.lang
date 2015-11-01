@@ -1,0 +1,29 @@
+tile.basalt.rough.name=Basalt
+tile.basalt.smooth.name=Smooth Basalt
+
+
+tile.Unobtanium_0.name=White Unobtanium Composite - Intact
+tile.Unobtanium_1.name=White Unobtanium Composite - 15% Damaged
+tile.Unobtanium_2.name=White Unobtanium Composite - 30% Damaged
+tile.Unobtanium_3.name=White Unobtanium Composite - 45% Damaged
+tile.Unobtanium_4.name=White Unobtanium Composite - 60% Damaged
+tile.Unobtanium_5.name=White Unobtanium Composite - 75% Damaged
+tile.Unobtanium_6.name=White Unobtanium Composite - 90% Damaged
+tile.Unobtanium_7.name=White Unobtanium Composite - Failed
+tile.Unobtanium_8.name=Gray Unobtanium Composite - Intact
+tile.Unobtanium_9.name=Gray Unobtanium Composite - 15% Damaged
+tile.Unobtanium_10.name=Gray Unobtanium Composite - 30% Damaged
+tile.Unobtanium_11.name=Gray Unobtanium Composite - 45% Damaged
+tile.Unobtanium_12.name=Gray Unobtanium Composite - 60% Damaged
+tile.Unobtanium_13.name=Gray Unobtanium Composite - 75% Damaged
+tile.Unobtanium_14.name=Gray Unobtanium Composite - 90% Damaged
+tile.Unobtanium_15.name=Gray Unobtanium Composite - Failed
+
+item.UnobtaniumRubble.name=Unobtanium Rubble
+
+
+
+tile.VolcanoBlock.name=Volcano Core
+tile.VolcanicLava.name=Volcanic Lava
+
+tile.HotBasalt.name=Hot Basalt

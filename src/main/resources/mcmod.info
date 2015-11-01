@@ -1,0 +1,16 @@
+[
+{
+  "modid": "adversity",
+  "name": "Adversity",
+  "description": "This mod wants you to hate it.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Grondag (aka Zaerudath)"],
+  "credits": "The Forge and FML guys, and all the other modders who went before.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
