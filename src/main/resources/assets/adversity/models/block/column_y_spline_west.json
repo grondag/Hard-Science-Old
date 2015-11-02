@@ -1,0 +1,54 @@
+{
+    "textures": {
+   },
+    "elements": [
+               {   "from": [ 0, 0, 1 ],
+            "to": [ 0.5, 16, 3 ],
+            "faces": {
+                "down":  { "texture": "#outer" },
+                "up":    { "texture": "#outer" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
+            },
+            "__comment": "WEST FACE, NORTH OUTER SPLINE"
+        },
+        {   "from": [ 0, 0, 5 ],
+            "to": [ 0.5, 16, 7 ],
+            "faces": {
+                "down":  { "texture": "#outer" },
+                "up":    { "texture": "#outer" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
+            },
+            "__comment": "WEST FACE, NORTH INNER SPLINE"
+        },
+        {   "from": [ 0, 0, 9 ],
+            "to": [ 0.5, 16, 11 ],
+            "faces": {
+                "down":  { "texture": "#outer" },
+                "up":    { "texture": "#outer" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
+            },
+            "__comment": "WEST FACE, SOUTH INNER SPLINE"
+        },
+        {   "from": [ 0, 0, 13 ],
+            "to": [ 0.5, 16, 15 ],
+            "faces": {
+                "down":  { "texture": "#outer" },
+                "up":    { "texture": "#outer" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
+            },
+            "__comment": "WEST FACE, SOUTH OUTER SPLINE"
+        }
+    ]
+}

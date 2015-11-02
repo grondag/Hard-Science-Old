@@ -11,12 +11,10 @@ bin
 eclipse
 
 ## gradle
+gradle
 .gradle
 build
 run
-# gradle
-build
-.gradle
 
 ## Jars
 *.jar
@@ -28,3 +26,7 @@ build
 
 # Thumbnails
 ._*
+
+#stuff
+config
+logs
