@@ -1,346 +1,105 @@
-{
-    "forge_marker": 1,
-    "defaults": {
-    },
-    "variants": {
-	    "style=rough": [
-			{ "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt3"}}
-	    ],
-	       
-	    "style=smooth": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ],                      
-	
-	
-	    "style=plate": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=column_x": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=column_y": [
-	        { "model": "adversity:pillar_y", 
-	           "textures": { 
-	               "inner": "adversity:blocks/basaltsmooth_dark-0-0",
-	               "outer": "adversity:blocks/basaltsmooth0"
-	           }
-	        }
-	    ], 
-	
-	    "style=column_z": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=brick1": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	                    
-	    "style=brick2": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	        
-	    "style=tile1": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=tile2": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=tile3": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=design1": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=design2": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=design3": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=cap": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ], 
-	    
-	    "style=base": [
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
-	        
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
-	        { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
-	    ]
+{  
+  "forge_marker":1,
+  "defaults":{  
+    "textures": { 
+            "inner": "adversity:blocks/basaltsmooth_dark-0-0",
+            "outer": "adversity:blocks/basaltsmooth0"
     }
+  },
+  "variants":{
+    "plate_up":{
+        "true": { "submodel": "adversity:column_y_plate_up_full"},  
+        "false": {}    
+    },  
+
+   "plate_down":{
+        "true": { "submodel": "adversity:column_y_plate_down_full"},  
+        "false": {}    
+    },  
+ 
+    "face_north":{
+        "0": {},
+        "1": { "submodel": "adversity:column_y_spline_north" },  
+        "2": { "submodel": "adversity:column_y_plate_north" }    
+    },  
+    "face_south":{
+        "0": {},
+        "1": { "submodel": "adversity:column_y_spline_south"},  
+        "2": { "submodel": "adversity:column_y_plate_south" }    
+    },   
+    "face_east":{
+        "0": {},
+        "1": { "submodel": "adversity:column_y_spline_east"},  
+        "2": { "submodel": "adversity:column_y_plate_east" }    
+    },   
+    "face_west":{
+        "0": {},
+        "1": { "submodel": "adversity:column_y_spline_west"},  
+        "2": { "submodel": "adversity:column_y_plate_west" }     
+    },  
+        
+    "style":{  
+      "rough":{
+          
+        "submodel":{  
+          "things":[  
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt0"}},
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt1"}},
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt2"}},
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basalt3"}},
+            
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt0"}},
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt1"}},
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt2"}},
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basalt3"}},
+            
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt0"}},
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt1"}},
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt2"}},
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basalt3"}},
+            
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt0"}},
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt1"}},
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt2"}},
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basalt3"}}
+        ]
+        }
+      },
+      "smooth":{  
+        "submodel":{  
+          "things":[  
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
+            { "model": "adversity:cube_rotate_all_0", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
+            
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
+            { "model": "adversity:cube_rotate_all_1", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
+            
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
+            { "model": "adversity:cube_rotate_all_2", "textures": { "all": "adversity:blocks/basaltsmooth3"}},
+            
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth0"}},
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth1"}},
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth2"}},
+            { "model": "adversity:cube_rotate_all_3", "textures": { "all": "adversity:blocks/basaltsmooth3"}}
+     
+ 
+          ]
+        }        
+      },
+      
+      "column_y":  { "model": "adversity:column_y_inner_full",
+            "transform": { 
+		        "scale": [ 0.0, 1.0, 0.0 ]
+            }
+      } 
+    
+      
+    }
+  }
 }
