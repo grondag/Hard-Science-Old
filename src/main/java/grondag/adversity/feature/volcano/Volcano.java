@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
@@ -9,10 +10,12 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeManager;
 import net.minecraftforge.common.BiomeManager.BiomeEntry;
 import net.minecraftforge.common.BiomeManager.BiomeType;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -24,6 +27,8 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+
+
 
 public class Volcano {
 
@@ -53,8 +58,14 @@ public class Volcano {
 		blockBasalt = (BlockBasalt) new BlockBasalt().setUnlocalizedName("basalt").setCreativeTab(Adversity.tabAdversity);
 		GameRegistry.registerBlock(blockBasalt, ItemBlockBasalt.class, "basalt");
 		
-		if(event.getSide()==Side.CLIENT){		
-		    Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
+		if(event.getSide()==Side.CLIENT){
+			
+		    // Need this to filter out unused state combinations
+			// otherwise model loader will try to create hundreds of meaningless combinations.
+			ModelLoader.setCustomStateMapper(Volcano.blockBasalt,  blockBasalt.new CustomStateMapper());
+
+			
+			Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
 	
 		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
 		    EnumStyle[] allStyles = EnumStyle.values();
@@ -99,6 +110,7 @@ public class Volcano {
 //		BiomeDictionary.registerBiomeType(Volcano.volcano, BiomeDictionary.Type.HOT);
 		
 		if(event.getSide()==Side.CLIENT){
+			
 		    Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
 		    ModelResourceLocation itemModelResourceLocation;
 		    
@@ -108,7 +120,10 @@ public class Volcano {
 		    	itemModelResourceLocation = new ModelResourceLocation("adversity:basalt_" + style.toString(), "inventory");
 			    Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(itemBlockVariants, style.getMetadata(), itemModelResourceLocation);
 		    }
+		    		    
 		}
+		
+		
 	}
 
 	public static void postInit(FMLPostInitializationEvent event) {
