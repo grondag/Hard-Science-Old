@@ -1,6 +1,6 @@
 {
       "textures": {
-        "inner": "adversity:blocks/basaltsmooth_dark-0-0",
+        "inner": "adversity:blocks/basaltsmooth_dark",
         "outer": "adversity:blocks/basaltsmooth0"
     },
     "elements": [

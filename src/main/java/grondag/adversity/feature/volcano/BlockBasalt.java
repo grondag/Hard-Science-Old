@@ -19,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Cartesian;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.MapPopulator;
 import net.minecraft.util.Vec3i;
@@ -64,6 +65,11 @@ public class BlockBasalt extends Block {
 	}	
 	
 	  @Override
+	public EnumWorldBlockLayer getBlockLayer() {
+		return EnumWorldBlockLayer.CUTOUT_MIPPED;
+	}
+
+	@Override
 	  public int damageDropped(IBlockState state)
 	  {
 	    EnumStyle enumStyle = (EnumStyle)state.getValue(PROP_STYLE);
