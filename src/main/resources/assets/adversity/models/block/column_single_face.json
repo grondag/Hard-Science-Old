@@ -38,10 +38,15 @@
             "__comment": "INNER BLOCK EAST SHIM"
         },
  
+        {
+            "from": [ 1, 0, 0 ],
+            "to": [ 15, 16, 0 ],
+            "faces": {"north": { "uv":[1, 0, 15, 16], "texture": "#column_face", "cullface": "north" }},
+             "__comment": "NORTH FACE"
+        },
         {   "from": [ 1, 0, 0 ],
             "to": [ 3, 16, 0.5 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "north" },
                 "east":  { "texture": "#outer" },
                 "west":  { "texture": "#outer" }
             },
@@ -50,7 +55,6 @@
         {   "from": [ 5, 0, 0 ],
             "to": [ 7, 16, 0.5 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "north" },
                 "west":  { "texture": "#outer" },
                 "east":  { "texture": "#outer" }
             },
@@ -59,7 +63,6 @@
         {   "from": [ 9, 0, 0 ],
             "to": [ 11, 16, 0.5 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "north" },
                 "west":  { "texture": "#outer" },
                 "east":  { "texture": "#outer" }
             },
@@ -68,11 +71,10 @@
         {   "from": [ 13, 0, 0 ],
             "to": [ 15, 16, 0.5 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "north" },
                 "east":  { "texture": "#outer" },
                 "west":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST OUTER SPLINE"
-        }                          
+        }                
     ]
 }

@@ -4,6 +4,7 @@
         "textures": { 
             "inner": "adversity:blocks/basaltsmooth_dark",
             "outer": "adversity:blocks/basaltsmooth1",
+            "column_face": "adversity:blocks/basaltsmooth_column_face",
             "cap_no_neighbors": "adversity:blocks/basaltsmooth_column_cap_face_no_neighbors",
             "cap_one_neighbor": "adversity:blocks/basaltsmooth_column_cap_face_one_neighbor",
             "cap_opposite_neighbors": "adversity:blocks/basaltsmooth_column_cap_face_opposite_neighbors",

@@ -13,12 +13,16 @@
             "__comment": "INNER BLOCK"
         },
         
+        {
+            "from": [ 0, 0, 0 ],
+            "to": [ 16, 16, 0 ],
+            "faces": {"north": { "texture": "#column_face", "cullface": "north" }},
+             "__comment": "NORTH FACE"
+        },
+        
         {   "from": [ 0, 0, 0 ],
             "to": [ 3, 16, 0.5 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},    
-                "north": { "texture": "#outer", "cullface": "north" },
                 "east":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST EDGE"
@@ -26,7 +30,6 @@
         {   "from": [ 5, 0, 0 ],
             "to": [ 7, 16, 0.5 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "north" },
                 "west":  { "texture": "#outer" },
                 "east":  { "texture": "#outer" }
             },
@@ -35,7 +38,6 @@
         {   "from": [ 9, 0, 0 ],
             "to": [ 11, 16, 0.5 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "north" },
                 "west":  { "texture": "#outer" },
                 "east":  { "texture": "#outer" }
             },
@@ -44,29 +46,28 @@
         {   "from": [ 13, 0, 0 ],
             "to": [ 16, 16, 0.5 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},    
-                "north": { "texture": "#outer", "cullface": "north" },
                 "west":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST EDGE"
         },
         
 
+        {
+            "from": [ 0, 0, 16 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {"south": { "texture": "#column_face", "cullface": "south" }},
+             "__comment": "SOUTH FACE"
+        },        
         {   "from": [ 0, 0, 15.5 ],
             "to": [ 3, 16, 16 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},
-                "south": { "texture": "#outer", "cullface": "south" },
                 "east":  { "texture": "#outer" }
             },
             "__comment": "SOUTH FACE, WEST EDGE"
         },
-        {   "from": [ 5, 0, 15.5 ],
+        {   "from": [ 5, 2, 15.5 ],
             "to": [ 7, 16, 16 ],
             "faces": {
-                "south": { "texture": "#outer", "cullface": "south" },
                 "west":  { "texture": "#outer" },
                 "east":  { "texture": "#outer" }
             },
@@ -75,7 +76,6 @@
         {   "from": [ 9, 0, 15.5 ],
             "to": [ 11, 16, 16 ],
             "faces": {
-                "south": { "texture": "#outer", "cullface": "south" },
                 "west":  { "texture": "#outer" },
                 "east":  { "texture": "#outer" }
             },
@@ -84,22 +84,22 @@
         {   "from": [ 13, 0, 15.5 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},    
-                "south": { "texture": "#outer", "cullface": "south" },
                 "west":  { "texture": "#outer" }
             },
             "__comment": "SOUTH FACE, EAST EDGE"
         },
         
         
+        {
+            "from": [ 16, 0, 0 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {"east": { "texture": "#column_face", "cullface": "east" }},
+             "__comment": "EAST FACE"
+        },
         {   "from": [ 15.5, 0, 0 ],
             "to": [ 16, 16, 3 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},
-                "south": { "texture": "#outer" },
-                "east":  { "texture": "#outer", "cullface": "east" }
+                "south": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, NORTH EDGE"
         },
@@ -107,8 +107,7 @@
             "to": [ 16, 16, 7 ],
             "faces": {
                 "north": { "texture": "#outer" },
-                "south": { "texture": "#outer" },
-                "east":  { "texture": "#outer", "cullface": "east" }
+                "south": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, NORTH SPLINE"
         },
@@ -116,30 +115,29 @@
             "to": [ 16, 16, 11 ],
             "faces": {
                 "north": { "texture": "#outer" },
-                "south": { "texture": "#outer" },
-                "east":  { "texture": "#outer", "cullface": "east" }
+                "south": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, SOUTH SPLINE"
         },
         {   "from": [ 15.5, 0, 13 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},    
-                "north": { "texture": "#outer" },
-                "east":  { "texture": "#outer", "cullface": "east" }
+                "north": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, SOUTH EDGE"
         },
         
         
-               {   "from": [ 0, 0, 0 ],
+        {
+            "from": [ 0, 0, 0 ],
+            "to": [ 0, 16, 16 ],
+            "faces": {"west": { "texture": "#column_face", "cullface": "west" }},
+             "__comment": "WEST FACE"
+        },
+        {   "from": [ 0, 0, 0 ],
             "to": [ 0.5, 16, 3 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},
-                "south": { "texture": "#outer" },
-                "west":  { "texture": "#outer", "cullface": "west" }
+                "south": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, NORTH EDGE"
         },
@@ -147,8 +145,7 @@
             "to": [ 0.5, 16, 7 ],
             "faces": {
                 "north": { "texture": "#outer" },
-                "south": { "texture": "#outer" },
-                "west":  { "texture": "#outer", "cullface": "west" }
+                "south": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, NORTH SPLINE"
         },
@@ -156,20 +153,16 @@
             "to": [ 0.5, 16, 11 ],
             "faces": {
                 "north": { "texture": "#outer" },
-                "south": { "texture": "#outer" },
-                "west":  { "texture": "#outer", "cullface": "west" }
+                "south": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, SOUTH SPLINE"
         },
         {   "from": [ 0, 0, 13 ],
             "to": [ 0.5, 16, 16 ],
             "faces": {
-                "up": { "texture": "#outer"},
-                "down": { "texture": "#outer"},    
-                "north": { "texture": "#outer" },
-                "west":  { "texture": "#outer", "cullface": "west" }
+                "north": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, SOUTH EDGE"
-        }             
+        }            
     ]
 }
