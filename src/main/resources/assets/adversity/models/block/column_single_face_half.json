@@ -2,18 +2,46 @@
       "textures": {
     },
     "elements": [
-        {   "from": [ 0, 14, 0 ],
+        
+       {   "from": [ 0, 14, 0 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "up":    { "texture": "#outer", "cullface":"up" },
                 "down":  { "texture": "#outer" },
-                "north": { "texture": "#outer", "cullface": "north"},
-                "south": { "texture": "#outer" },
-                "west":  { "texture": "#outer" },
-                "east":  { "texture": "#outer" }
+                "north": { "texture": "#outer", "cullface": "north" },
+                "south": { "texture": "#cap_inner_side" },
+                "west":  { "texture": "#cap_inner_side" },
+                "east":  { "texture": "#cap_inner_side" }
             },
-            "__comment": "TOP CAP"
+            "__comment": "TOP CAP SHELL"
         },
+ 
+         {   "from": [ 0, 15.5, 3 ], "to": [ 16, 16, 3 ], "faces": {"south":  { "texture": "#outer" } }
+            ,"__comment": "TOP CAP UPPER"},
+ 
+        {   "from": [ 0, 15.5, 5 ], "to": [ 16, 16, 7 ], "faces": {"north":  { "texture": "#outer" }, "south":  { "texture": "#outer" } }
+            ,"__comment": "TOP CAP UPPER TO MIDDLE"}, 
+            
+        {   "from": [ 0, 15.5, 9 ], "to": [ 7, 16, 16 ], "faces": {"north":  { "texture": "#outer" },"east":  { "texture": "#outer" } }
+            ,"__comment": "TOP CAP MIDDLE SW"}, 
+            
+        {   "from": [ 0, 15.5, 11 ], "to": [ 5, 16, 11 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP SW OUTSIDE"}, 
+        {   "from": [ 5, 15.5, 11 ], "to": [ 5, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP SW OUTSIDE]"},    
+
+        {   "from": [ 0, 15.5, 13 ], "to": [ 3, 16, 16 ], "faces": {"north":  { "texture": "#outer" },"east":  { "texture": "#outer" } }
+            ,"__comment": "TOP CAP SW INSIDE"}, 
+ 
+        {   "from": [ 9, 15.5, 9 ], "to": [16, 16, 16 ], "faces": {"north":  { "texture": "#outer" },"west":  { "texture": "#outer" } }
+            ,"__comment": "TOP CAP MIDDLE SE"}, 
+
+        {   "from": [ 11, 15.5, 11 ], "to": [ 16, 16, 11 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP SE OUTSIDE"}, 
+        {   "from": [ 11, 15.5, 11 ], "to": [ 11, 16, 16 ], "faces": {"east":  { "texture": "#outer" } },"__comment": "TOP CAP SE OUTSIDE]"},    
+
+        {   "from": [ 13, 15.5, 13 ], "to": [ 16, 16, 16 ], "faces": {"north":  { "texture": "#outer" },"west":  { "texture": "#outer" } }
+            ,"__comment": "TOP CAP SE INSIDE"},  
+             
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_three_neighbors", "cullface": "up" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+
     
         {   "from": [ 0.5, 0, 0.5 ],
             "to": [ 15.5, 14, 16 ],

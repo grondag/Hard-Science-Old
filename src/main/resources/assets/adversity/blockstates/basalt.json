@@ -10,6 +10,7 @@
             "cap_adjacent_neighbors": "adversity:blocks/basaltsmooth_column_cap_face_adjacent_neighbors",
             "cap_three_neighbors": "adversity:blocks/basaltsmooth_column_cap_face_three_neighbors",
             "cap_four_neighbors": "adversity:blocks/basaltsmooth_column_cap_face_four_neighbors",
+            "cap_inner_side": "adversity:blocks/basaltsmooth_column_cap_inner_side",
             "particle": "adversity:blocks/basaltsmooth0"
         }
     },
