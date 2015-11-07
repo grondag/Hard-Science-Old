@@ -2,23 +2,43 @@
       "textures": {
     },
     "elements": [
-        {   "from": [ 0, 14, 0 ],
+
+       {   "from": [ 0, 14, 0 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "up":    { "texture": "#outer", "cullface":"up" },
                 "down":  { "texture": "#outer" },
                 "north": { "texture": "#outer", "cullface": "north"},
-                "south": { "texture": "#outer" },
-                "west":  { "texture": "#outer" },
+                "south": { "texture": "#outer", "cullface": "south"},
+                "west":  { "texture": "#outer", "cullface": "west" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
-            "__comment": "TOP CAP"
+            "__comment": "TOP CAP SHELL"
         },
+        {   "from": [ 7, 15.5, 9 ], "to": [ 9, 16, 9 ], "faces": {"north": { "texture": "#outer" } },"__comment": "TOP CAP CENTER OUTSIDE NORTH"}, 
+        {   "from": [ 0, 15.5, 7 ], "to": [ 9, 16, 7 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP CENTER OUTSIDE SOUTH"}, 
+        {   "from": [ 7, 15.5, 7 ], "to": [ 7, 16, 9 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP CENTER OUTSIDE EAST"},    
+        {   "from": [ 9, 15.5, 7 ], "to": [ 9, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP CENTER OUTSIDE WEST"}, 
+
+        {   "from": [ 5, 15.5, 11 ], "to": [ 11, 16, 11 ], "faces": {"south": { "texture": "#outer" } },"__comment": "TOP CAP RING INSIDE NORTH"}, 
+        {   "from": [ 0, 15.5, 5 ], "to": [ 11, 16, 5 ], "faces": {"north":  { "texture": "#outer" } },"__comment": "TOP CAP RING INSIDE SOUTH"}, 
+        {   "from": [ 5, 15.5, 5 ], "to": [ 5, 16, 11 ], "faces": {"west":  { "texture": "#outer" } }, "__comment": "TOP CAP RING INSIDE EAST"},    
+        {   "from": [ 11, 15.5, 5 ], "to": [ 11, 16, 16 ], "faces": {"east":  { "texture": "#outer" } },"__comment": "TOP CAP RING INSIDE WEST"}, 
+
+
+        {   "from": [ 3, 15.5, 13 ], "to": [ 13, 16, 13 ], "faces": {"north": { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE NORTH"}, 
+        {   "from": [ 0, 15.5, 3 ], "to": [ 13, 16, 3 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE SOUTH"}, 
+        {   "from": [ 3, 15.5, 3 ], "to": [ 3, 16, 13 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP RING OUTSIDE EAST"},    
+        {   "from": [ 13, 15.5, 3 ], "to": [ 13, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE WEST"}, 
+
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_adjacent_neighbors", "cullface": "up" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+
 
         {   "from": [ 0.5, 2, 0.5 ],
             "to": [ 15.5, 14, 16 ],
             "faces": {
                 "north": { "texture": "#inner" },
+                "south":  { "texture": "#inner" },
                 "east":  { "texture": "#inner" },
                 "west":  { "texture": "#inner" }
             },
@@ -28,7 +48,8 @@
             "to": [ 0.5, 14, 15.5 ],
             "faces": {
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south":  { "texture": "#inner" },
+                "west":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK WEST SHIM"
         },
@@ -36,7 +57,7 @@
             "to": [ 3, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "east":  { "texture": "#outer", "cullface": "north" },
+                "east":  { "texture": "#outer" },
                 "west":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST OUTER SPLINE"
@@ -45,8 +66,8 @@
             "to": [ 7, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "west":  { "texture": "#outer", "cullface": "north" },
-                "east":  { "texture": "#outer", "cullface": "north" }
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST SPLINE"
         },
@@ -54,8 +75,8 @@
             "to": [ 11, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "west":  { "texture": "#outer", "cullface": "north" },
-                "east":  { "texture": "#outer", "cullface": "north" }
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST SPLINE"
         },
@@ -63,7 +84,7 @@
             "to": [ 16, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "west":  { "texture": "#outer", "cullface": "north" }
+                "west":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST EDGE"
         },
@@ -71,7 +92,7 @@
         {   "from": [ 15.5, 2, 0 ],
             "to": [ 16, 14, 3 ],
             "faces": {
-                "south": { "texture": "#outer", "cullface": "east" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, NORTH EDGE"
@@ -79,8 +100,8 @@
         {   "from": [ 15.5, 2, 5 ],
             "to": [ 16, 14, 7 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "east" },
-                "south": { "texture": "#outer", "cullface": "east" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, NORTH SPLINE"
@@ -88,8 +109,8 @@
         {   "from": [ 15.5, 2, 9 ],
             "to": [ 16, 14, 11 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "east" },
-                "south": { "texture": "#outer", "cullface": "east" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, SOUTH SPLINE"
@@ -97,7 +118,7 @@
         {   "from": [ 15.5, 2, 13 ],
             "to": [ 16, 14, 15 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "east" },
+                "north": { "texture": "#outer" },
                 "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },

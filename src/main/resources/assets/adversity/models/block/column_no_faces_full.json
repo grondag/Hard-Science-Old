@@ -15,7 +15,9 @@
             "to": [ 15.5, 14, 16 ],
             "faces": {
                 "east":  { "texture": "#inner" },
-                "west":  { "texture": "#inner" }
+                "west":  { "texture": "#inner" },
+                "north": { "texture": "#inner" },
+                "south": { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK"
         },
@@ -23,7 +25,8 @@
             "to": [ 0.5, 14, 15.5 ],
             "faces": {
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south": { "texture": "#inner" },
+                "west":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK WEST SHIM"
         },
@@ -31,7 +34,8 @@
             "to": [ 16, 14, 15.5 ],
             "faces": {
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south": { "texture": "#inner" },
+                "east":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK EAST SHIM"
         },

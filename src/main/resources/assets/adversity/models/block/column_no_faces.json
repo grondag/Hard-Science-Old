@@ -9,7 +9,9 @@
                 "up":    { "texture": "#outer" },
                 "down":  { "texture": "#outer" },
                 "east":  { "texture": "#inner" },
-                "west":  { "texture": "#inner" }
+                "west":  { "texture": "#inner" },    
+                "north": { "texture": "#inner" },
+                "south":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK"
         },
@@ -19,7 +21,8 @@
                 "up":    { "texture": "#outer" },
                 "down":  { "texture": "#outer" },    
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south": { "texture": "#inner" },
+                "west":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK WEST SHIM"
         },
@@ -29,7 +32,8 @@
                 "up":    { "texture": "#outer" },
                 "down":  { "texture": "#outer" },                    
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south": { "texture": "#inner" },
+                "east":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK EAST SHIM"
         }                         

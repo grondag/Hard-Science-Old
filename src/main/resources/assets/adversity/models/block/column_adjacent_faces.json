@@ -9,6 +9,7 @@
                 "up": { "texture": "#inner" },
                 "down": { "texture": "#inner" },
                 "north": { "texture": "#inner" },
+                "south":  { "texture": "#inner" },
                 "east":  { "texture": "#inner" },
                 "west":  { "texture": "#inner" }
             },
@@ -19,6 +20,7 @@
             "faces": {
                 "up": { "texture": "#inner" },
                 "down": { "texture": "#inner"},
+                "west":  { "texture": "#inner" },
                 "north": { "texture": "#inner" },
                 "south":  { "texture": "#inner" }
             },

@@ -9,6 +9,7 @@
                 "up": { "texture": "#inner" },
                 "down": { "texture": "#inner" },
                 "north": { "texture": "#inner" },
+                "south":  { "texture": "#inner" },
                 "east":  { "texture": "#inner" },
                 "west":  { "texture": "#inner" }
             },
@@ -20,7 +21,8 @@
                 "up": { "texture": "#inner" },
                 "down": { "texture": "#inner"},
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south":  { "texture": "#inner" },
+                "west":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK WEST SHIM"
         },
@@ -30,7 +32,8 @@
                 "up": { "texture": "#inner" },
                 "down": { "texture": "#inner"},
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south":  { "texture": "#inner" },
+                "east":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK EAST SHIM"
         },

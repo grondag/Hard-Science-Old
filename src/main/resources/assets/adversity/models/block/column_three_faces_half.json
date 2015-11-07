@@ -5,21 +5,37 @@
         {   "from": [ 0, 14, 0 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "up":    { "texture": "#outer", "cullface":"up" },
                 "down":  { "texture": "#outer" },
                 "north": { "texture": "#outer", "cullface": "north"},
-                "south": { "texture": "#outer" },
+                "south": { "texture": "#outer", "cullface": "south"},
                 "west":  { "texture": "#outer", "cullface": "west" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
-            "__comment": "TOP CAP"
+            "__comment": "TOP CAP SHELL"
         },
+        {   "from": [ 7, 15.5, 7 ], "to": [ 9, 16, 7 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP CENTER OUTSIDE SOUTH"}, 
+        {   "from": [ 7, 15.5, 7 ], "to": [ 7, 16, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP CENTER OUTSIDE EAST"},    
+        {   "from": [ 9, 15.5, 7 ], "to": [ 9, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP CENTER OUTSIDE WEST"}, 
+
+        {   "from": [ 5, 15.5, 5 ], "to": [ 11, 16, 5 ], "faces": {"north":  { "texture": "#outer" } },"__comment": "TOP CAP RING INSIDE SOUTH"}, 
+        {   "from": [ 5, 15.5, 5 ], "to": [ 5, 16, 16 ], "faces": {"west":  { "texture": "#outer" } }, "__comment": "TOP CAP RING INSIDE EAST"},    
+        {   "from": [ 11, 15.5, 5 ], "to": [ 11, 16, 16 ], "faces": {"east":  { "texture": "#outer" } },"__comment": "TOP CAP RING INSIDE WEST"}, 
+
+
+        {   "from": [ 3, 15.5, 3 ], "to": [ 13, 16, 3 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE SOUTH"}, 
+        {   "from": [ 3, 15.5, 3 ], "to": [ 3, 16, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP RING OUTSIDE EAST"},    
+        {   "from": [ 13, 15.5, 3 ], "to": [ 13, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE WEST"}, 
+
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_one_neighbor",  "cullface": "up" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+
     
         {   "from": [ 0.5, 0, 0.5 ],
             "to": [ 15.5, 14, 16 ],
             "faces": {
                 "down": { "texture": "#inner"},
                 "north": { "texture": "#inner" },
+                "south": { "texture": "#inner" },
                 "west":  { "texture": "#inner" },
                 "east":  { "texture": "#inner" }
             },

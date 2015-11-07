@@ -21,7 +21,8 @@
                 "down": { "texture": "#inner"},
                 "north": { "texture": "#inner" },
                 "east":  { "texture": "#inner" },
-                "west":  { "texture": "#inner" }
+                "west":  { "texture": "#inner" },
+                "south":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK"
         },
@@ -30,7 +31,8 @@
             "faces": {
                 "down": { "texture": "#inner"},
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south":  { "texture": "#inner" },
+                "west":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK WEST SHIM"
         },

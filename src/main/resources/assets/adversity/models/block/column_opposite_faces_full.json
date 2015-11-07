@@ -2,22 +2,35 @@
       "textures": {
     },
     "elements": [
-        {   "from": [ 0, 14, 0 ],
+       {   "from": [ 0, 14, 0 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "up":    { "texture": "#outer", "cullface":"up" },
                 "down":  { "texture": "#outer" },
-                "north": { "texture": "#outer" },
-                "south": { "texture": "#outer" },
+                "north": { "texture": "#outer", "cullface": "north"},
+                "south": { "texture": "#outer", "cullface": "south"},
                 "west":  { "texture": "#outer", "cullface": "west" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
-            "__comment": "TOP CAP"
+            "__comment": "TOP CAP SHELL"
         },
+        {   "from": [ 7, 15.5, 0 ], "to": [ 7, 16, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP CENTER OUTSIDE EAST"},    
+        {   "from": [ 9, 15.5, 0 ], "to": [ 9, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP CENTER OUTSIDE WEST"}, 
+
+        {   "from": [ 5, 15.5, 0 ], "to": [ 5, 16, 16 ], "faces": {"west":  { "texture": "#outer" } }, "__comment": "TOP CAP RING INSIDE EAST"},    
+        {   "from": [ 11, 15.5, 0 ], "to": [ 11, 16, 16 ], "faces": {"east":  { "texture": "#outer" } },"__comment": "TOP CAP RING INSIDE WEST"}, 
+
+        {   "from": [ 3, 15.5, 0 ], "to": [ 3, 16, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP RING OUTSIDE EAST"},    
+        {   "from": [ 13, 15.5, 0 ], "to": [ 13, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE WEST"}, 
+
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_opposite_neighbors",  "cullface": "up" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+
     
         {   "from": [ 0.5, 2, 0 ],
             "to": [ 15.5, 14, 16 ],
             "faces": {
+                "north": { "texture": "#inner" },
+                "south": { "texture": "#inner" },
                 "west":  { "texture": "#inner", "cullface": "west" },
                 "east":  { "texture": "#inner", "cullface": "east" }
             },
@@ -28,7 +41,7 @@
             "to": [ 16, 14, 3 ],
             "faces": {
                 "north": { "texture": "#outer" },
-                "south": { "texture": "#outer", "cullface": "east" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, NORTH OUTER SPLINE"
@@ -36,8 +49,8 @@
         {   "from": [ 15.5, 2, 5 ],
             "to": [ 16, 14, 7 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "east" },
-                "south": { "texture": "#outer", "cullface": "east" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, NORTH SPLINE"
@@ -45,8 +58,8 @@
         {   "from": [ 15.5, 2, 9 ],
             "to": [ 16, 14, 11 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "east" },
-                "south": { "texture": "#outer", "cullface": "east" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, SOUTH SPLINE"
@@ -54,8 +67,8 @@
         {   "from": [ 15.5, 2, 13 ],
             "to": [ 16, 14, 15 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "east" },
-                "south": { "texture": "#outer", "cullface": "south" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
             "__comment": "EAST FACE, SOUTH OUTER SPLINE"
@@ -65,7 +78,7 @@
         {   "from": [ 0, 2, 1 ],
             "to": [ 0.5, 14, 3 ],
             "faces": {
-                "south": { "texture": "#outer", "cullface": "west" },
+                "south": { "texture": "#outer" },
                 "west":  { "texture": "#outer", "cullface": "west" }
             },
             "__comment": "WEST FACE, NORTH OUTER SPLINE"
@@ -73,8 +86,8 @@
         {   "from": [ 0, 2, 5 ],
             "to": [ 0.5, 14, 7 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "west" },
-                "south": { "texture": "#outer", "cullface": "west" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "west":  { "texture": "#outer", "cullface": "west" }
             },
             "__comment": "WEST FACE, NORTH SPLINE"
@@ -82,8 +95,8 @@
         {   "from": [ 0, 2, 9 ],
             "to": [ 0.5, 14, 11 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "west" },
-                "south": { "texture": "#outer", "cullface": "west" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "west":  { "texture": "#outer", "cullface": "west" }
             },
             "__comment": "WEST FACE, SOUTH SPLINE"
@@ -91,8 +104,8 @@
         {   "from": [ 0, 2, 13 ],
             "to": [ 0.5, 14, 15 ],
             "faces": {
-                "north": { "texture": "#outer", "cullface": "west" },
-                "south": { "texture": "#outer", "cullface": "south" },
+                "north": { "texture": "#outer" },
+                "south": { "texture": "#outer" },
                 "west":  { "texture": "#outer", "cullface": "west" }
             },
             "__comment": "WEST FACE, SOUTH OUTER SPLINE"
@@ -101,14 +114,25 @@
         {   "from": [ 0, 0, 0 ],
             "to": [ 16, 2, 16 ],
             "faces": {
-                "up":    { "texture": "#outer" },
-                "down":  { "texture": "#outer", "cullface": "down" },
-                "north": { "texture": "#outer" },
-                "south": { "texture": "#outer" },
+                "up":  { "texture": "#outer" },
+                "north": { "texture": "#outer", "cullface": "north"},
+                "south": { "texture": "#outer", "cullface": "south"},
                 "west":  { "texture": "#outer", "cullface": "west" },
                 "east":  { "texture": "#outer", "cullface": "east" }
             },
-            "__comment": "BOTTOM CAP"
-        }                              
+            "__comment": "BOTTOM CAP SHELL"
+        },
+        {   "from": [ 7, 0, 0 ], "to": [ 7, 0.5, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "BOTTOM CAP CENTER OUTSIDE EAST"},    
+        {   "from": [ 9, 0, 0 ], "to": [ 9, 0.5, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "BOTTOM CAP CENTER OUTSIDE WEST"}, 
+
+        {   "from": [ 5, 0, 0 ], "to": [ 5, 0.5, 16 ], "faces": {"west":  { "texture": "#outer" } }, "__comment": "BOTTOM CAP RING INSIDE EAST"},    
+        {   "from": [ 11, 0, 0 ], "to": [ 11, 0.5, 16 ], "faces": {"east":  { "texture": "#outer" } },"__comment": "BOTTOM CAP RING INSIDE WEST"}, 
+
+
+        {   "from": [ 3, 0, 0 ], "to": [ 3, 0.5, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "BOTTOM CAP RING OUTSIDE EAST"},    
+        {   "from": [ 13, 0, 0 ], "to": [ 13, 0.5, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "BOTTOM CAP RING OUTSIDE WEST"}, 
+
+        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "texture": "#cap_opposite_neighbors",  "cullface": "down", "rotation":180 } }, "__comment": "BOTTOM CAP FACE" },
+        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner", "cullface": "down" } },"__comment": "BOTTOM CAP INSET" }                              
     ]
 }

@@ -7,6 +7,8 @@
             "faces": {
                 "up":    { "texture": "#inner" },
                 "down":  { "texture": "#inner" },                
+                "north": { "texture": "#inner" },
+                "south": { "texture": "#inner" },
                 "west":  { "texture": "#inner" },
                 "east":  { "texture": "#inner" }
             },

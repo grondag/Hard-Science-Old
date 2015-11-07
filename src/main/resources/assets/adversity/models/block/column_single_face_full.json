@@ -19,6 +19,7 @@
             "to": [ 15.5, 14, 16 ],
             "faces": {
                 "north": { "texture": "#inner" },
+                "south": { "texture": "#inner" },
                 "east":  { "texture": "#inner" },
                 "west":  { "texture": "#inner" }
             },
@@ -28,7 +29,8 @@
             "to": [ 0.5, 14, 15.5 ],
             "faces": {
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south":  { "texture": "#inner" },
+                "west":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK WEST SHIM"
         },
@@ -36,7 +38,8 @@
             "to": [ 16, 14, 15.5 ],
             "faces": {
                 "north": { "texture": "#inner" },
-                "south":  { "texture": "#inner" }
+                "south":  { "texture": "#inner" },
+                "east":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK EAST SHIM"
         },
@@ -45,7 +48,7 @@
             "to": [ 3, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "east":  { "texture": "#outer", "cullface": "north" },
+                "east":  { "texture": "#outer" },
                 "west":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST OUTER SPLINE"
@@ -54,8 +57,8 @@
             "to": [ 7, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "west":  { "texture": "#outer", "cullface": "north" },
-                "east":  { "texture": "#outer", "cullface": "north" }
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST SPLINE"
         },
@@ -63,8 +66,8 @@
             "to": [ 11, 14, 0.5 ],
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
-                "west":  { "texture": "#outer", "cullface": "north" },
-                "east":  { "texture": "#outer", "cullface": "north" }
+                "west":  { "texture": "#outer" },
+                "east":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST SPLINE"
         },
@@ -73,7 +76,7 @@
             "faces": {
                 "north": { "texture": "#outer", "cullface": "north" },
                 "east":  { "texture": "#outer" },
-                "west":  { "texture": "#outer", "cullface": "north" }
+                "west":  { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST OUTER SPLINE"
         },
