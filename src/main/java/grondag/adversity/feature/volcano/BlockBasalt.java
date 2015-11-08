@@ -29,6 +29,9 @@ import net.minecraftforge.common.property.Properties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import grondag.adversity.Adversity;
+import grondag.adversity.library.NeighborBlocks;
+import grondag.adversity.library.NeighborBlocks.INeighborTest;
+import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,10 +52,11 @@ public class BlockBasalt extends Block {
 	public static final PropertyEnum PROP_STYLE = PropertyEnum.create("style", EnumStyle.class);
 	public static final PropertyInteger	 PROP_DETAILS = PropertyInteger.create("details", 0, 63);
 
-	private static  Integer[][][][][][] col_x_lookup = new Integer[2][2][2][2][2][2];
-	private static  Integer[][][][][][] col_y_lookup = new Integer[2][2][2][2][2][2];
-	private static  Integer[][][][][][] col_z_lookup = new Integer[2][2][2][2][2][2];
-
+	private static  Integer[][][][][][] COL_X_LOOKUP = new Integer[2][2][2][2][2][2];
+	private static  Integer[][][][][][] COL_Y_LOOKUP = new Integer[2][2][2][2][2][2];
+	private static  Integer[][][][][][] COL_Z_LOOKUP = new Integer[2][2][2][2][2][2];
+	private static  Integer[][][][][][] BRICK_BIG_LOOKUP = new Integer[2][2][2][2][2][2];
+	
 	static {
 		setupLookupArrays();
 	}
@@ -137,16 +141,9 @@ public class BlockBasalt extends Block {
 	  {
 		  EnumStyle style = (EnumStyle) state.getValue(PROP_STYLE);
 		  
-		  int neighbor_up;
-		  int neighbor_down;
-		  int neighbor_east;
-		  int neighbor_west;
-		  int neighbor_north;
-		  int neighbor_south;
+		  NeighborTestResults tests;
+		  int detailID ;
 
-		  
-		  IBlockState test;
-		  
 		  switch(style){
 		  
 		  case ROUGH:
@@ -157,63 +154,25 @@ public class BlockBasalt extends Block {
 			  
 		  case COLUMN_Y:
 			  
-			  // Add top or bottom plates if this at the top or bottom of the column
-			  // Otherwise will "see through" gaps between splines.
-			  // Want to leave this block non-opaque for rendering efficiency.
-			  test = worldIn.getBlockState(pos.up()); 
-			  neighbor_up = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Y) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.down()); 
-			  neighbor_down = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Y) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.east()); 
-			  neighbor_east = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Y) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.west()); 
-			  neighbor_west = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Y) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.north()); 
-			  neighbor_north = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Y) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.south()); 
-			  neighbor_south = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Y) ? 1 : 0;
-			
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Y).withProperty(PROP_DETAILS, col_y_lookup[neighbor_up][neighbor_down][neighbor_east][neighbor_west][neighbor_north][neighbor_south]);			  
+			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.COLUMN_Y));
+			  detailID = COL_Y_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Y).withProperty(PROP_DETAILS, detailID);			   
 			  
-		  case COLUMN_X:
-			  
-			  // Add top or bottom plates if this at the top or bottom of the column
-			  // Otherwise will "see through" gaps between splines.
-			  // Want to leave this block non-opaque for rendering efficiency.
-			  test = worldIn.getBlockState(pos.up()); 
-			  neighbor_up = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_X) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.down()); 
-			  neighbor_down = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_X) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.east()); 
-			  neighbor_east = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_X) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.west()); 
-			  neighbor_west = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_X) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.north()); 
-			  neighbor_north = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_X) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.south()); 
-			  neighbor_south = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_X) ? 1 : 0;
-			  
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_X).withProperty(PROP_DETAILS, col_x_lookup[neighbor_up][neighbor_down][neighbor_east][neighbor_west][neighbor_north][neighbor_south]);			  
+		  case COLUMN_X:			  
 
+			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.COLUMN_X));
+			  detailID = COL_X_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_X).withProperty(PROP_DETAILS, detailID);			  
+			  
 		  case COLUMN_Z:
 			  
-			  // Add top or bottom plates if this at the top or bottom of the column
-			  // Otherwise will "see through" gaps between splines.
-			  // Want to leave this block non-opaque for rendering efficiency.
-			  test = worldIn.getBlockState(pos.up()); 
-			  neighbor_up = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Z) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.down()); 
-			  neighbor_down = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Z) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.east()); 
-			  neighbor_east = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Z) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.west()); 
-			  neighbor_west = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Z) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.north()); 
-			  neighbor_north = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Z) ? 1 : 0;
-			  test = worldIn.getBlockState(pos.south()); 
-			  neighbor_south = (test.getBlock() == this && test.getValue(PROP_STYLE) == EnumStyle.COLUMN_Z) ? 1 : 0;
-			  
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Z).withProperty(PROP_DETAILS, col_z_lookup[neighbor_up][neighbor_down][neighbor_east][neighbor_west][neighbor_north][neighbor_south]);			  
+			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.COLUMN_Z));
+			  detailID = COL_Z_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  // N.B.  Using state.withProperty here caused an NPE for center blocks.
+			  // Was never able to track down why.Hence the use of getDefaultState.
+			  // Was conspicuous that the detailID was the max value. 
+			  // This was before I re-factored the detail ID declarations, maybe it would work now.
+			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Z).withProperty(PROP_DETAILS, detailID);			  
 
 		  default:
 			  
@@ -234,6 +193,21 @@ public class BlockBasalt extends Block {
 	    return new BlockState(this, new IProperty[] {PROP_STYLE, PROP_DETAILS}); 
 	  }
 
+	  private class TestForSameStyle implements INeighborTest{
+
+		private final Block block;
+		private final EnumStyle style ;
+		
+		public TestForSameStyle(Block block, EnumStyle style){
+			this.block = block;
+			this.style = style;
+		}
+		  
+		@Override
+		public boolean TestNeighbor(IBlockState ibs) {
+			return (ibs.getBlock() == block && ibs.getValue(PROP_STYLE) == style);
+		}	  
+	  }
 
 	  public static enum EnumStyle implements IStringSerializable
 	  {
@@ -241,7 +215,8 @@ public class BlockBasalt extends Block {
 	    SMOOTH(1, "smooth", 0),
 	    COLUMN_Y(2, "column_y", 63),
 	    COLUMN_X(3, "column_x", 63),	    
-	    COLUMN_Z(4, "column_z", 63);
+	    COLUMN_Z(4, "column_z", 63),
+	    BRICK_BIG(5, "brick_big", 63);
 //	    PLATE(5, "plate"),	    
 //	    BRICK1(6, "brick1"),
 //	    BRICK2(7, "brick2"),
@@ -316,200 +291,200 @@ public class BlockBasalt extends Block {
 		  // U D E W N S
 		  // 1 means has adjacent block of same style
 		
-		  col_y_lookup[1][1][0][1][1][1]=0;
-		  col_y_lookup[1][1][1][0][1][1]=1;
-		  col_y_lookup[1][1][1][1][0][1]=2;
-		  col_y_lookup[1][1][1][1][1][0]=3;
-		  col_y_lookup[1][1][0][1][0][1]=4;
-		  col_y_lookup[1][1][1][0][0][1]=5;
-		  col_y_lookup[1][1][0][1][1][0]=6;
-		  col_y_lookup[1][1][1][0][1][0]=7;
-		  col_y_lookup[1][1][0][0][1][1]=8;
-		  col_y_lookup[1][1][1][1][0][0]=9;
-		  col_y_lookup[1][1][0][0][0][1]=10;
-		  col_y_lookup[1][1][0][0][1][0]=11;
-		  col_y_lookup[1][1][0][1][0][0]=12;
-		  col_y_lookup[1][1][1][0][0][0]=13;
-		  col_y_lookup[1][1][0][0][0][0]=14;
-		  col_y_lookup[1][1][1][1][1][1]=15;
-		  col_y_lookup[0][1][0][1][1][1]=16;
-		  col_y_lookup[0][1][1][0][1][1]=17;
-		  col_y_lookup[0][1][1][1][0][1]=18;
-		  col_y_lookup[0][1][1][1][1][0]=19;
-		  col_y_lookup[0][1][0][1][0][1]=20;
-		  col_y_lookup[0][1][1][0][0][1]=21;
-		  col_y_lookup[0][1][0][1][1][0]=22;
-		  col_y_lookup[0][1][1][0][1][0]=23;
-		  col_y_lookup[0][1][0][0][1][1]=24;
-		  col_y_lookup[0][1][1][1][0][0]=25;
-		  col_y_lookup[0][1][0][0][0][1]=26;
-		  col_y_lookup[0][1][0][0][1][0]=27;
-		  col_y_lookup[0][1][0][1][0][0]=28;
-		  col_y_lookup[0][1][1][0][0][0]=29;
-		  col_y_lookup[0][1][0][0][0][0]=30;
-		  col_y_lookup[0][1][1][1][1][1]=31;
-		  col_y_lookup[1][0][0][1][1][1]=32;
-		  col_y_lookup[1][0][1][0][1][1]=33;
-		  col_y_lookup[1][0][1][1][0][1]=34;
-		  col_y_lookup[1][0][1][1][1][0]=35;
-		  col_y_lookup[1][0][0][1][0][1]=36;
-		  col_y_lookup[1][0][1][0][0][1]=37;
-		  col_y_lookup[1][0][0][1][1][0]=38;
-		  col_y_lookup[1][0][1][0][1][0]=39;
-		  col_y_lookup[1][0][0][0][1][1]=40;
-		  col_y_lookup[1][0][1][1][0][0]=41;
-		  col_y_lookup[1][0][0][0][0][1]=42;
-		  col_y_lookup[1][0][0][0][1][0]=43;
-		  col_y_lookup[1][0][0][1][0][0]=44;
-		  col_y_lookup[1][0][1][0][0][0]=45;
-		  col_y_lookup[1][0][0][0][0][0]=46;
-		  col_y_lookup[1][0][1][1][1][1]=47;
-		  col_y_lookup[0][0][0][1][1][1]=48;
-		  col_y_lookup[0][0][1][0][1][1]=49;
-		  col_y_lookup[0][0][1][1][0][1]=50;
-		  col_y_lookup[0][0][1][1][1][0]=51;
-		  col_y_lookup[0][0][0][1][0][1]=52;
-		  col_y_lookup[0][0][1][0][0][1]=53;
-		  col_y_lookup[0][0][0][1][1][0]=54;
-		  col_y_lookup[0][0][1][0][1][0]=55;
-		  col_y_lookup[0][0][0][0][1][1]=56;
-		  col_y_lookup[0][0][1][1][0][0]=57;
-		  col_y_lookup[0][0][0][0][0][1]=58;
-		  col_y_lookup[0][0][0][0][1][0]=59;
-		  col_y_lookup[0][0][0][1][0][0]=60;
-		  col_y_lookup[0][0][1][0][0][0]=61;
-		  col_y_lookup[0][0][0][0][0][0]=62;
-		  col_y_lookup[0][0][1][1][1][1]=63;
+		  COL_Y_LOOKUP[1][1][0][1][1][1]=0;
+		  COL_Y_LOOKUP[1][1][1][0][1][1]=1;
+		  COL_Y_LOOKUP[1][1][1][1][0][1]=2;
+		  COL_Y_LOOKUP[1][1][1][1][1][0]=3;
+		  COL_Y_LOOKUP[1][1][0][1][0][1]=4;
+		  COL_Y_LOOKUP[1][1][1][0][0][1]=5;
+		  COL_Y_LOOKUP[1][1][0][1][1][0]=6;
+		  COL_Y_LOOKUP[1][1][1][0][1][0]=7;
+		  COL_Y_LOOKUP[1][1][0][0][1][1]=8;
+		  COL_Y_LOOKUP[1][1][1][1][0][0]=9;
+		  COL_Y_LOOKUP[1][1][0][0][0][1]=10;
+		  COL_Y_LOOKUP[1][1][0][0][1][0]=11;
+		  COL_Y_LOOKUP[1][1][0][1][0][0]=12;
+		  COL_Y_LOOKUP[1][1][1][0][0][0]=13;
+		  COL_Y_LOOKUP[1][1][0][0][0][0]=14;
+		  COL_Y_LOOKUP[1][1][1][1][1][1]=15;
+		  COL_Y_LOOKUP[0][1][0][1][1][1]=16;
+		  COL_Y_LOOKUP[0][1][1][0][1][1]=17;
+		  COL_Y_LOOKUP[0][1][1][1][0][1]=18;
+		  COL_Y_LOOKUP[0][1][1][1][1][0]=19;
+		  COL_Y_LOOKUP[0][1][0][1][0][1]=20;
+		  COL_Y_LOOKUP[0][1][1][0][0][1]=21;
+		  COL_Y_LOOKUP[0][1][0][1][1][0]=22;
+		  COL_Y_LOOKUP[0][1][1][0][1][0]=23;
+		  COL_Y_LOOKUP[0][1][0][0][1][1]=24;
+		  COL_Y_LOOKUP[0][1][1][1][0][0]=25;
+		  COL_Y_LOOKUP[0][1][0][0][0][1]=26;
+		  COL_Y_LOOKUP[0][1][0][0][1][0]=27;
+		  COL_Y_LOOKUP[0][1][0][1][0][0]=28;
+		  COL_Y_LOOKUP[0][1][1][0][0][0]=29;
+		  COL_Y_LOOKUP[0][1][0][0][0][0]=30;
+		  COL_Y_LOOKUP[0][1][1][1][1][1]=31;
+		  COL_Y_LOOKUP[1][0][0][1][1][1]=32;
+		  COL_Y_LOOKUP[1][0][1][0][1][1]=33;
+		  COL_Y_LOOKUP[1][0][1][1][0][1]=34;
+		  COL_Y_LOOKUP[1][0][1][1][1][0]=35;
+		  COL_Y_LOOKUP[1][0][0][1][0][1]=36;
+		  COL_Y_LOOKUP[1][0][1][0][0][1]=37;
+		  COL_Y_LOOKUP[1][0][0][1][1][0]=38;
+		  COL_Y_LOOKUP[1][0][1][0][1][0]=39;
+		  COL_Y_LOOKUP[1][0][0][0][1][1]=40;
+		  COL_Y_LOOKUP[1][0][1][1][0][0]=41;
+		  COL_Y_LOOKUP[1][0][0][0][0][1]=42;
+		  COL_Y_LOOKUP[1][0][0][0][1][0]=43;
+		  COL_Y_LOOKUP[1][0][0][1][0][0]=44;
+		  COL_Y_LOOKUP[1][0][1][0][0][0]=45;
+		  COL_Y_LOOKUP[1][0][0][0][0][0]=46;
+		  COL_Y_LOOKUP[1][0][1][1][1][1]=47;
+		  COL_Y_LOOKUP[0][0][0][1][1][1]=48;
+		  COL_Y_LOOKUP[0][0][1][0][1][1]=49;
+		  COL_Y_LOOKUP[0][0][1][1][0][1]=50;
+		  COL_Y_LOOKUP[0][0][1][1][1][0]=51;
+		  COL_Y_LOOKUP[0][0][0][1][0][1]=52;
+		  COL_Y_LOOKUP[0][0][1][0][0][1]=53;
+		  COL_Y_LOOKUP[0][0][0][1][1][0]=54;
+		  COL_Y_LOOKUP[0][0][1][0][1][0]=55;
+		  COL_Y_LOOKUP[0][0][0][0][1][1]=56;
+		  COL_Y_LOOKUP[0][0][1][1][0][0]=57;
+		  COL_Y_LOOKUP[0][0][0][0][0][1]=58;
+		  COL_Y_LOOKUP[0][0][0][0][1][0]=59;
+		  COL_Y_LOOKUP[0][0][0][1][0][0]=60;
+		  COL_Y_LOOKUP[0][0][1][0][0][0]=61;
+		  COL_Y_LOOKUP[0][0][0][0][0][0]=62;
+		  COL_Y_LOOKUP[0][0][1][1][1][1]=63;
 		  
-		  col_x_lookup[0][1][1][1][1][1]=0;
-		  col_x_lookup[1][0][1][1][1][1]=1;
-		  col_x_lookup[1][1][1][1][0][1]=2;
-		  col_x_lookup[1][1][1][1][1][0]=3;
-		  col_x_lookup[0][1][1][1][0][1]=4;
-		  col_x_lookup[1][0][1][1][0][1]=5;
-		  col_x_lookup[0][1][1][1][1][0]=6;
-		  col_x_lookup[1][0][1][1][1][0]=7;
-		  col_x_lookup[0][0][1][1][1][1]=8;
-		  col_x_lookup[1][1][1][1][0][0]=9;
-		  col_x_lookup[0][0][1][1][0][1]=10;
-		  col_x_lookup[0][0][1][1][1][0]=11;
-		  col_x_lookup[0][1][1][1][0][0]=12;
-		  col_x_lookup[1][0][1][1][0][0]=13;
-		  col_x_lookup[0][0][1][1][0][0]=14;
-		  col_x_lookup[1][1][1][1][1][1]=15;
-		  col_x_lookup[0][1][1][0][1][1]=16;
-		  col_x_lookup[1][0][1][0][1][1]=17;
-		  col_x_lookup[1][1][1][0][0][1]=18;
-		  col_x_lookup[1][1][1][0][1][0]=19;
-		  col_x_lookup[0][1][1][0][0][1]=20;
-		  col_x_lookup[1][0][1][0][0][1]=21;
-		  col_x_lookup[0][1][1][0][1][0]=22;
-		  col_x_lookup[1][0][1][0][1][0]=23;
-		  col_x_lookup[0][0][1][0][1][1]=24;
-		  col_x_lookup[1][1][1][0][0][0]=25;
-		  col_x_lookup[0][0][1][0][0][1]=26;
-		  col_x_lookup[0][0][1][0][1][0]=27;
-		  col_x_lookup[0][1][1][0][0][0]=28;
-		  col_x_lookup[1][0][1][0][0][0]=29;
-		  col_x_lookup[0][0][1][0][0][0]=30;
-		  col_x_lookup[1][1][1][0][1][1]=31;
-		  col_x_lookup[0][1][0][1][1][1]=32;
-		  col_x_lookup[1][0][0][1][1][1]=33;
-		  col_x_lookup[1][1][0][1][0][1]=34;
-		  col_x_lookup[1][1][0][1][1][0]=35;
-		  col_x_lookup[0][1][0][1][0][1]=36;
-		  col_x_lookup[1][0][0][1][0][1]=37;
-		  col_x_lookup[0][1][0][1][1][0]=38;
-		  col_x_lookup[1][0][0][1][1][0]=39;
-		  col_x_lookup[0][0][0][1][1][1]=40;
-		  col_x_lookup[1][1][0][1][0][0]=41;
-		  col_x_lookup[0][0][0][1][0][1]=42;
-		  col_x_lookup[0][0][0][1][1][0]=43;
-		  col_x_lookup[0][1][0][1][0][0]=44;
-		  col_x_lookup[1][0][0][1][0][0]=45;
-		  col_x_lookup[0][0][0][1][0][0]=46;
-		  col_x_lookup[1][1][0][1][1][1]=47;
-		  col_x_lookup[0][1][0][0][1][1]=48;
-		  col_x_lookup[1][0][0][0][1][1]=49;
-		  col_x_lookup[1][1][0][0][0][1]=50;
-		  col_x_lookup[1][1][0][0][1][0]=51;
-		  col_x_lookup[0][1][0][0][0][1]=52;
-		  col_x_lookup[1][0][0][0][0][1]=53;
-		  col_x_lookup[0][1][0][0][1][0]=54;
-		  col_x_lookup[1][0][0][0][1][0]=55;
-		  col_x_lookup[0][0][0][0][1][1]=56;
-		  col_x_lookup[1][1][0][0][0][0]=57;
-		  col_x_lookup[0][0][0][0][0][1]=58;
-		  col_x_lookup[0][0][0][0][1][0]=59;
-		  col_x_lookup[0][1][0][0][0][0]=60;
-		  col_x_lookup[1][0][0][0][0][0]=61;
-		  col_x_lookup[0][0][0][0][0][0]=62;
-		  col_x_lookup[1][1][0][0][1][1]=63;
+		  COL_X_LOOKUP[0][1][1][1][1][1]=0;
+		  COL_X_LOOKUP[1][0][1][1][1][1]=1;
+		  COL_X_LOOKUP[1][1][1][1][0][1]=2;
+		  COL_X_LOOKUP[1][1][1][1][1][0]=3;
+		  COL_X_LOOKUP[0][1][1][1][0][1]=4;
+		  COL_X_LOOKUP[1][0][1][1][0][1]=5;
+		  COL_X_LOOKUP[0][1][1][1][1][0]=6;
+		  COL_X_LOOKUP[1][0][1][1][1][0]=7;
+		  COL_X_LOOKUP[0][0][1][1][1][1]=8;
+		  COL_X_LOOKUP[1][1][1][1][0][0]=9;
+		  COL_X_LOOKUP[0][0][1][1][0][1]=10;
+		  COL_X_LOOKUP[0][0][1][1][1][0]=11;
+		  COL_X_LOOKUP[0][1][1][1][0][0]=12;
+		  COL_X_LOOKUP[1][0][1][1][0][0]=13;
+		  COL_X_LOOKUP[0][0][1][1][0][0]=14;
+		  COL_X_LOOKUP[1][1][1][1][1][1]=15;
+		  COL_X_LOOKUP[0][1][1][0][1][1]=16;
+		  COL_X_LOOKUP[1][0][1][0][1][1]=17;
+		  COL_X_LOOKUP[1][1][1][0][0][1]=18;
+		  COL_X_LOOKUP[1][1][1][0][1][0]=19;
+		  COL_X_LOOKUP[0][1][1][0][0][1]=20;
+		  COL_X_LOOKUP[1][0][1][0][0][1]=21;
+		  COL_X_LOOKUP[0][1][1][0][1][0]=22;
+		  COL_X_LOOKUP[1][0][1][0][1][0]=23;
+		  COL_X_LOOKUP[0][0][1][0][1][1]=24;
+		  COL_X_LOOKUP[1][1][1][0][0][0]=25;
+		  COL_X_LOOKUP[0][0][1][0][0][1]=26;
+		  COL_X_LOOKUP[0][0][1][0][1][0]=27;
+		  COL_X_LOOKUP[0][1][1][0][0][0]=28;
+		  COL_X_LOOKUP[1][0][1][0][0][0]=29;
+		  COL_X_LOOKUP[0][0][1][0][0][0]=30;
+		  COL_X_LOOKUP[1][1][1][0][1][1]=31;
+		  COL_X_LOOKUP[0][1][0][1][1][1]=32;
+		  COL_X_LOOKUP[1][0][0][1][1][1]=33;
+		  COL_X_LOOKUP[1][1][0][1][0][1]=34;
+		  COL_X_LOOKUP[1][1][0][1][1][0]=35;
+		  COL_X_LOOKUP[0][1][0][1][0][1]=36;
+		  COL_X_LOOKUP[1][0][0][1][0][1]=37;
+		  COL_X_LOOKUP[0][1][0][1][1][0]=38;
+		  COL_X_LOOKUP[1][0][0][1][1][0]=39;
+		  COL_X_LOOKUP[0][0][0][1][1][1]=40;
+		  COL_X_LOOKUP[1][1][0][1][0][0]=41;
+		  COL_X_LOOKUP[0][0][0][1][0][1]=42;
+		  COL_X_LOOKUP[0][0][0][1][1][0]=43;
+		  COL_X_LOOKUP[0][1][0][1][0][0]=44;
+		  COL_X_LOOKUP[1][0][0][1][0][0]=45;
+		  COL_X_LOOKUP[0][0][0][1][0][0]=46;
+		  COL_X_LOOKUP[1][1][0][1][1][1]=47;
+		  COL_X_LOOKUP[0][1][0][0][1][1]=48;
+		  COL_X_LOOKUP[1][0][0][0][1][1]=49;
+		  COL_X_LOOKUP[1][1][0][0][0][1]=50;
+		  COL_X_LOOKUP[1][1][0][0][1][0]=51;
+		  COL_X_LOOKUP[0][1][0][0][0][1]=52;
+		  COL_X_LOOKUP[1][0][0][0][0][1]=53;
+		  COL_X_LOOKUP[0][1][0][0][1][0]=54;
+		  COL_X_LOOKUP[1][0][0][0][1][0]=55;
+		  COL_X_LOOKUP[0][0][0][0][1][1]=56;
+		  COL_X_LOOKUP[1][1][0][0][0][0]=57;
+		  COL_X_LOOKUP[0][0][0][0][0][1]=58;
+		  COL_X_LOOKUP[0][0][0][0][1][0]=59;
+		  COL_X_LOOKUP[0][1][0][0][0][0]=60;
+		  COL_X_LOOKUP[1][0][0][0][0][0]=61;
+		  COL_X_LOOKUP[0][0][0][0][0][0]=62;
+		  COL_X_LOOKUP[1][1][0][0][1][1]=63;
 		  
-		  col_z_lookup[1][1][1][0][1][1]=0;
-		  col_z_lookup[1][1][0][1][1][1]=1;
-		  col_z_lookup[1][0][1][1][1][1]=2;
-		  col_z_lookup[0][1][1][1][1][1]=3;
-		  col_z_lookup[1][0][1][0][1][1]=4;
-		  col_z_lookup[1][0][0][1][1][1]=5;
-		  col_z_lookup[0][1][1][0][1][1]=6;
-		  col_z_lookup[0][1][0][1][1][1]=7;
-		  col_z_lookup[1][1][0][0][1][1]=8;
-		  col_z_lookup[0][0][1][1][1][1]=9;
-		  col_z_lookup[1][0][0][0][1][1]=10;
-		  col_z_lookup[0][1][0][0][1][1]=11;
-		  col_z_lookup[0][0][1][0][1][1]=12;
-		  col_z_lookup[0][0][0][1][1][1]=13;
-		  col_z_lookup[0][0][0][0][1][1]=14;
-		  col_z_lookup[1][1][1][1][1][1]=15;
-		  col_z_lookup[1][1][1][0][1][0]=16;
-		  col_z_lookup[1][1][0][1][1][0]=17;
-		  col_z_lookup[1][0][1][1][1][0]=18;
-		  col_z_lookup[0][1][1][1][1][0]=19;
-		  col_z_lookup[1][0][1][0][1][0]=20;
-		  col_z_lookup[1][0][0][1][1][0]=21;
-		  col_z_lookup[0][1][1][0][1][0]=22;
-		  col_z_lookup[0][1][0][1][1][0]=23;
-		  col_z_lookup[1][1][0][0][1][0]=24;
-		  col_z_lookup[0][0][1][1][1][0]=25;
-		  col_z_lookup[1][0][0][0][1][0]=26;
-		  col_z_lookup[0][1][0][0][1][0]=27;
-		  col_z_lookup[0][0][1][0][1][0]=28;
-		  col_z_lookup[0][0][0][1][1][0]=29;
-		  col_z_lookup[0][0][0][0][1][0]=30;
-		  col_z_lookup[1][1][1][1][1][0]=31;
-		  col_z_lookup[1][1][1][0][0][1]=32;
-		  col_z_lookup[1][1][0][1][0][1]=33;
-		  col_z_lookup[1][0][1][1][0][1]=34;
-		  col_z_lookup[0][1][1][1][0][1]=35;
-		  col_z_lookup[1][0][1][0][0][1]=36;
-		  col_z_lookup[1][0][0][1][0][1]=37;
-		  col_z_lookup[0][1][1][0][0][1]=38;
-		  col_z_lookup[0][1][0][1][0][1]=39;
-		  col_z_lookup[1][1][0][0][0][1]=40;
-		  col_z_lookup[0][0][1][1][0][1]=41;
-		  col_z_lookup[1][0][0][0][0][1]=42;
-		  col_z_lookup[0][1][0][0][0][1]=43;
-		  col_z_lookup[0][0][1][0][0][1]=44;
-		  col_z_lookup[0][0][0][1][0][1]=45;
-		  col_z_lookup[0][0][0][0][0][1]=46;
-		  col_z_lookup[1][1][1][1][0][1]=47;
-		  col_z_lookup[1][1][1][0][0][0]=48;
-		  col_z_lookup[1][1][0][1][0][0]=49;
-		  col_z_lookup[1][0][1][1][0][0]=50;
-		  col_z_lookup[0][1][1][1][0][0]=51;
-		  col_z_lookup[1][0][1][0][0][0]=52;
-		  col_z_lookup[1][0][0][1][0][0]=53;
-		  col_z_lookup[0][1][1][0][0][0]=54;
-		  col_z_lookup[0][1][0][1][0][0]=55;
-		  col_z_lookup[1][1][0][0][0][0]=56;
-		  col_z_lookup[0][0][1][1][0][0]=57;
-		  col_z_lookup[1][0][0][0][0][0]=58;
-		  col_z_lookup[0][1][0][0][0][0]=59;
-		  col_z_lookup[0][0][1][0][0][0]=60;
-		  col_z_lookup[0][0][0][1][0][0]=61;
-		  col_z_lookup[0][0][0][0][0][0]=62;
-		  col_z_lookup[1][1][1][1][0][0]=63;
+		  COL_Z_LOOKUP[1][1][1][0][1][1]=0;
+		  COL_Z_LOOKUP[1][1][0][1][1][1]=1;
+		  COL_Z_LOOKUP[1][0][1][1][1][1]=2;
+		  COL_Z_LOOKUP[0][1][1][1][1][1]=3;
+		  COL_Z_LOOKUP[1][0][1][0][1][1]=4;
+		  COL_Z_LOOKUP[1][0][0][1][1][1]=5;
+		  COL_Z_LOOKUP[0][1][1][0][1][1]=6;
+		  COL_Z_LOOKUP[0][1][0][1][1][1]=7;
+		  COL_Z_LOOKUP[1][1][0][0][1][1]=8;
+		  COL_Z_LOOKUP[0][0][1][1][1][1]=9;
+		  COL_Z_LOOKUP[1][0][0][0][1][1]=10;
+		  COL_Z_LOOKUP[0][1][0][0][1][1]=11;
+		  COL_Z_LOOKUP[0][0][1][0][1][1]=12;
+		  COL_Z_LOOKUP[0][0][0][1][1][1]=13;
+		  COL_Z_LOOKUP[0][0][0][0][1][1]=14;
+		  COL_Z_LOOKUP[1][1][1][1][1][1]=15;
+		  COL_Z_LOOKUP[1][1][1][0][1][0]=16;
+		  COL_Z_LOOKUP[1][1][0][1][1][0]=17;
+		  COL_Z_LOOKUP[1][0][1][1][1][0]=18;
+		  COL_Z_LOOKUP[0][1][1][1][1][0]=19;
+		  COL_Z_LOOKUP[1][0][1][0][1][0]=20;
+		  COL_Z_LOOKUP[1][0][0][1][1][0]=21;
+		  COL_Z_LOOKUP[0][1][1][0][1][0]=22;
+		  COL_Z_LOOKUP[0][1][0][1][1][0]=23;
+		  COL_Z_LOOKUP[1][1][0][0][1][0]=24;
+		  COL_Z_LOOKUP[0][0][1][1][1][0]=25;
+		  COL_Z_LOOKUP[1][0][0][0][1][0]=26;
+		  COL_Z_LOOKUP[0][1][0][0][1][0]=27;
+		  COL_Z_LOOKUP[0][0][1][0][1][0]=28;
+		  COL_Z_LOOKUP[0][0][0][1][1][0]=29;
+		  COL_Z_LOOKUP[0][0][0][0][1][0]=30;
+		  COL_Z_LOOKUP[1][1][1][1][1][0]=31;
+		  COL_Z_LOOKUP[1][1][1][0][0][1]=32;
+		  COL_Z_LOOKUP[1][1][0][1][0][1]=33;
+		  COL_Z_LOOKUP[1][0][1][1][0][1]=34;
+		  COL_Z_LOOKUP[0][1][1][1][0][1]=35;
+		  COL_Z_LOOKUP[1][0][1][0][0][1]=36;
+		  COL_Z_LOOKUP[1][0][0][1][0][1]=37;
+		  COL_Z_LOOKUP[0][1][1][0][0][1]=38;
+		  COL_Z_LOOKUP[0][1][0][1][0][1]=39;
+		  COL_Z_LOOKUP[1][1][0][0][0][1]=40;
+		  COL_Z_LOOKUP[0][0][1][1][0][1]=41;
+		  COL_Z_LOOKUP[1][0][0][0][0][1]=42;
+		  COL_Z_LOOKUP[0][1][0][0][0][1]=43;
+		  COL_Z_LOOKUP[0][0][1][0][0][1]=44;
+		  COL_Z_LOOKUP[0][0][0][1][0][1]=45;
+		  COL_Z_LOOKUP[0][0][0][0][0][1]=46;
+		  COL_Z_LOOKUP[1][1][1][1][0][1]=47;
+		  COL_Z_LOOKUP[1][1][1][0][0][0]=48;
+		  COL_Z_LOOKUP[1][1][0][1][0][0]=49;
+		  COL_Z_LOOKUP[1][0][1][1][0][0]=50;
+		  COL_Z_LOOKUP[0][1][1][1][0][0]=51;
+		  COL_Z_LOOKUP[1][0][1][0][0][0]=52;
+		  COL_Z_LOOKUP[1][0][0][1][0][0]=53;
+		  COL_Z_LOOKUP[0][1][1][0][0][0]=54;
+		  COL_Z_LOOKUP[0][1][0][1][0][0]=55;
+		  COL_Z_LOOKUP[1][1][0][0][0][0]=56;
+		  COL_Z_LOOKUP[0][0][1][1][0][0]=57;
+		  COL_Z_LOOKUP[1][0][0][0][0][0]=58;
+		  COL_Z_LOOKUP[0][1][0][0][0][0]=59;
+		  COL_Z_LOOKUP[0][0][1][0][0][0]=60;
+		  COL_Z_LOOKUP[0][0][0][1][0][0]=61;
+		  COL_Z_LOOKUP[0][0][0][0][0][0]=62;
+		  COL_Z_LOOKUP[1][1][1][1][0][0]=63;
 	  }
 
 	  public class CustomStateMapper extends DefaultStateMapper{
