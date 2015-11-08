@@ -55,7 +55,7 @@ public class BlockBasalt extends Block {
 	private static  Integer[][][][][][] COL_X_LOOKUP = new Integer[2][2][2][2][2][2];
 	private static  Integer[][][][][][] COL_Y_LOOKUP = new Integer[2][2][2][2][2][2];
 	private static  Integer[][][][][][] COL_Z_LOOKUP = new Integer[2][2][2][2][2][2];
-	private static  Integer[][][][][][] BRICK_BIG_LOOKUP = new Integer[2][2][2][2][2][2];
+	private static  Integer[][][][][][] JOIN_LOOKUP = new Integer[2][2][2][2][2][2];
 	
 	static {
 		setupLookupArrays();
@@ -132,10 +132,6 @@ public class BlockBasalt extends Block {
 	    return style.getMetadata();
 	  }
 
-	  // this method isn't required if your properties only depend on the stored metadata.
-	  // it is required if:
-	  // 1) you are making a multiblock which stores information in other blocks eg BlockBed, BlockDoor
-	  // 2) your block's state depends on other neighbours (eg BlockFence)
 	  @Override
 	  public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
 	  {
@@ -173,6 +169,12 @@ public class BlockBasalt extends Block {
 			  // Was conspicuous that the detailID was the max value. 
 			  // This was before I re-factored the detail ID declarations, maybe it would work now.
 			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Z).withProperty(PROP_DETAILS, detailID);			  
+
+		  case BRICK_BIG:
+			  
+			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.BRICK_BIG));
+			  detailID = JOIN_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.BRICK_BIG).withProperty(PROP_DETAILS, detailID);			  
 
 		  default:
 			  
@@ -485,6 +487,71 @@ public class BlockBasalt extends Block {
 		  COL_Z_LOOKUP[0][0][0][1][0][0]=61;
 		  COL_Z_LOOKUP[0][0][0][0][0][0]=62;
 		  COL_Z_LOOKUP[1][1][1][1][0][0]=63;
+		  
+		  JOIN_LOOKUP[0][0][0][0][0][0]=0;
+		  JOIN_LOOKUP[1][0][0][0][0][0]=1;
+		  JOIN_LOOKUP[0][1][0][0][0][0]=2;
+		  JOIN_LOOKUP[0][0][1][0][0][0]=3;
+		  JOIN_LOOKUP[0][0][0][1][0][0]=4;
+		  JOIN_LOOKUP[0][0][0][0][1][0]=5;
+		  JOIN_LOOKUP[0][0][0][0][0][1]=6;
+		  JOIN_LOOKUP[1][1][0][0][0][0]=7;
+		  JOIN_LOOKUP[0][0][1][1][0][0]=8;
+		  JOIN_LOOKUP[0][0][0][0][1][1]=9;
+		  JOIN_LOOKUP[1][0][1][0][0][0]=10;
+		  JOIN_LOOKUP[1][0][0][1][0][0]=11;
+		  JOIN_LOOKUP[1][0][0][0][1][0]=12;
+		  JOIN_LOOKUP[1][0][0][0][0][1]=13;
+		  JOIN_LOOKUP[0][1][1][0][0][0]=14;
+		  JOIN_LOOKUP[0][1][0][1][0][0]=15;
+		  JOIN_LOOKUP[0][1][0][0][1][0]=16;
+		  JOIN_LOOKUP[0][1][0][0][0][1]=17;
+		  JOIN_LOOKUP[0][0][1][0][1][0]=18;
+		  JOIN_LOOKUP[0][0][1][0][0][1]=19;
+		  JOIN_LOOKUP[0][0][0][1][1][0]=20;
+		  JOIN_LOOKUP[0][0][0][1][0][1]=21;
+		  JOIN_LOOKUP[1][0][1][1][0][0]=22;
+		  JOIN_LOOKUP[1][0][0][0][1][1]=23;
+		  JOIN_LOOKUP[0][1][1][1][0][0]=24;
+		  JOIN_LOOKUP[0][1][0][0][1][1]=25;
+		  JOIN_LOOKUP[0][0][1][1][1][0]=26;
+		  JOIN_LOOKUP[1][1][0][0][1][0]=27;
+		  JOIN_LOOKUP[0][0][1][1][0][1]=28;
+		  JOIN_LOOKUP[1][1][0][0][0][1]=29;
+		  JOIN_LOOKUP[1][1][1][0][0][0]=30;
+		  JOIN_LOOKUP[0][0][1][0][1][1]=31;
+		  JOIN_LOOKUP[1][1][0][1][0][0]=32;
+		  JOIN_LOOKUP[0][0][0][1][1][1]=33;
+		  JOIN_LOOKUP[1][0][1][0][1][0]=34;
+		  JOIN_LOOKUP[1][0][1][0][0][1]=35;
+		  JOIN_LOOKUP[1][0][0][1][1][0]=36;
+		  JOIN_LOOKUP[1][0][0][1][0][1]=37;
+		  JOIN_LOOKUP[0][1][1][0][1][0]=38;
+		  JOIN_LOOKUP[0][1][1][0][0][1]=39;
+		  JOIN_LOOKUP[0][1][0][1][1][0]=40;
+		  JOIN_LOOKUP[0][1][0][1][0][1]=41;
+		  JOIN_LOOKUP[0][0][1][1][1][1]=42;
+		  JOIN_LOOKUP[1][1][1][1][0][0]=43;
+		  JOIN_LOOKUP[1][1][0][0][1][1]=44;
+		  JOIN_LOOKUP[1][0][0][1][1][1]=45;
+		  JOIN_LOOKUP[1][0][1][0][1][1]=46;
+		  JOIN_LOOKUP[1][0][1][1][0][1]=47;
+		  JOIN_LOOKUP[1][0][1][1][1][0]=48;
+		  JOIN_LOOKUP[0][1][0][1][1][1]=49;
+		  JOIN_LOOKUP[0][1][1][0][1][1]=50;
+		  JOIN_LOOKUP[0][1][1][1][0][1]=51;
+		  JOIN_LOOKUP[0][1][1][1][1][0]=52;
+		  JOIN_LOOKUP[1][1][1][0][1][0]=53;
+		  JOIN_LOOKUP[1][1][1][0][0][1]=54;
+		  JOIN_LOOKUP[1][1][0][1][1][0]=55;
+		  JOIN_LOOKUP[1][1][0][1][0][1]=56;
+		  JOIN_LOOKUP[0][1][1][1][1][1]=57;
+		  JOIN_LOOKUP[1][0][1][1][1][1]=58;
+		  JOIN_LOOKUP[1][1][0][1][1][1]=59;
+		  JOIN_LOOKUP[1][1][1][0][1][1]=60;
+		  JOIN_LOOKUP[1][1][1][1][0][1]=61;
+		  JOIN_LOOKUP[1][1][1][1][1][0]=62;
+		  JOIN_LOOKUP[1][1][1][1][1][1]=63;
 	  }
 
 	  public class CustomStateMapper extends DefaultStateMapper{
