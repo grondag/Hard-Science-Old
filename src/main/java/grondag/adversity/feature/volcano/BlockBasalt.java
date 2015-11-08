@@ -47,9 +47,8 @@ import com.google.common.collect.Maps;
 public class BlockBasalt extends Block {
 	
 	public static final PropertyEnum PROP_STYLE = PropertyEnum.create("style", EnumStyle.class);
-	public static final PropertyInteger	 PROP_DETAILS = PropertyInteger.create("details", 0, 193);
+	public static final PropertyInteger	 PROP_DETAILS = PropertyInteger.create("details", 0, 63);
 
-	private static int[] detailParents = new int[194];
 	private static  Integer[][][][][][] col_x_lookup = new Integer[2][2][2][2][2][2];
 	private static  Integer[][][][][][] col_y_lookup = new Integer[2][2][2][2][2][2];
 	private static  Integer[][][][][][] col_z_lookup = new Integer[2][2][2][2][2][2];
@@ -154,7 +153,7 @@ public class BlockBasalt extends Block {
 			  return state.withProperty(PROP_DETAILS, 0);
 
 		  case SMOOTH:
-			  return state.withProperty(PROP_DETAILS, 1);
+			  return state.withProperty(PROP_DETAILS, 0);
 			  
 		  case COLUMN_Y:
 			  
@@ -238,11 +237,11 @@ public class BlockBasalt extends Block {
 
 	  public static enum EnumStyle implements IStringSerializable
 	  {
-	    ROUGH(0, "rough"),
-	    SMOOTH(1, "smooth"),
-	    COLUMN_Y(2, "column_y"),
-	    COLUMN_X(3, "column_x"),	    
-	    COLUMN_Z(4, "column_z");
+	    ROUGH(0, "rough", 0),
+	    SMOOTH(1, "smooth", 0),
+	    COLUMN_Y(2, "column_y", 63),
+	    COLUMN_X(3, "column_x", 63),	    
+	    COLUMN_Z(4, "column_z", 63);
 //	    PLATE(5, "plate"),	    
 //	    BRICK1(6, "brick1"),
 //	    BRICK2(7, "brick2"),
@@ -257,6 +256,8 @@ public class BlockBasalt extends Block {
 
 	    private final int meta;
 	    private final String name;
+	    private final int maxDetailID;
+	    
 	    private static final EnumStyle[] META_LOOKUP = new EnumStyle[values().length];
 	    
 	    static
@@ -294,412 +295,221 @@ public class BlockBasalt extends Block {
 	    {
 	      return this.name;
 	    }
+	    
+		public int getMaxDetailID()
+	    {
+	      return this.maxDetailID;
+	    }
 
-	    private EnumStyle(int i_meta, String i_name)
+	    private EnumStyle(int i_meta, String i_name, int i_maxDetailID)
 	    {
 	      this.meta = i_meta;
 	      this.name = i_name;
+	      this.maxDetailID = i_maxDetailID;
 	    }
 
 	  }
 	  
 	  private static void setupLookupArrays(){
-		  
-		  
-		  detailParents[0] = 0;
-		  detailParents[1] = 1;
-		  detailParents[2] = 2;
-		  detailParents[3] = 2;
-		  detailParents[4] = 2;
-		  detailParents[5] = 2;
-		  detailParents[6] = 2;
-		  detailParents[7] = 2;
-		  detailParents[8] = 2;
-		  detailParents[9] = 2;
-		  detailParents[10] = 2;
-		  detailParents[11] = 2;
-		  detailParents[12] = 2;
-		  detailParents[13] = 2;
-		  detailParents[14] = 2;
-		  detailParents[15] = 2;
-		  detailParents[16] = 2;
-		  detailParents[17] = 2;
-		  detailParents[18] = 2;
-		  detailParents[19] = 2;
-		  detailParents[20] = 2;
-		  detailParents[21] = 2;
-		  detailParents[22] = 2;
-		  detailParents[23] = 2;
-		  detailParents[24] = 2;
-		  detailParents[25] = 2;
-		  detailParents[26] = 2;
-		  detailParents[27] = 2;
-		  detailParents[28] = 2;
-		  detailParents[29] = 2;
-		  detailParents[30] = 2;
-		  detailParents[31] = 2;
-		  detailParents[32] = 2;
-		  detailParents[33] = 2;
-		  detailParents[34] = 2;
-		  detailParents[35] = 2;
-		  detailParents[36] = 2;
-		  detailParents[37] = 2;
-		  detailParents[38] = 2;
-		  detailParents[39] = 2;
-		  detailParents[40] = 2;
-		  detailParents[41] = 2;
-		  detailParents[42] = 2;
-		  detailParents[43] = 2;
-		  detailParents[44] = 2;
-		  detailParents[45] = 2;
-		  detailParents[46] = 2;
-		  detailParents[47] = 2;
-		  detailParents[48] = 2;
-		  detailParents[49] = 2;
-		  detailParents[50] = 2;
-		  detailParents[51] = 2;
-		  detailParents[52] = 2;
-		  detailParents[53] = 2;
-		  detailParents[54] = 2;
-		  detailParents[55] = 2;
-		  detailParents[56] = 2;
-		  detailParents[57] = 2;
-		  detailParents[58] = 2;
-		  detailParents[59] = 2;
-		  detailParents[60] = 2;
-		  detailParents[61] = 2;
-		  detailParents[62] = 2;
-		  detailParents[63] = 2;
-		  detailParents[64] = 2;
-		  detailParents[65] = 2;
-		  
-		  detailParents[66] = 3;
-		  detailParents[67] = 3;
-		  detailParents[68] = 3;
-		  detailParents[69] = 3;
-		  detailParents[70] = 3;
-		  detailParents[71] = 3;
-		  detailParents[72] = 3;
-		  detailParents[73] = 3;
-		  detailParents[74] = 3;
-		  detailParents[75] = 3;
-		  detailParents[76] = 3;
-		  detailParents[77] = 3;
-		  detailParents[78] = 3;
-		  detailParents[79] = 3;
-		  detailParents[80] = 3;
-		  detailParents[81] = 3;
-		  detailParents[82] = 3;
-		  detailParents[83] = 3;
-		  detailParents[84] = 3;
-		  detailParents[85] = 3;
-		  detailParents[86] = 3;
-		  detailParents[87] = 3;
-		  detailParents[88] = 3;
-		  detailParents[89] = 3;
-		  detailParents[90] = 3;
-		  detailParents[91] = 3;
-		  detailParents[92] = 3;
-		  detailParents[93] = 3;
-		  detailParents[94] = 3;
-		  detailParents[95] = 3;
-		  detailParents[96] = 3;
-		  detailParents[97] = 3;
-		  detailParents[98] = 3;
-		  detailParents[99] = 3;
-		  detailParents[100] = 3;
-		  detailParents[101] = 3;
-		  detailParents[102] = 3;
-		  detailParents[103] = 3;
-		  detailParents[104] = 3;
-		  detailParents[105] = 3;
-		  detailParents[106] = 3;
-		  detailParents[107] = 3;
-		  detailParents[108] = 3;
-		  detailParents[109] = 3;
-		  detailParents[110] = 3;
-		  detailParents[111] = 3;
-		  detailParents[112] = 3;
-		  detailParents[113] = 3;
-		  detailParents[114] = 3;
-		  detailParents[115] = 3;
-		  detailParents[116] = 3;
-		  detailParents[117] = 3;
-		  detailParents[118] = 3;
-		  detailParents[119] = 3;
-		  detailParents[120] = 3;
-		  detailParents[121] = 3;
-		  detailParents[122] = 3;
-		  detailParents[123] = 3;
-		  detailParents[124] = 3;
-		  detailParents[125] = 3;
-		  detailParents[126] = 3;
-		  detailParents[127] = 3;
-		  detailParents[128] = 3;
-		  detailParents[129] = 3;
-		  
-		  detailParents[130] = 4;
-		  detailParents[131] = 4;
-		  detailParents[132] = 4;
-		  detailParents[133] = 4;
-		  detailParents[134] = 4;
-		  detailParents[135] = 4;
-		  detailParents[136] = 4;
-		  detailParents[137] = 4;
-		  detailParents[138] = 4;
-		  detailParents[139] = 4;
-		  detailParents[140] = 4;
-		  detailParents[141] = 4;
-		  detailParents[142] = 4;
-		  detailParents[143] = 4;
-		  detailParents[144] = 4;
-		  detailParents[145] = 4;
-		  detailParents[146] = 4;
-		  detailParents[147] = 4;
-		  detailParents[148] = 4;
-		  detailParents[149] = 4;
-		  detailParents[150] = 4;
-		  detailParents[151] = 4;
-		  detailParents[152] = 4;
-		  detailParents[153] = 4;
-		  detailParents[154] = 4;
-		  detailParents[155] = 4;
-		  detailParents[156] = 4;
-		  detailParents[157] = 4;
-		  detailParents[158] = 4;
-		  detailParents[159] = 4;
-		  detailParents[160] = 4;
-		  detailParents[161] = 4;
-		  detailParents[162] = 4;
-		  detailParents[163] = 4;
-		  detailParents[164] = 4;
-		  detailParents[165] = 4;
-		  detailParents[166] = 4;
-		  detailParents[167] = 4;
-		  detailParents[168] = 4;
-		  detailParents[169] = 4;
-		  detailParents[170] = 4;
-		  detailParents[171] = 4;
-		  detailParents[172] = 4;
-		  detailParents[173] = 4;
-		  detailParents[174] = 4;
-		  detailParents[175] = 4;
-		  detailParents[176] = 4;
-		  detailParents[177] = 4;
-		  detailParents[178] = 4;
-		  detailParents[179] = 4;
-		  detailParents[180] = 4;
-		  detailParents[181] = 4;
-		  detailParents[182] = 4;
-		  detailParents[183] = 4;
-		  detailParents[184] = 4;
-		  detailParents[185] = 4;
-		  detailParents[186] = 4;
-		  detailParents[187] = 4;
-		  detailParents[188] = 4;
-		  detailParents[189] = 4;
-		  detailParents[190] = 4;
-		  detailParents[191] = 4;
-		  detailParents[192] = 4;
-		  detailParents[193] = 4;
-		  
+
+
 		  // U D E W N S
 		  // 1 means has adjacent block of same style
 		
-		  col_y_lookup[1][1][0][1][1][1]=2;
-		  col_y_lookup[1][1][1][0][1][1]=3;
-		  col_y_lookup[1][1][1][1][0][1]=4;
-		  col_y_lookup[1][1][1][1][1][0]=5;
-		  col_y_lookup[1][1][0][1][0][1]=6;
-		  col_y_lookup[1][1][1][0][0][1]=7;
-		  col_y_lookup[1][1][0][1][1][0]=8;
-		  col_y_lookup[1][1][1][0][1][0]=9;
-		  col_y_lookup[1][1][0][0][1][1]=10;
-		  col_y_lookup[1][1][1][1][0][0]=11;
-		  col_y_lookup[1][1][0][0][0][1]=12;
-		  col_y_lookup[1][1][0][0][1][0]=13;
-		  col_y_lookup[1][1][0][1][0][0]=14;
-		  col_y_lookup[1][1][1][0][0][0]=15;
-		  col_y_lookup[1][1][0][0][0][0]=16;
-		  col_y_lookup[1][1][1][1][1][1]=17;
-		  col_y_lookup[0][1][0][1][1][1]=18;
-		  col_y_lookup[0][1][1][0][1][1]=19;
-		  col_y_lookup[0][1][1][1][0][1]=20;
-		  col_y_lookup[0][1][1][1][1][0]=21;
-		  col_y_lookup[0][1][0][1][0][1]=22;
-		  col_y_lookup[0][1][1][0][0][1]=23;
-		  col_y_lookup[0][1][0][1][1][0]=24;
-		  col_y_lookup[0][1][1][0][1][0]=25;
-		  col_y_lookup[0][1][0][0][1][1]=26;
-		  col_y_lookup[0][1][1][1][0][0]=27;
-		  col_y_lookup[0][1][0][0][0][1]=28;
-		  col_y_lookup[0][1][0][0][1][0]=29;
-		  col_y_lookup[0][1][0][1][0][0]=30;
-		  col_y_lookup[0][1][1][0][0][0]=31;
-		  col_y_lookup[0][1][0][0][0][0]=32;
-		  col_y_lookup[0][1][1][1][1][1]=33;
-		  col_y_lookup[1][0][0][1][1][1]=34;
-		  col_y_lookup[1][0][1][0][1][1]=35;
-		  col_y_lookup[1][0][1][1][0][1]=36;
-		  col_y_lookup[1][0][1][1][1][0]=37;
-		  col_y_lookup[1][0][0][1][0][1]=38;
-		  col_y_lookup[1][0][1][0][0][1]=39;
-		  col_y_lookup[1][0][0][1][1][0]=40;
-		  col_y_lookup[1][0][1][0][1][0]=41;
-		  col_y_lookup[1][0][0][0][1][1]=42;
-		  col_y_lookup[1][0][1][1][0][0]=43;
-		  col_y_lookup[1][0][0][0][0][1]=44;
-		  col_y_lookup[1][0][0][0][1][0]=45;
-		  col_y_lookup[1][0][0][1][0][0]=46;
-		  col_y_lookup[1][0][1][0][0][0]=47;
-		  col_y_lookup[1][0][0][0][0][0]=48;
-		  col_y_lookup[1][0][1][1][1][1]=49;
-		  col_y_lookup[0][0][0][1][1][1]=50;
-		  col_y_lookup[0][0][1][0][1][1]=51;
-		  col_y_lookup[0][0][1][1][0][1]=52;
-		  col_y_lookup[0][0][1][1][1][0]=53;
-		  col_y_lookup[0][0][0][1][0][1]=54;
-		  col_y_lookup[0][0][1][0][0][1]=55;
-		  col_y_lookup[0][0][0][1][1][0]=56;
-		  col_y_lookup[0][0][1][0][1][0]=57;
-		  col_y_lookup[0][0][0][0][1][1]=58;
-		  col_y_lookup[0][0][1][1][0][0]=59;
-		  col_y_lookup[0][0][0][0][0][1]=60;
-		  col_y_lookup[0][0][0][0][1][0]=61;
-		  col_y_lookup[0][0][0][1][0][0]=62;
-		  col_y_lookup[0][0][1][0][0][0]=63;
-		  col_y_lookup[0][0][0][0][0][0]=64;
-		  col_y_lookup[0][0][1][1][1][1]=65;
+		  col_y_lookup[1][1][0][1][1][1]=0;
+		  col_y_lookup[1][1][1][0][1][1]=1;
+		  col_y_lookup[1][1][1][1][0][1]=2;
+		  col_y_lookup[1][1][1][1][1][0]=3;
+		  col_y_lookup[1][1][0][1][0][1]=4;
+		  col_y_lookup[1][1][1][0][0][1]=5;
+		  col_y_lookup[1][1][0][1][1][0]=6;
+		  col_y_lookup[1][1][1][0][1][0]=7;
+		  col_y_lookup[1][1][0][0][1][1]=8;
+		  col_y_lookup[1][1][1][1][0][0]=9;
+		  col_y_lookup[1][1][0][0][0][1]=10;
+		  col_y_lookup[1][1][0][0][1][0]=11;
+		  col_y_lookup[1][1][0][1][0][0]=12;
+		  col_y_lookup[1][1][1][0][0][0]=13;
+		  col_y_lookup[1][1][0][0][0][0]=14;
+		  col_y_lookup[1][1][1][1][1][1]=15;
+		  col_y_lookup[0][1][0][1][1][1]=16;
+		  col_y_lookup[0][1][1][0][1][1]=17;
+		  col_y_lookup[0][1][1][1][0][1]=18;
+		  col_y_lookup[0][1][1][1][1][0]=19;
+		  col_y_lookup[0][1][0][1][0][1]=20;
+		  col_y_lookup[0][1][1][0][0][1]=21;
+		  col_y_lookup[0][1][0][1][1][0]=22;
+		  col_y_lookup[0][1][1][0][1][0]=23;
+		  col_y_lookup[0][1][0][0][1][1]=24;
+		  col_y_lookup[0][1][1][1][0][0]=25;
+		  col_y_lookup[0][1][0][0][0][1]=26;
+		  col_y_lookup[0][1][0][0][1][0]=27;
+		  col_y_lookup[0][1][0][1][0][0]=28;
+		  col_y_lookup[0][1][1][0][0][0]=29;
+		  col_y_lookup[0][1][0][0][0][0]=30;
+		  col_y_lookup[0][1][1][1][1][1]=31;
+		  col_y_lookup[1][0][0][1][1][1]=32;
+		  col_y_lookup[1][0][1][0][1][1]=33;
+		  col_y_lookup[1][0][1][1][0][1]=34;
+		  col_y_lookup[1][0][1][1][1][0]=35;
+		  col_y_lookup[1][0][0][1][0][1]=36;
+		  col_y_lookup[1][0][1][0][0][1]=37;
+		  col_y_lookup[1][0][0][1][1][0]=38;
+		  col_y_lookup[1][0][1][0][1][0]=39;
+		  col_y_lookup[1][0][0][0][1][1]=40;
+		  col_y_lookup[1][0][1][1][0][0]=41;
+		  col_y_lookup[1][0][0][0][0][1]=42;
+		  col_y_lookup[1][0][0][0][1][0]=43;
+		  col_y_lookup[1][0][0][1][0][0]=44;
+		  col_y_lookup[1][0][1][0][0][0]=45;
+		  col_y_lookup[1][0][0][0][0][0]=46;
+		  col_y_lookup[1][0][1][1][1][1]=47;
+		  col_y_lookup[0][0][0][1][1][1]=48;
+		  col_y_lookup[0][0][1][0][1][1]=49;
+		  col_y_lookup[0][0][1][1][0][1]=50;
+		  col_y_lookup[0][0][1][1][1][0]=51;
+		  col_y_lookup[0][0][0][1][0][1]=52;
+		  col_y_lookup[0][0][1][0][0][1]=53;
+		  col_y_lookup[0][0][0][1][1][0]=54;
+		  col_y_lookup[0][0][1][0][1][0]=55;
+		  col_y_lookup[0][0][0][0][1][1]=56;
+		  col_y_lookup[0][0][1][1][0][0]=57;
+		  col_y_lookup[0][0][0][0][0][1]=58;
+		  col_y_lookup[0][0][0][0][1][0]=59;
+		  col_y_lookup[0][0][0][1][0][0]=60;
+		  col_y_lookup[0][0][1][0][0][0]=61;
+		  col_y_lookup[0][0][0][0][0][0]=62;
+		  col_y_lookup[0][0][1][1][1][1]=63;
 		  
-		  col_x_lookup[0][1][1][1][1][1]=66;
-		  col_x_lookup[1][0][1][1][1][1]=67;
-		  col_x_lookup[1][1][1][1][0][1]=68;
-		  col_x_lookup[1][1][1][1][1][0]=69;
-		  col_x_lookup[0][1][1][1][0][1]=70;
-		  col_x_lookup[1][0][1][1][0][1]=71;
-		  col_x_lookup[0][1][1][1][1][0]=72;
-		  col_x_lookup[1][0][1][1][1][0]=73;
-		  col_x_lookup[0][0][1][1][1][1]=74;
-		  col_x_lookup[1][1][1][1][0][0]=75;
-		  col_x_lookup[0][0][1][1][0][1]=76;
-		  col_x_lookup[0][0][1][1][1][0]=77;
-		  col_x_lookup[0][1][1][1][0][0]=78;
-		  col_x_lookup[1][0][1][1][0][0]=79;
-		  col_x_lookup[0][0][1][1][0][0]=80;
-		  col_x_lookup[1][1][1][1][1][1]=81;
-		  col_x_lookup[0][1][1][0][1][1]=82;
-		  col_x_lookup[1][0][1][0][1][1]=83;
-		  col_x_lookup[1][1][1][0][0][1]=84;
-		  col_x_lookup[1][1][1][0][1][0]=85;
-		  col_x_lookup[0][1][1][0][0][1]=86;
-		  col_x_lookup[1][0][1][0][0][1]=87;
-		  col_x_lookup[0][1][1][0][1][0]=88;
-		  col_x_lookup[1][0][1][0][1][0]=89;
-		  col_x_lookup[0][0][1][0][1][1]=90;
-		  col_x_lookup[1][1][1][0][0][0]=91;
-		  col_x_lookup[0][0][1][0][0][1]=92;
-		  col_x_lookup[0][0][1][0][1][0]=93;
-		  col_x_lookup[0][1][1][0][0][0]=94;
-		  col_x_lookup[1][0][1][0][0][0]=95;
-		  col_x_lookup[0][0][1][0][0][0]=96;
-		  col_x_lookup[1][1][1][0][1][1]=97;
-		  col_x_lookup[0][1][0][1][1][1]=98;
-		  col_x_lookup[1][0][0][1][1][1]=99;
-		  col_x_lookup[1][1][0][1][0][1]=100;
-		  col_x_lookup[1][1][0][1][1][0]=101;
-		  col_x_lookup[0][1][0][1][0][1]=102;
-		  col_x_lookup[1][0][0][1][0][1]=103;
-		  col_x_lookup[0][1][0][1][1][0]=104;
-		  col_x_lookup[1][0][0][1][1][0]=105;
-		  col_x_lookup[0][0][0][1][1][1]=106;
-		  col_x_lookup[1][1][0][1][0][0]=107;
-		  col_x_lookup[0][0][0][1][0][1]=108;
-		  col_x_lookup[0][0][0][1][1][0]=109;
-		  col_x_lookup[0][1][0][1][0][0]=110;
-		  col_x_lookup[1][0][0][1][0][0]=111;
-		  col_x_lookup[0][0][0][1][0][0]=112;
-		  col_x_lookup[1][1][0][1][1][1]=113;
-		  col_x_lookup[0][1][0][0][1][1]=114;
-		  col_x_lookup[1][0][0][0][1][1]=115;
-		  col_x_lookup[1][1][0][0][0][1]=116;
-		  col_x_lookup[1][1][0][0][1][0]=117;
-		  col_x_lookup[0][1][0][0][0][1]=118;
-		  col_x_lookup[1][0][0][0][0][1]=119;
-		  col_x_lookup[0][1][0][0][1][0]=120;
-		  col_x_lookup[1][0][0][0][1][0]=121;
-		  col_x_lookup[0][0][0][0][1][1]=122;
-		  col_x_lookup[1][1][0][0][0][0]=123;
-		  col_x_lookup[0][0][0][0][0][1]=124;
-		  col_x_lookup[0][0][0][0][1][0]=125;
-		  col_x_lookup[0][1][0][0][0][0]=126;
-		  col_x_lookup[1][0][0][0][0][0]=127;
-		  col_x_lookup[0][0][0][0][0][0]=128;
-		  col_x_lookup[1][1][0][0][1][1]=129;
+		  col_x_lookup[0][1][1][1][1][1]=0;
+		  col_x_lookup[1][0][1][1][1][1]=1;
+		  col_x_lookup[1][1][1][1][0][1]=2;
+		  col_x_lookup[1][1][1][1][1][0]=3;
+		  col_x_lookup[0][1][1][1][0][1]=4;
+		  col_x_lookup[1][0][1][1][0][1]=5;
+		  col_x_lookup[0][1][1][1][1][0]=6;
+		  col_x_lookup[1][0][1][1][1][0]=7;
+		  col_x_lookup[0][0][1][1][1][1]=8;
+		  col_x_lookup[1][1][1][1][0][0]=9;
+		  col_x_lookup[0][0][1][1][0][1]=10;
+		  col_x_lookup[0][0][1][1][1][0]=11;
+		  col_x_lookup[0][1][1][1][0][0]=12;
+		  col_x_lookup[1][0][1][1][0][0]=13;
+		  col_x_lookup[0][0][1][1][0][0]=14;
+		  col_x_lookup[1][1][1][1][1][1]=15;
+		  col_x_lookup[0][1][1][0][1][1]=16;
+		  col_x_lookup[1][0][1][0][1][1]=17;
+		  col_x_lookup[1][1][1][0][0][1]=18;
+		  col_x_lookup[1][1][1][0][1][0]=19;
+		  col_x_lookup[0][1][1][0][0][1]=20;
+		  col_x_lookup[1][0][1][0][0][1]=21;
+		  col_x_lookup[0][1][1][0][1][0]=22;
+		  col_x_lookup[1][0][1][0][1][0]=23;
+		  col_x_lookup[0][0][1][0][1][1]=24;
+		  col_x_lookup[1][1][1][0][0][0]=25;
+		  col_x_lookup[0][0][1][0][0][1]=26;
+		  col_x_lookup[0][0][1][0][1][0]=27;
+		  col_x_lookup[0][1][1][0][0][0]=28;
+		  col_x_lookup[1][0][1][0][0][0]=29;
+		  col_x_lookup[0][0][1][0][0][0]=30;
+		  col_x_lookup[1][1][1][0][1][1]=31;
+		  col_x_lookup[0][1][0][1][1][1]=32;
+		  col_x_lookup[1][0][0][1][1][1]=33;
+		  col_x_lookup[1][1][0][1][0][1]=34;
+		  col_x_lookup[1][1][0][1][1][0]=35;
+		  col_x_lookup[0][1][0][1][0][1]=36;
+		  col_x_lookup[1][0][0][1][0][1]=37;
+		  col_x_lookup[0][1][0][1][1][0]=38;
+		  col_x_lookup[1][0][0][1][1][0]=39;
+		  col_x_lookup[0][0][0][1][1][1]=40;
+		  col_x_lookup[1][1][0][1][0][0]=41;
+		  col_x_lookup[0][0][0][1][0][1]=42;
+		  col_x_lookup[0][0][0][1][1][0]=43;
+		  col_x_lookup[0][1][0][1][0][0]=44;
+		  col_x_lookup[1][0][0][1][0][0]=45;
+		  col_x_lookup[0][0][0][1][0][0]=46;
+		  col_x_lookup[1][1][0][1][1][1]=47;
+		  col_x_lookup[0][1][0][0][1][1]=48;
+		  col_x_lookup[1][0][0][0][1][1]=49;
+		  col_x_lookup[1][1][0][0][0][1]=50;
+		  col_x_lookup[1][1][0][0][1][0]=51;
+		  col_x_lookup[0][1][0][0][0][1]=52;
+		  col_x_lookup[1][0][0][0][0][1]=53;
+		  col_x_lookup[0][1][0][0][1][0]=54;
+		  col_x_lookup[1][0][0][0][1][0]=55;
+		  col_x_lookup[0][0][0][0][1][1]=56;
+		  col_x_lookup[1][1][0][0][0][0]=57;
+		  col_x_lookup[0][0][0][0][0][1]=58;
+		  col_x_lookup[0][0][0][0][1][0]=59;
+		  col_x_lookup[0][1][0][0][0][0]=60;
+		  col_x_lookup[1][0][0][0][0][0]=61;
+		  col_x_lookup[0][0][0][0][0][0]=62;
+		  col_x_lookup[1][1][0][0][1][1]=63;
 		  
-		  col_z_lookup[1][1][1][0][1][1]=130;
-		  col_z_lookup[1][1][0][1][1][1]=131;
-		  col_z_lookup[1][0][1][1][1][1]=132;
-		  col_z_lookup[0][1][1][1][1][1]=133;
-		  col_z_lookup[1][0][1][0][1][1]=134;
-		  col_z_lookup[1][0][0][1][1][1]=135;
-		  col_z_lookup[0][1][1][0][1][1]=136;
-		  col_z_lookup[0][1][0][1][1][1]=137;
-		  col_z_lookup[1][1][0][0][1][1]=138;
-		  col_z_lookup[0][0][1][1][1][1]=139;
-		  col_z_lookup[1][0][0][0][1][1]=140;
-		  col_z_lookup[0][1][0][0][1][1]=141;
-		  col_z_lookup[0][0][1][0][1][1]=142;
-		  col_z_lookup[0][0][0][1][1][1]=143;
-		  col_z_lookup[0][0][0][0][1][1]=144;
-		  col_z_lookup[1][1][1][1][1][1]=145;
-		  col_z_lookup[1][1][1][0][1][0]=146;
-		  col_z_lookup[1][1][0][1][1][0]=147;
-		  col_z_lookup[1][0][1][1][1][0]=148;
-		  col_z_lookup[0][1][1][1][1][0]=149;
-		  col_z_lookup[1][0][1][0][1][0]=150;
-		  col_z_lookup[1][0][0][1][1][0]=151;
-		  col_z_lookup[0][1][1][0][1][0]=152;
-		  col_z_lookup[0][1][0][1][1][0]=153;
-		  col_z_lookup[1][1][0][0][1][0]=154;
-		  col_z_lookup[0][0][1][1][1][0]=155;
-		  col_z_lookup[1][0][0][0][1][0]=156;
-		  col_z_lookup[0][1][0][0][1][0]=157;
-		  col_z_lookup[0][0][1][0][1][0]=158;
-		  col_z_lookup[0][0][0][1][1][0]=159;
-		  col_z_lookup[0][0][0][0][1][0]=160;
-		  col_z_lookup[1][1][1][1][1][0]=161;
-		  col_z_lookup[1][1][1][0][0][1]=162;
-		  col_z_lookup[1][1][0][1][0][1]=163;
-		  col_z_lookup[1][0][1][1][0][1]=164;
-		  col_z_lookup[0][1][1][1][0][1]=165;
-		  col_z_lookup[1][0][1][0][0][1]=166;
-		  col_z_lookup[1][0][0][1][0][1]=167;
-		  col_z_lookup[0][1][1][0][0][1]=168;
-		  col_z_lookup[0][1][0][1][0][1]=169;
-		  col_z_lookup[1][1][0][0][0][1]=170;
-		  col_z_lookup[0][0][1][1][0][1]=171;
-		  col_z_lookup[1][0][0][0][0][1]=172;
-		  col_z_lookup[0][1][0][0][0][1]=173;
-		  col_z_lookup[0][0][1][0][0][1]=174;
-		  col_z_lookup[0][0][0][1][0][1]=175;
-		  col_z_lookup[0][0][0][0][0][1]=176;
-		  col_z_lookup[1][1][1][1][0][1]=177;
-		  col_z_lookup[1][1][1][0][0][0]=178;
-		  col_z_lookup[1][1][0][1][0][0]=179;
-		  col_z_lookup[1][0][1][1][0][0]=180;
-		  col_z_lookup[0][1][1][1][0][0]=181;
-		  col_z_lookup[1][0][1][0][0][0]=182;
-		  col_z_lookup[1][0][0][1][0][0]=183;
-		  col_z_lookup[0][1][1][0][0][0]=184;
-		  col_z_lookup[0][1][0][1][0][0]=185;
-		  col_z_lookup[1][1][0][0][0][0]=186;
-		  col_z_lookup[0][0][1][1][0][0]=187;
-		  col_z_lookup[1][0][0][0][0][0]=188;
-		  col_z_lookup[0][1][0][0][0][0]=189;
-		  col_z_lookup[0][0][1][0][0][0]=190;
-		  col_z_lookup[0][0][0][1][0][0]=191;
-		  col_z_lookup[0][0][0][0][0][0]=192;
-		  col_z_lookup[1][1][1][1][0][0]=193;
+		  col_z_lookup[1][1][1][0][1][1]=0;
+		  col_z_lookup[1][1][0][1][1][1]=1;
+		  col_z_lookup[1][0][1][1][1][1]=2;
+		  col_z_lookup[0][1][1][1][1][1]=3;
+		  col_z_lookup[1][0][1][0][1][1]=4;
+		  col_z_lookup[1][0][0][1][1][1]=5;
+		  col_z_lookup[0][1][1][0][1][1]=6;
+		  col_z_lookup[0][1][0][1][1][1]=7;
+		  col_z_lookup[1][1][0][0][1][1]=8;
+		  col_z_lookup[0][0][1][1][1][1]=9;
+		  col_z_lookup[1][0][0][0][1][1]=10;
+		  col_z_lookup[0][1][0][0][1][1]=11;
+		  col_z_lookup[0][0][1][0][1][1]=12;
+		  col_z_lookup[0][0][0][1][1][1]=13;
+		  col_z_lookup[0][0][0][0][1][1]=14;
+		  col_z_lookup[1][1][1][1][1][1]=15;
+		  col_z_lookup[1][1][1][0][1][0]=16;
+		  col_z_lookup[1][1][0][1][1][0]=17;
+		  col_z_lookup[1][0][1][1][1][0]=18;
+		  col_z_lookup[0][1][1][1][1][0]=19;
+		  col_z_lookup[1][0][1][0][1][0]=20;
+		  col_z_lookup[1][0][0][1][1][0]=21;
+		  col_z_lookup[0][1][1][0][1][0]=22;
+		  col_z_lookup[0][1][0][1][1][0]=23;
+		  col_z_lookup[1][1][0][0][1][0]=24;
+		  col_z_lookup[0][0][1][1][1][0]=25;
+		  col_z_lookup[1][0][0][0][1][0]=26;
+		  col_z_lookup[0][1][0][0][1][0]=27;
+		  col_z_lookup[0][0][1][0][1][0]=28;
+		  col_z_lookup[0][0][0][1][1][0]=29;
+		  col_z_lookup[0][0][0][0][1][0]=30;
+		  col_z_lookup[1][1][1][1][1][0]=31;
+		  col_z_lookup[1][1][1][0][0][1]=32;
+		  col_z_lookup[1][1][0][1][0][1]=33;
+		  col_z_lookup[1][0][1][1][0][1]=34;
+		  col_z_lookup[0][1][1][1][0][1]=35;
+		  col_z_lookup[1][0][1][0][0][1]=36;
+		  col_z_lookup[1][0][0][1][0][1]=37;
+		  col_z_lookup[0][1][1][0][0][1]=38;
+		  col_z_lookup[0][1][0][1][0][1]=39;
+		  col_z_lookup[1][1][0][0][0][1]=40;
+		  col_z_lookup[0][0][1][1][0][1]=41;
+		  col_z_lookup[1][0][0][0][0][1]=42;
+		  col_z_lookup[0][1][0][0][0][1]=43;
+		  col_z_lookup[0][0][1][0][0][1]=44;
+		  col_z_lookup[0][0][0][1][0][1]=45;
+		  col_z_lookup[0][0][0][0][0][1]=46;
+		  col_z_lookup[1][1][1][1][0][1]=47;
+		  col_z_lookup[1][1][1][0][0][0]=48;
+		  col_z_lookup[1][1][0][1][0][0]=49;
+		  col_z_lookup[1][0][1][1][0][0]=50;
+		  col_z_lookup[0][1][1][1][0][0]=51;
+		  col_z_lookup[1][0][1][0][0][0]=52;
+		  col_z_lookup[1][0][0][1][0][0]=53;
+		  col_z_lookup[0][1][1][0][0][0]=54;
+		  col_z_lookup[0][1][0][1][0][0]=55;
+		  col_z_lookup[1][1][0][0][0][0]=56;
+		  col_z_lookup[0][0][1][1][0][0]=57;
+		  col_z_lookup[1][0][0][0][0][0]=58;
+		  col_z_lookup[0][1][0][0][0][0]=59;
+		  col_z_lookup[0][0][1][0][0][0]=60;
+		  col_z_lookup[0][0][0][1][0][0]=61;
+		  col_z_lookup[0][0][0][0][0][0]=62;
+		  col_z_lookup[1][1][1][1][0][0]=63;
 	  }
 
 	  public class CustomStateMapper extends DefaultStateMapper{
@@ -716,7 +526,7 @@ public class BlockBasalt extends Block {
 		        	EnumStyle parentID = (EnumStyle) iblockstate.getValue(BlockBasalt.PROP_STYLE);
 		            int childID = (Integer) iblockstate.getValue(BlockBasalt.PROP_DETAILS);
 		            	
-		            if(childID == 0 || parentID.meta == detailParents[childID] ){
+		            if(childID <= parentID.getMaxDetailID()){
 		            	this.mapStateModelLocations.put(iblockstate, this.getModelResourceLocation(iblockstate));
 		            }
 
