@@ -1,5 +1,7 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
+
     },
     "elements": [
         {   "from": [ 0, 14, 0 ],
@@ -26,16 +28,16 @@
         {   "from": [ 3, 15.5, 3 ], "to": [ 3, 16, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP RING OUTSIDE EAST"},    
         {   "from": [ 13, 15.5, 3 ], "to": [ 13, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE WEST"}, 
 
-        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_one_neighbor",  "cullface": "up" } }, "__comment": "TOP CAP FACE" },
-        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_one_neighbor" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner" } },"__comment": "TOP CAP INSET" }, 
     
         {   "from": [ 0.5, 2, 0.5 ],
             "to": [ 15.5, 14, 16 ],
             "faces": {
-                "north": { "texture": "#inner", "cullface": "north" },
+                "north": { "texture": "#inner" },
                 "south": { "texture": "#inner" },
-                "west":  { "texture": "#inner", "cullface": "west" },
-                "east":  { "texture": "#inner", "cullface": "east" }
+                "west":  { "texture": "#inner" },
+                "east":  { "texture": "#inner" }
             },
             "__comment": "INNER BLOCK"
         },
@@ -179,8 +181,8 @@
         {   "from": [ 3, 0, 3 ], "to": [ 3, 0.5, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "BOTTOM CAP RING OUTSIDE EAST"},    
         {   "from": [ 13, 0, 3 ], "to": [ 13, 0.5, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "BOTTOM CAP RING OUTSIDE WEST"}, 
 
-        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "texture": "#cap_one_neighbor",  "cullface": "down", "rotation":180 } }, "__comment": "BOTTOM CAP FACE" },
-        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner", "cullface": "down" } },"__comment": "BOTTOM CAP INSET" }
+        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "texture": "#cap_one_neighbor", "rotation":180 } }, "__comment": "BOTTOM CAP FACE" },
+        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner" } },"__comment": "BOTTOM CAP INSET" }
                             
     ]
 }

@@ -11,10 +11,10 @@ Until further notice, please do not use this mod in ModPacks, nor in any world y
 DRAFT NOTES
 
 COLUMN BLOCKS
-While these blocks render as opaque blocks, and are indeed guaranteed to properly occlude adjacent blocks that aren't themselves, they do NOT properly occlude themselves unless faces that would normally be culled are drawn instead. They also have several times the polygon count of a typical building block. What does this all mean? They are slightly more expensive to render compared to normal square blocks, so don't go too crazy with them if your machine(s) have framerate challenges.
+While these blocks render as opaque blocks, and are indeed guaranteed to properly occlude adjacent blocks that aren't themselves, they do NOT properly occlude themselves unless faces that would normally be culled are drawn instead. They also have several times the polygon count of a typical building block. What does this all mean? They are slightly more expensive to render compared to normal square blocks, so if you are placing hundreds of them within viewing distance you may want to keep an eye on your frame rate.
 
 CONSTRUCTION COMPOSITE
-Durable, attractive and cheap, "Comp Blocks" are the useful residue of mineral reprocessing.  Also useful later on as matter feedstock when advanced technologies come online.  
+Durable, attractive and cheap, "Comp Blocks" are the useful residue of mineral processing.  Also useful later on as matter feedstock when advanced technologies come online.  
 
 DURAPLAST
 Already-durable construction composite infused with unobtanium nanobots, its internal matrix is powered by absorbed energy.  Able to withstand multiple direct heavy-weapon impacts, it will slowly self-repair if not completely destroyed. Incredibly tedious to remove once placed, you don't want to put this somewhere by mistake.  Automated building methods (or a DPST) are *strongly* advised.

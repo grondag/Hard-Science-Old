@@ -1,5 +1,6 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
     },
     "elements": [
 
@@ -56,8 +57,8 @@
             ,"__comment": "TOP CAP SE INSIDE"},  
             
              
-        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_four_neighbors", "cullface": "up" } }, "__comment": "TOP CAP FACE" },
-        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_four_neighbors" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner" } },"__comment": "TOP CAP INSET" }, 
     
     
         {   "from": [ 0.5, 2, 0 ],
@@ -142,8 +143,8 @@
             ,"__comment": "BOTTOM CAP SE INSIDE"},  
             
              
-        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "texture": "#cap_four_neighbors", "cullface": "down" } }, "__comment": "BOTTOM CAP FACE" },
-        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner", "cullface": "down" } },"__comment": "BOTTOM CAP INSET" } 
+        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "texture": "#cap_four_neighbors" } }, "__comment": "BOTTOM CAP FACE" },
+        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner" } },"__comment": "BOTTOM CAP INSET" } 
                             
     ]
 }

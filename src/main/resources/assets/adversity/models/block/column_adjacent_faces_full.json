@@ -1,5 +1,6 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
     },
     "elements": [
 
@@ -7,10 +8,10 @@
             "to": [ 16, 16, 16 ],
             "faces": {
                 "down":  { "texture": "#outer" },
-                "north": { "texture": "#outer", "cullface": "north" },
+                "north": { "texture": "#outer"},
                 "south": { "texture": "#cap_inner_side" },
                 "west":  { "texture": "#cap_inner_side" },
-                "east":  { "texture": "#outer", "cullface": "east" }
+                "east":  { "texture": "#outer" }
             },
             "__comment": "TOP CAP SHELL"
         },
@@ -33,8 +34,8 @@
         {   "from": [ 0, 15.5, 3 ], "to": [ 13, 16, 3 ], "faces": {"south":  { "texture": "#outer" } },"__comment": "TOP CAP NE OUTSIDE"}, 
         {   "from": [ 13, 15.5, 3 ], "to": [ 13, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP NE OUTSIDE]"}, 
 
-        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_adjacent_neighbors", "cullface": "up" } }, "__comment": "TOP CAP FACE" },
-        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_adjacent_neighbors" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner" } },"__comment": "TOP CAP INSET" }, 
 
 
         {   "from": [ 0.5, 2, 0.5 ],
@@ -166,8 +167,8 @@
         {   "from": [ 13, 0, 3 ], "to": [ 13, 0.5, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "BOTTOM CAP NE OUTSIDE]"}, 
 
 
-        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "uv": [ 0, 16, 16, 0 ],"texture": "#cap_adjacent_neighbors", "cullface": "down" } }, "__comment": "BOTTOM CAP FACE" },
-        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner", "cullface": "down" } },"__comment": "BOTTOM CAP INSET" } 
+        {   "from": [ 0, 0, 0 ], "to": [ 16, 0, 16 ], "faces": {"down":  { "uv": [ 0, 16, 16, 0 ],"texture": "#cap_adjacent_neighbors" } }, "__comment": "BOTTOM CAP FACE" },
+        {   "from": [ 0, 0.5, 0 ], "to": [ 16, 0.5, 16 ], "faces": {"down":  { "texture": "#inner" } },"__comment": "BOTTOM CAP INSET" } 
                             
     ]
 }

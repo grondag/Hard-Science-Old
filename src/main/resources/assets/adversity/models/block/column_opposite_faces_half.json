@@ -1,5 +1,7 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
+
     },
     "elements": [
         {   "from": [ 0, 14, 0 ],
@@ -22,8 +24,8 @@
         {   "from": [ 3, 15.5, 0 ], "to": [ 3, 16, 16 ], "faces": {"east":  { "texture": "#outer" } }, "__comment": "TOP CAP RING OUTSIDE EAST"},    
         {   "from": [ 13, 15.5, 0 ], "to": [ 13, 16, 16 ], "faces": {"west":  { "texture": "#outer" } },"__comment": "TOP CAP RING OUTSIDE WEST"}, 
 
-        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_opposite_neighbors",  "cullface": "up" } }, "__comment": "TOP CAP FACE" },
-        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner", "cullface": "up" } },"__comment": "TOP CAP INSET" }, 
+        {   "from": [ 0, 16, 0 ], "to": [ 16, 16, 16 ], "faces": {"up":  { "texture": "#cap_opposite_neighbors" } }, "__comment": "TOP CAP FACE" },
+        {   "from": [ 0, 15.5, 0 ], "to": [ 16, 15.5, 16 ], "faces": {"up":  { "texture": "#inner" } },"__comment": "TOP CAP INSET" }, 
     
         {   "from": [ 0.5, 0, 0 ],
             "to": [ 15.5, 14, 16 ],

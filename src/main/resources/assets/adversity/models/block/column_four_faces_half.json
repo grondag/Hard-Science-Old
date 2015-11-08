@@ -1,5 +1,7 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
+
     },
     "elements": [
         {   "from": [ 0, 14, 0 ],
@@ -53,7 +55,8 @@
         {   "from": [ 0, 0, 0 ],
             "to": [ 3, 14, 0.5 ],
             "faces": {
-                "east":  { "texture": "#outer" }
+                "east":  { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST EDGE"
         },
@@ -76,7 +79,8 @@
         {   "from": [ 13, 0, 0 ],
             "to": [ 16, 14, 0.5 ],
             "faces": {
-                "west":  { "texture": "#outer" }
+                "west":  { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST EDGE"
         },
@@ -91,11 +95,12 @@
         {   "from": [ 0, 0, 15.5 ],
             "to": [ 3, 14, 16 ],
             "faces": {
-                "east":  { "texture": "#outer" }
+                "east":  { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "SOUTH FACE, WEST EDGE"
         },
-        {   "from": [ 5, 2, 15.5 ],
+        {   "from": [ 5, 0, 15.5 ],
             "to": [ 7, 14, 16 ],
             "faces": {
                 "west":  { "texture": "#outer" },
@@ -114,7 +119,8 @@
         {   "from": [ 13, 0, 15.5 ],
             "to": [ 16, 14, 16 ],
             "faces": {
-                "west":  { "texture": "#outer" }
+                "west":  { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "SOUTH FACE, EAST EDGE"
         },
@@ -129,7 +135,8 @@
         {   "from": [ 15.5, 0, 0 ],
             "to": [ 16, 14, 3 ],
             "faces": {
-                "south": { "texture": "#outer" }
+                "south": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, NORTH EDGE"
         },
@@ -152,7 +159,8 @@
         {   "from": [ 15.5, 0, 13 ],
             "to": [ 16, 14, 16 ],
             "faces": {
-                "north": { "texture": "#outer" }
+                "north": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, SOUTH EDGE"
         },
@@ -167,7 +175,8 @@
         {   "from": [ 0, 0, 0 ],
             "to": [ 0.5, 14, 3 ],
             "faces": {
-                "south": { "texture": "#outer" }
+                "south": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, NORTH EDGE"
         },
@@ -190,7 +199,8 @@
         {   "from": [ 0, 0, 13 ],
             "to": [ 0.5, 14, 16 ],
             "faces": {
-                "north": { "texture": "#outer" }
+                "north": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, SOUTH EDGE"
         }

@@ -1,5 +1,7 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
+
     },
     "elements": [
         {   "from": [ 0.5, 0, 0 ],

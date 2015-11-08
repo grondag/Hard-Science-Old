@@ -1,5 +1,7 @@
 {
-      "textures": {
+    "textures": {
+          "particle": "#outer"
+
     },
     "elements": [
         {   "from": [ 0.5, 0, 0.5 ],
@@ -25,7 +27,9 @@
         {   "from": [ 0, 0, 0 ],
             "to": [ 3, 16, 0.5 ],
             "faces": {
-                "east":  { "texture": "#outer" }
+                "east":  { "texture": "#outer" },
+                "up": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, WEST EDGE"
         },
@@ -48,7 +52,9 @@
         {   "from": [ 13, 0, 0 ],
             "to": [ 16, 16, 0.5 ],
             "faces": {
-                "west":  { "texture": "#outer" }
+                "west":  { "texture": "#outer" },
+                "up": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "NORTH FACE, EAST EDGE"
         },
@@ -62,7 +68,9 @@
         {   "from": [ 15.5, 0, 0 ],
             "to": [ 16, 16, 3 ],
             "faces": {
-                "south": { "texture": "#outer" }
+                "south": { "texture": "#outer" },
+                "up": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "EAST FACE, NORTH EDGE"
         },
@@ -101,7 +109,9 @@
         {   "from": [ 0, 0, 0 ],
             "to": [ 0.5, 16, 3 ],
             "faces": {
-                "south": { "texture": "#outer" }
+                "south": { "texture": "#outer" },
+                "up": { "texture": "#outer" },
+                "down": { "texture": "#outer" }
             },
             "__comment": "WEST FACE, NORTH EDGE"
         },
