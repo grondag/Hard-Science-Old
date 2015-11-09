@@ -86,27 +86,97 @@ public class BlockBasalt extends Block {
 	  public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing blockFaceClickedOn, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	  {
 	    EnumStyle style = EnumStyle.byMetadata(meta);
+	    IBlockState bs = super.onBlockPlaced(worldIn, pos, blockFaceClickedOn, hitX, hitY, hitZ, meta, placer);
 	    
 	    if(style == EnumStyle.COLUMN_Y || style == EnumStyle.COLUMN_X || style == EnumStyle.COLUMN_Z){
 		    
 		    switch(blockFaceClickedOn.getAxis()){
 		    case X:
-		    	style = EnumStyle.COLUMN_X;
-		    	break;
+		    	return bs.withProperty(PROP_STYLE, EnumStyle.COLUMN_X);
+
 		    case Y:
-		    	style = EnumStyle.COLUMN_Y;
-		    	break;
+		    	return bs.withProperty(PROP_STYLE, EnumStyle.COLUMN_Y);
+
 		    case Z:
-		    	style = EnumStyle.COLUMN_Z;
-		    	break;
+		    	return bs.withProperty(PROP_STYLE, EnumStyle.COLUMN_Z);
 		    }
-	
-		    return this.getDefaultState().withProperty(PROP_STYLE, style);
+
 		    
-	    } else {
-	    	return super.onBlockPlaced(worldIn, pos, blockFaceClickedOn, hitX, hitY, hitZ, meta, placer);
-	    }
+	    } else if(style == EnumStyle.BRICK_BIG_A || style == EnumStyle.BRICK_BIG_B){
+	    	
+	    	return bs.withProperty(PROP_STYLE, findBestStyleForPlacedBrick( worldIn, pos));
+
+	    }	
+	    return bs;
+	    
 	  }
+	  
+	  private EnumStyle findBestStyleForPlacedBrick(World worldIn, BlockPos pos){
+		  
+		  // ROUGH is default because it will not match any of the brick styles
+		  EnumStyle styleNorth = EnumStyle.ROUGH;
+		  EnumStyle styleSouth = EnumStyle.ROUGH;
+		  EnumStyle styleEast = EnumStyle.ROUGH;
+		  EnumStyle styleWest = EnumStyle.ROUGH;
+		  
+		  NeighborBlocks centerBlocks = new NeighborBlocks(worldIn, pos);
+		  NeighborTestResults testBigBricks = centerBlocks.getNeighborTestResults(new TestForBigBrick(this));
+
+		  if(testBigBricks.north) styleNorth = (EnumStyle) centerBlocks.north.getValue(PROP_STYLE);
+		  if(testBigBricks.south) styleSouth = (EnumStyle) centerBlocks.south.getValue(PROP_STYLE);
+		  if(testBigBricks.east) styleEast = (EnumStyle) centerBlocks.east.getValue(PROP_STYLE);
+		  if(testBigBricks.west) styleWest = (EnumStyle) centerBlocks.west.getValue(PROP_STYLE);
+		  
+		  if(testBigBricks.north ){
+			  if(!doesBrickHaveMatches(centerBlocks.north, worldIn, pos.north())
+				  && styleNorth != styleEast && styleNorth != styleSouth && styleNorth != styleWest){
+				  return styleNorth;
+			  }
+		  }
+		  if(testBigBricks.south ){
+			  if(!doesBrickHaveMatches(centerBlocks.south, worldIn, pos.south())
+				  && styleSouth != styleEast && styleSouth != styleNorth && styleSouth != styleWest){
+				  return styleSouth;
+			  }
+		  }
+		  if(testBigBricks.east ){
+			  if(!doesBrickHaveMatches(centerBlocks.east, worldIn, pos.east())
+				  && styleEast != styleNorth && styleEast != styleSouth && styleEast != styleWest){
+				  return styleEast;
+			  }
+		  }
+		  if(testBigBricks.west ){
+			  if(!doesBrickHaveMatches(centerBlocks.west, worldIn, pos.west())
+				  && styleWest != styleEast && styleWest != styleSouth && styleWest != styleNorth){
+				  return styleWest;
+			  }
+		  }
+		  
+		  // if no available mates, try to choose a style that will not connect to what is surrounding
+		  NeighborTestResults testA = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_A));
+		  NeighborTestResults testB = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_B));
+		  NeighborTestResults testC = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_C));
+		  
+		  boolean hasA = testA.north || testA.south || testA.east || testA.west;
+		  boolean hasB = testB.north || testB.south || testB.east || testB.west;
+		  boolean hasC = testC.north || testC.south || testC.east || testC.west;
+		  
+		  if(hasA && !hasB){
+			  return EnumStyle.BRICK_BIG_B;
+		  } else if (hasB && !hasC) {
+			  return EnumStyle.BRICK_BIG_C;
+		  } else {
+			  return EnumStyle.BRICK_BIG_A;
+		  }
+	  }
+	  
+	 // True if block at this location is already matched with at least one brick of the same style
+	 private boolean doesBrickHaveMatches(IBlockState ibs, World worldIn, BlockPos pos){
+
+		 EnumStyle style = (EnumStyle) ibs.getValue(PROP_STYLE);
+		 NeighborTestResults candidates = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(this, style));
+		 return candidates.east || candidates.west || candidates.north || candidates.south;		  
+	 }
 	  
 	  @Override
 	  @SideOnly(Side.CLIENT)
@@ -136,9 +206,6 @@ public class BlockBasalt extends Block {
 	  public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
 	  {
 		  EnumStyle style = (EnumStyle) state.getValue(PROP_STYLE);
-		  
-		  NeighborTestResults tests;
-		  int detailID ;
 
 		  switch(style){
 		  
@@ -149,58 +216,86 @@ public class BlockBasalt extends Block {
 			  return state.withProperty(PROP_DETAILS, 0);
 			  
 		  case COLUMN_Y:
-			  
-			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.COLUMN_Y));
-			  detailID = COL_Y_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Y).withProperty(PROP_DETAILS, detailID);			   
-			  
 		  case COLUMN_X:			  
-
-			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.COLUMN_X));
-			  detailID = COL_X_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_X).withProperty(PROP_DETAILS, detailID);			  
-			  
 		  case COLUMN_Z:
-			  
-			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.COLUMN_Z));
-			  detailID = COL_Z_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
 			  // N.B.  Using state.withProperty here caused an NPE for center blocks.
 			  // Was never able to track down why.Hence the use of getDefaultState.
 			  // Was conspicuous that the detailID was the max value. 
-			  // This was before I re-factored the detail ID declarations, maybe it would work now.
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_Z).withProperty(PROP_DETAILS, detailID);			  
+			  // This was before I re-factored quite a bit, maybe it would work now.
+			  return GetColumnState(style, state, worldIn, pos);
 
-		  case BRICK_BIG:
+		  case BRICK_BIG_A:
+		  case BRICK_BIG_B:
+		  case BRICK_BIG_C:
 			  
-			  tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForSameStyle(this, EnumStyle.BRICK_BIG));
-			  detailID = JOIN_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
-			  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.BRICK_BIG).withProperty(PROP_DETAILS, detailID);			  
-
+			  return GetBigBrickState(style, state, worldIn, pos);
+			  
 		  default:
 			  
 		  }
 
 		  return state; 
-
-	    
+    
 		  // TODO: May need to handle some texture rotation here.
 		  // See MathHelper.getPositionRandom(Vec3i pos)
 		  // but note intended for client only.
 
 	  }
 
+	  private IBlockState GetColumnState(EnumStyle style, IBlockState state, IBlockAccess worldIn, BlockPos pos){
+
+
+		  NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(this, style));
+		  int detailID = 0;
+		  
+		  //TODO: need a cleaner way to do this
+		  switch (style){
+		  case COLUMN_X:
+			  detailID = COL_X_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  break;
+		  case COLUMN_Y:
+			  detailID = COL_Y_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  break;
+		  case COLUMN_Z:
+			  detailID = COL_Z_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+			  break;
+		  default:
+			  // should never get here			  			  
+		  }
+		  
+		  return this.getDefaultState().withProperty(PROP_STYLE, style).withProperty(PROP_DETAILS, detailID);			   
+		  
+	  }
+	  
+	  private IBlockState GetBigBrickState(EnumStyle style, IBlockState state, IBlockAccess worldIn, BlockPos pos){
+		  
+		  NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
+		  NeighborTestResults mates = neighbors.getNeighborTestResults(new TestForStyle(this, style));
+		  NeighborTestResults bigBricks = neighbors.getNeighborTestResults(new TestForBigBrick(this));
+		  NeighborTestResults thisBlock = neighbors.getNeighborTestResults(new TestForThisBlock(this));
+		  
+		  int detailID = JOIN_LOOKUP[0][thisBlock.down?1:0]  //UP DOWN
+				  [(thisBlock.east && !bigBricks.east) || (bigBricks.east && !mates.east)?1:0] 	// EAST
+				  [thisBlock.west && !bigBricks.west?1:0]  											// WEST
+				  [(thisBlock.north && !bigBricks.north) || (bigBricks.north && !mates.north)?1:0]									// NORTH
+				  [thisBlock.south && !bigBricks.south?1:0]; 								// SOUTH
+		  
+		  return this.getDefaultState().withProperty(PROP_STYLE, style).withProperty(PROP_DETAILS, detailID);			  
+		  
+	  }
+	  
 	  @Override
 	  protected BlockState createBlockState()
 	  {
 	    return new BlockState(this, new IProperty[] {PROP_STYLE, PROP_DETAILS}); 
 	  }
 
-	  private class TestForSameStyle implements INeighborTest{
+	  private class TestForStyle implements INeighborTest{
 
 		private final Block block;
 		private final EnumStyle style ;
 		
-		public TestForSameStyle(Block block, EnumStyle style){
+		public TestForStyle(Block block, EnumStyle style){
 			this.block = block;
 			this.style = style;
 		}
@@ -210,7 +305,40 @@ public class BlockBasalt extends Block {
 			return (ibs.getBlock() == block && ibs.getValue(PROP_STYLE) == style);
 		}	  
 	  }
+	  
+	  private class TestForBigBrick implements INeighborTest{
 
+		private final Block block;
+		
+		public TestForBigBrick(Block block){
+			this.block = block;
+		}
+		  
+		@Override
+		public boolean TestNeighbor(IBlockState ibs) {
+			boolean result = false;
+			if (ibs.getBlock() == block) {
+				EnumStyle style = (EnumStyle) ibs.getValue(PROP_STYLE);
+				result = style.isBigBrick();
+			}
+			return result;
+		}	  
+	  }
+
+	  private class TestForThisBlock implements INeighborTest{
+
+		private final Block block;
+		
+		public TestForThisBlock(Block block){
+			this.block = block;
+		}
+		  
+		@Override
+		public boolean TestNeighbor(IBlockState ibs) {
+			return ibs.getBlock() == block;
+		}	  
+	  }
+	  
 	  public static enum EnumStyle implements IStringSerializable
 	  {
 	    ROUGH(0, "rough", 0),
@@ -218,7 +346,9 @@ public class BlockBasalt extends Block {
 	    COLUMN_Y(2, "column_y", 63),
 	    COLUMN_X(3, "column_x", 63),	    
 	    COLUMN_Z(4, "column_z", 63),
-	    BRICK_BIG(5, "brick_big", 63);
+	    BRICK_BIG_A(5, "brick_big_a", 63),
+	    BRICK_BIG_B(6, "brick_big_b", 63),
+	    BRICK_BIG_C(7, "brick_big_c", 63);
 //	    PLATE(5, "plate"),	    
 //	    BRICK1(6, "brick1"),
 //	    BRICK2(7, "brick2"),
@@ -256,7 +386,18 @@ public class BlockBasalt extends Block {
 	    {
 	      return this.name;
 	    }
-
+	    
+	    
+	    public boolean isBigBrick(){
+			switch(this){
+	    	case BRICK_BIG_A:
+			case BRICK_BIG_B:
+			case BRICK_BIG_C:
+				return true;
+			default:
+	    		return false;
+	    	}
+	    }
 	    public static EnumStyle byMetadata(int meta)
 	    {
 	      if (meta < 0 || meta >= META_LOOKUP.length)
