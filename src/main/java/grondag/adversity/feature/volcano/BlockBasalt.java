@@ -30,8 +30,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.INeighborTest;
+import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.library.ShapeValidatorCubic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,7 +103,7 @@ public class BlockBasalt extends Block {
 		    }
 
 		    
-	    } else if(style == EnumStyle.BRICK_BIG_A || style == EnumStyle.BRICK_BIG_B){
+	    } else if(style.isBigBrick()){
 	    	
 	    	return bs.withProperty(PROP_STYLE, findBestStyleForPlacedBrick( worldIn, pos));
 
@@ -113,58 +114,104 @@ public class BlockBasalt extends Block {
 	  
 	  private EnumStyle findBestStyleForPlacedBrick(World worldIn, BlockPos pos){
 		  
-		  // ROUGH is default because it will not match any of the brick styles
-		  EnumStyle styleNorth = EnumStyle.ROUGH;
-		  EnumStyle styleSouth = EnumStyle.ROUGH;
-		  EnumStyle styleEast = EnumStyle.ROUGH;
-		  EnumStyle styleWest = EnumStyle.ROUGH;
+		  ShapeValidatorCubic shape = new ShapeValidatorCubic(2, 1, 1);
 		  
+//		  // ROUGH is default because it will not match any of the brick styles
+//		  EnumStyle styleNorth = EnumStyle.ROUGH;
+//		  EnumStyle styleSouth = EnumStyle.ROUGH;
+//		  EnumStyle styleEast = EnumStyle.ROUGH;
+//		  EnumStyle styleWest = EnumStyle.ROUGH;
+//		  EnumStyle styleDown = EnumStyle.ROUGH;
+//		  EnumStyle styleUp = EnumStyle.ROUGH;
+//		  
 		  NeighborBlocks centerBlocks = new NeighborBlocks(worldIn, pos);
 		  NeighborTestResults testBigBricks = centerBlocks.getNeighborTestResults(new TestForBigBrick(this));
-
-		  if(testBigBricks.north) styleNorth = (EnumStyle) centerBlocks.north.getValue(PROP_STYLE);
-		  if(testBigBricks.south) styleSouth = (EnumStyle) centerBlocks.south.getValue(PROP_STYLE);
-		  if(testBigBricks.east) styleEast = (EnumStyle) centerBlocks.east.getValue(PROP_STYLE);
-		  if(testBigBricks.west) styleWest = (EnumStyle) centerBlocks.west.getValue(PROP_STYLE);
 		  
-		  if(testBigBricks.north ){
-			  if(!doesBrickHaveMatches(centerBlocks.north, worldIn, pos.north())
-				  && styleNorth != styleEast && styleNorth != styleSouth && styleNorth != styleWest){
-				  return styleNorth;
+		  EnumStyle candidateStyle;
+		  
+		  if(testBigBricks.east){
+			  candidateStyle = (EnumStyle) centerBlocks.east.getValue(PROP_STYLE);
+			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
+				  return candidateStyle;
+			  };
+		  } else if (testBigBricks.west){
+			  candidateStyle = (EnumStyle) centerBlocks.west.getValue(PROP_STYLE);
+			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
+				  return candidateStyle;		  
+			  }
+		  }	else if (testBigBricks.north){
+			  candidateStyle = (EnumStyle) centerBlocks.north.getValue(PROP_STYLE);
+			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
+				  return candidateStyle;		  
+			  }
+		  } else if (testBigBricks.south){
+			  candidateStyle = (EnumStyle) centerBlocks.south.getValue(PROP_STYLE);
+			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
+				  return candidateStyle;		  
+			  }
+		  } else if (testBigBricks.up){
+			  candidateStyle = (EnumStyle) centerBlocks.up.getValue(PROP_STYLE);
+			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
+				  return candidateStyle;		  
+			  }
+		  } else if (testBigBricks.down){
+			  candidateStyle = (EnumStyle) centerBlocks.down.getValue(PROP_STYLE);
+			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
+				  return candidateStyle;		  
 			  }
 		  }
-		  if(testBigBricks.south ){
-			  if(!doesBrickHaveMatches(centerBlocks.south, worldIn, pos.south())
-				  && styleSouth != styleEast && styleSouth != styleNorth && styleSouth != styleWest){
-				  return styleSouth;
-			  }
-		  }
-		  if(testBigBricks.east ){
-			  if(!doesBrickHaveMatches(centerBlocks.east, worldIn, pos.east())
-				  && styleEast != styleNorth && styleEast != styleSouth && styleEast != styleWest){
-				  return styleEast;
-			  }
-		  }
-		  if(testBigBricks.west ){
-			  if(!doesBrickHaveMatches(centerBlocks.west, worldIn, pos.west())
-				  && styleWest != styleEast && styleWest != styleSouth && styleWest != styleNorth){
-				  return styleWest;
-			  }
-		  }
+//
+//		  if(testBigBricks.north) styleNorth = (EnumStyle) centerBlocks.north.getValue(PROP_STYLE);
+//		  if(testBigBricks.south) styleSouth = (EnumStyle) centerBlocks.south.getValue(PROP_STYLE);
+//		  if(testBigBricks.east) styleEast = (EnumStyle) centerBlocks.east.getValue(PROP_STYLE);
+//		  if(testBigBricks.west) styleWest = (EnumStyle) centerBlocks.west.getValue(PROP_STYLE);
+//		  
+//		  if(testBigBricks.north ){
+//			  if(!doesBrickHaveMatches(centerBlocks.north, worldIn, pos.north())
+//				  && styleNorth != styleEast && styleNorth != styleSouth && styleNorth != styleWest){
+//				  return styleNorth;
+//			  }
+//		  }
+//		  if(testBigBricks.south ){
+//			  if(!doesBrickHaveMatches(centerBlocks.south, worldIn, pos.south())
+//				  && styleSouth != styleEast && styleSouth != styleNorth && styleSouth != styleWest){
+//				  return styleSouth;
+//			  }
+//		  }
+//		  if(testBigBricks.east ){
+//			  if(!doesBrickHaveMatches(centerBlocks.east, worldIn, pos.east())
+//				  && styleEast != styleNorth && styleEast != styleSouth && styleEast != styleWest){
+//				  return styleEast;
+//			  }
+//		  }
+//		  if(testBigBricks.west ){
+//			  if(!doesBrickHaveMatches(centerBlocks.west, worldIn, pos.west())
+//				  && styleWest != styleEast && styleWest != styleSouth && styleWest != styleNorth){
+//				  return styleWest;
+//			  }
+//		  }
 		  
 		  // if no available mates, try to choose a style that will not connect to what is surrounding
 		  NeighborTestResults testA = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_A));
 		  NeighborTestResults testB = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_B));
 		  NeighborTestResults testC = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_C));
+		  NeighborTestResults testD = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_D));
+		  NeighborTestResults testE = centerBlocks.getNeighborTestResults(new TestForStyle(this, EnumStyle.BRICK_BIG_E));
 		  
-		  boolean hasA = testA.north || testA.south || testA.east || testA.west;
-		  boolean hasB = testB.north || testB.south || testB.east || testB.west;
-		  boolean hasC = testC.north || testC.south || testC.east || testC.west;
+		  boolean hasA = testA.north || testA.south || testA.east || testA.west || testA.up || testA.down;
+		  boolean hasB = testB.north || testB.south || testB.east || testB.west || testB.up || testB.down;
+		  boolean hasC = testC.north || testC.south || testC.east || testC.west || testC.up || testC.down;
+		  boolean hasD = testD.north || testD.south || testD.east || testD.west || testD.up || testD.down;
+		  boolean hasE = testE.north || testE.south || testE.east || testE.west || testE.up || testE.down;
 		  
 		  if(hasA && !hasB){
 			  return EnumStyle.BRICK_BIG_B;
 		  } else if (hasB && !hasC) {
 			  return EnumStyle.BRICK_BIG_C;
+		  } else if (hasC && !hasD) {
+			  return EnumStyle.BRICK_BIG_D;
+		  } else if (hasD && !hasE) {
+			  return EnumStyle.BRICK_BIG_E;
 		  } else {
 			  return EnumStyle.BRICK_BIG_A;
 		  }
@@ -227,6 +274,8 @@ public class BlockBasalt extends Block {
 		  case BRICK_BIG_A:
 		  case BRICK_BIG_B:
 		  case BRICK_BIG_C:
+		  case BRICK_BIG_D:
+		  case BRICK_BIG_E:
 			  
 			  return GetBigBrickState(style, state, worldIn, pos);
 			  
@@ -274,7 +323,7 @@ public class BlockBasalt extends Block {
 		  NeighborTestResults bigBricks = neighbors.getNeighborTestResults(new TestForBigBrick(this));
 		  NeighborTestResults thisBlock = neighbors.getNeighborTestResults(new TestForThisBlock(this));
 		  
-		  int detailID = JOIN_LOOKUP[0][thisBlock.down?1:0]  //UP DOWN
+		  int detailID = JOIN_LOOKUP[0][thisBlock.down && !mates.down?1:0]  //UP DOWN
 				  [(thisBlock.east && !bigBricks.east) || (bigBricks.east && !mates.east)?1:0] 	// EAST
 				  [thisBlock.west && !bigBricks.west?1:0]  											// WEST
 				  [(thisBlock.north && !bigBricks.north) || (bigBricks.north && !mates.north)?1:0]									// NORTH
@@ -290,7 +339,7 @@ public class BlockBasalt extends Block {
 	    return new BlockState(this, new IProperty[] {PROP_STYLE, PROP_DETAILS}); 
 	  }
 
-	  private class TestForStyle implements INeighborTest{
+	  private class TestForStyle implements IBlockTest{
 
 		private final Block block;
 		private final EnumStyle style ;
@@ -301,12 +350,12 @@ public class BlockBasalt extends Block {
 		}
 		  
 		@Override
-		public boolean TestNeighbor(IBlockState ibs) {
+		public boolean testBlock(IBlockState ibs) {
 			return (ibs.getBlock() == block && ibs.getValue(PROP_STYLE) == style);
 		}	  
 	  }
 	  
-	  private class TestForBigBrick implements INeighborTest{
+	  private class TestForBigBrick implements IBlockTest{
 
 		private final Block block;
 		
@@ -315,7 +364,7 @@ public class BlockBasalt extends Block {
 		}
 		  
 		@Override
-		public boolean TestNeighbor(IBlockState ibs) {
+		public boolean testBlock(IBlockState ibs) {
 			boolean result = false;
 			if (ibs.getBlock() == block) {
 				EnumStyle style = (EnumStyle) ibs.getValue(PROP_STYLE);
@@ -325,7 +374,7 @@ public class BlockBasalt extends Block {
 		}	  
 	  }
 
-	  private class TestForThisBlock implements INeighborTest{
+	  private class TestForThisBlock implements IBlockTest{
 
 		private final Block block;
 		
@@ -334,7 +383,7 @@ public class BlockBasalt extends Block {
 		}
 		  
 		@Override
-		public boolean TestNeighbor(IBlockState ibs) {
+		public boolean testBlock(IBlockState ibs) {
 			return ibs.getBlock() == block;
 		}	  
 	  }
@@ -348,7 +397,9 @@ public class BlockBasalt extends Block {
 	    COLUMN_Z(4, "column_z", 63),
 	    BRICK_BIG_A(5, "brick_big_a", 63),
 	    BRICK_BIG_B(6, "brick_big_b", 63),
-	    BRICK_BIG_C(7, "brick_big_c", 63);
+	    BRICK_BIG_C(7, "brick_big_c", 63),
+	    BRICK_BIG_D(8, "brick_big_d", 63),
+	    BRICK_BIG_E(9, "brick_big_e", 63);
 //	    PLATE(5, "plate"),	    
 //	    BRICK1(6, "brick1"),
 //	    BRICK2(7, "brick2"),
@@ -393,6 +444,8 @@ public class BlockBasalt extends Block {
 	    	case BRICK_BIG_A:
 			case BRICK_BIG_B:
 			case BRICK_BIG_C:
+			case BRICK_BIG_D:
+			case BRICK_BIG_E:
 				return true;
 			default:
 	    		return false;

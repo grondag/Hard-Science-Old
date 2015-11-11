@@ -22,16 +22,13 @@ public class NeighborBlocks {
 	  north = worldIn.getBlockState(pos.north()); 
 	  south = worldIn.getBlockState(pos.south()); 
 	}
+
 	
-	public interface INeighborTest{
-		public boolean TestNeighbor(IBlockState ibs);
-	}
-	
-	public NeighborTestResults getNeighborTestResults(INeighborTest test){
+	public NeighborTestResults getNeighborTestResults(IBlockTest test){
 		return new NeighborTestResults(
-				test.TestNeighbor(this.up), test.TestNeighbor(this.down), 
-				test.TestNeighbor(this.east), test.TestNeighbor(this.west),
-				test.TestNeighbor(this.north), test.TestNeighbor(this.south)
+				test.testBlock(this.up), test.testBlock(this.down), 
+				test.testBlock(this.east), test.testBlock(this.west),
+				test.testBlock(this.north), test.testBlock(this.south)
 		);
 	}
 	
