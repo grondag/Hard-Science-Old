@@ -1,5 +1,13 @@
 tile.basalt.rough.name=Basalt
 tile.basalt.smooth.name=Smooth Basalt
+tile.basalt.column_x.name=Basalt Column
+tile.basalt.column_y.name=Basalt Column
+tile.basalt.column_z.name=Basalt Column
+tile.basalt.brick_big_a.name=Big Basalt Brick
+tile.basalt.brick_big_b.name=Big Basalt Brick
+tile.basalt.brick_big_c.name=Big Basalt Brick
+tile.basalt.brick_big_d.name=Big Basalt Brick
+tile.basalt.brick_big_e.name=Big Basalt Brick
 
 
 tile.Unobtanium_0.name=White Unobtanium Composite - Intact

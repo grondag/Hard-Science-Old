@@ -1,6 +1,10 @@
 package grondag.adversity.feature.volcano;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 
@@ -18,8 +22,16 @@ public class ItemBlockBasalt extends ItemBlock
   {
     return metadata;
   }
+  
+  
 
   @Override
+public void getSubItems(Item itemIn, CreativeTabs tab, List subItems) {
+	// TODO Auto-generated method stub
+	super.getSubItems(itemIn, tab, subItems);
+}
+
+@Override
   public String getUnlocalizedName(ItemStack stack)
   {
     BlockBasalt.EnumStyle style = BlockBasalt.EnumStyle.byMetadata(stack.getMetadata());

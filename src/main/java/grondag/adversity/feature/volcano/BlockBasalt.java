@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -114,7 +115,7 @@ public class BlockBasalt extends Block {
 	  
 	  private EnumStyle findBestStyleForPlacedBrick(World worldIn, BlockPos pos){
 		  
-		  ShapeValidatorCubic shape = new ShapeValidatorCubic(2, 1, 1);
+		  ShapeValidatorCubic shape = new ShapeValidatorCubic(4, 2, 2);
 		  
 //		  // ROUGH is default because it will not match any of the brick styles
 //		  EnumStyle styleNorth = EnumStyle.ROUGH;
@@ -134,27 +135,32 @@ public class BlockBasalt extends Block {
 			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
 				  return candidateStyle;
 			  };
-		  } else if (testBigBricks.west){
+		  } 
+		  if (testBigBricks.west){
 			  candidateStyle = (EnumStyle) centerBlocks.west.getValue(PROP_STYLE);
 			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
 				  return candidateStyle;		  
 			  }
-		  }	else if (testBigBricks.north){
+		  }	
+		  if (testBigBricks.north){
 			  candidateStyle = (EnumStyle) centerBlocks.north.getValue(PROP_STYLE);
 			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
 				  return candidateStyle;		  
 			  }
-		  } else if (testBigBricks.south){
+		  } 
+		  if (testBigBricks.south){
 			  candidateStyle = (EnumStyle) centerBlocks.south.getValue(PROP_STYLE);
 			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
 				  return candidateStyle;		  
 			  }
-		  } else if (testBigBricks.up){
+		  } 
+		  if (testBigBricks.up){
 			  candidateStyle = (EnumStyle) centerBlocks.up.getValue(PROP_STYLE);
 			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
 				  return candidateStyle;		  
 			  }
-		  } else if (testBigBricks.down){
+		  }  
+		  if (testBigBricks.down){
 			  candidateStyle = (EnumStyle) centerBlocks.down.getValue(PROP_STYLE);
 			  if(shape.isValidShape(worldIn, pos, new TestForStyle(this, candidateStyle), true)){
 				  return candidateStyle;		  
@@ -218,21 +224,21 @@ public class BlockBasalt extends Block {
 	  }
 	  
 	 // True if block at this location is already matched with at least one brick of the same style
-	 private boolean doesBrickHaveMatches(IBlockState ibs, World worldIn, BlockPos pos){
-
-		 EnumStyle style = (EnumStyle) ibs.getValue(PROP_STYLE);
-		 NeighborTestResults candidates = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(this, style));
-		 return candidates.east || candidates.west || candidates.north || candidates.south;		  
-	 }
+//	 private boolean doesBrickHaveMatches(IBlockState ibs, World worldIn, BlockPos pos){
+//
+//		 EnumStyle style = (EnumStyle) ibs.getValue(PROP_STYLE);
+//		 NeighborTestResults candidates = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(this, style));
+//		 return candidates.east || candidates.west || candidates.north || candidates.south;		  
+//	 }
 	  
 	  @Override
 	  @SideOnly(Side.CLIENT)
 	  public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
 	  {
-	    EnumStyle[] allStyles = EnumStyle.values();
-	    for (EnumStyle style : allStyles) {
-	      list.add(new ItemStack(itemIn, 1, style.getMetadata()));
-	    }
+	      list.add(new ItemStack(itemIn, 1, EnumStyle.ROUGH.getMetadata()));
+	      list.add(new ItemStack(itemIn, 1, EnumStyle.SMOOTH.getMetadata()));
+	      list.add(new ItemStack(itemIn, 1, EnumStyle.COLUMN_X.getMetadata()));
+	      list.add(new ItemStack(itemIn, 1, EnumStyle.BRICK_BIG_A.getMetadata()));
 	  }
 
 	  @Override
@@ -328,12 +334,29 @@ public class BlockBasalt extends Block {
 				  [thisBlock.west && !bigBricks.west?1:0]  											// WEST
 				  [(thisBlock.north && !bigBricks.north) || (bigBricks.north && !mates.north)?1:0]									// NORTH
 				  [thisBlock.south && !bigBricks.south?1:0]; 								// SOUTH
+
 		  
-		  return this.getDefaultState().withProperty(PROP_STYLE, style).withProperty(PROP_DETAILS, detailID);			  
+		  return this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.BRICK_BIG_A).withProperty(PROP_DETAILS, detailID);			  
 		  
 	  }
 	  
-	  @Override
+
+
+	@Override
+	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
+		EnumStyle style = (EnumStyle) state.getValue(PROP_STYLE);
+		IBlockState returnState = state;
+		if(style.isBigBrick()){
+			returnState = this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.BRICK_BIG_A);
+		} else if (style.isColumn()) {
+			returnState = this.getDefaultState().withProperty(PROP_STYLE, EnumStyle.COLUMN_X);
+		}
+		
+		return super.getItemDropped(returnState, rand, fortune);
+
+	}
+
+	@Override
 	  protected BlockState createBlockState()
 	  {
 	    return new BlockState(this, new IProperty[] {PROP_STYLE, PROP_DETAILS}); 
@@ -396,10 +419,10 @@ public class BlockBasalt extends Block {
 	    COLUMN_X(3, "column_x", 63),	    
 	    COLUMN_Z(4, "column_z", 63),
 	    BRICK_BIG_A(5, "brick_big_a", 63),
-	    BRICK_BIG_B(6, "brick_big_b", 63),
-	    BRICK_BIG_C(7, "brick_big_c", 63),
-	    BRICK_BIG_D(8, "brick_big_d", 63),
-	    BRICK_BIG_E(9, "brick_big_e", 63);
+	    BRICK_BIG_B(6, "brick_big_b", 0),
+	    BRICK_BIG_C(7, "brick_big_c", 0),
+	    BRICK_BIG_D(8, "brick_big_d", 0),
+	    BRICK_BIG_E(9, "brick_big_e", 0);
 //	    PLATE(5, "plate"),	    
 //	    BRICK1(6, "brick1"),
 //	    BRICK2(7, "brick2"),
@@ -451,6 +474,18 @@ public class BlockBasalt extends Block {
 	    		return false;
 	    	}
 	    }
+	    
+	    public boolean isColumn(){
+			switch(this){
+	    	case COLUMN_X:
+			case COLUMN_Y:
+			case COLUMN_Z:
+				return true;
+			default:
+	    		return false;
+	    	}
+	    }
+	    
 	    public static EnumStyle byMetadata(int meta)
 	    {
 	      if (meta < 0 || meta >= META_LOOKUP.length)

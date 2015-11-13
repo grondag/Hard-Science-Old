@@ -1,15 +1,15 @@
 package grondag.adversity.library;
 
-import java.util.BitSet;
+//import java.util.BitSet;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-// import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 public class ShapeValidatorCubic {
 	
 	//TIntHashSet visited;
-	BitSet visited;
+	TIntHashSet visited;
 	
 
 	//dimension of valid shape
@@ -22,6 +22,7 @@ public class ShapeValidatorCubic {
 	private int maxOffset;
 	
 	private BlockPos origin;
+	private BlockPos hashOrigin;
 
 	private BlockPos maxPos;
 	private BlockPos minPos;
@@ -30,10 +31,12 @@ public class ShapeValidatorCubic {
 	
 	public ShapeValidatorCubic( int i, int j, int k){
 		
-		validShape = Useful.sortedBlockPos(new BlockPos(i, j, k));
+		validShape = Useful.sortedBlockPos(new BlockPos(Math.min(i, 255), Math.min(j, 255), Math.min(j, 255)));
 		
 		// we don't know which dimension will have the max value
 		maxOffset = validShape.getX();
+		
+		visited = new TIntHashSet((i+2) * (j+2) * (k+2));
 	}
 	
 	public boolean isValidShape(IBlockAccess worldIn, BlockPos origin, IBlockTest test, boolean assumeStartValid){
@@ -46,19 +49,18 @@ public class ShapeValidatorCubic {
 
 		maxPos = origin;
 		minPos = origin;
+		
+		
 		this.origin = origin;
 		
-		// have origin block at this point
-		length = new BlockPos(1, 1, 1);
+		// doing this ensures positive numbers for PosHash function
+		hashOrigin = origin.subtract(new BlockPos(256,256, 256));
 		
-		if(visited == null) {
-			// bitset has to support max range in any dimension, thus multiply by 2^3
-			visited = new BitSet( maxOffset * maxOffset * maxOffset * 8);
-		} else {
-			visited.clear();
-		}
+		visited.clear();
 		
 		setVisited(origin);
+		
+		updateMeasurements(origin);
 		
 		visit(worldIn, origin.up(),test);
 		visit(worldIn, origin.down(),test);
@@ -72,12 +74,8 @@ public class ShapeValidatorCubic {
 	
 	private void visit(IBlockAccess worldIn, BlockPos pos, IBlockTest test){
 		
-		if(getVisited(pos)) {
+		if(!isReachable(pos) || !setVisited(pos)) {
 			return;
-		} else if(Math.abs(pos.getX()) > maxOffset || Math.abs(pos.getY()) > maxOffset || Math.abs(pos.getZ()) > maxOffset){
-			return;
-		} else {
-			setVisited(pos);
 		}
 		
 		if(test.testBlock(worldIn.getBlockState(pos))) {
@@ -101,24 +99,31 @@ public class ShapeValidatorCubic {
 
 	}
 	
+	
+	private boolean isReachable(BlockPos pos){
+		BlockPos dist = pos.subtract(origin);
+		return !(Math.abs(dist.getX()) > maxOffset || Math.abs(dist.getY()) > maxOffset || Math.abs(dist.getZ()) > maxOffset);
+	}
+	
 	private boolean isValid(){
 		
 		BlockPos clearances = validShape.subtract(Useful.sortedBlockPos(maxPos.subtract(minPos).add(1, 1, 1)));
 		return clearances.getX() >= 0 && clearances.getY() >= 0 && clearances.getZ() >=0;
 	}
 	
-	private void setVisited(BlockPos pos){
+	// returns true if key was not in the set
+	private boolean setVisited(BlockPos pos){
 		
-		visited.set(getBitIndex(origin.subtract(pos)));
+		return visited.add(getPosHash(pos.subtract(hashOrigin)));
 
 	}
 	
 	private boolean getVisited(BlockPos pos){
-		return visited.get(getBitIndex(origin.subtract(pos)));	
+		return visited.contains(getPosHash(pos.subtract(hashOrigin)));	
 	}
 	
-	private int getBitIndex(BlockPos pos){	
+	private int getPosHash(BlockPos pos){	
 		// Add max offset to handle negative values.  Bitset width is double max offset for this purpose.
-		return (pos.getX() + maxOffset) * maxOffset * maxOffset + (pos.getY()+ maxOffset) * maxOffset + pos.getZ() + + maxOffset;
+		return (pos.getX() & 0x3FF) | ((pos.getY() & 0x3FF) << 10) | ((pos.getZ() & 0x3FF) << 20); 
 	}
 }

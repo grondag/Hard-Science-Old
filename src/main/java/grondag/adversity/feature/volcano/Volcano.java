@@ -68,10 +68,10 @@ public class Volcano {
 			Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
 	
 		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
-		    EnumStyle[] allStyles = EnumStyle.values();
-		    for (EnumStyle style : allStyles) {
-		    	ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + style.toString());
-		    }
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.ROUGH.toString());
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.SMOOTH.toString());
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.COLUMN_X.toString());
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.BRICK_BIG_A.toString());
 		}
 		
 		//GameRegistry.registerBlock(Volcano.blockHotBasalt = new BlockHotBasalt("HotBasalt", Material.rock),
