@@ -21,7 +21,7 @@ import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import grondag.adversity.Adversity;
 import grondag.adversity.Config;
-import grondag.adversity.feature.volcano.BlockBasalt.EnumStyle;
+import grondag.adversity.library.NiceBlock.EnumStyle;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;

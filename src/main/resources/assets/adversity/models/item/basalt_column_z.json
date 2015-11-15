@@ -1,10 +1,10 @@
 {
   "parent": "adversity:block/column_four_faces_full",
       "textures": {
-        "inner": "adversity:blocks/basaltsmooth_dark",
-        "outer": "adversity:blocks/basaltsmooth1",
-        "column_face": "adversity:blocks/basaltsmooth_column_face",
-        "cap_no_neighbors": "adversity:blocks/basaltsmooth_column_cap_face_no_neighbors"
+        "outer": "adversity:blocks/basalt/basalt_1_3",
+        "inner": "adversity:blocks/basalt/basalt_1_4",
+        "column_face": "adversity:blocks/basalt/basalt_0_7",
+        "cap_no_neighbors": "adversity:blocks/basalt/basalt_0_5"
     },
   "display": {
     "thirdperson": {

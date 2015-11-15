@@ -1,6 +1,5 @@
 package grondag.adversity.library;
 
-import grondag.adversity.feature.volcano.BlockBasalt.EnumStyle;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;

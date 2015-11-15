@@ -1,7 +1,7 @@
 {
   "parent": "block/cube_all",
       "textures": {
-        "all": "adversity:blocks/basalt0"
+        "all": "adversity:blocks/basalt/basalt_0_0"
     },
   "display": {
     "thirdperson": {
