@@ -32,7 +32,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class NiceBlock extends Block {
 
 	public static final PropertyEnum PROP_STYLE = PropertyEnum.create("style", EnumStyle.class);
-	public static final PropertyInteger	 PROP_DETAILS = PropertyInteger.create("details", 0, 75);
+	public static final PropertyInteger	 PROP_DETAILS = PropertyInteger.create("details", 0, 170);
 
 	private static  Integer[][][][][][] COL_X_LOOKUP = new Integer[2][2][2][2][2][2];
 	private static  Integer[][][][][][] COL_Y_LOOKUP = new Integer[2][2][2][2][2][2];
@@ -366,7 +366,7 @@ public class NiceBlock extends Block {
 		BRICK_BIG_C(7, "brick_big_c", 63),
 		BRICK_BIG_D(8, "brick_big_d", 63),
 		BRICK_BIG_E(9, "brick_big_e", 63),
-		BLOCK_BIG_A(10, "block_big_a", 75),
+		BLOCK_BIG_A(10, "block_big_a", 111),
 		BLOCK_BIG_B(11, "block_big_b", 0),
 		BLOCK_BIG_C(12, "block_big_c", 0),
 		BLOCK_BIG_D(13, "block_big_d", 0),
@@ -866,49 +866,84 @@ public class NiceBlock extends Block {
 		 
 		CORNER_JOIN_LOOKUP[0][0][0][1][0][1]=new CornerJoin( 32, "SW" );
 		 
-		CORNER_JOIN_LOOKUP[1][0][1][1][0][0]=new CornerJoin( 34 );
-		CORNER_JOIN_LOOKUP[1][0][0][0][1][1]=new CornerJoin( 35 );
-		CORNER_JOIN_LOOKUP[0][1][1][1][0][0]=new CornerJoin( 36 );
-		CORNER_JOIN_LOOKUP[0][1][0][0][1][1]=new CornerJoin( 37 );
-		CORNER_JOIN_LOOKUP[0][0][1][1][1][0]=new CornerJoin( 38 );
-		CORNER_JOIN_LOOKUP[1][1][0][0][1][0]=new CornerJoin( 39 );
-		CORNER_JOIN_LOOKUP[0][0][1][1][0][1]=new CornerJoin( 40 );
-		CORNER_JOIN_LOOKUP[1][1][0][0][0][1]=new CornerJoin( 41 );
-		CORNER_JOIN_LOOKUP[1][1][1][0][0][0]=new CornerJoin( 42 );
-		CORNER_JOIN_LOOKUP[0][0][1][0][1][1]=new CornerJoin( 43 );
-		CORNER_JOIN_LOOKUP[1][1][0][1][0][0]=new CornerJoin( 44 );
-		CORNER_JOIN_LOOKUP[0][0][0][1][1][1]=new CornerJoin( 45 );
-		CORNER_JOIN_LOOKUP[1][0][1][0][1][0]=new CornerJoin( 46 );
-		CORNER_JOIN_LOOKUP[1][0][1][0][0][1]=new CornerJoin( 47 );
-		CORNER_JOIN_LOOKUP[1][0][0][1][1][0]=new CornerJoin( 48 );
-		CORNER_JOIN_LOOKUP[1][0][0][1][0][1]=new CornerJoin( 49 );
-		CORNER_JOIN_LOOKUP[0][1][1][0][1][0]=new CornerJoin( 50 );
-		CORNER_JOIN_LOOKUP[0][1][1][0][0][1]=new CornerJoin( 51 );
-		CORNER_JOIN_LOOKUP[0][1][0][1][1][0]=new CornerJoin( 52 );
-		CORNER_JOIN_LOOKUP[0][1][0][1][0][1]=new CornerJoin( 53 );
-		CORNER_JOIN_LOOKUP[0][0][1][1][1][1]=new CornerJoin( 54 );
-		CORNER_JOIN_LOOKUP[1][1][1][1][0][0]=new CornerJoin( 55 );
-		CORNER_JOIN_LOOKUP[1][1][0][0][1][1]=new CornerJoin( 56 );
-		CORNER_JOIN_LOOKUP[1][0][0][1][1][1]=new CornerJoin( 57 );
-		CORNER_JOIN_LOOKUP[1][0][1][0][1][1]=new CornerJoin( 58 );
-		CORNER_JOIN_LOOKUP[1][0][1][1][0][1]=new CornerJoin( 59 );
-		CORNER_JOIN_LOOKUP[1][0][1][1][1][0]=new CornerJoin( 60 );
-		CORNER_JOIN_LOOKUP[0][1][0][1][1][1]=new CornerJoin( 61 );
-		CORNER_JOIN_LOOKUP[0][1][1][0][1][1]=new CornerJoin( 62 );
-		CORNER_JOIN_LOOKUP[0][1][1][1][0][1]=new CornerJoin( 63 );
-		CORNER_JOIN_LOOKUP[0][1][1][1][1][0]=new CornerJoin( 64 );
-		CORNER_JOIN_LOOKUP[1][1][1][0][1][0]=new CornerJoin( 65 );
-		CORNER_JOIN_LOOKUP[1][1][1][0][0][1]=new CornerJoin( 66 );
-		CORNER_JOIN_LOOKUP[1][1][0][1][1][0]=new CornerJoin( 67 );
-		CORNER_JOIN_LOOKUP[1][1][0][1][0][1]=new CornerJoin( 68 );
-		CORNER_JOIN_LOOKUP[0][1][1][1][1][1]=new CornerJoin( 69 );
-		CORNER_JOIN_LOOKUP[1][0][1][1][1][1]=new CornerJoin( 70 );
-		CORNER_JOIN_LOOKUP[1][1][0][1][1][1]=new CornerJoin( 71 );
-		CORNER_JOIN_LOOKUP[1][1][1][0][1][1]=new CornerJoin( 72 );
-		CORNER_JOIN_LOOKUP[1][1][1][1][0][1]=new CornerJoin( 73 );
-		CORNER_JOIN_LOOKUP[1][1][1][1][1][0]=new CornerJoin( 74 );
-		CORNER_JOIN_LOOKUP[1][1][1][1][1][1]=new CornerJoin( 75 );
-
+		CORNER_JOIN_LOOKUP[1][0][1][1][0][0]=new CornerJoin( 34, "UE", "UW" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[1][0][0][0][1][1]=new CornerJoin( 38, "US", "UN" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[0][1][1][1][0][0]=new CornerJoin( 42, "DW", "DE" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[0][1][0][0][1][1]=new CornerJoin( 46, "DN", "DS" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[0][0][1][1][1][0]=new CornerJoin( 50, "NE", "NW" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[1][1][0][0][1][0]=new CornerJoin( 54, "UN", "DN" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[0][0][1][1][0][1]=new CornerJoin( 58, "SE", "SW" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[1][1][0][0][0][1]=new CornerJoin( 62, "DS", "US" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[1][1][1][0][0][0]=new CornerJoin( 66, "DE", "UE" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[0][0][1][0][1][1]=new CornerJoin( 70, "SE", "NE" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[1][1][0][1][0][0]=new CornerJoin( 74, "DW", "UW" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[0][0][0][1][1][1]=new CornerJoin( 78, "SW", "NW" );
+		 
+		 
+		 
+		CORNER_JOIN_LOOKUP[1][0][1][0][1][0]=new CornerJoin( 82 );
+		CORNER_JOIN_LOOKUP[1][0][1][0][0][1]=new CornerJoin( 83 );
+		CORNER_JOIN_LOOKUP[1][0][0][1][1][0]=new CornerJoin( 84 );
+		CORNER_JOIN_LOOKUP[1][0][0][1][0][1]=new CornerJoin( 85 );
+		CORNER_JOIN_LOOKUP[0][1][1][0][1][0]=new CornerJoin( 86 );
+		CORNER_JOIN_LOOKUP[0][1][1][0][0][1]=new CornerJoin( 87 );
+		CORNER_JOIN_LOOKUP[0][1][0][1][1][0]=new CornerJoin( 88 );
+		CORNER_JOIN_LOOKUP[0][1][0][1][0][1]=new CornerJoin( 89 );
+		CORNER_JOIN_LOOKUP[0][0][1][1][1][1]=new CornerJoin( 90 );
+		CORNER_JOIN_LOOKUP[1][1][1][1][0][0]=new CornerJoin( 91 );
+		CORNER_JOIN_LOOKUP[1][1][0][0][1][1]=new CornerJoin( 92 );
+		CORNER_JOIN_LOOKUP[1][0][0][1][1][1]=new CornerJoin( 93 );
+		CORNER_JOIN_LOOKUP[1][0][1][0][1][1]=new CornerJoin( 94 );
+		CORNER_JOIN_LOOKUP[1][0][1][1][0][1]=new CornerJoin( 95 );
+		CORNER_JOIN_LOOKUP[1][0][1][1][1][0]=new CornerJoin( 96 );
+		CORNER_JOIN_LOOKUP[0][1][0][1][1][1]=new CornerJoin( 97 );
+		CORNER_JOIN_LOOKUP[0][1][1][0][1][1]=new CornerJoin( 98 );
+		CORNER_JOIN_LOOKUP[0][1][1][1][0][1]=new CornerJoin( 99 );
+		CORNER_JOIN_LOOKUP[0][1][1][1][1][0]=new CornerJoin( 100 );
+		CORNER_JOIN_LOOKUP[1][1][1][0][1][0]=new CornerJoin( 101 );
+		CORNER_JOIN_LOOKUP[1][1][1][0][0][1]=new CornerJoin( 102 );
+		CORNER_JOIN_LOOKUP[1][1][0][1][1][0]=new CornerJoin( 103 );
+		CORNER_JOIN_LOOKUP[1][1][0][1][0][1]=new CornerJoin( 104 );
+		CORNER_JOIN_LOOKUP[0][1][1][1][1][1]=new CornerJoin( 105 );
+		CORNER_JOIN_LOOKUP[1][0][1][1][1][1]=new CornerJoin( 106 );
+		CORNER_JOIN_LOOKUP[1][1][0][1][1][1]=new CornerJoin( 107 );
+		CORNER_JOIN_LOOKUP[1][1][1][0][1][1]=new CornerJoin( 108 );
+		CORNER_JOIN_LOOKUP[1][1][1][1][0][1]=new CornerJoin( 109 );
+		CORNER_JOIN_LOOKUP[1][1][1][1][1][0]=new CornerJoin( 110 );
+		CORNER_JOIN_LOOKUP[1][1][1][1][1][1]=new CornerJoin( 111 );
 
 	}
 }

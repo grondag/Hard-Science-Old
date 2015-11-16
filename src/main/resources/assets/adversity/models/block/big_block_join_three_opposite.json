@@ -10,8 +10,8 @@
                 "up":    { "texture": "#bb0", "cullface": "up", "rotation": 0 },
                 "north": { "texture": "#bb0", "cullface": "north", "rotation": 0 },
                 "south": { "texture": "#bb0", "cullface": "south", "rotation": 0 },
-                "west":  { "texture": "#bb3", "cullface": "west", "rotation": 0 },
-                "east":  { "texture": "#bb3", "cullface": "east", "rotation": 0 }
+                "west":  { "texture": "#bb3front", "cullface": "west", "rotation": 0 },
+                "east":  { "texture": "#bb3back", "cullface": "east", "rotation": 0 }
             }
         }
     ]
