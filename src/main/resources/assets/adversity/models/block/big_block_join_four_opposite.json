@@ -6,7 +6,7 @@
         {   "from": [ 0, 0, 0 ],
             "to": [ 16, 16, 16 ],
             "faces": {
-                "down":  { "texture": "#bb4", "cullface": "down", "rotation": 0 },
+                "down":  { "uv": [16, 0, 0, 16], "texture": "#bb4", "cullface": "down", "rotation": 180 },
                 "up":    { "texture": "#bb4", "cullface": "up", "rotation": 0 },
                 "north": { "texture": "#bb0", "cullface": "north", "rotation": 0 },
                 "south": { "texture": "#bb0", "cullface": "south", "rotation": 0 },
