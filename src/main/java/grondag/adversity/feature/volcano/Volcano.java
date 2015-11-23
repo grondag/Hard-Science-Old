@@ -1,8 +1,13 @@
 package grondag.adversity.feature.volcano;
 
+import net.minecraft.block.BlockCactus;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMap;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
@@ -21,7 +26,10 @@ import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import grondag.adversity.Adversity;
 import grondag.adversity.Config;
+import grondag.adversity.library.NiceBigBlockModel;
 import grondag.adversity.library.NiceBlock.EnumStyle;
+import grondag.adversity.library.NiceItemBlock2;
+import grondag.adversity.library.TextureLoader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -37,6 +45,8 @@ public class Volcano {
 
 	// BLOCKS
 	public static BlockBasalt		blockBasalt;
+	public static BlockBasalt2		blockBasalt2;
+	public static NiceBigBlockModel	blockBasaltBBM;
 	//public static BlockHotBasalt	blockHotBasalt;
 	//public static BlockVolcanicLava	blockVolcanicLava;
 	//public static BlockHaze			blockHaze;
@@ -56,14 +66,37 @@ public class Volcano {
 
 		// BLOCKS
 		blockBasalt = (BlockBasalt) new BlockBasalt().setUnlocalizedName("basalt").setCreativeTab(Adversity.tabAdversity);
+		blockBasalt2 = (BlockBasalt2) new BlockBasalt2().setUnlocalizedName("basalt2").setCreativeTab(Adversity.tabAdversity);
 		GameRegistry.registerBlock(blockBasalt, ItemBlockBasalt.class, "basalt");
+		GameRegistry.registerBlock(blockBasalt2, NiceItemBlock2.class, "basalt2");
 		
 		if(event.getSide()==Side.CLIENT){
 			
+			 MinecraftForge.EVENT_BUS.register(new TextureLoader("basalt", 256));
+			 
+			blockBasaltBBM = new NiceBigBlockModel("basalt");
+			
+		    StateMapperBase ignoreState = new StateMapperBase() {
+		        @Override
+		        protected ModelResourceLocation getModelResourceLocation(IBlockState iBlockState) {
+		          return blockBasaltBBM.modelResourceLocation;
+		        }
+		      };
+		      
+		      ModelLoader.setCustomStateMapper(blockBasalt2, ignoreState);
+
+		      // ModelBakeEvent will be used to add our ISmartBlockModel to the ModelManager's registry (the
+		      //  registry used to map all the ModelResourceLocations to IBlockModels).  For the stone example there is a map from
+		      // ModelResourceLocation("minecraft:granite#normal") to an IBakedModel created from models/block/granite.json.
+		      // For the camouflage block, it will map from
+		      // CamouflageISmartBlockModelFactory.modelResourceLocation to our CamouflageISmartBlockModelFactory instance
+		      MinecraftForge.EVENT_BUS.register(blockBasaltBBM);
+			 
+			 
 		    // Need this to filter out unused state combinations
 			// otherwise model loader will try to create hundreds of meaningless combinations.
 			ModelLoader.setCustomStateMapper(Volcano.blockBasalt,  blockBasalt.new CustomStateMapper());
-
+//			ModelLoader.setCustomStateMapper(Volcano.blockBasalt2,  (new StateMap.Builder()).addPropertiesToIgnore(new IProperty[] {BlockBasalt2.PROP_STYLE}).build());
 			
 			Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
 	
@@ -72,6 +105,16 @@ public class Volcano {
 		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.SMOOTH.toString());
 		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.COLUMN_X.toString());
 		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.BRICK_BIG_A.toString());
+
+			itemBlockVariants = GameRegistry.findItem("adversity", "basalt2");
+			
+		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt2_" + EnumStyle.ROUGH.toString());
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt2_" + EnumStyle.SMOOTH.toString());
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt2_" + EnumStyle.BRICK_BIG_A.toString());
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt2_" + EnumStyle.BLOCK_BIG_A.toString());
+
+		
 		}
 		
 		//GameRegistry.registerBlock(Volcano.blockHotBasalt = new BlockHotBasalt("HotBasalt", Material.rock),
@@ -136,3 +179,5 @@ public class Volcano {
 
 }
 
+// if you want to use your own texture, you can add it to the texture map using code similar to this:
+//   MinecraftForge.EVENT_BUS.register(new StitcherAddDigitsTexture());
