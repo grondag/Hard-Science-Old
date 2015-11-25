@@ -1,7 +1,11 @@
 package grondag.adversity;
 
 import java.io.File;
+import java.util.HashMap;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.Block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraftforge.common.config.Configuration;
 
 public class Config {
@@ -31,6 +35,15 @@ public class Config {
 		public static float		explodedFailureChance	= 0.25F;
 		public static float		resistanceFailureChance	= 0.001F;
 	}
+
+	public static class Substance{
+		public int hardness;
+		public int resistance;
+		public String harvestTool;
+		public int harvestLevel;
+	}
+	
+	public static HashMap<String,Substance> substances = new HashMap<String,Substance>();
 
 	public static Configuration	config;
 
@@ -106,6 +119,40 @@ public class Config {
 				.getFloat("resistanceFailureChance", "Unobtanium", 0.001F, 0.0F, 1.0F,
 						"If canBeDamaged=true, the chance that a blast resistance test (usually an explosion) will damage an Unobtanium block.");
 
+		// SUBSTANCES
+
+
+		// UNOBTANIUM
+		
+		String[] allowedTools = {"pickaxe","shove", "axe"};
+		
+		config.addCustomCategoryComment("Substances", "General settings for various in-game materials.");
+		
+		substances.clear();
+		
+		
+		Substance dressedStone = new Substance();
+		dressedStone.hardness = config.getInt("dessedStoneHardness", "Substances", 2, 1, 50, "");
+		dressedStone.harvestTool = config.getString("dressedStoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		dressedStone.harvestLevel = config.getInt("dessedStoneHarvestLevel", "Substances", 1, 1, 3, "");
+		dressedStone.resistance = config.getInt("dressedStoneResistance", "Substances", 10, 1, 50, "");
+		substances.put("dressed_stone", dressedStone);
+		
+		Substance composite = new Substance();
+		composite.hardness = config.getInt("compositeHardness", "Substances", 4, 1, 50, "");
+		composite.harvestTool = config.getString("compositeHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		composite.harvestLevel = config.getInt("compositeHarvestLevel", "Substances", 2, 1, 3, "");
+		composite.resistance = config.getInt("compositeResistance", "Substances", 50, 1, 50, "");
+		substances.put("composite", dressedStone);
+
+		Substance duraplast = new Substance();
+		duraplast.hardness = config.getInt("duraplastHardness", "Substances", 10, 1, 50, "");
+		duraplast.harvestTool = config.getString("duraplastHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		duraplast.harvestLevel = config.getInt("duraplastHarvestLevel", "Substances", 3, 1, 3, "");
+		duraplast.resistance = config.getInt("duraplastResistance", "Substances", 200, 1, 50, "");
+		substances.put("duraplast", dressedStone);
+
+		
 		// END
 		config.save();
 

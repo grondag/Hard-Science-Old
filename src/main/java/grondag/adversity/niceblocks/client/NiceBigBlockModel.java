@@ -1,8 +1,11 @@
-package grondag.adversity.library;
+package grondag.adversity.niceblocks.client;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.ClientProxy;
-import grondag.adversity.library.NiceBlockData.TextureOffsets;
+import grondag.adversity.niceblocks.NiceBlock2;
+import grondag.adversity.niceblocks.client.NiceBlockData.CornerJoins;
+import grondag.adversity.niceblocks.client.NiceBlockData.Rotation;
+import grondag.adversity.niceblocks.client.NiceBlockData.TextureOffsets;
 
 import java.io.IOException;
 import java.util.List;
@@ -139,12 +142,12 @@ public class NiceBigBlockModel implements IBakedModel, ISmartBlockModel, ISmartI
 
 					Map<String, String> textures = Maps.newHashMap();
 					TextureOffsets scenarioOffsets = NiceBlockData.CornerJoins.scenarioOffsets[rotation.index][i];
-					textures.put("up", TextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.up));
-					textures.put("down", TextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.down));
-					textures.put("east", TextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.east));
-					textures.put("west", TextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.west));
-					textures.put("north", TextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.north));
-					textures.put("south", TextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.south));
+					textures.put("up", NiceBlockTextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.up));
+					textures.put("down", NiceBlockTextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.down));
+					textures.put("east", NiceBlockTextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.east));
+					textures.put("west", NiceBlockTextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.west));
+					textures.put("north", NiceBlockTextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.north));
+					textures.put("south", NiceBlockTextureLoader.buildTextureName(baseName, baseOffset + scenarioOffsets.south));
 
 					IModel model=template.retexture(ImmutableMap.copyOf(textures));
 

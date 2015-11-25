@@ -1,7 +1,10 @@
-package grondag.adversity.library;
+package grondag.adversity.niceblocks;
 
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.IBlockTest;
+import grondag.adversity.library.NeighborBlocks;
+import grondag.adversity.library.ShapeValidatorCubic;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 
 import java.util.Iterator;
@@ -29,7 +32,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class NiceBlock extends Block {
+public class NiceBlockOld extends Block implements INiceBlock {
 
 	public static final PropertyEnum PROP_STYLE = PropertyEnum.create("style", EnumStyle.class);
 	public static final PropertyInteger	 PROP_DETAILS = PropertyInteger.create("details", 0, 385);
@@ -46,7 +49,7 @@ public class NiceBlock extends Block {
 	}
 
 
-	public NiceBlock(Material stuff) {
+	public NiceBlockOld(Material stuff) {
 		super(stuff);
 	}	
 

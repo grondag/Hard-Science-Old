@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano;
+package grondag.adversity.niceblocks;
 
 
 import java.util.List;
