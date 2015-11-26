@@ -16,7 +16,9 @@ import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -24,14 +26,15 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.client.model.IRetexturableModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
+public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
 
 	protected final String myResourceLocation;
-	protected final String textureBaseName;
 	
 	protected final NiceBlockStyle style;
 	protected final NiceSubstance substance;
@@ -49,8 +52,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		this.style = style;
 		this.substance = substance;
 		myResourceLocation = style.getResourceLocationForSubstance(substance);
-		this.textureBaseName = substance.resourceName() + "_" + style.textureSuffix;;
-		this.models = new IFlexibleBakedModel[style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)][style.cookbook.getRecipeCount()];
+		this.models = new IFlexibleBakedModel[style.cookbook.getAlternateCount()][style.cookbook.getRecipeCount()];
 	}
 	
 	
@@ -80,28 +82,34 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	};
 	
 	
-	/**
-	 * This method MUST be overridden to create the necessary baked models
-	 *
-	 */
 	public void handleBakeEvent(ModelBakeEvent event) throws IOException
 	{
+
+		for(int recipe =0 ; recipe < style.cookbook.getRecipeCount() ; recipe++){
+
+			for(int alt = 0; alt < style.alternateCount; alt++){
+
+				NiceCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, recipe, alt);
+
+				IRetexturableModel template = (IRetexturableModel)event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
+
+				IModel model=template.retexture(ingredients.textures);
+
+				this.models[alt][recipe]=model.bake(ingredients.state, DefaultVertexFormats.BLOCK, textureGetter);
+			}		
+		}
+		
 		event.modelRegistry.putObject(myResourceLocation, this);
-		//TODO: something with items?
-		//event.modelRegistry.putObject(ClientProxy.itemLocation, customModel);
 
 	}
+	
 	
 	public void handleTextureStitchEvent(TextureStitchEvent.Pre event){
 		for (int alt = 0; alt < style.alternateCount; alt++){
 			for (int tex = 0 ; tex < style.textureCount ; tex++){
-				event.map.registerSprite(new ResourceLocation(buildTextureName(textureBaseName, (alt * style.textureCount) + style.textureIndex + tex)));
+				event.map.registerSprite(new ResourceLocation(style.buildTextureName(substance, (alt * style.textureCount) + style.textureIndex + tex)));
 			}
 		}
-	}
-	
-	protected static String buildTextureName(String basename, int offset){
-		return "adversity:blocks/" + basename + "/" + basename + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 	
 	@Override

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import net.minecraft.block.material.Material;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -27,23 +26,25 @@ public class NiceBlockRegistrar {
 			{{NiceSubstance.BASALT}};
 	
 	// declare the block instances
-	public final static NiceBlock raw1 = new NiceBlock(Material.rock, "raw1", NiceBlockStyle.RAW, substance16Group[0]);
-	public final static NiceBlock smooth1 = new NiceBlock(Material.rock, "smooth1", NiceBlockStyle.SMOOTH, substance16Group[0]);
-	public final static NiceBlock bigBlockA1 = new NiceBlock(Material.rock, "bigBlockA1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
-	public final static NiceBlock bigBlockB1 = new NiceBlock(Material.rock, "bigBlockB1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
-	public final static NiceBlock bigBlockC1 = new NiceBlock(Material.rock, "bigBlockC1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
-	public final static NiceBlock bigBlockD1 = new NiceBlock(Material.rock, "bigBlockD1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
-	public final static NiceBlock bigBlockE1 = new NiceBlock(Material.rock, "bigBlockE1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
+	public final static NiceBlock raw1 = new NiceBlock("raw1", NiceBlockStyle.RAW, substance16Group[0]);
+	public final static NiceBlock smooth1 = new NiceBlock("smooth1", NiceBlockStyle.SMOOTH, substance16Group[0]);
+	public final static NiceBlock bigBlockA1 = new NiceBlock("bigBlockA1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
+	public final static NiceBlock bigBlockB1 = new NiceBlock("bigBlockB1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
+	public final static NiceBlock bigBlockC1 = new NiceBlock("bigBlockC1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
+	public final static NiceBlock bigBlockD1 = new NiceBlock("bigBlockD1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
+	public final static NiceBlock bigBlockE1 = new NiceBlock("bigBlockE1", NiceBlockStyle.BIG_WORN, substance16Group[0]);
 	
 	private final static NiceBlockRegistrar instance = new NiceBlockRegistrar();
 	
-	private static LinkedList<NiceBlock> allBlocks = new LinkedList<NiceBlock>();
+	/**
+	 * NiceBlocks add themselves here so that we can easily iterate them during registration
+	 */
+	public static LinkedList<NiceBlock> allBlocks = new LinkedList<NiceBlock>();
+	
 	private static LinkedList<NiceModel> allModels = new LinkedList<NiceModel>();
 	private static Map<String, NiceBlock> lookupSnS = new HashMap<String, NiceBlock>();
 	
 	private static void registerBlockCompletely(NiceBlock block, boolean doClientStuff){
-		//add to our internal list for later registration events
-		allBlocks.add(block);
 		
 		// actually register the block! Hurrah!
 		GameRegistry.registerBlock(block, NiceItemBlock2.class, block.getUnlocalizedName());
@@ -66,31 +67,28 @@ public class NiceBlockRegistrar {
 				Constructor<?> ctor;
 				try {
 					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class);
+					
+					try {
+						NiceModel model = (NiceModel)ctor.newInstance(block.style, substance);
+						allModels.add(model);
+						
+					} catch (InstantiationException e) {
+						Adversity.log.warn("Unable to instantiate block model for class style/substance:" + location);
+					} catch (IllegalAccessException e) {
+						Adversity.log.warn("Unable to access instantiation for block model for class style/substance:" + location);
+					} catch (IllegalArgumentException e) {
+						Adversity.log.warn("Bad argument while instantiating block model for class style/substance:" + location);
+					} catch (InvocationTargetException e) {
+						Adversity.log.warn("Exception happened while instantiating block model for class style/substance:" + location);
+					}
+					
 				} catch (NoSuchMethodException e) {
 					Adversity.log.warn("Unable to find constructor for block model class for style/substance:" + location);
-					break;
 				} catch (SecurityException e) {
 					Adversity.log.warn("Unable to access constructor for block model class for style/substance:" + location);
-					break;
 				}
 				
-				try {
-					NiceModel model = (NiceModel)ctor.newInstance(block.style, substance);
-					allModels.add(model);
-					
-				} catch (InstantiationException e) {
-					Adversity.log.warn("Unable to instantiate block model for class style/substance:" + location);
-					break;
-				} catch (IllegalAccessException e) {
-					Adversity.log.warn("Unable to access instantiation for block model for class style/substance:" + location);
-					break;
-				} catch (IllegalArgumentException e) {
-					Adversity.log.warn("Bad argument while instantiating block model for class style/substance:" + location);
-					break;
-				} catch (InvocationTargetException e) {
-					Adversity.log.warn("Exception happened while instantiating block model for class style/substance:" + location);
-					break;
-				}
+
 			}
 		}
 	
@@ -106,13 +104,13 @@ public class NiceBlockRegistrar {
 	public static void preInit(FMLPreInitializationEvent event) {
 
 		// In case we get called more than 1X.
-		allBlocks.clear();
 		lookupSnS.clear();
 		allModels.clear();
 		
 		// REGISTER ALL BLOCKS
-		registerBlockCompletely(raw1, event.getSide()==Side.CLIENT);
-		
+		for(NiceBlock block : allBlocks){
+			registerBlockCompletely(block, event.getSide()==Side.CLIENT);
+		}
 		
 		if(event.getSide()==Side.CLIENT){
 			

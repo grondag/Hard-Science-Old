@@ -2,11 +2,12 @@ package grondag.adversity.niceblocks;
 
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Alternator;
+import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.ShapeValidatorCubic;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblocks.client.INiceCookbook;
 
 import java.util.List;
 import java.util.Random;
@@ -45,6 +46,8 @@ public class NiceBlock extends Block {
 	public final NiceSubstance[] substances;
     public final int countMaterials;
     public final NiceBlockStyle style;
+    
+    private final IAlternator alternator;
 
     /**
      * Assumes first substance is representative of all the substances
@@ -64,10 +67,13 @@ public class NiceBlock extends Block {
 		this.setStepSound(substances[0].baseMaterial.stepSound);
 		this.setHardness(substances[0].baseMaterial.hardness);
 		this.setResistance(substances[0].baseMaterial.resistance);
+		this.alternator = Alternator.getAlternator((byte)(style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)));
 		
 		// just in case I'm stupid enough to send in more than metadata will support
 		this.countMaterials = Math.min(substances.length + 1, 16);
 
+		// let registrar know to register us when appropriate
+		NiceBlockRegistrar.allBlocks.add(this);
 	}	
 
 	@Override
@@ -111,8 +117,11 @@ public class NiceBlock extends Block {
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		// should always be an IExtendedBlockState but avoid crash if not
+		
 		if (state instanceof IExtendedBlockState) {  
-			return style.cookbook.getExtendedState((IExtendedBlockState)state, world, pos);
+			return ((IExtendedBlockState)state)
+					.withProperty(PROP_RECIPE, style.cookbook.getModelIndex((IExtendedBlockState)state, world, pos))
+					.withProperty(PROP_ALTERNATE, alternator.getAlternate(pos));
 		} else {
 			return state;
 		}
