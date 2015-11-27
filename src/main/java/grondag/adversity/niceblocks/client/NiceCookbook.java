@@ -20,6 +20,7 @@ import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.IModelState;
@@ -41,10 +42,14 @@ public class NiceCookbook {
 	/** dimensions are rotation and recipe */
 	protected static final TextureOffset[][] CONNECTED_CORNER_TEXTURE_OFFSETS = new TextureOffset[4][386];
 
-	protected final NiceBlockStyle style;
-	
-	public NiceCookbook(NiceBlockStyle style){
-		this.style = style;
+	protected NiceBlockStyle style;
+
+	public void setStyle(NiceBlockStyle style){
+		if(this.style == null) {
+			this.style = style;
+		} else {
+			Adversity.log.warn("Attempted to set Cookbook style more than once.  This should never happen.");
+		}
 	}
 	
 	public int getRecipeCount() {
@@ -107,33 +112,12 @@ public class NiceCookbook {
 			return Rotation.ROTATE_NONE;
 		}
 	}
-
-
-	/** 
-	 * Creates the appropriate model transform for the specified rotations.
-	 * Order of rotation matters, and this applies them in Y, X, Z order.
-	 * I found it easier to visualize the necessary rotations 
-	 * by considering Y-rotation first. *shrug*
-	 */
-	protected final TRSRTransformation createRotationYFirst(float degreesX, float degreesY, float degreesZ){
-            Quat4f rotation = new Quat4f(0, 0, 0, 1);
-            if(degreesY !=0.0){
-            	rotation.mul(rotationForAxis(Axis.Y, degreesY));
-            }
-            if(degreesX !=0.0){
-            	rotation.mul(rotationForAxis(Axis.X, degreesX));
-            }
-            if(degreesZ !=0.0){
-            	rotation.mul(rotationForAxis(Axis.Z, degreesZ));
-            }
-            return new TRSRTransformation(null, rotation, null, null);
-	}
 	
 	/** 
 	 * Builds the appropriate quaternion to rotate
 	 * around the given axis.
 	 */
-    protected final static Quat4f rotationForAxis(EnumFacing.Axis axis, float degrees)
+    protected final static Quat4f rotationForAxis(EnumFacing.Axis axis, double degrees)
     {
     	Quat4f retVal = new Quat4f();
     	switch(axis){

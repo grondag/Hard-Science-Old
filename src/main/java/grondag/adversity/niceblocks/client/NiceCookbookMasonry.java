@@ -22,10 +22,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class NiceCookbookMasonry extends NiceCookbook{
 
-	public NiceCookbookMasonry(NiceBlockStyle style) {
-		super(style);
-	}
-
 	@Override
 	public  int getRecipeCount() {
 		return 64;

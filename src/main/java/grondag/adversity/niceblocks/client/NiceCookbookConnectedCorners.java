@@ -19,10 +19,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class NiceCookbookConnectedCorners extends NiceCookbook {
 	
-	public NiceCookbookConnectedCorners(NiceBlockStyle style) {
-		super(style);
-	}
-
 	@Override
 	public int getRecipeCount() {
 		return 386;
