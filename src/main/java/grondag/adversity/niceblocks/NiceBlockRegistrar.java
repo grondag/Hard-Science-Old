@@ -11,6 +11,8 @@ import java.util.Map;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.item.Item;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -70,10 +72,10 @@ public class NiceBlockRegistrar {
 	public final static NiceBlock columnZ1 = new NiceBlock("columnX1", NiceBlockStyle.COLUMN_Z, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
 
 	
-	private static void registerBlockCompletely(NiceBlock block, boolean doClientStuff){
+	private static void registerBlockCompletely(NiceBlock block, FMLPreInitializationEvent event){
 		
 		// actually register the block! Hurrah!
-		GameRegistry.registerBlock(block, NiceItemBlock2.class, block.getUnlocalizedName());
+		GameRegistry.registerBlock(block, NiceItemBlock.class, block.getUnlocalizedName());
 
 		// Blocks need custom state mapper for two reasons
 		// 1) To avoid creating mappings for unused substance indexes (metadata values)
@@ -87,9 +89,10 @@ public class NiceBlockRegistrar {
 			
 			lookupSnS.put(location, block);
 
-			if(doClientStuff){
+			if(event.getSide()==Side.CLIENT){
 				// Create model for later event handling.
 				// Java gonna make us jump through a bunch of hoops - hold on to your butts!
+				// TODO: finding constructor should probably be outside loop
 				Constructor<?> ctor;
 				try {
 					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class);
@@ -113,9 +116,18 @@ public class NiceBlockRegistrar {
 				} catch (SecurityException e) {
 					Adversity.log.warn("Unable to access constructor for block model class for style/substance:" + location);
 				}
-				
-
 			}
+			
+			// ADD ITEM VARIENTS FOR SUB BLOCKS
+			// TODO: finding item should probably be outside loop
+			Item itemBlockVariants = GameRegistry.findItem("adversity", block.getUnlocalizedName());
+	
+		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
+
+		    ModelBakery.addVariantName(itemBlockVariants, "adversity:" + block.getUnlocalizedName()
+		    		+ "." + block.style.toString() + "_" + substance.id);
+
+		
 		}
 	
 	}
@@ -155,24 +167,13 @@ public class NiceBlockRegistrar {
 		
 		// REGISTER ALL BLOCKS
 		for(NiceBlock block : allBlocks){
-			registerBlockCompletely(block, event.getSide()==Side.CLIENT);
+			registerBlockCompletely(block, event);
 		}
 		
 		if(event.getSide()==Side.CLIENT){
 			
 			// Register handlers for texture stitch and model bake events (they are in this class)
 			MinecraftForge.EVENT_BUS.register(instance);
-			 
-			
-			//TODO:  ADD ITEM VARIENTS FOR SUB BLOCKS
-//			Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
-//	
-//		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
-//		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.ROUGH.toString());
-//		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.SMOOTH.toString());
-//		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.COLUMN_X.toString());
-//		    ModelBakery.addVariantName(itemBlockVariants, "adversity:basalt_" + EnumStyle.BRICK_BIG_A.toString());
-
 		
 		}
 

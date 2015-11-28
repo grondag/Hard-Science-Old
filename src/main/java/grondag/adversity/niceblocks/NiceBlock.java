@@ -46,7 +46,6 @@ public class NiceBlock extends Block {
 	public static final IUnlistedProperty PROP_ALTERNATE = Properties.toUnlisted(PropertyInteger.create("alternate", 0, 15));
 	
 	public final NiceSubstance[] substances;
-    public final int countMaterials;
     public final NiceBlockStyle style;
     
     /** see NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()*/
@@ -76,9 +75,6 @@ public class NiceBlock extends Block {
 		this.alternator = Alternator.getAlternator((byte)(style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)));
 		this.placementHandler = placer;
 		
-		// just in case I'm stupid enough to send in more than metadata will support
-		this.countMaterials = Math.min(substances.length + 1, 16);
-
 		// let registrar know to register us when appropriate
 		NiceBlockRegistrar.allBlocks.add(this);
 	}	
@@ -94,7 +90,7 @@ public class NiceBlock extends Block {
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
 	{
-		for(int i = 0; i < countMaterials; i++){
+		for(int i = 0; i < substances.length; i++){
 			list.add(new ItemStack(itemIn, 1, i));
 		}
 	}
