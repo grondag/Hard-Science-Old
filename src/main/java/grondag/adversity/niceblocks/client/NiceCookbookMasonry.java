@@ -35,7 +35,7 @@ public class NiceCookbookMasonry extends NiceCookbook{
 		int baseOffset = (style.textureCount * alternate) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
-		NiceCookbook.TextureOffset offset = SIMPLE_JOIN_MASONRY_OFFSETS[rotation.index][recipe];
+		NiceCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
 
 		textures.put("up", style.buildTextureName(substance, baseOffset + offset.up));
 		textures.put("down", style.buildTextureName(substance, baseOffset + offset.down));
