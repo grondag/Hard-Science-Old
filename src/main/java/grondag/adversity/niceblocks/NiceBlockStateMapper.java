@@ -1,7 +1,5 @@
 package grondag.adversity.niceblocks;
 
-import grondag.adversity.niceblocks.NiceBlockOld.EnumStyle;
-
 import java.util.Map;
 
 import com.google.common.collect.Maps;

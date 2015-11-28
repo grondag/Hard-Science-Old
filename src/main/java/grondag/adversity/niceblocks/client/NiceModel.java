@@ -1,7 +1,6 @@
 package grondag.adversity.niceblocks.client;
 
 import grondag.adversity.niceblocks.NiceBlock;
-import grondag.adversity.niceblocks.NiceBlock2;
 import grondag.adversity.niceblocks.NiceBlockStyle;
 import grondag.adversity.niceblocks.NiceSubstance;
 
@@ -58,6 +57,16 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	
 	@Override
 	public IBakedModel handleBlockState(IBlockState state) {
+		
+		// noted with interest...
+		//	++    /**
+		//++     * Queries if this block should render in a given layer.
+		//++     * ISmartBlockModel can use MinecraftForgeClient.getRenderLayer to alter their model based on layer
+		//++     */
+		//++    public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+		//++    {
+		//++        return func_180664_k() == layer;
+		//++    }
 
 		Minecraft mc = Minecraft.getMinecraft();
 		BlockRendererDispatcher blockRendererDispatcher = mc.getBlockRendererDispatcher();

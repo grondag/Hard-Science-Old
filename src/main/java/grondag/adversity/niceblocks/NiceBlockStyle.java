@@ -12,17 +12,32 @@ import grondag.adversity.niceblocks.client.NiceCookbookMasonry;
 import grondag.adversity.niceblocks.client.NiceModel;
 
 public enum NiceBlockStyle {
-	RAW("a", 0, 1, 4, true, new NiceCookbook(), NiceModel.class),
-	SMOOTH("a", 4, 1, 4, true, new NiceCookbook(), NiceModel.class),
-	//LARGE_BRICKS("B", 16, 1, 8, true, new NiceCookbook(), NiceModel.class),
-	//SMALL_BRICKS("B", 24, 1, 8, true, new NiceCookbook(), NiceModel.class),
-	BIG_WORN("a", 16, 48, 3, true, new NiceCookbookConnectedCorners(), NiceModel.class),
-	BIG_WEATHERED("a", 160, 48, 1, true, new NiceCookbookConnectedCorners(), NiceModel.class),
-	BIG_ORNATE("a", 208, 48, 1, true, new NiceCookbookConnectedCorners(), NiceModel.class),
-	MASONRY_A("b", 0, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class),
-	COLUMN_X("c", 0, 9, 1, false, new NiceCookbookColumn(Axis.X), NiceModel.class),
-	COLUMN_Y("c", 0, 9, 1, false, new NiceCookbookColumn(Axis.Y), NiceModel.class),
-	COLUMN_Z("c", 0, 9, 1, false, new NiceCookbookColumn(Axis.Z), NiceModel.class);
+	RAW("", 0, 1, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	SMOOTH("", 4, 1, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	LARGE_BRICKS("", 96, 6, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	SMALL_BRICKS("", 120, 6, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	BIG_WORN("", 256, 48, 3, true, new NiceCookbookConnectedCorners(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	BIG_WEATHERED("", 400, 48, 1, true, new NiceCookbookConnectedCorners(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	BIG_ORNATE("", 448, 48, 1, true, new NiceCookbookConnectedCorners(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	MASONRY_A("", 16, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	MASONRY_B("", 32, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	MASONRY_C("", 48, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	MASONRY_D("", 64, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	MASONRY_E("", 80, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
+	COLUMN_X("", 8, 9, 1, false, new NiceCookbookColumn(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_Y("", 8, 9, 1, false, new NiceCookbookColumn(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_Z("", 8, 9, 1, false, new NiceCookbookColumn(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT);
+	
+	/** convenience factory method */
+	public static NicePlacement makeColumnPlacer(){
+		return new NicePlacement.PlacementColumn(NiceBlockStyle.COLUMN_X, NiceBlockStyle.COLUMN_Y, NiceBlockStyle.COLUMN_Z);
+	}
+	
+	/** convenience factory method */
+	public static NicePlacement makeMasonryPlacer(){
+		return new NicePlacement.PlacementMasonry(NiceBlockStyle.MASONRY_A, NiceBlockStyle.MASONRY_B, 
+				NiceBlockStyle.MASONRY_C, NiceBlockStyle.MASONRY_D, NiceBlockStyle.MASONRY_E);
+	}	
 	
 	/** 
 	 * 	Identifies which resource texture file group is used for this style
@@ -67,16 +82,17 @@ public enum NiceBlockStyle {
 	public final Class<?> modelClass;
 	
 	/**
+	 * Governs behavior of NiceBlock.canRenderInLayer()
+	 * Allows for rendering in multiple layers.
+	 */
+	public final int renderLayerFlags;
+
+	
+	/**
 	 * 
-	 * @param textureSuffix
-	 * @param textureIndex
-	 * @param textureCount
-	 * @param alternateCount
-	 * @param useRotationsAsAlternates
-	 * @param model
 	 */
 	NiceBlockStyle(String textureSuffix, int textureIndex, int textureCount, int alternateCount, 
-		boolean useRotationsAsAlternates,  NiceCookbook cookbook, Class<?> modelClass){
+		boolean useRotationsAsAlternates,  NiceCookbook cookbook, Class<?> modelClass, int renderLayerFlags){
 		this.textureSuffix = textureSuffix;
 		this.textureIndex = textureIndex;
 		this.textureCount = textureCount;
@@ -85,6 +101,7 @@ public enum NiceBlockStyle {
 		this.modelClass = modelClass;
 		cookbook.setStyle(this);
 		this.cookbook = cookbook;
+		this.renderLayerFlags = renderLayerFlags;
 	}
 	
 	
@@ -103,7 +120,7 @@ public enum NiceBlockStyle {
 	 * Offsets are specific to a style. Cookbooks know which one to use for what purpose.
 	 */
 	public String buildTextureName(NiceSubstance substance, int offset){
-		String basename = substance.resourceName() + "_" + this.textureSuffix;
+		String basename = substance.resourceName() + (textureSuffix == "" ? "" : "_") + textureSuffix;
 		return "adversity:blocks/" + basename + "/" + basename + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 }

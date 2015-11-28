@@ -10,7 +10,6 @@ import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.niceblocks.NiceBlock2.EnumStyle;
 import grondag.adversity.niceblocks.NiceBlockStyle;
 import grondag.adversity.niceblocks.NiceSubstance;
 import net.minecraft.block.state.IBlockState;

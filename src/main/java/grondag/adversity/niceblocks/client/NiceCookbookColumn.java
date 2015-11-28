@@ -64,8 +64,6 @@ public class NiceCookbookColumn extends NiceCookbook{
 	};
 	
 	
-	
-	
 	@Override
 	public int getRecipeCount() {
 		// TODO Auto-generated method stub
@@ -85,7 +83,7 @@ public class NiceCookbookColumn extends NiceCookbook{
 //        "cap_no_neighbors": "adversity:blocks/basalt/basalt_0_5",
 
 		textures.put("inner", style.buildTextureName(substance, baseOffset + 0));
-		textures.put("outer", style.buildTextureName(substance, baseOffset + 8));
+		textures.put("outer", style.buildTextureName(substance, baseOffset - 1));
 		textures.put("column_face", style.buildTextureName(substance, baseOffset + 7));
 		textures.put("cap_opposite_neighbors", style.buildTextureName(substance, baseOffset + 7));
 		textures.put("cap_three_neighbors", style.buildTextureName(substance, baseOffset + 6));

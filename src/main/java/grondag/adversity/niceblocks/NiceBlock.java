@@ -9,6 +9,8 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.ShapeValidatorCubic;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -47,17 +49,21 @@ public class NiceBlock extends Block {
     public final int countMaterials;
     public final NiceBlockStyle style;
     
+    /** see NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()*/
+	public final static int LAYER_SOLID = 1;
+	public final static int LAYER_CUTOUT_MIPPED = 2;
+	public final static int LAYER_CUTOUT = 4;
+	public final static int LAYER_TRANSLUCENT = 8;
+    
     private final IAlternator alternator;
+    
+    private final NicePlacement placementHandler;
 
     /**
      * Assumes first substance is representative of all the substances
      * for purposes of setting material-dependent attributes.
-     * 
-     * @param unlocalizedName
-     * @param style
-     * @param substances
      */
-	public NiceBlock(String unlocalizedName, NiceBlockStyle style, NiceSubstance... substances ) {
+	public NiceBlock(String unlocalizedName, NiceBlockStyle style, NicePlacement placer, NiceSubstance... substances ) {
 		super(substances[0].baseMaterial.material);
 		this.style = style;
 		this.substances = substances;
@@ -68,6 +74,7 @@ public class NiceBlock extends Block {
 		this.setHardness(substances[0].baseMaterial.hardness);
 		this.setResistance(substances[0].baseMaterial.resistance);
 		this.alternator = Alternator.getAlternator((byte)(style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)));
+		this.placementHandler = placer;
 		
 		// just in case I'm stupid enough to send in more than metadata will support
 		this.countMaterials = Math.min(substances.length + 1, 16);
@@ -82,11 +89,6 @@ public class NiceBlock extends Block {
 		return (Integer) state.getValue(PROP_SUBSTANCE_INDEX);
 	}
 
-	@Override
-	public String getUnlocalizedName() {
-		// TODO Auto-generated method stub
-		return super.getUnlocalizedName();
-	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -128,6 +130,22 @@ public class NiceBlock extends Block {
 	}	
 
 	@Override
+	public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
+		switch(layer){
+		case SOLID:
+			return (style.renderLayerFlags & LAYER_SOLID) == LAYER_SOLID;
+		case CUTOUT_MIPPED:
+			return (style.renderLayerFlags & LAYER_CUTOUT_MIPPED) == LAYER_CUTOUT_MIPPED;
+		case CUTOUT:
+			return (style.renderLayerFlags & LAYER_CUTOUT) == LAYER_CUTOUT;
+		case TRANSLUCENT:
+			return (style.renderLayerFlags & LAYER_TRANSLUCENT) == LAYER_TRANSLUCENT;
+		default:
+			return false;
+		}
+	}
+
+	@Override
 	protected BlockState createBlockState()
 	{
 		return new ExtendedBlockState(this, new IProperty[] {PROP_SUBSTANCE_INDEX}, new IUnlistedProperty[] {PROP_RECIPE, PROP_ALTERNATE});
@@ -137,7 +155,6 @@ public class NiceBlock extends Block {
 	/**
 	 * Blocks match if they have are the same block and same substance.
 	 * Also implies the same style.
-	 * @author grondag
 	 */
 	public static class TestForCompleteMatch implements IBlockTest{
 
@@ -145,8 +162,9 @@ public class NiceBlock extends Block {
 		private final int substanceIndex;
 		
 		/**
+		 * Blocks match if they have are the same block and same substance.
+		 * Also implies the same style.
 		 * Pass in the state of the block you want to match with.
-		 * @param ibs
 		 */
 		public TestForCompleteMatch(IBlockState ibs){
 			this.block = ibs.getBlock();
@@ -159,10 +177,11 @@ public class NiceBlock extends Block {
 		}	 
 	}
 
+
 	/**
 	 * Blocks match if they are of the same substance.
 	 * Can be different styles or blocks.
-	 * @author grondag
+	 * Substance taken from the blockstate parameter.
 	 */
 	public static class TestForSubstance implements IBlockTest{
 
@@ -185,12 +204,16 @@ public class NiceBlock extends Block {
 	/**
 	 * Blocks match if they have have the same style.
 	 * Can be different substances or blocks.
-	 * @author grondag
 	 */
 	public static class TestForStyle implements IBlockTest{
 
 		private final NiceBlockStyle style;
-
+		
+		/**
+		 * Blocks match if they have have the same style.
+		 * Can be different substances or blocks.
+		 * Style taken from blockstate parameter.
+		 */
 		public TestForStyle(IBlockState ibs){
 			if( ibs.getBlock() instanceof NiceBlock){
 				this.style = ((NiceBlock) ibs.getBlock()).style;
@@ -205,4 +228,74 @@ public class NiceBlock extends Block {
 		}	  
 	}
 	
+	/**
+	 * Blocks match if they have have the same style and subtance.
+	 * Can be different blocks.
+	 */
+	public static class TestForStyleAndSubstance implements IBlockTest{
+
+		private final NiceBlockStyle style;
+		private final int substanceIndex;
+		
+		/**
+		 * Blocks match if they have have the same style and subtance.
+		 * Can be different blocks.
+		 * Style and subtance taken from blockstate parameter.
+		 */	
+		public TestForStyleAndSubstance(IBlockState ibs){
+			if( ibs.getBlock() instanceof NiceBlock){
+				this.style = ((NiceBlock) ibs.getBlock()).style;
+				this.substanceIndex = (Integer) ibs.getValue(PROP_SUBSTANCE_INDEX);
+			} else{
+				this.style = null;
+				substanceIndex = -1;
+			}
+		}
+		
+		@Override
+		public boolean testBlock(IBlockState ibs) {
+			return ibs.getBlock() instanceof NiceBlock && ((NiceBlock) ibs.getBlock()).style == style
+					 && (Integer)ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+		}	  
+	}
+		
+	/**
+	 * Just like TestForStyleAndSubstance but matches on any one of 
+	 * a group of styles passed in at instantiation.
+	 */
+	public static class TestForStyleGroupAndSubstance implements IBlockTest{
+
+		private final HashSet<NiceBlockStyle> styles;
+		private final int substanceIndex;
+		
+		/**
+		 * Just like TestForStyleAndSubstance but matches on any one of 
+		 * a group of styles passed in at instantiation.
+		 * Substance taken from block state passed in.
+		 */
+		public TestForStyleGroupAndSubstance(IBlockState ibs, NiceBlockStyle... styles){
+			this.styles = new HashSet(Arrays.asList(styles));
+			if( ibs.getBlock() instanceof NiceBlock){
+				this.substanceIndex = (Integer) ibs.getValue(PROP_SUBSTANCE_INDEX);
+			} else{
+				substanceIndex = -1;
+			}
+		}
+
+		@Override
+		public boolean testBlock(IBlockState ibs) {
+			return ibs.getBlock() instanceof NiceBlock && styles.contains(((NiceBlock) ibs.getBlock()).style) 
+					 && (Integer)ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+		}	  
+	}
+
+	@Override
+	public IBlockState onBlockPlaced(World worldIn, BlockPos pos,
+			EnumFacing facing, float hitX, float hitY, float hitZ, int meta,
+			EntityLivingBase placer) {
+		
+		return placementHandler.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
+
+
+	}
 }
