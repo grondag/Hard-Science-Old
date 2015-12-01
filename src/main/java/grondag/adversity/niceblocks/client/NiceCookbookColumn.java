@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4f;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -26,6 +27,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
@@ -76,7 +78,7 @@ public class NiceCookbookColumn extends NiceCookbook{
 
 		String modelName = MODEL_LOOKUP[recipe];
 		
-		int baseOffset = (style.textureCount * alternate) + style.textureIndex;
+		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
 //        "cap_inner_side": "adversity:blocks/basalt/basalt_0_4",
@@ -93,7 +95,8 @@ public class NiceCookbookColumn extends NiceCookbook{
 		textures.put("cap_no_neighbors", style.buildTextureName(substance, baseOffset + 5));
 		textures.put("cap_inner_side", style.buildTextureName(substance, baseOffset + 4));
 		
-		return new Ingredients(modelName, textures, new TRSRTransformation(null, ROTATION_LOOKUP[recipe], null, null));
+		return new Ingredients(modelName, textures, 
+				 TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, ROTATION_LOOKUP[recipe], null, null)));
 	}
 
 	

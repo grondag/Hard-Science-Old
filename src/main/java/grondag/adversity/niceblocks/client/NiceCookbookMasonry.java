@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblocks.NiceBlock;
@@ -15,6 +16,7 @@ import grondag.adversity.niceblocks.NiceSubstance;
 import grondag.adversity.niceblocks.client.NiceCookbook.CornerRecipeFinder;
 import grondag.adversity.niceblocks.client.NiceCookbook.Ingredients;
 import grondag.adversity.niceblocks.client.NiceCookbook.Rotation;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -32,7 +34,7 @@ public class NiceCookbookMasonry extends NiceCookbook{
 		
 		Rotation rotation = calcRotation(alternate);
 		String modelName = "adversity:block/cube_rotate_" + calcRotation(alternate).degrees;
-		int baseOffset = (style.textureCount * alternate) + style.textureIndex;
+		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
 		NiceCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
@@ -51,14 +53,20 @@ public class NiceCookbookMasonry extends NiceCookbook{
 	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		NeighborTestResults mates = neighbors.getNeighborTestResults(new TestForCompleteMatch(state));
-		NeighborTestResults masonry = neighbors.getNeighborTestResults(new TestForStyle(state));
+		NeighborTestResults needsMortar = neighbors.getNeighborTestResults(
+				new IBlockTest() {
+					@Override
+					public boolean testBlock(IBlockState ibs) {
+						return (ibs.getBlock() instanceof NiceBlock) && ibs.getBlock().isFullCube();
+					}
+				});
 		NeighborTestResults thisSubstance = neighbors.getNeighborTestResults(new TestForSubstance(state));
 
 		return SIMPLE_JOIN_RECIPE_LOOKUP[0][thisSubstance.down && !mates.down?1:0]  					// UP DOWN
-				[(thisSubstance.east && !masonry.east) || (masonry.east && !mates.east)?1:0] 		// EAST
-				[thisSubstance.west && !masonry.west?1:0]  											// WEST
-				[(thisSubstance.north && !masonry.north) || (masonry.north && !mates.north)?1:0]	// NORTH								// NORTH
-				[thisSubstance.south && !masonry.south?1:0]; 	
+				[(thisSubstance.east && !needsMortar.east) || (needsMortar.east && !mates.east)?1:0] 		// EAST
+				[thisSubstance.west && !needsMortar.west?1:0]  											// WEST
+				[(thisSubstance.north && !needsMortar.north) || (needsMortar.north && !mates.north)?1:0]	// NORTH								// NORTH
+				[thisSubstance.south && !needsMortar.south?1:0]; 	
 	}
 	
 }

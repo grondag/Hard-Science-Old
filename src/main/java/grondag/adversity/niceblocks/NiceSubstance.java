@@ -20,7 +20,7 @@ public enum NiceSubstance {
 	}
 	
 	public String resourceName(){
-		return baseMaterial.name + "_" + name;
+		return name;
 	}
 	
 	public enum BaseMaterial{

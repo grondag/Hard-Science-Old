@@ -29,7 +29,7 @@ public class NiceCookbookConnectedCorners extends NiceCookbook {
 		
 		Rotation rotation = calcRotation(alternate);
 		String modelName = "adversity:block/cube_rotate_" + calcRotation(alternate).degrees;
-		int baseOffset = (style.textureCount * alternate) + style.textureIndex;
+		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
 		NiceCookbook.TextureOffset offset = CONNECTED_CORNER_TEXTURE_OFFSETS[rotation.index][recipe];

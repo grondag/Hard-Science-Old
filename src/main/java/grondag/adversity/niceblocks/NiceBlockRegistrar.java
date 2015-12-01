@@ -12,6 +12,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -68,8 +69,8 @@ public class NiceBlockRegistrar {
 	public final static NiceBlock masonryE1 = new NiceBlock("masonryE1", NiceBlockStyle.MASONRY_E, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
 
 	public final static NiceBlock columnX1 = new NiceBlock("columnX1", NiceBlockStyle.COLUMN_X, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);	
-	public final static NiceBlock columnY1 = new NiceBlock("columnX1", NiceBlockStyle.COLUMN_Y, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
-	public final static NiceBlock columnZ1 = new NiceBlock("columnX1", NiceBlockStyle.COLUMN_Z, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
+	public final static NiceBlock columnY1 = new NiceBlock("columnY1", NiceBlockStyle.COLUMN_Y, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
+	public final static NiceBlock columnZ1 = new NiceBlock("columnZ1", NiceBlockStyle.COLUMN_Z, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
 
 	
 	private static void registerBlockCompletely(NiceBlock block, FMLPreInitializationEvent event){
@@ -82,12 +83,12 @@ public class NiceBlockRegistrar {
 		// 2) To point them to our custom model instead of looking for a json file
 		ModelLoader.setCustomStateMapper(block,  NiceBlockStateMapper.instance);
 		
-		
 		// iterate all substance variants and add to collections for later handling
-		for(NiceSubstance substance: block.substances){
-			String location = block.style.getResourceLocationForSubstance(substance);
+		for(int i = 0; i< block.substances.length; i++){
+			ModelResourceLocation mrl = NiceBlockStateMapper.instance.getModelResourceLocation(
+					block.getDefaultState().withProperty(NiceBlock.PROP_SUBSTANCE_INDEX, i));
 			
-			lookupSnS.put(location, block);
+			lookupSnS.put(getSnSkey(block.style, block.substances[i]), block);
 
 			if(event.getSide()==Side.CLIENT){
 				// Create model for later event handling.
@@ -95,45 +96,47 @@ public class NiceBlockRegistrar {
 				// TODO: finding constructor should probably be outside loop
 				Constructor<?> ctor;
 				try {
-					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class);
+					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class, ModelResourceLocation.class);
 					
 					try {
-						NiceModel model = (NiceModel)ctor.newInstance(block.style, substance);
+						NiceModel model = (NiceModel)ctor.newInstance(block.style, block.substances[i], mrl);
 						allModels.add(model);
 						
 					} catch (InstantiationException e) {
-						Adversity.log.warn("Unable to instantiate block model for class style/substance:" + location);
+						Adversity.log.warn("Unable to instantiate block model for:" + mrl);
 					} catch (IllegalAccessException e) {
-						Adversity.log.warn("Unable to access instantiation for block model for class style/substance:" + location);
+						Adversity.log.warn("Unable to access instantiation for block model for:" + mrl);
 					} catch (IllegalArgumentException e) {
-						Adversity.log.warn("Bad argument while instantiating block model for class style/substance:" + location);
+						Adversity.log.warn("Bad argument while instantiating block model for:" + mrl);
 					} catch (InvocationTargetException e) {
-						Adversity.log.warn("Exception happened while instantiating block model for class style/substance:" + location);
+						Adversity.log.warn("Exception happened while instantiating block model for:" + mrl);
 					}
 					
 				} catch (NoSuchMethodException e) {
-					Adversity.log.warn("Unable to find constructor for block model class for style/substance:" + location);
+					Adversity.log.warn("Unable to find constructor for block model class for:" + mrl);
 				} catch (SecurityException e) {
-					Adversity.log.warn("Unable to access constructor for block model class for style/substance:" + location);
+					Adversity.log.warn("Unable to access constructor for block model class for:" + mrl);
 				}
-			}
-			
-			// ADD ITEM VARIENTS FOR SUB BLOCKS
-			// TODO: finding item should probably be outside loop
-			Item itemBlockVariants = GameRegistry.findItem("adversity", block.getUnlocalizedName());
-	
-		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
-
-		    ModelBakery.addVariantName(itemBlockVariants, "adversity:" + block.getUnlocalizedName()
-		    		+ "." + block.style.toString() + "_" + substance.id);
-
+				
+				
+				// ADD ITEM VARIENTS FOR SUB BLOCKS
+				// TODO: finding item should probably be outside loop
+				Item itemBlockVariants = GameRegistry.findItem("adversity", block.getUnlocalizedName());
 		
+			    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
+
+			    ModelBakery.addVariantName(itemBlockVariants, "adversity:" + block.getUnlocalizedName()
+			    		+ "." + block.style.toString() + "_" + block.substances[i].id);
+
+			}
 		}
-	
 	}
 	
+	private static String getSnSkey(NiceBlockStyle style, NiceSubstance substance){
+		return style.toString() + "." + substance.id;
+	}
 	public static Collection<NiceBlock> getBlocksForStyleAndSubstance(NiceBlockStyle style, NiceSubstance substance){
-		return lookupSnS.get(style.getResourceLocationForSubstance(substance)); 
+		return lookupSnS.get(getSnSkey(style, substance)); 
 	}
 
 	/** 
@@ -159,6 +162,7 @@ public class NiceBlockRegistrar {
 	private static String getKeyForStyleAndSubstance(NiceBlockStyle style, NiceSubstance substance){
 		return style.toString() + substance.id;
 	}
+	
 	public static void preInit(FMLPreInitializationEvent event) {
 
 		// In case we get called more than 1X.

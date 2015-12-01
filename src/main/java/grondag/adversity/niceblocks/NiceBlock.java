@@ -21,6 +21,7 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
@@ -74,6 +75,7 @@ public class NiceBlock extends Block {
 		this.setResistance(substances[0].baseMaterial.resistance);
 		this.alternator = Alternator.getAlternator((byte)(style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)));
 		this.placementHandler = placer;
+		placer.setOwner(this);
 		
 		// let registrar know to register us when appropriate
 		NiceBlockRegistrar.allBlocks.add(this);

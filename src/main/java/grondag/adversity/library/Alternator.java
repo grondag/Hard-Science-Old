@@ -61,7 +61,7 @@ public class Alternator implements IAlternator{
 	private static class UnAlternator implements IAlternator{
 		@Override
 		public int getAlternate(BlockPos pos) {
-			return 1;
+			return 0;
 		}
 	}
 

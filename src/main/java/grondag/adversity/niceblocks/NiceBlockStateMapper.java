@@ -12,6 +12,18 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 public class NiceBlockStateMapper extends DefaultStateMapper{
 	
 	public final static NiceBlockStateMapper instance = new NiceBlockStateMapper();
+
+
+//	@Override
+//	protected ModelResourceLocation getModelResourceLocation(IBlockState iBlockState)
+//	{
+//		return ((NiceBlock)iBlockState.getBlock()).getModelResourceLocationForState(iBlockState);
+//	}
+
+	// public for use in NiceBlockRegistrar
+	public ModelResourceLocation getModelResourceLocation(IBlockState p_178132_1_){
+		return super.getModelResourceLocation(p_178132_1_);
+	}
 	
 	@Override  
 	public Map putStateModelLocations(Block block)
@@ -23,7 +35,7 @@ public class NiceBlockStateMapper extends DefaultStateMapper{
     		
     		for (int i = 0; i < niceBlock.substances.length; i++){
 				IBlockState state = niceBlock.getDefaultState().withProperty(NiceBlock.PROP_SUBSTANCE_INDEX, i);
-				mapLocations.put(state, new ModelResourceLocation(niceBlock.style.getResourceLocationForSubstance(niceBlock.substances[i])));
+				mapLocations.put(state, this.getModelResourceLocation(state));
     		}
     	}
     	return mapLocations;	

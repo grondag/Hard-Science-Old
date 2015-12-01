@@ -10,10 +10,10 @@ import net.minecraft.item.ItemStack;
 
 public class NiceItemBlock extends ItemBlock
 {
-  public NiceItemBlock(NiceBlock block)
+  public NiceItemBlock(Block block)
   {
     super(block);
-    this.setMaxDamage(block.substances.length - 1);
+    this.setMaxDamage(((NiceBlock)block).substances.length - 1);
     this.setHasSubtypes(true);
   }
 

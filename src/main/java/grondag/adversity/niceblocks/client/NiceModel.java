@@ -33,7 +33,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
 
-	protected final String myResourceLocation;
+	protected final ModelResourceLocation myResourceLocation;
 	
 	protected final NiceBlockStyle style;
 	protected final NiceSubstance substance;
@@ -47,10 +47,10 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	protected IFlexibleBakedModel[][] models; 
 
 	
-	NiceModel(NiceBlockStyle style, NiceSubstance substance){
+	public NiceModel(NiceBlockStyle style, NiceSubstance substance, ModelResourceLocation mrl){
 		this.style = style;
 		this.substance = substance;
-		myResourceLocation = style.getResourceLocationForSubstance(substance);
+		myResourceLocation = mrl;
 		this.models = new IFlexibleBakedModel[style.cookbook.getAlternateCount()][style.cookbook.getRecipeCount()];
 	}
 	
@@ -96,7 +96,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 		for(int recipe =0 ; recipe < style.cookbook.getRecipeCount() ; recipe++){
 
-			for(int alt = 0; alt < style.alternateCount; alt++){
+			for(int alt = 0; alt < style.cookbook.getAlternateCount(); alt++){
 
 				NiceCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, recipe, alt);
 

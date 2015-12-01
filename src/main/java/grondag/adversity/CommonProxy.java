@@ -12,6 +12,7 @@ import grondag.adversity.feature.volcano.Volcano;
 //import grondag.adversity.world.AdversityWorldProvider;
 //import grondag.adversity.world.AdversityWorldType;
 
+import grondag.adversity.niceblocks.NiceBlockRegistrar;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -27,6 +28,7 @@ public class CommonProxy {
 
 //		Drylands.preInit(event);
 		Volcano.preInit(event);
+		NiceBlockRegistrar.preInit(event);
 //		Unobtanium.preInit(event);
 
 	}
@@ -41,6 +43,7 @@ public class CommonProxy {
 
 //		Drylands.init(event);
 		Volcano.init(event);
+		NiceBlockRegistrar.init(event);
 //		Unobtanium.init(event);
 
 	}

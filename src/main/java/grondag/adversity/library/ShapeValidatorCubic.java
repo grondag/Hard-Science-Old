@@ -50,7 +50,6 @@ public class ShapeValidatorCubic {
 		maxPos = origin;
 		minPos = origin;
 		
-		
 		this.origin = origin;
 		
 		// doing this ensures positive numbers for PosHash function

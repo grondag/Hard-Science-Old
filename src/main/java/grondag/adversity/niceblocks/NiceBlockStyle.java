@@ -105,16 +105,6 @@ public enum NiceBlockStyle {
 	}
 	
 	
-	/**
-	 * Used to identify the model in the model registry
-	 * and thus to associate block state with models.
-	 * Use this value any place we need to identify a style/substance combination.
-	 */
-	public String getResourceLocationForSubstance(NiceSubstance substance ){
-		return this.toString().toLowerCase() + "_" + substance.id;
-	}
-	
-	
 	/** 
 	 * Generate the texture name associated with this style for a given substance and offset.
 	 * Offsets are specific to a style. Cookbooks know which one to use for what purpose.
