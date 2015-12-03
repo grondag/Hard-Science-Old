@@ -21,8 +21,8 @@ public class NiceBlockStateMapper extends DefaultStateMapper{
 //	}
 
 	// public for use in NiceBlockRegistrar
-	public ModelResourceLocation getModelResourceLocation(IBlockState p_178132_1_){
-		return super.getModelResourceLocation(p_178132_1_);
+	public ModelResourceLocation getModelResourceLocation(IBlockState blockState){
+		return new ModelResourceLocation(  ((NiceBlock)blockState.getBlock()).name, "normal");
 	}
 	
 	@Override  

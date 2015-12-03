@@ -56,18 +56,19 @@ public class NiceBlock extends Block {
 	public final static int LAYER_TRANSLUCENT = 8;
     
     private final IAlternator alternator;
-    
+    public final String name;
     private final NicePlacement placementHandler;
 
     /**
      * Assumes first substance is representative of all the substances
      * for purposes of setting material-dependent attributes.
      */
-	public NiceBlock(String unlocalizedName, NiceBlockStyle style, NicePlacement placer, NiceSubstance... substances ) {
+	public NiceBlock(String name, NiceBlockStyle style, NicePlacement placer, NiceSubstance... substances ) {
 		super(substances[0].baseMaterial.material);
 		this.style = style;
 		this.substances = substances;
-		this.setUnlocalizedName(unlocalizedName);
+		this.name = name;
+		this.setUnlocalizedName(Adversity.MODID + ":" + name);
 		this.setCreativeTab(Adversity.tabAdversity);
 		this.setHarvestLevel(substances[0].baseMaterial.harvestTool, substances[0].baseMaterial.harvestLevel);
 		this.setStepSound(substances[0].baseMaterial.stepSound);

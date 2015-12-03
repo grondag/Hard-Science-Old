@@ -33,7 +33,8 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
 
-	protected final ModelResourceLocation myResourceLocation;
+	protected final ModelResourceLocation blockResourceLocation;
+	protected final ModelResourceLocation itemResourceLocation;
 	
 	protected final NiceBlockStyle style;
 	protected final NiceSubstance substance;
@@ -47,10 +48,11 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	protected IFlexibleBakedModel[][] models; 
 
 	
-	public NiceModel(NiceBlockStyle style, NiceSubstance substance, ModelResourceLocation mrl){
+	public NiceModel(NiceBlockStyle style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
 		this.style = style;
 		this.substance = substance;
-		myResourceLocation = mrl;
+		blockResourceLocation = mrlBlock;
+		itemResourceLocation = mrlItem;
 		this.models = new IFlexibleBakedModel[style.cookbook.getAlternateCount()][style.cookbook.getRecipeCount()];
 	}
 	
@@ -108,7 +110,8 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			}		
 		}
 		
-		event.modelRegistry.putObject(myResourceLocation, this);
+		event.modelRegistry.putObject(blockResourceLocation, this);
+		event.modelRegistry.putObject(itemResourceLocation, this);
 
 	}
 	
@@ -139,16 +142,14 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 	@Override
 	public boolean isAmbientOcclusion() {
-		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-		return false;
+		return true;
 	}
 
 
 
 	@Override
-	public boolean isGui3d() {
-		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-		return false;
+	public boolean isGui3d() {		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
+		return true;
 	}
 
 
@@ -171,14 +172,12 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 	@Override
 	public ItemCameraTransforms getItemCameraTransforms() {
-		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-		return null;
+		return ItemCameraTransforms.DEFAULT;
 	}
 
 
 	@Override
 	public IBakedModel handleItemState(ItemStack stack) {
-		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-		return null;
+		return models[0][0];
 	}
 }

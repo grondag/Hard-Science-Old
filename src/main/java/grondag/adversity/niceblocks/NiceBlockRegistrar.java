@@ -11,6 +11,7 @@ import java.util.Map;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -51,42 +52,45 @@ public class NiceBlockRegistrar {
 			{{NiceSubstance.BASALT}};
 	
 	// declare the block instances
-	public final static NiceBlock raw1 = new NiceBlock("raw1", NiceBlockStyle.RAW, new PlacementSimple(), substance16Group[0]);
-	public final static NiceBlock smooth1 = new NiceBlock("smooth1", NiceBlockStyle.SMOOTH, new PlacementSimple(), substance16Group[0]);
-	public final static NiceBlock largeBrick1 = new NiceBlock("largeBrick1", NiceBlockStyle.LARGE_BRICKS, new PlacementSimple(), substance16Group[0]);
-	public final static NiceBlock smallBrick1 = new NiceBlock("smallBrick1", NiceBlockStyle.SMALL_BRICKS, new PlacementSimple(), substance16Group[0]);
-	public final static NiceBlock bigBlockA1 = new NiceBlock("bigBlockA1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock bigBlockB1 = new NiceBlock("bigBlockB1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock bigBlockC1 = new NiceBlock("bigBlockC1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock bigBlockD1 = new NiceBlock("bigBlockD1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock bigBlockE1 = new NiceBlock("bigBlockE1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock bigWeathered1 = new NiceBlock("bigWeathered1", NiceBlockStyle.BIG_WEATHERED, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock bigOrnate1 = new NiceBlock("bigOrnate1", NiceBlockStyle.BIG_ORNATE, new PlacementBigBlock(), substance16Group[0]);
-	public final static NiceBlock masonryA1 = new NiceBlock("masonryA1", NiceBlockStyle.MASONRY_A, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
-	public final static NiceBlock masonryB1 = new NiceBlock("masonryB1", NiceBlockStyle.MASONRY_B, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
-	public final static NiceBlock masonryC1 = new NiceBlock("masonryC1", NiceBlockStyle.MASONRY_C, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
-	public final static NiceBlock masonryD1 = new NiceBlock("masonryD1", NiceBlockStyle.MASONRY_D, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
-	public final static NiceBlock masonryE1 = new NiceBlock("masonryE1", NiceBlockStyle.MASONRY_E, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
+	public final static NiceBlock raw1 = new NiceBlock("raw_1", NiceBlockStyle.RAW, new PlacementSimple(), substance16Group[0]);
+	public final static NiceBlock smooth1 = new NiceBlock("smooth_1", NiceBlockStyle.SMOOTH, new PlacementSimple(), substance16Group[0]);
+	public final static NiceBlock largeBrick1 = new NiceBlock("large_brick_1", NiceBlockStyle.LARGE_BRICKS, new PlacementSimple(), substance16Group[0]);
+	public final static NiceBlock smallBrick1 = new NiceBlock("small_brick_1", NiceBlockStyle.SMALL_BRICKS, new PlacementSimple(), substance16Group[0]);
+	public final static NiceBlock bigBlockA1 = new NiceBlock("big_block_a_1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock bigBlockB1 = new NiceBlock("big_block_b_1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock bigBlockC1 = new NiceBlock("big_block_c_1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock bigBlockD1 = new NiceBlock("big_block_d_1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock bigBlockE1 = new NiceBlock("big_block_e_1", NiceBlockStyle.BIG_WORN, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock bigWeathered1 = new NiceBlock("big_weathered_1", NiceBlockStyle.BIG_WEATHERED, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock bigOrnate1 = new NiceBlock("big_ornate_1", NiceBlockStyle.BIG_ORNATE, new PlacementBigBlock(), substance16Group[0]);
+	public final static NiceBlock masonryA1 = new NiceBlock("masonry_a_1", NiceBlockStyle.MASONRY_A, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
+	public final static NiceBlock masonryB1 = new NiceBlock("masonry_b_1", NiceBlockStyle.MASONRY_B, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
+	public final static NiceBlock masonryC1 = new NiceBlock("masonry_c_1", NiceBlockStyle.MASONRY_C, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
+	public final static NiceBlock masonryD1 = new NiceBlock("masonry_d_1", NiceBlockStyle.MASONRY_D, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
+	public final static NiceBlock masonryE1 = new NiceBlock("masonry_e_1", NiceBlockStyle.MASONRY_E, NiceBlockStyle.makeMasonryPlacer(), substance16Group[0]);
 
-	public final static NiceBlock columnX1 = new NiceBlock("columnX1", NiceBlockStyle.COLUMN_X, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);	
-	public final static NiceBlock columnY1 = new NiceBlock("columnY1", NiceBlockStyle.COLUMN_Y, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
-	public final static NiceBlock columnZ1 = new NiceBlock("columnZ1", NiceBlockStyle.COLUMN_Z, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
+	public final static NiceBlock columnX1 = new NiceBlock("column_x_1", NiceBlockStyle.COLUMN_X, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);	
+	public final static NiceBlock columnY1 = new NiceBlock("column_y_1", NiceBlockStyle.COLUMN_Y, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
+	public final static NiceBlock columnZ1 = new NiceBlock("column_z_1", NiceBlockStyle.COLUMN_Z, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
 
 	
 	private static void registerBlockCompletely(NiceBlock block, FMLPreInitializationEvent event){
 		
 		// actually register the block! Hurrah!
-		GameRegistry.registerBlock(block, NiceItemBlock.class, block.getUnlocalizedName());
+		GameRegistry.registerBlock(block, block.name);
 
 		// Blocks need custom state mapper for two reasons
 		// 1) To avoid creating mappings for unused substance indexes (metadata values)
 		// 2) To point them to our custom model instead of looking for a json file
 		ModelLoader.setCustomStateMapper(block,  NiceBlockStateMapper.instance);
 		
+		
 		// iterate all substance variants and add to collections for later handling
 		for(int i = 0; i< block.substances.length; i++){
-			ModelResourceLocation mrl = NiceBlockStateMapper.instance.getModelResourceLocation(
+			ModelResourceLocation mrlBlock = NiceBlockStateMapper.instance.getModelResourceLocation(
 					block.getDefaultState().withProperty(NiceBlock.PROP_SUBSTANCE_INDEX, i));
+			ModelResourceLocation mrlItem = new ModelResourceLocation(block.name, "inventory");
+			
 			
 			lookupSnS.put(getSnSkey(block.style, block.substances[i]), block);
 
@@ -96,37 +100,35 @@ public class NiceBlockRegistrar {
 				// TODO: finding constructor should probably be outside loop
 				Constructor<?> ctor;
 				try {
-					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class, ModelResourceLocation.class);
+					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class, 
+							ModelResourceLocation.class, ModelResourceLocation.class);
 					
 					try {
-						NiceModel model = (NiceModel)ctor.newInstance(block.style, block.substances[i], mrl);
+						NiceModel model = (NiceModel)ctor.newInstance(block.style, block.substances[i], mrlBlock, mrlItem);
 						allModels.add(model);
 						
 					} catch (InstantiationException e) {
-						Adversity.log.warn("Unable to instantiate block model for:" + mrl);
+						Adversity.log.warn("Unable to instantiate block model for:" + mrlBlock);
 					} catch (IllegalAccessException e) {
-						Adversity.log.warn("Unable to access instantiation for block model for:" + mrl);
+						Adversity.log.warn("Unable to access instantiation for block model for:" + mrlBlock);
 					} catch (IllegalArgumentException e) {
-						Adversity.log.warn("Bad argument while instantiating block model for:" + mrl);
+						Adversity.log.warn("Bad argument while instantiating block model for:" + mrlBlock);
 					} catch (InvocationTargetException e) {
-						Adversity.log.warn("Exception happened while instantiating block model for:" + mrl);
+						Adversity.log.warn("Exception happened while instantiating block model for:" + mrlBlock);
 					}
 					
 				} catch (NoSuchMethodException e) {
-					Adversity.log.warn("Unable to find constructor for block model class for:" + mrl);
+					Adversity.log.warn("Unable to find constructor for block model class for:" + mrlBlock);
 				} catch (SecurityException e) {
-					Adversity.log.warn("Unable to access constructor for block model class for:" + mrl);
+					Adversity.log.warn("Unable to access constructor for block model class for:" + mrlBlock);
 				}
 				
 				
-				// ADD ITEM VARIENTS FOR SUB BLOCKS
+				// ADD ITEM VARIANTS FOR SUB BLOCKS
 				// TODO: finding item should probably be outside loop
-				Item itemBlockVariants = GameRegistry.findItem("adversity", block.getUnlocalizedName());
-		
-			    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
-
-			    ModelBakery.addVariantName(itemBlockVariants, "adversity:" + block.getUnlocalizedName()
-			    		+ "." + block.style.toString() + "_" + block.substances[i].id);
+				Item itemVariant = Item.getItemFromBlock(block);
+				
+				ModelLoader.setCustomModelResourceLocation(itemVariant, i, mrlItem);
 
 			}
 		}
