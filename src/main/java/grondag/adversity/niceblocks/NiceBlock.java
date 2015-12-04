@@ -32,10 +32,21 @@ import net.minecraftforge.common.property.Properties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+/**
+ * Base class for Adversity building blocks.
+ * Should be instantiated and set up in NiceBlockRegistrar.
+ */
 public class NiceBlock extends Block {
 	
+	/** Index to the substances[] array.*/
 	public static final PropertyInteger PROP_SUBSTANCE_INDEX = PropertyInteger.create("substance_index", 0, 15);
+	/** Used by NiceModel to select correct in-game variant.  385 is the max. Most blocks have fewer variants. */
 	public static final IUnlistedProperty PROP_RECIPE = Properties.toUnlisted(PropertyInteger.create("recipe", 0, 385));
+	/** 
+	 * Used by NiceModel to select an alternate in-game appearance when more than one is available. 
+	 * We don't use the MineCraft alternate functionality because it is non-deterministic for different block states.
+	 * This causes undesirable changes to texture selection when neighbor blocks change.
+	 */
 	public static final IUnlistedProperty PROP_ALTERNATE = Properties.toUnlisted(PropertyInteger.create("alternate", 0, 15));
 	
 	public final NiceSubstance[] substances;
