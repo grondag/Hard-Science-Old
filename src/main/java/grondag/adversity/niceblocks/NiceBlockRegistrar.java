@@ -4,37 +4,32 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.item.Item;
-import net.minecraft.util.EnumFacing.Axis;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblocks.client.NiceCookbook;
-import grondag.adversity.niceblocks.client.NiceCookbookColumn;
-import grondag.adversity.niceblocks.client.NiceCookbookConnectedCorners;
-import grondag.adversity.niceblocks.client.NiceCookbookMasonry;
 import grondag.adversity.niceblocks.client.NiceModel;
 import grondag.adversity.niceblocks.NicePlacement.PlacementSimple;
 import grondag.adversity.niceblocks.NicePlacement.PlacementBigBlock;
 
+/**
+ *	Contains instances for all NiceBlocks and handles all creation and registration of same. 
+ *	Includes handling of associated items, textures and models.
+ *	It is also the subscriber for model bake and texture stitch events, but handles these simply
+ *	by calling handler methods on the models associated with the blocks. 
+ */
 public class NiceBlockRegistrar {
 	
 	private static final NiceBlockRegistrar instance = new NiceBlockRegistrar();
@@ -44,13 +39,20 @@ public class NiceBlockRegistrar {
 	 */
 	public static LinkedList<NiceBlock> allBlocks = new LinkedList<NiceBlock>();
 	
+	/**
+	 * NiceBlockModels contained here for handling during model bake and texture stitch
+	 */
 	private static LinkedList<NiceModel> allModels = new LinkedList<NiceModel>();
+	
+	/** 
+	 * Supports the getBlock(s)ForStyleAndSubstance methods
+	 */
 	private static Multimap<String, NiceBlock> lookupSnS = HashMultimap.create();
 
 
 	//define our substance groupings
 	private static final NiceSubstance[][] substance16Group =
-			{{NiceSubstance.BASALT}};
+			{{NiceSubstance.BASALT, NiceSubstance.DIORITE}};
 	
 	// declare the block instances
 	public static final NiceBlock raw1 = new NiceBlock("raw_1", NiceBlockStyle.RAW, new PlacementSimple(), substance16Group[0]);
@@ -74,10 +76,19 @@ public class NiceBlockRegistrar {
 	public static final NiceBlock columnY1 = new NiceBlock("column_y_1", NiceBlockStyle.COLUMN_Y, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
 	public static final NiceBlock columnZ1 = new NiceBlock("column_z_1", NiceBlockStyle.COLUMN_Z, NiceBlockStyle.makeColumnPlacer(), substance16Group[0]);
 
+	/**
+	 * Use to generate model resource location names with a consistent convention.
+	 */
 	public static String getModelResourceNameFromMeta(NiceBlock block, int meta){
 		return block.name + "." + meta;
 	}
 	
+	/**
+	 * Handles all the plumbing needed to make a block work except for the instantiation.
+	 * It should never be necessary to call this method directly.
+	 * This is called during pre-init for every block in allBlocks collection.
+	 * NiceBlocks add themselves to the allBlocks collection automatically at instantiation.
+	 */
 	private static void registerBlockCompletely(NiceBlock block, FMLPreInitializationEvent event){
 		
 		// actually register the block! Hurrah!
@@ -87,10 +98,6 @@ public class NiceBlockRegistrar {
 		
 		// iterate all substance variants and add to collections for later handling
 		for(int i = 0; i< block.substances.length; i++){
-//			ModelResourceLocation mrlBlock = NiceBlockStateMapper.instance.getModelResourceLocation(
-//					block.getDefaultState().withProperty(NiceBlock.PROP_SUBSTANCE_INDEX, i));
-			
-			
 			
 			lookupSnS.put(getSnSkey(block.style, block.substances[i]), block);
 
@@ -111,7 +118,8 @@ public class NiceBlockRegistrar {
 				
 				// Create model for later event handling.
 				// Java gonna make us jump through a bunch of hoops - hold on to your butts!
-				// TODO: finding constructor should probably be outside loop
+				// TODO: finding constructor should ideally be outside loop, 
+				// but probably not worth fixing unless load performance is slow.
 				Constructor<?> ctor;
 				try {
 					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class, 
@@ -141,9 +149,16 @@ public class NiceBlockRegistrar {
 		}
 	}
 	
+	/**
+	 * Provides consistent key construction for style/substance lookup.
+	 * */
 	private static String getSnSkey(NiceBlockStyle style, NiceSubstance substance){
 		return style.toString() + "." + substance.id;
 	}
+	
+	/**
+	 * Used to find sibling blocks for blocks that are part of a group with the same style and substance.
+	 */
 	public static Collection<NiceBlock> getBlocksForStyleAndSubstance(NiceBlockStyle style, NiceSubstance substance){
 		return lookupSnS.get(getSnSkey(style, substance)); 
 	}
@@ -168,10 +183,6 @@ public class NiceBlockRegistrar {
 		}
 	}
 	
-	private static String getKeyForStyleAndSubstance(NiceBlockStyle style, NiceSubstance substance){
-		return style.toString() + substance.id;
-	}
-	
 	public static void preInit(FMLPreInitializationEvent event) {
 
 		// In case we get called more than 1X.
@@ -186,33 +197,11 @@ public class NiceBlockRegistrar {
 		if(event.getSide()==Side.CLIENT){
 			
 			// Register handlers for texture stitch and model bake events (they are in this class)
-			MinecraftForge.EVENT_BUS.register(instance);
-		
+			MinecraftForge.EVENT_BUS.register(instance);		
 		}
 
 	}
 	
-	public static void init(FMLInitializationEvent event) {
-		
-		if(event.getSide()==Side.CLIENT){
-			
-			//TODO: FIgure out how the hell items work
-//		    Item itemBlockVariants = GameRegistry.findItem("adversity", "basalt");
-//		    ModelResourceLocation itemModelResourceLocation;
-//		    
-//		    // need to add the variants to the bakery so it knows what models are available for rendering the different subtypes
-//		    EnumStyle[] allStyles = EnumStyle.values();
-//		    for (EnumStyle style : allStyles) {
-//		    	itemModelResourceLocation = new ModelResourceLocation("adversity:basalt_" + style.toString(), "inventory");
-//			    Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(itemBlockVariants, style.getMetadata(), itemModelResourceLocation);
-//		    }
-		    		    
-		}
-		
-		
-	}
-
-
 	
 	@SubscribeEvent
 	public void onModelBakeEvent(ModelBakeEvent event) throws IOException

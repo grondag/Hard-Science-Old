@@ -5,27 +5,16 @@ import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.ShapeValidatorCubic;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-
 import com.google.common.base.Function;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
@@ -34,11 +23,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
@@ -56,7 +42,7 @@ public class NiceBlock extends Block {
     public final NiceBlockStyle style;
     public final ItemMultiTexture item;
     
-    /** see NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()*/
+    // see NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()
 	public static final int LAYER_SOLID = 1;
 	public static final int LAYER_CUTOUT_MIPPED = 2;
 	public static final int LAYER_CUTOUT = 4;
@@ -85,7 +71,7 @@ public class NiceBlock extends Block {
 		this.placementHandler = placer;
 		placer.setOwner(this);
 		
-		this.item = new ItemMultiTexture((Block)this, (Block)this, new Function<ItemStack, String>()
+		this.item = new ItemMultiTexture(this, this, new Function<ItemStack, String>()
 			    	    {
 			    	        @Override
 			    	        public String apply(ItemStack stack)
@@ -102,7 +88,7 @@ public class NiceBlock extends Block {
 	@Override
 	public int damageDropped(IBlockState state)
 	{
-		return (Integer) state.getValue(PROP_SUBSTANCE_INDEX);
+		return state.getValue(PROP_SUBSTANCE_INDEX);
 	}
 
 
@@ -124,7 +110,7 @@ public class NiceBlock extends Block {
 	@Override
 	public int getMetaFromState(IBlockState state)
 	{
-		return (Integer) state.getValue(PROP_SUBSTANCE_INDEX);
+		return state.getValue(PROP_SUBSTANCE_INDEX);
 	}
 
 	@Override
@@ -184,12 +170,12 @@ public class NiceBlock extends Block {
 		 */
 		public TestForCompleteMatch(IBlockState ibs){
 			this.block = ibs.getBlock();
-			this.substanceIndex = (Integer) ibs.getValue(PROP_SUBSTANCE_INDEX);
+			this.substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
 		}
 
 		@Override
 		public boolean testBlock(IBlockState ibs) {
-			return ibs.getBlock() == block && (Integer)ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+			return ibs.getBlock() == block && ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
 		}	 
 	}
 
@@ -205,7 +191,7 @@ public class NiceBlock extends Block {
 
 		public TestForSubstance(IBlockState ibs){
 			if( ibs.getBlock() instanceof NiceBlock){
-				this.substanceIndex = (Integer) ibs.getValue(PROP_SUBSTANCE_INDEX);
+				this.substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
 			} else{
 				substanceIndex = -1;
 			}
@@ -213,7 +199,7 @@ public class NiceBlock extends Block {
 
 		@Override
 		public boolean testBlock(IBlockState ibs) {
-			return ibs.getBlock() instanceof NiceBlock && (Integer)ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+			return ibs.getBlock() instanceof NiceBlock && ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
 		}	  
 	}
 	
@@ -261,7 +247,7 @@ public class NiceBlock extends Block {
 		public TestForStyleAndSubstance(IBlockState ibs){
 			if( ibs.getBlock() instanceof NiceBlock){
 				this.style = ((NiceBlock) ibs.getBlock()).style;
-				this.substanceIndex = (Integer) ibs.getValue(PROP_SUBSTANCE_INDEX);
+				this.substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
 			} else{
 				this.style = null;
 				substanceIndex = -1;
@@ -271,7 +257,7 @@ public class NiceBlock extends Block {
 		@Override
 		public boolean testBlock(IBlockState ibs) {
 			return ibs.getBlock() instanceof NiceBlock && ((NiceBlock) ibs.getBlock()).style == style
-					 && (Integer)ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+					 && ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
 		}	  
 	}
 		
@@ -292,7 +278,7 @@ public class NiceBlock extends Block {
 		public TestForStyleGroupAndSubstance(IBlockState ibs, NiceBlockStyle... styles){
 			this.styles = new HashSet(Arrays.asList(styles));
 			if( ibs.getBlock() instanceof NiceBlock){
-				this.substanceIndex = (Integer) ibs.getValue(PROP_SUBSTANCE_INDEX);
+				this.substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
 			} else{
 				substanceIndex = -1;
 			}
@@ -301,7 +287,7 @@ public class NiceBlock extends Block {
 		@Override
 		public boolean testBlock(IBlockState ibs) {
 			return ibs.getBlock() instanceof NiceBlock && styles.contains(((NiceBlock) ibs.getBlock()).style) 
-					 && (Integer)ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+					 && ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
 		}	  
 	}
 

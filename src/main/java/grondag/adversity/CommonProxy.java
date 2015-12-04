@@ -43,7 +43,6 @@ public class CommonProxy {
 
 //		Drylands.init(event);
 		Volcano.init(event);
-		NiceBlockRegistrar.init(event);
 //		Unobtanium.init(event);
 
 	}

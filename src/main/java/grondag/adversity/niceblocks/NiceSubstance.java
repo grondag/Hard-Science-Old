@@ -6,7 +6,8 @@ import net.minecraft.block.Block.SoundType;
 import net.minecraft.block.material.Material;
 
 public enum NiceSubstance {
-	BASALT(0, "basalt", BaseMaterial.DRESSED_STONE);
+	BASALT(0, "basalt", BaseMaterial.DRESSED_STONE),
+	DIORITE(1, "diorite", BaseMaterial.DRESSED_STONE);
 	
 	public final int id;
 	public final String name;
