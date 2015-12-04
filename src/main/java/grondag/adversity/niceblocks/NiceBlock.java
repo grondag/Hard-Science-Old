@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.base.Function;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -21,15 +23,19 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
@@ -48,12 +54,13 @@ public class NiceBlock extends Block {
 	
 	public final NiceSubstance[] substances;
     public final NiceBlockStyle style;
+    public final ItemMultiTexture item;
     
     /** see NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()*/
-	public final static int LAYER_SOLID = 1;
-	public final static int LAYER_CUTOUT_MIPPED = 2;
-	public final static int LAYER_CUTOUT = 4;
-	public final static int LAYER_TRANSLUCENT = 8;
+	public static final int LAYER_SOLID = 1;
+	public static final int LAYER_CUTOUT_MIPPED = 2;
+	public static final int LAYER_CUTOUT = 4;
+	public static final int LAYER_TRANSLUCENT = 8;
     
     private final IAlternator alternator;
     public final String name;
@@ -78,9 +85,19 @@ public class NiceBlock extends Block {
 		this.placementHandler = placer;
 		placer.setOwner(this);
 		
+		this.item = new ItemMultiTexture((Block)this, (Block)this, new Function<ItemStack, String>()
+			    	    {
+			    	        @Override
+			    	        public String apply(ItemStack stack)
+			    	        {
+			    	            return String.valueOf(stack.getMetadata());
+			    	        }
+			    	    });
+		
 		// let registrar know to register us when appropriate
 		NiceBlockRegistrar.allBlocks.add(this);
 	}	
+
 
 	@Override
 	public int damageDropped(IBlockState state)
