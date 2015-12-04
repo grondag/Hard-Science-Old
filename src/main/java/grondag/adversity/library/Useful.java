@@ -5,7 +5,10 @@ import net.minecraft.util.BlockPos;
 public class Useful {
 	
 	
-	// sorts members of the vector so that x is highest and z is lowest
+	/** 
+	 * Sorts members of the vector so that x is largest and z is smallest.
+	 * Useful when BlockPos represents a volume instead of a position.
+	 */
 	public static BlockPos sortedBlockPos(BlockPos pos){
 		
 		if(pos.getX() > pos.getY()){
