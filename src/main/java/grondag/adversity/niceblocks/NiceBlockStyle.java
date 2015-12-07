@@ -1,15 +1,12 @@
 package grondag.adversity.niceblocks;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import net.minecraft.util.EnumFacing.Axis;
-import grondag.adversity.Adversity;
 import grondag.adversity.niceblocks.client.NiceCookbook;
-import grondag.adversity.niceblocks.client.NiceCookbookColumn;
+import grondag.adversity.niceblocks.client.NiceCookbookColumnRound;
+import grondag.adversity.niceblocks.client.NiceCookbookColumnSquare;
 import grondag.adversity.niceblocks.client.NiceCookbookConnectedCorners;
 import grondag.adversity.niceblocks.client.NiceCookbookMasonry;
 import grondag.adversity.niceblocks.client.NiceModel;
+import net.minecraft.util.EnumFacing.Axis;
 
 public enum NiceBlockStyle {
 	RAW("", 0, 1, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
@@ -24,75 +21,83 @@ public enum NiceBlockStyle {
 	MASONRY_C("", 48, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
 	MASONRY_D("", 64, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
 	MASONRY_E("", 80, 16, 1, true, new NiceCookbookMasonry(), NiceModel.class, NiceBlock.LAYER_SOLID),
-	COLUMN_X("", 8, 9, 1, false, new NiceCookbookColumn(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
-	COLUMN_Y("", 8, 9, 1, false, new NiceCookbookColumn(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
-	COLUMN_Z("", 8, 9, 1, false, new NiceCookbookColumn(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT);
-	
+	COLUMN_SQUARE_X("", 8, 9, 1, false, new NiceCookbookColumnSquare(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_SQUARE_Y("", 8, 9, 1, false, new NiceCookbookColumnSquare(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_SQUARE_Z("", 8, 9, 1, false, new NiceCookbookColumnSquare(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_ROUND_X("", 4, 1, 4, false, new NiceCookbookColumnRound(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_ROUND_Y("", 4, 1, 4, false, new NiceCookbookColumnRound(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_ROUND_Z("", 4, 1, 4, false, new NiceCookbookColumnRound(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT);
+
 	/** convenience factory method */
-	public static NicePlacement makeColumnPlacer(){
-		return new NicePlacement.PlacementColumn(NiceBlockStyle.COLUMN_X, NiceBlockStyle.COLUMN_Y, NiceBlockStyle.COLUMN_Z);
+	public static NicePlacement makeColumnPlacerSquare() {
+		return new NicePlacement.PlacementColumn(NiceBlockStyle.COLUMN_SQUARE_X, NiceBlockStyle.COLUMN_SQUARE_Y,
+				NiceBlockStyle.COLUMN_SQUARE_Z);
 	}
 	
 	/** convenience factory method */
-	public static NicePlacement makeMasonryPlacer(){
-		return new NicePlacement.PlacementMasonry(NiceBlockStyle.MASONRY_A, NiceBlockStyle.MASONRY_B, 
+	public static NicePlacement makeColumnPlacerRound() {
+		return new NicePlacement.PlacementColumn(NiceBlockStyle.COLUMN_ROUND_X, NiceBlockStyle.COLUMN_ROUND_Y,
+				NiceBlockStyle.COLUMN_ROUND_Z);
+	}
+
+	/** convenience factory method */
+	public static NicePlacement makeMasonryPlacer() {
+		return new NicePlacement.PlacementMasonry(NiceBlockStyle.MASONRY_A, NiceBlockStyle.MASONRY_B,
 				NiceBlockStyle.MASONRY_C, NiceBlockStyle.MASONRY_D, NiceBlockStyle.MASONRY_E);
-	}	
-	
-	/** 
-	 * 	Identifies which resource texture file group is used for this style
-	 */
-	public final String textureSuffix;
-	
-	/** 
-	 * Index of the first texture to be used for this style.
-	 * 	The model will assume all textures are offset from this index.
-	 */
-	public final int textureIndex;
-	
+	}
+
 	/**
-	 * Number of textures that should be loaded for each alternate
-	 * So, the total number of textures would be textureCount * alternateCount.
+	 * Identifies which resource texture file group is used for this style
 	 */
-	public final int textureCount;
-	
-	/** 
-	 * How many versions of textures are provided in the atlas.
-	 * (count includes the first texture)
-	 * Does not include rotations.
-	 */
-	public final int alternateCount;
-	
-	
+	public final String			textureSuffix;
+
 	/**
-	 * If true, textures on each face can be rotated.
-	 * Block will use a cookbook to handle selection of texture recipes
-	 * to match the rotations if the faces have a visible orientation.
+	 * Index of the first texture to be used for this style. The model will
+	 * assume all textures are offset from this index.
 	 */
-	public final boolean useRotationsAsAlternates; 
-	
+	public final int			textureIndex;
+
 	/**
-	 * Identifies the texture cookbook that should be used for extendedBlockState.
+	 * Number of textures that should be loaded for each alternate So, the total
+	 * number of textures would be textureCount * alternateCount.
 	 */
-	public final NiceCookbook cookbook;
-	
+	public final int			textureCount;
+
+	/**
+	 * How many versions of textures are provided in the atlas. (count includes
+	 * the first texture) Does not include rotations.
+	 */
+	public final int			alternateCount;
+
+	/**
+	 * If true, textures on each face can be rotated. Block will use a cookbook
+	 * to handle selection of texture recipes to match the rotations if the
+	 * faces have a visible orientation.
+	 */
+	public final boolean		useRotationsAsAlternates;
+
+	/**
+	 * Identifies the texture cookbook that should be used for
+	 * extendedBlockState.
+	 */
+	public final NiceCookbook	cookbook;
+
 	/**
 	 * Name of NiceModel class to use with this style.
 	 */
-	public final Class<?> modelClass;
-	
-	/**
-	 * Governs behavior of NiceBlock.canRenderInLayer()
-	 * Allows for rendering in multiple layers.
-	 */
-	public final int renderLayerFlags;
+	public final Class<?>		modelClass;
 
-	
 	/**
-	 * 
+	 * Governs behavior of NiceBlock.canRenderInLayer() Allows for rendering in
+	 * multiple layers.
 	 */
-	NiceBlockStyle(String textureSuffix, int textureIndex, int textureCount, int alternateCount, 
-		boolean useRotationsAsAlternates,  NiceCookbook cookbook, Class<?> modelClass, int renderLayerFlags){
+	public final int			renderLayerFlags;
+
+	/**
+	 *
+	 */
+	NiceBlockStyle(String textureSuffix, int textureIndex, int textureCount, int alternateCount,
+			boolean useRotationsAsAlternates, NiceCookbook cookbook, Class<?> modelClass, int renderLayerFlags) {
 		this.textureSuffix = textureSuffix;
 		this.textureIndex = textureIndex;
 		this.textureCount = textureCount;
@@ -103,13 +108,13 @@ public enum NiceBlockStyle {
 		this.cookbook = cookbook;
 		this.renderLayerFlags = renderLayerFlags;
 	}
-	
-	
-	/** 
-	 * Generate the texture name associated with this style for a given substance and offset.
-	 * Offsets are specific to a style. Cookbooks know which one to use for what purpose.
+
+	/**
+	 * Generate the texture name associated with this style for a given
+	 * substance and offset. Offsets are specific to a style. Cookbooks know
+	 * which one to use for what purpose.
 	 */
-	public String buildTextureName(NiceSubstance substance, int offset){
+	public String buildTextureName(NiceSubstance substance, int offset) {
 		String basename = substance.resourceName() + (textureSuffix == "" ? "" : "_") + textureSuffix;
 		return "adversity:blocks/" + basename + "/" + basename + "_" + (offset >> 3) + "_" + (offset & 7);
 	}

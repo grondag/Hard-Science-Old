@@ -31,11 +31,11 @@ import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class NiceCookbookColumn extends NiceCookbook{
+public class NiceCookbookColumnSquare extends NiceCookbook{
 
-	private final  Integer[][][][][][] RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
-	private final Quat4f[] ROTATION_LOOKUP;
-	private final Vec3[] ROTATION_LOOKUP_Y = {
+	protected final  Integer[][][][][][] RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
+	protected final Quat4f[] ROTATION_LOOKUP;
+	protected final Vec3[] ROTATION_LOOKUP_Y = {
 			new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 180.0, 0.0 ), 
 			new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 180.0, 0.0 ), 
 			new Vec3(0.0,0.0, 0.0 ), new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 180.0, 0.0 ), 
@@ -54,7 +54,7 @@ public class NiceCookbookColumn extends NiceCookbook{
 			new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 )
 	};
 
-	private final  String[] MODEL_LOOKUP = {
+	protected final  String[] MODEL_LOOKUP = {
 			"adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces",
 			"adversity:block/column_opposite_faces", "adversity:block/column_opposite_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_four_faces", "adversity:block/column_no_faces",
 			"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
@@ -68,7 +68,6 @@ public class NiceCookbookColumn extends NiceCookbook{
 	
 	@Override
 	public int getRecipeCount() {
-		// TODO Auto-generated method stub
 		return 64;
 	}
 
@@ -80,9 +79,6 @@ public class NiceCookbookColumn extends NiceCookbook{
 		
 		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
-
-//        "cap_inner_side": "adversity:blocks/basalt/basalt_0_4",
-//        "cap_no_neighbors": "adversity:blocks/basalt/basalt_0_5",
 
 		textures.put("inner", style.buildTextureName(substance, baseOffset + 0));
 		textures.put("outer", style.buildTextureName(substance, baseOffset - 1));
@@ -113,7 +109,7 @@ public class NiceCookbookColumn extends NiceCookbook{
 	}
 
 	
-	public NiceCookbookColumn (EnumFacing.Axis axis){
+	public NiceCookbookColumnSquare (EnumFacing.Axis axis){
 		super();
 		
 		switch (axis){
