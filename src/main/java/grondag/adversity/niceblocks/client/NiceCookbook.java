@@ -40,7 +40,7 @@ public class NiceCookbook {
 	protected static final TextureOffset[][] SIMPLE_JOIN_TEXTURE_OFFSETS = new TextureOffset[4][64];
 	/** dimensions are rotation and recipe */
 	protected static final TextureOffset[][] CONNECTED_CORNER_TEXTURE_OFFSETS = new TextureOffset[4][386];
-
+	
 	protected NiceBlockStyle style;
 
 	public void setStyle(NiceBlockStyle style){
@@ -74,6 +74,14 @@ public class NiceCookbook {
 	 */
 	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos){
 		return 0;
+	}
+	
+	public int getItemModelIndex() {
+		return 0;
+	}
+	
+	public String getParticleTextureName(NiceSubstance substance){
+		return style.buildTextureName(substance, style.textureIndex);
 	}
 	
 	/** 

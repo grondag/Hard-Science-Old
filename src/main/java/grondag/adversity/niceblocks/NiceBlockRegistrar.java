@@ -98,11 +98,11 @@ public class NiceBlockRegistrar {
 			NiceBlockStyle.makeColumnPlacerSquare(), substance16Group[0]);
 
 	
-	public static final NiceBlockPart columnRoundX1 = new NiceBlockPart("column_round_x_1", NiceBlockStyle.COLUMN_ROUND_X,
+	public static final NiceBlockColumnRound columnRoundX1 = new NiceBlockColumnRound("column_round_x_1", NiceBlockStyle.COLUMN_ROUND_X,
 			NiceBlockStyle.makeColumnPlacerRound(), substance16Group[0]);
-	public static final NiceBlockPart columnRoundY1 = new NiceBlockPart("column_round_y_1", NiceBlockStyle.COLUMN_ROUND_Y,
+	public static final NiceBlockColumnRound columnRoundY1 = new NiceBlockColumnRound("column_round_y_1", NiceBlockStyle.COLUMN_ROUND_Y,
 			NiceBlockStyle.makeColumnPlacerRound(), substance16Group[0]);
-	public static final NiceBlockPart columnRoundZ1 = new NiceBlockPart("column_round_z_1", NiceBlockStyle.COLUMN_ROUND_Z,
+	public static final NiceBlockColumnRound columnRoundZ1 = new NiceBlockColumnRound("column_round_z_1", NiceBlockStyle.COLUMN_ROUND_Z,
 			NiceBlockStyle.makeColumnPlacerRound(), substance16Group[0]);
 	
 	/**

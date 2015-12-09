@@ -1,4 +1,4 @@
-mtllib models/block/cylinder.mtl
+mtllib models/block/col_round.mtl
 usemtl all
 
 g Cylinder

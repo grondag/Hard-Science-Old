@@ -39,6 +39,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	protected final NiceBlockStyle style;
 	protected final NiceSubstance substance;
 	
+	protected final TextureAtlasSprite particleTexture;
 	
 	/** 
 	 * Holds the baked models that will be returned for rendering based on extended state.
@@ -54,6 +55,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		blockResourceLocation = mrlBlock;
 		itemResourceLocation = mrlItem;
 		this.models = new IFlexibleBakedModel[style.cookbook.getAlternateCount()][style.cookbook.getRecipeCount()];
+		this.particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.cookbook.getParticleTextureName(substance));
 	}
 	
 	
@@ -161,13 +163,13 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	}
 
 
-
+	/**
+	 * Used for block-breaking particles.
+	 */
 	@Override
 	public TextureAtlasSprite getTexture() {
-		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-		return null;
+		return particleTexture;
 	}
-
 
 
 	@Override
@@ -178,6 +180,6 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 	@Override
 	public IBakedModel handleItemState(ItemStack stack) {
-		return models[0][0];
+		return models[0][style.cookbook.getItemModelIndex()];
 	}
 }

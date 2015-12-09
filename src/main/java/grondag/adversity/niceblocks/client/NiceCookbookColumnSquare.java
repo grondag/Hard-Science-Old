@@ -54,23 +54,29 @@ public class NiceCookbookColumnSquare extends NiceCookbook{
 			new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 )
 	};
 
-	protected final  String[] MODEL_LOOKUP = {
-			"adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces",
-			"adversity:block/column_opposite_faces", "adversity:block/column_opposite_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_four_faces", "adversity:block/column_no_faces",
-			"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
-			"adversity:block/column_opposite_faces_half", "adversity:block/column_opposite_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_four_faces_half", "adversity:block/column_no_faces_half",
-			"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
-			"adversity:block/column_opposite_faces_half", "adversity:block/column_opposite_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_four_faces_half", "adversity:block/column_no_faces_half",
-			"adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full",
-			"adversity:block/column_opposite_faces_full", "adversity:block/column_opposite_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_four_faces_full", "adversity:block/column_no_faces_full"
-	};
-	
+
 	
 	@Override
 	public int getRecipeCount() {
 		return 64;
 	}
 
+	private static final String[] MODEL_LOOKUP = {
+		"adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces",
+		"adversity:block/column_opposite_faces", "adversity:block/column_opposite_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_four_faces", "adversity:block/column_no_faces",
+		"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
+		"adversity:block/column_opposite_faces_half", "adversity:block/column_opposite_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_four_faces_half", "adversity:block/column_no_faces_half",
+		"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
+		"adversity:block/column_opposite_faces_half", "adversity:block/column_opposite_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_four_faces_half", "adversity:block/column_no_faces_half",
+		"adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full",
+		"adversity:block/column_opposite_faces_full", "adversity:block/column_opposite_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_four_faces_full", "adversity:block/column_no_faces_full"
+	};
+
+
+	@Override
+	public int getItemModelIndex() {
+		return 62;
+	}
 
 	@Override
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {

@@ -9,9 +9,9 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class NiceBlockPart extends NiceBlock{
+public class NiceBlockColumnRound extends NiceBlock{
 
-	public NiceBlockPart(String name, NiceBlockStyle style, NicePlacement placer, NiceSubstance[] substances) {
+	public NiceBlockColumnRound(String name, NiceBlockStyle style, NicePlacement placer, NiceSubstance[] substances) {
 		super(name, style, placer, substances);
 	}
 
