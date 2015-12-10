@@ -110,7 +110,7 @@ public class NiceBlockRegistrar {
 	 * convention.
 	 */
 	public static String getModelResourceNameFromMeta(NiceBlock block, int meta) {
-		return block.name + "." + meta;
+		return Adversity.MODID + ":"+ block.name + "." + meta;
 	}
 
 	/**
@@ -150,34 +150,38 @@ public class NiceBlockRegistrar {
 				ModelBakery.addVariantName(block.item, getModelResourceNameFromMeta(block, i));
 
 				// Create model for later event handling.
-				// Java gonna make us jump through a bunch of hoops - hold on to your butts!
-				// TODO: finding constructor should ideally be outside loop,
-				// but probably not worth fixing unless load performance is slow.
-				Constructor<?> ctor;
-				try {
-					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class,
-							ModelResourceLocation.class, ModelResourceLocation.class);
-
-					try {
-						NiceModel model = (NiceModel) ctor.newInstance(block.style, block.substances[i], mrlBlock,
-								mrlItem);
-						allModels.add(model);
-
-					} catch (InstantiationException e) {
-						Adversity.log.warn("Unable to instantiate block model for:" + mrlBlock);
-					} catch (IllegalAccessException e) {
-						Adversity.log.warn("Unable to access instantiation for block model for:" + mrlBlock);
-					} catch (IllegalArgumentException e) {
-						Adversity.log.warn("Bad argument while instantiating block model for:" + mrlBlock);
-					} catch (InvocationTargetException e) {
-						Adversity.log.warn("Exception happened while instantiating block model for:" + mrlBlock);
-					}
-
-				} catch (NoSuchMethodException e) {
-					Adversity.log.warn("Unable to find constructor for block model class for:" + mrlBlock);
-				} catch (SecurityException e) {
-					Adversity.log.warn("Unable to access constructor for block model class for:" + mrlBlock);
-				}
+				NiceModel model = new NiceModel(block.style, block.substances[i], mrlBlock, mrlItem);
+				allModels.add(model);
+				
+	
+//				// Java gonna make us jump through a bunch of hoops - hold on to your butts!
+//				// TODO: finding constructor should ideally be outside loop,
+//				// but probably not worth fixing unless load performance is slow.
+//				Constructor<?> ctor;
+//				try {
+//					ctor = block.style.modelClass.getConstructor(NiceBlockStyle.class, NiceSubstance.class,
+//							ModelResourceLocation.class, ModelResourceLocation.class);
+//
+//					try {
+//						NiceModel model = (NiceModel) ctor.newInstance(block.style, block.substances[i], mrlBlock,
+//								mrlItem);
+//						allModels.add(model);
+//
+//					} catch (InstantiationException e) {
+//						Adversity.log.warn("Unable to instantiate block model for:" + mrlBlock);
+//					} catch (IllegalAccessException e) {
+//						Adversity.log.warn("Unable to access instantiation for block model for:" + mrlBlock);
+//					} catch (IllegalArgumentException e) {
+//						Adversity.log.warn("Bad argument while instantiating block model for:" + mrlBlock);
+//					} catch (InvocationTargetException e) {
+//						Adversity.log.warn("Exception happened while instantiating block model for:" + mrlBlock);
+//					}
+//
+//				} catch (NoSuchMethodException e) {
+//					Adversity.log.warn("Unable to find constructor for block model class for:" + mrlBlock);
+//				} catch (SecurityException e) {
+//					Adversity.log.warn("Unable to access constructor for block model class for:" + mrlBlock);
+//				}
 
 			}
 		}
