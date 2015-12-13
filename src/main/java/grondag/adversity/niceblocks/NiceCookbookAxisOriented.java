@@ -1,40 +1,27 @@
-package grondag.adversity.niceblocks.client;
-
-import java.util.Map;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4f;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+package grondag.adversity.niceblocks;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblocks.NiceBlockStyle;
-import grondag.adversity.niceblocks.NiceSubstance;
-import grondag.adversity.niceblocks.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblocks.NiceBlock.TestForSubstance;
 import grondag.adversity.niceblocks.NiceBlock.TestForStyle;
-import grondag.adversity.niceblocks.client.NiceCookbook.Ingredients;
-import grondag.adversity.niceblocks.client.NiceCookbook.Rotation;
-import grondag.adversity.niceblocks.client.NiceCookbook.TextureOffset;
+
+import javax.vecmath.Quat4f;
+
+import org.lwjgl.util.vector.Vector3f;
+
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.Vec3;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class NiceCookbookColumnSquare extends NiceCookbook{
-
+public abstract class NiceCookbookAxisOriented extends NiceCookbook{
+	
+	protected String[] modelNames = new String[AxisAlignedModel.values().length];
 	protected final  Integer[][][][][][] RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
-	protected final Quat4f[] ROTATION_LOOKUP;
+	protected final TRSRTransformation[] ROTATION_LOOKUP;
 	protected final Vec3[] ROTATION_LOOKUP_Y = {
 			new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 180.0, 0.0 ), 
 			new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 180.0, 0.0 ), 
@@ -53,80 +40,50 @@ public class NiceCookbookColumnSquare extends NiceCookbook{
 			new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 180.0, 0.0 ), 
 			new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 )
 	};
-
-
 	
-	@Override
-	public int getRecipeCount() {
-		return 64;
-	}
-
-	private static final String[] MODEL_LOOKUP = {
-		"adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_single_face", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces", "adversity:block/column_adjacent_faces",
-		"adversity:block/column_opposite_faces", "adversity:block/column_opposite_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_three_faces", "adversity:block/column_four_faces", "adversity:block/column_no_faces",
-		"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
-		"adversity:block/column_opposite_faces_half", "adversity:block/column_opposite_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_four_faces_half", "adversity:block/column_no_faces_half",
-		"adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_single_face_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half", "adversity:block/column_adjacent_faces_half",
-		"adversity:block/column_opposite_faces_half", "adversity:block/column_opposite_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_three_faces_half", "adversity:block/column_four_faces_half", "adversity:block/column_no_faces_half",
-		"adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_single_face_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full", "adversity:block/column_adjacent_faces_full",
-		"adversity:block/column_opposite_faces_full", "adversity:block/column_opposite_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_three_faces_full", "adversity:block/column_four_faces_full", "adversity:block/column_no_faces_full"
+	protected static final int[] MODEL_INDEX = {
+		AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index,
+		AxisAlignedModel.TWO_OPPOSITE_OPEN.index, AxisAlignedModel.TWO_OPPOSITE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.FOUR_OPEN.index, AxisAlignedModel.NONE_OPEN.index,
+		AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index,
+		AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.FOUR_TOP_CLOSED.index, AxisAlignedModel.NONE_TOP_CLOSED.index,
+		AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index,
+		AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.FOUR_TOP_CLOSED.index, AxisAlignedModel.NONE_TOP_CLOSED.index,
+		AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index,
+		AxisAlignedModel.TWO_OPPOSITE_CLOSED.index, AxisAlignedModel.TWO_OPPOSITE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.FOUR_CLOSED.index, AxisAlignedModel.NONE_CLOSED.index
 	};
-
-
-	@Override
-	public int getItemModelIndex() {
-		return 62;
-	}
-
-	@Override
-	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
-
-		String modelName = MODEL_LOOKUP[recipe];
-		
-		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
-		Map<String, String> textures = Maps.newHashMap();
-
-		textures.put("inner", style.buildTextureName(substance, baseOffset + 0));
-		textures.put("outer", style.buildTextureName(substance, baseOffset - 1));
-		textures.put("column_face", style.buildTextureName(substance, baseOffset + 7));
-		textures.put("cap_opposite_neighbors", style.buildTextureName(substance, baseOffset + 7));
-		textures.put("cap_three_neighbors", style.buildTextureName(substance, baseOffset + 6));
-		textures.put("cap_adjacent_neighbors", style.buildTextureName(substance, baseOffset + 2));
-		textures.put("cap_one_neighbor", style.buildTextureName(substance, baseOffset + 3));
-		textures.put("cap_four_neighbors", style.buildTextureName(substance, baseOffset + 1));
-		textures.put("cap_no_neighbors", style.buildTextureName(substance, baseOffset + 5));
-		textures.put("cap_inner_side", style.buildTextureName(substance, baseOffset + 4));
-		
-		return new Ingredients(modelName, textures, 
-				 TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, ROTATION_LOOKUP[recipe], null, null)));
-	}
-
 	
-
-
 	
-	@Override
-	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
-		
-		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
-		
-		return  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
-
-	}
-
+	protected abstract void populateModelNames();
 	
-	public NiceCookbookColumnSquare (EnumFacing.Axis axis){
+	public NiceCookbookAxisOriented (EnumFacing.Axis axis){
 		super();
+		populateModelNames();
+
+// TODO: REMOVE
+//		FOR REFERENCE ON ROTATIONS
+//		public int rotateVertex(Vector3f position, EnumFacing facing, int vertexIndex, net.minecraftforge.client.model.ITransformation modelRotationIn, boolean uvLocked)
+//	    {
+//	        if (modelRotationIn == ModelRotation.X0_Y0)
+//	        {
+//	            return vertexIndex;
+//	        }
+//	        else
+//	        {
+//	            net.minecraftforge.client.ForgeHooksClient.transform(position, modelRotationIn.getMatrix());
+//	            return modelRotationIn.rotate(facing, vertexIndex);
+//	        }
+//	    }
+
+		ROTATION_LOOKUP = new TRSRTransformation[64];
 		
 		switch (axis){
 		case X:
-			ROTATION_LOOKUP = new Quat4f[64];
 			for(int i=0; i < 64; i++){
 				Quat4f rotation = new Quat4f(0, 0, 0, 1);
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].yCoord));
 				rotation.mul(rotationForAxis(Axis.Y, ROTATION_LOOKUP_Y[i].xCoord));
 				rotation.mul(rotationForAxis(Axis.Z, 90.0));
-				ROTATION_LOOKUP[i] = rotation;
+				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 			}
 			
 			RECIPE_LOOKUP[0][1][1][1][1][1]=0;
@@ -196,12 +153,11 @@ public class NiceCookbookColumnSquare extends NiceCookbook{
 			break;
 			
 		case Y:
-			ROTATION_LOOKUP = new Quat4f[64];
 			for(int i=0; i < 64; i++){
 				Quat4f rotation = new Quat4f(0, 0, 0, 1);
 				rotation.mul(rotationForAxis(Axis.Y, -ROTATION_LOOKUP_Y[i].yCoord));
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord));
-				ROTATION_LOOKUP[i] = rotation;
+				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 			}
 			
 			RECIPE_LOOKUP[1][1][0][1][1][1]=0;
@@ -272,13 +228,12 @@ public class NiceCookbookColumnSquare extends NiceCookbook{
 			break;
 			
 		case Z:
-			ROTATION_LOOKUP = new Quat4f[64];
 			for(int i=0; i < 64; i++){
 				Quat4f rotation = new Quat4f(0, 0, 0, 1);
 				rotation.mul(rotationForAxis(Axis.Z, -ROTATION_LOOKUP_Y[i].yCoord));
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord + 90));
 				rotation.mul(rotationForAxis(Axis.Y, 180.0));
-				ROTATION_LOOKUP[i] = rotation;
+				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 			}
 			
 			RECIPE_LOOKUP[1][1][1][0][1][1]=0;
@@ -346,14 +301,57 @@ public class NiceCookbookColumnSquare extends NiceCookbook{
 			RECIPE_LOOKUP[0][0][0][0][0][0]=62;
 			RECIPE_LOOKUP[1][1][1][1][0][0]=63;
 			break;
-		default:
-
-			// Done to suppress compiler warning for uninitialized final.
-			// If we actually get here we are f'd.
-			ROTATION_LOOKUP = null;
-			
-				
 		}
 	}
+
+	@Override
+	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		
+		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
+		
+		return  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+
+	}
+	
+	@Override
+	public int getRecipeCount() {
+		return 64;
+	}
+
+	@Override
+	public int getItemModelIndex() {
+		return 62;
+	}
+	
+	public enum AxisAlignedModel{
+		FOUR_CLOSED(0),
+		FOUR_TOP_CLOSED(1),
+		FOUR_OPEN(2),
+		THREE_CLOSED(3),
+		THREE_TOP_CLOSED(4),
+		THREE_OPEN(5),
+		TWO_ADJACENT_CLOSED(6),
+		TWO_ADJACENT_TOP_CLOSED(7),
+		TWO_ADJACENT_OPEN(8),
+		TWO_OPPOSITE_CLOSED(9),
+		TWO_OPPOSITE_TOP_CLOSED(10),
+		TWO_OPPOSITE_OPEN(11),
+		ONE_CLOSED(12),
+		ONE_TOP_CLOSED(13),
+		ONE_OPEN(14),
+		NONE_CLOSED(15),
+		NONE_TOP_CLOSED(16),
+		NONE_OPEN(17);
+		
+		public final int index;
+		
+		private AxisAlignedModel(int index){
+			this.index = index;
+		}
+		
+	}
+
+
+	
 	
 }

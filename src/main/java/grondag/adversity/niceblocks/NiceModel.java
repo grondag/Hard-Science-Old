@@ -1,8 +1,4 @@
-package grondag.adversity.niceblocks.client;
-
-import grondag.adversity.niceblocks.NiceBlock;
-import grondag.adversity.niceblocks.NiceBlockStyle;
-import grondag.adversity.niceblocks.NiceSubstance;
+package grondag.adversity.niceblocks;
 
 import java.io.IOException;
 import java.util.List;
@@ -123,7 +119,6 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 				event.map.registerSprite(new ResourceLocation(style.buildTextureName(substance, (alt * style.textureCount) + style.textureIndex + tex)));
 			}
 		}
-		this.particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.cookbook.getParticleTextureName(substance));
 	}
 	
 	@Override
@@ -136,7 +131,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 	@Override
 	public List getGeneralQuads() {
-		// should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
+		// should not need to provide quads because we provide a separate IFlexibleBakedModel instance in handleBlockState
 		return null;
 	}
 
@@ -168,6 +163,10 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	 */
 	@Override
 	public TextureAtlasSprite getTexture() {
+		// lazy lookup to ensure happens after texture atlas has been created
+		if(particleTexture == null){
+			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.cookbook.getParticleTextureName(substance));
+		}
 		return particleTexture;
 	}
 

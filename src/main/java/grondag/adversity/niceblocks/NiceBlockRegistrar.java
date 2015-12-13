@@ -3,7 +3,6 @@ package grondag.adversity.niceblocks;
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblocks.NicePlacement.PlacementBigBlock;
 import grondag.adversity.niceblocks.NicePlacement.PlacementSimple;
-import grondag.adversity.niceblocks.client.NiceModel;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

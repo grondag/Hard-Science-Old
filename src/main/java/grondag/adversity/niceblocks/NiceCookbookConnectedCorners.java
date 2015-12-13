@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks.client;
+package grondag.adversity.niceblocks;
 
 import java.util.Map;
 
@@ -6,12 +6,7 @@ import com.google.common.collect.Maps;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblocks.NiceBlock;
 import grondag.adversity.niceblocks.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblocks.NiceBlockStyle;
-import grondag.adversity.niceblocks.NiceSubstance;
-import grondag.adversity.niceblocks.client.NiceCookbook.Ingredients;
-import grondag.adversity.niceblocks.client.NiceCookbook.Rotation;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;

@@ -1,11 +1,5 @@
 package grondag.adversity.niceblocks;
 
-import grondag.adversity.niceblocks.client.NiceCookbook;
-import grondag.adversity.niceblocks.client.NiceCookbookColumnRound;
-import grondag.adversity.niceblocks.client.NiceCookbookColumnSquare;
-import grondag.adversity.niceblocks.client.NiceCookbookConnectedCorners;
-import grondag.adversity.niceblocks.client.NiceCookbookMasonry;
-import grondag.adversity.niceblocks.client.NiceModel;
 import net.minecraft.util.EnumFacing.Axis;
 
 public enum NiceBlockStyle {

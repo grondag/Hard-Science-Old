@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks.client;
+package grondag.adversity.niceblocks;
 
 import java.util.Map;
 
@@ -10,8 +10,6 @@ import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.niceblocks.NiceBlockStyle;
-import grondag.adversity.niceblocks.NiceSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.ModelResourceLocation;

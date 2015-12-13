@@ -15,10 +15,12 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
@@ -100,6 +102,7 @@ public class NiceBlock extends Block {
 		NiceBlockRegistrar.allBlocks.add(this);
 	}
 
+	
 	@Override
 	public int damageDropped(IBlockState state) {
 		return state.getValue(PROP_SUBSTANCE_INDEX);
@@ -162,7 +165,7 @@ public class NiceBlock extends Block {
 		return new ExtendedBlockState(this, new IProperty[] { PROP_SUBSTANCE_INDEX }, new IUnlistedProperty[] {
 				PROP_RECIPE, PROP_ALTERNATE });
 	}
-
+	
 	/**
 	 * Blocks match if they have are the same block and same substance. Also
 	 * implies the same style.
