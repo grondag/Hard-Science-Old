@@ -1,25 +1,39 @@
 package grondag.adversity.niceblocks;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblocks.NiceBlock.TestForStyle;
 
+import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import com.google.common.collect.ImmutableList;
+
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelRotation;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public abstract class NiceCookbookAxisOriented extends NiceCookbook{
+public abstract class NiceCookbookAxisOriented extends NiceCookbook implements ICollisionHandler{
 	
 	protected String[] modelNames = new String[AxisAlignedModel.values().length];
+	protected final ImmutableList<AxisAlignedBB>[] MODEL_BOUNDS = new ImmutableList[64];
+	
 	protected final  Integer[][][][][][] RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
 	protected final TRSRTransformation[] ROTATION_LOOKUP;
 	protected final Vec3[] ROTATION_LOOKUP_Y = {
@@ -41,23 +55,92 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook{
 			new Vec3(0.0, 90.0, 0.0 ), new Vec3(0.0, 270.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 ), new Vec3(0.0, 0.0, 0.0 )
 	};
 	
-	protected static final int[] MODEL_INDEX = {
-		AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.ONE_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index, AxisAlignedModel.TWO_ADJACENT_OPEN.index,
-		AxisAlignedModel.TWO_OPPOSITE_OPEN.index, AxisAlignedModel.TWO_OPPOSITE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.THREE_OPEN.index, AxisAlignedModel.FOUR_OPEN.index, AxisAlignedModel.NONE_OPEN.index,
-		AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index,
-		AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.FOUR_TOP_CLOSED.index, AxisAlignedModel.NONE_TOP_CLOSED.index,
-		AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.ONE_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED.index,
-		AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.THREE_TOP_CLOSED.index, AxisAlignedModel.FOUR_TOP_CLOSED.index, AxisAlignedModel.NONE_TOP_CLOSED.index,
-		AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.ONE_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index, AxisAlignedModel.TWO_ADJACENT_CLOSED.index,
-		AxisAlignedModel.TWO_OPPOSITE_CLOSED.index, AxisAlignedModel.TWO_OPPOSITE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.THREE_CLOSED.index, AxisAlignedModel.FOUR_CLOSED.index, AxisAlignedModel.NONE_CLOSED.index
+	/** Maps which base model (out of 18) to use with each recipe index (out of 64).
+	 *  Also used to map bounding boxes for each recipe because these generally correspond with model.
+	 */
+	protected static final AxisAlignedModel[] MODEL_FOR_RECIPE = {
+		AxisAlignedModel.ONE_OPEN, AxisAlignedModel.ONE_OPEN, AxisAlignedModel.ONE_OPEN, AxisAlignedModel.ONE_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN,
+		AxisAlignedModel.TWO_OPPOSITE_OPEN, AxisAlignedModel.TWO_OPPOSITE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.FOUR_OPEN, AxisAlignedModel.NONE_OPEN,
+		AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED,
+		AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.FOUR_TOP_CLOSED, AxisAlignedModel.NONE_TOP_CLOSED,
+		AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED,
+		AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.FOUR_TOP_CLOSED, AxisAlignedModel.NONE_TOP_CLOSED,
+		AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED,
+		AxisAlignedModel.TWO_OPPOSITE_CLOSED, AxisAlignedModel.TWO_OPPOSITE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.FOUR_CLOSED, AxisAlignedModel.NONE_CLOSED
 	};
 	
 	
 	protected abstract void populateModelNames();
 	
+	/** not important unless getCollisionHandler is overriden */
+	protected ImmutableList<AxisAlignedBB> getModelBounds(AxisAlignedModel model, Matrix4f rotation){
+		ImmutableList defaultList = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, 1, 1)).build();
+		return defaultList;
+	}
+	
+	/** won't be called unless getCollisionHandler is overriden */
+	@Override
+	public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end) {
+
+        Vec3 localStart = start.addVector((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ()));
+        Vec3 localEnd = end.addVector((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ()));
+        
+        ArrayList<AxisAlignedBB> bounds = new ArrayList();
+        
+        this.addCollisionBoxesToList(worldIn, pos, worldIn.getBlockState(pos), 
+        		new AxisAlignedBB(start.xCoord, start.yCoord, start.zCoord, end.xCoord, end.yCoord, end.zCoord), 
+        		bounds, null);
+        
+        MovingObjectPosition retval = null;
+        double distance = 1;
+        
+        for(AxisAlignedBB aabb : bounds){
+        	MovingObjectPosition candidate = aabb.calculateIntercept(localStart, localEnd);
+        	if (candidate != null) {
+		    	double checkDist = candidate.hitVec.squareDistanceTo(localStart);
+		    	if(retval == null || checkDist < distance) {
+		    		retval = candidate;
+		    		distance = checkDist;
+		    	}
+        	}
+        }
+        
+        return retval == null ? null : new MovingObjectPosition(retval.hitVec.addVector((double)pos.getX(), (double)pos.getY(), (double)pos.getZ()), retval.sideHit, pos);
+ 		
+	}
+	
+	/** Won't be called unless getCollisionHandler is overriden. 
+	 *  Uses the bounds in modelBounds array to add appropriate collision bounds.
+	 *  Necessary for non-cube blocks.
+	 */
+	@Override
+	public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask,
+			List<AxisAlignedBB> list, Entity collidingEntity) {
+	
+		AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
+		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
+		
+		int recipe =  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+		
+		Adversity.log.info("bounds for recipe:" + recipe);
+		for(AxisAlignedBB aabb: MODEL_BOUNDS[recipe]){
+			Adversity.log.info(aabb.toString());
+			if(localMask.intersectsWith(aabb)){
+				list.add(aabb);
+			}
+		}
+	}
+	
+	/** won't do anything unless getCollisionHandler is overriden */
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state) {
+		return null;
+	}
+	
 	public NiceCookbookAxisOriented (EnumFacing.Axis axis){
 		super();
 		populateModelNames();
+
 
 // TODO: REMOVE
 //		FOR REFERENCE ON ROTATIONS
@@ -84,6 +167,8 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook{
 				rotation.mul(rotationForAxis(Axis.Y, ROTATION_LOOKUP_Y[i].xCoord));
 				rotation.mul(rotationForAxis(Axis.Z, 90.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
+				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
+				Adversity.log.info("axis:X recipe:" + i + " bounds:" + MODEL_BOUNDS[i].toString());
 			}
 			
 			RECIPE_LOOKUP[0][1][1][1][1][1]=0;
@@ -158,6 +243,8 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook{
 				rotation.mul(rotationForAxis(Axis.Y, -ROTATION_LOOKUP_Y[i].yCoord));
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
+				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
+				Adversity.log.info("axis:Y recipe:" + i + " bounds:" + MODEL_BOUNDS[i].toString());
 			}
 			
 			RECIPE_LOOKUP[1][1][0][1][1][1]=0;
@@ -234,6 +321,8 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook{
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord + 90));
 				rotation.mul(rotationForAxis(Axis.Y, 180.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
+				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
+				Adversity.log.info("axis:Z recipe:" + i + " bounds:" + MODEL_BOUNDS[i].toString());
 			}
 			
 			RECIPE_LOOKUP[1][1][1][0][1][1]=0;
@@ -305,7 +394,7 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook{
 	}
 
 	@Override
-	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 		

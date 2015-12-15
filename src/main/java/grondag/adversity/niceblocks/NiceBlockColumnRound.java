@@ -41,23 +41,6 @@ public class NiceBlockColumnRound extends NiceBlock{
 		return false;
 	}
 
-	@Override
-    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
-    {
-        AxisAlignedBB axisalignedbb = this.getCollisionBoundingBox(worldIn, pos, state);
-
-        if (axisalignedbb != null && mask.intersectsWith(axisalignedbb))
-        {
-            list.add(axisalignedbb);
-        }
-    }
-
-	@Override
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
-    {
-        return new AxisAlignedBB((double)pos.getX() + 0.4, (double)pos.getY() + 0.0, (double)pos.getZ() + 0.4, (double)pos.getX() + 0.6, (double)pos.getY() + 1.0, (double)pos.getZ() + 0.6);
-    }
-	
 	// TODO
 	// Add handler for DrawBlockHighlightEvent(context, player, target, subID, currentItem, partialTicks)
 	

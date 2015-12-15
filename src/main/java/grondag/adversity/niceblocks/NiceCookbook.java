@@ -57,6 +57,13 @@ public class NiceCookbook {
 		return calcExpanded();
 	}
 
+	/**
+	 * Override if you want to enable special collision handling.
+	 */
+	public ICollisionHandler getCollisionHandler(){
+		return null;
+	}
+	
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
 		
 		String modelName = "adversity:block/cube_rotate_all_" + calcRotation(alternate).degrees;
@@ -70,7 +77,7 @@ public class NiceCookbook {
 	/**
 	 * Used by NiceBlock to know which model to use.
 	 */
-	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos){
+	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos){
 		return 0;
 	}
 	

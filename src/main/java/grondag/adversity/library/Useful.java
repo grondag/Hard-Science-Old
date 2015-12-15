@@ -1,6 +1,15 @@
 package grondag.adversity.library;
 
+import javax.vecmath.Matrix4f;
+
+import org.lwjgl.util.vector.Vector3f;
+
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 
 public class Useful {
 	
@@ -34,4 +43,13 @@ public class Useful {
 		}
 	}
 
+	
+	public static AxisAlignedBB makeRotatedAABB(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, Matrix4f rotation){
+		Vector3f minPos = new Vector3f(minX, minY, minZ);
+		Vector3f maxPos = new Vector3f(maxX, maxY, maxZ);
+		net.minecraftforge.client.ForgeHooksClient.transform(minPos, rotation);
+		net.minecraftforge.client.ForgeHooksClient.transform(maxPos, rotation);
+		return new AxisAlignedBB(minPos.x, minPos.y, minPos.z, maxPos.x, maxPos.y, maxPos.z);
+	}
+	
 }

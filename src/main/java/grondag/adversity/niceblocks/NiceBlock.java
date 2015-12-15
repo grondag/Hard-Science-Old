@@ -24,6 +24,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -71,6 +73,7 @@ public class NiceBlock extends Block {
 	private final IAlternator				alternator;
 	public final String						name;
 	private final NicePlacement				placementHandler;
+	private final ICollisionHandler			collisionHandler;
 	
 	/**
 	 * Assumes first substance is representative of all the substances for
@@ -90,6 +93,7 @@ public class NiceBlock extends Block {
 		alternator = Alternator.getAlternator((byte) (style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)));
 		placementHandler = placer;
 		placer.setOwner(this);
+		collisionHandler = style.cookbook.getCollisionHandler();
 
 		item = new ItemMultiTexture(this, this, new Function<ItemStack, String>() {
 			@Override
@@ -137,7 +141,7 @@ public class NiceBlock extends Block {
 
 		if (state instanceof IExtendedBlockState) {
 			return ((IExtendedBlockState) state).withProperty(PROP_RECIPE,
-					style.cookbook.getModelIndex((IExtendedBlockState) state, world, pos)).withProperty(PROP_ALTERNATE,
+					style.cookbook.getRecipeIndex((IExtendedBlockState) state, world, pos)).withProperty(PROP_ALTERNATE,
 									alternator.getAlternate(pos));
 		} else {
 			return state;
@@ -165,6 +169,35 @@ public class NiceBlock extends Block {
 		return new ExtendedBlockState(this, new IProperty[] { PROP_SUBSTANCE_INDEX }, new IUnlistedProperty[] {
 				PROP_RECIPE, PROP_ALTERNATE });
 	}
+		
+	@Override
+	public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end) {
+		if(collisionHandler == null){
+			return super.collisionRayTrace(worldIn, pos, start, end);
+		} else {
+			return collisionHandler.collisionRayTrace(worldIn, pos, start, end);
+		}
+	}
+	
+	@Override
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+    {
+		if(collisionHandler == null){
+			super.addCollisionBoxesToList( worldIn, pos, state, mask,list, collidingEntity);
+		} else {
+			collisionHandler.addCollisionBoxesToList( worldIn, pos, state, mask,list, collidingEntity);
+		}
+    }
+
+	@Override
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    {
+		if(collisionHandler == null){
+			return super.getCollisionBoundingBox( worldIn, pos, state);
+		} else {
+			return collisionHandler.getCollisionBoundingBox( worldIn, pos, state);
+		}
+    }
 	
 	/**
 	 * Blocks match if they have are the same block and same substance. Also

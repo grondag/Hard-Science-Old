@@ -3,21 +3,35 @@ package grondag.adversity.niceblocks;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.NeighborBlocks.NeighborSet;
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblocks.NiceBlock.TestForStyle;
 import grondag.adversity.niceblocks.NiceCookbook.Ingredients;
 import grondag.adversity.niceblocks.NiceCookbookAxisOriented.AxisAlignedModel;
 
+import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Matrix4f;
+
+import org.lwjgl.util.vector.Vector3f;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class NiceCookbookColumnRound extends NiceCookbookColumnSquare {
+public class NiceCookbookColumnRound extends NiceCookbookColumnSquare  implements ICollisionHandler {
 
 	public NiceCookbookColumnRound(Axis axis) {
 		super(axis);
@@ -53,7 +67,7 @@ public class NiceCookbookColumnRound extends NiceCookbookColumnSquare {
 	@Override
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
 
-		String modelName = modelNames[MODEL_INDEX[recipe]];
+		String modelName = modelNames[MODEL_FOR_RECIPE[recipe].index];
 		
 		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
@@ -65,7 +79,7 @@ public class NiceCookbookColumnRound extends NiceCookbookColumnSquare {
 	
 	@SuppressWarnings("incomplete-switch")
 	@Override
-	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		TestForStyle styleTest = new TestForStyle(state);
@@ -167,5 +181,51 @@ public class NiceCookbookColumnRound extends NiceCookbookColumnSquare {
 		return  RECIPE_LOOKUP[up][down][east][west][north][south];
 
 	}
+
+
+	
+	@Override
+	public ICollisionHandler getCollisionHandler() {
+		return this;
+	}
+
+	@Override
+	protected ImmutableList<AxisAlignedBB> getModelBounds(AxisAlignedModel model, Matrix4f rotation){
+		
+		switch(model){
+		case FOUR_CLOSED:
+		case FOUR_TOP_CLOSED:
+		case FOUR_OPEN:
+			return new ImmutableList.Builder<AxisAlignedBB>()
+					.add(Useful.makeRotatedAABB(0.2f, 0.0f, 0.2f, 0.8f, 1.0f, 0.8f, rotation))
+					.add(Useful.makeRotatedAABB(0.4f, 0.0f, 0.0f, 0.6f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.4f, 1.0f, 1.0f, 0.6f, rotation))
+					.build();
+		case THREE_CLOSED:
+		case THREE_TOP_CLOSED:
+		case THREE_OPEN:
+			return new ImmutableList.Builder<AxisAlignedBB>()
+					.add(Useful.makeRotatedAABB(0.4f, 0.0f, 0.0f, 0.6f, 1.0f, 0.2f, rotation))
+					.add(Useful.makeRotatedAABB(0.2f, 0.0f, 0.2f, 0.8f, 1.0f, 0.4f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.4f, 1.0f, 1.0f, 1.0f, rotation))
+					.build();
+			
+		case TWO_ADJACENT_CLOSED:
+		case TWO_ADJACENT_TOP_CLOSED:
+		case TWO_ADJACENT_OPEN:
+			return new ImmutableList.Builder<AxisAlignedBB>()
+					.add(Useful.makeRotatedAABB(0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f, rotation))
+					.add(Useful.makeRotatedAABB(0.25f, 0.0f, 0.25f, 1.0f, 1.0f, 0.5f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, rotation))
+					.build();
+		default:
+			return new ImmutableList.Builder<AxisAlignedBB>()
+						.add(new AxisAlignedBB(0, 0, 0, 1, 1, 1))
+						.build();
+		}
+	}
+
+
+
 
 }

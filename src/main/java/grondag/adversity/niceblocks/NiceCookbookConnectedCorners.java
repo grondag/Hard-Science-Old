@@ -41,7 +41,7 @@ public class NiceCookbookConnectedCorners extends NiceCookbook {
 	}
 
 	@Override
-	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		NiceBlock.TestForCompleteMatch test = new TestForCompleteMatch(state);
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		NeighborTestResults mates = neighbors.getNeighborTestResults(test);

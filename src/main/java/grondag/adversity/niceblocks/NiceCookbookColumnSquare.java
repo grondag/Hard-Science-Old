@@ -61,7 +61,7 @@ public class NiceCookbookColumnSquare extends NiceCookbookAxisOriented{
 	@Override
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
 
-		String modelName = modelNames[MODEL_INDEX[recipe]];
+		String modelName = modelNames[MODEL_FOR_RECIPE[recipe].index];
 		
 		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();

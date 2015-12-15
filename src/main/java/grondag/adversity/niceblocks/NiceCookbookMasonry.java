@@ -43,7 +43,7 @@ public class NiceCookbookMasonry extends NiceCookbook{
 	}
 
 	@Override
-	public int getModelIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		NeighborTestResults mates = neighbors.getNeighborTestResults(new TestForCompleteMatch(state));
 		NeighborTestResults needsMortar = neighbors.getNeighborTestResults(
