@@ -33,6 +33,7 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 	
 	protected String[] modelNames = new String[AxisAlignedModel.values().length];
 	public final ImmutableList<AxisAlignedBB>[] MODEL_BOUNDS = new ImmutableList[64];
+	public final AxisAlignedBB[] COMBINED_BOUNDS = new AxisAlignedBB[64];
 	
 	protected final  Integer[][][][][][] RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
 	protected final TRSRTransformation[] ROTATION_LOOKUP;
@@ -132,7 +133,11 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 	/** won't  be called unless getCollisionHandler is overriden */
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state) {
-		return null;
+		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
+		
+		int recipe =  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+
+		return COMBINED_BOUNDS[recipe];
 	}
 	
 	/** won't be called unless getCollisionHandler is overriden */
@@ -150,6 +155,20 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 		}
 		return builder.build();
 	}
+	
+	protected void setModelBoundsForRecipe(int recipe){
+		MODEL_BOUNDS[recipe] = this.getModelBounds(MODEL_FOR_RECIPE[recipe], ROTATION_LOOKUP[recipe].getMatrix());
+		AxisAlignedBB compositeBounds = null;
+		for(AxisAlignedBB aabb: MODEL_BOUNDS[recipe]){
+			if(compositeBounds == null){
+				compositeBounds = aabb;
+			} else {
+				compositeBounds = compositeBounds.union(aabb);
+			}
+		}
+		COMBINED_BOUNDS[recipe] = compositeBounds;
+	}
+	
 
 	public NiceCookbookAxisOriented (EnumFacing.Axis axis){
 		super();
@@ -165,7 +184,7 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 				rotation.mul(rotationForAxis(Axis.Y, ROTATION_LOOKUP_Y[i].xCoord));
 				rotation.mul(rotationForAxis(Axis.Z, 90.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
-				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
+				setModelBoundsForRecipe(i);
 			}
 			
 			RECIPE_LOOKUP[0][1][1][1][1][1]=0;
@@ -240,7 +259,7 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 				rotation.mul(rotationForAxis(Axis.Y, -ROTATION_LOOKUP_Y[i].yCoord));
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
-				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
+				setModelBoundsForRecipe(i);
 			}
 			
 			RECIPE_LOOKUP[1][1][0][1][1][1]=0;
@@ -317,7 +336,7 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord + 90));
 				rotation.mul(rotationForAxis(Axis.Y, 180.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
-				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
+				setModelBoundsForRecipe(i);
 			}
 			
 			RECIPE_LOOKUP[1][1][1][0][1][1]=0;

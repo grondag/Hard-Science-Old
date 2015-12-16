@@ -208,12 +208,7 @@ public class NiceCookbookColumnRound extends NiceCookbookColumnSquare  implement
 					.add(Useful.makeRotatedAABB(0.14f, 0.0f, 0.14f, 0.86f, 1.0f, 0.5f, rotation))
 					.add(Useful.makeRotatedAABB(0.3f, 0.0f, 0.03f, 0.7f, 1.0f, 0.5f, rotation))
 					.add(Useful.makeRotatedAABB(0.03f, 0.0f, 0.3f, 0.97f, 1.0f, 0.5f, rotation))
-
 					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, rotation))
-					
-//					.add(Useful.makeRotatedAABB(0.4f, 0.0f, 0.0f, 0.6f, 1.0f, 0.2f, rotation))
-//					.add(Useful.makeRotatedAABB(0.2f, 0.0f, 0.2f, 0.8f, 1.0f, 0.4f, rotation))
-
 					.build();
 			
 		case TWO_ADJACENT_CLOSED:
