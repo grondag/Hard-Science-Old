@@ -14,10 +14,10 @@ public interface ICollisionHandler {
 
 	public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end);
 
-
     public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity);
 
-
     public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state);
+    
+    public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state);
 
 }

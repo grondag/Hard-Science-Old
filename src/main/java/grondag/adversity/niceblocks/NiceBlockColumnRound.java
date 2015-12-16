@@ -40,6 +40,11 @@ public class NiceBlockColumnRound extends NiceBlock{
 	public boolean isFullCube() {
 		return false;
 	}
+	
+	@Override
+	public boolean needsCustomHighlight(){
+		return true;
+	}
 
 	// TODO
 	// Add handler for DrawBlockHighlightEvent(context, player, target, subID, currentItem, partialTicks)

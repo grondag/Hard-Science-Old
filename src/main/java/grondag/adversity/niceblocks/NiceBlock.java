@@ -36,6 +36,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * Base class for Adversity building blocks. Should be instantiated and set up
@@ -73,7 +75,7 @@ public class NiceBlock extends Block {
 	private final IAlternator				alternator;
 	public final String						name;
 	private final NicePlacement				placementHandler;
-	private final ICollisionHandler			collisionHandler;
+	public final ICollisionHandler			collisionHandler;
 	
 	/**
 	 * Assumes first substance is representative of all the substances for
@@ -170,6 +172,10 @@ public class NiceBlock extends Block {
 				PROP_RECIPE, PROP_ALTERNATE });
 	}
 		
+	public boolean needsCustomHighlight(){
+		return false;
+	}
+	
 	@Override
 	public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end) {
 		if(collisionHandler == null){
@@ -198,6 +204,16 @@ public class NiceBlock extends Block {
 			return collisionHandler.getCollisionBoundingBox( worldIn, pos, state);
 		}
     }
+	
+	public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state){
+		if(collisionHandler == null){
+			return new ImmutableList.Builder()
+					.add(new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ))
+					.build();
+		} else {
+			return collisionHandler.getSelectionBoundingBoxes( worldIn, pos, state);
+		}
+	}
 	
 	/**
 	 * Blocks match if they have are the same block and same substance. Also

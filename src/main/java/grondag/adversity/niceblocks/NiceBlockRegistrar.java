@@ -208,6 +208,11 @@ public class NiceBlockRegistrar {
 			// Register handlers for texture stitch and model bake events (they
 			// are in this class)
 			MinecraftForge.EVENT_BUS.register(instance);
+			
+			/**
+			 * Register custom block highlighter for blocks with irregular hitboxes.
+			 */
+			MinecraftForge.EVENT_BUS.register(NiceBlockHighlighter.instance);
 		}
 		
 	}

@@ -32,7 +32,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 public abstract class NiceCookbookAxisOriented extends NiceCookbook implements ICollisionHandler{
 	
 	protected String[] modelNames = new String[AxisAlignedModel.values().length];
-	protected final ImmutableList<AxisAlignedBB>[] MODEL_BOUNDS = new ImmutableList[64];
+	public final ImmutableList<AxisAlignedBB>[] MODEL_BOUNDS = new ImmutableList[64];
 	
 	protected final  Integer[][][][][][] RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
 	protected final TRSRTransformation[] ROTATION_LOOKUP;
@@ -122,40 +122,38 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 		
 		int recipe =  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
 		
-		Adversity.log.info("bounds for recipe:" + recipe);
 		for(AxisAlignedBB aabb: MODEL_BOUNDS[recipe]){
-			Adversity.log.info(aabb.toString());
 			if(localMask.intersectsWith(aabb)){
 				list.add(aabb);
 			}
 		}
 	}
 	
-	/** won't do anything unless getCollisionHandler is overriden */
+	/** won't  be called unless getCollisionHandler is overriden */
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state) {
 		return null;
 	}
 	
+	/** won't be called unless getCollisionHandler is overriden */
+	@Override
+	public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
+		
+		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
+		
+		int recipe =  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
+		
+		ImmutableList.Builder builder = new ImmutableList.Builder<AxisAlignedBB>();
+		
+		for(AxisAlignedBB aabb: MODEL_BOUNDS[recipe]){
+			builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
+		}
+		return builder.build();
+	}
+
 	public NiceCookbookAxisOriented (EnumFacing.Axis axis){
 		super();
 		populateModelNames();
-
-
-// TODO: REMOVE
-//		FOR REFERENCE ON ROTATIONS
-//		public int rotateVertex(Vector3f position, EnumFacing facing, int vertexIndex, net.minecraftforge.client.model.ITransformation modelRotationIn, boolean uvLocked)
-//	    {
-//	        if (modelRotationIn == ModelRotation.X0_Y0)
-//	        {
-//	            return vertexIndex;
-//	        }
-//	        else
-//	        {
-//	            net.minecraftforge.client.ForgeHooksClient.transform(position, modelRotationIn.getMatrix());
-//	            return modelRotationIn.rotate(facing, vertexIndex);
-//	        }
-//	    }
 
 		ROTATION_LOOKUP = new TRSRTransformation[64];
 		
@@ -168,7 +166,6 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 				rotation.mul(rotationForAxis(Axis.Z, 90.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
-				Adversity.log.info("axis:X recipe:" + i + " bounds:" + MODEL_BOUNDS[i].toString());
 			}
 			
 			RECIPE_LOOKUP[0][1][1][1][1][1]=0;
@@ -244,7 +241,6 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
-				Adversity.log.info("axis:Y recipe:" + i + " bounds:" + MODEL_BOUNDS[i].toString());
 			}
 			
 			RECIPE_LOOKUP[1][1][0][1][1][1]=0;
@@ -322,7 +318,6 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 				rotation.mul(rotationForAxis(Axis.Y, 180.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 				MODEL_BOUNDS[i] = this.getModelBounds(MODEL_FOR_RECIPE[i], ROTATION_LOOKUP[i].getMatrix());
-				Adversity.log.info("axis:Z recipe:" + i + " bounds:" + MODEL_BOUNDS[i].toString());
 			}
 			
 			RECIPE_LOOKUP[1][1][1][0][1][1]=0;

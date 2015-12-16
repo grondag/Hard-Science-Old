@@ -197,26 +197,32 @@ public class NiceCookbookColumnRound extends NiceCookbookColumnSquare  implement
 		case FOUR_TOP_CLOSED:
 		case FOUR_OPEN:
 			return new ImmutableList.Builder<AxisAlignedBB>()
-					.add(Useful.makeRotatedAABB(0.2f, 0.0f, 0.2f, 0.8f, 1.0f, 0.8f, rotation))
-					.add(Useful.makeRotatedAABB(0.4f, 0.0f, 0.0f, 0.6f, 1.0f, 1.0f, rotation))
-					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.4f, 1.0f, 1.0f, 0.6f, rotation))
+					.add(Useful.makeRotatedAABB(0.14f, 0.0f, 0.14f, 0.86f, 1.0f, 0.86f, rotation))
+					.add(Useful.makeRotatedAABB(0.3f, 0.0f, 0.03f, 0.7f, 1.0f, 0.97f, rotation))
+					.add(Useful.makeRotatedAABB(0.03f, 0.0f, 0.3f, 0.97f, 1.0f, 0.7f, rotation))
 					.build();
 		case THREE_CLOSED:
 		case THREE_TOP_CLOSED:
 		case THREE_OPEN:
 			return new ImmutableList.Builder<AxisAlignedBB>()
-					.add(Useful.makeRotatedAABB(0.4f, 0.0f, 0.0f, 0.6f, 1.0f, 0.2f, rotation))
-					.add(Useful.makeRotatedAABB(0.2f, 0.0f, 0.2f, 0.8f, 1.0f, 0.4f, rotation))
-					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.4f, 1.0f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.14f, 0.0f, 0.14f, 0.86f, 1.0f, 0.5f, rotation))
+					.add(Useful.makeRotatedAABB(0.3f, 0.0f, 0.03f, 0.7f, 1.0f, 0.5f, rotation))
+					.add(Useful.makeRotatedAABB(0.03f, 0.0f, 0.3f, 0.97f, 1.0f, 0.5f, rotation))
+
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, rotation))
+					
+//					.add(Useful.makeRotatedAABB(0.4f, 0.0f, 0.0f, 0.6f, 1.0f, 0.2f, rotation))
+//					.add(Useful.makeRotatedAABB(0.2f, 0.0f, 0.2f, 0.8f, 1.0f, 0.4f, rotation))
+
 					.build();
 			
 		case TWO_ADJACENT_CLOSED:
 		case TWO_ADJACENT_TOP_CLOSED:
 		case TWO_ADJACENT_OPEN:
 			return new ImmutableList.Builder<AxisAlignedBB>()
-					.add(Useful.makeRotatedAABB(0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f, rotation))
-					.add(Useful.makeRotatedAABB(0.25f, 0.0f, 0.25f, 1.0f, 1.0f, 0.5f, rotation))
-					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.0f, 0.4f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.27f, 0.73f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.6f, 1.0f, 1.0f, 1.0f, rotation))
 					.build();
 		default:
 			return new ImmutableList.Builder<AxisAlignedBB>()
