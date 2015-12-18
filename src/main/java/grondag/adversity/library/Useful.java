@@ -49,7 +49,8 @@ public class Useful {
 		Vector3f maxPos = new Vector3f(maxX, maxY, maxZ);
 		net.minecraftforge.client.ForgeHooksClient.transform(minPos, rotation);
 		net.minecraftforge.client.ForgeHooksClient.transform(maxPos, rotation);
-		return new AxisAlignedBB(minPos.x, minPos.y, minPos.z, maxPos.x, maxPos.y, maxPos.z);
+		return new AxisAlignedBB(Math.round(minPos.x * 100.0)/100.0, Math.round(minPos.y * 100.0)/100.0, Math.round(minPos.z * 100.0)/100.0, 
+				Math.round(maxPos.x * 100.0)/100.0, Math.round(maxPos.y * 100.0)/100.0, Math.round(maxPos.z * 100.0)/100.0);
 	}
 	
 }

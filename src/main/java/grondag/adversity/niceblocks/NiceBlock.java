@@ -45,6 +45,15 @@ import com.google.common.collect.ImmutableList.Builder;
  */
 public class NiceBlock extends Block {
 
+	/* (non-Javadoc)
+	 * @see net.minecraft.block.Block#onEntityCollidedWithBlock(net.minecraft.world.World, net.minecraft.util.BlockPos, net.minecraft.block.state.IBlockState, net.minecraft.entity.Entity)
+	 */
+	@Override
+	public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
+		// TODO Remove, for debug only
+		super.onEntityCollidedWithBlock(worldIn, pos, state, entityIn);
+	}
+
 	/** Index to the substances[] array. */
 	public static final PropertyInteger		PROP_SUBSTANCE_INDEX	= PropertyInteger.create("substance_index", 0, 15);
 	/**
@@ -185,6 +194,23 @@ public class NiceBlock extends Block {
 		}
 	}
 	
+
+	@Override
+	public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
+		if(collisionHandler == null){
+			super.setBlockBoundsBasedOnState(worldIn, pos);
+		} else {
+			AxisAlignedBB aabb = collisionHandler.getCollisionBoundingBox( worldIn, pos, worldIn.getBlockState(pos));
+	        this.minX = aabb.minX;
+	        this.minY = aabb.minY;
+	        this.minZ = aabb.minZ;
+	        this.maxX = aabb.maxX;
+	        this.maxY = aabb.maxY;
+	        this.maxZ = aabb.maxZ;
+		}
+	}
+
+
 	@Override
     public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
     {

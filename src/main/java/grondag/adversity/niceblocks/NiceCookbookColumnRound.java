@@ -215,9 +215,9 @@ public class NiceCookbookColumnRound extends NiceCookbookColumnSquare  implement
 		case TWO_ADJACENT_TOP_CLOSED:
 		case TWO_ADJACENT_OPEN:
 			return new ImmutableList.Builder<AxisAlignedBB>()
-					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.0f, 0.4f, 1.0f, 1.0f, rotation))
-					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.27f, 0.73f, 1.0f, 1.0f, rotation))
-					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.6f, 1.0f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.0f, 0.3f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.31f, 0.69f, 1.0f, 1.0f, rotation))
+					.add(Useful.makeRotatedAABB(0.0f, 0.0f, 0.7f, 1.0f, 1.0f, 1.0f, rotation))
 					.build();
 		default:
 			return new ImmutableList.Builder<AxisAlignedBB>()

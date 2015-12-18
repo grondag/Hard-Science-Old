@@ -82,9 +82,6 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 	/** won't be called unless getCollisionHandler is overriden */
 	@Override
 	public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end) {
-
-        Vec3 localStart = start.addVector((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ()));
-        Vec3 localEnd = end.addVector((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ()));
         
         ArrayList<AxisAlignedBB> bounds = new ArrayList();
         
@@ -96,9 +93,9 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
         double distance = 1;
         
         for(AxisAlignedBB aabb : bounds){
-        	MovingObjectPosition candidate = aabb.calculateIntercept(localStart, localEnd);
+        	MovingObjectPosition candidate = aabb.calculateIntercept(start, end);
         	if (candidate != null) {
-		    	double checkDist = candidate.hitVec.squareDistanceTo(localStart);
+		    	double checkDist = candidate.hitVec.squareDistanceTo(start);
 		    	if(retval == null || checkDist < distance) {
 		    		retval = candidate;
 		    		distance = checkDist;
@@ -125,19 +122,19 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 		
 		for(AxisAlignedBB aabb: MODEL_BOUNDS[recipe]){
 			if(localMask.intersectsWith(aabb)){
-				list.add(aabb);
+				list.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
 			}
 		}
 	}
 	
 	/** won't  be called unless getCollisionHandler is overriden */
 	@Override
-	public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state) {
+	public AxisAlignedBB getCollisionBoundingBox(IBlockAccess worldIn, BlockPos pos, IBlockState state) {
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 		
 		int recipe =  RECIPE_LOOKUP[tests.up?1:0][tests.down?1:0][tests.east?1:0][tests.west?1:0][tests.north?1:0][tests.south?1:0];
 
-		return COMBINED_BOUNDS[recipe];
+		return COMBINED_BOUNDS[recipe].offset(pos.getX(), pos.getY(), pos.getZ());
 	}
 	
 	/** won't be called unless getCollisionHandler is overriden */
