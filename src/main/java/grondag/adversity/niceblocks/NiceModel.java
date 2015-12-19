@@ -43,6 +43,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	 * Dimensions are alternate and recipe
 	 */
 	protected IFlexibleBakedModel[][] models; 
+	protected IFlexibleBakedModel itemModel;
 
 	
 	public NiceModel(NiceBlockStyle style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
@@ -104,8 +105,14 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 				IModel model=template.retexture(ingredients.textures);
 
 				this.models[alt][recipe]=model.bake(ingredients.state, DefaultVertexFormats.BLOCK, textureGetter);
-			}		
+			}	
 		}
+		
+		NiceCookbook.Ingredients itemIngredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
+		IRetexturableModel itemTemplate = (IRetexturableModel)event.modelLoader.getModel(new ModelResourceLocation(itemIngredients.modelName));
+		IModel itemModel=itemTemplate.retexture(itemIngredients.textures);
+		this.itemModel=itemModel.bake(itemIngredients.state, DefaultVertexFormats.BLOCK, textureGetter);
+
 		
 		event.modelRegistry.putObject(blockResourceLocation, this);
 		event.modelRegistry.putObject(itemResourceLocation, this);
