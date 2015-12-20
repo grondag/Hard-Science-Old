@@ -2,7 +2,7 @@
 
 Welcome to the repository for Adversity.
 
-This mod is in active development and is currently not be available for download until after Minecraft 1.9 ships.  
+This mod is in active development and will not be available for download until after Minecraft 1.9 ships.  
 
 Until further notice, please do not use this mod in ModPacks, nor in any world you want to keep.
 
@@ -11,7 +11,7 @@ Until further notice, please do not use this mod in ModPacks, nor in any world y
 DRAFT NOTES
 
 COLUMN BLOCKS
-While these blocks render as opaque blocks, and are indeed guaranteed to properly occlude adjacent blocks that aren't themselves, they do NOT properly occlude themselves unless faces that would normally be culled are drawn instead. They also have several times the polygon count of a typical building block. What does this all mean? They are slightly more expensive to render compared to normal square blocks, so if you are placing hundreds of them within viewing distance you may want to keep an eye on your frame rate.
+Available in both elaborate square and rounded versions, they also form multiblock pillars when placed adjacent to each other. These are more expensive to render compared to normal building blocks, so if you are placing hundreds of them within viewing distance you may want to keep an eye on your frame rate.
 
 CONSTRUCTION COMPOSITE
 Durable, attractive and cheap, "Comp Blocks" are the useful residue of mineral processing.  Also useful later on as matter feedstock when advanced technologies come online.  
