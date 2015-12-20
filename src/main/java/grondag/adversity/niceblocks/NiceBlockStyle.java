@@ -18,9 +18,9 @@ public enum NiceBlockStyle {
 	COLUMN_SQUARE_X("", 8, 9, 1, false, new NiceCookbookColumnSquare(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
 	COLUMN_SQUARE_Y("", 8, 9, 1, false, new NiceCookbookColumnSquare(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
 	COLUMN_SQUARE_Z("", 8, 9, 1, false, new NiceCookbookColumnSquare(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT),
-	COLUMN_ROUND_X("", 4, 1, 4, false, new NiceCookbookColumnRound(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
-	COLUMN_ROUND_Y("", 4, 1, 4, false, new NiceCookbookColumnRound(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
-	COLUMN_ROUND_Z("", 4, 1, 4, false, new NiceCookbookColumnRound(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT);
+	COLUMN_ROUND_X("", 4, 1, 1, false, new NiceCookbookColumnRound(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_ROUND_Y("", 4, 1, 1, false, new NiceCookbookColumnRound(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
+	COLUMN_ROUND_Z("", 4, 1, 1, false, new NiceCookbookColumnRound(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT);
 
 	/** convenience factory method */
 	public static NicePlacement makeColumnPlacerSquare() {

@@ -173,8 +173,8 @@ public class NiceBlockRegistrar {
 
 	/**
 	 * Returns the first block with the same style and substance. For most
-	 * blocks, there will be only one result and this method will yell at your
-	 * if there is more than one and return the first result. For sibling blocks
+	 * blocks, there will be only one result. If there is more than one,  
+	 * this method will yell at you and return the first result. For sibling blocks
 	 * that have multiple blocks the same style and substance, use
 	 * getBlocksForStyleAndSubstace.
 	 */

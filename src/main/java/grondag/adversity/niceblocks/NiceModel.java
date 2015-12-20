@@ -1,5 +1,7 @@
 package grondag.adversity.niceblocks;
 
+import grondag.adversity.Adversity;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -25,6 +27,7 @@ import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.IRetexturableModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.client.model.obj.OBJModel.OBJBakedModel;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
@@ -78,6 +81,10 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			retVal = models[exState.getValue(NiceBlock.PROP_ALTERNATE)][exState.getValue(NiceBlock.PROP_RECIPE)];
 		}
 		
+		if(retVal instanceof OBJBakedModel){
+			return ((OBJBakedModel)retVal).handleBlockState(state);
+		}
+		
 		return retVal;
 	}
 	
@@ -104,14 +111,14 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 				IModel model=template.retexture(ingredients.textures);
 
-				this.models[alt][recipe]=model.bake(ingredients.state, DefaultVertexFormats.BLOCK, textureGetter);
+				this.models[alt][recipe]=model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 			}	
 		}
 		
 		NiceCookbook.Ingredients itemIngredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
 		IRetexturableModel itemTemplate = (IRetexturableModel)event.modelLoader.getModel(new ModelResourceLocation(itemIngredients.modelName));
 		IModel itemModel=itemTemplate.retexture(itemIngredients.textures);
-		this.itemModel=itemModel.bake(itemIngredients.state, DefaultVertexFormats.BLOCK, textureGetter);
+		this.itemModel=itemModel.bake(itemIngredients.state, DefaultVertexFormats.ITEM, textureGetter);
 
 		
 		event.modelRegistry.putObject(blockResourceLocation, this);
