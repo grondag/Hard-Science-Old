@@ -3,49 +3,46 @@ package grondag.adversity;
 import java.io.File;
 import java.util.HashMap;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Block.SoundType;
-import net.minecraft.block.material.Material;
 import net.minecraftforge.common.config.Configuration;
 
 public class Config {
 
 	public static class BiomeIDs {
-		public static int	drylandHills	= 51;
-		public static int	drylandMesa		= 52;
-		public static int	drylandFlats	= 53;
-		public static int	volcano			= 54;
+		public static int drylandHills = 51;
+		public static int drylandMesa = 52;
+		public static int drylandFlats = 53;
+		public static int volcano = 54;
 	}
 
 	public static class Unobtanium {
-		public static boolean	enabled					= true;
-		public static boolean	logging					= false;
-		public static boolean	allowMobSpawning		= false;
-		public static boolean	allowFire				= false;
-		public static boolean	allowHarvest			= true;
-		public static boolean	allowSilkTouch			= true;
-		public static float		selfRepairChance		= 0.01F;
-		public static boolean	selfRepairFailedBlocks	= false;
-		public static boolean	canBeDamaged			= true;
-		public static float		startingHardness		= 25.0F;
-		public static float		hardnessDamageFactor	= 0.8F;
-		public static int		intactBlastResistance	= 6000000;
-		public static int		failedBlastResistance	= 30;
-		public static float		destroyedFailureChance	= 0.25F;
-		public static float		explodedFailureChance	= 0.25F;
-		public static float		resistanceFailureChance	= 0.001F;
+		public static boolean enabled = true;
+		public static boolean logging = false;
+		public static boolean allowMobSpawning = false;
+		public static boolean allowFire = false;
+		public static boolean allowHarvest = true;
+		public static boolean allowSilkTouch = true;
+		public static float selfRepairChance = 0.01F;
+		public static boolean selfRepairFailedBlocks = false;
+		public static boolean canBeDamaged = true;
+		public static float startingHardness = 25.0F;
+		public static float hardnessDamageFactor = 0.8F;
+		public static int intactBlastResistance = 6000000;
+		public static int failedBlastResistance = 30;
+		public static float destroyedFailureChance = 0.25F;
+		public static float explodedFailureChance = 0.25F;
+		public static float resistanceFailureChance = 0.001F;
 	}
 
-	public static class Substance{
+	public static class Substance {
 		public int hardness;
 		public int resistance;
 		public String harvestTool;
 		public int harvestLevel;
 	}
-	
-	public static HashMap<String,Substance> substances = new HashMap<String,Substance>();
 
-	public static Configuration	config;
+	public static HashMap<String, Substance> substances = new HashMap<String, Substance>();
+
+	public static Configuration config;
 
 	public static void init(File file) {
 		config = new Configuration(file);
@@ -121,23 +118,21 @@ public class Config {
 
 		// SUBSTANCES
 
-
 		// UNOBTANIUM
-		
-		String[] allowedTools = {"pickaxe","shove", "axe"};
-		
+
+		String[] allowedTools = { "pickaxe", "shove", "axe" };
+
 		config.addCustomCategoryComment("Substances", "General settings for various in-game materials.");
-		
+
 		substances.clear();
-		
-		
+
 		Substance dressedStone = new Substance();
 		dressedStone.hardness = config.getInt("dessedStoneHardness", "Substances", 2, 1, 50, "");
 		dressedStone.harvestTool = config.getString("dressedStoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
 		dressedStone.harvestLevel = config.getInt("dessedStoneHarvestLevel", "Substances", 1, 1, 3, "");
 		dressedStone.resistance = config.getInt("dressedStoneResistance", "Substances", 10, 1, 50, "");
 		substances.put("dressed_stone", dressedStone);
-		
+
 		Substance composite = new Substance();
 		composite.hardness = config.getInt("compositeHardness", "Substances", 4, 1, 50, "");
 		composite.harvestTool = config.getString("compositeHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
@@ -152,7 +147,6 @@ public class Config {
 		duraplast.resistance = config.getInt("duraplastResistance", "Substances", 200, 1, 50, "");
 		substances.put("duraplast", dressedStone);
 
-		
 		// END
 		config.save();
 
