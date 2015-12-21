@@ -20,7 +20,7 @@ DURAPLAST
 Already-durable construction composite infused with unobtanium nanobots, its internal matrix is powered by absorbed energy.  Able to withstand multiple direct heavy-weapon impacts, it will slowly self-repair if not completely destroyed. Incredibly tedious to remove once placed, you don't want to put this somewhere by mistake.  Automated building methods (or a DPST) are *strongly* advised.
 
 UNOBTANIUM
-A purely synthetic trans-atomic structure that could never naturally occur, unobtanium probably shouldn't exist yet somehow manages to do so. An old saw among material scientists is that anyone who needs Unobtanium explained to them is incapable of understanding the explanation.  Impossibly strong and can be either superconducting or a perfect insulator depending on nano patterning. 
+A purely synthetic trans-atomic structure that could never naturally occur, unobtanium probably shouldn't exist yet somehow manages to do so. An old saw among material scientists is that anyone who needs to ask how Unobtanium works is incapable of understanding the answer.  Impossibly strong and can be either a superconductor or a perfect insulator depending on nano patterning. 
 
 EXOTIC MATTER
 Perhaps the ultimate accomplishment of the physical sciences, exotic matter is the normal-space hull of a nine-dimensional Unobtanium matrix. Almost impossible to fabricate and outrageously demanding of resources, it possesses miraculous properties that enable myriad advanced technologies.  Anchored in hyperspace as it is, exotic matter is indestructible - to a point.  If that point is ever reached it fails in a cataclysmic way, but of course an energy release that causes such a failure implies that you already have larger problems. 

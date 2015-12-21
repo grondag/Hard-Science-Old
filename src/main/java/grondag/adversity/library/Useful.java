@@ -11,11 +11,13 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+/**
+ * Random utilities that have not yet found a more appropriate home.
+ */
 public class Useful {
 	
-	
 	/** 
-	 * Sorts members of the vector so that x is largest and z is smallest.
+	 * Sorts members of the BlockPos vector so that x is largest and z is smallest.
 	 * Useful when BlockPos represents a volume instead of a position.
 	 */
 	public static BlockPos sortedBlockPos(BlockPos pos){
@@ -42,7 +44,6 @@ public class Useful {
 			return new BlockPos(pos.getZ(), pos.getY(), pos.getX());
 		}
 	}
-
 	
 	public static AxisAlignedBB makeRotatedAABB(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, Matrix4f rotation){
 		Vector3f minPos = new Vector3f(minX, minY, minZ);
