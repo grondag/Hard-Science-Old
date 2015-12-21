@@ -2,7 +2,7 @@ package grondag.adversity.niceblocks;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.library.ShapeValidatorCubic;
+import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblocks.NiceBlock.TestForCompleteMatch;
 import grondag.adversity.niceblocks.NiceBlock.TestForStyleGroupAndSubstance;
 import net.minecraft.block.state.IBlockState;
@@ -50,7 +50,7 @@ public abstract class NicePlacement {
 		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 				float hitZ, int meta, EntityLivingBase placer) {
 
-			ShapeValidatorCubic shape = new ShapeValidatorCubic(4, 4, 4);
+			PlacementValidatorCubic shape = new PlacementValidatorCubic(4, 4, 4);
 
 			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 			NeighborTestResults results = neighbors.getNeighborTestResults(new NiceBlock.TestForStyleAndSubstance(owner
@@ -60,38 +60,38 @@ public abstract class NicePlacement {
 
 			if (results.east) {
 				candidate = neighbors.east;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 				;
 			}
 			if (results.west) {
 				candidate = neighbors.west;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.north) {
 				candidate = neighbors.north;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.south) {
 				candidate = neighbors.south;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.up) {
 				candidate = neighbors.up;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.down) {
 				candidate = neighbors.down;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
@@ -156,7 +156,7 @@ public abstract class NicePlacement {
 		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 				float hitZ, int meta, EntityLivingBase placer) {
 
-			ShapeValidatorCubic shape = new ShapeValidatorCubic(2, 1, 1);
+			PlacementValidatorCubic shape = new PlacementValidatorCubic(2, 1, 1);
 
 			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 			NeighborTestResults results = neighbors.getNeighborTestResults(new TestForStyleGroupAndSubstance(owner
@@ -166,38 +166,38 @@ public abstract class NicePlacement {
 
 			if (results.east) {
 				candidate = neighbors.east;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 				;
 			}
 			if (results.west) {
 				candidate = neighbors.west;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.north) {
 				candidate = neighbors.north;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.south) {
 				candidate = neighbors.south;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.up) {
 				candidate = neighbors.up;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
 			if (results.down) {
 				candidate = neighbors.down;
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate), true)) {
+				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
