@@ -30,6 +30,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  * This, combined with style, substance and model, determines how block appears in game.
  */
 public class NiceCookbook {
+	
 	/** Dimensions are UDNSEW. Value 0 means no neighbor, 1 means neighbor present */
 	protected static  Integer[][][][][][] SIMPLE_JOIN_RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
 	/** Dimensions are UDNSEW. Value 0 means no neighbor, 1 means neighbor present */

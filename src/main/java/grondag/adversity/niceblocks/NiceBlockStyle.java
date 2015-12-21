@@ -2,6 +2,8 @@ package grondag.adversity.niceblocks;
 
 import net.minecraft.util.EnumFacing.Axis;
 
+
+
 public enum NiceBlockStyle {
 	RAW("", 0, 1, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
 	SMOOTH("", 4, 1, 4, true, new NiceCookbook(), NiceModel.class, NiceBlock.LAYER_SOLID),
@@ -21,6 +23,7 @@ public enum NiceBlockStyle {
 	COLUMN_ROUND_X("", 4, 1, 1, false, new NiceCookbookColumnRound(Axis.X), NiceModel.class, NiceBlock.LAYER_CUTOUT),
 	COLUMN_ROUND_Y("", 4, 1, 1, false, new NiceCookbookColumnRound(Axis.Y), NiceModel.class, NiceBlock.LAYER_CUTOUT),
 	COLUMN_ROUND_Z("", 4, 1, 1, false, new NiceCookbookColumnRound(Axis.Z), NiceModel.class, NiceBlock.LAYER_CUTOUT);
+
 
 	/** convenience factory method */
 	public static NicePlacement makeColumnPlacerSquare() {

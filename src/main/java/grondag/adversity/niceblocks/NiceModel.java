@@ -78,7 +78,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 		if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock) {
 			IExtendedBlockState exState = (IExtendedBlockState) state;
-			retVal = models[exState.getValue(NiceBlock.PROP_ALTERNATE)][exState.getValue(NiceBlock.PROP_RECIPE)];
+			retVal = models[exState.getValue(NiceBlock.PROP_MODEL_ALTERNATE)][exState.getValue(NiceBlock.PROP_MODEL_RECIPE)];
 		}
 		
 		if(retVal instanceof OBJBakedModel){

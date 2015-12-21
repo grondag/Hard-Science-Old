@@ -37,55 +37,91 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * Base class for Adversity building blocks. Should be instantiated and set up
  * in NiceBlockRegistrar.
+ *
+ * Note that NiceBlock metadata is ONLY used to define substance variants. For
+ * blocks that require facing or other configuration that cannot be derived from
+ * neighboring blocks, a different block instance is used. (Or a tile entity, if
+ * needed to avoid an impractical number of instances.) In contrast, vanilla and
+ * most mods use metadata for facing data on stairs, slabs, etc.
+ *
+ * NiceBlocks does it this way beause Adversity has MANY building blocks with
+ * many variants and I wanted to avoid creating tile entities in most cases and
+ * to be fully efficient in usage of metadata bits. If each NiceBlock instance
+ * has 16 substance variants then no metadata bits are wasted. Slabs, stairs,
+ * etc. do not necessarily consume four metadata bits and this also system means
+ * all niceblocks can be fully consistent in the way they use metadata.
  */
 public class NiceBlock extends Block {
 
-	/* (non-Javadoc)
-	 * @see net.minecraft.block.Block#onEntityCollidedWithBlock(net.minecraft.world.World, net.minecraft.util.BlockPos, net.minecraft.block.state.IBlockState, net.minecraft.entity.Entity)
-	 */
-	@Override
-	public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-		// TODO Remove, for debug only
-		super.onEntityCollidedWithBlock(worldIn, pos, state, entityIn);
-	}
-
 	/** Index to the substances[] array. */
-	public static final PropertyInteger		PROP_SUBSTANCE_INDEX	= PropertyInteger.create("substance_index", 0, 15);
+	public static final PropertyInteger PROP_SUBSTANCE_INDEX 
+		= PropertyInteger.create("substance_index", 0, 15);
 	/**
 	 * Used by NiceModel to select correct in-game variant. 385 is the max. Most
 	 * blocks have fewer variants.
 	 */
-	public static final IUnlistedProperty	PROP_RECIPE				= Properties.toUnlisted(PropertyInteger.create(
-																			"recipe", 0, 385));
+	public static final IUnlistedProperty PROP_MODEL_RECIPE 
+		= Properties.toUnlisted(PropertyInteger.create("model_recipe", 0, 385));
 	/**
 	 * Used by NiceModel to select an alternate in-game appearance when more
 	 * than one is available. We don't use the MineCraft alternate functionality
 	 * because it is non-deterministic for different block states. This causes
 	 * undesirable changes to texture selection when neighbor blocks change.
 	 */
-	public static final IUnlistedProperty	PROP_ALTERNATE			= Properties.toUnlisted(PropertyInteger.create(
-																			"alternate", 0, 15));
-
-	public final NiceSubstance[]			substances;
-	public final NiceBlockStyle				style;
-	public final ItemMultiTexture			item;
-
-	// see NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()
-	public static final int					LAYER_SOLID				= 1;
-	public static final int					LAYER_CUTOUT_MIPPED		= 2;
-	public static final int					LAYER_CUTOUT			= 4;
-	public static final int					LAYER_TRANSLUCENT		= 8;
-
-	private final IAlternator				alternator;
-	public final String						name;
-	private final NicePlacement				placementHandler;
-	public final ICollisionHandler			collisionHandler;
+	public static final IUnlistedProperty PROP_MODEL_ALTERNATE 
+		= Properties.toUnlisted(PropertyInteger.create("model_alternate", 0, 15));
 	
+	/**
+	 * Maps metadata to specific Adversity substance. Metadata is the index to
+	 * this array. Substance control texture and may be used to control some
+	 * in-game properties and behaviors.
+	 */
+	public final NiceSubstance[] substances;
+
+	/**
+	 * Identifies the visual appearance of the block and handles aspects related
+	 * to models, collision, extended state, placement, etc.
+	 */
+	public final NiceBlockStyle style;
+
+	/**
+	 * Item for this block. Will have same substance variants as this block.
+	 * Instantiated and retained here for convenience and to enable consistent
+	 * handling.
+	 */
+	public final ItemMultiTexture item;
+
+	/**
+	 * Model randomizer for this block.  These are cached in Alternator class, so
+	 * no significant cost to keeping a reference in each block.  
+	 * Necessary because Vanilla alternate function apparently uses block state
+	 * as input, causing textures to vary for the same position as extended state changes,
+	 * which gives a jarring effect in some cases.  Alternator only uses BlockPos as input.
+	 */
+	private final IAlternator alternator;
+	
+	/** Non-prefixed, unlocalized name of this block */
+	public final String name;
+	
+	/** 
+	 * Handler for onBlockPlaced event. Given at instantiation.
+	 * Allows player to build large multi-blocks with connected-texture blocks
+	 * and handles appropriate placement of axis-oriented blocks, for example.
+	 */
+	private final NicePlacement placementHandler;
+	
+	/**
+	 * CAN BE NULL!
+	 * If non-null, blocks requires special collision handling, typically 
+	 * because it is not a standard cube shape.  Retrieved from model cook book
+	 * at instantiation and reference saved for simpler coding.
+	 */
+	public final ICollisionHandler collisionHandler;
+
 	/**
 	 * Assumes first substance is representative of all the substances for
 	 * purposes of setting material-dependent attributes.
@@ -117,11 +153,13 @@ public class NiceBlock extends Block {
 		NiceBlockRegistrar.allBlocks.add(this);
 	}
 
-	
 	@Override
-	public int damageDropped(IBlockState state) {
-		return state.getValue(PROP_SUBSTANCE_INDEX);
+	protected BlockState createBlockState() {
+		return new ExtendedBlockState(this, new IProperty[] { PROP_SUBSTANCE_INDEX }, new IUnlistedProperty[] {
+				PROP_MODEL_RECIPE, PROP_MODEL_ALTERNATE });
 	}
+
+	// BASIC METADATA MECHANICS
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -141,23 +179,38 @@ public class NiceBlock extends Block {
 		return state.getValue(PROP_SUBSTANCE_INDEX);
 	}
 
+	// INTERACTION HANDLING
+	
+	@Override
+	public int damageDropped(IBlockState state) {
+		return state.getValue(PROP_SUBSTANCE_INDEX);
+	}
+	
+	@Override
+	public IBlockState onBlockPlaced(World worldIn, BlockPos pos, 
+			EnumFacing facing, float hitX, float hitY,
+			float hitZ, int meta, EntityLivingBase placer) {
+
+		return placementHandler.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
+
+	}
+	
+	// RENDERING-RELATED THINGS AND STUFF
+	// Note that some of the methods here are called server-side. 
+	// (Ray tracing and collisions, mainly.)
+	
 	@Override
 	public EnumWorldBlockLayer getBlockLayer() {
 		return EnumWorldBlockLayer.SOLID;
 	}
 
-	@Override
-	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		// should always be an IExtendedBlockState but avoid crash if not
-
-		if (state instanceof IExtendedBlockState) {
-			return ((IExtendedBlockState) state).withProperty(PROP_RECIPE,
-					style.cookbook.getRecipeIndex((IExtendedBlockState) state, world, pos)).withProperty(PROP_ALTERNATE,
-									alternator.getAlternate(pos));
-		} else {
-			return state;
-		}
-	}
+	// Used in NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()
+	// Would have expected that forge already defines these somewhere but
+	// couldn't find them.
+	public static final int LAYER_SOLID = 1;
+	public static final int LAYER_CUTOUT_MIPPED = 2;
+	public static final int LAYER_CUTOUT = 4;
+	public static final int LAYER_TRANSLUCENT = 8;
 
 	@Override
 	public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
@@ -175,71 +228,90 @@ public class NiceBlock extends Block {
 		}
 	}
 
+
+	/**
+	 * Determines which model should be displayed via PROP_MODEL_RECIPE.
+	 * Handling is delegated to the style cook book.
+	 */
 	@Override
-	protected BlockState createBlockState() {
-		return new ExtendedBlockState(this, new IProperty[] { PROP_SUBSTANCE_INDEX }, new IUnlistedProperty[] {
-				PROP_RECIPE, PROP_ALTERNATE });
+	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		// should always be an IExtendedBlockState but avoid crash if somehow not
+		if (state instanceof IExtendedBlockState) {
+			return ((IExtendedBlockState) state).withProperty(PROP_MODEL_RECIPE,
+					style.cookbook.getRecipeIndex((IExtendedBlockState) state, world, pos)).withProperty(PROP_MODEL_ALTERNATE,
+					alternator.getAlternate(pos));
+		} else {
+			return state;
+		}
 	}
-		
-	public boolean needsCustomHighlight(){
+
+	/** 
+	 * Used by NiceBlockHighligher to know if custom hit box rendering is needed.
+	 * Actual event handling is in that class.  Override for blocks that need it.
+	 */
+	public boolean needsCustomHighlight() {
 		return false;
+	}
+
+	/** 
+	 * Used by NiceBlockHighligher get custom hit boxes for rendering.
+	 * Only used if needsCustomHighlight returns true. 
+	 */
+	public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
+		if (collisionHandler == null) {
+			return new ImmutableList.Builder()
+			.add(new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY, pos.getZ() + maxZ))
+			.build();
+		} else {
+			return collisionHandler.getSelectionBoundingBoxes(worldIn, pos, state);
+		}
 	}
 	
 	@Override
 	public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end) {
-		if(collisionHandler == null){
+		if (collisionHandler == null) {
 			return super.collisionRayTrace(worldIn, pos, start, end);
 		} else {
 			return collisionHandler.collisionRayTrace(worldIn, pos, start, end);
 		}
 	}
-	
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
-		if(collisionHandler == null){
+		if (collisionHandler == null) {
 			super.setBlockBoundsBasedOnState(worldIn, pos);
 		} else {
-			AxisAlignedBB aabb = collisionHandler.getCollisionBoundingBox( worldIn, pos, worldIn.getBlockState(pos));
-	        this.minX = aabb.minX;
-	        this.minY = aabb.minY;
-	        this.minZ = aabb.minZ;
-	        this.maxX = aabb.maxX;
-	        this.maxY = aabb.maxY;
-	        this.maxZ = aabb.maxZ;
+			AxisAlignedBB aabb = collisionHandler.getCollisionBoundingBox(worldIn, pos, worldIn.getBlockState(pos));
+			minX = aabb.minX;
+			minY = aabb.minY;
+			minZ = aabb.minZ;
+			maxX = aabb.maxX;
+			maxY = aabb.maxY;
+			maxZ = aabb.maxZ;
 		}
 	}
 
-
 	@Override
-    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
-    {
-		if(collisionHandler == null){
-			super.addCollisionBoxesToList( worldIn, pos, state, mask,list, collidingEntity);
+	public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+	{
+		if (collisionHandler == null) {
+			super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
 		} else {
-			collisionHandler.addCollisionBoxesToList( worldIn, pos, state, mask,list, collidingEntity);
-		}
-    }
-
-	@Override
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
-    {
-		if(collisionHandler == null){
-			return super.getCollisionBoundingBox( worldIn, pos, state);
-		} else {
-			return collisionHandler.getCollisionBoundingBox( worldIn, pos, state);
-		}
-    }
-	
-	public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state){
-		if(collisionHandler == null){
-			return new ImmutableList.Builder()
-					.add(new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ))
-					.build();
-		} else {
-			return collisionHandler.getSelectionBoundingBoxes( worldIn, pos, state);
+			collisionHandler.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
 		}
 	}
+
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+	{
+		if (collisionHandler == null) {
+			return super.getCollisionBoundingBox(worldIn, pos, state);
+		} else {
+			return collisionHandler.getCollisionBoundingBox(worldIn, pos, state);
+		}
+	}
+
+	// BLOCK TESTS
 	
 	/**
 	 * Blocks match if they have are the same block and same substance. Also
@@ -247,8 +319,8 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForCompleteMatch implements IBlockTest {
 
-		private final Block	block;
-		private final int	substanceIndex;
+		private final Block block;
+		private final int substanceIndex;
 
 		/**
 		 * Blocks match if they have are the same block and same substance. Also
@@ -272,7 +344,7 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForSubstance implements IBlockTest {
 
-		private final int	substanceIndex;
+		private final int substanceIndex;
 
 		public TestForSubstance(IBlockState ibs) {
 			if (ibs.getBlock() instanceof NiceBlock) {
@@ -294,7 +366,7 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForStyle implements IBlockTest {
 
-		private final NiceBlockStyle	style;
+		private final NiceBlockStyle style;
 
 		/**
 		 * Blocks match if they have have the same style. Can be different
@@ -320,8 +392,8 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForStyleAndSubstance implements IBlockTest {
 
-		private final NiceBlockStyle	style;
-		private final int				substanceIndex;
+		private final NiceBlockStyle style;
+		private final int substanceIndex;
 
 		/**
 		 * Blocks match if they have have the same style and subtance. Can be
@@ -350,8 +422,8 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForStyleGroupAndSubstance implements IBlockTest {
 
-		private final HashSet<NiceBlockStyle>	styles;
-		private final int						substanceIndex;
+		private final HashSet<NiceBlockStyle> styles;
+		private final int substanceIndex;
 
 		/**
 		 * Just like TestForStyleAndSubstance but matches on any one of a group
@@ -374,11 +446,4 @@ public class NiceBlock extends Block {
 		}
 	}
 
-	@Override
-	public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-			float hitZ, int meta, EntityLivingBase placer) {
-
-		return placementHandler.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
-
-	}
 }
