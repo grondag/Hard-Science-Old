@@ -4,6 +4,7 @@ import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.model.NiceModel;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
+import grondag.adversity.niceblock.support.NicePlacement;
 import grondag.adversity.niceblock.support.NicePlacement.PlacementBigBlock;
 import grondag.adversity.niceblock.support.NicePlacement.PlacementSimple;
 
@@ -81,29 +82,29 @@ public class NiceBlockRegistrar {
 	public static final NiceBlock bigOrnate1 = new NiceBlock("big_ornate_1", NiceStyle.BIG_ORNATE,
 			new PlacementBigBlock(), substance16Group[0]);
 	public static final NiceBlock masonryA1 = new NiceBlock("masonry_a_1", NiceStyle.MASONRY_A,
-			NiceStyle.makeMasonryPlacer(), substance16Group[0]);
+			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
 	public static final NiceBlock masonryB1 = new NiceBlock("masonry_b_1", NiceStyle.MASONRY_B,
-			NiceStyle.makeMasonryPlacer(), substance16Group[0]);
+			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
 	public static final NiceBlock masonryC1 = new NiceBlock("masonry_c_1", NiceStyle.MASONRY_C,
-			NiceStyle.makeMasonryPlacer(), substance16Group[0]);
+			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
 	public static final NiceBlock masonryD1 = new NiceBlock("masonry_d_1", NiceStyle.MASONRY_D,
-			NiceStyle.makeMasonryPlacer(), substance16Group[0]);
+			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
 	public static final NiceBlock masonryE1 = new NiceBlock("masonry_e_1", NiceStyle.MASONRY_E,
-			NiceStyle.makeMasonryPlacer(), substance16Group[0]);
+			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
 
 	public static final NiceBlock columnSquareX1 = new NiceBlock("column_square_x_1", NiceStyle.COLUMN_SQUARE_X,
-			NiceStyle.makeColumnPlacerSquare(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
 	public static final NiceBlock columnSquareY1 = new NiceBlock("column_square_y_1", NiceStyle.COLUMN_SQUARE_Y,
-			NiceStyle.makeColumnPlacerSquare(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
 	public static final NiceBlock columnSquareZ1 = new NiceBlock("column_square_z_1", NiceStyle.COLUMN_SQUARE_Z,
-			NiceStyle.makeColumnPlacerSquare(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
 
 	public static final NiceBlockColumnRound columnRoundX1 = new NiceBlockColumnRound("column_round_x_1", NiceStyle.COLUMN_ROUND_X,
-			NiceStyle.makeColumnPlacerRound(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
 	public static final NiceBlockColumnRound columnRoundY1 = new NiceBlockColumnRound("column_round_y_1", NiceStyle.COLUMN_ROUND_Y,
-			NiceStyle.makeColumnPlacerRound(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
 	public static final NiceBlockColumnRound columnRoundZ1 = new NiceBlockColumnRound("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
-			NiceStyle.makeColumnPlacerRound(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
 
 	/**
 	 * Use to generate model resource location names with a consistent
@@ -163,7 +164,7 @@ public class NiceBlockRegistrar {
 	 * Provides consistent key construction for style/substance lookup.
 	 */
 	private static String getSnSkey(NiceStyle style, NiceSubstance substance) {
-		return style.toString() + "." + substance.id;
+		return style.toString() + "." + substance.name;
 	}
 
 	/**

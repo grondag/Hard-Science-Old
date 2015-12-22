@@ -6,9 +6,15 @@ import grondag.adversity.niceblock.model.ModelCookbookColumnSquare;
 import grondag.adversity.niceblock.model.ModelCookbookConnectedCorners;
 import grondag.adversity.niceblock.model.ModelCookbookMasonry;
 import grondag.adversity.niceblock.model.NiceModel;
-import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.util.EnumFacing.Axis;
 
+/**
+ * Style governs the visual appearance and some behavior of a NiceBlock.
+ * A NiceBlock can have only a single style, but multiple Substances.
+ * Some styles are visually similar or identical but have distinct identities
+ * to allow multi-blocks with connected textures that are adjacent to each other.
+ * 
+ */
 public enum NiceStyle {
 	RAW("", 0, 1, 4, true, new ModelCookbook(), NiceBlock.LAYER_SOLID),
 	SMOOTH("", 4, 1, 4, true, new ModelCookbook(), NiceBlock.LAYER_SOLID),
@@ -28,24 +34,6 @@ public enum NiceStyle {
 	COLUMN_ROUND_X("", 4, 1, 1, false, new ModelCookbookColumnRound(Axis.X), NiceBlock.LAYER_CUTOUT),
 	COLUMN_ROUND_Y("", 4, 1, 1, false, new ModelCookbookColumnRound(Axis.Y), NiceBlock.LAYER_CUTOUT),
 	COLUMN_ROUND_Z("", 4, 1, 1, false, new ModelCookbookColumnRound(Axis.Z), NiceBlock.LAYER_CUTOUT);
-
-	/** convenience factory method */
-	public static NicePlacement makeColumnPlacerSquare() {
-		return new NicePlacement.PlacementColumn(NiceStyle.COLUMN_SQUARE_X, NiceStyle.COLUMN_SQUARE_Y,
-				NiceStyle.COLUMN_SQUARE_Z);
-	}
-
-	/** convenience factory method */
-	public static NicePlacement makeColumnPlacerRound() {
-		return new NicePlacement.PlacementColumn(NiceStyle.COLUMN_ROUND_X, NiceStyle.COLUMN_ROUND_Y,
-				NiceStyle.COLUMN_ROUND_Z);
-	}
-
-	/** convenience factory method */
-	public static NicePlacement makeMasonryPlacer() {
-		return new NicePlacement.PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
-				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
-	}
 
 	/**
 	 * Identifies which resource texture file group is used for this style
@@ -90,7 +78,7 @@ public enum NiceStyle {
 	public final int renderLayerFlags;
 
 	/**
-	 *
+	 * Instantiate a new style.  See elsewhere in this class for what stuff does.
 	 */
 	NiceStyle(String textureSuffix, int textureIndex, int textureCount, int alternateCount,
 			boolean useRotationsAsAlternates, ModelCookbook cookbook, int renderLayerFlags) {
@@ -110,7 +98,7 @@ public enum NiceStyle {
 	 * which one to use for what purpose.
 	 */
 	public String buildTextureName(NiceSubstance substance, int offset) {
-		String basename = substance.resourceName() + (textureSuffix == "" ? "" : "_") + textureSuffix;
+		String basename = substance.name + (textureSuffix == "" ? "" : "_") + textureSuffix;
 		return "adversity:blocks/" + basename + "/" + basename + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 }

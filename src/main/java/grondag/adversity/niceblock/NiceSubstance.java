@@ -5,41 +5,44 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Block.SoundType;
 import net.minecraft.block.material.Material;
 
+/**
+ * Substance as a property of a NiceBlock determines textures and some physical
+ * properties via baseMaterial. While a NiceBlock can have up to 16 substances
+ * with different physical properties, and while most of the block methods
+ * should use metadata, preference is to have each NiceBlock use Substances with
+ * the same or similar base materials.
+ */
 public enum NiceSubstance {
-	BASALT(0, "basalt", BaseMaterial.DRESSED_STONE),
-	DIORITE(1, "diorite", BaseMaterial.DRESSED_STONE);
+	BASALT("basalt", BaseMaterial.DRESSED_STONE),
+	DIORITE("diorite", BaseMaterial.DRESSED_STONE);
 
-	public final int			id;
-	public final String			name;
-	public final BaseMaterial	baseMaterial;
+	public final String name;
+	public final BaseMaterial baseMaterial;
 
-	NiceSubstance(int id, String name, BaseMaterial baseMaterial) {
-		this.id = id;
+	NiceSubstance(String name, BaseMaterial baseMaterial) {
 		this.name = name;
 		this.baseMaterial = baseMaterial;
 	}
 
-	public String resourceName() {
-		return name;
-	}
-
+	/**
+	 * Similar to Minecraft Material. Didn't want to tie to that implementation.
+	 * Determines Minecraft material and other physical properties.
+	 */
 	public enum BaseMaterial {
-		DRESSED_STONE(0, "dressed_stone", Material.rock, Block.soundTypeStone),
-		COMPOSITE(1, "composite", Material.rock, Block.soundTypeStone),
-		DURAPLAST(2, "duraplast", Material.iron, Block.soundTypeMetal);
+		DRESSED_STONE("dressed_stone", Material.rock, Block.soundTypeStone),
+		COMPOSITE("composite", Material.rock, Block.soundTypeStone),
+		DURAPLAST("duraplast", Material.iron, Block.soundTypeMetal);
 
-		public final int		id;
-		public final String		name;
-		public final Material	material;
-		public final SoundType	stepSound;
+		public final String name;
+		public final Material material;
+		public final SoundType stepSound;
 
-		public final int		hardness;
-		public final int		resistance;
-		public final String		harvestTool;
-		public final int		harvestLevel;
+		public final int hardness;
+		public final int resistance;
+		public final String harvestTool;
+		public final int harvestLevel;
 
-		BaseMaterial(int id, String name, Material material, SoundType sound) {
-			this.id = id;
+		BaseMaterial(String name, Material material, SoundType sound) {
 			this.name = name;
 			this.material = material;
 			stepSound = sound;
@@ -49,8 +52,6 @@ public enum NiceSubstance {
 			resistance = props.resistance;
 			harvestTool = props.harvestTool;
 			harvestLevel = props.harvestLevel;
-
 		}
 	}
-
 }

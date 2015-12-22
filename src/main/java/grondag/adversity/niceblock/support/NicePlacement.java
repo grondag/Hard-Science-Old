@@ -28,6 +28,24 @@ public abstract class NicePlacement {
 	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 			float hitZ, int meta, EntityLivingBase placer);
 
+	/** convenience factory method */
+	public static NicePlacement makeMasonryPlacer() {
+		return new PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
+				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
+	}
+
+	/** convenience factory method */
+	public static NicePlacement makeColumnPlacerRound() {
+		return new PlacementColumn(NiceStyle.COLUMN_ROUND_X, NiceStyle.COLUMN_ROUND_Y,
+				NiceStyle.COLUMN_ROUND_Z);
+	}
+
+	/** convenience factory method */
+	public static NicePlacement makeColumnPlacerSquare() {
+		return new PlacementColumn(NiceStyle.COLUMN_SQUARE_X, NiceStyle.COLUMN_SQUARE_Y,
+				NiceStyle.COLUMN_SQUARE_Z);
+	}
+
 	/**
 	 * Handles placement of blocks that join together in appearance and have
 	 * multiple block instances with the same style.
