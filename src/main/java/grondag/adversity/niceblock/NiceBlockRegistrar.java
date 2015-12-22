@@ -8,8 +8,6 @@ import grondag.adversity.niceblock.support.NicePlacement.PlacementBigBlock;
 import grondag.adversity.niceblock.support.NicePlacement.PlacementSimple;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -46,7 +44,8 @@ public class NiceBlockRegistrar {
 	public static LinkedList<NiceBlock> allBlocks = new LinkedList<NiceBlock>();
 
 	/**
-	 * NiceBlockModels contained here for handling during model bake and texture stitch
+	 * NiceBlockModels contained here for handling during model bake and texture
+	 * stitch
 	 */
 	private static LinkedList<NiceModel> allModels = new LinkedList<NiceModel>();
 
@@ -57,7 +56,7 @@ public class NiceBlockRegistrar {
 
 	// define our substance groupings
 	private static final NiceSubstance[][] substance16Group = { { NiceSubstance.BASALT, NiceSubstance.DIORITE } };
-	
+
 	// declare the block instances
 	public static final NiceBlock raw1 = new NiceBlock("raw_1", NiceStyle.RAW, new PlacementSimple(),
 			substance16Group[0]);
@@ -99,20 +98,19 @@ public class NiceBlockRegistrar {
 	public static final NiceBlock columnSquareZ1 = new NiceBlock("column_square_z_1", NiceStyle.COLUMN_SQUARE_Z,
 			NiceStyle.makeColumnPlacerSquare(), substance16Group[0]);
 
-	
 	public static final NiceBlockColumnRound columnRoundX1 = new NiceBlockColumnRound("column_round_x_1", NiceStyle.COLUMN_ROUND_X,
 			NiceStyle.makeColumnPlacerRound(), substance16Group[0]);
 	public static final NiceBlockColumnRound columnRoundY1 = new NiceBlockColumnRound("column_round_y_1", NiceStyle.COLUMN_ROUND_Y,
 			NiceStyle.makeColumnPlacerRound(), substance16Group[0]);
 	public static final NiceBlockColumnRound columnRoundZ1 = new NiceBlockColumnRound("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
 			NiceStyle.makeColumnPlacerRound(), substance16Group[0]);
-	
+
 	/**
 	 * Use to generate model resource location names with a consistent
 	 * convention.
 	 */
 	public static String getModelResourceNameFromMeta(NiceBlock block, int meta) {
-		return Adversity.MODID + ":"+ block.name + "." + meta;
+		return Adversity.MODID + ":" + block.name + "." + meta;
 	}
 
 	/**
@@ -144,8 +142,10 @@ public class NiceBlockRegistrar {
 				ModelLoader.setCustomModelResourceLocation(block.item, i, mrlItem);
 
 				// Blocks need custom state mapper for two reasons
-				// 1) To avoid creating mappings for unused substance indexes (metadata values)
-				// 2) To point them to our custom model instead of looking for a json file
+				// 1) To avoid creating mappings for unused substance indexes
+				// (metadata values)
+				// 2) To point them to our custom model instead of looking for a
+				// json file
 				ModelLoader.setCustomStateMapper(block, NiceBlockStateMapper.instance);
 
 				// prevents console spam about missing item models
@@ -161,7 +161,7 @@ public class NiceBlockRegistrar {
 
 	/**
 	 * Provides consistent key construction for style/substance lookup.
-	 * */
+	 */
 	private static String getSnSkey(NiceStyle style, NiceSubstance substance) {
 		return style.toString() + "." + substance.id;
 	}
@@ -176,8 +176,8 @@ public class NiceBlockRegistrar {
 
 	/**
 	 * Returns the first block with the same style and substance. For most
-	 * blocks, there will be only one result. If there is more than one,  
-	 * this method will yell at you and return the first result. For sibling blocks
+	 * blocks, there will be only one result. If there is more than one, this
+	 * method will yell at you and return the first result. For sibling blocks
 	 * that have multiple blocks the same style and substance, use
 	 * getBlocksForStyleAndSubstace.
 	 */
@@ -188,8 +188,8 @@ public class NiceBlockRegistrar {
 		} else {
 			if (blocks.size() > 1) {
 				Adversity.log
-						.warn("getFirstBlockForStyleAndSubstance found more than one block! This should not normally happen. "
-								+ "style = " + style + ", substance = " + substance);
+				.warn("getFirstBlockForStyleAndSubstance found more than one block! This should not normally happen. "
+						+ "style = " + style + ", substance = " + substance);
 			}
 			return blocks.toArray(new NiceBlock[0])[0];
 		}
@@ -211,13 +211,14 @@ public class NiceBlockRegistrar {
 			// Register handlers for texture stitch and model bake events (they
 			// are in this class)
 			MinecraftForge.EVENT_BUS.register(instance);
-			
+
 			/**
-			 * Register custom block highlighter for blocks with irregular hitboxes.
+			 * Register custom block highlighter for blocks with irregular
+			 * hitboxes.
 			 */
 			MinecraftForge.EVENT_BUS.register(NiceBlockHighlighter.instance);
 		}
-		
+
 	}
 
 	@SubscribeEvent

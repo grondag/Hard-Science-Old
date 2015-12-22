@@ -1,18 +1,10 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.support.NicePlacement;
-
-import java.util.List;
-
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 
-public class NiceBlockColumnRound extends NiceBlock{
+public class NiceBlockColumnRound extends NiceBlock {
 
 	public NiceBlockColumnRound(String name, NiceStyle style, NicePlacement placer, NiceSubstance[] substances) {
 		super(name, style, placer, substances);
@@ -42,14 +34,10 @@ public class NiceBlockColumnRound extends NiceBlock{
 	public boolean isFullCube() {
 		return false;
 	}
-	
+
 	@Override
-	public boolean needsCustomHighlight(){
+	public boolean needsCustomHighlight() {
 		return true;
 	}
 
-	// TODO
-	// Add handler for DrawBlockHighlightEvent(context, player, target, subID, currentItem, partialTicks)
-	
-	
 }
