@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.model;
 
 import java.util.Map;
 
@@ -13,8 +13,9 @@ import com.google.gson.JsonParseException;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblocks.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblocks.NiceBlock.TestForStyle;
+import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.NiceBlock.TestForStyle;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -25,9 +26,9 @@ import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class NiceCookbookColumnSquare extends NiceCookbookAxisOriented{
+public class ModelCookbookColumnSquare extends ModelCookbookAxisOriented{
 	
-	public NiceCookbookColumnSquare(Axis axis) {
+	public ModelCookbookColumnSquare(Axis axis) {
 		super(axis);
 	}
 

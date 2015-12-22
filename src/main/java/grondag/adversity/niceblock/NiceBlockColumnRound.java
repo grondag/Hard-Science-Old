@@ -1,4 +1,6 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock;
+
+import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.util.List;
 
@@ -12,7 +14,7 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 
 public class NiceBlockColumnRound extends NiceBlock{
 
-	public NiceBlockColumnRound(String name, NiceBlockStyle style, NicePlacement placer, NiceSubstance[] substances) {
+	public NiceBlockColumnRound(String name, NiceStyle style, NicePlacement placer, NiceSubstance[] substances) {
 		super(name, style, placer, substances);
 	}
 

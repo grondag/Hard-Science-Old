@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.support;
 
 import java.util.List;
 

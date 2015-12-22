@@ -1,12 +1,15 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.model;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.NeighborBlocks.NeighborSet;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblocks.NiceBlock.TestForStyle;
-import grondag.adversity.niceblocks.NiceCookbook.Ingredients;
-import grondag.adversity.niceblocks.NiceCookbookAxisOriented.AxisAlignedModel;
+import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.NiceBlock.TestForStyle;
+import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
+import grondag.adversity.niceblock.model.ModelCookbookAxisOriented.AxisAlignedModel;
+import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.List;
 import java.util.Map;
@@ -31,9 +34,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class NiceCookbookColumnRound extends NiceCookbookColumnSquare  implements ICollisionHandler {
+public class ModelCookbookColumnRound extends ModelCookbookColumnSquare  implements ICollisionHandler {
 
-	public NiceCookbookColumnRound(Axis axis) {
+	public ModelCookbookColumnRound(Axis axis) {
 		super(axis);
 	}
 	

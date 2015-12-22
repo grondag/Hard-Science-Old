@@ -1,4 +1,7 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.support;
+
+import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 
 import java.util.Map;
 

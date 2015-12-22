@@ -1,6 +1,9 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.model;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.NiceSubstance;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +38,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	protected final ModelResourceLocation blockResourceLocation;
 	protected final ModelResourceLocation itemResourceLocation;
 	
-	protected final NiceBlockStyle style;
+	protected final NiceStyle style;
 	protected final NiceSubstance substance;
 	
 	protected TextureAtlasSprite particleTexture;
@@ -49,7 +52,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	protected IFlexibleBakedModel itemModel;
 
 	
-	public NiceModel(NiceBlockStyle style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
+	public NiceModel(NiceStyle style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
 		this.style = style;
 		this.substance = substance;
 		blockResourceLocation = mrlBlock;
@@ -105,7 +108,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 			for(int alt = 0; alt < style.cookbook.getAlternateCount(); alt++){
 
-				NiceCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, recipe, alt);
+				ModelCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, recipe, alt);
 
 				IRetexturableModel template = (IRetexturableModel)event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
 
@@ -115,7 +118,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			}	
 		}
 		
-		NiceCookbook.Ingredients itemIngredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
+		ModelCookbook.Ingredients itemIngredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
 		IRetexturableModel itemTemplate = (IRetexturableModel)event.modelLoader.getModel(new ModelResourceLocation(itemIngredients.modelName));
 		IModel itemModel=itemTemplate.retexture(itemIngredients.textures);
 		this.itemModel=itemModel.bake(itemIngredients.state, DefaultVertexFormats.ITEM, textureGetter);

@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.model;
 
 import java.util.Map;
 
@@ -7,15 +7,17 @@ import com.google.common.collect.Maps;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblocks.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblocks.NiceBlock.TestForSubstance;
+import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.NiceBlock.TestForSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class NiceCookbookMasonry extends NiceCookbook{
+public class ModelCookbookMasonry extends ModelCookbook{
 
 	@Override
 	public  int getRecipeCount() {
@@ -30,7 +32,7 @@ public class NiceCookbookMasonry extends NiceCookbook{
 		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
-		NiceCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
+		ModelCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
 
 		textures.put("up", style.buildTextureName(substance, baseOffset + offset.up));
 		textures.put("down", style.buildTextureName(substance, baseOffset + offset.down));

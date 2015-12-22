@@ -12,7 +12,7 @@ import grondag.adversity.feature.volcano.Volcano;
 //import grondag.adversity.world.AdversityWorldProvider;
 //import grondag.adversity.world.AdversityWorldType;
 
-import grondag.adversity.niceblocks.NiceBlockRegistrar;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;

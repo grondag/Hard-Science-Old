@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.model;
 
 import java.util.Map;
 
@@ -10,6 +10,9 @@ import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.IBlockTest;
+import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -29,7 +32,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  * Used by NiceBlock to determine extended block state.
  * This, combined with style, substance and model, determines how block appears in game.
  */
-public class NiceCookbook {
+public class ModelCookbook {
 	
 	/** Dimensions are UDNSEW. Value 0 means no neighbor, 1 means neighbor present */
 	protected static  Integer[][][][][][] SIMPLE_JOIN_RECIPE_LOOKUP = new Integer[2][2][2][2][2][2];
@@ -40,9 +43,9 @@ public class NiceCookbook {
 	/** dimensions are rotation and recipe */
 	protected static final TextureOffset[][] CONNECTED_CORNER_TEXTURE_OFFSETS = new TextureOffset[4][386];
 	
-	protected NiceBlockStyle style;
+	protected NiceStyle style;
 
-	public void setStyle(NiceBlockStyle style){
+	public void setStyle(NiceStyle style){
 		if(this.style == null) {
 			this.style = style;
 		} else {

@@ -1,4 +1,6 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.support;
+
+import grondag.adversity.niceblock.NiceBlock;
 
 import java.io.IOException;
 import java.util.ArrayList;

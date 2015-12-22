@@ -1,10 +1,14 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.support;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
-import grondag.adversity.niceblocks.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblocks.NiceBlock.TestForStyleGroupAndSubstance;
+import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.NiceBlock.TestForStyleAndSubstance;
+import grondag.adversity.niceblock.NiceBlock.TestForStyleGroupAndSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.BlockPos;
@@ -127,13 +131,13 @@ public abstract class NicePlacement {
 		 * Blocks that share substance and have one of styles given at
 		 * instantiation
 		 */
-		private final NiceBlockStyle[]	styles;
+		private final NiceStyle[]	styles;
 
 		/** Blocks that share the same style and substance */
 		private NiceBlock[]				siblingsCache;
 		private boolean					isSiblingsCacheDone	= false;
 
-		public PlacementMasonry(NiceBlockStyle... styles) {
+		public PlacementMasonry(NiceStyle... styles) {
 			super();
 			this.styles = styles;
 		}
@@ -230,16 +234,16 @@ public abstract class NicePlacement {
 	 */
 	public static class PlacementColumn extends NicePlacement {
 
-		private final NiceBlockStyle	styleX;
-		private final NiceBlockStyle	styleY;
-		private final NiceBlockStyle	styleZ;
+		private final NiceStyle	styleX;
+		private final NiceStyle	styleY;
+		private final NiceStyle	styleZ;
 
 		private NiceBlock				blockX;
 		private NiceBlock				blockY;
 		private NiceBlock				blockZ;
 		private boolean					areSiblingBlocksFound	= false;
 
-		public PlacementColumn(NiceBlockStyle styleX, NiceBlockStyle styleY, NiceBlockStyle styleZ) {
+		public PlacementColumn(NiceStyle styleX, NiceStyle styleY, NiceStyle styleZ) {
 			super();
 			this.styleX = styleX;
 			this.styleY = styleY;

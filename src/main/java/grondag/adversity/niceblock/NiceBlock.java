@@ -1,9 +1,11 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
+import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -86,7 +88,7 @@ public class NiceBlock extends Block {
 	 * Identifies the visual appearance of the block and handles aspects related
 	 * to models, collision, extended state, placement, etc.
 	 */
-	public final NiceBlockStyle style;
+	public final NiceStyle style;
 
 	/**
 	 * Item for this block. Will have same substance variants as this block.
@@ -126,7 +128,7 @@ public class NiceBlock extends Block {
 	 * Assumes first substance is representative of all the substances for
 	 * purposes of setting material-dependent attributes.
 	 */
-	public NiceBlock(String name, NiceBlockStyle style, NicePlacement placer, NiceSubstance... substances) {
+	public NiceBlock(String name, NiceStyle style, NicePlacement placer, NiceSubstance... substances) {
 		super(substances[0].baseMaterial.material);
 		this.style = style;
 		this.substances = substances;
@@ -366,7 +368,7 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForStyle implements IBlockTest {
 
-		private final NiceBlockStyle style;
+		private final NiceStyle style;
 
 		/**
 		 * Blocks match if they have have the same style. Can be different
@@ -392,7 +394,7 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForStyleAndSubstance implements IBlockTest {
 
-		private final NiceBlockStyle style;
+		private final NiceStyle style;
 		private final int substanceIndex;
 
 		/**
@@ -422,7 +424,7 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForStyleGroupAndSubstance implements IBlockTest {
 
-		private final HashSet<NiceBlockStyle> styles;
+		private final HashSet<NiceStyle> styles;
 		private final int substanceIndex;
 
 		/**
@@ -430,7 +432,7 @@ public class NiceBlock extends Block {
 		 * of styles passed in at instantiation. Substance taken from block
 		 * state passed in.
 		 */
-		public TestForStyleGroupAndSubstance(IBlockState ibs, NiceBlockStyle... styles) {
+		public TestForStyleGroupAndSubstance(IBlockState ibs, NiceStyle... styles) {
 			this.styles = new HashSet(Arrays.asList(styles));
 			if (ibs.getBlock() instanceof NiceBlock) {
 				substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);

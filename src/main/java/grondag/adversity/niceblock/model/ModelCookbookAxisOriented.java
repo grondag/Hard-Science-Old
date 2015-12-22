@@ -1,4 +1,4 @@
-package grondag.adversity.niceblocks;
+package grondag.adversity.niceblock.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,9 @@ import java.util.List;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblocks.NiceBlock.TestForStyle;
+import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceBlock.TestForStyle;
+import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -29,7 +31,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public abstract class NiceCookbookAxisOriented extends NiceCookbook implements ICollisionHandler{
+public abstract class ModelCookbookAxisOriented extends ModelCookbook implements ICollisionHandler{
 	
 	protected String[] modelNames = new String[AxisAlignedModel.values().length];
 	public final ImmutableList<AxisAlignedBB>[] MODEL_BOUNDS = new ImmutableList[64];
@@ -167,7 +169,7 @@ public abstract class NiceCookbookAxisOriented extends NiceCookbook implements I
 	}
 	
 
-	public NiceCookbookAxisOriented (EnumFacing.Axis axis){
+	public ModelCookbookAxisOriented (EnumFacing.Axis axis){
 		super();
 		populateModelNames();
 
