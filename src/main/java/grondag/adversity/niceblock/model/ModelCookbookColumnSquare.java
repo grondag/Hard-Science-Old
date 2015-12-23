@@ -18,6 +18,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
 import grondag.adversity.niceblock.NiceBlock.TestForStyle;
+import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
@@ -82,15 +83,8 @@ public class ModelCookbookColumnSquare extends ModelCookbookAxisOriented{
 		textures.put("cap_no_neighbors", style.buildTextureName(substance, baseOffset + 5));
 		textures.put("cap_inner_side", style.buildTextureName(substance, baseOffset + 4));
 		
-		
-        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
-                new Vector3f(0, 1.5f / 16, -2.75f / 16),
-                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
-                new Vector3f(0.375f, 0.375f, 0.375f),
-                null));
-    
-		return new Ingredients(modelName, textures, 
-			new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(ROTATION_LOOKUP[recipe])));
+		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
+
 	}
 
 	

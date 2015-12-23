@@ -75,7 +75,7 @@ public class ModelCookbook {
 		Map<String, String> textures = Maps.newHashMap();
 		textures.put("all", style.buildTextureName(substance, calcAlternate(alternate) + style.textureIndex));
 		
-		return new Ingredients(modelName, textures, ModelRotation.X0_Y0);
+		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}
 	
 	/**
@@ -157,9 +157,9 @@ public class ModelCookbook {
     public class Ingredients{
     	public final String modelName;
     	public final ImmutableMap<String, String> textures;
-    	public final IModelState state;
+    	public final TRSRTransformation state;
     	
-    	public Ingredients(String modelName, Map<String, String> textures, IModelState state){
+    	public Ingredients(String modelName, Map<String, String> textures, TRSRTransformation state){
     		this.modelName = modelName;
     		this.textures = ImmutableMap.copyOf(textures);
     		this.state = state;

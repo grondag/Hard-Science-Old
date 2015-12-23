@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 
 import java.io.IOException;
 import java.util.List;
@@ -196,7 +197,26 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			}
 		}
 		
-		this.itemModel = models[0][style.cookbook.getItemModelIndex()];
+		
+		// Item model is the same as one of the block models, except that we need to handle perspective.
+		// All the models we use implement IPerspectiveAwareModel but because they aren't loaded via the 
+		// standard loader they don't have an IModelState that includes the necessary key.
+		//
+		// To fix this, we replace the normal block state with a SimpleModelState instance
+		// that includes a third-person perspective and the normal block state as the default.
+		// This is retained by the Bake method for that model type and then applied via handlePerspective in that model.
+		ModelCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
+		IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
+		IModel model = template.retexture(ingredients.textures);
+		
+        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+                new Vector3f(0, 1.5f / 16, -2.75f / 16),
+                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
+                new Vector3f(0.375f, 0.375f, 0.375f),
+                null));
+ 		
+		itemModel = model.bake(new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(ingredients.state)),
+				DefaultVertexFormats.ITEM, textureGetter);
 
 		event.modelRegistry.putObject(blockResourceLocation, this);
 		event.modelRegistry.putObject(itemResourceLocation, this);
@@ -206,7 +226,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	@Override
 	public List getFaceQuads(EnumFacing p_177551_1_) {
 		// should never be called because we provide a separate
-// IFlexibleBakedModel instance in handleBlockState
+		// IFlexibleBakedModel instance in handleBlockState
 		return null;
 	}
 

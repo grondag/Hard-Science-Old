@@ -15,6 +15,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ModelCookbookMasonry extends ModelCookbook{
@@ -41,7 +42,7 @@ public class ModelCookbookMasonry extends ModelCookbook{
 		textures.put("north", style.buildTextureName(substance, baseOffset + offset.north));
 		textures.put("south", style.buildTextureName(substance, baseOffset + offset.south));
 		
-		return new Ingredients(modelName, textures, ModelRotation.X0_Y0);
+		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}
 
 	@Override
