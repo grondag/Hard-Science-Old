@@ -12,9 +12,15 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 
 import com.google.common.collect.Maps;
 
+/**
+ * Niceblocks generally only have Substance as part of block state.
+ * Each different substance state is mapped the model instance for
+ * that block style and substance.
+ * 
+ */
 public class NiceBlockStateMapper extends DefaultStateMapper {
 
-	public final static NiceBlockStateMapper	instance	= new NiceBlockStateMapper();
+	public final static NiceBlockStateMapper instance = new NiceBlockStateMapper();
 
 	@Override
 	public Map putStateModelLocations(Block block) {

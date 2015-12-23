@@ -4,20 +4,24 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.NiceBlock.TestForStyleGroupAndSubstance;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.NiceStyle;
-import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblock.NiceBlock.TestForStyleAndSubstance;
-import grondag.adversity.niceblock.NiceBlock.TestForStyleGroupAndSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
+
+/**
+ * Specialized onBlockPlaced event handlers to enable building of
+ * decorative multiblocks with connected textures/geometry.
+ */
 public abstract class NicePlacement {
 
-	protected NiceBlock	owner;
+	protected NiceBlock owner;
 
 	/** call from Block class on initialization **/
 	public void setOwner(NiceBlock owner) {
@@ -53,12 +57,11 @@ public abstract class NicePlacement {
 	public static class PlacementBigBlock extends NicePlacement {
 
 		/** Blocks that share the same style and substance */
-		private NiceBlock[]	siblingsCache;
-		private boolean		isSiblingsCacheDone	= false;
+		private NiceBlock[] siblingsCache;
+		private boolean isSiblingsCacheDone = false;
 
 		private NiceBlock[] getSiblings() {
-			// substances are grouped consistently across blocks, so the first
-			// substance
+			// substances are grouped consistently across blocks, so the first substance
 			// is sufficient for finding sibling blocks.
 			if (!isSiblingsCacheDone) {
 				siblingsCache = NiceBlockRegistrar.getBlocksForStyleAndSubstance(owner.style, owner.substances[0])
@@ -149,11 +152,11 @@ public abstract class NicePlacement {
 		 * Blocks that share substance and have one of styles given at
 		 * instantiation
 		 */
-		private final NiceStyle[]	styles;
+		private final NiceStyle[] styles;
 
 		/** Blocks that share the same style and substance */
-		private NiceBlock[]				siblingsCache;
-		private boolean					isSiblingsCacheDone	= false;
+		private NiceBlock[] siblingsCache;
+		private boolean isSiblingsCacheDone = false;
 
 		public PlacementMasonry(NiceStyle... styles) {
 			super();
@@ -161,8 +164,7 @@ public abstract class NicePlacement {
 		}
 
 		private NiceBlock[] getSiblings() {
-			// substances are grouped consistently across blocks, so the first
-			// substance
+			// substances are grouped consistently across blocks, so the first substance
 			// is sufficient for finding sibling blocks.
 			if (!isSiblingsCacheDone) {
 				siblingsCache = new NiceBlock[styles.length];
@@ -252,14 +254,14 @@ public abstract class NicePlacement {
 	 */
 	public static class PlacementColumn extends NicePlacement {
 
-		private final NiceStyle	styleX;
-		private final NiceStyle	styleY;
-		private final NiceStyle	styleZ;
+		private final NiceStyle styleX;
+		private final NiceStyle styleY;
+		private final NiceStyle styleZ;
 
-		private NiceBlock				blockX;
-		private NiceBlock				blockY;
-		private NiceBlock				blockZ;
-		private boolean					areSiblingBlocksFound	= false;
+		private NiceBlock blockX;
+		private NiceBlock blockY;
+		private NiceBlock blockZ;
+		private boolean areSiblingBlocksFound = false;
 
 		public PlacementColumn(NiceStyle styleX, NiceStyle styleY, NiceStyle styleZ) {
 			super();
@@ -294,8 +296,7 @@ public abstract class NicePlacement {
 				return blockZ.getStateFromMeta(meta);
 
 			default:
-				// should be impossible to get here, but silences eclipse
-				// warning
+				// should be impossible to get here, but silences eclipse warning
 				return owner.getStateFromMeta(meta);
 			}
 		}
@@ -311,8 +312,6 @@ public abstract class NicePlacement {
 				float hitZ, int meta, EntityLivingBase placer) {
 
 			return owner.getStateFromMeta(meta);
-
 		}
-
 	}
 }

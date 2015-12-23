@@ -11,10 +11,9 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-
-/** 
- * Implement to provide specialized collision handling
- * to NiceBlock for blocks with non-standard shapes.
+/**
+ * Implement to provide specialized collision handling to NiceBlock for blocks
+ * with non-standard shapes.
  */
 public interface ICollisionHandler {
 
