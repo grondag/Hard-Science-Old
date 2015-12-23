@@ -1,22 +1,22 @@
 package grondag.adversity.niceblock.model;
 
-import java.util.Map;
-
-import com.google.common.collect.Maps;
-
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
-import net.minecraft.client.resources.model.ModelRotation;
+import grondag.adversity.niceblock.NiceSubstance;
+
+import java.util.Map;
+
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
+import com.google.common.collect.Maps;
+
 public class ModelCookbookConnectedCorners extends ModelCookbook {
-	
+
 	@Override
 	public int getRecipeCount() {
 		return 386;
@@ -24,10 +24,10 @@ public class ModelCookbookConnectedCorners extends ModelCookbook {
 
 	@Override
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
-		
+
 		Rotation rotation = calcRotation(alternate);
 		String modelName = "adversity:block/cube_rotate_" + calcRotation(alternate).degrees;
-		int baseOffset = (style.textureCount * calcAlternate(alternate)) + style.textureIndex;
+		int baseOffset = style.textureCount * calcAlternate(alternate) + style.textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
 		ModelCookbook.TextureOffset offset = CONNECTED_CORNER_TEXTURE_OFFSETS[rotation.index][recipe];
@@ -38,9 +38,9 @@ public class ModelCookbookConnectedCorners extends ModelCookbook {
 		textures.put("west", style.buildTextureName(substance, baseOffset + offset.west));
 		textures.put("north", style.buildTextureName(substance, baseOffset + offset.north));
 		textures.put("south", style.buildTextureName(substance, baseOffset + offset.south));
-		
+
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
-		
+
 	}
 
 	@Override
@@ -49,14 +49,11 @@ public class ModelCookbookConnectedCorners extends ModelCookbook {
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		NeighborTestResults mates = neighbors.getNeighborTestResults(test);
 
-		CornerRecipeFinder finder = CONNECTED_CORNER_RECIPE_LOOKUP[mates.up?1:0][mates.down?1:0]
-				[mates.east?1:0][mates.west?1:0] 
-						[mates.north?1:0][mates.south?1:0];
+		CornerRecipeFinder finder = CONNECTED_CORNER_RECIPE_LOOKUP[mates.up ? 1 : 0][mates.down ? 1 : 0]
+				[mates.east ? 1 : 0][mates.west ? 1 : 0]
+				[mates.north ? 1 : 0][mates.south ? 1 : 0];
 
 		return finder.getRecipe(test, worldIn, pos);
 	}
-	
-	
 
 }
-

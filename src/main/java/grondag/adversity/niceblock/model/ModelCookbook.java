@@ -45,6 +45,10 @@ public class ModelCookbook {
 	 */
 	protected static final TextureOffset[][] SIMPLE_JOIN_TEXTURE_OFFSETS = new TextureOffset[4][64];
 
+	 // Connected corner lookups are defined in base class because 
+	// simple join texture lookups are a subset of them.
+
+	
 	/**
 	 * Use with NeighborBlocks test for lookup of recipe for connected blocks
 	 * that depend on adjacent blocks and do require corner tests. (Blocks with
@@ -340,6 +344,10 @@ public class ModelCookbook {
 
 	static {
 
+		// Could have generated all this programmatically but did it by hand
+		// before setting down the path of creating a generic block framework
+		// and it wasn't broke and constants are fast and reliable, so kept it.
+		
 		SIMPLE_JOIN_RECIPE_LOOKUP[0][0][0][0][0][0] = 0;
 		SIMPLE_JOIN_RECIPE_LOOKUP[1][0][0][0][0][0] = 1;
 		SIMPLE_JOIN_RECIPE_LOOKUP[0][1][0][0][0][0] = 2;
