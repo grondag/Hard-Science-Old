@@ -4,8 +4,10 @@ import java.util.Map;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,6 +18,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
 import grondag.adversity.niceblock.NiceBlock.TestForStyle;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -23,6 +26,7 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.model.IModelState;
+import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
@@ -78,7 +82,15 @@ public class ModelCookbookColumnSquare extends ModelCookbookAxisOriented{
 		textures.put("cap_no_neighbors", style.buildTextureName(substance, baseOffset + 5));
 		textures.put("cap_inner_side", style.buildTextureName(substance, baseOffset + 4));
 		
-		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
+		
+        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+                new Vector3f(0, 1.5f / 16, -2.75f / 16),
+                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
+                new Vector3f(0.375f, 0.375f, 0.375f),
+                null));
+    
+		return new Ingredients(modelName, textures, 
+			new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(ROTATION_LOOKUP[recipe])));
 	}
 
 	

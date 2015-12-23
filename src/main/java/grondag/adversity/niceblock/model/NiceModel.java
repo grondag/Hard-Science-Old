@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.block.model.ModelBlock;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -29,14 +31,19 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.IRetexturableModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.client.model.SimpleModelState;
+import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.client.model.obj.OBJModel.OBJBakedModel;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Container for NiceBlock model variants retrieved by the block render dispatcher.
@@ -130,13 +137,9 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		// ++ {
 		// ++ return func_180664_k() == layer;
 		// ++ }
-
-		Minecraft mc = Minecraft.getMinecraft();
-		BlockRendererDispatcher blockRendererDispatcher = mc.getBlockRendererDispatcher();
-		BlockModelShapes blockModelShapes = blockRendererDispatcher.getBlockModelShapes();
 		
-		// Provide missing model as a default to contain the damage if we derp it up.
-		IBakedModel retVal = blockModelShapes.getModelManager().getMissingModel();
+		// Provide a default to contain the damage if we derp it up.
+		IBakedModel retVal = itemModel;
 
 		// Really should ALWAYS be a NiceBlock instance but if someone goes mucking about 
 		// with the model registry crazy stuff could happen.
@@ -145,18 +148,18 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			retVal = models[exState.getValue(NiceBlock.PROP_MODEL_ALTERNATE)][exState.getValue(NiceBlock.PROP_MODEL_RECIPE)];
 		}
 
-		if (retVal instanceof OBJBakedModel) {
-			// OBJBakedModel.handleBlockState doesn't really do anything, but that could change in the future.
-			return ((OBJBakedModel) retVal).handleBlockState(state);
+		if (retVal instanceof ISmartBlockModel) {
+			return ((ISmartBlockModel) retVal).handleBlockState(state);
 		}
 
 		return retVal;
 	}
 
 	/**
-	 * Presumably provides a way to do fancy texture management via inversion of control, 
+	 * The function parameter to bake method presumably provides 
+	 * a way to do fancy texture management via inversion of control, 
 	 * but we don't need that because we register all our textures in texture bake.  
-	 * So, just providing access to the vanilla texture maps.
+	 * This function simply provides access to the vanilla texture maps.
 	 */
 	protected Function<ResourceLocation, TextureAtlasSprite> textureGetter = new Function<ResourceLocation, TextureAtlasSprite>()
 	{
@@ -167,6 +170,22 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		}
 	};
 
+	/**
+	 * Registers all textures that will be needed for this style/substance.
+	 * Happens before model bake.
+	 */
+	public void handleTextureStitchEvent(TextureStitchEvent.Pre event) {
+		for (int alt = 0; alt < style.alternateCount; alt++) {
+			for (int tex = 0; tex < style.textureCount; tex++) {
+				event.map.registerSprite(new ResourceLocation(style.buildTextureName(substance, alt * style.textureCount + style.textureIndex + tex)));
+			}
+		}
+	}
+	
+	/**
+	 * Bakes all the models for this style/substance and caches them in array.
+	 * Should happen after texture stitch and before any models are retrieved with handleBlockState.
+	 */
 	public void handleBakeEvent(ModelBakeEvent event) throws IOException {
 		for (int recipe = 0; recipe < style.cookbook.getRecipeCount(); recipe++) {
 			for (int alt = 0; alt < style.cookbook.getAlternateCount(); alt++) {
@@ -176,23 +195,12 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 				models[alt][recipe] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 			}
 		}
+		
+		this.itemModel = models[0][style.cookbook.getItemModelIndex()];
 
-		ModelCookbook.Ingredients itemIngredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
-				IRetexturableModel itemTemplate = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(itemIngredients.modelName));
-				IModel itemModel = itemTemplate.retexture(itemIngredients.textures);
-				this.itemModel = itemModel.bake(itemIngredients.state, DefaultVertexFormats.ITEM, textureGetter);
-	
 		event.modelRegistry.putObject(blockResourceLocation, this);
-				event.modelRegistry.putObject(itemResourceLocation, this);
+		event.modelRegistry.putObject(itemResourceLocation, this);
 
-	}
-
-	public void handleTextureStitchEvent(TextureStitchEvent.Pre event) {
-		for (int alt = 0; alt < style.alternateCount; alt++) {
-			for (int tex = 0; tex < style.textureCount; tex++) {
-				event.map.registerSprite(new ResourceLocation(style.buildTextureName(substance, alt * style.textureCount + style.textureIndex + tex)));
-			}
-		}
 	}
 
 	@Override
@@ -242,23 +250,14 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 	@Override
 	public ItemCameraTransforms getItemCameraTransforms() {
-		return ItemCameraTransforms.DEFAULT;
+		// Different model types could have different transforms but should be same 
+		// type of model in all array elements, so just use the first.
+		return itemModel.getItemCameraTransforms();
 	}
 
 	@Override
 	public IBakedModel handleItemState(ItemStack stack) {
-		return models[0][style.cookbook.getItemModelIndex()];
+		return itemModel;
 	}
 
-	@Override
-	public VertexFormat getFormat() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

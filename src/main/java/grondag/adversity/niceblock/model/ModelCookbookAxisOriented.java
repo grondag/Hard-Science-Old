@@ -12,12 +12,15 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
 
-import org.lwjgl.util.vector.Vector3f;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.resources.model.ModelRotation;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
@@ -28,6 +31,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
@@ -172,7 +176,7 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 	public ModelCookbookAxisOriented (EnumFacing.Axis axis){
 		super();
 		populateModelNames();
-
+        
 		ROTATION_LOOKUP = new TRSRTransformation[64];
 		
 		switch (axis){
@@ -186,6 +190,9 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 				setModelBoundsForRecipe(i);
 			}
 			
+
+
+
 			RECIPE_LOOKUP[0][1][1][1][1][1]=0;
 			RECIPE_LOOKUP[1][0][1][1][1][1]=1;
 			RECIPE_LOOKUP[1][1][1][1][0][1]=2;

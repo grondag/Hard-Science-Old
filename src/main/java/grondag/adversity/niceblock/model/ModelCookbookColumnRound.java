@@ -15,13 +15,16 @@ import java.util.List;
 import java.util.Map;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 
-import org.lwjgl.util.vector.Vector3f;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -31,6 +34,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
@@ -77,7 +81,15 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare  impleme
 
 		textures.put("#all", style.buildTextureName(substance, baseOffset));
 		
-		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
+        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+                new Vector3f(0, 1.5f / 16, -2.75f / 16),
+                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
+                new Vector3f(0.375f, 0.375f, 0.375f),
+                null));
+    
+		return new Ingredients(modelName, textures, 
+			new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(ROTATION_LOOKUP[recipe])));
+
 	}
 	
 	@SuppressWarnings("incomplete-switch")
