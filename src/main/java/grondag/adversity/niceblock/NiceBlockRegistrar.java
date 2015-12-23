@@ -99,11 +99,11 @@ public class NiceBlockRegistrar {
 	public static final NiceBlock columnSquareZ1 = new NiceBlock("column_square_z_1", NiceStyle.COLUMN_SQUARE_Z,
 			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
 
-	public static final NiceBlockColumnRound columnRoundX1 = new NiceBlockColumnRound("column_round_x_1", NiceStyle.COLUMN_ROUND_X,
+	public static final NiceBlockNonCubic columnRoundX1 = new NiceBlockNonCubic("column_round_x_1", NiceStyle.COLUMN_ROUND_X,
 			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
-	public static final NiceBlockColumnRound columnRoundY1 = new NiceBlockColumnRound("column_round_y_1", NiceStyle.COLUMN_ROUND_Y,
+	public static final NiceBlockNonCubic columnRoundY1 = new NiceBlockNonCubic("column_round_y_1", NiceStyle.COLUMN_ROUND_Y,
 			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
-	public static final NiceBlockColumnRound columnRoundZ1 = new NiceBlockColumnRound("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
+	public static final NiceBlockNonCubic columnRoundZ1 = new NiceBlockNonCubic("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
 			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
 
 	/**
@@ -222,6 +222,9 @@ public class NiceBlockRegistrar {
 
 	}
 
+	/**
+	 * Centralized event handler for NiceModel baking.
+	 */
 	@SubscribeEvent
 	public void onModelBakeEvent(ModelBakeEvent event) throws IOException {
 		for (NiceModel model : allModels) {
@@ -229,6 +232,9 @@ public class NiceBlockRegistrar {
 		}
 	}
 
+	/**
+	 * Centralized event handler for NiceModel texture stitch.
+	 */
 	@SubscribeEvent
 	public void stitcherEventPre(TextureStitchEvent.Pre event) {
 		for (NiceModel model : allModels) {

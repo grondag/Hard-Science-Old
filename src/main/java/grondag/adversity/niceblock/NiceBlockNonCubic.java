@@ -4,9 +4,12 @@ import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class NiceBlockColumnRound extends NiceBlock {
+/**
+ * For blocks that don't fully occlude neighbors and require special hit boxes.
+ */
+public class NiceBlockNonCubic extends NiceBlock {
 
-	public NiceBlockColumnRound(String name, NiceStyle style, NicePlacement placer, NiceSubstance[] substances) {
+	public NiceBlockNonCubic(String name, NiceStyle style, NicePlacement placer, NiceSubstance[] substances) {
 		super(name, style, placer, substances);
 	}
 

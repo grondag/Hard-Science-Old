@@ -238,7 +238,7 @@ public class NiceBlock extends Block {
 		if (state instanceof IExtendedBlockState) {
 			return ((IExtendedBlockState) state).withProperty(PROP_MODEL_RECIPE,
 					style.cookbook.getRecipeIndex((IExtendedBlockState) state, world, pos)).withProperty(PROP_MODEL_ALTERNATE,
-							alternator.getAlternate(pos));
+					alternator.getAlternate(pos));
 		} else {
 			return state;
 		}
@@ -260,8 +260,8 @@ public class NiceBlock extends Block {
 	public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
 		if (collisionHandler == null) {
 			return new ImmutableList.Builder()
-					.add(new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY, pos.getZ() + maxZ))
-					.build();
+			.add(new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY, pos.getZ() + maxZ))
+			.build();
 		} else {
 			return collisionHandler.getSelectionBoundingBoxes(worldIn, pos, state);
 		}
