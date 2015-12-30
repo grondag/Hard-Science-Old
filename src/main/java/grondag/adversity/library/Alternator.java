@@ -54,11 +54,20 @@ public class Alternator implements IAlternator {
 			for (int j = 0; j < 32; j++) {
 				for (int k = 0; k < 32; k++) {
 					mix[i][j][k] = (byte) r.nextInt(alternateCount);
+					int tryCount = 0;
+					while(tryCount < 3 && (
+							(i > 0 && mix[i-1][j][k] == mix[i][j][k])
+							|| (j > 0 && mix[i][j-1][k] == mix[i][j][k])
+							|| (k > 0 && mix[i][j][k-1] == mix[i][j][k])
+							)){
+						mix[i][j][k] = (byte) r.nextInt(alternateCount);
+						tryCount++;
+					}
 				}
 			}
 		}
 	}
-
+	
 	/**
 	 * Returns a uniformly distributed integer (byte) values between 0 and the
 	 * alternate count - 1. Alternate count is determined when you retrieve the
