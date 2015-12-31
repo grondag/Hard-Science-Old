@@ -30,7 +30,7 @@ public class NiceBlockStateMapper extends DefaultStateMapper {
 			NiceBlock niceBlock = (NiceBlock) block;
 
 			for (int i = 0; i < niceBlock.substances.length; i++) {
-				IBlockState state = niceBlock.getDefaultState().withProperty(NiceBlock.PROP_SUBSTANCE_INDEX, i);
+				IBlockState state = niceBlock.getDefaultState().withProperty(NiceBlock.SUBSTANCE_INDEX, i);
 				mapLocations.put(state,
 						new ModelResourceLocation(NiceBlockRegistrar.getModelResourceNameFromMeta(niceBlock, i)));
 			}

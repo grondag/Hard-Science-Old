@@ -23,8 +23,8 @@ import com.google.common.collect.Maps;
 
 public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implements ICollisionHandler {
 
-	public ModelCookbookColumnRound(Axis axis) {
-		super(axis);
+	public ModelCookbookColumnRound(int textureIndex, int alternateCount, Axis axis) {
+		super(textureIndex, alternateCount, axis);
 	}
 
 	@Override
@@ -59,17 +59,17 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 
 		String modelName = modelNames[MODEL_FOR_RECIPE[recipe].index];
 
-		int baseOffset = style.textureCount * calcAlternate(alternate) + style.textureIndex;
+		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
-		textures.put("#all", style.buildTextureName(substance, baseOffset));
+		textures.put("#all", buildTextureName(substance, baseOffset));
 
 		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
 	}
 
 	@SuppressWarnings("incomplete-switch")
 	@Override
-	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getModelRecipeID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		TestForStyle styleTest = new TestForStyle(state);

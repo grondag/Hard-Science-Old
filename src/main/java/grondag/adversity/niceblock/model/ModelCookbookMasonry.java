@@ -24,33 +24,47 @@ import com.google.common.collect.Maps;
  */
 public class ModelCookbookMasonry extends ModelCookbook {
 
+	public ModelCookbookMasonry(int textureIndex, int alternateCount) {
+		super(textureIndex, alternateCount);
+	}
+	
 	@Override
 	public int getRecipeCount() {
 		return 64;
 	}
 
 	@Override
+	public int getTextureCount() {
+		return 16;
+	}
+	
+	@Override
+	public boolean useRotatedTexturesAsAlternates(){
+		return false;
+	}
+	
+	@Override
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
 
 		Rotation rotation = calcRotation(alternate);
 		String modelName = "adversity:block/cube_rotate_" + calcRotation(alternate).degrees;
-		int baseOffset = style.textureCount * calcAlternate(alternate) + style.textureIndex;
+		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
 		ModelCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
 
-		textures.put("up", style.buildTextureName(substance, baseOffset + offset.up));
-		textures.put("down", style.buildTextureName(substance, baseOffset + offset.down));
-		textures.put("east", style.buildTextureName(substance, baseOffset + offset.east));
-		textures.put("west", style.buildTextureName(substance, baseOffset + offset.west));
-		textures.put("north", style.buildTextureName(substance, baseOffset + offset.north));
-		textures.put("south", style.buildTextureName(substance, baseOffset + offset.south));
+		textures.put("up", buildTextureName(substance, baseOffset + offset.up));
+		textures.put("down", buildTextureName(substance, baseOffset + offset.down));
+		textures.put("east", buildTextureName(substance, baseOffset + offset.east));
+		textures.put("west", buildTextureName(substance, baseOffset + offset.west));
+		textures.put("north", buildTextureName(substance, baseOffset + offset.north));
+		textures.put("south", buildTextureName(substance, baseOffset + offset.south));
 
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}
 
 	@Override
-	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getModelRecipeID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		NeighborTestResults mates = neighbors.getNeighborTestResults(new TestForCompleteMatch(state));
 		NeighborTestResults needsMortar = neighbors.getNeighborTestResults(

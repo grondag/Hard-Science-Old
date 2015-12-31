@@ -1,7 +1,10 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Alternator;
+import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
+import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
@@ -13,6 +16,7 @@ import javax.vecmath.Quat4f;
 
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -75,7 +79,17 @@ public class ModelCookbook {
 	 * Style that holds this cook book instance.
 	 */
 	protected NiceStyle style;
-
+	
+	/**
+	 * Randomizer for texture alternates. These are cached in Alternator class, so
+	 * no significant cost to keeping a reference in each block. Necessary
+	 * because Vanilla alternate function apparently uses block state as input,
+	 * causing textures to vary for the same position as extended state changes,
+	 * which gives a jarring effect in some cases. Alternator only uses BlockPos
+	 * as input.
+	 */
+	private final IAlternator alternator;
+	
 	public void setStyle(NiceStyle style) {
 		if (this.style == null) {
 			this.style = style;
@@ -83,15 +97,68 @@ public class ModelCookbook {
 			Adversity.log.warn("Attempted to set Cookbook style more than once.  This should never happen.");
 		}
 	}
+	
+	/**
+	 * Index of the first texture to be used. The cookbook will
+	 * assume all textures are offset from this index.
+	 */
+	protected final int textureIndex;
 
+	/**
+	 * How many versions of textures are provided in the atlas. (count includes
+	 * the first texture) Does not include rotations.
+	 */
+	protected final int alternateCount;
+
+	public ModelCookbook(int textureIndex, int alternateCount){
+		this.textureIndex = textureIndex;
+		this.alternateCount = alternateCount;
+		alternator = Alternator.getAlternator((byte) (alternateCount * (useRotatedTexturesAsAlternates() ? 4 : 1)));
+	}
+	
 	public int getRecipeCount() {
 		return 1;
 	}
 
+	/**
+	 * Provides consistent calculation of variant ID that is used
+	 * to look up the appropriate model for recipe and alternate.
+	 * We use a combined variant ID so that only one extended state property
+	 * is needed for each cookbook and NiceBlock doesn't need to understand our implementation.
+	 */
+	public int calcVariantID(int recipe, int alt){
+		return (recipe * alternateCount) + alt;
+	}
+	
+	/**
+	 * If true, textures on each face can be rotated. Cookbook must still
+	 * handle selection of specific textures to match the rotations if the
+	 * faces have a visible orientation.
+	 */
+	public boolean useRotatedTexturesAsAlternates(){
+		return true;
+	}
+	
 	public final int getAlternateCount() {
 		return calcExpanded();
 	}
+	
+	/**
+	 * Rendering layer for the model controlled by this cookbook.
+	 */
+	public EnumWorldBlockLayer getRenderLayer() {
+		return EnumWorldBlockLayer.SOLID;
+	}
 
+	/**
+	 * Number of textures expected by this model. The total
+	 * number of textures will be textureCount * alternateCount.
+	 * Alternate count is determined by the style.
+	 */
+	public int getTextureCount() {
+		return 1;
+	}
+	
 	/**
 	 * Override if special collision handling is needed due to non-cubic shape.
 	 */
@@ -104,17 +171,23 @@ public class ModelCookbook {
 		String modelName = "adversity:block/cube_rotate_all_" + calcRotation(alternate).degrees;
 
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", style.buildTextureName(substance, calcAlternate(alternate) + style.textureIndex));
+		textures.put("all", buildTextureName(substance, calcAlternate(alternate) + textureIndex));
 
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}
 
 	/**
-	 * Used by NiceBlock to provide extended state to NiceModel so that it knows
-	 * which model to provide to renderer.
-	 *
+	 * Used by NiceStyle to provide extended state to NiceBlock so that 
+	 * NiceModel knows which model to provide to renderer.
 	 */
-	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getVariantID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		return calcVariantID(getModelRecipeID(state, worldIn, pos), alternator.getAlternate(pos));
+	}
+	
+	/**
+	 * Override when different textures/models are needed based on in-world situation.
+	 */
+	protected int getModelRecipeID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos){
 		return 0;
 	}
 
@@ -128,10 +201,10 @@ public class ModelCookbook {
 	}
 
 	/**
-	 * Tells NiceModel which texture to use to block-breaking particles.
+	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
 	public String getParticleTextureName(NiceSubstance substance) {
-		return style.buildTextureName(substance, style.textureIndex);
+		return buildTextureName(substance, textureIndex);
 	}
 
 	/**
@@ -139,10 +212,10 @@ public class ModelCookbook {
 	 * pairs with calcRotation and calcAlternate
 	 * */
 	protected final int calcExpanded() {
-		if (style.useRotationsAsAlternates) {
-			return style.alternateCount * 4;
+		if (useRotatedTexturesAsAlternates()) {
+			return alternateCount * 4;
 		} else {
-			return style.alternateCount;
+			return alternateCount;
 		}
 	}
 
@@ -150,7 +223,7 @@ public class ModelCookbook {
 	 * retrieves alternate index from expanded value see calcExpanded
 	 */
 	protected final int calcAlternate(int expanded) {
-		if (style.useRotationsAsAlternates) {
+		if (useRotatedTexturesAsAlternates()) {
 			return expanded / 4;
 		} else {
 			return expanded;
@@ -161,7 +234,7 @@ public class ModelCookbook {
 	 * retrieves rotation from expanded value see calcExpanded
 	 */
 	protected final Rotation calcRotation(int expanded) {
-		if (style.useRotationsAsAlternates) {
+		if (useRotatedTexturesAsAlternates()) {
 			return Rotation.values()[expanded & 3];
 		} else {
 			return Rotation.ROTATE_NONE;
@@ -188,6 +261,14 @@ public class ModelCookbook {
 		return retVal;
 	}
 
+	/**
+	 * Generate the texture name for a given substance and offset. 
+	 * Cookbook determines which offset to use for what purpose.
+	 */
+	public static String buildTextureName(NiceSubstance substance, int offset) {
+		return "adversity:blocks/" + substance.name + "/" + substance.name + "_" + (offset >> 3) + "_" + (offset & 7);
+	}
+	
 	/**
 	 * Used to pass all the stuff NiceModel needs to bake a model.
 	 *

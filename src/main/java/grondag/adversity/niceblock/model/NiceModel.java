@@ -19,7 +19,9 @@ import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
@@ -90,9 +92,15 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	/**
 	 * Holds the baked models that will be returned for rendering based on
 	 * extended state. Array is initialized during the handleBake event.
-	 * Dimensions are alternate and recipe
 	 */
-	protected IFlexibleBakedModel[][] models;
+	protected final IFlexibleBakedModel[] primaryModels;
+	
+	/**
+	 * Holds second-pass baked models that will be returned for rendering based on
+	 * extended state for two-pass rendering. Array is initialized during the handleBake event.
+	 */
+	protected final IFlexibleBakedModel[] secondaryModels;
+	
 	protected IFlexibleBakedModel itemModel;
 
 	/**
@@ -107,7 +115,13 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		this.substance = substance;
 		blockResourceLocation = mrlBlock;
 		itemResourceLocation = mrlItem;
-		models = new IFlexibleBakedModel[style.cookbook.getAlternateCount()][style.cookbook.getRecipeCount()];
+		primaryModels = new IFlexibleBakedModel[style.firstCookbook.getAlternateCount() * style.firstCookbook.getRecipeCount()];
+		
+		if(style.secondCookbook != null){
+			secondaryModels = new IFlexibleBakedModel[style.secondCookbook.getAlternateCount() * style.secondCookbook.getRecipeCount()];
+		} else {
+			secondaryModels = null;
+		}
 	}
 
 	/**
@@ -118,33 +132,32 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	@Override
 	public IBakedModel handleBlockState(IBlockState state) {
 
-		// noted with interest...
-		// ++ /**
-		// ++ * Queries if this block should render in a given layer.
-		// ++ * ISmartBlockModel can use MinecraftForgeClient.getRenderLayer to
-		// alter their model based on layer
-		// ++ */
-		// ++ public boolean canRenderInLayer(EnumWorldBlockLayer layer)
-		// ++ {
-		// ++ return func_180664_k() == layer;
-		// ++ }
-
 		// Provide a default to contain the damage if we derp it up.
 		IBakedModel retVal = itemModel;
 
 		// Really should ALWAYS be a NiceBlock instance but if someone goes
-		// mucking about
-		// with the model registry crazy stuff could happen.
+		// mucking about with the model registry crazy stuff could happen.
 		if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock) {
 			IExtendedBlockState exState = (IExtendedBlockState) state;
-			retVal = models[exState.getValue(NiceBlock.PROP_MODEL_ALTERNATE)][exState.getValue(NiceBlock.PROP_MODEL_RECIPE)];
-		}
+			
+			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
 
+			if(layer == style.firstCookbook.getRenderLayer()){
+				retVal = primaryModels[exState.getValue(NiceBlock.FIRST_MODEL_VARIANT)];
+			} else if (style.secondCookbook != null && layer == style.secondCookbook.getRenderLayer()){
+				retVal = primaryModels[exState.getValue(NiceBlock.SECOND_MODEL_VARIANT)];
+			}
+		}
+		
+		
+		// May not be strictly needed, but doing in case something important happens in some model types.
 		if (retVal instanceof ISmartBlockModel) {
 			return ((ISmartBlockModel) retVal).handleBlockState(state);
 		}
 
 		return retVal;
+		
+
 	}
 
 	/**
@@ -166,9 +179,17 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	 * Happens before model bake.
 	 */
 	public void handleTextureStitchEvent(TextureStitchEvent.Pre event) {
-		for (int alt = 0; alt < style.alternateCount; alt++) {
-			for (int tex = 0; tex < style.textureCount; tex++) {
-				event.map.registerSprite(new ResourceLocation(style.buildTextureName(substance, alt * style.textureCount + style.textureIndex + tex)));
+		for (int alt = 0; alt < style.firstCookbook.alternateCount; alt++) {
+			for (int tex = 0; tex < style.firstCookbook.getTextureCount(); tex++) {
+				event.map.registerSprite(new ResourceLocation(ModelCookbook.buildTextureName(substance, alt * style.firstCookbook.getTextureCount() + style.firstCookbook.textureIndex + tex)));
+			}
+		}
+		
+		if(style.secondCookbook != null){
+			for (int alt = 0; alt < style.secondCookbook.alternateCount; alt++) {
+				for (int tex = 0; tex < style.secondCookbook.getTextureCount(); tex++) {
+					event.map.registerSprite(new ResourceLocation(ModelCookbook.buildTextureName(substance, alt * style.secondCookbook.getTextureCount() + style.secondCookbook.textureIndex + tex)));
+				}
 			}
 		}
 	}
@@ -179,15 +200,25 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	 * with handleBlockState.
 	 */
 	public void handleBakeEvent(ModelBakeEvent event) throws IOException {
-		for (int recipe = 0; recipe < style.cookbook.getRecipeCount(); recipe++) {
-			for (int alt = 0; alt < style.cookbook.getAlternateCount(); alt++) {
-				ModelCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, recipe, alt);
+		for (int recipe = 0; recipe < style.firstCookbook.getRecipeCount(); recipe++) {
+			for (int alt = 0; alt < style.firstCookbook.getAlternateCount(); alt++) {
+				ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(substance, recipe, alt);
 				IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
 				IModel model = template.retexture(ingredients.textures);
-				models[alt][recipe] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
+				primaryModels[style.firstCookbook.calcVariantID(recipe, alt)] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 			}
 		}
 
+		if(style.secondCookbook != null){
+			for (int recipe = 0; recipe < style.secondCookbook.getRecipeCount(); recipe++) {
+				for (int alt = 0; alt < style.secondCookbook.getAlternateCount(); alt++) {
+					ModelCookbook.Ingredients ingredients = style.secondCookbook.getIngredients(substance, recipe, alt);
+					IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
+					IModel model = template.retexture(ingredients.textures);
+					secondaryModels[style.secondCookbook.calcVariantID(recipe, alt)] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
+				}
+			}
+		}
 		/**
 		 * Item model is the same as one of the block models, except that we need to handle perspective.
 		 * All the models we use implement IPerspectiveAwareModel but because they aren't loaded via the
@@ -198,7 +229,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		 * This is retained by the Bake method for that model type and then applied via handlePerspective in that model.
 		 */
 		
-		ModelCookbook.Ingredients ingredients = style.cookbook.getIngredients(substance, style.cookbook.getItemModelIndex(), 0);
+		ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(substance, style.firstCookbook.getItemModelIndex(), 0);
 		IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
 		IModel model = template.retexture(ingredients.textures);
 
@@ -213,7 +244,6 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 
 		event.modelRegistry.putObject(blockResourceLocation, this);
 		event.modelRegistry.putObject(itemResourceLocation, this);
-
 	}
 
 	/**
@@ -264,7 +294,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	public TextureAtlasSprite getTexture() {
 		// lazy lookup to ensure happens after texture atlas has been created
 		if (particleTexture == null) {
-			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.cookbook.getParticleTextureName(substance));
+			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.firstCookbook.getParticleTextureName(substance));
 		}
 		return particleTexture;
 	}

@@ -60,19 +60,19 @@ import com.google.common.collect.ImmutableList;
 public class NiceBlock extends Block {
 
 	/** Index to the substances[] array. */
-	public static final PropertyInteger PROP_SUBSTANCE_INDEX = PropertyInteger.create("substance_index", 0, 15);
+	public static final PropertyInteger SUBSTANCE_INDEX = PropertyInteger.create("substance_index", 0, 15);
+	
 	/**
-	 * Used by NiceModel to select correct in-game variant. 385 is the max. Most
-	 * blocks have fewer variants.
+	 * Used by NiceModel to select correct in-game variant. 
+	 * Most blocks have far fewer variants than the max allowed.
+	 * The first model is used for collision detection.
 	 */
-	public static final IUnlistedProperty PROP_MODEL_RECIPE = Properties.toUnlisted(PropertyInteger.create("model_recipe", 0, 385));
+	public static final IUnlistedProperty FIRST_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("first_model_variant", 0, 16000));
+	
 	/**
-	 * Used by NiceModel to select an alternate in-game appearance when more
-	 * than one is available. We don't use the MineCraft alternate functionality
-	 * because it is non-deterministic for different block states. This causes
-	 * undesirable changes to texture selection when neighbor blocks change.
+	 * Just like FIRST_MODEL_VARIANT but for secondary model when block has two layers.
 	 */
-	public static final IUnlistedProperty PROP_MODEL_ALTERNATE = Properties.toUnlisted(PropertyInteger.create("model_alternate", 0, 15));
+	public static final IUnlistedProperty SECOND_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("second_model_variant", 0, 385));
 
 	/**
 	 * Maps metadata to specific Adversity substance. Metadata is the index to
@@ -93,16 +93,6 @@ public class NiceBlock extends Block {
 	 * handling.
 	 */
 	public final ItemMultiTexture item;
-
-	/**
-	 * Model randomizer for this block. These are cached in Alternator class, so
-	 * no significant cost to keeping a reference in each block. Necessary
-	 * because Vanilla alternate function apparently uses block state as input,
-	 * causing textures to vary for the same position as extended state changes,
-	 * which gives a jarring effect in some cases. Alternator only uses BlockPos
-	 * as input.
-	 */
-	private final IAlternator alternator;
 
 	/** Non-prefixed, unlocalized name of this block */
 	public final String name;
@@ -136,10 +126,9 @@ public class NiceBlock extends Block {
 		setStepSound(substances[0].baseMaterial.stepSound);
 		setHardness(substances[0].baseMaterial.hardness);
 		setResistance(substances[0].baseMaterial.resistance);
-		alternator = Alternator.getAlternator((byte) (style.alternateCount * (style.useRotationsAsAlternates ? 4 : 1)));
 		placementHandler = placer;
 		placer.setOwner(this);
-		collisionHandler = style.cookbook.getCollisionHandler();
+		collisionHandler = style.firstCookbook.getCollisionHandler();
 
 		item = new ItemMultiTexture(this, this, new Function<ItemStack, String>() {
 			@Override
@@ -154,8 +143,8 @@ public class NiceBlock extends Block {
 
 	@Override
 	protected BlockState createBlockState() {
-		return new ExtendedBlockState(this, new IProperty[] { PROP_SUBSTANCE_INDEX }, new IUnlistedProperty[] {
-				PROP_MODEL_RECIPE, PROP_MODEL_ALTERNATE });
+		return new ExtendedBlockState(this, new IProperty[] { SUBSTANCE_INDEX }, new IUnlistedProperty[] {
+				FIRST_MODEL_VARIANT, SECOND_MODEL_VARIANT });
 	}
 
 	// BASIC METADATA MECHANICS
@@ -170,19 +159,19 @@ public class NiceBlock extends Block {
 
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		return getDefaultState().withProperty(PROP_SUBSTANCE_INDEX, meta);
+		return getDefaultState().withProperty(SUBSTANCE_INDEX, meta);
 	}
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return state.getValue(PROP_SUBSTANCE_INDEX);
+		return state.getValue(SUBSTANCE_INDEX);
 	}
 
 	// INTERACTION HANDLING
 
 	@Override
 	public int damageDropped(IBlockState state) {
-		return state.getValue(PROP_SUBSTANCE_INDEX);
+		return state.getValue(SUBSTANCE_INDEX);
 	}
 
 	@Override
@@ -203,28 +192,10 @@ public class NiceBlock extends Block {
 		return EnumWorldBlockLayer.SOLID;
 	}
 
-	// Used in NiceBlockStyle renderLayerFlags and NiceBlock.canRenderInLayer()
-	// Would have expected that forge already defines these somewhere but
-	// couldn't find them.
-	public static final int LAYER_SOLID = 1;
-	public static final int LAYER_CUTOUT_MIPPED = 2;
-	public static final int LAYER_CUTOUT = 4;
-	public static final int LAYER_TRANSLUCENT = 8;
-
 	@Override
 	public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
-		switch (layer) {
-		case SOLID:
-			return (style.renderLayerFlags & LAYER_SOLID) == LAYER_SOLID;
-		case CUTOUT_MIPPED:
-			return (style.renderLayerFlags & LAYER_CUTOUT_MIPPED) == LAYER_CUTOUT_MIPPED;
-		case CUTOUT:
-			return (style.renderLayerFlags & LAYER_CUTOUT) == LAYER_CUTOUT;
-		case TRANSLUCENT:
-			return (style.renderLayerFlags & LAYER_TRANSLUCENT) == LAYER_TRANSLUCENT;
-		default:
-			return false;
-		}
+		return style.firstCookbook.getRenderLayer() == layer
+				|| (style.secondCookbook != null && style.secondCookbook.getRenderLayer() == layer);
 	}
 
 	/**
@@ -236,9 +207,8 @@ public class NiceBlock extends Block {
 		// should always be an IExtendedBlockState but avoid crash if somehow
 		// not
 		if (state instanceof IExtendedBlockState) {
-			return ((IExtendedBlockState) state).withProperty(PROP_MODEL_RECIPE,
-					style.cookbook.getRecipeIndex((IExtendedBlockState) state, world, pos)).withProperty(PROP_MODEL_ALTERNATE,
-					alternator.getAlternate(pos));
+			return ((IExtendedBlockState) state).withProperty(FIRST_MODEL_VARIANT,
+					style.firstCookbook.getVariantID((IExtendedBlockState) state, world, pos));
 		} else {
 			return state;
 		}
@@ -329,12 +299,12 @@ public class NiceBlock extends Block {
 		 */
 		public TestForCompleteMatch(IBlockState ibs) {
 			block = ibs.getBlock();
-			substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
+			substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
 		}
 
 		@Override
 		public boolean testBlock(IBlockState ibs) {
-			return ibs.getBlock() == block && ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+			return ibs.getBlock() == block && ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
 	}
 
@@ -348,7 +318,7 @@ public class NiceBlock extends Block {
 
 		public TestForSubstance(IBlockState ibs) {
 			if (ibs.getBlock() instanceof NiceBlock) {
-				substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
+				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
 			} else {
 				substanceIndex = -1;
 			}
@@ -356,7 +326,7 @@ public class NiceBlock extends Block {
 
 		@Override
 		public boolean testBlock(IBlockState ibs) {
-			return ibs.getBlock() instanceof NiceBlock && ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+			return ibs.getBlock() instanceof NiceBlock && ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
 	}
 
@@ -402,7 +372,7 @@ public class NiceBlock extends Block {
 		public TestForStyleAndSubstance(IBlockState ibs) {
 			if (ibs.getBlock() instanceof NiceBlock) {
 				style = ((NiceBlock) ibs.getBlock()).style;
-				substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
+				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
 			} else {
 				style = null;
 				substanceIndex = -1;
@@ -412,7 +382,7 @@ public class NiceBlock extends Block {
 		@Override
 		public boolean testBlock(IBlockState ibs) {
 			return ibs.getBlock() instanceof NiceBlock && ((NiceBlock) ibs.getBlock()).style == style
-					&& ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+					&& ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
 	}
 
@@ -433,7 +403,7 @@ public class NiceBlock extends Block {
 		public TestForStyleGroupAndSubstance(IBlockState ibs, NiceStyle... styles) {
 			this.styles = new HashSet(Arrays.asList(styles));
 			if (ibs.getBlock() instanceof NiceBlock) {
-				substanceIndex = ibs.getValue(PROP_SUBSTANCE_INDEX);
+				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
 			} else {
 				substanceIndex = -1;
 			}
@@ -442,7 +412,7 @@ public class NiceBlock extends Block {
 		@Override
 		public boolean testBlock(IBlockState ibs) {
 			return ibs.getBlock() instanceof NiceBlock && styles.contains(((NiceBlock) ibs.getBlock()).style)
-					&& ibs.getValue(PROP_SUBSTANCE_INDEX) == substanceIndex;
+					&& ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
 	}
 

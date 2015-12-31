@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.model;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceBlock.TestForStyle;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -206,8 +207,8 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 		return builder.build();
 	}
 
-	public ModelCookbookAxisOriented(EnumFacing.Axis axis) {
-		super();
+	public ModelCookbookAxisOriented(int textureIndex, int alternateCount, EnumFacing.Axis axis) {
+		super(textureIndex, alternateCount);
 		populateModelNames();
 
 		ROTATION_LOOKUP = new TRSRTransformation[64];
@@ -444,11 +445,12 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 	}
 
 	@Override
-	public int getRecipeIndex(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public int getModelRecipeID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 
 		return RECIPE_LOOKUP[tests.up ? 1 : 0][tests.down ? 1 : 0][tests.east ? 1 : 0][tests.west ? 1 : 0][tests.north ? 1 : 0][tests.south ? 1 : 0];
+
 
 	}
 

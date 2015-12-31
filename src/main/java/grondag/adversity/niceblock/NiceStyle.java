@@ -6,7 +6,11 @@ import grondag.adversity.niceblock.model.ModelCookbookColumnSquare;
 import grondag.adversity.niceblock.model.ModelCookbookConnectedCorners;
 import grondag.adversity.niceblock.model.ModelCookbookMasonry;
 import grondag.adversity.niceblock.model.NiceModel;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.property.IExtendedBlockState;
 
 /**
  * Style governs the visual appearance and some behavior of a NiceBlock.
@@ -16,89 +20,60 @@ import net.minecraft.util.EnumFacing.Axis;
  * 
  */
 public enum NiceStyle {
-	RAW("", 0, 1, 4, true, new ModelCookbook(), NiceBlock.LAYER_SOLID),
-	SMOOTH("", 4, 1, 4, true, new ModelCookbook(), NiceBlock.LAYER_SOLID),
-	LARGE_BRICKS("", 96, 6, 4, true, new ModelCookbook(), NiceBlock.LAYER_SOLID),
-	SMALL_BRICKS("", 120, 6, 4, true, new ModelCookbook(), NiceBlock.LAYER_SOLID),
-	BIG_WORN("", 256, 48, 3, false, new ModelCookbookConnectedCorners(), NiceBlock.LAYER_SOLID),
-	BIG_WEATHERED("", 400, 48, 1, false, new ModelCookbookConnectedCorners(), NiceBlock.LAYER_SOLID),
-	BIG_ORNATE("", 448, 48, 1, false, new ModelCookbookConnectedCorners(), NiceBlock.LAYER_SOLID),
-	MASONRY_A("", 16, 16, 1, false, new ModelCookbookMasonry(), NiceBlock.LAYER_SOLID),
-	MASONRY_B("", 32, 16, 1, false, new ModelCookbookMasonry(), NiceBlock.LAYER_SOLID),
-	MASONRY_C("", 48, 16, 1, false, new ModelCookbookMasonry(), NiceBlock.LAYER_SOLID),
-	MASONRY_D("", 64, 16, 1, false, new ModelCookbookMasonry(), NiceBlock.LAYER_SOLID),
-	MASONRY_E("", 80, 16, 1, false, new ModelCookbookMasonry(), NiceBlock.LAYER_SOLID),
-	COLUMN_SQUARE_X("", 8, 9, 1, false, new ModelCookbookColumnSquare(Axis.X), NiceBlock.LAYER_CUTOUT),
-	COLUMN_SQUARE_Y("", 8, 9, 1, false, new ModelCookbookColumnSquare(Axis.Y), NiceBlock.LAYER_CUTOUT),
-	COLUMN_SQUARE_Z("", 8, 9, 1, false, new ModelCookbookColumnSquare(Axis.Z), NiceBlock.LAYER_CUTOUT),
-	COLUMN_ROUND_X("", 4, 1, 1, false, new ModelCookbookColumnRound(Axis.X), NiceBlock.LAYER_CUTOUT),
-	COLUMN_ROUND_Y("", 4, 1, 1, false, new ModelCookbookColumnRound(Axis.Y), NiceBlock.LAYER_CUTOUT),
-	COLUMN_ROUND_Z("", 4, 1, 1, false, new ModelCookbookColumnRound(Axis.Z), NiceBlock.LAYER_CUTOUT);
+	RAW(new ModelCookbook(0, 4), null),
+	SMOOTH(new ModelCookbook(4, 4), null),
+	LARGE_BRICKS(new ModelCookbook(96, 4), null),
+	SMALL_BRICKS(new ModelCookbook(120, 4), null),
+	BIG_WORN(new ModelCookbookConnectedCorners(256, 3), null),
+	BIG_WEATHERED(new ModelCookbookConnectedCorners(400, 1), null),
+	BIG_ORNATE(new ModelCookbookConnectedCorners(448, 1), null),
+	MASONRY_A(new ModelCookbookMasonry(16, 1), null),
+	MASONRY_B(new ModelCookbookMasonry(32, 1), null),
+	MASONRY_C(new ModelCookbookMasonry(48, 1), null),
+	MASONRY_D(new ModelCookbookMasonry(64, 1), null),
+	MASONRY_E(new ModelCookbookMasonry(80, 1), null),
+	COLUMN_SQUARE_X(new ModelCookbookColumnSquare(8, 1, Axis.X), null),
+	COLUMN_SQUARE_Y(new ModelCookbookColumnSquare(8, 1, Axis.Y), null),
+	COLUMN_SQUARE_Z(new ModelCookbookColumnSquare(8, 1, Axis.Z), null),
+	COLUMN_ROUND_X(new ModelCookbookColumnRound(4, 1, Axis.X), null),
+	COLUMN_ROUND_Y(new ModelCookbookColumnRound(4, 1, Axis.Y), null),
+	COLUMN_ROUND_Z(new ModelCookbookColumnRound(4, 1, Axis.Z), null);
 
 	/**
-	 * Identifies which resource texture file group is used for this style
+	 * Identifies the model cookbook that should always be used for
+	 * extendedBlockState.  This cookbook also provides custom
+	 * collision detection if needed.
 	 */
-	public final String textureSuffix;
-
+	public final ModelCookbook firstCookbook;
+	
 	/**
-	 * Index of the first texture to be used for this style. The model will
-	 * assume all textures are offset from this index.
+	 * Identifies an optional model cookbook for overlay or
+	 * other visual components that require a different render pass.
+	 * This cookbook is not used for custom collision detection.
+	 * MAY BE NULL.
 	 */
-	public final int textureIndex;
-
-	/**
-	 * Number of textures that should be loaded for each alternate So, the total
-	 * number of textures would be textureCount * alternateCount.
-	 */
-	public final int textureCount;
-
-	/**
-	 * How many versions of textures are provided in the atlas. (count includes
-	 * the first texture) Does not include rotations.
-	 */
-	public final int alternateCount;
-
-	/**
-	 * If true, textures on each face can be rotated. Block will use a cookbook
-	 * to handle selection of texture recipes to match the rotations if the
-	 * faces have a visible orientation.
-	 */
-	public final boolean useRotationsAsAlternates;
-
-	/**
-	 * Identifies the texture cookbook that should be used for
-	 * extendedBlockState.
-	 */
-	public final ModelCookbook cookbook;
-
-	/**
-	 * Governs behavior of NiceBlock.canRenderInLayer() Allows for rendering in
-	 * multiple layers.
-	 */
-	public final int renderLayerFlags;
+	public final ModelCookbook secondCookbook;
 
 	/**
 	 * Instantiate a new style.  See elsewhere in this class for what stuff does.
 	 */
-	NiceStyle(String textureSuffix, int textureIndex, int textureCount, int alternateCount,
-			boolean useRotationsAsAlternates, ModelCookbook cookbook, int renderLayerFlags) {
-		this.textureSuffix = textureSuffix;
-		this.textureIndex = textureIndex;
-		this.textureCount = textureCount;
-		this.alternateCount = alternateCount;
-		this.useRotationsAsAlternates = useRotationsAsAlternates;
-		cookbook.setStyle(this);
-		this.cookbook = cookbook;
-		this.renderLayerFlags = renderLayerFlags;
+	NiceStyle(ModelCookbook firstCookbook, ModelCookbook secondCookbook) {
+		this.firstCookbook = firstCookbook;
+		this.firstCookbook.setStyle(this);
+	
+		this.secondCookbook = secondCookbook;
+		if(this.secondCookbook != null){
+			this.secondCookbook.setStyle(this);
+		}
 	}
-
-	/**
-	 * Generate the texture name associated with this style for a given
-	 * substance and offset. Offsets are specific to a style. Cookbooks know
-	 * which one to use for what purpose.
-	 */
-	public String buildTextureName(NiceSubstance substance, int offset) {
-		String basename = substance.name + (textureSuffix == "" ? "" : "_") + textureSuffix;
-		return "adversity:blocks/" + basename + "/" + basename + "_" + (offset >> 3) + "_" + (offset & 7);
+	
+	// Used by NiceBlock to set extended state so that NiceModel knows what models to provide to renderer.
+	public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		if(secondCookbook == null){
+			return state.withProperty(NiceBlock.FIRST_MODEL_VARIANT,firstCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+		} else {
+			return state.withProperty(NiceBlock.FIRST_MODEL_VARIANT,firstCookbook.getVariantID((IExtendedBlockState) state, world, pos))
+					.withProperty(NiceBlock.SECOND_MODEL_VARIANT, secondCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+		}
 	}
 }
