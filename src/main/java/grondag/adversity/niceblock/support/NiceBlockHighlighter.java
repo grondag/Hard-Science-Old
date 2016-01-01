@@ -40,7 +40,7 @@ public class NiceBlockHighlighter {
 				double d2 = event.player.lastTickPosZ + (event.player.posZ - event.player.lastTickPosZ) * event.partialTicks;
 
 				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.player.worldObj, event.target.getBlockPos(), bs)) {
-					RenderGlobal.func_181561_a(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
+					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
 				}
 
 				GlStateManager.depthMask(true);

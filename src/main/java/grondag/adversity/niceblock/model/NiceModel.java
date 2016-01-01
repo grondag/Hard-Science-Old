@@ -145,7 +145,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			if(layer == style.firstCookbook.getRenderLayer()){
 				retVal = primaryModels[exState.getValue(NiceBlock.FIRST_MODEL_VARIANT)];
 			} else if (style.secondCookbook != null && layer == style.secondCookbook.getRenderLayer()){
-				retVal = primaryModels[exState.getValue(NiceBlock.SECOND_MODEL_VARIANT)];
+				retVal = secondaryModels[exState.getValue(NiceBlock.SECOND_MODEL_VARIANT)];
 			}
 		}
 		
@@ -291,7 +291,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	 * Used for block-breaking particles.
 	 */
 	@Override
-	public TextureAtlasSprite getTexture() {
+	public TextureAtlasSprite getParticleTexture() {
 		// lazy lookup to ensure happens after texture atlas has been created
 		if (particleTexture == null) {
 			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.firstCookbook.getParticleTextureName(substance));

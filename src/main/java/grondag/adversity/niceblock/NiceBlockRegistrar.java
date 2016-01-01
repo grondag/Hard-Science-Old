@@ -56,7 +56,10 @@ public class NiceBlockRegistrar {
 	private static Multimap<String, NiceBlock> lookupSnS = HashMultimap.create();
 
 	// define our substance groupings
-	private static final NiceSubstance[][] substance16Group = { { NiceSubstance.BASALT, NiceSubstance.DIORITE } };
+	private static final NiceSubstance[][] substance16Group = { 
+		{ NiceSubstance.BASALT, NiceSubstance.DIORITE },
+		{ NiceSubstance.HOT_BASALT }
+		};
 
 	// declare the block instances
 	public static final NiceBlock raw1 = new NiceBlock("raw_1", NiceStyle.RAW, new PlacementSimple(),
@@ -106,6 +109,10 @@ public class NiceBlockRegistrar {
 	public static final NiceBlockNonCubic columnRoundZ1 = new NiceBlockNonCubic("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
 			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
 
+	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
+			substance16Group[1]);
+
+	
 	/**
 	 * Use to generate model resource location names with a consistent
 	 * convention.

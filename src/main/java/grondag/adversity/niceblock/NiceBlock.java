@@ -30,6 +30,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
@@ -204,11 +205,9 @@ public class NiceBlock extends Block {
 	 */
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		// should always be an IExtendedBlockState but avoid crash if somehow
-		// not
+		// should always be an IExtendedBlockState but avoid crash if somehow not
 		if (state instanceof IExtendedBlockState) {
-			return ((IExtendedBlockState) state).withProperty(FIRST_MODEL_VARIANT,
-					style.firstCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+			return style.getExtendedState((IExtendedBlockState) state, world, pos);
 		} else {
 			return state;
 		}

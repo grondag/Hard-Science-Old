@@ -14,7 +14,8 @@ import net.minecraft.block.material.Material;
  */
 public enum NiceSubstance {
 	BASALT("basalt", BaseMaterial.DRESSED_STONE),
-	DIORITE("diorite", BaseMaterial.DRESSED_STONE);
+	DIORITE("diorite", BaseMaterial.DRESSED_STONE),
+	HOT_BASALT("hot_basalt", BaseMaterial.DRESSED_STONE);
 
 	public final String name;
 	public final BaseMaterial baseMaterial;

@@ -110,9 +110,18 @@ public class ModelCookbook {
 	 */
 	protected final int alternateCount;
 
+	protected final EnumWorldBlockLayer renderLayer;
+	protected final boolean isShaded;
+	
 	public ModelCookbook(int textureIndex, int alternateCount){
+		this(textureIndex, alternateCount, EnumWorldBlockLayer.SOLID, true);
+	}
+	
+	public ModelCookbook(int textureIndex, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded){
 		this.textureIndex = textureIndex;
 		this.alternateCount = alternateCount;
+		this.renderLayer = renderLayer;
+		this.isShaded = isShaded;
 		alternator = Alternator.getAlternator((byte) (alternateCount * (useRotatedTexturesAsAlternates() ? 4 : 1)));
 	}
 	
@@ -147,7 +156,7 @@ public class ModelCookbook {
 	 * Rendering layer for the model controlled by this cookbook.
 	 */
 	public EnumWorldBlockLayer getRenderLayer() {
-		return EnumWorldBlockLayer.SOLID;
+		return renderLayer;
 	}
 
 	/**
@@ -168,7 +177,13 @@ public class ModelCookbook {
 
 	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
 
-		String modelName = "adversity:block/cube_rotate_all_" + calcRotation(alternate).degrees;
+		String modelName;
+		
+		if(isShaded){
+			modelName = "adversity:block/cube_rotate_all_" + calcRotation(alternate).degrees;
+		} else {
+			modelName = "adversity:block/cube_no_shade_rotate_all_" + calcRotation(alternate).degrees;
+		}
 
 		Map<String, String> textures = Maps.newHashMap();
 		textures.put("all", buildTextureName(substance, calcAlternate(alternate) + textureIndex));
