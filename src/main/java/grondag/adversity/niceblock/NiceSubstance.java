@@ -15,14 +15,34 @@ import net.minecraft.block.material.Material;
 public enum NiceSubstance {
 	BASALT("basalt", BaseMaterial.DRESSED_STONE),
 	DIORITE("diorite", BaseMaterial.DRESSED_STONE),
-	HOT_BASALT("hot_basalt", BaseMaterial.DRESSED_STONE);
+	HOT_BASALT("hot_basalt", BaseMaterial.DRESSED_STONE, "hot_basalt");
 
-	public final String name;
+	/**
+	 * Folder and prefix for primary textures.
+	 * Specific usage left up to model cookbook.
+	 */
+	public final String firstTexture;
+
+	/**
+	 * Folder and prefix for secondary textures.
+	 * Specific usage left up to model cookbook.
+	 * MAY BE NULL.
+	 */
+	public final String secondTexture;
+	
+	/**
+	 * Controls MineCraft material properties.
+	 */
 	public final BaseMaterial baseMaterial;
 
-	NiceSubstance(String name, BaseMaterial baseMaterial) {
-		this.name = name;
+	NiceSubstance(String firstTexture, BaseMaterial baseMaterial) {
+		this(firstTexture, baseMaterial, null);
+	}
+	
+	NiceSubstance(String firstTexture, BaseMaterial baseMaterial, String secondTexture){
 		this.baseMaterial = baseMaterial;
+		this.firstTexture = firstTexture;
+		this.secondTexture = secondTexture;
 	}
 
 	/**

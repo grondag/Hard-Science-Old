@@ -109,19 +109,28 @@ public class ModelCookbook {
 	 * the first texture) Does not include rotations.
 	 */
 	protected final int alternateCount;
+	
+	/**
+	 * If true, will use the second textures for the substance.
+	 * Use for overlays, etc.
+	 */
+	protected final boolean useSecondaryTextures;
 
 	protected final EnumWorldBlockLayer renderLayer;
 	protected final boolean isShaded;
+	protected final boolean useRotations;
 	
 	public ModelCookbook(int textureIndex, int alternateCount){
-		this(textureIndex, alternateCount, EnumWorldBlockLayer.SOLID, true);
+		this(textureIndex, alternateCount, false, EnumWorldBlockLayer.SOLID, true, true);
 	}
 	
-	public ModelCookbook(int textureIndex, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded){
+	public ModelCookbook(int textureIndex, int alternateCount, boolean useSecondaryTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
 		this.textureIndex = textureIndex;
 		this.alternateCount = alternateCount;
+		this.useSecondaryTextures = useSecondaryTextures;
 		this.renderLayer = renderLayer;
 		this.isShaded = isShaded;
+		this.useRotations = useRotations;
 		alternator = Alternator.getAlternator((byte) (alternateCount * (useRotatedTexturesAsAlternates() ? 4 : 1)));
 	}
 	
@@ -145,7 +154,7 @@ public class ModelCookbook {
 	 * faces have a visible orientation.
 	 */
 	public boolean useRotatedTexturesAsAlternates(){
-		return true;
+		return useRotations;
 	}
 	
 	public final int getAlternateCount() {
@@ -186,7 +195,7 @@ public class ModelCookbook {
 		}
 
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", buildTextureName(substance, calcAlternate(alternate) + textureIndex));
+		textures.put("all", getTextureName(substance, calcAlternate(alternate) + textureIndex));
 
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}
@@ -219,7 +228,7 @@ public class ModelCookbook {
 	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
 	public String getParticleTextureName(NiceSubstance substance) {
-		return buildTextureName(substance, textureIndex);
+		return getTextureName(substance, textureIndex);
 	}
 
 	/**
@@ -277,11 +286,17 @@ public class ModelCookbook {
 	}
 
 	/**
-	 * Generate the texture name for a given substance and offset. 
+	 * Generate the appropriate texture name for a given substance and offset. 
 	 * Cookbook determines which offset to use for what purpose.
 	 */
-	public static String buildTextureName(NiceSubstance substance, int offset) {
-		return "adversity:blocks/" + substance.name + "/" + substance.name + "_" + (offset >> 3) + "_" + (offset & 7);
+	public String getTextureName(NiceSubstance substance, int offset) {
+		return (this.useSecondaryTextures && substance.secondTexture != null)
+				? buildTextureName(substance.secondTexture, offset)
+				: buildTextureName(substance.firstTexture, offset);
+	}
+	
+	private static String buildTextureName(String textureName, int offset) {
+		return "adversity:blocks/" + textureName + "/" + textureName + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 	
 	/**

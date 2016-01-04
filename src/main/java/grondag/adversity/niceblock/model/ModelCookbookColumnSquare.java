@@ -66,16 +66,16 @@ public class ModelCookbookColumnSquare extends ModelCookbookAxisOriented {
 		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
-		textures.put("inner", buildTextureName(substance, baseOffset + 0));
-		textures.put("outer", buildTextureName(substance, baseOffset - 1));
-		textures.put("column_face", buildTextureName(substance, baseOffset + 7));
-		textures.put("cap_opposite_neighbors", buildTextureName(substance, baseOffset + 7));
-		textures.put("cap_three_neighbors", buildTextureName(substance, baseOffset + 6));
-		textures.put("cap_adjacent_neighbors", buildTextureName(substance, baseOffset + 2));
-		textures.put("cap_one_neighbor", buildTextureName(substance, baseOffset + 3));
-		textures.put("cap_four_neighbors", buildTextureName(substance, baseOffset + 1));
-		textures.put("cap_no_neighbors", buildTextureName(substance, baseOffset + 5));
-		textures.put("cap_inner_side", buildTextureName(substance, baseOffset + 4));
+		textures.put("inner", getTextureName(substance, baseOffset + 0));
+		textures.put("outer", getTextureName(substance, baseOffset - 1));
+		textures.put("column_face", getTextureName(substance, baseOffset + 7));
+		textures.put("cap_opposite_neighbors", getTextureName(substance, baseOffset + 7));
+		textures.put("cap_three_neighbors", getTextureName(substance, baseOffset + 6));
+		textures.put("cap_adjacent_neighbors", getTextureName(substance, baseOffset + 2));
+		textures.put("cap_one_neighbor", getTextureName(substance, baseOffset + 3));
+		textures.put("cap_four_neighbors", getTextureName(substance, baseOffset + 1));
+		textures.put("cap_no_neighbors", getTextureName(substance, baseOffset + 5));
+		textures.put("cap_inner_side", getTextureName(substance, baseOffset + 4));
 
 		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
 

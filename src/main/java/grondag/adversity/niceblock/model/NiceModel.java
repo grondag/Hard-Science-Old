@@ -181,14 +181,14 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	public void handleTextureStitchEvent(TextureStitchEvent.Pre event) {
 		for (int alt = 0; alt < style.firstCookbook.alternateCount; alt++) {
 			for (int tex = 0; tex < style.firstCookbook.getTextureCount(); tex++) {
-				event.map.registerSprite(new ResourceLocation(ModelCookbook.buildTextureName(substance, alt * style.firstCookbook.getTextureCount() + style.firstCookbook.textureIndex + tex)));
+				event.map.registerSprite(new ResourceLocation(style.firstCookbook.getTextureName(substance, alt * style.firstCookbook.getTextureCount() + style.firstCookbook.textureIndex + tex)));
 			}
 		}
 		
 		if(style.secondCookbook != null){
 			for (int alt = 0; alt < style.secondCookbook.alternateCount; alt++) {
 				for (int tex = 0; tex < style.secondCookbook.getTextureCount(); tex++) {
-					event.map.registerSprite(new ResourceLocation(ModelCookbook.buildTextureName(substance, alt * style.secondCookbook.getTextureCount() + style.secondCookbook.textureIndex + tex)));
+					event.map.registerSprite(new ResourceLocation(style.secondCookbook.getTextureName(substance, alt * style.secondCookbook.getTextureCount() + style.secondCookbook.textureIndex + tex)));
 				}
 			}
 		}

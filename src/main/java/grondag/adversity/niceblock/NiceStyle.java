@@ -39,7 +39,8 @@ public enum NiceStyle {
 	COLUMN_ROUND_X(new ModelCookbookColumnRound(4, 1, Axis.X), null),
 	COLUMN_ROUND_Y(new ModelCookbookColumnRound(4, 1, Axis.Y), null),
 	COLUMN_ROUND_Z(new ModelCookbookColumnRound(4, 1, Axis.Z), null),
-	HOT_BASALT(new ModelCookbook(0,1, EnumWorldBlockLayer.SOLID, false), new ModelCookbook(1, 1, EnumWorldBlockLayer.CUTOUT, true));
+	HOT_BASALT(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, false), 
+			new ModelCookbook(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, false));
 
 	/**
 	 * Identifies the model cookbook that should always be used for

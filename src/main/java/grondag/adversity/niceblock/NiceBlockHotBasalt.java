@@ -14,7 +14,7 @@ public class NiceBlockHotBasalt extends NiceBlock {
 
 	@Override
 	public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
-		if(MinecraftForgeClient.getRenderLayer() == EnumWorldBlockLayer.SOLID){
+		if(MinecraftForgeClient.getRenderLayer() != EnumWorldBlockLayer.SOLID){
 			return 0xFFFFFFFF; 
 		} else {
 			return super.getMixedBrightnessForBlock(worldIn, pos);

@@ -62,7 +62,7 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
 		Map<String, String> textures = Maps.newHashMap();
 
-		textures.put("#all", buildTextureName(substance, baseOffset));
+		textures.put("#all", getTextureName(substance, baseOffset));
 
 		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
 	}

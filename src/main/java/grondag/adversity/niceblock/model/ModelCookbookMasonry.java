@@ -53,12 +53,12 @@ public class ModelCookbookMasonry extends ModelCookbook {
 
 		ModelCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
 
-		textures.put("up", buildTextureName(substance, baseOffset + offset.up));
-		textures.put("down", buildTextureName(substance, baseOffset + offset.down));
-		textures.put("east", buildTextureName(substance, baseOffset + offset.east));
-		textures.put("west", buildTextureName(substance, baseOffset + offset.west));
-		textures.put("north", buildTextureName(substance, baseOffset + offset.north));
-		textures.put("south", buildTextureName(substance, baseOffset + offset.south));
+		textures.put("up", getTextureName(substance, baseOffset + offset.up));
+		textures.put("down", getTextureName(substance, baseOffset + offset.down));
+		textures.put("east", getTextureName(substance, baseOffset + offset.east));
+		textures.put("west", getTextureName(substance, baseOffset + offset.west));
+		textures.put("north", getTextureName(substance, baseOffset + offset.north));
+		textures.put("south", getTextureName(substance, baseOffset + offset.south));
 
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}

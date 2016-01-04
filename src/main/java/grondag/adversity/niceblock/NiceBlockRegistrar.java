@@ -171,7 +171,7 @@ public class NiceBlockRegistrar {
 	 * Provides consistent key construction for style/substance lookup.
 	 */
 	private static String getSnSkey(NiceStyle style, NiceSubstance substance) {
-		return style.toString() + "." + substance.name;
+		return style.toString() + "." + substance.toString();
 	}
 
 	/**
