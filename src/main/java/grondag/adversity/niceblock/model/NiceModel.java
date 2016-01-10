@@ -31,6 +31,7 @@ import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.client.model.SimpleModelState;
 import net.minecraftforge.client.model.TRSRTransformation;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import com.google.common.base.Function;
@@ -203,7 +204,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		for (int recipe = 0; recipe < style.firstCookbook.getRecipeCount(); recipe++) {
 			for (int alt = 0; alt < style.firstCookbook.getAlternateCount(); alt++) {
 				ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(substance, recipe, alt);
-				IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
+				IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(ingredients.modelName));
 				IModel model = template.retexture(ingredients.textures);
 				primaryModels[style.firstCookbook.calcVariantID(recipe, alt)] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 			}
@@ -213,7 +214,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 			for (int recipe = 0; recipe < style.secondCookbook.getRecipeCount(); recipe++) {
 				for (int alt = 0; alt < style.secondCookbook.getAlternateCount(); alt++) {
 					ModelCookbook.Ingredients ingredients = style.secondCookbook.getIngredients(substance, recipe, alt);
-					IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
+					IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(ingredients.modelName));
 					IModel model = template.retexture(ingredients.textures);
 					secondaryModels[style.secondCookbook.calcVariantID(recipe, alt)] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 				}
@@ -230,7 +231,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 		 */
 		
 		ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(substance, style.firstCookbook.getItemModelIndex(), 0);
-		IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ModelResourceLocation(ingredients.modelName));
+		IRetexturableModel template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(ingredients.modelName));
 		IModel model = template.retexture(ingredients.textures);
 
 		TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(

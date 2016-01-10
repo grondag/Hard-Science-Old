@@ -15,7 +15,7 @@ import net.minecraft.block.material.Material;
 public enum NiceSubstance {
 	BASALT("basalt", BaseMaterial.DRESSED_STONE),
 	DIORITE("diorite", BaseMaterial.DRESSED_STONE),
-	HOT_BASALT("hot_basalt", BaseMaterial.DRESSED_STONE, "hot_basalt");
+	HOT_BASALT("basalt", BaseMaterial.DRESSED_STONE, "hot_basalt");
 
 	/**
 	 * Folder and prefix for primary textures.
