@@ -133,7 +133,7 @@ public class NiceBlock extends Block {
 		setResistance(substances[0].baseMaterial.resistance);
 		placementHandler = placer;
 		placer.setOwner(this);
-		collisionHandler = style.firstCookbook.getCollisionHandler();
+		collisionHandler = style.getCollisionHandler();
 
 		item = new ItemMultiTexture(this, this, new Function<ItemStack, String>() {
 			@Override
@@ -199,8 +199,7 @@ public class NiceBlock extends Block {
 
 	@Override
 	public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
-		return style.firstCookbook.getRenderLayer() == layer
-				|| (style.secondCookbook != null && style.secondCookbook.getRenderLayer() == layer);
+		return style.canRenderInLayer(layer);
 	}
 
 	/**
