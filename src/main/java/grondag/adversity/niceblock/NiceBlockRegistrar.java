@@ -58,7 +58,7 @@ public class NiceBlockRegistrar {
 	// define our substance groupings
 	private static final NiceSubstance[][] substance16Group = { 
 		{ NiceSubstance.BASALT, NiceSubstance.DIORITE },
-		{ NiceSubstance.HOT_BASALT }
+		{ NiceSubstance.HOT_BASALT_0, NiceSubstance.HOT_BASALT_1, NiceSubstance.HOT_BASALT_2, NiceSubstance.HOT_BASALT_3  }
 		};
 
 	// declare the block instances
@@ -160,7 +160,7 @@ public class NiceBlockRegistrar {
 				ModelBakery.addVariantName(block.item, getModelResourceNameFromMeta(block, i));
 
 				// Create model for later event handling.
-				NiceModel model = new NiceModel(block.style, block.substances[i], mrlBlock, mrlItem);
+				NiceModel model = block.style.getModel(block.substances[i], mrlBlock, mrlItem);
 				allModels.add(model);
 
 			}

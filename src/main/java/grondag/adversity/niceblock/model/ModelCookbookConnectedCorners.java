@@ -4,6 +4,7 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.support.CornerRecipeFinder;
 import grondag.adversity.niceblock.NiceSubstance;
 
 import java.util.Map;

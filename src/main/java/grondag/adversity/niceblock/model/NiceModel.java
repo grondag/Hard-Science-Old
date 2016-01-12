@@ -82,7 +82,7 @@ public class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel
 	 * Controls model baking and selection via model cookbook.
 	 */
 	protected final NiceStyle style;
-
+	
 	/**
 	 * Provides texture parameters.
 	 */

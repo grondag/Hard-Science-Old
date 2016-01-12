@@ -5,6 +5,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborSet;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlock.TestForStyle;
+import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -67,7 +68,6 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	@Override
 	public int getModelRecipeID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 
@@ -92,8 +92,7 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 		 * we have to test for the neighbors of the adjacent column block to
 		 * know if it would occlude this one fully.
 		 */
-		switch (style) {
-		case COLUMN_ROUND_X:
+		if(style == NiceStyle.COLUMN_ROUND_X){
 			if (tests.east) {
 				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.east(), NeighborSet.X_NORMALS).getNeighborTestResults(styleTest);
 				if (!(faceTests.up == tests.up && faceTests.down == tests.down && faceTests.north == tests.north && faceTests.south == tests.south)) {
@@ -116,9 +115,7 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 				}
 			}
 
-			break;
-
-		case COLUMN_ROUND_Y:
+		} else if (style == NiceStyle.COLUMN_ROUND_Y) {
 			if (tests.up) {
 				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.up(), NeighborSet.Y_NORMALS).getNeighborTestResults(styleTest);
 				if (!(faceTests.east == tests.east && faceTests.west == tests.west && faceTests.north == tests.north && faceTests.south == tests.south)) {
@@ -141,9 +138,7 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 				}
 			}
 
-			break;
-
-		case COLUMN_ROUND_Z:
+		} else if (style == NiceStyle.COLUMN_ROUND_Z) {
 			if (tests.north) {
 				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.north(), NeighborSet.Z_NORMALS).getNeighborTestResults(styleTest);
 				if (!(faceTests.up == tests.up && faceTests.down == tests.down && faceTests.east == tests.east && faceTests.west == tests.west)) {
@@ -165,8 +160,6 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 					south = 1;
 				}
 			}
-
-			break;
 		}
 
 		return RECIPE_LOOKUP[up][down][east][west][north][south];

@@ -74,7 +74,11 @@ public class NiceBlock extends Block {
 	 * Just like FIRST_MODEL_VARIANT but for secondary model when block has two layers.
 	 */
 	public static final IUnlistedProperty SECOND_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("second_model_variant", 0, 385));
-
+	
+	public static final IUnlistedProperty ALTERNATE_X = Properties.toUnlisted(PropertyInteger.create("alternate_x", 0, 256));
+	public static final IUnlistedProperty ALTERNATE_Y = Properties.toUnlisted(PropertyInteger.create("alternate_y", 0, 256));
+	public static final IUnlistedProperty ALTERNATE_Z = Properties.toUnlisted(PropertyInteger.create("alternate_z", 0, 256));
+	
 	/**
 	 * Maps metadata to specific Adversity substance. Metadata is the index to
 	 * this array. Substance control texture and may be used to control some
@@ -145,7 +149,7 @@ public class NiceBlock extends Block {
 	@Override
 	protected BlockState createBlockState() {
 		return new ExtendedBlockState(this, new IProperty[] { SUBSTANCE_INDEX }, new IUnlistedProperty[] {
-				FIRST_MODEL_VARIANT, SECOND_MODEL_VARIANT });
+				FIRST_MODEL_VARIANT, SECOND_MODEL_VARIANT, ALTERNATE_X, ALTERNATE_Y, ALTERNATE_Z });
 	}
 
 	// BASIC METADATA MECHANICS

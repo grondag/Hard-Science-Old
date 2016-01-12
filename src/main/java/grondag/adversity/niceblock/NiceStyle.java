@@ -7,6 +7,7 @@ import grondag.adversity.niceblock.model.ModelCookbookConnectedCorners;
 import grondag.adversity.niceblock.model.ModelCookbookMasonry;
 import grondag.adversity.niceblock.model.NiceModel;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumWorldBlockLayer;
@@ -20,26 +21,27 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  * to allow multi-blocks with connected textures that are adjacent to each other.
  * 
  */
-public enum NiceStyle {
-	RAW(new ModelCookbook(0, 4), null),
-	SMOOTH(new ModelCookbook(4, 4), null),
-	LARGE_BRICKS(new ModelCookbook(96, 4), null),
-	SMALL_BRICKS(new ModelCookbook(120, 4), null),
-	BIG_WORN(new ModelCookbookConnectedCorners(256, 3), null),
-	BIG_WEATHERED(new ModelCookbookConnectedCorners(400, 1), null),
-	BIG_ORNATE(new ModelCookbookConnectedCorners(448, 1), null),
-	MASONRY_A(new ModelCookbookMasonry(16, 1), null),
-	MASONRY_B(new ModelCookbookMasonry(32, 1), null),
-	MASONRY_C(new ModelCookbookMasonry(48, 1), null),
-	MASONRY_D(new ModelCookbookMasonry(64, 1), null),
-	MASONRY_E(new ModelCookbookMasonry(80, 1), null),
-	COLUMN_SQUARE_X(new ModelCookbookColumnSquare(8, 1, Axis.X), null),
-	COLUMN_SQUARE_Y(new ModelCookbookColumnSquare(8, 1, Axis.Y), null),
-	COLUMN_SQUARE_Z(new ModelCookbookColumnSquare(8, 1, Axis.Z), null),
-	COLUMN_ROUND_X(new ModelCookbookColumnRound(4, 1, Axis.X), null),
-	COLUMN_ROUND_Y(new ModelCookbookColumnRound(4, 1, Axis.Y), null),
-	COLUMN_ROUND_Z(new ModelCookbookColumnRound(4, 1, Axis.Z), null),
-	HOT_BASALT(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, true), 
+public class NiceStyle {
+	
+	public static final NiceStyle RAW = new NiceStyle(new ModelCookbook(0, 4), null);
+	public static final NiceStyle SMOOTH = new NiceStyle(new ModelCookbook(4, 4), null);
+	public static final NiceStyle LARGE_BRICKS = new NiceStyle(new ModelCookbook(96, 4), null);
+	public static final NiceStyle SMALL_BRICKS = new NiceStyle(new ModelCookbook(120, 4), null);
+	public static final NiceStyle BIG_WORN = new NiceStyle(new ModelCookbookConnectedCorners(256, 3), null);
+	public static final NiceStyle BIG_WEATHERED = new NiceStyle(new ModelCookbookConnectedCorners(400, 1), null);
+	public static final NiceStyle BIG_ORNATE = new NiceStyle(new ModelCookbookConnectedCorners(448, 1), null);
+	public static final NiceStyle MASONRY_A = new NiceStyle(new ModelCookbookMasonry(16, 1), null);
+	public static final NiceStyle MASONRY_B = new NiceStyle(new ModelCookbookMasonry(32, 1), null);
+	public static final NiceStyle MASONRY_C = new NiceStyle(new ModelCookbookMasonry(48, 1), null);
+	public static final NiceStyle MASONRY_D = new NiceStyle(new ModelCookbookMasonry(64, 1), null);
+	public static final NiceStyle MASONRY_E = new NiceStyle(new ModelCookbookMasonry(80, 1), null);
+	public static final NiceStyle COLUMN_SQUARE_X = new NiceStyle(new ModelCookbookColumnSquare(8, 1, Axis.X), null);
+	public static final NiceStyle COLUMN_SQUARE_Y = new NiceStyle(new ModelCookbookColumnSquare(8, 1, Axis.Y), null);
+	public static final NiceStyle COLUMN_SQUARE_Z = new NiceStyle(new ModelCookbookColumnSquare(8, 1, Axis.Z), null);
+	public static final NiceStyle COLUMN_ROUND_X = new NiceStyle(new ModelCookbookColumnRound(4, 1, Axis.X), null);
+	public static final NiceStyle COLUMN_ROUND_Y = new NiceStyle(new ModelCookbookColumnRound(4, 1, Axis.Y), null);
+	public static final NiceStyle COLUMN_ROUND_Z = new NiceStyle(new ModelCookbookColumnRound(4, 1, Axis.Z), null);
+	public static final NiceStyle HOT_BASALT = new NiceStyle(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, true), 
 			new ModelCookbook(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true));
 
 	/**
@@ -68,6 +70,13 @@ public enum NiceStyle {
 		if(this.secondCookbook != null){
 			this.secondCookbook.setStyle(this);
 		}
+	}
+	
+	/**
+	 * TODO: docs
+	 */
+	public NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
+		return new NiceModel(this, substance, mrlBlock, mrlItem);
 	}
 	
 	// Used by NiceBlock to set extended state so that NiceModel knows what models to provide to renderer.
