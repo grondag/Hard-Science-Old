@@ -53,11 +53,6 @@ public abstract class NiceStyle {
 	public abstract NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem);
 	
 	/**
-	 *  Used by NiceBlock to set extended state so that NiceModel knows what models to provide to renderer.
-	 */
-	public abstract IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos);
-
-	/**
 	 * Override if special collision handling is needed due to non-cubic shape.
 	 */
 	public ICollisionHandler getCollisionHandler() {
@@ -116,14 +111,6 @@ public abstract class NiceStyle {
 			return new NiceModelOld(this, substance, mrlBlock, mrlItem);
 		}
 		
-		public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-			if(secondCookbook == null){
-				return state.withProperty(NiceBlock.FIRST_MODEL_VARIANT,firstCookbook.getVariantID((IExtendedBlockState) state, world, pos));
-			} else {
-				return state.withProperty(NiceBlock.FIRST_MODEL_VARIANT,firstCookbook.getVariantID((IExtendedBlockState) state, world, pos))
-						.withProperty(NiceBlock.SECOND_MODEL_VARIANT, secondCookbook.getVariantID((IExtendedBlockState) state, world, pos));
-			}
-		}
 }
 	
 	public static class NiceStyleBigTex extends NiceStyle{
@@ -135,11 +122,5 @@ public abstract class NiceStyle {
 		public NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
 			return new NiceModelNew(this, substance, mrlBlock, mrlItem);
 		}
-
-		@Override
-		public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-			return null;
-		}
-		
 	}
 }

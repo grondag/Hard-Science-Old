@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceStyle.NiceStyleBasic;
 import grondag.adversity.niceblock.NiceStyle.NiceStyleBigTex;
+import grondag.adversity.niceblock.support.IExStateHandler;
 import grondag.adversity.niceblock.NiceSubstance;
 
 import java.util.List;
@@ -30,6 +31,11 @@ public class NiceModelNew extends NiceModel {
 	public NiceModelNew(NiceStyleBigTex style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
 		super(substance, mrlBlock, mrlItem);
 		this.style = style;
+	}
+	
+	@Override
+	public IExStateHandler getExStateHandler() {
+		return new IExStateHandler.ExStateHandlerDefault();
 	}
 
 	@Override

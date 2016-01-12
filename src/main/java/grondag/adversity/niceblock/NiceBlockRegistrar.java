@@ -2,6 +2,7 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.model.NiceModel;
+import grondag.adversity.niceblock.support.IExStateHandler;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 import grondag.adversity.niceblock.support.NicePlacement;
@@ -161,6 +162,7 @@ public class NiceBlockRegistrar {
 
 				// Create model for later event handling.
 				NiceModel model = block.style.getModel(block.substances[i], mrlBlock, mrlItem);
+				block.setExStateHandler(model.getExStateHandler());
 				allModels.add(model);
 
 			}

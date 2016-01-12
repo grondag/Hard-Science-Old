@@ -4,6 +4,7 @@ import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceStyle.NiceStyleBasic;
 import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.support.IExStateHandler;
 
 import java.io.IOException;
 import java.util.List;
@@ -310,5 +311,14 @@ public class NiceModelOld extends NiceModel {
 	public IBakedModel handleItemState(ItemStack stack) {
 		return itemModel;
 	}
+
+
+
+	@Override
+	public IExStateHandler getExStateHandler() {
+		return new IExStateHandler.ExStateHandlerCookbooks(style.firstCookbook, style.secondCookbook);
+	}
+	
+	
 
 }

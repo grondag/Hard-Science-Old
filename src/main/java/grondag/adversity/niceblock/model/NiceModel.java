@@ -1,15 +1,19 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.support.IExStateHandler;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.common.property.IExtendedBlockState;
 
 public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
 	/**
@@ -49,5 +53,8 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	public abstract void handleBakeEvent(ModelBakeEvent event);
 
 	public abstract void handleTextureStitchEvent(Pre event);
+	
+	public abstract IExStateHandler getExStateHandler();
+	
 		
 }

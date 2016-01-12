@@ -5,6 +5,7 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.IExStateHandler;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.util.Arrays;
@@ -117,6 +118,16 @@ public class NiceBlock extends Block {
 	public final ICollisionHandler collisionHandler;
 
 	/**
+	 * CAN BE NULL!  If non-null, block style requires special extended state handling.
+	 * Obtained from model and set by BlockRegistrar during registration.
+	 */
+	protected IExStateHandler exStateHandler;
+	
+	public void setExStateHandler(IExStateHandler exStateHandler){
+		this.exStateHandler = exStateHandler;
+	}
+	
+	/**
 	 * Assumes first substance is representative of all the substances for
 	 * purposes of setting material-dependent attributes.
 	 */
@@ -209,8 +220,8 @@ public class NiceBlock extends Block {
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		// should always be an IExtendedBlockState but avoid crash if somehow not
-		if (state instanceof IExtendedBlockState) {
-			return style.getExtendedState((IExtendedBlockState) state, world, pos);
+		if (state instanceof IExtendedBlockState && exStateHandler != null) {
+			return exStateHandler.getExtendedState((IExtendedBlockState) state, world, pos);
 		} else {
 			return state;
 		}
