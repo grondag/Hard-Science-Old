@@ -4,7 +4,6 @@ import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceStyle.NiceStyleBasic;
 import grondag.adversity.niceblock.NiceSubstance;
-import grondag.adversity.niceblock.support.IExStateHandler;
 
 import java.io.IOException;
 import java.util.List;
@@ -66,7 +65,7 @@ import com.google.common.collect.ImmutableMap;
  * needed this one because most of the functionality is delegated to the model
  * cook book.
  */
-public class NiceModelOld extends NiceModel {
+public class NiceModelBasic extends NiceModel {
 
 
 	/**
@@ -95,7 +94,7 @@ public class NiceModelOld extends NiceModel {
 	 *
 	 * See class header and member descriptions for more info on what things do.
 	 */
-	public NiceModelOld(NiceStyleBasic style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
+	public NiceModelBasic(NiceStyleBasic style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
 		super(substance, mrlBlock, mrlItem);
 		this.style = style;
 		primaryModels = new IFlexibleBakedModel[style.firstCookbook.getAlternateCount() * style.firstCookbook.getRecipeCount()];
@@ -105,6 +104,7 @@ public class NiceModelOld extends NiceModel {
 		} else {
 			secondaryModels = null;
 		}
+		
 	}
 
 	
@@ -312,12 +312,6 @@ public class NiceModelOld extends NiceModel {
 		return itemModel;
 	}
 
-
-
-	@Override
-	public IExStateHandler getExStateHandler() {
-		return new IExStateHandler.ExStateHandlerCookbooks(style.firstCookbook, style.secondCookbook);
-	}
 	
 	
 

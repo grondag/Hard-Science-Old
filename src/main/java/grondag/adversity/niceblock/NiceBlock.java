@@ -4,8 +4,8 @@ import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
+import grondag.adversity.niceblock.model.ModelRenderProperty;
 import grondag.adversity.niceblock.support.ICollisionHandler;
-import grondag.adversity.niceblock.support.IExStateHandler;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.util.Arrays;
@@ -69,16 +69,12 @@ public class NiceBlock extends Block {
 	 * Most blocks have far fewer variants than the max allowed.
 	 * The first model is used for collision detection.
 	 */
-	public static final IUnlistedProperty FIRST_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("first_model_variant", 0, 16000));
+	public static final IUnlistedProperty FIRST_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("first_model_variant", 0, 160000000));
 	
 	/**
 	 * Just like FIRST_MODEL_VARIANT but for secondary model when block has two layers.
 	 */
-	public static final IUnlistedProperty SECOND_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("second_model_variant", 0, 385));
-	
-	public static final IUnlistedProperty ALTERNATE_X = Properties.toUnlisted(PropertyInteger.create("alternate_x", 0, 256));
-	public static final IUnlistedProperty ALTERNATE_Y = Properties.toUnlisted(PropertyInteger.create("alternate_y", 0, 256));
-	public static final IUnlistedProperty ALTERNATE_Z = Properties.toUnlisted(PropertyInteger.create("alternate_z", 0, 256));
+	public static final IUnlistedProperty SECOND_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("second_model_variant", 0, 160000000));
 	
 	/**
 	 * Maps metadata to specific Adversity substance. Metadata is the index to
@@ -118,16 +114,6 @@ public class NiceBlock extends Block {
 	public final ICollisionHandler collisionHandler;
 
 	/**
-	 * CAN BE NULL!  If non-null, block style requires special extended state handling.
-	 * Obtained from model and set by BlockRegistrar during registration.
-	 */
-	protected IExStateHandler exStateHandler;
-	
-	public void setExStateHandler(IExStateHandler exStateHandler){
-		this.exStateHandler = exStateHandler;
-	}
-	
-	/**
 	 * Assumes first substance is representative of all the substances for
 	 * purposes of setting material-dependent attributes.
 	 */
@@ -144,7 +130,7 @@ public class NiceBlock extends Block {
 		setResistance(substances[0].baseMaterial.resistance);
 		placementHandler = placer;
 		placer.setOwner(this);
-		collisionHandler = style.getCollisionHandler();
+		collisionHandler = style.getModelController().getCollisionHandler();
 
 		item = new ItemMultiTexture(this, this, new Function<ItemStack, String>() {
 			@Override
@@ -160,7 +146,7 @@ public class NiceBlock extends Block {
 	@Override
 	protected BlockState createBlockState() {
 		return new ExtendedBlockState(this, new IProperty[] { SUBSTANCE_INDEX }, new IUnlistedProperty[] {
-				FIRST_MODEL_VARIANT, SECOND_MODEL_VARIANT, ALTERNATE_X, ALTERNATE_Y, ALTERNATE_Z });
+				FIRST_MODEL_VARIANT, SECOND_MODEL_VARIANT });
 	}
 
 	// BASIC METADATA MECHANICS
@@ -210,7 +196,7 @@ public class NiceBlock extends Block {
 
 	@Override
 	public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
-		return style.canRenderInLayer(layer);
+		return style.getModelController().canRenderInLayer(layer);
 	}
 
 	/**
@@ -220,8 +206,8 @@ public class NiceBlock extends Block {
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		// should always be an IExtendedBlockState but avoid crash if somehow not
-		if (state instanceof IExtendedBlockState && exStateHandler != null) {
-			return exStateHandler.getExtendedState((IExtendedBlockState) state, world, pos);
+		if (state instanceof IExtendedBlockState) {
+			return style.getModelController().getExtendedState((IExtendedBlockState) state, world, pos);
 		} else {
 			return state;
 		}

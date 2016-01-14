@@ -1,13 +1,14 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.niceblock.model.IModelController;
 import grondag.adversity.niceblock.model.ModelCookbook;
 import grondag.adversity.niceblock.model.ModelCookbookColumnRound;
 import grondag.adversity.niceblock.model.ModelCookbookColumnSquare;
 import grondag.adversity.niceblock.model.ModelCookbookConnectedCorners;
 import grondag.adversity.niceblock.model.ModelCookbookMasonry;
+import grondag.adversity.niceblock.model.ModelRenderData;
 import grondag.adversity.niceblock.model.NiceModel;
-import grondag.adversity.niceblock.model.NiceModelNew;
-import grondag.adversity.niceblock.model.NiceModelOld;
+import grondag.adversity.niceblock.model.NiceModelBasic;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -47,23 +48,15 @@ public abstract class NiceStyle {
 	public static final NiceStyle HOT_BASALT = new NiceStyleBasic(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, true), 
 			new ModelCookbook(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true));
 	
-	/**
-	 * Used by NiceBlockRegistrar to register models for block/style/substance combinations.
-	 */
-	public abstract NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem);
+	public abstract IModelController getModelController();
 	
-	/**
-	 * Override if special collision handling is needed due to non-cubic shape.
-	 */
-	public ICollisionHandler getCollisionHandler() {
-		return null;
-	}
 	
-	public boolean canRenderInLayer(EnumWorldBlockLayer layer) {
-		return layer == EnumWorldBlockLayer.SOLID;
-	}
-	
-	public static class NiceStyleBasic extends NiceStyle{
+	public static class NiceStyleBasic extends NiceStyle implements IModelController{
+		
+		@Override
+		public IModelController getModelController(){
+			return this;
+		}
 		
 		/**
 		 * Identifies the model cookbook that should always be used for
@@ -108,19 +101,20 @@ public abstract class NiceStyle {
 		}
 		
 		public NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
-			return new NiceModelOld(this, substance, mrlBlock, mrlItem);
+			return new NiceModelBasic(this, substance, mrlBlock, mrlItem);
 		}
 		
-}
-	
-	public static class NiceStyleBigTex extends NiceStyle{
-
-		NiceStyleBigTex() {
-		}
-
 		@Override
-		public NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
-			return new NiceModelNew(this, substance, mrlBlock, mrlItem);
+		public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+			
+			if(secondCookbook == null){
+				return state.withProperty(
+						NiceBlock.FIRST_MODEL_VARIANT, firstCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+			} else {
+				return state
+						.withProperty(NiceBlock.FIRST_MODEL_VARIANT, firstCookbook.getVariantID((IExtendedBlockState) state, world, pos))
+						.withProperty(NiceBlock.SECOND_MODEL_VARIANT, secondCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+			}
 		}
 	}
 }
