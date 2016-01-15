@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.model;
 
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-public class ModelRenderProperty implements IUnlistedProperty<ModelRenderData> {
+public class ModelRenderProperty implements IUnlistedProperty<ModelRenderState> {
 
 	@Override
 	public String getName() {
@@ -10,17 +10,17 @@ public class ModelRenderProperty implements IUnlistedProperty<ModelRenderData> {
 	}
 
 	@Override
-	public boolean isValid(ModelRenderData value) {
+	public boolean isValid(ModelRenderState value) {
 		return true;
 	}
 
 	@Override
 	public Class getType() {
-		return ModelRenderData.class;
+		return ModelRenderState.class;
 	}
 
 	@Override
-	public String valueToString(ModelRenderData value) {
+	public String valueToString(ModelRenderState value) {
 		return value.toString();
 	}
 	

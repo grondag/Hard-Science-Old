@@ -65,16 +65,12 @@ public class NiceBlock extends Block {
 	public static final PropertyInteger SUBSTANCE_INDEX = PropertyInteger.create("substance_index", 0, 15);
 	
 	/**
-	 * Used by NiceModel to select correct in-game variant. 
-	 * Most blocks have far fewer variants than the max allowed.
-	 * The first model is used for collision detection.
+	 * Contains render state passed from getExtendedState to handleBlockState.
+	 * Using a custom unlisted property because we need large int values and the
+	 * vanilla implementation enumerates all allowed values into a hashmap...
+	 * Plus this hides the implementation of render state from the block.
 	 */
-	public static final IUnlistedProperty FIRST_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("first_model_variant", 0, 160000000));
-	
-	/**
-	 * Just like FIRST_MODEL_VARIANT but for secondary model when block has two layers.
-	 */
-	public static final IUnlistedProperty SECOND_MODEL_VARIANT = Properties.toUnlisted(PropertyInteger.create("second_model_variant", 0, 160000000));
+	public static final ModelRenderProperty MODEL_RENDER_STATE = new ModelRenderProperty();
 	
 	/**
 	 * Maps metadata to specific Adversity substance. Metadata is the index to
@@ -146,7 +142,7 @@ public class NiceBlock extends Block {
 	@Override
 	protected BlockState createBlockState() {
 		return new ExtendedBlockState(this, new IProperty[] { SUBSTANCE_INDEX }, new IUnlistedProperty[] {
-				FIRST_MODEL_VARIANT, SECOND_MODEL_VARIANT });
+				MODEL_RENDER_STATE});
 	}
 
 	// BASIC METADATA MECHANICS

@@ -126,11 +126,12 @@ public class NiceModelBasic extends NiceModel {
 			IExtendedBlockState exState = (IExtendedBlockState) state;
 			
 			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-
+			
+			ModelRenderState renderState = exState.getValue(NiceBlock.MODEL_RENDER_STATE);
 			if(layer == style.firstCookbook.getRenderLayer()){
-				retVal = primaryModels[exState.getValue(NiceBlock.FIRST_MODEL_VARIANT)];
+				retVal = primaryModels[renderState.variant1];
 			} else if (style.secondCookbook != null && layer == style.secondCookbook.getRenderLayer()){
-				retVal = secondaryModels[exState.getValue(NiceBlock.SECOND_MODEL_VARIANT)];
+				retVal = secondaryModels[renderState.variant2];
 			}
 		}
 		

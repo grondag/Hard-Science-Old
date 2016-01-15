@@ -6,7 +6,7 @@ import grondag.adversity.niceblock.model.ModelCookbookColumnRound;
 import grondag.adversity.niceblock.model.ModelCookbookColumnSquare;
 import grondag.adversity.niceblock.model.ModelCookbookConnectedCorners;
 import grondag.adversity.niceblock.model.ModelCookbookMasonry;
-import grondag.adversity.niceblock.model.ModelRenderData;
+import grondag.adversity.niceblock.model.ModelRenderState;
 import grondag.adversity.niceblock.model.NiceModel;
 import grondag.adversity.niceblock.model.NiceModelBasic;
 import grondag.adversity.niceblock.support.ICollisionHandler;
@@ -109,11 +109,14 @@ public abstract class NiceStyle {
 			
 			if(secondCookbook == null){
 				return state.withProperty(
-						NiceBlock.FIRST_MODEL_VARIANT, firstCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+						NiceBlock.MODEL_RENDER_STATE, 
+						new ModelRenderState(firstCookbook.getVariantID((IExtendedBlockState) state, world, pos), -1));
 			} else {
-				return state
-						.withProperty(NiceBlock.FIRST_MODEL_VARIANT, firstCookbook.getVariantID((IExtendedBlockState) state, world, pos))
-						.withProperty(NiceBlock.SECOND_MODEL_VARIANT, secondCookbook.getVariantID((IExtendedBlockState) state, world, pos));
+				return state.withProperty(
+						NiceBlock.MODEL_RENDER_STATE, 
+						new ModelRenderState(
+								firstCookbook.getVariantID((IExtendedBlockState) state, world, pos),
+								secondCookbook.getVariantID((IExtendedBlockState) state, world, pos)));
 			}
 		}
 	}
