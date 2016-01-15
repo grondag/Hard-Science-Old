@@ -35,4 +35,9 @@ public interface IModelController {
 	 */
 	public boolean canRenderInLayer(EnumWorldBlockLayer layer);
 	
+	/**
+	 * Tells NiceModel which texture to use for block-breaking particles.
+	 */
+	public String getParticleTextureName(NiceSubstance substance);
+	
 }

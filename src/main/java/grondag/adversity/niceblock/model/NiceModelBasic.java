@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
-import grondag.adversity.niceblock.NiceStyle.NiceStyleBasic;
+import grondag.adversity.niceblock.NiceStyle.NiceStyleOld;
 import grondag.adversity.niceblock.NiceSubstance;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class NiceModelBasic extends NiceModel {
 	/**
 	 * Controls model baking and selection via model cookbook.
 	 */
-	protected final NiceStyleBasic style;
+	protected final NiceStyleOld style;
 
 	/**
 	 * Holds the baked models that will be returned for rendering based on
@@ -87,14 +87,8 @@ public class NiceModelBasic extends NiceModel {
 	
 	protected IFlexibleBakedModel itemModel;
 
-	/**
-	 * Create a model for this style/substance combination. Caller will
-	 * typically create 16 of these per NiceBlock instance if all 16 substance
-	 * metadata values are used.
-	 *
-	 * See class header and member descriptions for more info on what things do.
-	 */
-	public NiceModelBasic(NiceStyleBasic style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
+
+	public NiceModelBasic(NiceStyleOld style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
 		super(substance, mrlBlock, mrlItem);
 		this.style = style;
 		primaryModels = new IFlexibleBakedModel[style.firstCookbook.getAlternateCount() * style.firstCookbook.getRecipeCount()];
@@ -107,13 +101,7 @@ public class NiceModelBasic extends NiceModel {
 		
 	}
 
-	
-	
-	/**
-	 * Does the heavy lifting for the ISmartBlockModel interface. Determines
-	 * block state and returns the appropriate baked model. See class header for
-	 * more info.
-	 */
+
 	@Override
 	public IBakedModel handleBlockState(IBlockState state) {
 
@@ -145,24 +133,8 @@ public class NiceModelBasic extends NiceModel {
 
 	}
 
-	/**
-	 * The function parameter to bake method presumably provides a way to do
-	 * fancy texture management via inversion of control, but we don't need that
-	 * because we register all our textures in texture bake. This function
-	 * simply provides access to the vanilla texture maps.
-	 */
-	protected Function<ResourceLocation, TextureAtlasSprite> textureGetter = new Function<ResourceLocation, TextureAtlasSprite>(){
-		@Override
-		public TextureAtlasSprite apply(ResourceLocation location)
-		{
-			return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
-		}
-	};
 
-	/**
-	 * Registers all textures that will be needed for this style/substance.
-	 * Happens before model bake.
-	 */
+
 	public void handleTextureStitchEvent(TextureStitchEvent.Pre event) {
 		for (int alt = 0; alt < style.firstCookbook.alternateCount; alt++) {
 			for (int tex = 0; tex < style.firstCookbook.getTextureCount(); tex++) {
@@ -179,11 +151,6 @@ public class NiceModelBasic extends NiceModel {
 		}
 	}
 
-	/**
-	 * Bakes all the models for this style/substance and caches them in array.
-	 * Should happen after texture stitch and before any models are retrieved
-	 * with handleBlockState.
-	 */
 	public void handleBakeEvent(ModelBakeEvent event)  {
 		for (int recipe = 0; recipe < style.firstCookbook.getRecipeCount(); recipe++) {
 			for (int alt = 0; alt < style.firstCookbook.getAlternateCount(); alt++) {
@@ -250,46 +217,6 @@ public class NiceModelBasic extends NiceModel {
 		event.modelRegistry.putObject(itemResourceLocation, this);
 	}
 
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public List getFaceQuads(EnumFacing p_177551_1_) {
-		return null;
-	}
-
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public List getGeneralQuads() {
-		return null;
-	}
-
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public boolean isAmbientOcclusion() {
-		return true;
-	}
-
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public boolean isGui3d() { 
-		return true;
-	}
-
-
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public boolean isBuiltInRenderer() {
-		return false;
-	}
 
 	/**
 	 * Used for block-breaking particles.
@@ -303,15 +230,14 @@ public class NiceModelBasic extends NiceModel {
 		return particleTexture;
 	}
 
-	@Override
-	public ItemCameraTransforms getItemCameraTransforms() {
-		return itemModel.getItemCameraTransforms();
-	}
 
 	@Override
-	public IBakedModel handleItemState(ItemStack stack) {
-		return itemModel;
+	public IBakedModel getModelVariant(int variantID) {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
+
 
 	
 	

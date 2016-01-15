@@ -24,14 +24,14 @@ public enum NiceSubstance {
 	 * Folder and prefix for primary textures.
 	 * Specific usage left up to model cookbook.
 	 */
-	public final String firstTexture;
+	public final String baseTexture;
 
 	/**
 	 * Folder and prefix for secondary textures.
 	 * Specific usage left up to model cookbook.
 	 * MAY BE NULL.
 	 */
-	public final String secondTexture;
+	public final String overlayTexture;
 	
 	/**
 	 * Controls MineCraft material properties.
@@ -44,8 +44,8 @@ public enum NiceSubstance {
 	
 	NiceSubstance(String firstTexture, BaseMaterial baseMaterial, String secondTexture){
 		this.baseMaterial = baseMaterial;
-		this.firstTexture = firstTexture;
-		this.secondTexture = secondTexture;
+		this.baseTexture = firstTexture;
+		this.overlayTexture = secondTexture;
 	}
 
 	/**

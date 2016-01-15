@@ -27,31 +27,41 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  */
 public abstract class NiceStyle {
 	
-	public static final NiceStyle RAW = new NiceStyleBasic(new ModelCookbook(0, 4), null);
-	public static final NiceStyle SMOOTH = new NiceStyleBasic(new ModelCookbook(4, 4), null);
-	public static final NiceStyle LARGE_BRICKS = new NiceStyleBasic(new ModelCookbook(96, 4), null);
-	public static final NiceStyle SMALL_BRICKS = new NiceStyleBasic(new ModelCookbook(120, 4), null);
-	public static final NiceStyle BIG_WORN = new NiceStyleBasic(new ModelCookbookConnectedCorners(256, 3), null);
-	public static final NiceStyle BIG_WEATHERED = new NiceStyleBasic(new ModelCookbookConnectedCorners(400, 1), null);
-	public static final NiceStyle BIG_ORNATE = new NiceStyleBasic(new ModelCookbookConnectedCorners(448, 1), null);
-	public static final NiceStyle MASONRY_A = new NiceStyleBasic(new ModelCookbookMasonry(16, 1), null);
-	public static final NiceStyle MASONRY_B = new NiceStyleBasic(new ModelCookbookMasonry(32, 1), null);
-	public static final NiceStyle MASONRY_C = new NiceStyleBasic(new ModelCookbookMasonry(48, 1), null);
-	public static final NiceStyle MASONRY_D = new NiceStyleBasic(new ModelCookbookMasonry(64, 1), null);
-	public static final NiceStyle MASONRY_E = new NiceStyleBasic(new ModelCookbookMasonry(80, 1), null);
-	public static final NiceStyle COLUMN_SQUARE_X = new NiceStyleBasic(new ModelCookbookColumnSquare(8, 1, Axis.X), null);
-	public static final NiceStyle COLUMN_SQUARE_Y = new NiceStyleBasic(new ModelCookbookColumnSquare(8, 1, Axis.Y), null);
-	public static final NiceStyle COLUMN_SQUARE_Z = new NiceStyleBasic(new ModelCookbookColumnSquare(8, 1, Axis.Z), null);
-	public static final NiceStyle COLUMN_ROUND_X = new NiceStyleBasic(new ModelCookbookColumnRound(4, 1, Axis.X), null);
-	public static final NiceStyle COLUMN_ROUND_Y = new NiceStyleBasic(new ModelCookbookColumnRound(4, 1, Axis.Y), null);
-	public static final NiceStyle COLUMN_ROUND_Z = new NiceStyleBasic(new ModelCookbookColumnRound(4, 1, Axis.Z), null);
-	public static final NiceStyle HOT_BASALT = new NiceStyleBasic(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, true), 
+	public static final NiceStyle RAW = new NiceStyleOld(new ModelCookbook(0, 4), null);
+	public static final NiceStyle SMOOTH = new NiceStyleOld(new ModelCookbook(4, 4), null);
+	public static final NiceStyle LARGE_BRICKS = new NiceStyleOld(new ModelCookbook(96, 4), null);
+	public static final NiceStyle SMALL_BRICKS = new NiceStyleOld(new ModelCookbook(120, 4), null);
+	public static final NiceStyle BIG_WORN = new NiceStyleOld(new ModelCookbookConnectedCorners(256, 3), null);
+	public static final NiceStyle BIG_WEATHERED = new NiceStyleOld(new ModelCookbookConnectedCorners(400, 1), null);
+	public static final NiceStyle BIG_ORNATE = new NiceStyleOld(new ModelCookbookConnectedCorners(448, 1), null);
+	public static final NiceStyle MASONRY_A = new NiceStyleOld(new ModelCookbookMasonry(16, 1), null);
+	public static final NiceStyle MASONRY_B = new NiceStyleOld(new ModelCookbookMasonry(32, 1), null);
+	public static final NiceStyle MASONRY_C = new NiceStyleOld(new ModelCookbookMasonry(48, 1), null);
+	public static final NiceStyle MASONRY_D = new NiceStyleOld(new ModelCookbookMasonry(64, 1), null);
+	public static final NiceStyle MASONRY_E = new NiceStyleOld(new ModelCookbookMasonry(80, 1), null);
+	public static final NiceStyle COLUMN_SQUARE_X = new NiceStyleOld(new ModelCookbookColumnSquare(8, 1, Axis.X), null);
+	public static final NiceStyle COLUMN_SQUARE_Y = new NiceStyleOld(new ModelCookbookColumnSquare(8, 1, Axis.Y), null);
+	public static final NiceStyle COLUMN_SQUARE_Z = new NiceStyleOld(new ModelCookbookColumnSquare(8, 1, Axis.Z), null);
+	public static final NiceStyle COLUMN_ROUND_X = new NiceStyleOld(new ModelCookbookColumnRound(4, 1, Axis.X), null);
+	public static final NiceStyle COLUMN_ROUND_Y = new NiceStyleOld(new ModelCookbookColumnRound(4, 1, Axis.Y), null);
+	public static final NiceStyle COLUMN_ROUND_Z = new NiceStyleOld(new ModelCookbookColumnRound(4, 1, Axis.Z), null);
+	public static final NiceStyle HOT_BASALT = new NiceStyleOld(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, true), 
 			new ModelCookbook(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true));
 	
 	public abstract IModelController getModelController();
 	
+	public static class NiceStyleNew extends NiceStyle {
+
+		@Override
+		public IModelController getModelController() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
 	
-	public static class NiceStyleBasic extends NiceStyle implements IModelController{
+	
+	public static class NiceStyleOld extends NiceStyle implements IModelController{
 		
 		@Override
 		public IModelController getModelController(){
@@ -76,7 +86,7 @@ public abstract class NiceStyle {
 		/**
 		 * Instantiate a new style.  See elsewhere in this class for what stuff does.
 		 */
-		NiceStyleBasic(ModelCookbook firstCookbook, ModelCookbook secondCookbook) {
+		NiceStyleOld(ModelCookbook firstCookbook, ModelCookbook secondCookbook) {
 			this.firstCookbook = firstCookbook;
 			this.firstCookbook.setStyle(this);
 		
@@ -118,6 +128,12 @@ public abstract class NiceStyle {
 								firstCookbook.getVariantID((IExtendedBlockState) state, world, pos),
 								secondCookbook.getVariantID((IExtendedBlockState) state, world, pos)));
 			}
+		}
+
+		@Override
+		public String getParticleTextureName(NiceSubstance substance) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 }

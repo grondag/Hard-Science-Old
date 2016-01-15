@@ -111,10 +111,10 @@ public class ModelCookbook {
 	protected final int alternateCount;
 	
 	/**
-	 * If true, will use the second textures for the substance.
-	 * Use for overlays, etc.
+	 * If true, will use the overlay textures for the substance.
+	 * In this case, textureIndex gives the starting offset for overlay textures.
 	 */
-	protected final boolean useSecondaryTextures;
+	protected final boolean useOverlayTextures;
 
 	protected final EnumWorldBlockLayer renderLayer;
 	protected final boolean isShaded;
@@ -127,7 +127,7 @@ public class ModelCookbook {
 	public ModelCookbook(int textureIndex, int alternateCount, boolean useSecondaryTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
 		this.textureIndex = textureIndex;
 		this.alternateCount = alternateCount;
-		this.useSecondaryTextures = useSecondaryTextures;
+		this.useOverlayTextures = useSecondaryTextures;
 		this.renderLayer = renderLayer;
 		this.isShaded = isShaded;
 		this.useRotations = useRotations;
@@ -290,9 +290,9 @@ public class ModelCookbook {
 	 * Cookbook determines which offset to use for what purpose.
 	 */
 	public String getTextureName(NiceSubstance substance, int offset) {
-		return (this.useSecondaryTextures && substance.secondTexture != null)
-				? buildTextureName(substance.secondTexture, offset)
-				: buildTextureName(substance.firstTexture, offset);
+		return (this.useOverlayTextures && substance.overlayTexture != null)
+				? buildTextureName(substance.overlayTexture, offset)
+				: buildTextureName(substance.baseTexture, offset);
 	}
 	
 	private static String buildTextureName(String textureName, int offset) {
