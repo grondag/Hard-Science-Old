@@ -50,16 +50,4 @@ public class ModelControllerDual implements IModelController {
 		return controllerPrimary.getParticleTextureName(substance);
 	}
 
-	@Override
-	public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass) {
-		
-		EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-
-		if(controllerPrimary.canRenderInLayer(layer)){
-			return controllerPrimary.useOverlayTextures ? substance.overlayColor : substance.baseColor;			
-		} else if (controllerSecondary.canRenderInLayer(layer)){
-			return controllerSecondary.useOverlayTextures ? substance.overlayColor : substance.baseColor;
-		} else return 16777215;
-	}
-
 }

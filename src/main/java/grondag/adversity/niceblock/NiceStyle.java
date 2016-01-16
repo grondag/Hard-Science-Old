@@ -51,8 +51,6 @@ public abstract class NiceStyle {
 			new ModelControllerDual(
 					new ModelControllerBlock(0, 4, false, EnumWorldBlockLayer.SOLID, true, true),
 					new ModelControllerBlock(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true)));
-	public static final NiceStyle GLERP = new NiceStyleNew(
-			new ModelControllerBlock(0, 4, false, EnumWorldBlockLayer.SOLID, true, true));
 
 	
 	public abstract IModelController getModelController();
@@ -148,9 +146,5 @@ public abstract class NiceStyle {
 			return null;
 		}
 
-		@Override
-		public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass) {
-			return 16777215;
-		}
 	}
 }

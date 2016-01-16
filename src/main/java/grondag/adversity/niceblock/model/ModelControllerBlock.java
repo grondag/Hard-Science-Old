@@ -64,9 +64,4 @@ public class ModelControllerBlock extends ModelController{
 				new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1));
 	}
 
-	@Override
-	public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass) {
-		return this.useOverlayTextures ? substance.overlayColor : substance.baseColor;
-	}
-
 }

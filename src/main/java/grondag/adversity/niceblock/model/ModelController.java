@@ -104,13 +104,6 @@ public abstract class ModelController implements IModelController{
 		return layer == renderLayer;
 	}
 	
-	
-	@Override
-	public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 	/**
 	 * Looks up and returns the appropriate textures for offset.
 	 * For convenience, accepts expanded alternate index values

@@ -195,13 +195,6 @@ public class NiceBlock extends Block {
 		return style.getModelController().canRenderInLayer(layer);
 	}
 
-	@Override
-	public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass) {
-		return style.getModelController().getColorMultiplier(
-				substances[worldIn.getBlockState(pos).getValue(SUBSTANCE_INDEX)], 
-				worldIn, pos, renderPass);
-	}
-
 	/**
 	 * Determines which model should be displayed via PROP_MODEL_RECIPE.
 	 * Handling is delegated to the style cook book.

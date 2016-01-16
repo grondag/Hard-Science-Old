@@ -39,8 +39,5 @@ public interface IModelController {
 	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
 	public String getParticleTextureName(NiceSubstance substance);
-
-	public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass);
-
 	
 }
