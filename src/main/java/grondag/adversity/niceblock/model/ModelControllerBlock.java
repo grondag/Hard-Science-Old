@@ -52,8 +52,8 @@ public class ModelControllerBlock extends ModelController{
 	}	
 	
 	@Override
-	public NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
-		return new NiceModelBlock(substance, mrlBlock, mrlItem, this);
+	public NiceModel getModel(NiceSubstance substance) {
+		return new NiceModelBlock(substance, this);
 	}
 
 	@Override

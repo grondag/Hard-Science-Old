@@ -48,7 +48,7 @@ public class NiceBlockRegistrar {
 	 * NiceBlockModels contained here for handling during model bake and texture
 	 * stitch
 	 */
-	private static LinkedList<NiceModel> allModels = new LinkedList<NiceModel>();
+	private static LinkedList<ModelRegistration> allModels = new LinkedList<ModelRegistration>();
 
 	/**
 	 * Supports the getBlock(s)ForStyleAndSubstance methods
@@ -163,8 +163,8 @@ public class NiceBlockRegistrar {
 				ModelBakery.addVariantName(block.item, getModelResourceNameFromMeta(block, i));
 
 				// Create model for later event handling.
-				NiceModel model = block.style.getModelController().getModel(block.substances[i], mrlBlock, mrlItem);
-				allModels.add(model);
+				NiceModel model = block.style.getModelController().getModel(block.substances[i]);
+				allModels.add(new ModelRegistration(model, mrlBlock, mrlItem));
 
 			}
 		}
@@ -237,8 +237,10 @@ public class NiceBlockRegistrar {
 	 */
 	@SubscribeEvent
 	public void onModelBakeEvent(ModelBakeEvent event) throws IOException {
-		for (NiceModel model : allModels) {
-			model.handleBakeEvent(event);
+		for (ModelRegistration reg : allModels) {
+			reg.model.handleBakeEvent(event);
+			event.modelRegistry.putObject(reg.mrlBlock, reg.model);
+			event.modelRegistry.putObject(reg.mrlItem, reg.model);
 		}
 	}
 
@@ -247,8 +249,23 @@ public class NiceBlockRegistrar {
 	 */
 	@SubscribeEvent
 	public void stitcherEventPre(TextureStitchEvent.Pre event) {
-		for (NiceModel model : allModels) {
-			model.handleTextureStitchEvent(event);
+		for (ModelRegistration reg : allModels) {
+			reg.model.handleTextureStitchEvent(event);
+		}
+	}
+	
+	/**
+	 * Contains stuff we need to replace model references during model bake.
+	 */
+	private static class ModelRegistration{
+		public final NiceModel model;
+		public final ModelResourceLocation mrlBlock;
+		public final ModelResourceLocation mrlItem;
+
+		public ModelRegistration(NiceModel model, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
+			this.model = model;
+			this.mrlBlock = mrlBlock;
+			this.mrlItem = mrlItem;
 		}
 	}
 

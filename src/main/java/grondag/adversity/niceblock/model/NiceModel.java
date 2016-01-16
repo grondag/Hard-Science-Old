@@ -51,17 +51,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  * cook book.
  */
 public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
-	/**
-	 * Identify THIS INSTANCE in the model registry. Needs to be consistent with
-	 * block state mapping for the block/substance represented by this model.
-	 * Does NOT identify the model(s) that will be returned by handleBlockState.
-	 */
-	protected final ModelResourceLocation blockResourceLocation;
-
-	/**
-	 * Same as blockResourceLocation but for the item.
-	 */
-	protected final ModelResourceLocation itemResourceLocation;
 
 	/**
 	 * Provides texture parameters.
@@ -72,6 +61,8 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 
 	protected IFlexibleBakedModel itemModel;
 
+	public abstract ModelController getController();
+	
 	/**
 	 * Create a model for this style/substance combination. Caller will
 	 * typically create 16 of these per NiceBlock instance if all 16 substance
@@ -79,10 +70,8 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 *
 	 * See class header and member descriptions for more info on what things do.
 	 */
-	protected NiceModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
+	protected NiceModel(NiceSubstance substance) {
 		this.substance = substance;
-		blockResourceLocation = mrlBlock;
-		itemResourceLocation = mrlItem;
 	}
 
 	/**

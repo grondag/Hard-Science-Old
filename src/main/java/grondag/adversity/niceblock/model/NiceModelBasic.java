@@ -85,8 +85,8 @@ public class NiceModelBasic extends NiceModel {
 	 */
 	protected final IFlexibleBakedModel[] secondaryModels;
 	
-	public NiceModelBasic(NiceStyleOld style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
-		super(substance, mrlBlock, mrlItem);
+	public NiceModelBasic(NiceStyleOld style, NiceSubstance substance) {
+		super(substance);
 		this.style = style;
 		primaryModels = new IFlexibleBakedModel[style.firstCookbook.getAlternateCount() * style.firstCookbook.getRecipeCount()];
 		
@@ -209,9 +209,6 @@ public class NiceModelBasic extends NiceModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		event.modelRegistry.putObject(blockResourceLocation, this);
-		event.modelRegistry.putObject(itemResourceLocation, this);
 	}
 
 
@@ -231,6 +228,12 @@ public class NiceModelBasic extends NiceModel {
 	@Override
 	public IBakedModel getModelVariant(int variantID) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public ModelController getController() {
 		return null;
 	}
 

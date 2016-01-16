@@ -112,10 +112,7 @@ public abstract class ModelController implements IModelController{
 	public ImmutableMap<String, String> getTexturesForExpandedAlternate(NiceSubstance substance, int expanded) {
 		
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", 
-				this.useOverlayTextures && substance.overlayTexture != null
-				? getTextureName(substance, calcAlternate(expanded) + textureIndex)
-				: getTextureName(substance, calcAlternate(expanded) + textureIndex));
+		textures.put("all", getTextureName(substance, calcAlternate(expanded) + textureIndex));
 				
 		return ImmutableMap.copyOf(textures);
 	}

@@ -18,7 +18,7 @@ public interface IModelController {
 	/**
 	 * Used by NiceBlockRegistrar to register models for block/style/substance combinations.
 	 */
-	public abstract NiceModel getModel(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem);
+	public abstract NiceModel getModel(NiceSubstance substance);
 	
 	/**
 	 * Used by NiceBlock to generate appropriate render state.

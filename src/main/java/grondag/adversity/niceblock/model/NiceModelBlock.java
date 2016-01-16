@@ -44,8 +44,8 @@ public class NiceModelBlock extends NiceModel {
 	 */
 	protected final IBakedModel[] models;
 
-	protected NiceModelBlock(NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem, ModelControllerBlock controller) {
-		super(substance, mrlBlock, mrlItem);
+	protected NiceModelBlock(NiceSubstance substance, ModelControllerBlock controller) {
+		super(substance);
 		this.controller = controller;
 		models = new IFlexibleBakedModel[controller.expandedAlternateCount];
 	}
@@ -140,8 +140,6 @@ public class NiceModelBlock extends NiceModel {
 		itemModel = getBakedModelForExpandedAlternate(event, 0, 
 				new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity())));
 		
-		event.modelRegistry.putObject(blockResourceLocation, this);
-		event.modelRegistry.putObject(itemResourceLocation, this);
 	}
 
 	@Override
@@ -149,5 +147,10 @@ public class NiceModelBlock extends NiceModel {
 		for(String tex : controller.getAllTextures(substance)){
 			event.map.registerSprite(new ResourceLocation(tex));
 		}
+	}
+
+	@Override
+	public ModelController getController() {
+		return controller;
 	}
 }
