@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.model.IModelController;
+import grondag.adversity.niceblock.model.ModelControllerBlock;
 import grondag.adversity.niceblock.model.ModelCookbook;
 import grondag.adversity.niceblock.model.ModelCookbookColumnRound;
 import grondag.adversity.niceblock.model.ModelCookbookColumnSquare;
@@ -47,15 +48,20 @@ public abstract class NiceStyle {
 	public static final NiceStyle COLUMN_ROUND_Z = new NiceStyleOld(new ModelCookbookColumnRound(4, 1, Axis.Z), null);
 	public static final NiceStyle HOT_BASALT = new NiceStyleOld(new ModelCookbook(0, 4, false, EnumWorldBlockLayer.SOLID, true, true), 
 			new ModelCookbook(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true));
+	public static final NiceStyle NEW_BASALT = new NiceStyleNew(new ModelControllerBlock(0, 4, false, EnumWorldBlockLayer.SOLID, true, true));
 	
 	public abstract IModelController getModelController();
 	
 	public static class NiceStyleNew extends NiceStyle {
 
+		final IModelController controller;
+		
+		public NiceStyleNew(IModelController controller){
+			this.controller = controller;
+		}
 		@Override
 		public IModelController getModelController() {
-			// TODO Auto-generated method stub
-			return null;
+			return controller;
 		}
 		
 	}

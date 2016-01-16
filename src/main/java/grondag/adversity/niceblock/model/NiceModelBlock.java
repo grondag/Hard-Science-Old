@@ -100,7 +100,7 @@ public class NiceModelBlock extends NiceModel {
 	}
 
 
-	private IBakedModel getBakedModelForExpandedAlternate(ModelBakeEvent event, int expanded, IModelState state){
+	private IFlexibleBakedModel getBakedModelForExpandedAlternate(ModelBakeEvent event, int expanded, IModelState state){
 		String baseModelName = controller.isShaded ? "adversity:block/cube_rotate_all_" : "adversity:block/cube_no_shade_rotate_all_";
 		
 		IRetexturableModel template;
@@ -110,9 +110,8 @@ public class NiceModelBlock extends NiceModel {
 			return model.bake(state, DefaultVertexFormats.ITEM, textureGetter);
 		} catch (IOException e) {
 			Adversity.log.error("Unable to load model " + baseModelName + " in " + this.getClass(), e);
-			return event.modelManager.getBlockModelShapes().getModelManager().getMissingModel();
+			return null;
 		}
-
 	}
 	
 	@Override

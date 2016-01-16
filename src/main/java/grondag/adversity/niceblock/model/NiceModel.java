@@ -70,7 +70,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 
 	protected TextureAtlasSprite particleTexture;
 
-	protected IBakedModel itemModel;
+	protected IFlexibleBakedModel itemModel;
 
 	/**
 	 * Create a model for this style/substance combination. Caller will

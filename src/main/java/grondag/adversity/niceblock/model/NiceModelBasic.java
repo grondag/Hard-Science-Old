@@ -85,9 +85,6 @@ public class NiceModelBasic extends NiceModel {
 	 */
 	protected final IFlexibleBakedModel[] secondaryModels;
 	
-	protected IFlexibleBakedModel itemModel;
-
-
 	public NiceModelBasic(NiceStyleOld style, NiceSubstance substance, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem) {
 		super(substance, mrlBlock, mrlItem);
 		this.style = style;
