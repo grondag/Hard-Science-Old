@@ -101,6 +101,7 @@ public class NiceModelBlock extends NiceModel {
 
 
 	private IFlexibleBakedModel getBakedModelForExpandedAlternate(ModelBakeEvent event, int expanded, IModelState state){
+		
 		String baseModelName = controller.isShaded ? "adversity:block/cube_rotate_all_" : "adversity:block/cube_no_shade_rotate_all_";
 		
 		IRetexturableModel template;

@@ -58,7 +58,8 @@ public class NiceBlockRegistrar {
 	// define our substance groupings
 	private static final NiceSubstance[][] substance16Group = { 
 		{ NiceSubstance.BASALT, NiceSubstance.DIORITE },
-		{ NiceSubstance.HOT_BASALT_0, NiceSubstance.HOT_BASALT_1, NiceSubstance.HOT_BASALT_2, NiceSubstance.HOT_BASALT_3  }
+		{ NiceSubstance.HOT_BASALT_0, NiceSubstance.HOT_BASALT_1, NiceSubstance.HOT_BASALT_2, NiceSubstance.HOT_BASALT_3  },
+		{ NiceSubstance.GLERP }
 		};
 
 	// declare the block instances
@@ -112,9 +113,11 @@ public class NiceBlockRegistrar {
 //	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
 //			substance16Group[1]);
 
-	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.NEW_BASALT, new PlacementSimple(),
+	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
 	substance16Group[1]);
 
+	public static final NiceBlock glerpBlock = new NiceBlock("glerp", NiceStyle.GLERP, new PlacementSimple(),
+	substance16Group[2]);
 	
 	/**
 	 * Use to generate model resource location names with a consistent

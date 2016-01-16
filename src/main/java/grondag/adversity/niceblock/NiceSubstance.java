@@ -15,17 +15,24 @@ import net.minecraft.block.material.Material;
 public enum NiceSubstance {
 	BASALT("basalt", BaseMaterial.DRESSED_STONE),
 	DIORITE("diorite", BaseMaterial.DRESSED_STONE),
-	HOT_BASALT_0("basalt", BaseMaterial.DRESSED_STONE, "hot_basalt_0"),
-	HOT_BASALT_1("basalt", BaseMaterial.DRESSED_STONE, "hot_basalt_1"),
-	HOT_BASALT_2("basalt", BaseMaterial.DRESSED_STONE, "hot_basalt_2"),
-	HOT_BASALT_3("basalt", BaseMaterial.DRESSED_STONE, "hot_basalt_3");
+	HOT_BASALT_0("tintbase", 0x373839, BaseMaterial.DRESSED_STONE, "hot_basalt_0"),
+	HOT_BASALT_1("tintbase", 0x373839, BaseMaterial.DRESSED_STONE, "hot_basalt_1"),
+	HOT_BASALT_2("tintbase", 0x373839, BaseMaterial.DRESSED_STONE, "hot_basalt_2"),
+	HOT_BASALT_3("tintbase", 0x373839, BaseMaterial.DRESSED_STONE, "hot_basalt_3"),
+	GLERP("tintbase", 0x6689DD, BaseMaterial.DRESSED_STONE, "hot_basalt_3");
+	
 
 	/**
 	 * Folder and prefix for primary textures.
 	 * Specific usage left up to model cookbook.
 	 */
 	public final String baseTexture;
-
+	
+	/**
+	 * Color multiplier for base texture.
+	 */
+	public final int baseColor;
+	
 	/**
 	 * Folder and prefix for secondary textures.
 	 * Specific usage left up to model cookbook.
@@ -34,18 +41,41 @@ public enum NiceSubstance {
 	public final String overlayTexture;
 	
 	/**
+	 * Color multiplier for overlay texture.
+	 */
+	public final int overlayColor;
+	
+	/**
 	 * Controls MineCraft material properties.
 	 */
 	public final BaseMaterial baseMaterial;
 
-	NiceSubstance(String firstTexture, BaseMaterial baseMaterial) {
-		this(firstTexture, baseMaterial, null);
+	NiceSubstance(String baseTexture, BaseMaterial baseMaterial) {
+		this(baseTexture, 16777215, baseMaterial, null, 16777215);
 	}
 	
-	NiceSubstance(String firstTexture, BaseMaterial baseMaterial, String secondTexture){
+	NiceSubstance(String baseTexture, int baseColor, BaseMaterial baseMaterial) {
+		this(baseTexture, baseColor, baseMaterial, null, 16777215);
+	}
+	
+	NiceSubstance(String baseTexture, int baseColor, BaseMaterial baseMaterial, String overlayTexture) {
+		this(baseTexture, baseColor, baseMaterial, overlayTexture, 16777215);
+	}
+
+	NiceSubstance(String baseTexture, BaseMaterial baseMaterial, String overlayTexture){
+		this(baseTexture, 16777215, baseMaterial, overlayTexture, 16777215);
+	}
+	
+	NiceSubstance(String baseTexture, BaseMaterial baseMaterial, String overlayTexture,  int overlayColor){
+		this(baseTexture, 16777215, baseMaterial, overlayTexture, overlayColor);
+	}
+
+	NiceSubstance(String baseTexture, int baseColor, BaseMaterial baseMaterial, String overlayTexture, int overlayColor){
 		this.baseMaterial = baseMaterial;
-		this.baseTexture = firstTexture;
-		this.overlayTexture = secondTexture;
+		this.baseColor = baseColor;
+		this.baseTexture = baseTexture;
+		this.overlayColor = overlayColor;
+		this.overlayTexture = overlayTexture;
 	}
 
 	/**

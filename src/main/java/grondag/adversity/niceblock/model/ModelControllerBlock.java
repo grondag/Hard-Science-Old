@@ -16,6 +16,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
@@ -62,6 +63,10 @@ public class ModelControllerBlock extends ModelController{
 				NiceBlock.MODEL_RENDER_STATE, 
 				new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1));
 	}
-	
+
+	@Override
+	public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass) {
+		return this.useOverlayTextures ? substance.overlayColor : substance.baseColor;
+	}
 
 }

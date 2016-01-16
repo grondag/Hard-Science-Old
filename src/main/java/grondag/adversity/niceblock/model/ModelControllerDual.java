@@ -7,6 +7,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ModelControllerDual implements IModelController {
@@ -47,6 +48,18 @@ public class ModelControllerDual implements IModelController {
 	@Override
 	public String getParticleTextureName(NiceSubstance substance) {
 		return controllerPrimary.getParticleTextureName(substance);
+	}
+
+	@Override
+	public int getColorMultiplier(NiceSubstance substance, IBlockAccess worldIn, BlockPos pos, int renderPass) {
+		
+		EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
+
+		if(controllerPrimary.canRenderInLayer(layer)){
+			return controllerPrimary.useOverlayTextures ? substance.overlayColor : substance.baseColor;			
+		} else if (controllerSecondary.canRenderInLayer(layer)){
+			return controllerSecondary.useOverlayTextures ? substance.overlayColor : substance.baseColor;
+		} else return 16777215;
 	}
 
 }
