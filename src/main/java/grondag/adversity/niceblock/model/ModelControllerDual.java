@@ -46,8 +46,14 @@ public class ModelControllerDual implements IModelController {
 	}
 
 	@Override
-	public String getParticleTextureName(NiceSubstance substance) {
-		return controllerPrimary.getParticleTextureName(substance);
+	public String getFirstTextureName(NiceSubstance substance) {
+		return controllerPrimary.getFirstTextureName(substance);
+	}
+
+	@Override
+	public String[] getAllTextures(NiceSubstance substance) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -38,6 +38,11 @@ public interface IModelController {
 	/**
 	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
-	public String getParticleTextureName(NiceSubstance substance);
+	public String getFirstTextureName(NiceSubstance substance);
+	
+	/**
+	 * Supports texture stitch event
+	 */
+	public String[] getAllTextures(NiceSubstance substance);
 	
 }

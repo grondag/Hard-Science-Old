@@ -54,42 +54,14 @@ public class NiceModelBlock extends NiceModel {
 	public TextureAtlasSprite getParticleTexture() {
 		// lazy lookup to ensure happens after texture atlas has been created
 		if (particleTexture == null) {
-			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getParticleTextureName(substance));
+			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getFirstTextureName(substance));
 		}
 		return particleTexture;
 	}
 
 	@Override
-	public IBakedModel handleBlockState(IBlockState state) {
-
-		// Provide a default to contain the damage if we derp it up.
-		IBakedModel retVal = itemModel;
-
-		// Really should ALWAYS be a NiceBlock instance but if someone goes
-		// mucking about with the model registry crazy stuff could happen.
-		if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock) {
-			
-			IExtendedBlockState exState = (IExtendedBlockState) state;
-			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-			ModelRenderState renderState = exState.getValue(NiceBlock.MODEL_RENDER_STATE);
-
-			if(layer == controller.renderLayer){
-				retVal = getModelVariant(renderState.variant1);
-			}
-		}
-		
-		// May not be strictly needed, but doing in case something important happens in some model types.
-		if (retVal instanceof ISmartBlockModel) {
-			return ((ISmartBlockModel) retVal).handleBlockState(state);
-		}
-
-		return retVal;
-	}
 	
-	/**
-	 * The logic for handleBlockState.  
-	 * Separate and public to enable composite models.
-	 */
+
 	public IBakedModel getModelVariant(int variantID){
 		if (variantID >= 0 && variantID < controller.expandedAlternateCount) {
 			return models[variantID];
@@ -141,13 +113,6 @@ public class NiceModelBlock extends NiceModel {
 		itemModel = getBakedModelForExpandedAlternate(event, 0, 
 				new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity())));
 		
-	}
-
-	@Override
-	public void handleTextureStitchEvent(Pre event) {
-		for(String tex : controller.getAllTextures(substance)){
-			event.map.registerSprite(new ResourceLocation(tex));
-		}
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.base.Function;
 
+import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
@@ -61,7 +63,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 
 	protected IFlexibleBakedModel itemModel;
 
-	public abstract ModelController getController();
+	public abstract IModelController getController();
 	
 	/**
 	 * Create a model for this style/substance combination. Caller will
@@ -99,7 +101,11 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Registers all textures that will be needed for this style/substance.
 	 * Happens before model bake.
 	 */
-	public abstract void handleTextureStitchEvent(Pre event);
+	public void handleTextureStitchEvent(Pre event){
+		for(String tex : getController().getAllTextures(substance)){
+			event.map.registerSprite(new ResourceLocation(tex));
+		}
+	}
 	
 	@Override
 	public ItemCameraTransforms getItemCameraTransforms() {
@@ -112,7 +118,30 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * more info.
 	 */
 	@Override
-	public abstract IBakedModel handleBlockState(IBlockState state);
+	public IBakedModel handleBlockState(IBlockState state) {
+		// Provide a default to contain the damage if we derp it up.
+		IBakedModel retVal = itemModel;
+
+		// Really should ALWAYS be a NiceBlock instance but if someone goes
+		// mucking about with the model registry crazy stuff could happen.
+		if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock) {
+			
+			IExtendedBlockState exState = (IExtendedBlockState) state;
+			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
+			ModelRenderState renderState = exState.getValue(NiceBlock.MODEL_RENDER_STATE);
+
+			if(getController().canRenderInLayer(layer)){
+				retVal = getModelVariant(renderState.variant1);
+			}
+		}
+		
+		// May not be strictly needed, but doing in case something important happens in some model types.
+		if (retVal instanceof ISmartBlockModel) {
+			return ((ISmartBlockModel) retVal).handleBlockState(state);
+		}
+
+		return retVal;
+	}
 	
 	/**
 	 * The logic for handleBlockState.  

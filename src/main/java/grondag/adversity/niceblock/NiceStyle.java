@@ -141,7 +141,13 @@ public abstract class NiceStyle {
 		}
 
 		@Override
-		public String getParticleTextureName(NiceSubstance substance) {
+		public String getFirstTextureName(NiceSubstance substance) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String[] getAllTextures(NiceSubstance substance) {
 			// TODO Auto-generated method stub
 			return null;
 		}

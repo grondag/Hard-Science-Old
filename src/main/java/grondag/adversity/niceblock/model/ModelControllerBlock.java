@@ -57,11 +57,4 @@ public class ModelControllerBlock extends ModelController{
 		return new NiceModelBlock(substance, this);
 	}
 
-	@Override
-	public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-		return state.withProperty(
-				NiceBlock.MODEL_RENDER_STATE, 
-				new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1));
-	}
-
 }

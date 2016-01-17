@@ -12,6 +12,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
+import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -32,30 +33,30 @@ public abstract class ModelController implements IModelController{
 	 * Index of the first texture to be used. The controller will
 	 * assume all textures are offset from this index.
 	 */
-	public final int textureIndex;
+	protected final int textureIndex;
 
 	/**
 	 * How many versions of textures are provided in the atlas. (count includes
 	 * the first texture) Does not include rotations.
 	 */
-	public final int alternateTextureCount;
+	protected final int alternateTextureCount;
 	
 	/**
 	 * If true, textures on each face can be rotated. Cookbook must still
 	 * handle selection of specific textures to match the rotations if the
 	 * faces have a visible orientation.
 	 */
-	public final boolean useRotatedTexturesAsAlternates;
+	protected final boolean useRotatedTexturesAsAlternates;
 
 	/**
 	 * Total alternate face variants, including rotations.
 	 */
-	public final int expandedAlternateCount;
+	protected final int expandedAlternateCount;
 	
 	/**
 	 * Layer in which block faces should render.
 	 */
-	public final EnumWorldBlockLayer renderLayer;
+	protected final EnumWorldBlockLayer renderLayer;
 	
 	/**
 	 * If false, faces of the block are not shaded according to light levels.
@@ -80,7 +81,7 @@ public abstract class ModelController implements IModelController{
 	}
 	
 	@Override
-	public String getParticleTextureName(NiceSubstance substance) {
+	public String getFirstTextureName(NiceSubstance substance) {
 		return getTextureName(substance, textureIndex);
 	}
 
@@ -96,6 +97,13 @@ public abstract class ModelController implements IModelController{
 	 */
 	public int getVariantID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		return alternator.getAlternate(pos);
+	}
+	
+	@Override
+	public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		return state.withProperty(
+				NiceBlock.MODEL_RENDER_STATE, 
+				new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1));
 	}
 
 	
@@ -127,6 +135,7 @@ public abstract class ModelController implements IModelController{
 		return "adversity:blocks/" + textureName + "/" + textureName + "_" + (position >> 3) + "_" + (position & 7);
 	}
 	
+	@Override
 	public String[] getAllTextures(NiceSubstance substance){
 		
 		final String retVal[] = new String[alternateTextureCount];

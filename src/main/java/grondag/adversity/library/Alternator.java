@@ -87,5 +87,4 @@ public class Alternator implements IAlternator {
 			return 0;
 		}
 	}
-
 }
