@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.model.IModelController;
+import grondag.adversity.niceblock.model.ModelControllerBigTex;
 import grondag.adversity.niceblock.model.ModelControllerBlock;
 import grondag.adversity.niceblock.model.ModelControllerDual;
 import grondag.adversity.niceblock.model.ModelCookbook;
@@ -51,6 +52,9 @@ public abstract class NiceStyle {
 			new ModelControllerDual(
 					new ModelControllerBlock(0, 4, false, EnumWorldBlockLayer.SOLID, true, true),
 					new ModelControllerBlock(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true)));
+
+	public static final NiceStyle BIG_TEX = new NiceStyleNew(
+					new ModelControllerBigTex(0, false, EnumWorldBlockLayer.SOLID, true, false));
 
 	
 	public abstract IModelController getModelController();

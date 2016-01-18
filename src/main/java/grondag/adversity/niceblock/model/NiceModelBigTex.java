@@ -1,41 +1,30 @@
 package grondag.adversity.niceblock.model;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import grondag.adversity.niceblock.NiceSubstance;
+
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Ints;
-
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
-import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.IModelState;
-import net.minecraftforge.client.model.IRetexturableModel;
-import net.minecraftforge.client.model.ISmartBlockModel;
-import net.minecraftforge.common.property.IExtendedBlockState;
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
+import net.minecraftforge.client.model.pipeline.LightUtil;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Ints;
 
 public class NiceModelBigTex extends NiceModel {
 
 	protected final ModelControllerBigTex controller;
-	
+
 	/**
 	 * Holds the baked models that will be returned for rendering based on
 	 * extended state. Array is populated during the handleBake event.
@@ -43,120 +32,144 @@ public class NiceModelBigTex extends NiceModel {
 	protected final List<BakedQuad>[][] faceQuads;
 
 	protected final BigTexFacade[] facadeModels;
-	
+
 	protected TextureAtlasSprite textureSprite;
-	
-	protected TextureAtlasSprite getTextureSprite(){
-		// lazy lookup to ensure happens after texture atlas has been created
-		if (textureSprite == null) {
-			textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getFirstTextureName(substance));
-		}
-		return textureSprite;
+
+	/**
+	 * Registers all textures that will be needed for this style/substance.
+	 * Happens before model bake.
+	 */
+	@Override
+	public void handleTexturePreStitch(Pre event) {
+		event.map.registerSprite(new ResourceLocation(getController().getFirstTextureName(substance)));
 	}
-	
+
+	@Override
+	public void handleTexturePostStitch(Post event) {
+		textureSprite = event.map.getAtlasSprite(getController().getFirstTextureName(substance));
+		particleTexture = textureSprite;
+	}
+
 	protected NiceModelBigTex(NiceSubstance substance, ModelControllerBigTex controller) {
 		super(substance);
 		this.controller = controller;
-		faceQuads = new List[6][controller.useRotatedTexturesAsAlternates ? 256 : 64];
+		faceQuads = new List[6][controller.useRotatedTexturesAsAlternates ? 1024 : 256];
 		facadeModels = new BigTexFacade[4096];
 	}
-	
+
 	@Override
 	public IModelController getController() {
 		return controller;
 	}
-	
-    private int[] vertexToInts(double x, double y, double z, float u, float v) {
-        return new int[] {
-                Float.floatToRawIntBits((float) x),
-                Float.floatToRawIntBits((float) y),
-                Float.floatToRawIntBits((float) z),
-                -1,
-                Float.floatToRawIntBits(getTextureSprite().getInterpolatedU(u)),
-                Float.floatToRawIntBits(getTextureSprite().getInterpolatedV(v)),
-                0
-        };
-    }
 
-    private BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4,  EnumFacing side) {
-        return new BakedQuad(Ints.concat(
-                vertexToInts(v1.x, v1.y, v1.z, v1.u, v1.v),
-                vertexToInts(v2.x, v2.y, v2.z, v2.u, v2.v),
-                vertexToInts(v3.x, v3.y, v3.z, v3.u, v3.v),
-                vertexToInts(v4.x, v4.y, v4.z, v4.u, v4.v)
-        ), -1, side);
-    }
-	
-    private static class Vertex{
-    	private final float x;
-    	private final float y;
-    	private final float z;
-    	private final float u;
-    	private final float v;
-    	
-    	public Vertex(float x, float y, float z, float u, float v){
-    		this.x = x;
-    		this.y = y;
-    		this.z = z;
-    		this.u = u;
-    		this.v = v;
-    	}
-    }
-    
-    
+	private int[] vertexToInts(double x, double y, double z, float u, float v, int color) {
+
+
+		return new int[] {
+				Float.floatToRawIntBits((float) x),
+				Float.floatToRawIntBits((float) y),
+				Float.floatToRawIntBits((float) z),
+				color,
+				Float.floatToRawIntBits(textureSprite.getInterpolatedU(u)),
+				Float.floatToRawIntBits(textureSprite.getInterpolatedV(v)),
+				0
+		};
+	}
+
+	private BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side) {
+
+		float shade = LightUtil.diffuseLight(side);
+
+		int color = 0xFFFFFFFF;
+
+		int red = (int) (shade * 255f * ((color >> 16 & 0xFF) / 255f));
+		int green = (int) (shade * 255f * ((color >> 8 & 0xFF) / 255f));
+		int blue = (int) (shade * 255f * ((color & 0xFF) / 255f));
+		int alpha = color >> 24 & 0xFF;
+
+		color = red | green << 8 | blue << 16 | alpha << 24;
+
+		int[] aint = Ints.concat(
+				vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, color),
+				vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, color),
+				vertexToInts(v3.xCoord, v3.yCoord, v3.zCoord, v3.u, v3.v, color),
+				vertexToInts(v4.xCoord, v4.yCoord, v4.zCoord, v4.u, v4.v, color)
+				);
+		
+		// necessary to support forge lighting model
+		net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
+		
+		return new BakedQuad(aint,-1, side);
+
+	}
+
+	private static class Vertex extends Vec3 {
+		private final float u;
+		private final float v;
+
+		public Vertex(float x, float y, float z, float u, float v) {
+			super(x, y, z);
+			this.u = u;
+			this.v = v;
+		}
+	}
+
 	@Override
 	public void handleBakeEvent(ModelBakeEvent event) {
 
-		final float UVSTEP = 1 / 16;
-		
-		for(int i=0; i < 64; i++){
-			
-			float u0 = i & 15;
-			float v0 = i >> 4;
-			float u1 = u0 + UVSTEP;
-			float v1 = v0 + UVSTEP;
-			
-			faceQuads[EnumFacing.UP.ordinal()][i] = 
-					new ImmutableList.Builder<BakedQuad>()
-					.add(createQuad(
-							new Vertex(0,1,0,u0,v0), new Vertex(0,1,1,u0,v1), new Vertex(1,1,1,u1,v1), new Vertex(1,1,0,u1,v0), EnumFacing.UP))
-					.build();
-			
-			faceQuads[EnumFacing.DOWN.ordinal()][i] = 
-					new ImmutableList.Builder<BakedQuad>()
-					.add(createQuad(
-							new Vertex(0,0,0,u0,v0), new Vertex(0,0,1,u0,v1), new Vertex(1,0,1,u1,v1), new Vertex(1,0,0,u1,v0), EnumFacing.DOWN))
-					.build();
+		textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getController().getFirstTextureName(substance));
 
-			faceQuads[EnumFacing.EAST.ordinal()][i] = 
-					new ImmutableList.Builder<BakedQuad>()
-					.add(createQuad(
-							new Vertex(1,0,0,u0,v0), new Vertex(1,0,1,u0,v1), new Vertex(1,1,1,u1,v1), new Vertex(1,1,0,u1,v0), EnumFacing.EAST))
-					.build();
+		for (int i = 0; i < 16; i++) {
+			for (int j = 0; j < 16; j++) {
 
-			faceQuads[EnumFacing.WEST.ordinal()][i] = 
-					new ImmutableList.Builder<BakedQuad>()
-					.add(createQuad(
-							new Vertex(0,0,0,u0,v0), new Vertex(0,0,1,u0,v1), new Vertex(0,1,1,u1,v1), new Vertex(0,1,0,u1,v0), EnumFacing.WEST))
-					.build();
+				int index = i << 4 | j;
+				float u0 = i;
+				float v0 = j;
+				float u1 = u0 + 1;
+				float v1 = v0 + 1;
 
-			faceQuads[EnumFacing.NORTH.ordinal()][i] = 
-					new ImmutableList.Builder<BakedQuad>()
-					.add(createQuad(
-							new Vertex(0,0,1,u0,v0), new Vertex(0,1,1,u0,v1), new Vertex(1,1,1,u1,v1), new Vertex(1,0,1,u1,v0), EnumFacing.NORTH))
-					.build();
+				faceQuads[EnumFacing.UP.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+						.add(createQuad(
+										new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0), EnumFacing.UP))
+								.build();
 
-			faceQuads[EnumFacing.SOUTH.ordinal()][i] = 
-					new ImmutableList.Builder<BakedQuad>()
-					.add(createQuad(
-							new Vertex(0,0,0,u0,v0), new Vertex(0,1,0,u0,v1), new Vertex(1,1,0,u1,v1), new Vertex(1,0,0,u1,v0), EnumFacing.SOUTH))
-					.build();
+				faceQuads[EnumFacing.DOWN.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+						.add(createQuad(
+										new Vertex(0, 0, 0, u0, v0), new Vertex(1, 0, 0, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(0, 0, 1, u1, v0), EnumFacing.DOWN))
+								.build();
+
+				faceQuads[EnumFacing.EAST.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+								.add(createQuad(
+								new Vertex(0, 0, 0, u0, v0), new Vertex(0, 0, 1, u0, v1), new Vertex(0, 1, 1, u1, v1), new Vertex(0, 1, 0, u1, v0), EnumFacing.EAST))
+								.build();
+
+				faceQuads[EnumFacing.WEST.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+								.add(createQuad(
+										new Vertex(1, 0, 0, u0, v0), new Vertex(1, 1, 0, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 0, 1, u1, v0), EnumFacing.WEST))
+								.build();
+
+				faceQuads[EnumFacing.NORTH.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+								.add(createQuad(
+								new Vertex(0, 0, 0, u0, v0), new Vertex(0, 1, 0, u0, v1), new Vertex(1, 1, 0, u1, v1), new Vertex(1, 0, 0, u1, v0), EnumFacing.NORTH))
+								.build();
+
+				faceQuads[EnumFacing.SOUTH.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+								.add(createQuad(
+								new Vertex(0, 0, 1, u0, v0), new Vertex(1, 0, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), EnumFacing.SOUTH))
+								.build();
+			}
 		}
-		
-		for(int x = 0; x < 16; x++){
-			for(int y = 0; y < 16; y++){
-				for(int z = 0; z < 16; z++){
-					facadeModels[x * 64 + y * 16 + z] = new BigTexFacade((y << 4 | z), (x << 4 | z), (x << 4 | y));
+
+		for (int x = 0; x < 16; x++) {
+			for (int y = 0; y < 16; y++) {
+				for (int z = 0; z < 16; z++) {
+					facadeModels[x << 8 | y << 4 | z] = new BigTexFacade(y << 4 | z, x << 4 | z, x << 4 | y);
 				}
 			}
 		}
@@ -169,44 +182,45 @@ public class NiceModelBigTex extends NiceModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture() {
-		return getTextureSprite();
+		return textureSprite;
 	}
 
 	private class BigTexFacade implements IBakedModel {
-		
+
 		protected final int faceSelector;
-		
-		public BigTexFacade(int xFace, int yFace, int zFace){
-			faceSelector = (xFace & 15) << 8 | (yFace & 15) << 4 | (zFace & 15);
+
+		public BigTexFacade(int xFace, int yFace, int zFace) {
+			faceSelector = (xFace & 63) << 16 | (yFace & 63) << 8 | zFace & 63;
 		}
-		
+
 		@Override
 		public List<BakedQuad> getFaceQuads(EnumFacing face) {
-			switch(face){
+
+			switch (face) {
 			case DOWN:
-				return faceQuads[0][(faceSelector >> 4) & 15];
+				return faceQuads[0][faceSelector >> 8 & 63];
 			case UP:
-				return faceQuads[1][(faceSelector >> 4) & 15];
+				return faceQuads[1][faceSelector >> 8 & 63];
 			case NORTH:
-				return faceQuads[2][faceSelector & 15];
+				return faceQuads[2][faceSelector & 63];
 			case SOUTH:
-				return faceQuads[3][faceSelector & 15];
+				return faceQuads[3][faceSelector & 63];
 			case EAST:
-				return faceQuads[4][(faceSelector >> 8) & 15];
+				return faceQuads[4][faceSelector >> 16 & 63];
 			case WEST:
-				return faceQuads[5][(faceSelector >> 8) & 15];
+				return faceQuads[5][faceSelector >> 16 & 63];
 			}
 			return Collections.emptyList();
 		}
 
 		@Override
 		public List<BakedQuad> getGeneralQuads() {
-            return Collections.emptyList();
+			return Collections.emptyList();
 		}
 
 		@Override
 		public boolean isAmbientOcclusion() {
-			return !controller.isShaded;
+			return controller.isShaded;
 		}
 
 		@Override
@@ -221,14 +235,14 @@ public class NiceModelBigTex extends NiceModel {
 
 		@Override
 		public TextureAtlasSprite getParticleTexture() {
-			return NiceModelBigTex.this.getTextureSprite();
+			return textureSprite;
 		}
 
 		@Override
 		public ItemCameraTransforms getItemCameraTransforms() {
 			return itemModel.getItemCameraTransforms();
 		}
-		
+
 	}
-	
+
 }

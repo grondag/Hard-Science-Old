@@ -21,6 +21,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
+import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
@@ -101,10 +102,18 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Registers all textures that will be needed for this style/substance.
 	 * Happens before model bake.
 	 */
-	public void handleTextureStitchEvent(Pre event){
+	public void handleTexturePreStitch(Pre event){
 		for(String tex : getController().getAllTextures(substance)){
 			event.map.registerSprite(new ResourceLocation(tex));
 		}
+	}
+	
+	/**
+	 * Override to lookup retained references to texture sprites.
+	 * Happens before model bake but after texture atlas is created.
+	 */
+	public void handleTexturePostStitch(Post event){
+		particleTexture = event.map.getAtlasSprite(getController().getFirstTextureName(substance));
 	}
 	
 	@Override
@@ -158,7 +167,9 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Used for block-breaking particles.
 	 */
 	@Override
-	public abstract TextureAtlasSprite getParticleTexture();
+	public TextureAtlasSprite getParticleTexture(){
+		return particleTexture;
+	}
 	
 	/**
 	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState

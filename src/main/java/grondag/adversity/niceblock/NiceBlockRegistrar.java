@@ -115,6 +115,8 @@ public class NiceBlockRegistrar {
 	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
 	substance16Group[1]);
 
+	public static final NiceBlock bigTex = new NiceBlock("bigtex", NiceStyle.BIG_TEX, new PlacementSimple(), substance16Group[0] );
+	
 	/**
 	 * Use to generate model resource location names with a consistent
 	 * convention.
@@ -249,10 +251,20 @@ public class NiceBlockRegistrar {
 	@SubscribeEvent
 	public void stitcherEventPre(TextureStitchEvent.Pre event) {
 		for (ModelRegistration reg : allModels) {
-			reg.model.handleTextureStitchEvent(event);
+			reg.model.handleTexturePreStitch(event);
 		}
 	}
 	
+	/**
+	 * Centralized event handler for NiceModel texture stitch.
+	 */
+	@SubscribeEvent
+	public void stitcherEventPost(TextureStitchEvent.Post event) {
+		for (ModelRegistration reg : allModels) {
+			reg.model.handleTexturePostStitch(event);
+		}
+	}
+
 	/**
 	 * Contains stuff we need to replace model references during model bake.
 	 */

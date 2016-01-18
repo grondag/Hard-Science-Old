@@ -25,6 +25,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.IRetexturableModel;
@@ -132,7 +133,7 @@ public class NiceModelBasic extends NiceModel {
 
 
 
-	public void handleTextureStitchEvent(TextureStitchEvent.Pre event) {
+	public void handleTexturePreStitch(TextureStitchEvent.Pre event) {
 		for (int alt = 0; alt < style.firstCookbook.alternateCount; alt++) {
 			for (int tex = 0; tex < style.firstCookbook.getTextureCount(); tex++) {
 				event.map.registerSprite(new ResourceLocation(style.firstCookbook.getTextureName(substance, alt * style.firstCookbook.getTextureCount() + style.firstCookbook.textureIndex + tex)));
@@ -209,6 +210,13 @@ public class NiceModelBasic extends NiceModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+
+	@Override
+	public void handleTexturePostStitch(Post event) {
+		// Temporary to prevent NPE due to null controller with legacy framework
+		return;
 	}
 
 

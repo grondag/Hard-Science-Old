@@ -15,6 +15,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
@@ -107,9 +108,15 @@ public class NiceModelDual extends NiceModel {
 	}
 
 	@Override
-	public void handleTextureStitchEvent(Pre event) {
-		modelPrimary.handleTextureStitchEvent(event);
-		modelSecondary.handleTextureStitchEvent(event);
+	public void handleTexturePreStitch(Pre event) {
+		modelPrimary.handleTexturePreStitch(event);
+		modelSecondary.handleTexturePreStitch(event);
+	}
+
+	@Override
+	public void handleTexturePostStitch(Post event) {
+		modelPrimary.handleTexturePostStitch(event);
+		modelSecondary.handleTexturePostStitch(event);
 	}
 
 	/**

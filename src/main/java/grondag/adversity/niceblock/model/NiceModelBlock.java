@@ -49,19 +49,8 @@ public class NiceModelBlock extends NiceModel {
 		this.controller = controller;
 		models = new IFlexibleBakedModel[controller.expandedAlternateCount];
 	}
-
-	@Override
-	public TextureAtlasSprite getParticleTexture() {
-		// lazy lookup to ensure happens after texture atlas has been created
-		if (particleTexture == null) {
-			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getFirstTextureName(substance));
-		}
-		return particleTexture;
-	}
-
-	@Override
 	
-
+	@Override
 	public IBakedModel getModelVariant(int variantID){
 		if (variantID >= 0 && variantID < controller.expandedAlternateCount) {
 			return models[variantID];

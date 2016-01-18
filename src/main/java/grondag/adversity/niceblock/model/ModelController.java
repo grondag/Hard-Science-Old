@@ -82,7 +82,7 @@ public abstract class ModelController implements IModelController{
 	
 	@Override
 	public String getFirstTextureName(NiceSubstance substance) {
-		return getTextureName(substance, textureIndex);
+		return this.getTextureName(substance, textureIndex);
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public abstract class ModelController implements IModelController{
 	public ImmutableMap<String, String> getTexturesForExpandedAlternate(NiceSubstance substance, int expanded) {
 		
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", getTextureName(substance, calcAlternate(expanded) + textureIndex));
+		textures.put("all", this.getTextureName(substance, calcAlternate(expanded) + textureIndex));
 				
 		return ImmutableMap.copyOf(textures);
 	}
@@ -141,7 +141,7 @@ public abstract class ModelController implements IModelController{
 		final String retVal[] = new String[alternateTextureCount];
 		
 		for(int alt = 0 ; alt < alternateTextureCount ; alt++){
-			retVal[alt] = getTextureName(substance, alt);
+			retVal[alt] = this.getTextureName(substance, alt);
 		}
 		return retVal;
 	}
