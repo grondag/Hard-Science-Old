@@ -137,31 +137,31 @@ public class NiceModelBigTex extends NiceModel {
 				faceQuads[EnumFacing.DOWN.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 						.add(createQuad(
-										new Vertex(0, 0, 0, u0, v0), new Vertex(1, 0, 0, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(0, 0, 1, u1, v0), EnumFacing.DOWN))
-								.build();
-
-				faceQuads[EnumFacing.EAST.ordinal()][index] =
-						new ImmutableList.Builder<BakedQuad>()
-								.add(createQuad(
-								new Vertex(0, 0, 0, u0, v0), new Vertex(0, 0, 1, u0, v1), new Vertex(0, 1, 1, u1, v1), new Vertex(0, 1, 0, u1, v0), EnumFacing.EAST))
+										new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0), EnumFacing.DOWN))
 								.build();
 
 				faceQuads[EnumFacing.WEST.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-										new Vertex(1, 0, 0, u0, v0), new Vertex(1, 1, 0, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 0, 1, u1, v0), EnumFacing.WEST))
+								new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0), EnumFacing.WEST))
+								.build();
+
+				faceQuads[EnumFacing.EAST.ordinal()][index] =
+						new ImmutableList.Builder<BakedQuad>()
+								.add(createQuad(
+										new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1), EnumFacing.EAST))
 								.build();
 
 				faceQuads[EnumFacing.NORTH.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-								new Vertex(0, 0, 0, u0, v0), new Vertex(0, 1, 0, u0, v1), new Vertex(1, 1, 0, u1, v1), new Vertex(1, 0, 0, u1, v0), EnumFacing.NORTH))
+								new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1), EnumFacing.NORTH))
 								.build();
 
 				faceQuads[EnumFacing.SOUTH.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-								new Vertex(0, 0, 1, u0, v0), new Vertex(1, 0, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), EnumFacing.SOUTH))
+								new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0), EnumFacing.SOUTH))
 								.build();
 			}
 		}
@@ -169,7 +169,14 @@ public class NiceModelBigTex extends NiceModel {
 		for (int x = 0; x < 16; x++) {
 			for (int y = 0; y < 16; y++) {
 				for (int z = 0; z < 16; z++) {
-					facadeModels[x << 8 | y << 4 | z] = new BigTexFacade(y << 4 | z, x << 4 | z, x << 4 | y);
+					facadeModels[(x << 8) | (y << 4) | z] 
+							= new BigTexFacade(
+									((x << 4) | z), 
+									(((~x & 0xF) << 4) | z), 
+									(y) | ((~z & 0xF) << 4), 
+									(y) | (z  << 4),
+									(((~x & 0xF) << 4) | (~y & 0xF)),
+									((x << 4) | (~y & 0xF)));
 				}
 			}
 		}
@@ -187,28 +194,44 @@ public class NiceModelBigTex extends NiceModel {
 
 	private class BigTexFacade implements IBakedModel {
 
-		protected final int faceSelector;
+		protected final long faceSelector;
 
-		public BigTexFacade(int xFace, int yFace, int zFace) {
-			faceSelector = (xFace & 63) << 16 | (yFace & 63) << 8 | zFace & 63;
+		
+		public BigTexFacade(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace) {
+			faceSelector = ((long)upFace << 40) | ((long)downFace << 32) | ((long)eastFace << 24) | ((long)westFace << 16) | ((long)northFace << 8) |  (long)southFace;
 		}
 
 		@Override
 		public List<BakedQuad> getFaceQuads(EnumFacing face) {
 
+//			switch (face) {
+//			case DOWN:
+//				return faceQuads[EnumFacing.DOWN.ordinal()][yFace];
+//			case UP:
+//				return faceQuads[EnumFacing.UP.ordinal()][yFace];
+//			case NORTH:
+//				return faceQuads[EnumFacing.NORTH.ordinal()][zFace];
+//			case SOUTH:
+//				return faceQuads[EnumFacing.SOUTH.ordinal()][zFace];
+//			case EAST:
+//				return faceQuads[EnumFacing.EAST.ordinal()][xFace];
+//			case WEST:
+//				return faceQuads[EnumFacing.WEST.ordinal()][xFace];
+//			}
+
 			switch (face) {
-			case DOWN:
-				return faceQuads[0][faceSelector >> 8 & 63];
 			case UP:
-				return faceQuads[1][faceSelector >> 8 & 63];
-			case NORTH:
-				return faceQuads[2][faceSelector & 63];
-			case SOUTH:
-				return faceQuads[3][faceSelector & 63];
+				return faceQuads[EnumFacing.UP.ordinal()][(int) ((faceSelector & 0xFF0000000000L) >> 40)];
+			case DOWN:
+				return faceQuads[EnumFacing.DOWN.ordinal()][(int) ((faceSelector & 0xFF00000000L) >> 32)];
 			case EAST:
-				return faceQuads[4][faceSelector >> 16 & 63];
+				return faceQuads[EnumFacing.EAST.ordinal()][(int) ((faceSelector & 0xFF000000L) >> 24)];
 			case WEST:
-				return faceQuads[5][faceSelector >> 16 & 63];
+				return faceQuads[EnumFacing.WEST.ordinal()][(int) ((faceSelector & 0xFF0000L) >> 16)];
+			case NORTH:
+				return faceQuads[EnumFacing.NORTH.ordinal()][(int) ((faceSelector & 0xFF00L) >> 8)];
+			case SOUTH:
+				return faceQuads[EnumFacing.SOUTH.ordinal()][(int) (faceSelector & 0xFFL)];
 			}
 			return Collections.emptyList();
 		}

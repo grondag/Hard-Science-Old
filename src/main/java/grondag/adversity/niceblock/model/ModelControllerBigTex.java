@@ -17,7 +17,7 @@ public class ModelControllerBigTex extends ModelController{
 
 	@Override
 	public int getVariantID(IExtendedBlockState state, IBlockAccess worldIn, BlockPos pos) {
-		return (pos.getX() & 15) << 8 | (pos.getY() & 15) << 4 | (pos.getZ() & 15);
+		return ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class ModelControllerBigTex extends ModelController{
 		int position = this.textureIndex + offset;
 				
 		return "adversity:blocks/bigtex_" + position + "_0";
-	
+		//return "adversity:blocks/bigstonetest";
 	}
 
 	@Override
