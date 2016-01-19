@@ -55,7 +55,7 @@ public abstract class NiceStyle {
 					new ModelControllerBlock(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true)));
 
 	public static final NiceStyle BIG_TEX = new NiceStyleNew(
-					new ModelControllerBigTex(0, false, EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false));
+					new ModelControllerBigTex(0, false, EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, 0xBBB9AB));
 
 	
 	public abstract IModelController getModelController();

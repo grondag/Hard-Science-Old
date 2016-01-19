@@ -15,13 +15,15 @@ public class ModelControllerBigTex extends ModelController{
 	protected final Rotation textureRotation;
 	protected final boolean flipU;
 	protected final boolean flipV;
+	protected final int color;
 
 
-	public ModelControllerBigTex(int bigTextureIndex, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, Rotation textureRotation, boolean flipU, boolean flipV) {
+	public ModelControllerBigTex(int bigTextureIndex, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, Rotation textureRotation, boolean flipU, boolean flipV, int color) {
 		super(bigTextureIndex, 1, useOverlayTextures, renderLayer, isShaded, false);
 		this.textureRotation = textureRotation;
 		this.flipU = flipU;
 		this.flipV = flipV;
+		this.color = color;
 	}
 
 	@Override
@@ -36,8 +38,9 @@ public class ModelControllerBigTex extends ModelController{
 
 		int position = this.textureIndex + offset;
 				
-		return "adversity:blocks/bigtex_" + position + "_0";
+		//return "adversity:blocks/bigtex_" + position + "_0";
 		//return "adversity:blocks/bigstonetest";
+		return "adversity:blocks/bigtex_rock_test";
 	}
 
 	@Override

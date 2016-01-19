@@ -81,14 +81,12 @@ public class NiceModelBigTex extends NiceModel {
 
 		float shade = LightUtil.diffuseLight(side);
 
-		int color = 0xFFFFFFFF;
+		int red = (int) (shade * 255f * ((controller.color >> 16 & 0xFF) / 255f));
+		int green = (int) (shade * 255f * ((controller.color >> 8 & 0xFF) / 255f));
+		int blue = (int) (shade * 255f * ((controller.color & 0xFF) / 255f));
+		int alpha = controller.color >> 24 & 0xFF;
 
-		int red = (int) (shade * 255f * ((color >> 16 & 0xFF) / 255f));
-		int green = (int) (shade * 255f * ((color >> 8 & 0xFF) / 255f));
-		int blue = (int) (shade * 255f * ((color & 0xFF) / 255f));
-		int alpha = color >> 24 & 0xFF;
-
-		color = red | (green << 8) | (blue << 16) | (alpha << 24);
+		int color = red | (green << 8) | (blue << 16) | (alpha << 24);
 
 		for(int r= 0; r < this.controller.textureRotation.index; r++){
 			rotateQuadUV(v1, v2, v3, v4);
