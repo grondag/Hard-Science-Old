@@ -45,4 +45,31 @@ public interface IModelController {
 	 */
 	public String[] getAllTextures(NiceSubstance substance);
 	
+	
+	/**
+	 * Texture rotations. Used mainly when rotated textures are used as
+	 * alternate textures.
+	 */
+	public static enum Rotation {
+		ROTATE_NONE(0, 0),
+		ROTATE_90(1, 90),
+		ROTATE_180(2, 180),
+		ROTATE_270(3, 270);
+
+		/**
+		 * May be useful for dynamic manipulations.
+		 */
+		public final int index;
+
+		/**
+		 * Useful for locating model file names that use degrees as a suffix.
+		 */
+		public final int degrees;
+
+		Rotation(int index, int degrees) {
+			this.index = index;
+			this.degrees = degrees;
+		}
+
+	}
 }

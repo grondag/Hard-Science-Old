@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.model.IModelController.Rotation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
@@ -11,8 +12,16 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ModelControllerBigTex extends ModelController{
 
-	public ModelControllerBigTex(int bigTextureIndex, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations) {
-		super(bigTextureIndex, 1, useOverlayTextures, renderLayer, isShaded, useRotations);
+	protected final Rotation textureRotation;
+	protected final boolean flipU;
+	protected final boolean flipV;
+
+
+	public ModelControllerBigTex(int bigTextureIndex, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, Rotation textureRotation, boolean flipU, boolean flipV) {
+		super(bigTextureIndex, 1, useOverlayTextures, renderLayer, isShaded, false);
+		this.textureRotation = textureRotation;
+		this.flipU = flipU;
+		this.flipV = flipV;
 	}
 
 	@Override

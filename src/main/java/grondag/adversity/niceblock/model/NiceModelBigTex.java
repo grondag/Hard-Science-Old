@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.model.IModelController.Rotation;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,7 @@ public class NiceModelBigTex extends NiceModel {
 	protected NiceModelBigTex(NiceSubstance substance, ModelControllerBigTex controller) {
 		super(substance);
 		this.controller = controller;
-		faceQuads = new List[6][controller.useRotatedTexturesAsAlternates ? 1024 : 256];
+		faceQuads = new List[6][256];
 		facadeModels = new BigTexFacade[4096];
 	}
 
@@ -87,8 +88,12 @@ public class NiceModelBigTex extends NiceModel {
 		int blue = (int) (shade * 255f * ((color & 0xFF) / 255f));
 		int alpha = color >> 24 & 0xFF;
 
-		color = red | green << 8 | blue << 16 | alpha << 24;
+		color = red | (green << 8) | (blue << 16) | (alpha << 24);
 
+		for(int r= 0; r < this.controller.textureRotation.index; r++){
+			rotateQuadUV(v1, v2, v3, v4);
+		}
+		
 		int[] aint = Ints.concat(
 				vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, color),
 				vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, color),
@@ -103,9 +108,26 @@ public class NiceModelBigTex extends NiceModel {
 
 	}
 
+	/**
+	 * Rotates face texture 90deg clockwise
+	 */
+	private void rotateQuadUV(Vertex v1, Vertex v2, Vertex v3, Vertex v4){
+		float swapU = v1.u;
+		float swapV = v1.v;
+		v1.u = v2.u;
+		v1.v = v2.v;
+		v2.u = v3.u;
+		v2.v = v3.v;
+		v3.u = v4.u;
+		v3.v = v4.v;
+		v4.u = swapU;
+		v4.v = swapV;
+	}
+	
+	
 	private static class Vertex extends Vec3 {
-		private final float u;
-		private final float v;
+		private float u;
+		private float v;
 
 		public Vertex(float x, float y, float z, float u, float v) {
 			super(x, y, z);
@@ -123,10 +145,10 @@ public class NiceModelBigTex extends NiceModel {
 			for (int j = 0; j < 16; j++) {
 
 				int index = i << 4 | j;
-				float u0 = i;
-				float v0 = j;
-				float u1 = u0 + 1;
-				float v1 = v0 + 1;
+				float u0 = controller.flipU ? 16-i : i;
+				float v0 = controller.flipV ? 16-j : j;
+				float u1 = u0 + (controller.flipU ? -1 : 1);
+				float v1 = v0 + (controller.flipV ? -1 : 1);
 
 				faceQuads[EnumFacing.UP.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
@@ -166,19 +188,65 @@ public class NiceModelBigTex extends NiceModel {
 			}
 		}
 
+		int xOff = 0;
 		for (int x = 0; x < 16; x++) {
+
+			int yOff = 0;
 			for (int y = 0; y < 16; y++) {
+				int zOff = 0;
 				for (int z = 0; z < 16; z++) {
-					facadeModels[(x << 8) | (y << 4) | z] 
-							= new BigTexFacade(
-									((x << 4) | z), 
-									(((~x & 0xF) << 4) | z), 
-									(y) | ((~z & 0xF) << 4), 
-									(y) | (z  << 4),
-									(((~x & 0xF) << 4) | (~y & 0xF)),
-									((x << 4) | (~y & 0xF)));
+					
+					// Really can't be null because all cases handled.
+					// Initializing to silence eclipse warning.
+					BigTexFacade facade = null;
+					
+					// clockwise rotations
+					switch(this.controller.textureRotation){
+					case ROTATE_NONE:
+						facade = new BigTexFacade(
+								(((x + yOff) & 0xF) << 4) | ((z + yOff) & 0xF), 
+								((~(x + yOff) & 0xF) << 4) | ((z + yOff) & 0xF), 
+								(~(y + xOff)  & 0xF) | ((~(z + xOff) & 0xF) << 4), 
+								(~(y + xOff)  & 0xF) | (((z + xOff) & 0xF)  << 4),
+								((~(x + zOff) & 0xF) << 4) | (~(y + zOff) & 0xF),
+								(((x + zOff) & 0xF) << 4) | (~(y + zOff) & 0xF));
+						break;
+					case ROTATE_90:
+						 facade = new BigTexFacade(
+								(((z + yOff) & 0xF) << 4) | (~(x + yOff) & 0xF), 
+								(((z + yOff) & 0xF) << 4) | ((x + yOff) & 0xF), 
+								((z + xOff)  & 0xF) | ((~(y + xOff) & 0xF) << 4), 
+								(~(z + xOff)  & 0xF) | ((~(y + xOff) & 0xF)  << 4),
+								((~(y + zOff) & 0xF) << 4) | ((x + zOff) & 0xF),
+								((~(y + zOff) & 0xF) << 4) | (~(x + zOff) & 0xF));
+						break;
+					case ROTATE_180:
+						 facade = new BigTexFacade(
+								((~(x + yOff) & 0xF) << 4) | (~(z + yOff) & 0xF), 
+								(((x + yOff) & 0xF) << 4) | (~(z + yOff) & 0xF), 
+								((y + xOff)  & 0xF) | (((z + xOff) & 0xF) << 4), 
+								((y + xOff)  & 0xF) | ((~(z + xOff) & 0xF)  << 4),
+								(((x + zOff) & 0xF) << 4) | ((y + zOff) & 0xF),
+								((~(x + zOff) & 0xF) << 4) | ((y + zOff) & 0xF));
+						break;
+					case ROTATE_270:
+						facade = new BigTexFacade(
+								((~(z + yOff) & 0xF) << 4) | ((x + yOff) & 0xF), 
+								((~(z + yOff) & 0xF) << 4) | (~(x + yOff) & 0xF), 
+								(~(z + xOff)  & 0xF) | (((y + xOff) & 0xF) << 4), 
+								((z + xOff)  & 0xF) | (((y + xOff) & 0xF)  << 4),
+								(((y + zOff) & 0xF) << 4) | (~(x + zOff) & 0xF),
+								(((y + zOff) & 0xF) << 4) | ((x + zOff) & 0xF));
+						break;
+					}
+					
+					facadeModels[(x << 8) | (y << 4) | z] = facade;
+							
+					zOff += 7;
 				}
+				yOff +=7;
 			}
+			xOff +=7;
 		}
 	}
 
@@ -194,45 +262,40 @@ public class NiceModelBigTex extends NiceModel {
 
 	private class BigTexFacade implements IBakedModel {
 
-		protected final long faceSelector;
-
+		private final short upFace;
+		private final short downFace;
+		private final short eastFace;
+		private final short westFace;
+		private final short northFace;
+		private final short southFace;
 		
 		public BigTexFacade(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace) {
-			faceSelector = ((long)upFace << 40) | ((long)downFace << 32) | ((long)eastFace << 24) | ((long)westFace << 16) | ((long)northFace << 8) |  (long)southFace;
+			this.upFace = (short) upFace;
+			this.downFace = (short) downFace;
+			this.eastFace = (short) eastFace;
+			this.westFace = (short) westFace;
+			this.northFace = (short) northFace;
+			this.southFace = (short) southFace;
 		}
 
 		@Override
 		public List<BakedQuad> getFaceQuads(EnumFacing face) {
 
-//			switch (face) {
-//			case DOWN:
-//				return faceQuads[EnumFacing.DOWN.ordinal()][yFace];
-//			case UP:
-//				return faceQuads[EnumFacing.UP.ordinal()][yFace];
-//			case NORTH:
-//				return faceQuads[EnumFacing.NORTH.ordinal()][zFace];
-//			case SOUTH:
-//				return faceQuads[EnumFacing.SOUTH.ordinal()][zFace];
-//			case EAST:
-//				return faceQuads[EnumFacing.EAST.ordinal()][xFace];
-//			case WEST:
-//				return faceQuads[EnumFacing.WEST.ordinal()][xFace];
-//			}
-
 			switch (face) {
-			case UP:
-				return faceQuads[EnumFacing.UP.ordinal()][(int) ((faceSelector & 0xFF0000000000L) >> 40)];
 			case DOWN:
-				return faceQuads[EnumFacing.DOWN.ordinal()][(int) ((faceSelector & 0xFF00000000L) >> 32)];
-			case EAST:
-				return faceQuads[EnumFacing.EAST.ordinal()][(int) ((faceSelector & 0xFF000000L) >> 24)];
-			case WEST:
-				return faceQuads[EnumFacing.WEST.ordinal()][(int) ((faceSelector & 0xFF0000L) >> 16)];
+				return faceQuads[EnumFacing.DOWN.ordinal()][downFace];
+			case UP:
+				return faceQuads[EnumFacing.UP.ordinal()][upFace];
 			case NORTH:
-				return faceQuads[EnumFacing.NORTH.ordinal()][(int) ((faceSelector & 0xFF00L) >> 8)];
+				return faceQuads[EnumFacing.NORTH.ordinal()][northFace];
 			case SOUTH:
-				return faceQuads[EnumFacing.SOUTH.ordinal()][(int) (faceSelector & 0xFFL)];
+				return faceQuads[EnumFacing.SOUTH.ordinal()][southFace];
+			case EAST:
+				return faceQuads[EnumFacing.EAST.ordinal()][eastFace];
+			case WEST:
+				return faceQuads[EnumFacing.WEST.ordinal()][westFace];
 			}
+
 			return Collections.emptyList();
 		}
 
