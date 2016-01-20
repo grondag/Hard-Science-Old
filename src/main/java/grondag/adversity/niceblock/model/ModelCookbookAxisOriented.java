@@ -172,7 +172,7 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 		AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 
-		int recipe = RECIPE_LOOKUP[tests.up ? 1 : 0][tests.down ? 1 : 0][tests.east ? 1 : 0][tests.west ? 1 : 0][tests.north ? 1 : 0][tests.south ? 1 : 0];
+		int recipe = RECIPE_LOOKUP[tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
 
 		for (AxisAlignedBB aabb : MODEL_BOUNDS[recipe]) {
 			if (localMask.intersectsWith(aabb)) {
@@ -186,7 +186,7 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 	public AxisAlignedBB getCollisionBoundingBox(IBlockAccess worldIn, BlockPos pos, IBlockState state) {
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 
-		int recipe = RECIPE_LOOKUP[tests.up ? 1 : 0][tests.down ? 1 : 0][tests.east ? 1 : 0][tests.west ? 1 : 0][tests.north ? 1 : 0][tests.south ? 1 : 0];
+		int recipe = RECIPE_LOOKUP[tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
 
 		return COMBINED_BOUNDS[recipe].offset(pos.getX(), pos.getY(), pos.getZ());
 	}
@@ -197,7 +197,7 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 
-		int recipe = RECIPE_LOOKUP[tests.up ? 1 : 0][tests.down ? 1 : 0][tests.east ? 1 : 0][tests.west ? 1 : 0][tests.north ? 1 : 0][tests.south ? 1 : 0];
+		int recipe = RECIPE_LOOKUP[tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
 
 		ImmutableList.Builder builder = new ImmutableList.Builder<AxisAlignedBB>();
 
@@ -449,8 +449,7 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 
 		NeighborTestResults tests = new NeighborBlocks(worldIn, pos).getNeighborTestResults(new TestForStyle(state));
 
-		return RECIPE_LOOKUP[tests.up ? 1 : 0][tests.down ? 1 : 0][tests.east ? 1 : 0][tests.west ? 1 : 0][tests.north ? 1 : 0][tests.south ? 1 : 0];
-
+		return RECIPE_LOOKUP[tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
 
 	}
 

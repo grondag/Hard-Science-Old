@@ -64,9 +64,9 @@ public class ModelCookbookConnectedCorners extends ModelCookbook {
 		NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 		NeighborTestResults mates = neighbors.getNeighborTestResults(test);
 
-		CornerRecipeFinder finder = CONNECTED_CORNER_RECIPE_LOOKUP[mates.up ? 1 : 0][mates.down ? 1 : 0]
-				[mates.east ? 1 : 0][mates.west ? 1 : 0]
-				[mates.north ? 1 : 0][mates.south ? 1 : 0];
+		CornerRecipeFinder finder = CONNECTED_CORNER_RECIPE_LOOKUP[mates.upBit()][mates.downBit()]
+				[mates.eastBit()][mates.westBit()]
+				[mates.northBit()][mates.southBit()];
 
 		return finder.getRecipe(test, worldIn, pos);
 	}

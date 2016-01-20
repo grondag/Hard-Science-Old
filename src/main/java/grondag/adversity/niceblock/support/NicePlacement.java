@@ -83,39 +83,39 @@ public abstract class NicePlacement {
 
 			IBlockState candidate;
 
-			if (results.east) {
-				candidate = neighbors.east;
+			if (results.east()) {
+				candidate = neighbors.east();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 				;
 			}
-			if (results.west) {
-				candidate = neighbors.west;
+			if (results.west()) {
+				candidate = neighbors.west();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.north) {
-				candidate = neighbors.north;
+			if (results.north()) {
+				candidate = neighbors.north();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.south) {
-				candidate = neighbors.south;
+			if (results.south()) {
+				candidate = neighbors.south();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.up) {
-				candidate = neighbors.up;
+			if (results.up()) {
+				candidate = neighbors.up();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.down) {
-				candidate = neighbors.down;
+			if (results.down()) {
+				candidate = neighbors.down();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
@@ -129,8 +129,8 @@ public abstract class NicePlacement {
 			for (int n = 0; n < getSiblings().length; n++) {
 				tests[n] = neighbors.getNeighborTestResults(new TestForCompleteMatch(getSiblings()[n]
 						.getStateFromMeta(meta)));
-				match[n] = tests[n].north || tests[n].south || tests[n].east || tests[n].west || tests[n].up
-						|| tests[n].down;
+				match[n] = tests[n].north() || tests[n].south() || tests[n].east() || tests[n].west() || tests[n].up()
+						|| tests[n].down();
 			}
 
 			for (int n = 0; n < getSiblings().length - 1; n++) {
@@ -188,39 +188,39 @@ public abstract class NicePlacement {
 
 			IBlockState candidate;
 
-			if (results.east) {
-				candidate = neighbors.east;
+			if (results.east()) {
+				candidate = neighbors.east();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 				;
 			}
-			if (results.west) {
-				candidate = neighbors.west;
+			if (results.west()) {
+				candidate = neighbors.west();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.north) {
-				candidate = neighbors.north;
+			if (results.north()) {
+				candidate = neighbors.north();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.south) {
-				candidate = neighbors.south;
+			if (results.south()) {
+				candidate = neighbors.south();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.up) {
-				candidate = neighbors.up;
+			if (results.up()) {
+				candidate = neighbors.up();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
 			}
-			if (results.down) {
-				candidate = neighbors.down;
+			if (results.down()) {
+				candidate = neighbors.down();
 				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
 					return candidate;
 				}
@@ -234,8 +234,8 @@ public abstract class NicePlacement {
 			for (int n = 0; n < getSiblings().length; n++) {
 				tests[n] = neighbors.getNeighborTestResults(new TestForCompleteMatch(getSiblings()[n]
 						.getStateFromMeta(meta)));
-				match[n] = tests[n].north || tests[n].south || tests[n].east || tests[n].west || tests[n].up
-						|| tests[n].down;
+				match[n] = tests[n].north() || tests[n].south() || tests[n].east() || tests[n].west() || tests[n].up()
+						|| tests[n].down();
 			}
 
 			for (int n = 0; n < getSiblings().length - 1; n++) {

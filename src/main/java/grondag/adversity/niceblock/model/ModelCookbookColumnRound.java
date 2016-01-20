@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.NeighborSet;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlock.TestForStyle;
@@ -76,12 +75,12 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 
 		NeighborTestResults tests = neighbors.getNeighborTestResults(styleTest);
 
-		int up = tests.up ? 1 : 0;
-		int down = tests.down ? 1 : 0;
-		int east = tests.east ? 1 : 0;
-		int west = tests.west ? 1 : 0;
-		int north = tests.north ? 1 : 0;
-		int south = tests.south ? 1 : 0;
+		int up = tests.upBit();
+		int down = tests.downBit();
+		int east = tests.eastBit();
+		int west = tests.westBit();
+		int north = tests.northBit();
+		int south = tests.southBit();
 
 		/**
 		 * The column caps have a large poly count and I don't think MC can do
@@ -93,70 +92,70 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 		 * know if it would occlude this one fully.
 		 */
 		if(style == NiceStyle.COLUMN_ROUND_X){
-			if (tests.east) {
-				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.east(), NeighborSet.X_NORMALS).getNeighborTestResults(styleTest);
-				if (!(faceTests.up == tests.up && faceTests.down == tests.down && faceTests.north == tests.north && faceTests.south == tests.south)) {
+			if (tests.east()) {
+				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.east()).getNeighborTestResults(styleTest);
+				if (!(faceTests.up() == tests.up() && faceTests.down() == tests.down() && faceTests.north() == tests.north() && faceTests.south() == tests.south())) {
 					east = 0;
 				}
 			} else {
-				if (neighbors.east.getBlock().isOpaqueCube()) {
+				if (neighbors.east().getBlock().isOpaqueCube()) {
 					east = 1;
 				}
 			}
 
-			if (tests.west) {
-				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.west(), NeighborSet.X_NORMALS).getNeighborTestResults(styleTest);
-				if (!(faceTests.up == tests.up && faceTests.down == tests.down && faceTests.north == tests.north && faceTests.south == tests.south)) {
+			if (tests.west()) {
+				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.west()).getNeighborTestResults(styleTest);
+				if (!(faceTests.up() == tests.up() && faceTests.down() == tests.down() && faceTests.north() == tests.north() && faceTests.south() == tests.south())) {
 					west = 0;
 				}
 			} else {
-				if (neighbors.west.getBlock().isOpaqueCube()) {
+				if (neighbors.west().getBlock().isOpaqueCube()) {
 					west = 1;
 				}
 			}
 
 		} else if (style == NiceStyle.COLUMN_ROUND_Y) {
-			if (tests.up) {
-				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.up(), NeighborSet.Y_NORMALS).getNeighborTestResults(styleTest);
-				if (!(faceTests.east == tests.east && faceTests.west == tests.west && faceTests.north == tests.north && faceTests.south == tests.south)) {
+			if (tests.up()) {
+				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.up()).getNeighborTestResults(styleTest);
+				if (!(faceTests.east() == tests.east() && faceTests.west() == tests.west() && faceTests.north() == tests.north() && faceTests.south() == tests.south())) {
 					up = 0;
 				}
 			} else {
-				if (neighbors.up.getBlock().isOpaqueCube()) {
+				if (neighbors.up().getBlock().isOpaqueCube()) {
 					up = 1;
 				}
 			}
 
-			if (tests.down) {
-				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.down(), NeighborSet.Y_NORMALS).getNeighborTestResults(styleTest);
-				if (!(faceTests.east == tests.east && faceTests.west == tests.west && faceTests.north == tests.north && faceTests.south == tests.south)) {
+			if (tests.down()) {
+				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.down()).getNeighborTestResults(styleTest);
+				if (!(faceTests.east() == tests.east() && faceTests.west() == tests.west() && faceTests.north() == tests.north() && faceTests.south() == tests.south())) {
 					down = 0;
 				}
 			} else {
-				if (neighbors.down.getBlock().isOpaqueCube()) {
+				if (neighbors.down().getBlock().isOpaqueCube()) {
 					down = 1;
 				}
 			}
 
 		} else if (style == NiceStyle.COLUMN_ROUND_Z) {
-			if (tests.north) {
-				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.north(), NeighborSet.Z_NORMALS).getNeighborTestResults(styleTest);
-				if (!(faceTests.up == tests.up && faceTests.down == tests.down && faceTests.east == tests.east && faceTests.west == tests.west)) {
+			if (tests.north()) {
+				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.north()).getNeighborTestResults(styleTest);
+				if (!(faceTests.up() == tests.up() && faceTests.down() == tests.down() && faceTests.east() == tests.east() && faceTests.west() == tests.west())) {
 					north = 0;
 				}
 			} else {
-				if (neighbors.north.getBlock().isOpaqueCube()) {
+				if (neighbors.north().getBlock().isOpaqueCube()) {
 					north = 1;
 				}
 			}
 
-			if (tests.south) {
-				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.south(), NeighborSet.Z_NORMALS).getNeighborTestResults(styleTest);
-				if (!(faceTests.up == tests.up && faceTests.down == tests.down && faceTests.east == tests.east && faceTests.west == tests.west)) {
+			if (tests.south()) {
+				NeighborTestResults faceTests = new NeighborBlocks(worldIn, pos.south()).getNeighborTestResults(styleTest);
+				if (!(faceTests.up() == tests.up() && faceTests.down() == tests.down() && faceTests.east() == tests.east() && faceTests.west() == tests.west())) {
 					south = 0;
 				}
 			} else {
-				if (neighbors.south.getBlock().isOpaqueCube()) {
+				if (neighbors.south().getBlock().isOpaqueCube()) {
 					south = 1;
 				}
 			}

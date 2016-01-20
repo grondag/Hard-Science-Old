@@ -76,10 +76,10 @@ public class ModelCookbookMasonry extends ModelCookbook {
 				});
 		NeighborTestResults thisSubstance = neighbors.getNeighborTestResults(new TestForSubstance(state));
 
-		return SIMPLE_JOIN_RECIPE_LOOKUP[0][thisSubstance.down && !mates.down ? 1 : 0] // UP & DOWN
-		[thisSubstance.east && !needsMortar.east || needsMortar.east && !mates.east ? 1 : 0] // EAST
-		[thisSubstance.west && !needsMortar.west ? 1 : 0] // WEST
-		[thisSubstance.north && !needsMortar.north || needsMortar.north && !mates.north ? 1 : 0] // NORTH
-		[thisSubstance.south && !needsMortar.south ? 1 : 0]; // SOUTH
+		return SIMPLE_JOIN_RECIPE_LOOKUP[0][thisSubstance.down() && !mates.down() ? 1 : 0] // UP & DOWN
+		[thisSubstance.east() && !needsMortar.east() || needsMortar.east() && !mates.east() ? 1 : 0] // EAST
+		[thisSubstance.west() && !needsMortar.west() ? 1 : 0] // WEST
+		[thisSubstance.north() && !needsMortar.north() || needsMortar.north() && !mates.north() ? 1 : 0] // NORTH
+		[thisSubstance.south() && !needsMortar.south() ? 1 : 0]; // SOUTH
 	}
 }
