@@ -69,7 +69,10 @@ public abstract class ModelController implements IModelController{
 	 */
 	public final boolean useOverlayTextures;
 	
-	protected ModelController(int textureIndex, int alternateCount, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
+	protected final int color;
+
+	
+	protected ModelController(int textureIndex, int alternateCount, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations, int color){
 		this.textureIndex = textureIndex;
 		this.alternateTextureCount = Math.max(1, alternateCount);
 		this.renderLayer = renderLayer;
@@ -77,6 +80,7 @@ public abstract class ModelController implements IModelController{
 		this.useOverlayTextures = useOverlayTextures;
 		this.useRotatedTexturesAsAlternates = useRotations;
 		this.expandedAlternateCount = calcExpanded();
+		this.color = color;
 		alternator = Alternator.getAlternator((byte) expandedAlternateCount);
 	}
 	

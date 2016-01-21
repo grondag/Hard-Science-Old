@@ -35,18 +35,19 @@ public class NeighborBlocks {
 	private static final int SOUTH_EAST 	= NORTH_WEST << 1;
 	private static final int SOUTH_WEST   = SOUTH_EAST << 1;
 	
-	private IBlockState up;
-	private IBlockState down;
+	// cache block states for the most commonly used neighbors
 	private IBlockState east;
 	private IBlockState west;
+	private IBlockState up;
+	private IBlockState down;
 	private IBlockState north;
 	private IBlockState south;
-	
+
 	private final IBlockAccess world;
 	private final BlockPos pos;
 
 	/**
-	 * Gathers blockstates for all six adjacent positions.
+	 * Gathers blockstates for adjacent positions as needed.
 	 */
 	public NeighborBlocks(IBlockAccess worldIn, BlockPos pos) {
 		this.world = worldIn;
@@ -94,6 +95,22 @@ public class NeighborBlocks {
 		}
 		return west;
 	}
+	
+	// convenience methods, no caching
+	public IBlockState upEast(){return world.getBlockState(pos.up().east());};
+	public IBlockState upWest(){return world.getBlockState(pos.up().west());};
+	public IBlockState downEast(){return world.getBlockState(pos.down().east());};
+	public IBlockState downWest(){return world.getBlockState(pos.down().west());};
+
+	public IBlockState northEast(){return world.getBlockState(pos.north().east());};
+	public IBlockState northWest(){return world.getBlockState(pos.north().west());};
+	public IBlockState southEast(){return world.getBlockState(pos.south().east());};
+	public IBlockState southWest(){return world.getBlockState(pos.south().west());};
+
+	public IBlockState upNorth(){return world.getBlockState(pos.up().north());};
+	public IBlockState upSouth(){return world.getBlockState(pos.up().south());};
+	public IBlockState downNorth(){return world.getBlockState(pos.down().north());};
+	public IBlockState downSouth(){return world.getBlockState(pos.down().south());};
 
 	/**
 	 * Apply given test to all available block states.
@@ -187,6 +204,159 @@ public class NeighborBlocks {
 		public int westBit(){
 			return west() ? 1 : 0;
 		}
-	}
+		
+		public boolean upNorth(){
+			if((completionFlags & UP_NORTH) != UP_NORTH) {
+				if(test.testBlock(NeighborBlocks.this.upNorth())) resultFlags |= UP_NORTH;
+				completionFlags |= UP_NORTH;
+			}
+			return (resultFlags & UP_NORTH) == UP_NORTH;
+		}
+		
+		public int upNorthBit(){
+			return upNorth() ? 1 : 0;
+		}
 
+		public boolean upSouth(){
+			if((completionFlags & UP_SOUTH) != UP_SOUTH) {
+				if(test.testBlock(NeighborBlocks.this.upSouth())) resultFlags |= UP_SOUTH;
+				completionFlags |= UP_SOUTH;
+			}
+			return (resultFlags & UP_SOUTH) == UP_SOUTH;
+		}
+		
+		public int upSouthBit(){
+			return upSouth() ? 1 : 0;
+		}
+
+		public boolean upEast(){
+			if((completionFlags & UP_EAST) != UP_EAST) {
+				if(test.testBlock(NeighborBlocks.this.upEast())) resultFlags |= UP_EAST;
+				completionFlags |= UP_EAST;
+			}
+			return (resultFlags & UP_EAST) == UP_EAST;
+		}
+		
+		public int upEastBit(){
+			return upEast() ? 1 : 0;
+		}
+
+		private static final int UP_WEST     = UP_EAST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int DOWN_NORTH 	= UP_WEST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int DOWN_SOUTH 	= DOWN_NORTH << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int DOWN_EAST 	= DOWN_SOUTH << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int DOWN_WEST   = DOWN_EAST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+		
+		private static final int NORTH_EAST 	= DOWN_WEST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int NORTH_WEST 	= NORTH_EAST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int SOUTH_EAST 	= NORTH_WEST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+		private static final int SOUTH_WEST   = SOUTH_EAST << 1;
+		public boolean west(){
+			if((completionFlags & WEST) != WEST) {
+				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				completionFlags |= WEST;
+			}
+			return (resultFlags & WEST) == WEST;
+		}
+		
+		public int westBit(){
+			return west() ? 1 : 0;
+		}
+
+	}
 }

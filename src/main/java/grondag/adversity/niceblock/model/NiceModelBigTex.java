@@ -63,76 +63,6 @@ public class NiceModelBigTex extends NiceModel {
 		return controller;
 	}
 
-	private int[] vertexToInts(double x, double y, double z, float u, float v, int color) {
-
-
-		return new int[] {
-				Float.floatToRawIntBits((float) x),
-				Float.floatToRawIntBits((float) y),
-				Float.floatToRawIntBits((float) z),
-				color,
-				Float.floatToRawIntBits(textureSprite.getInterpolatedU(u)),
-				Float.floatToRawIntBits(textureSprite.getInterpolatedV(v)),
-				0
-		};
-	}
-
-	private BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side) {
-
-		float shade = LightUtil.diffuseLight(side);
-
-		int red = (int) (shade * 255f * ((controller.color >> 16 & 0xFF) / 255f));
-		int green = (int) (shade * 255f * ((controller.color >> 8 & 0xFF) / 255f));
-		int blue = (int) (shade * 255f * ((controller.color & 0xFF) / 255f));
-		int alpha = controller.color >> 24 & 0xFF;
-
-		int color = red | (green << 8) | (blue << 16) | (alpha << 24);
-
-		for(int r= 0; r < this.controller.textureRotation.index; r++){
-			rotateQuadUV(v1, v2, v3, v4);
-		}
-		
-		int[] aint = Ints.concat(
-				vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, color),
-				vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, color),
-				vertexToInts(v3.xCoord, v3.yCoord, v3.zCoord, v3.u, v3.v, color),
-				vertexToInts(v4.xCoord, v4.yCoord, v4.zCoord, v4.u, v4.v, color)
-				);
-		
-		// necessary to support forge lighting model
-		net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
-		
-		return new BakedQuad(aint,-1, side);
-
-	}
-
-	/**
-	 * Rotates face texture 90deg clockwise
-	 */
-	private void rotateQuadUV(Vertex v1, Vertex v2, Vertex v3, Vertex v4){
-		float swapU = v1.u;
-		float swapV = v1.v;
-		v1.u = v2.u;
-		v1.v = v2.v;
-		v2.u = v3.u;
-		v2.v = v3.v;
-		v3.u = v4.u;
-		v3.v = v4.v;
-		v4.u = swapU;
-		v4.v = swapV;
-	}
-	
-	
-	private static class Vertex extends Vec3 {
-		private float u;
-		private float v;
-
-		public Vertex(float x, float y, float z, float u, float v) {
-			super(x, y, z);
-			this.u = u;
-			this.v = v;
-		}
-	}
 
 	@Override
 	public void handleBakeEvent(ModelBakeEvent event) {
@@ -151,37 +81,37 @@ public class NiceModelBigTex extends NiceModel {
 				faceQuads[EnumFacing.UP.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 						.add(createQuad(
-										new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0), EnumFacing.UP))
+										new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0), EnumFacing.UP, textureSprite, controller.textureRotation, controller.color))
 								.build();
 
 				faceQuads[EnumFacing.DOWN.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 						.add(createQuad(
-										new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0), EnumFacing.DOWN))
+										new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0), EnumFacing.DOWN, textureSprite, controller.textureRotation, controller.color))
 								.build();
 
 				faceQuads[EnumFacing.WEST.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-								new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0), EnumFacing.WEST))
+								new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0), EnumFacing.WEST, textureSprite, controller.textureRotation, controller.color))
 								.build();
 
 				faceQuads[EnumFacing.EAST.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-										new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1), EnumFacing.EAST))
+										new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1), EnumFacing.EAST, textureSprite, controller.textureRotation, controller.color))
 								.build();
 
 				faceQuads[EnumFacing.NORTH.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-								new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1), EnumFacing.NORTH))
+								new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1), EnumFacing.NORTH, textureSprite, controller.textureRotation, controller.color))
 								.build();
 
 				faceQuads[EnumFacing.SOUTH.ordinal()][index] =
 						new ImmutableList.Builder<BakedQuad>()
 								.add(createQuad(
-								new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0), EnumFacing.SOUTH))
+								new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0), EnumFacing.SOUTH, textureSprite, controller.textureRotation, controller.color))
 								.build();
 			}
 		}

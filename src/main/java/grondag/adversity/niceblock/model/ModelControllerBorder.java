@@ -5,8 +5,8 @@ import net.minecraft.util.EnumWorldBlockLayer;
 
 public class ModelControllerBorder extends ModelController {
 
-	protected ModelControllerBorder(int textureIndex, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations) {
-		super(textureIndex, alternateCount, false, renderLayer, isShaded, useRotations);
+	protected ModelControllerBorder(int textureIndex, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations, int color) {
+		super(textureIndex, alternateCount, false, renderLayer, isShaded, useRotations, color);
 	}
 
 	@Override

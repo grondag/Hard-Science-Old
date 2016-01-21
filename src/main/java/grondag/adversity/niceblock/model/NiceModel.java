@@ -3,11 +3,15 @@ package grondag.adversity.niceblock.model;
 import java.util.List;
 
 import com.google.common.base.Function;
+import com.google.common.primitives.Ints;
 
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.model.IModelController.Rotation;
+import grondag.adversity.niceblock.model.NiceModelBigTex.Vertex;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
@@ -17,6 +21,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -25,6 +30,7 @@ import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 /**
@@ -212,4 +218,77 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		return false;
 	}
 		
+	// UTILITIES
+	
+	/**
+	 * Rotates face texture 90deg clockwise
+	 */
+	protected static void rotateQuadUV(Vertex v1, Vertex v2, Vertex v3, Vertex v4){
+		float swapU = v1.u;
+		float swapV = v1.v;
+		v1.u = v2.u;
+		v1.v = v2.v;
+		v2.u = v3.u;
+		v2.v = v3.v;
+		v3.u = v4.u;
+		v3.v = v4.v;
+		v4.u = swapU;
+		v4.v = swapV;
+	}
+	
+	
+	protected static class Vertex extends Vec3 {
+		protected float u;
+		protected float v;
+
+		protected Vertex(float x, float y, float z, float u, float v) {
+			super(x, y, z);
+			this.u = u;
+			this.v = v;
+		}
+	}
+	
+	protected BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
+
+		float shade = LightUtil.diffuseLight(side);
+
+		int red = (int) (shade * 255f * ((colorIn >> 16 & 0xFF) / 255f));
+		int green = (int) (shade * 255f * ((colorIn >> 8 & 0xFF) / 255f));
+		int blue = (int) (shade * 255f * ((colorIn & 0xFF) / 255f));
+		int alpha = colorIn >> 24 & 0xFF;
+
+		int colorOut = red | (green << 8) | (blue << 16) | (alpha << 24);
+
+		for(int r= 0; r < rotation.index; r++){
+			rotateQuadUV(v1, v2, v3, v4);
+		}
+		
+		int[] aint = Ints.concat(
+				vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, colorOut, sprite),
+				vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, colorOut, sprite),
+				vertexToInts(v3.xCoord, v3.yCoord, v3.zCoord, v3.u, v3.v, colorOut, sprite),
+				vertexToInts(v4.xCoord, v4.yCoord, v4.zCoord, v4.u, v4.v, colorOut, sprite)
+				);
+		
+		// necessary to support forge lighting model
+		net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
+		
+		return new BakedQuad(aint,-1, side);
+
+	}
+	
+	private int[] vertexToInts(double x, double y, double z, float u, float v, int color, TextureAtlasSprite sprite) {
+
+
+		return new int[] {
+				Float.floatToRawIntBits((float) x),
+				Float.floatToRawIntBits((float) y),
+				Float.floatToRawIntBits((float) z),
+				color,
+				Float.floatToRawIntBits(sprite.getInterpolatedU(u)),
+				Float.floatToRawIntBits(sprite.getInterpolatedV(v)),
+				0
+		};
+	}
+
 }

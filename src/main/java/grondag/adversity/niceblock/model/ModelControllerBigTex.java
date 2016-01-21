@@ -15,15 +15,13 @@ public class ModelControllerBigTex extends ModelController{
 	protected final Rotation textureRotation;
 	protected final boolean flipU;
 	protected final boolean flipV;
-	protected final int color;
 
 
 	public ModelControllerBigTex(int bigTextureIndex, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, Rotation textureRotation, boolean flipU, boolean flipV, int color) {
-		super(bigTextureIndex, 1, useOverlayTextures, renderLayer, isShaded, false);
+		super(bigTextureIndex, 1, useOverlayTextures, renderLayer, isShaded, false, color);
 		this.textureRotation = textureRotation;
 		this.flipU = flipU;
 		this.flipV = flipV;
-		this.color = color;
 	}
 
 	@Override
