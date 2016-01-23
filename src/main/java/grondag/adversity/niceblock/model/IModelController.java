@@ -70,6 +70,20 @@ public interface IModelController {
 			this.index = index;
 			this.degrees = degrees;
 		}
+		
+		public Rotation clockwise(){
+			switch (this){
+			case ROTATE_180:
+				return ROTATE_270;
+			case ROTATE_270:
+				return ROTATE_NONE;
+			case ROTATE_90:
+				return ROTATE_180;
+			case ROTATE_NONE:
+			default:
+				return ROTATE_90;
+			}
+		}
 
 	}
 }

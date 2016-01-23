@@ -8,7 +8,6 @@ import com.google.common.primitives.Ints;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
-import grondag.adversity.niceblock.model.NiceModelBigTex.Vertex;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;

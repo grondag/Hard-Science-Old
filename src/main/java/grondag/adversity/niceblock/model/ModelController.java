@@ -35,6 +35,12 @@ public abstract class ModelController implements IModelController{
 	 */
 	protected final int textureIndex;
 
+	
+	/** How many texture are in a complete set of textures used by controller.
+	 * Total number of textures to be loaded will be textureCount * alternateTextureCount
+	 */
+	protected int textureCount = 1;
+	
 	/**
 	 * How many versions of textures are provided in the atlas. (count includes
 	 * the first texture) Does not include rotations.
@@ -142,10 +148,10 @@ public abstract class ModelController implements IModelController{
 	@Override
 	public String[] getAllTextures(NiceSubstance substance){
 		
-		final String retVal[] = new String[alternateTextureCount];
+		final String retVal[] = new String[alternateTextureCount * textureCount];
 		
-		for(int alt = 0 ; alt < alternateTextureCount ; alt++){
-			retVal[alt] = this.getTextureName(substance, alt);
+		for(int i = 0 ; i < alternateTextureCount * textureCount ; i++){
+			retVal[i] = this.getTextureName(substance, i);
 		}
 		return retVal;
 	}

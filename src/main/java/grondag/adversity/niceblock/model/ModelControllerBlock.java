@@ -45,7 +45,7 @@ public class ModelControllerBlock extends ModelController{
 	
 	
 	public ModelControllerBlock(int textureIndex, int alternateCount, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
-		super(textureIndex, alternateCount, useOverlayTextures, renderLayer, isShaded, useRotations);
+		super(textureIndex, alternateCount, useOverlayTextures, renderLayer, isShaded, useRotations, 0xFFFFFFFF);
 	}
 	
 	public ModelControllerBlock(int textureIndex, int alternateCount){

@@ -199,14 +199,26 @@ public class NiceBlock extends Block {
 	 * Determines which model should be displayed via PROP_MODEL_RECIPE.
 	 * Handling is delegated to the style cook book.
 	 */
+	
+	private static long elapsedTime;
+	private static int timerCount = 0;
+	
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		
+		IBlockState retval = state;
+		long start = System.nanoTime();
 		// should always be an IExtendedBlockState but avoid crash if somehow not
 		if (state instanceof IExtendedBlockState) {
-			return style.getModelController().getExtendedState((IExtendedBlockState) state, world, pos);
-		} else {
-			return state;
+			state = style.getModelController().getExtendedState((IExtendedBlockState) state, world, pos);
 		}
+		long end = System.nanoTime();
+		elapsedTime += (end - start);
+		timerCount++;
+		if((timerCount & 0x80) == 0x80){
+			Adversity.log.info("average getExtendedState =" +  elapsedTime / timerCount);
+		}
+		return state;
 	}
 
 	/**

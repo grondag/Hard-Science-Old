@@ -241,121 +241,112 @@ public class NeighborBlocks {
 			return upEast() ? 1 : 0;
 		}
 
-		private static final int UP_WEST     = UP_EAST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean upWest(){
+			if((completionFlags & UP_WEST) != UP_WEST) {
+				if(test.testBlock(NeighborBlocks.this.upWest())) resultFlags |= UP_WEST;
+				completionFlags |= UP_WEST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & UP_WEST) == UP_WEST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int upWestBit(){
+			return upWest() ? 1 : 0;
 		}
 
-		private static final int DOWN_NORTH 	= UP_WEST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean downNorth(){
+			if((completionFlags & DOWN_NORTH) != DOWN_NORTH) {
+				if(test.testBlock(NeighborBlocks.this.downNorth())) resultFlags |= DOWN_NORTH;
+				completionFlags |= DOWN_NORTH;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & DOWN_NORTH) == DOWN_NORTH;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int downNorthBit(){
+			return downNorth() ? 1 : 0;
 		}
 
-		private static final int DOWN_SOUTH 	= DOWN_NORTH << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean downSouth(){
+			if((completionFlags & DOWN_SOUTH) != DOWN_SOUTH) {
+				if(test.testBlock(NeighborBlocks.this.downSouth())) resultFlags |= DOWN_SOUTH;
+				completionFlags |= DOWN_SOUTH;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & DOWN_SOUTH) == DOWN_SOUTH;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int downSouthBit(){
+			return downSouth() ? 1 : 0;
 		}
 
-		private static final int DOWN_EAST 	= DOWN_SOUTH << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean downEast(){
+			if((completionFlags & DOWN_EAST) != DOWN_EAST) {
+				if(test.testBlock(NeighborBlocks.this.downEast())) resultFlags |= DOWN_EAST;
+				completionFlags |= DOWN_EAST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & DOWN_EAST) == DOWN_EAST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int downEastBit(){
+			return downEast() ? 1 : 0;
 		}
 
-		private static final int DOWN_WEST   = DOWN_EAST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean downWest(){
+			if((completionFlags & DOWN_WEST) != DOWN_WEST) {
+				if(test.testBlock(NeighborBlocks.this.downWest())) resultFlags |= DOWN_WEST;
+				completionFlags |= DOWN_WEST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & DOWN_WEST) == DOWN_WEST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int downWestBit(){
+			return downWest() ? 1 : 0;
 		}
 		
-		private static final int NORTH_EAST 	= DOWN_WEST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean northEast(){
+			if((completionFlags & NORTH_EAST) != NORTH_EAST) {
+				if(test.testBlock(NeighborBlocks.this.northEast())) resultFlags |= NORTH_EAST;
+				completionFlags |= NORTH_EAST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & NORTH_EAST) == NORTH_EAST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int northEastBit(){
+			return northEast() ? 1 : 0;
 		}
 
-		private static final int NORTH_WEST 	= NORTH_EAST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean northWest(){
+			if((completionFlags & NORTH_WEST) != NORTH_WEST) {
+				if(test.testBlock(NeighborBlocks.this.northWest())) resultFlags |= NORTH_WEST;
+				completionFlags |= NORTH_WEST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & NORTH_WEST) == NORTH_WEST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int northWestBit(){
+			return northWest() ? 1 : 0;
 		}
 
-		private static final int SOUTH_EAST 	= NORTH_WEST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean southEast(){
+			if((completionFlags & SOUTH_EAST) != SOUTH_EAST) {
+				if(test.testBlock(NeighborBlocks.this.southEast())) resultFlags |= SOUTH_EAST;
+				completionFlags |= SOUTH_EAST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & SOUTH_EAST) == SOUTH_EAST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int southEastBit(){
+			return southEast() ? 1 : 0;
 		}
 
-		private static final int SOUTH_WEST   = SOUTH_EAST << 1;
-		public boolean west(){
-			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
-				completionFlags |= WEST;
+		public boolean southWest(){
+			if((completionFlags & SOUTH_WEST) != SOUTH_WEST) {
+				if(test.testBlock(NeighborBlocks.this.southWest())) resultFlags |= SOUTH_WEST;
+				completionFlags |= SOUTH_WEST;
 			}
-			return (resultFlags & WEST) == WEST;
+			return (resultFlags & SOUTH_WEST) == SOUTH_WEST;
 		}
 		
-		public int westBit(){
-			return west() ? 1 : 0;
+		public int southWestBit(){
+			return southWest() ? 1 : 0;
 		}
 
 	}

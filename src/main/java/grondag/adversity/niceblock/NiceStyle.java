@@ -4,6 +4,7 @@ import grondag.adversity.niceblock.model.IModelController;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
 import grondag.adversity.niceblock.model.ModelControllerBigTex;
 import grondag.adversity.niceblock.model.ModelControllerBlock;
+import grondag.adversity.niceblock.model.ModelControllerBorder;
 import grondag.adversity.niceblock.model.ModelControllerDual;
 import grondag.adversity.niceblock.model.ModelCookbook;
 import grondag.adversity.niceblock.model.ModelCookbookColumnRound;
@@ -54,9 +55,17 @@ public abstract class NiceStyle {
 					new ModelControllerBlock(0, 4, false, EnumWorldBlockLayer.SOLID, true, true),
 					new ModelControllerBlock(0, 4, true, EnumWorldBlockLayer.TRANSLUCENT, false, true)));
 
-	public static final NiceStyle BIG_TEX = new NiceStyleNew(
-					new ModelControllerBigTex(0, false, EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, 0xBBB9AB));
+//	public static final NiceStyle BIG_TEX = new NiceStyleNew(
+//					new ModelControllerBigTex(0, false, EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, 0xBBB9AB));
 
+	public static final NiceStyle BIG_TEX = new NiceStyleNew(
+			new ModelControllerDual(
+					new ModelControllerBigTex(0, false, EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, 0xBBB9AB),
+					new ModelControllerBorder(0, 1, EnumWorldBlockLayer.TRANSLUCENT, true, 0xFFDBD9CB)));
+	
+//	public static final NiceStyle BIG_TEX = new NiceStyleNew(
+//					new ModelControllerBorder(0, 1, EnumWorldBlockLayer.TRANSLUCENT, true, 0xFFBBB9AB));
+	
 	
 	public abstract IModelController getModelController();
 	
