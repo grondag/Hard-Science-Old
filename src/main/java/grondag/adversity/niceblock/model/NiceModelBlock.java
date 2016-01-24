@@ -11,7 +11,6 @@ import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -44,8 +43,8 @@ public class NiceModelBlock extends NiceModel {
 	 */
 	protected final IBakedModel[] models;
 
-	protected NiceModelBlock(NiceSubstance substance, ModelControllerBlock controller) {
-		super(substance);
+	protected NiceModelBlock(ModelControllerBlock controller, int meta) {
+		super(meta);
 		this.controller = controller;
 		models = new IFlexibleBakedModel[controller.expandedAlternateCount];
 	}
@@ -68,7 +67,7 @@ public class NiceModelBlock extends NiceModel {
 		IRetexturableModel template;
 		try {
 			template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(baseModelName + controller.calcRotation(expanded).degrees));
-			IModel model = template.retexture(controller.getTexturesForExpandedAlternate(substance, expanded));
+			IModel model = template.retexture(controller.getTexturesForExpandedAlternate(meta, expanded));
 			return model.bake(state, DefaultVertexFormats.ITEM, textureGetter);
 		} catch (IOException e) {
 			Adversity.log.error("Unable to load model " + baseModelName + " in " + this.getClass(), e);

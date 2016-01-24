@@ -1,8 +1,8 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
@@ -18,7 +18,7 @@ public interface IModelController {
 	/**
 	 * Used by NiceBlockRegistrar to register models for block/style/substance combinations.
 	 */
-	public abstract NiceModel getModel(NiceSubstance substance);
+	public abstract NiceModel getModel(int meta);
 	
 	/**
 	 * Used by NiceBlock to generate appropriate render state.
@@ -38,13 +38,17 @@ public interface IModelController {
 	/**
 	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
-	public String getFirstTextureName(NiceSubstance substance);
+	public String getFirstTextureName(int meta);
 	
 	/**
 	 * Supports texture stitch event
 	 */
-	public String[] getAllTextures(NiceSubstance substance);
+	public String[] getAllTextures(int meta);
 	
+	/**
+	 * Used to tint item block models because item renderer ignores color on pre-baked quads.
+	 */
+	public int getItemColor(ItemStack stack, int renderPass);
 	
 	/**
 	 * Texture rotations. Used mainly when rotated textures are used as

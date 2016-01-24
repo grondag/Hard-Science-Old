@@ -49,7 +49,7 @@ import com.google.common.collect.ImmutableList;
  * Base class for Adversity building blocks. Should be instantiated and set up
  * in NiceBlockRegistrar.
  *
- * Note that NiceBlock metadata is ONLY used to define substance variants. For
+ * Note that NiceBlock metadata is ONLY used to define meta variants. For
  * blocks that require facing or other configuration that cannot be derived from
  * neighboring blocks, a different block instance is used. (Or a tile entity, if
  * needed to avoid an impractical number of instances.) In contrast, vanilla and
@@ -58,14 +58,17 @@ import com.google.common.collect.ImmutableList;
  * NiceBlocks does it this way beause Adversity has MANY building blocks with
  * many variants and I wanted to avoid creating tile entities in most cases and
  * to be fully efficient in usage of metadata bits. If each NiceBlock instance
- * has 16 substance variants then no metadata bits are wasted. Slabs, stairs,
+ * has 16 meta variants then no metadata bits are wasted. Slabs, stairs,
  * etc. do not necessarily consume four metadata bits and this also system means
  * all niceblocks can be fully consistent in the way they use metadata.
  */
 public class NiceBlock extends Block {
 
-	/** Index to the substances[] array. */
-	public static final PropertyInteger SUBSTANCE_INDEX = PropertyInteger.create("substance_index", 0, 15);
+	/** 
+	 * Used for multiple purposes depending on block style.
+	 * Thus the generic name.
+	 */
+	public static final PropertyInteger META = PropertyInteger.create("meta", 0, 15);
 
 	/**
 	 * Contains render state passed from getExtendedState to handleBlockState.
@@ -76,11 +79,9 @@ public class NiceBlock extends Block {
 	public static final ModelRenderProperty MODEL_RENDER_STATE = new ModelRenderProperty();
 	
 	/**
-	 * Maps metadata to specific Adversity substance. Metadata is the index to
-	 * this array. Substance control texture and may be used to control some
-	 * in-game properties and behaviors.
+	 * Controls material-dependent properties
 	 */
-	public final NiceSubstance[] substances;
+	public final BaseMaterial material;
 
 	/**
 	 * Identifies the visual appearance of the block and handles aspects related
@@ -89,7 +90,7 @@ public class NiceBlock extends Block {
 	public final NiceStyle style;
 
 	/**
-	 * Item for this block. Will have same substance variants as this block.
+	 * Item for this block. Will have same meta variants as this block.
 	 * Instantiated and retained here for convenience and to enable consistent
 	 * handling.
 	 */
@@ -112,21 +113,25 @@ public class NiceBlock extends Block {
 	 */
 	public final ICollisionHandler collisionHandler;
 
+	/** number of meta variants to create.  Max is 16. */
+	public final int metaCount;
+	
 	/**
 	 * Assumes first substance is representative of all the substances for
 	 * purposes of setting material-dependent attributes.
 	 */
-	public NiceBlock(String name, NiceStyle style, NicePlacement placer, NiceSubstance... substances) {
-		super(substances[0].baseMaterial.material);
+	public NiceBlock(String name, NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
+		super(material.material);
 		this.style = style;
-		this.substances = substances;
+		this.material = material;
+		this.metaCount = metaCount;
 		this.name = name;
 		setUnlocalizedName(Adversity.MODID + ":" + name);
 		setCreativeTab(Adversity.tabAdversity);
-		this.setHarvestLevel(substances[0].baseMaterial.harvestTool, substances[0].baseMaterial.harvestLevel);
-		setStepSound(substances[0].baseMaterial.stepSound);
-		setHardness(substances[0].baseMaterial.hardness);
-		setResistance(substances[0].baseMaterial.resistance);
+		this.setHarvestLevel(material.harvestTool, material.harvestLevel);
+		setStepSound(material.stepSound);
+		setHardness(material.hardness);
+		setResistance(material.resistance);
 		placementHandler = placer;
 		placer.setOwner(this);
 		collisionHandler = style.getModelController().getCollisionHandler();
@@ -160,7 +165,7 @@ public class NiceBlock extends Block {
 	
 	@Override
 	protected BlockState createBlockState() {
-		return new ExtendedBlockState(this, new IProperty[] { SUBSTANCE_INDEX }, new IUnlistedProperty[] {
+		return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] {
 				MODEL_RENDER_STATE});
 	}
 
@@ -169,26 +174,26 @@ public class NiceBlock extends Block {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
-		for (int i = 0; i < substances.length; i++) {
+		for (int i = 0; i < metaCount; i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
 	}
 
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		return getDefaultState().withProperty(SUBSTANCE_INDEX, meta);
+		return getDefaultState().withProperty(META, meta);
 	}
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return state.getValue(SUBSTANCE_INDEX);
+		return state.getValue(META);
 	}
 
 	// INTERACTION HANDLING
 
 	@Override
 	public int damageDropped(IBlockState state) {
-		return state.getValue(SUBSTANCE_INDEX);
+		return state.getValue(META);
 	}
 
 	@Override
@@ -321,7 +326,7 @@ public class NiceBlock extends Block {
 	public static class TestForCompleteMatch implements IBlockTest {
 
 		private final Block block;
-		private final int substanceIndex;
+		private final int meta;
 
 		/**
 		 * Blocks match if they have are the same block and same substance. Also
@@ -330,7 +335,7 @@ public class NiceBlock extends Block {
 		 */
 		public TestForCompleteMatch(IBlockState ibs) {
 			block = ibs.getBlock();
-			substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
+			meta = ibs.getValue(META);
 		}
 
 		@Override
@@ -340,7 +345,7 @@ public class NiceBlock extends Block {
 				Adversity.log.info("caught deleted at" + pos.toString());
 				return false;
 			}
-			return ibs.getBlock() == block && ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
+			return ibs.getBlock() == block && ibs.getValue(META) == meta;
 		}
 	}
 
@@ -350,19 +355,19 @@ public class NiceBlock extends Block {
 	 */
 	public static class TestForSubstance implements IBlockTest {
 
-		private final int substanceIndex;
+		private final int meta;
 
 		public TestForSubstance(IBlockState ibs) {
 			if (ibs.getBlock() instanceof NiceBlock) {
-				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
+				meta = ibs.getValue(META);
 			} else {
-				substanceIndex = -1;
+				meta = -1;
 			}
 		}
 
 		@Override
 		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
-			return ibs.getBlock() instanceof NiceBlock && ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
+			return ibs.getBlock() instanceof NiceBlock && ibs.getValue(META) == meta;
 		}
 	}
 
@@ -399,7 +404,7 @@ public class NiceBlock extends Block {
 	public static class TestForStyleAndSubstance implements IBlockTest {
 
 		private final NiceStyle style;
-		private final int substanceIndex;
+		private final int meta;
 
 		/**
 		 * Blocks match if they have have the same style and subtance. Can be
@@ -408,17 +413,17 @@ public class NiceBlock extends Block {
 		public TestForStyleAndSubstance(IBlockState ibs) {
 			if (ibs.getBlock() instanceof NiceBlock) {
 				style = ((NiceBlock) ibs.getBlock()).style;
-				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
+				meta = ibs.getValue(META);
 			} else {
 				style = null;
-				substanceIndex = -1;
+				meta = -1;
 			}
 		}
 
 		@Override
 		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 			return ibs.getBlock() instanceof NiceBlock && ((NiceBlock) ibs.getBlock()).style == style
-					&& ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
+					&& ibs.getValue(META) == meta;
 		}
 	}
 
@@ -429,7 +434,7 @@ public class NiceBlock extends Block {
 	public static class TestForStyleGroupAndSubstance implements IBlockTest {
 
 		private final HashSet<NiceStyle> styles;
-		private final int substanceIndex;
+		private final int meta;
 
 		/**
 		 * Just like TestForStyleAndSubstance but matches on any one of a group
@@ -439,16 +444,16 @@ public class NiceBlock extends Block {
 		public TestForStyleGroupAndSubstance(IBlockAccess world, IBlockState ibs, BlockPos pos, NiceStyle... styles) {
 			this.styles = new HashSet(Arrays.asList(styles));
 			if (ibs.getBlock() instanceof NiceBlock) {
-				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
+				meta = ibs.getValue(META);
 			} else {
-				substanceIndex = -1;
+				meta = -1;
 			}
 		}
 
 		@Override
 		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 			return ibs.getBlock() instanceof NiceBlock && styles.contains(((NiceBlock) ibs.getBlock()).style)
-					&& ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
+					&& ibs.getValue(META) == meta;
 		}
 	}
 

@@ -6,8 +6,8 @@ import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.support.CornerRecipeFinder;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
@@ -27,15 +27,18 @@ public class ModelControllerBorder extends ModelController {
 	 * of corner blocks, giving 386 possible recipes..
 	 */
 	protected static CornerRecipeFinder[][][][][][] CONNECTED_CORNER_RECIPE_LOOKUP = new CornerRecipeFinder[2][2][2][2][2][2];
+	
+	protected final NiceColor firstColor;
 
-	public ModelControllerBorder(int textureIndex, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, int color) {
-		super(textureIndex, alternateCount, false, renderLayer, isShaded, false, color);
+	public ModelControllerBorder(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, NiceColor firstColor) {
+		super(textureName, alternateCount, renderLayer, isShaded, false);
+		this.firstColor = firstColor;
 		textureCount = 15;
 	}
 
 	@Override
-	public NiceModelBorder getModel(NiceSubstance substance) {
-		return new NiceModelBorder(substance, this);
+	public NiceModelBorder getModel(int meta) {
+		return new NiceModelBorder(this, meta, NiceColor.values()[firstColor.ordinal() + meta]);
 	}
 
 	@Override
@@ -50,13 +53,6 @@ public class ModelControllerBorder extends ModelController {
 				[mates.northBit()][mates.southBit()];
 
 		return finder.getRecipe(test, worldIn, pos);
-	}
-
-	@Override
-	protected String getTextureName(NiceSubstance substance, int offset) {
-		
-		int position = this.textureIndex + offset;
-		return "adversity:blocks/bordertest/bordertest_" + (position >> 3) + "_" + (position & 7);		
 	}
 	
 	static {

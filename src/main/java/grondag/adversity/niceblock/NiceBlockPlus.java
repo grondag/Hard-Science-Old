@@ -13,8 +13,8 @@ import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 
-	public NiceBlockPlus(String name, NiceStyle style, NicePlacement placer, NiceSubstance[] substances) {
-		super(name, style, placer, substances);
+	public NiceBlockPlus(String name, NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
+		super(name, style, placer, material, metaCount);
 	}
 	
 	private static long elapsedTime;

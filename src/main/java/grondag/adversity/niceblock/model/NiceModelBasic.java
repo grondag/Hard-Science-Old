@@ -3,7 +3,6 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceStyle.NiceStyleOld;
-import grondag.adversity.niceblock.NiceSubstance;
 
 import java.io.IOException;
 import java.util.List;
@@ -86,8 +85,8 @@ public class NiceModelBasic extends NiceModel {
 	 */
 	protected final IFlexibleBakedModel[] secondaryModels;
 	
-	public NiceModelBasic(NiceStyleOld style, NiceSubstance substance) {
-		super(substance);
+	public NiceModelBasic(NiceStyleOld style, int meta) {
+		super(meta);
 		this.style = style;
 		primaryModels = new IFlexibleBakedModel[style.firstCookbook.getAlternateCount() * style.firstCookbook.getRecipeCount()];
 		
@@ -136,14 +135,14 @@ public class NiceModelBasic extends NiceModel {
 	public void handleTexturePreStitch(TextureStitchEvent.Pre event) {
 		for (int alt = 0; alt < style.firstCookbook.alternateCount; alt++) {
 			for (int tex = 0; tex < style.firstCookbook.getTextureCount(); tex++) {
-				event.map.registerSprite(new ResourceLocation(style.firstCookbook.getTextureName(substance, alt * style.firstCookbook.getTextureCount() + style.firstCookbook.textureIndex + tex)));
+				event.map.registerSprite(new ResourceLocation(style.firstCookbook.getTextureName(meta, alt * style.firstCookbook.getTextureCount() + tex)));
 			}
 		}
 		
 		if(style.secondCookbook != null){
 			for (int alt = 0; alt < style.secondCookbook.alternateCount; alt++) {
 				for (int tex = 0; tex < style.secondCookbook.getTextureCount(); tex++) {
-					event.map.registerSprite(new ResourceLocation(style.secondCookbook.getTextureName(substance, alt * style.secondCookbook.getTextureCount() + style.secondCookbook.textureIndex + tex)));
+					event.map.registerSprite(new ResourceLocation(style.secondCookbook.getTextureName(meta, alt * style.secondCookbook.getTextureCount() + tex)));
 				}
 			}
 		}
@@ -152,7 +151,7 @@ public class NiceModelBasic extends NiceModel {
 	public void handleBakeEvent(ModelBakeEvent event)  {
 		for (int recipe = 0; recipe < style.firstCookbook.getRecipeCount(); recipe++) {
 			for (int alt = 0; alt < style.firstCookbook.getAlternateCount(); alt++) {
-				ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(substance, recipe, alt);
+				ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(meta, recipe, alt);
 				IRetexturableModel template;
 				try {
 					template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(ingredients.modelName));
@@ -168,7 +167,7 @@ public class NiceModelBasic extends NiceModel {
 		if(style.secondCookbook != null){
 			for (int recipe = 0; recipe < style.secondCookbook.getRecipeCount(); recipe++) {
 				for (int alt = 0; alt < style.secondCookbook.getAlternateCount(); alt++) {
-					ModelCookbook.Ingredients ingredients = style.secondCookbook.getIngredients(substance, recipe, alt);
+					ModelCookbook.Ingredients ingredients = style.secondCookbook.getIngredients(meta, recipe, alt);
 					IRetexturableModel template;
 					try {
 						template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(ingredients.modelName));
@@ -191,7 +190,7 @@ public class NiceModelBasic extends NiceModel {
 		 * This is retained by the Bake method for that model type and then applied via handlePerspective in that model.
 		 */
 		
-		ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(substance, style.firstCookbook.getItemModelIndex(), 0);
+		ModelCookbook.Ingredients ingredients = style.firstCookbook.getIngredients(meta, style.firstCookbook.getItemModelIndex(), 0);
 		IRetexturableModel template;
 		try {
 			template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(ingredients.modelName));
@@ -227,7 +226,7 @@ public class NiceModelBasic extends NiceModel {
 	public TextureAtlasSprite getParticleTexture() {
 		// lazy lookup to ensure happens after texture atlas has been created
 		if (particleTexture == null) {
-			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.firstCookbook.getParticleTextureName(substance));
+			particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(style.firstCookbook.getParticleTextureName(meta));
 		}
 		return particleTexture;
 	}

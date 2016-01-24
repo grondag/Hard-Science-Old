@@ -5,7 +5,6 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.CornerRecipeFinder;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -102,7 +101,7 @@ public class ModelCookbook {
 	 * Index of the first texture to be used. The cookbook will
 	 * assume all textures are offset from this index.
 	 */
-	protected final int textureIndex;
+	protected final String textureName;
 
 	/**
 	 * How many versions of textures are provided in the atlas. (count includes
@@ -110,24 +109,17 @@ public class ModelCookbook {
 	 */
 	protected final int alternateCount;
 	
-	/**
-	 * If true, will use the overlay textures for the substance.
-	 * In this case, textureIndex gives the starting offset for overlay textures.
-	 */
-	protected final boolean useOverlayTextures;
-
 	protected final EnumWorldBlockLayer renderLayer;
 	protected final boolean isShaded;
 	protected final boolean useRotations;
 	
-	public ModelCookbook(int textureIndex, int alternateCount){
-		this(textureIndex, alternateCount, false, EnumWorldBlockLayer.SOLID, true, true);
+	public ModelCookbook(String textureName, int alternateCount){
+		this(textureName, alternateCount, EnumWorldBlockLayer.SOLID, true, true);
 	}
 	
-	public ModelCookbook(int textureIndex, int alternateCount, boolean useSecondaryTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
-		this.textureIndex = textureIndex;
+	public ModelCookbook(String textureName, int alternateCount,EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
+		this.textureName = textureName;
 		this.alternateCount = alternateCount;
-		this.useOverlayTextures = useSecondaryTextures;
 		this.renderLayer = renderLayer;
 		this.isShaded = isShaded;
 		this.useRotations = useRotations;
@@ -184,7 +176,7 @@ public class ModelCookbook {
 		return null;
 	}
 
-	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
+	public Ingredients getIngredients(int meta, int recipe, int alternate) {
 
 		String modelName;
 		
@@ -195,7 +187,7 @@ public class ModelCookbook {
 		}
 
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", getTextureName(substance, calcAlternate(alternate) + textureIndex));
+		textures.put("all", getTextureName(meta, calcAlternate(alternate)));
 
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}
@@ -227,8 +219,8 @@ public class ModelCookbook {
 	/**
 	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
-	public String getParticleTextureName(NiceSubstance substance) {
-		return getTextureName(substance, textureIndex);
+	public String getParticleTextureName(int meta) {
+		return getTextureName(meta, 0);
 	}
 
 	/**
@@ -289,14 +281,8 @@ public class ModelCookbook {
 	 * Generate the appropriate texture name for a given substance and offset. 
 	 * Cookbook determines which offset to use for what purpose.
 	 */
-	public String getTextureName(NiceSubstance substance, int offset) {
-		return (this.useOverlayTextures && substance.overlayTexture != null)
-				? buildTextureName(substance.overlayTexture, offset)
-				: buildTextureName(substance.baseTexture, offset);
-	}
-	
-	private static String buildTextureName(String textureName, int offset) {
-		return "adversity:blocks/" + textureName + "/" + textureName + "_" + (offset >> 3) + "_" + (offset & 7);
+	public String getTextureName(int meta, int offset) {
+		return "adversity:blocks/" + textureName + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 	
 	/**

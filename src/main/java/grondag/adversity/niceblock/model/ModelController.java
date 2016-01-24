@@ -6,6 +6,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
@@ -13,7 +14,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 public abstract class ModelController implements IModelController{
@@ -28,13 +28,11 @@ public abstract class ModelController implements IModelController{
 	 */
 	protected final IAlternator alternator;
 	
-	
 	/**
-	 * Index of the first texture to be used. The controller will
-	 * assume all textures are offset from this index.
+	 * Folder and prefix for textures.  Will use first texture as starting point
 	 */
-	protected final int textureIndex;
-
+	protected final String textureName;
+	
 	
 	/** How many texture are in a complete set of textures used by controller.
 	 * Total number of textures to be loaded will be textureCount * alternateTextureCount
@@ -68,33 +66,28 @@ public abstract class ModelController implements IModelController{
 	 * If false, faces of the block are not shaded according to light levels.
 	 */
 	public final boolean isShaded;
-	
-	/**
-	 * If true, will use the overlay textures for the substance.
-	 * In this case, textureIndex gives the starting offset for overlay textures.
-	 */
-	public final boolean useOverlayTextures;
-	
-	protected final int color;
-
-	
-	protected ModelController(int textureIndex, int alternateCount, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations, int color){
-		this.textureIndex = textureIndex;
+			
+	protected ModelController(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
+		this.textureName = textureName;
 		this.alternateTextureCount = Math.max(1, alternateCount);
 		this.renderLayer = renderLayer;
 		this.isShaded = isShaded;
-		this.useOverlayTextures = useOverlayTextures;
 		this.useRotatedTexturesAsAlternates = useRotations;
 		this.expandedAlternateCount = calcExpanded();
-		this.color = color;
 		alternator = Alternator.getAlternator((byte) expandedAlternateCount);
 	}
 	
 	@Override
-	public String getFirstTextureName(NiceSubstance substance) {
-		return this.getTextureName(substance, textureIndex);
+	public String getFirstTextureName(int meta) {
+		return this.getTextureName(meta, 0);
 	}
 
+    @Override
+    public int getItemColor(ItemStack stack, int renderPass)
+    {
+        return 0xFFFFFFFF;
+    }
+    
 	@Override
 	public ICollisionHandler getCollisionHandler() {
 		return null;
@@ -125,31 +118,25 @@ public abstract class ModelController implements IModelController{
 	 * For convenience, accepts expanded alternate index values
 	 * that occur when using rotations as alternate textures.
 	 */
-	public ImmutableMap<String, String> getTexturesForExpandedAlternate(NiceSubstance substance, int expanded) {
+	public ImmutableMap<String, String> getTexturesForExpandedAlternate(int meta, int expanded) {
 		
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", this.getTextureName(substance, calcAlternate(expanded) + textureIndex));
+		textures.put("all", this.getTextureName(meta, calcAlternate(expanded)));
 				
 		return ImmutableMap.copyOf(textures);
 	}
 	
-	protected String getTextureName(NiceSubstance substance, int offset) {
-		
-		String textureName = this.useOverlayTextures && substance.overlayTexture != null
-				? substance.overlayTexture : substance.baseTexture;
-
-		int position = this.textureIndex + offset;
-				
-		return "adversity:blocks/" + textureName + "/" + textureName + "_" + (position >> 3) + "_" + (position & 7);
+	protected String getTextureName(int meta, int offset) {
+		return "adversity:blocks/" + textureName + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 	
 	@Override
-	public String[] getAllTextures(NiceSubstance substance){
+	public String[] getAllTextures(int meta){
 		
 		final String retVal[] = new String[alternateTextureCount * textureCount];
 		
 		for(int i = 0 ; i < alternateTextureCount * textureCount ; i++){
-			retVal[i] = this.getTextureName(substance, i);
+			retVal[i] = this.getTextureName(meta, i);
 		}
 		return retVal;
 	}

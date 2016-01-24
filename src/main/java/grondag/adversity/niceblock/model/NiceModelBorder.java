@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.event.ModelBakeEvent;
-import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
 import grondag.adversity.niceblock.model.NiceModel.Vertex;
 
@@ -30,9 +30,11 @@ public class NiceModelBorder extends NiceModel {
 	 */
 	protected final BorderFacade[] facadeModels;
 	
+	protected final NiceColor color;
 
-	protected NiceModelBorder(NiceSubstance substance, ModelControllerBorder controller) {
-		super(substance);
+	protected NiceModelBorder(ModelControllerBorder controller, int meta, NiceColor color) {
+		super(meta);
+		this.color = color;
 		this.controller = controller;
 		faceQuads = new List[6][48];
 		facadeModels = new BorderFacade[386];
@@ -50,7 +52,7 @@ public class NiceModelBorder extends NiceModel {
 		float v1 = flipV ? 0 : 16;
 		
 		TextureAtlasSprite textureSprite = 
-				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(substance, textureOffset));
+				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(meta, textureOffset));
 
 		List<BakedQuad> retval = Collections.EMPTY_LIST;
 		
@@ -60,7 +62,7 @@ public class NiceModelBorder extends NiceModel {
 			retval = new ImmutableList.Builder<BakedQuad>()
 				.add(createQuad(
 					new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0), 
-					EnumFacing.UP, textureSprite, rotation, controller.color))
+					EnumFacing.UP, textureSprite, rotation, color.border))
 				.build();
 			break;
 	
@@ -68,7 +70,7 @@ public class NiceModelBorder extends NiceModel {
 			retval = new ImmutableList.Builder<BakedQuad>()
 				.add(createQuad(
 						new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0), 
-					EnumFacing.DOWN, textureSprite, rotation.clockwise().clockwise(), controller.color))
+					EnumFacing.DOWN, textureSprite, rotation.clockwise().clockwise(), color.border))
 				.build();
 			break;
 			
@@ -76,7 +78,7 @@ public class NiceModelBorder extends NiceModel {
 			retval = new ImmutableList.Builder<BakedQuad>()
 				.add(createQuad(
 					new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0), 
-					EnumFacing.WEST, textureSprite, rotation, controller.color))
+					EnumFacing.WEST, textureSprite, rotation, color.border))
 				.build();
 			break;
 			
@@ -84,7 +86,7 @@ public class NiceModelBorder extends NiceModel {
 			retval = new ImmutableList.Builder<BakedQuad>()
 				.add(createQuad(
 					new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1),
-					EnumFacing.EAST, textureSprite, rotation, controller.color))
+					EnumFacing.EAST, textureSprite, rotation, color.border))
 				.build();
 			break;
 			
@@ -92,7 +94,7 @@ public class NiceModelBorder extends NiceModel {
 			retval = new ImmutableList.Builder<BakedQuad>()
 				.add(createQuad(
 					new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1),
-					EnumFacing.NORTH, textureSprite, rotation, controller.color))
+					EnumFacing.NORTH, textureSprite, rotation, color.border))
 				.build();
 			break;
 			
@@ -100,7 +102,7 @@ public class NiceModelBorder extends NiceModel {
 			retval = new ImmutableList.Builder<BakedQuad>()
 				.add(createQuad(
 					new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0), 
-					EnumFacing.SOUTH, textureSprite, rotation, controller.color))
+					EnumFacing.SOUTH, textureSprite, rotation, color.border))
 				.build();
 			break;
 		}

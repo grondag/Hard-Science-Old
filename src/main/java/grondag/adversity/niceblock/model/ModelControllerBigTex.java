@@ -3,8 +3,9 @@ package grondag.adversity.niceblock.model;
 import com.google.common.collect.ImmutableMap;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceSubstance;
+import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
@@ -16,9 +17,11 @@ public class ModelControllerBigTex extends ModelController{
 	protected final boolean flipU;
 	protected final boolean flipV;
 
+	protected final NiceColor firstColor;
 
-	public ModelControllerBigTex(int bigTextureIndex, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, Rotation textureRotation, boolean flipU, boolean flipV, int color) {
-		super(bigTextureIndex, 1, useOverlayTextures, renderLayer, isShaded, false, color);
+	public ModelControllerBigTex(String textureName, EnumWorldBlockLayer renderLayer, boolean isShaded, Rotation textureRotation, boolean flipU, boolean flipV, NiceColor firstColor) {
+		super(textureName, 1, renderLayer, isShaded, false);
+		this.firstColor = firstColor;
 		this.textureRotation = textureRotation;
 		this.flipU = flipU;
 		this.flipV = flipV;
@@ -30,20 +33,18 @@ public class ModelControllerBigTex extends ModelController{
 	}
 
 	@Override
-	protected String getTextureName(NiceSubstance substance, int offset) {
-//		String textureName = this.useOverlayTextures && substance.overlayTexture != null
-//				? substance.overlayTexture : substance.baseTexture;
-
-		int position = this.textureIndex + offset;
-				
-		//return "adversity:blocks/bigtex_" + position + "_0";
-		//return "adversity:blocks/bigstonetest";
-		return "adversity:blocks/bigtex_rock_test";
+	public NiceModel getModel(int meta) {
+		return new NiceModelBigTex(this, meta, NiceColor.values()[firstColor.ordinal() + meta]);
 	}
 
-	@Override
-	public NiceModel getModel(NiceSubstance substance) {
-		return new NiceModelBigTex(substance, this);
+	protected String getTextureName(int meta, int offset) {
+		return "adversity:blocks/" + textureName;
 	}
+
+    @Override
+    public int getItemColor(ItemStack stack, int renderPass)
+    {
+        return NiceColor.values()[Math.min(firstColor.ordinal() + (stack.getItemDamage() & 0xF), NiceColor.values().length-1)].base;
+    }
 
 }

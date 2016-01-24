@@ -3,7 +3,6 @@ package grondag.adversity.niceblock.model;
 import java.util.List;
 
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -27,7 +26,7 @@ public class NiceModelDual extends NiceModel {
 	protected final NiceModel modelSecondary;
 	
 	public NiceModelDual(NiceModel modelPrimary, NiceModel modelSecondary){
-		super(modelPrimary.substance);
+		super(modelPrimary.meta);
 		this.modelPrimary = modelPrimary;
 		this.modelSecondary = modelSecondary;
 	}

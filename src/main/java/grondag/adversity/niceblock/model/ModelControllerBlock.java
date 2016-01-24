@@ -9,7 +9,6 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -44,17 +43,17 @@ public class ModelControllerBlock extends ModelController{
 	 */
 	
 	
-	public ModelControllerBlock(int textureIndex, int alternateCount, boolean useOverlayTextures, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
-		super(textureIndex, alternateCount, useOverlayTextures, renderLayer, isShaded, useRotations, 0xFFFFFFFF);
+	public ModelControllerBlock(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations){
+		super(textureName, alternateCount, renderLayer, isShaded, useRotations);
 	}
 	
-	public ModelControllerBlock(int textureIndex, int alternateCount){
-		 this(textureIndex, alternateCount, false, EnumWorldBlockLayer.SOLID, true, true);
+	public ModelControllerBlock(String textureName, int alternateCount){
+		 this(textureName, alternateCount, EnumWorldBlockLayer.SOLID, true, true);
 	}	
 	
 	@Override
-	public NiceModel getModel(NiceSubstance substance) {
-		return new NiceModelBlock(substance, this);
+	public NiceModel getModel(int meta) {
+		return new NiceModelBlock(this, meta);
 	}
 
 }

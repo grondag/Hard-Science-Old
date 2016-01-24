@@ -5,7 +5,6 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlock.TestForStyle;
 import grondag.adversity.niceblock.NiceStyle;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.Map;
@@ -23,8 +22,8 @@ import com.google.common.collect.Maps;
 
 public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implements ICollisionHandler {
 
-	public ModelCookbookColumnRound(int textureIndex, int alternateCount, Axis axis) {
-		super(textureIndex, alternateCount, axis);
+	public ModelCookbookColumnRound(String textureName, int alternateCount, Axis axis) {
+		super(textureName, alternateCount, axis);
 	}
 
 	@Override
@@ -55,14 +54,19 @@ public class ModelCookbookColumnRound extends ModelCookbookColumnSquare implemen
 	}
 
 	@Override
-	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
+	public int getTextureCount() {
+		return 1;
+	}
+	
+	@Override
+	public Ingredients getIngredients(int meta, int recipe, int alternate) {
 
 		String modelName = modelNames[MODEL_FOR_RECIPE[recipe].index];
 
-		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
+		int baseOffset = getTextureCount() * calcAlternate(alternate);
 		Map<String, String> textures = Maps.newHashMap();
 
-		textures.put("#all", getTextureName(substance, baseOffset));
+		textures.put("#all", getTextureName(meta, baseOffset));
 
 		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
 	}

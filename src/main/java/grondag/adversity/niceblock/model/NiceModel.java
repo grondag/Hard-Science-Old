@@ -6,7 +6,6 @@ import com.google.common.base.Function;
 import com.google.common.primitives.Ints;
 
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -27,6 +26,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.client.model.pipeline.LightUtil;
@@ -42,7 +42,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  * memory, they don't take up that much space and this ensures minimal
  * processing during the render loop.
  *
- * Each NiceBlock will have a separate NiceModel for each substance and each
+ * Each NiceBlock will have a separate NiceModel for each meta and each
  * NiceModel can contain one or hundreds of variants selected via
  * handleBlockState.
  *
@@ -63,7 +63,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	/**
 	 * Provides texture parameters.
 	 */
-	protected final NiceSubstance substance;
+	protected final int meta;
 
 	protected TextureAtlasSprite particleTexture;
 
@@ -72,14 +72,14 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	public abstract IModelController getController();
 	
 	/**
-	 * Create a model for this style/substance combination. Caller will
-	 * typically create 16 of these per NiceBlock instance if all 16 substance
+	 * Create a model for this style/meta combination. Caller will
+	 * typically create 16 of these per NiceBlock instance if all 16 
 	 * metadata values are used.
 	 *
 	 * See class header and member descriptions for more info on what things do.
 	 */
-	protected NiceModel(NiceSubstance substance) {
-		this.substance = substance;
+	protected NiceModel(int meta) {
+		this.meta= meta;
 	}
 
 	/**
@@ -97,18 +97,18 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	};
 	
 	/**
-	 * Bakes all the models for this style/substance and caches them in array.
+	 * Bakes all the models for this style/meta and caches them in array.
 	 * Should happen after texture stitch and before any models are retrieved
 	 * with handleBlockState.
 	 */
 	public abstract void handleBakeEvent(ModelBakeEvent event);
 
 	/**
-	 * Registers all textures that will be needed for this style/substance.
+	 * Registers all textures that will be needed for this style/meta.
 	 * Happens before model bake.
 	 */
 	public void handleTexturePreStitch(Pre event){
-		for(String tex : getController().getAllTextures(substance)){
+		for(String tex : getController().getAllTextures(meta)){
 			event.map.registerSprite(new ResourceLocation(tex));
 		}
 	}
@@ -118,7 +118,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Happens before model bake but after texture atlas is created.
 	 */
 	public void handleTexturePostStitch(Post event){
-		particleTexture = event.map.getAtlasSprite(getController().getFirstTextureName(substance));
+		particleTexture = event.map.getAtlasSprite(getController().getFirstTextureName(meta));
 	}
 	
 	@Override
@@ -274,6 +274,10 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		
 		return new BakedQuad(aint,-1, side);
 
+	}
+	
+	public static BakedQuad tintedBakedQuad(BakedQuad quadIn, int tint){
+	    return new BakedQuad(quadIn.getVertexData(), tint, quadIn.getFace());
 	}
 	
 	private int[] vertexToInts(double x, double y, double z, float u, float v, int color, TextureAtlasSprite sprite) {

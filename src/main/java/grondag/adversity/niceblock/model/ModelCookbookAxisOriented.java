@@ -207,8 +207,8 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 		return builder.build();
 	}
 
-	public ModelCookbookAxisOriented(int textureIndex, int alternateCount, EnumFacing.Axis axis) {
-		super(textureIndex, alternateCount);
+	public ModelCookbookAxisOriented(String textureName, int alternateCount, EnumFacing.Axis axis) {
+		super(textureName, alternateCount);
 		populateModelNames();
 
 		ROTATION_LOOKUP = new TRSRTransformation[64];

@@ -9,8 +9,8 @@ import net.minecraft.world.IBlockAccess;
  */
 public class NiceBlockNonCubic extends NiceBlock {
 
-	public NiceBlockNonCubic(String name, NiceStyle style, NicePlacement placer, NiceSubstance[] substances) {
-		super(name, style, placer, substances);
+	public NiceBlockNonCubic(String name, NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
+		super(name, style, placer, material, metaCount);
 	}
 
 	@Override

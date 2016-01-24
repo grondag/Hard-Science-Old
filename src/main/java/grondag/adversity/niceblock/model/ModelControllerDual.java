@@ -1,9 +1,9 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
@@ -21,9 +21,9 @@ public class ModelControllerDual implements IModelController {
 	}
 
 	@Override
-	public NiceModel getModel(NiceSubstance substance) {
-		return new NiceModelDual((NiceModel)controllerPrimary.getModel(substance),
-				(NiceModel)controllerSecondary.getModel(substance));
+	public NiceModel getModel(int meta) {
+		return new NiceModelDual((NiceModel)controllerPrimary.getModel(meta),
+				(NiceModel)controllerSecondary.getModel(meta));
 	}
 
 	@Override
@@ -44,14 +44,20 @@ public class ModelControllerDual implements IModelController {
 	}
 
 	@Override
-	public String getFirstTextureName(NiceSubstance substance) {
-		return controllerPrimary.getFirstTextureName(substance);
+	public String getFirstTextureName(int meta) {
+		return controllerPrimary.getFirstTextureName(meta);
 	}
 
 	@Override
-	public String[] getAllTextures(NiceSubstance substance) {
+	public String[] getAllTextures(int meta) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public int getItemColor(ItemStack stack, int renderPass)
+    {
+        return controllerPrimary.getItemColor(stack, renderPass);
+    }
 
 }

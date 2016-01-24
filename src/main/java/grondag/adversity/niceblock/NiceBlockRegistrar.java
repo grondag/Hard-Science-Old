@@ -53,69 +53,65 @@ public class NiceBlockRegistrar {
 	/**
 	 * Supports the getBlock(s)ForStyleAndSubstance methods
 	 */
-	private static Multimap<String, NiceBlock> lookupSnS = HashMultimap.create();
-
-	// define our substance groupings
-	private static final NiceSubstance[][] substance16Group = { 
-		{ NiceSubstance.BASALT, NiceSubstance.DIORITE },
-		{ NiceSubstance.HOT_BASALT_0, NiceSubstance.HOT_BASALT_1, NiceSubstance.HOT_BASALT_2, NiceSubstance.HOT_BASALT_3  }
-	};
+	private static Multimap<String, NiceBlock> lookupSnM = HashMultimap.create();
 
 	// declare the block instances
-	public static final NiceBlock raw1 = new NiceBlock("raw_1", NiceStyle.RAW, new PlacementSimple(),
-			substance16Group[0]);
-	public static final NiceBlock smooth1 = new NiceBlock("smooth_1", NiceStyle.SMOOTH, new PlacementSimple(),
-			substance16Group[0]);
-	public static final NiceBlock largeBrick1 = new NiceBlock("large_brick_1", NiceStyle.LARGE_BRICKS,
-			new PlacementSimple(), substance16Group[0]);
-	public static final NiceBlock smallBrick1 = new NiceBlock("small_brick_1", NiceStyle.SMALL_BRICKS,
-			new PlacementSimple(), substance16Group[0]);
-	public static final NiceBlock bigBlockA1 = new NiceBlock("big_block_a_1", NiceStyle.BIG_WORN,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock bigBlockB1 = new NiceBlock("big_block_b_1", NiceStyle.BIG_WORN,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock bigBlockC1 = new NiceBlock("big_block_c_1", NiceStyle.BIG_WORN,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock bigBlockD1 = new NiceBlock("big_block_d_1", NiceStyle.BIG_WORN,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock bigBlockE1 = new NiceBlock("big_block_e_1", NiceStyle.BIG_WORN,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock bigWeathered1 = new NiceBlock("big_weathered_1", NiceStyle.BIG_WEATHERED,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock bigOrnate1 = new NiceBlock("big_ornate_1", NiceStyle.BIG_ORNATE,
-			new PlacementBigBlock(), substance16Group[0]);
-	public static final NiceBlock masonryA1 = new NiceBlock("masonry_a_1", NiceStyle.MASONRY_A,
-			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
-	public static final NiceBlock masonryB1 = new NiceBlock("masonry_b_1", NiceStyle.MASONRY_B,
-			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
-	public static final NiceBlock masonryC1 = new NiceBlock("masonry_c_1", NiceStyle.MASONRY_C,
-			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
-	public static final NiceBlock masonryD1 = new NiceBlock("masonry_d_1", NiceStyle.MASONRY_D,
-			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
-	public static final NiceBlock masonryE1 = new NiceBlock("masonry_e_1", NiceStyle.MASONRY_E,
-			NicePlacement.makeMasonryPlacer(), substance16Group[0]);
+	public static final NiceBlock raw1 = new NiceBlock("raw_1", NiceStyle.RAW, new PlacementSimple(), 
+			BaseMaterial.EXTRUDED_STONE, 1);
+			
+	public static final NiceBlock smooth1 = new NiceBlock("smooth_1", NiceStyle.SMOOTH, 
+			new PlacementSimple(), BaseMaterial.EXTRUDED_STONE, 1);
+//	public static final NiceBlock largeBrick1 = new NiceBlock("large_brick_1", NiceStyle.LARGE_BRICKS,
+//			new PlacementSimple(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock smallBrick1 = new NiceBlock("small_brick_1", NiceStyle.SMALL_BRICKS,
+//			new PlacementSimple(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigBlockA1 = new NiceBlock("big_block_a_1", NiceStyle.BIG_WORN,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigBlockB1 = new NiceBlock("big_block_b_1", NiceStyle.BIG_WORN,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigBlockC1 = new NiceBlock("big_block_c_1", NiceStyle.BIG_WORN,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigBlockD1 = new NiceBlock("big_block_d_1", NiceStyle.BIG_WORN,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigBlockE1 = new NiceBlock("big_block_e_1", NiceStyle.BIG_WORN,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigWeathered1 = new NiceBlock("big_weathered_1", NiceStyle.BIG_WEATHERED,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock bigOrnate1 = new NiceBlock("big_ornate_1", NiceStyle.BIG_ORNATE,
+//			new PlacementBigBlock(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock masonryA1 = new NiceBlock("masonry_a_1", NiceStyle.MASONRY_A,
+//			NicePlacement.makeMasonryPlacer(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock masonryB1 = new NiceBlock("masonry_b_1", NiceStyle.MASONRY_B,
+//			NicePlacement.makeMasonryPlacer(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock masonryC1 = new NiceBlock("masonry_c_1", NiceStyle.MASONRY_C,
+//			NicePlacement.makeMasonryPlacer(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock masonryD1 = new NiceBlock("masonry_d_1", NiceStyle.MASONRY_D,
+//			NicePlacement.makeMasonryPlacer(), BaseMaterial.REFORMED_STONE, 1);
+//	public static final NiceBlock masonryE1 = new NiceBlock("masonry_e_1", NiceStyle.MASONRY_E,
+//			NicePlacement.makeMasonryPlacer(), BaseMaterial.REFORMED_STONE, 1);
 
 	public static final NiceBlock columnSquareX1 = new NiceBlock("column_square_x_1", NiceStyle.COLUMN_SQUARE_X,
-			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.EXTRUDED_STONE, 1);
 	public static final NiceBlock columnSquareY1 = new NiceBlock("column_square_y_1", NiceStyle.COLUMN_SQUARE_Y,
-			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.EXTRUDED_STONE, 1);
 	public static final NiceBlock columnSquareZ1 = new NiceBlock("column_square_z_1", NiceStyle.COLUMN_SQUARE_Z,
-			NicePlacement.makeColumnPlacerSquare(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.EXTRUDED_STONE, 1);
 
 	public static final NiceBlockNonCubic columnRoundX1 = new NiceBlockNonCubic("column_round_x_1", NiceStyle.COLUMN_ROUND_X,
-			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerRound(), BaseMaterial.EXTRUDED_STONE, 1);
 	public static final NiceBlockNonCubic columnRoundY1 = new NiceBlockNonCubic("column_round_y_1", NiceStyle.COLUMN_ROUND_Y,
-			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerRound(), BaseMaterial.EXTRUDED_STONE, 1);
 	public static final NiceBlockNonCubic columnRoundZ1 = new NiceBlockNonCubic("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
-			NicePlacement.makeColumnPlacerRound(), substance16Group[0]);
+			NicePlacement.makeColumnPlacerRound(), BaseMaterial.EXTRUDED_STONE, 1);
 
 //	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
 //			substance16Group[1]);
 
-	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
-	substance16Group[1]);
+	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, 
+			new PlacementSimple(), BaseMaterial.EXTRUDED_STONE, 1);
 
-	public static final NiceBlock bigTex = new NiceBlockPlus("bigtex", NiceStyle.BIG_TEX, new PlacementSimple(), substance16Group[0] );
+	public static final NiceBlock bigTex = new NiceBlockPlus("bigtex", NiceStyle.BIG_TEX, 
+			new PlacementSimple(), BaseMaterial.EXTRUDED_STONE, 16);
 	
 	/**
 	 * Use to generate model resource location names with a consistent
@@ -141,9 +137,9 @@ public class NiceBlockRegistrar {
 
 		// iterate all substance variants and add to collections for later
 		// handling
-		for (int i = 0; i < block.substances.length; i++) {
+		for (int i = 0; i < block.metaCount; i++) {
 
-			lookupSnS.put(getSnSkey(block.style, block.substances[i]), block);
+			lookupSnM.put(getSnMkey(block.style, i), block);
 
 			if (event.getSide() == Side.CLIENT) {
 
@@ -164,7 +160,7 @@ public class NiceBlockRegistrar {
 				ModelBakery.addVariantName(block.item, getModelResourceNameFromMeta(block, i));
 
 				// Create model for later event handling.
-				NiceModel model = block.style.getModelController().getModel(block.substances[i]);
+				NiceModel model = block.style.getModelController().getModel(i);
 				allModels.add(new ModelRegistration(model, mrlBlock, mrlItem));
 
 			}
@@ -172,36 +168,36 @@ public class NiceBlockRegistrar {
 	}
 
 	/**
-	 * Provides consistent key construction for style/substance lookup.
+	 * Provides consistent key construction for style/meta lookup.
 	 */
-	private static String getSnSkey(NiceStyle style, NiceSubstance substance) {
-		return style.toString() + "." + substance.toString();
+	private static String getSnMkey(NiceStyle style, int meta) {
+		return style.toString() + "." + meta;
 	}
 
 	/**
 	 * Used to find sibling blocks for blocks that are part of a group with the
-	 * same style and substance.
+	 * same style and meta.
 	 */
-	public static Collection<NiceBlock> getBlocksForStyleAndSubstance(NiceStyle style, NiceSubstance substance) {
-		return lookupSnS.get(getSnSkey(style, substance));
+	public static Collection<NiceBlock> getBlocksForStyleAndMeta(NiceStyle style, int meta) {
+		return lookupSnM.get(getSnMkey(style, meta));
 	}
 
 	/**
-	 * Returns the first block with the same style and substance. For most
+	 * Returns the first block with the same meta and substance. For most
 	 * blocks, there will be only one result. If there is more than one, this
 	 * method will yell at you and return the first result. For sibling blocks
-	 * that have multiple blocks the same style and substance, use
-	 * getBlocksForStyleAndSubstace.
+	 * that have multiple blocks the same meta and substance, use
+	 * getBlocksForStyleAndMeta.
 	 */
-	public static NiceBlock getBlockForStyleAndSubstance(NiceStyle style, NiceSubstance substance) {
-		Collection<NiceBlock> blocks = getBlocksForStyleAndSubstance(style, substance);
+	public static NiceBlock getBlockForStyleAndMeta(NiceStyle style, int meta) {
+		Collection<NiceBlock> blocks = getBlocksForStyleAndMeta(style, meta);
 		if (blocks.isEmpty()) {
 			return null;
 		} else {
 			if (blocks.size() > 1) {
 				Adversity.log
-				.warn("getFirstBlockForStyleAndSubstance found more than one block! This should not normally happen. "
-						+ "style = " + style + ", substance = " + substance);
+				.warn("getFirstBlockForStyleAndMeta found more than one block! This should not normally happen. "
+						+ "style = " + style + ", meta = " + meta);
 			}
 			return blocks.toArray(new NiceBlock[0])[0];
 		}
@@ -210,7 +206,7 @@ public class NiceBlockRegistrar {
 	public static void preInit(FMLPreInitializationEvent event) {
 
 		// In case we get called more than 1X.
-		lookupSnS.clear();
+		lookupSnM.clear();
 		allModels.clear();
 
 		// REGISTER ALL BLOCKS

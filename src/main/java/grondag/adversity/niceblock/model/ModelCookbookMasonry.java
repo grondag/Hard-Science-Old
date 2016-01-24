@@ -6,7 +6,6 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
 import grondag.adversity.niceblock.NiceBlock.TestForSubstance;
-import grondag.adversity.niceblock.NiceSubstance;
 
 import java.util.Map;
 
@@ -24,8 +23,8 @@ import com.google.common.collect.Maps;
  */
 public class ModelCookbookMasonry extends ModelCookbook {
 
-	public ModelCookbookMasonry(int textureIndex, int alternateCount) {
-		super(textureIndex, alternateCount);
+	public ModelCookbookMasonry(String textureName, int alternateCount) {
+		super(textureName, alternateCount);
 	}
 	
 	@Override
@@ -44,21 +43,21 @@ public class ModelCookbookMasonry extends ModelCookbook {
 	}
 	
 	@Override
-	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
+	public Ingredients getIngredients(int meta, int recipe, int alternate) {
 
 		Rotation rotation = calcRotation(alternate);
 		String modelName = "adversity:block/cube_rotate_" + calcRotation(alternate).degrees;
-		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
+		int baseOffset = getTextureCount() * calcAlternate(alternate);
 		Map<String, String> textures = Maps.newHashMap();
 
 		ModelCookbook.TextureOffset offset = SIMPLE_JOIN_TEXTURE_OFFSETS[rotation.index][recipe];
 
-		textures.put("up", getTextureName(substance, baseOffset + offset.up));
-		textures.put("down", getTextureName(substance, baseOffset + offset.down));
-		textures.put("east", getTextureName(substance, baseOffset + offset.east));
-		textures.put("west", getTextureName(substance, baseOffset + offset.west));
-		textures.put("north", getTextureName(substance, baseOffset + offset.north));
-		textures.put("south", getTextureName(substance, baseOffset + offset.south));
+		textures.put("up", getTextureName(meta, baseOffset + offset.up));
+		textures.put("down", getTextureName(meta, baseOffset + offset.down));
+		textures.put("east", getTextureName(meta, baseOffset + offset.east));
+		textures.put("west", getTextureName(meta, baseOffset + offset.west));
+		textures.put("north", getTextureName(meta, baseOffset + offset.north));
+		textures.put("south", getTextureName(meta, baseOffset + offset.south));
 
 		return new Ingredients(modelName, textures, TRSRTransformation.identity());
 	}

@@ -32,11 +32,11 @@ public abstract class NicePlacement {
 	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 			float hitZ, int meta, EntityLivingBase placer);
 
-	/** convenience factory method */
-	public static NicePlacement makeMasonryPlacer() {
-		return new PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
-				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
-	}
+//	/** convenience factory method */
+//	public static NicePlacement makeMasonryPlacer() {
+//		return new PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
+//				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
+//	}
 
 	/** convenience factory method */
 	public static NicePlacement makeColumnPlacerRound() {
@@ -52,11 +52,11 @@ public abstract class NicePlacement {
 
 	/**
 	 * Handles placement of blocks that join together in appearance and have
-	 * multiple block instances with the same style.
+	 * multiple block instances with the same meta.
 	 * */
 	public static class PlacementBigBlock extends NicePlacement {
 
-		/** Blocks that share the same style and substance */
+		/** Blocks that share the same style and meta*/
 		private NiceBlock[] siblingsCache;
 		private boolean isSiblingsCacheDone = false;
 
@@ -64,7 +64,7 @@ public abstract class NicePlacement {
 			// substances are grouped consistently across blocks, so the first substance
 			// is sufficient for finding sibling blocks.
 			if (!isSiblingsCacheDone) {
-				siblingsCache = NiceBlockRegistrar.getBlocksForStyleAndSubstance(owner.style, owner.substances[0])
+				siblingsCache = NiceBlockRegistrar.getBlocksForStyleAndMeta(owner.style, 0)
 						.toArray(new NiceBlock[0]);
 				isSiblingsCacheDone = true;
 			}
@@ -146,106 +146,106 @@ public abstract class NicePlacement {
 	 * Handles placement of blocks that join together in appearance and have
 	 * multiple block instances with different styles.
 	 * */
-	public static class PlacementMasonry extends NicePlacement {
-
-		/**
-		 * Blocks that share substance and have one of styles given at
-		 * instantiation
-		 */
-		private final NiceStyle[] styles;
-
-		/** Blocks that share the same style and substance */
-		private NiceBlock[] siblingsCache;
-		private boolean isSiblingsCacheDone = false;
-
-		public PlacementMasonry(NiceStyle... styles) {
-			super();
-			this.styles = styles;
-		}
-
-		private NiceBlock[] getSiblings() {
-			// substances are grouped consistently across blocks, so the first substance
-			// is sufficient for finding sibling blocks.
-			if (!isSiblingsCacheDone) {
-				siblingsCache = new NiceBlock[styles.length];
-				for (int i = 0; i < styles.length; i++) {
-					siblingsCache[i] = NiceBlockRegistrar.getBlockForStyleAndSubstance(styles[i], owner.substances[0]);
-				}
-				isSiblingsCacheDone = true;
-			}
-			return siblingsCache;
-		}
-
-		@Override
-		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-				float hitZ, int meta, EntityLivingBase placer) {
-
-			PlacementValidatorCubic shape = new PlacementValidatorCubic(2, 1, 1);
-
-			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
-			NeighborTestResults results = neighbors.getNeighborTestResults(
-					new TestForStyleGroupAndSubstance(worldIn, owner.getStateFromMeta(meta), pos, styles));
-
-			IBlockState candidate;
-
-			if (results.east()) {
-				candidate = neighbors.east();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
-					return candidate;
-				}
-				;
-			}
-			if (results.west()) {
-				candidate = neighbors.west();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
-					return candidate;
-				}
-			}
-			if (results.north()) {
-				candidate = neighbors.north();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
-					return candidate;
-				}
-			}
-			if (results.south()) {
-				candidate = neighbors.south();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
-					return candidate;
-				}
-			}
-			if (results.up()) {
-				candidate = neighbors.up();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
-					return candidate;
-				}
-			}
-			if (results.down()) {
-				candidate = neighbors.down();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
-					return candidate;
-				}
-			}
-
-			// if no available mates, try to choose a style that will not
-			// connect to what is surrounding
-			NeighborTestResults tests[] = new NeighborTestResults[getSiblings().length];
-			boolean match[] = new boolean[getSiblings().length];
-
-			for (int n = 0; n < getSiblings().length; n++) {
-				tests[n] = neighbors.getNeighborTestResults(new TestForCompleteMatch(getSiblings()[n]
-						.getStateFromMeta(meta)));
-				match[n] = tests[n].north() || tests[n].south() || tests[n].east() || tests[n].west() || tests[n].up()
-						|| tests[n].down();
-			}
-
-			for (int n = 0; n < getSiblings().length - 1; n++) {
-				if (match[n] && !match[n + 1]) {
-					return getSiblings()[n + 1].getStateFromMeta(meta);
-				}
-			}
-			return getSiblings()[0].getStateFromMeta(meta);
-		}
-	}
+//	public static class PlacementMasonry extends NicePlacement {
+//
+//		/**
+//		 * Blocks that share substance and have one of styles given at
+//		 * instantiation
+//		 */
+//		private final NiceStyle[] styles;
+//
+//		/** Blocks that share the same style and substance */
+//		private NiceBlock[] siblingsCache;
+//		private boolean isSiblingsCacheDone = false;
+//
+//		public PlacementMasonry(NiceStyle... styles) {
+//			super();
+//			this.styles = styles;
+//		}
+//
+//		private NiceBlock[] getSiblings() {
+//			// substances are grouped consistently across blocks, so the first substance
+//			// is sufficient for finding sibling blocks.
+//			if (!isSiblingsCacheDone) {
+//				siblingsCache = new NiceBlock[styles.length];
+//				for (int i = 0; i < styles.length; i++) {
+//					siblingsCache[i] = NiceBlockRegistrar.getBlockForStyleAndMeta(styles[i], 0);
+//				}
+//				isSiblingsCacheDone = true;
+//			}
+//			return siblingsCache;
+//		}
+//
+//		@Override
+//		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+//				float hitZ, int meta, EntityLivingBase placer) {
+//
+//			PlacementValidatorCubic shape = new PlacementValidatorCubic(2, 1, 1);
+//
+//			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
+//			NeighborTestResults results = neighbors.getNeighborTestResults(
+//					new TestForStyleGroupAndSubstance(worldIn, owner.getStateFromMeta(meta), pos, styles));
+//
+//			IBlockState candidate;
+//
+//			if (results.east()) {
+//				candidate = neighbors.east();
+//				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+//					return candidate;
+//				}
+//				;
+//			}
+//			if (results.west()) {
+//				candidate = neighbors.west();
+//				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+//					return candidate;
+//				}
+//			}
+//			if (results.north()) {
+//				candidate = neighbors.north();
+//				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+//					return candidate;
+//				}
+//			}
+//			if (results.south()) {
+//				candidate = neighbors.south();
+//				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+//					return candidate;
+//				}
+//			}
+//			if (results.up()) {
+//				candidate = neighbors.up();
+//				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+//					return candidate;
+//				}
+//			}
+//			if (results.down()) {
+//				candidate = neighbors.down();
+//				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+//					return candidate;
+//				}
+//			}
+//
+//			// if no available mates, try to choose a style that will not
+//			// connect to what is surrounding
+//			NeighborTestResults tests[] = new NeighborTestResults[getSiblings().length];
+//			boolean match[] = new boolean[getSiblings().length];
+//
+//			for (int n = 0; n < getSiblings().length; n++) {
+//				tests[n] = neighbors.getNeighborTestResults(new TestForCompleteMatch(getSiblings()[n]
+//						.getStateFromMeta(meta)));
+//				match[n] = tests[n].north() || tests[n].south() || tests[n].east() || tests[n].west() || tests[n].up()
+//						|| tests[n].down();
+//			}
+//
+//			for (int n = 0; n < getSiblings().length - 1; n++) {
+//				if (match[n] && !match[n + 1]) {
+//					return getSiblings()[n + 1].getStateFromMeta(meta);
+//				}
+//			}
+//			return getSiblings()[0].getStateFromMeta(meta);
+//		}
+//	}
 
 	/**
 	 * Handles placement of axis-aligned blocks like columns. Switches to
@@ -279,9 +279,9 @@ public abstract class NicePlacement {
 			 * blocks may not yet be created at that time.
 			 */
 			if (!areSiblingBlocksFound) {
-				blockX = NiceBlockRegistrar.getBlockForStyleAndSubstance(styleX, owner.substances[0]);
-				blockY = NiceBlockRegistrar.getBlockForStyleAndSubstance(styleY, owner.substances[0]);
-				blockZ = NiceBlockRegistrar.getBlockForStyleAndSubstance(styleZ, owner.substances[0]);
+				blockX = NiceBlockRegistrar.getBlockForStyleAndMeta(styleX, 0);
+				blockY = NiceBlockRegistrar.getBlockForStyleAndMeta(styleY, 0);
+				blockZ = NiceBlockRegistrar.getBlockForStyleAndMeta(styleZ, 0);
 				areSiblingBlocksFound = true;
 			}
 

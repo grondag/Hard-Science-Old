@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceSubstance;
 
 import java.util.Map;
 
@@ -27,8 +26,8 @@ public class ModelCookbookColumnSquare extends ModelCookbookAxisOriented {
 		return false;
 	}
 	
-	public ModelCookbookColumnSquare(int textureIndex, int alternateCount, Axis axis) {
-		super(textureIndex, alternateCount, axis);
+	public ModelCookbookColumnSquare(String textureName, int alternateCount, Axis axis) {
+		super(textureName, alternateCount, axis);
 	}
 	
 	@Override
@@ -59,23 +58,23 @@ public class ModelCookbookColumnSquare extends ModelCookbookAxisOriented {
 	}
 
 	@Override
-	public Ingredients getIngredients(NiceSubstance substance, int recipe, int alternate) {
+	public Ingredients getIngredients(int meta, int recipe, int alternate) {
 
 		String modelName = modelNames[MODEL_FOR_RECIPE[recipe].index];
 
-		int baseOffset = getTextureCount() * calcAlternate(alternate) + textureIndex;
+		int baseOffset = getTextureCount() * calcAlternate(alternate);
 		Map<String, String> textures = Maps.newHashMap();
 
-		textures.put("inner", getTextureName(substance, baseOffset + 0));
-		textures.put("outer", getTextureName(substance, baseOffset - 1));
-		textures.put("column_face", getTextureName(substance, baseOffset + 7));
-		textures.put("cap_opposite_neighbors", getTextureName(substance, baseOffset + 7));
-		textures.put("cap_three_neighbors", getTextureName(substance, baseOffset + 6));
-		textures.put("cap_adjacent_neighbors", getTextureName(substance, baseOffset + 2));
-		textures.put("cap_one_neighbor", getTextureName(substance, baseOffset + 3));
-		textures.put("cap_four_neighbors", getTextureName(substance, baseOffset + 1));
-		textures.put("cap_no_neighbors", getTextureName(substance, baseOffset + 5));
-		textures.put("cap_inner_side", getTextureName(substance, baseOffset + 4));
+		textures.put("inner", getTextureName(meta, baseOffset + 0));
+		textures.put("outer", getTextureName(meta, baseOffset + 8));
+		textures.put("column_face", getTextureName(meta, baseOffset + 7));
+		textures.put("cap_opposite_neighbors", getTextureName(meta, baseOffset + 7));
+		textures.put("cap_three_neighbors", getTextureName(meta, baseOffset + 6));
+		textures.put("cap_adjacent_neighbors", getTextureName(meta, baseOffset + 2));
+		textures.put("cap_one_neighbor", getTextureName(meta, baseOffset + 3));
+		textures.put("cap_four_neighbors", getTextureName(meta, baseOffset + 1));
+		textures.put("cap_no_neighbors", getTextureName(meta, baseOffset + 5));
+		textures.put("cap_inner_side", getTextureName(meta, baseOffset + 4));
 
 		return new Ingredients(modelName, textures, ROTATION_LOOKUP[recipe]);
 

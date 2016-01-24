@@ -126,26 +126,26 @@ public class Config {
 
 		substances.clear();
 
-		Substance dressedStone = new Substance();
-		dressedStone.hardness = config.getInt("dessedStoneHardness", "Substances", 2, 1, 50, "");
-		dressedStone.harvestTool = config.getString("dressedStoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
-		dressedStone.harvestLevel = config.getInt("dessedStoneHarvestLevel", "Substances", 1, 1, 3, "");
-		dressedStone.resistance = config.getInt("dressedStoneResistance", "Substances", 10, 1, 50, "");
-		substances.put("dressed_stone", dressedStone);
+		Substance extrudedStone = new Substance();
+		extrudedStone.hardness = config.getInt("dessedStoneHardness", "Substances", 2, 1, 50, "");
+		extrudedStone.harvestTool = config.getString("extrudedStoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		extrudedStone.harvestLevel = config.getInt("dessedStoneHarvestLevel", "Substances", 1, 1, 3, "");
+		extrudedStone.resistance = config.getInt("extrudedStoneResistance", "Substances", 10, 1, 50, "");
+		substances.put("extruded_stone", extrudedStone);
 
 		Substance composite = new Substance();
 		composite.hardness = config.getInt("compositeHardness", "Substances", 4, 1, 50, "");
 		composite.harvestTool = config.getString("compositeHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
 		composite.harvestLevel = config.getInt("compositeHarvestLevel", "Substances", 2, 1, 3, "");
 		composite.resistance = config.getInt("compositeResistance", "Substances", 50, 1, 50, "");
-		substances.put("composite", dressedStone);
+		substances.put("composite", composite);
 
 		Substance duraplast = new Substance();
 		duraplast.hardness = config.getInt("duraplastHardness", "Substances", 10, 1, 50, "");
 		duraplast.harvestTool = config.getString("duraplastHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
 		duraplast.harvestLevel = config.getInt("duraplastHarvestLevel", "Substances", 3, 1, 3, "");
 		duraplast.resistance = config.getInt("duraplastResistance", "Substances", 200, 1, 50, "");
-		substances.put("duraplast", dressedStone);
+		substances.put("duraplast", duraplast);
 
 		// END
 		config.save();

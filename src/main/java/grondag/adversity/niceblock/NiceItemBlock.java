@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
 public class NiceItemBlock extends ItemBlock {
 	public NiceItemBlock(Block block) {
 		super(block);
-		setMaxDamage(((NiceBlock) block).substances.length - 1);
+		setMaxDamage(((NiceBlock) block).metaCount - 1);
 		setHasSubtypes(true);
 	}
 
@@ -19,4 +19,12 @@ public class NiceItemBlock extends ItemBlock {
 	public String getUnlocalizedName(ItemStack stack) {
 		return super.getUnlocalizedName() + "." + ((NiceBlock) block).style.toString() + "_" + stack.getMetadata();
 	}
+
+    @Override
+    public int getColorFromItemStack(ItemStack stack, int renderPass)
+    {
+        return ((NiceBlock)this.block).style.getModelController().getItemColor(stack, renderPass);
+    }
+	
+	
 }
