@@ -139,18 +139,14 @@ public abstract class NiceStyle {
 		}
 		
 		@Override
-		public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		public ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
 			
 			if(secondCookbook == null){
-				return state.withProperty(
-						NiceBlock.MODEL_RENDER_STATE, 
-						new ModelRenderState(firstCookbook.getVariantID((IExtendedBlockState) state, world, pos), -1));
+				return new ModelRenderState(firstCookbook.getVariantID((IExtendedBlockState) state, world, pos), -1);
 			} else {
-				return state.withProperty(
-						NiceBlock.MODEL_RENDER_STATE, 
-						new ModelRenderState(
+				return new ModelRenderState(
 								firstCookbook.getVariantID((IExtendedBlockState) state, world, pos),
-								secondCookbook.getVariantID((IExtendedBlockState) state, world, pos)));
+								secondCookbook.getVariantID((IExtendedBlockState) state, world, pos));
 			}
 		}
 

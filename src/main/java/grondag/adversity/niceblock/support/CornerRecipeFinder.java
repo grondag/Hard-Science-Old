@@ -82,7 +82,7 @@ public class CornerRecipeFinder {
 			for (int i = 0; i < offsets.length; i++) {
 				// corner block not found means we need to show corner
 				// texture
-				if (!test.testBlock(worldIn.getBlockState(pos.add(offsets[i])))) {
+				if (!test.testBlock(worldIn, worldIn.getBlockState(pos.add(offsets[i])), pos)) {
 					result += 1 << i;
 				}
 			}

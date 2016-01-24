@@ -115,7 +115,7 @@ public class NiceBlockRegistrar {
 	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
 	substance16Group[1]);
 
-	public static final NiceBlock bigTex = new NiceBlock("bigtex", NiceStyle.BIG_TEX, new PlacementSimple(), substance16Group[0] );
+	public static final NiceBlock bigTex = new NiceBlockPlus("bigtex", NiceStyle.BIG_TEX, new PlacementSimple(), substance16Group[0] );
 	
 	/**
 	 * Use to generate model resource location names with a consistent
@@ -218,6 +218,8 @@ public class NiceBlockRegistrar {
 			registerBlockCompletely(block, event);
 		}
 
+		 GameRegistry.registerTileEntity(NiceTileEntity.class, "nicetileentity");
+		 
 		if (event.getSide() == Side.CLIENT) {
 
 			// Register handlers for texture stitch and model bake events (they

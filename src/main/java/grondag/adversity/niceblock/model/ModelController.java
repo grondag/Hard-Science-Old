@@ -110,10 +110,8 @@ public abstract class ModelController implements IModelController{
 	}
 	
 	@Override
-	public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-		return state.withProperty(
-				NiceBlock.MODEL_RENDER_STATE, 
-				new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1));
+	public ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		return new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1);
 	}
 
 	

@@ -135,7 +135,7 @@ public class NeighborBlocks {
 		
 		public boolean up(){
 			if((completionFlags & UP) != UP) {
-				if(test.testBlock(NeighborBlocks.this.up())) resultFlags |= UP;
+				if(test.testBlock(world, NeighborBlocks.this.up(), pos.up())) resultFlags |= UP;
 				completionFlags |= UP;
 			}
 			return (resultFlags & UP) == UP;
@@ -147,7 +147,7 @@ public class NeighborBlocks {
 		
 		public boolean down(){
 			if((completionFlags & DOWN) != DOWN) {
-				if(test.testBlock(NeighborBlocks.this.down())) resultFlags |= DOWN;
+				if(test.testBlock(world, NeighborBlocks.this.down(), pos.down())) resultFlags |= DOWN;
 				completionFlags |= DOWN;
 			}
 			return (resultFlags & DOWN) == DOWN;
@@ -159,7 +159,7 @@ public class NeighborBlocks {
 		
 		public boolean north(){
 			if((completionFlags & NORTH) != NORTH) {
-				if(test.testBlock(NeighborBlocks.this.north())) resultFlags |= NORTH;
+				if(test.testBlock(world, NeighborBlocks.this.north(), pos.north())) resultFlags |= NORTH;
 				completionFlags |= NORTH;
 			}
 			return (resultFlags & NORTH) == NORTH;
@@ -171,7 +171,7 @@ public class NeighborBlocks {
 		
 		public boolean south(){
 			if((completionFlags & SOUTH) != SOUTH) {
-				if(test.testBlock(NeighborBlocks.this.south())) resultFlags |= SOUTH;
+				if(test.testBlock(world, NeighborBlocks.this.south(), pos.south())) resultFlags |= SOUTH;
 				completionFlags |= SOUTH;
 			}
 			return (resultFlags & SOUTH) == SOUTH;
@@ -183,7 +183,7 @@ public class NeighborBlocks {
 		
 		public boolean east(){
 			if((completionFlags & EAST) != EAST) {
-				if(test.testBlock(NeighborBlocks.this.east())) resultFlags |= EAST;
+				if(test.testBlock(world, NeighborBlocks.this.east(), pos.east())) resultFlags |= EAST;
 				completionFlags |= EAST;
 			}
 			return (resultFlags & EAST) == EAST;
@@ -195,7 +195,7 @@ public class NeighborBlocks {
 		
 		public boolean west(){
 			if((completionFlags & WEST) != WEST) {
-				if(test.testBlock(NeighborBlocks.this.west())) resultFlags |= WEST;
+				if(test.testBlock(world, NeighborBlocks.this.west(), pos.west())) resultFlags |= WEST;
 				completionFlags |= WEST;
 			}
 			return (resultFlags & WEST) == WEST;
@@ -207,7 +207,7 @@ public class NeighborBlocks {
 		
 		public boolean upNorth(){
 			if((completionFlags & UP_NORTH) != UP_NORTH) {
-				if(test.testBlock(NeighborBlocks.this.upNorth())) resultFlags |= UP_NORTH;
+				if(test.testBlock(world, NeighborBlocks.this.upNorth(), pos.up().north())) resultFlags |= UP_NORTH;
 				completionFlags |= UP_NORTH;
 			}
 			return (resultFlags & UP_NORTH) == UP_NORTH;
@@ -219,7 +219,7 @@ public class NeighborBlocks {
 
 		public boolean upSouth(){
 			if((completionFlags & UP_SOUTH) != UP_SOUTH) {
-				if(test.testBlock(NeighborBlocks.this.upSouth())) resultFlags |= UP_SOUTH;
+				if(test.testBlock(world, NeighborBlocks.this.upSouth(), pos.up().south())) resultFlags |= UP_SOUTH;
 				completionFlags |= UP_SOUTH;
 			}
 			return (resultFlags & UP_SOUTH) == UP_SOUTH;
@@ -231,7 +231,7 @@ public class NeighborBlocks {
 
 		public boolean upEast(){
 			if((completionFlags & UP_EAST) != UP_EAST) {
-				if(test.testBlock(NeighborBlocks.this.upEast())) resultFlags |= UP_EAST;
+				if(test.testBlock(world, NeighborBlocks.this.upEast(), pos.up().east())) resultFlags |= UP_EAST;
 				completionFlags |= UP_EAST;
 			}
 			return (resultFlags & UP_EAST) == UP_EAST;
@@ -243,7 +243,7 @@ public class NeighborBlocks {
 
 		public boolean upWest(){
 			if((completionFlags & UP_WEST) != UP_WEST) {
-				if(test.testBlock(NeighborBlocks.this.upWest())) resultFlags |= UP_WEST;
+				if(test.testBlock(world, NeighborBlocks.this.upWest(), pos.up().west())) resultFlags |= UP_WEST;
 				completionFlags |= UP_WEST;
 			}
 			return (resultFlags & UP_WEST) == UP_WEST;
@@ -255,7 +255,7 @@ public class NeighborBlocks {
 
 		public boolean downNorth(){
 			if((completionFlags & DOWN_NORTH) != DOWN_NORTH) {
-				if(test.testBlock(NeighborBlocks.this.downNorth())) resultFlags |= DOWN_NORTH;
+				if(test.testBlock(world, NeighborBlocks.this.downNorth(), pos.down().north())) resultFlags |= DOWN_NORTH;
 				completionFlags |= DOWN_NORTH;
 			}
 			return (resultFlags & DOWN_NORTH) == DOWN_NORTH;
@@ -267,7 +267,7 @@ public class NeighborBlocks {
 
 		public boolean downSouth(){
 			if((completionFlags & DOWN_SOUTH) != DOWN_SOUTH) {
-				if(test.testBlock(NeighborBlocks.this.downSouth())) resultFlags |= DOWN_SOUTH;
+				if(test.testBlock(world, NeighborBlocks.this.downSouth(), pos.down().south())) resultFlags |= DOWN_SOUTH;
 				completionFlags |= DOWN_SOUTH;
 			}
 			return (resultFlags & DOWN_SOUTH) == DOWN_SOUTH;
@@ -279,7 +279,7 @@ public class NeighborBlocks {
 
 		public boolean downEast(){
 			if((completionFlags & DOWN_EAST) != DOWN_EAST) {
-				if(test.testBlock(NeighborBlocks.this.downEast())) resultFlags |= DOWN_EAST;
+				if(test.testBlock(world, NeighborBlocks.this.downEast(), pos.down().east())) resultFlags |= DOWN_EAST;
 				completionFlags |= DOWN_EAST;
 			}
 			return (resultFlags & DOWN_EAST) == DOWN_EAST;
@@ -291,7 +291,7 @@ public class NeighborBlocks {
 
 		public boolean downWest(){
 			if((completionFlags & DOWN_WEST) != DOWN_WEST) {
-				if(test.testBlock(NeighborBlocks.this.downWest())) resultFlags |= DOWN_WEST;
+				if(test.testBlock(world, NeighborBlocks.this.downWest(), pos.down().west())) resultFlags |= DOWN_WEST;
 				completionFlags |= DOWN_WEST;
 			}
 			return (resultFlags & DOWN_WEST) == DOWN_WEST;
@@ -303,7 +303,7 @@ public class NeighborBlocks {
 		
 		public boolean northEast(){
 			if((completionFlags & NORTH_EAST) != NORTH_EAST) {
-				if(test.testBlock(NeighborBlocks.this.northEast())) resultFlags |= NORTH_EAST;
+				if(test.testBlock(world, NeighborBlocks.this.northEast(), pos.north().east())) resultFlags |= NORTH_EAST;
 				completionFlags |= NORTH_EAST;
 			}
 			return (resultFlags & NORTH_EAST) == NORTH_EAST;
@@ -315,7 +315,7 @@ public class NeighborBlocks {
 
 		public boolean northWest(){
 			if((completionFlags & NORTH_WEST) != NORTH_WEST) {
-				if(test.testBlock(NeighborBlocks.this.northWest())) resultFlags |= NORTH_WEST;
+				if(test.testBlock(world, NeighborBlocks.this.northWest(), pos.north().west())) resultFlags |= NORTH_WEST;
 				completionFlags |= NORTH_WEST;
 			}
 			return (resultFlags & NORTH_WEST) == NORTH_WEST;
@@ -327,7 +327,7 @@ public class NeighborBlocks {
 
 		public boolean southEast(){
 			if((completionFlags & SOUTH_EAST) != SOUTH_EAST) {
-				if(test.testBlock(NeighborBlocks.this.southEast())) resultFlags |= SOUTH_EAST;
+				if(test.testBlock(world, NeighborBlocks.this.southEast(), pos.south().east())) resultFlags |= SOUTH_EAST;
 				completionFlags |= SOUTH_EAST;
 			}
 			return (resultFlags & SOUTH_EAST) == SOUTH_EAST;
@@ -339,7 +339,7 @@ public class NeighborBlocks {
 
 		public boolean southWest(){
 			if((completionFlags & SOUTH_WEST) != SOUTH_WEST) {
-				if(test.testBlock(NeighborBlocks.this.southWest())) resultFlags |= SOUTH_WEST;
+				if(test.testBlock(world, NeighborBlocks.this.southWest(), pos.south().west())) resultFlags |= SOUTH_WEST;
 				completionFlags |= SOUTH_WEST;
 			}
 			return (resultFlags & SOUTH_WEST) == SOUTH_WEST;

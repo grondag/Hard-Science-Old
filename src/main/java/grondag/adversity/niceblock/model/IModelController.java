@@ -23,7 +23,7 @@ public interface IModelController {
 	/**
 	 * Used by NiceBlock to generate appropriate render state.
 	 */
-	public abstract IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos);
+	public abstract ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos);
 	
 	/**
 	 * Override if special collision handling is needed due to non-cubic shape.

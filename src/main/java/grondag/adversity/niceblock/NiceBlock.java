@@ -5,6 +5,7 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.model.ModelRenderProperty;
+import grondag.adversity.niceblock.model.ModelRenderState;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import grondag.adversity.niceblock.support.NicePlacement;
 
@@ -13,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
@@ -23,6 +25,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -63,7 +66,7 @@ public class NiceBlock extends Block {
 
 	/** Index to the substances[] array. */
 	public static final PropertyInteger SUBSTANCE_INDEX = PropertyInteger.create("substance_index", 0, 15);
-	
+
 	/**
 	 * Contains render state passed from getExtendedState to handleBlockState.
 	 * Using a custom unlisted property because we need large int values and the
@@ -139,6 +142,22 @@ public class NiceBlock extends Block {
 		NiceBlockRegistrar.allBlocks.add(this);
 	}
 
+//	@Override
+//	public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock) {
+//		super.onNeighborBlockChange(worldIn, pos, state, neighborBlock);
+//		if(worldIn.isRemote){
+//			TileEntity target = worldIn.getTileEntity(pos);
+//			if(target != null && target instanceof NiceTileEntity)
+//			{
+//				((NiceTileEntity)target).dirtyNeighbors();
+//				Adversity.log.info("dirtying @" + pos.toString());
+//			}
+//
+//		}
+//		
+//	}
+
+	
 	@Override
 	protected BlockState createBlockState() {
 		return new ExtendedBlockState(this, new IProperty[] { SUBSTANCE_INDEX }, new IUnlistedProperty[] {
@@ -202,21 +221,26 @@ public class NiceBlock extends Block {
 	
 	private static long elapsedTime;
 	private static int timerCount = 0;
-	
+
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		
-		IBlockState retval = state;
 		long start = System.nanoTime();
+		
 		// should always be an IExtendedBlockState but avoid crash if somehow not
 		if (state instanceof IExtendedBlockState) {
-			state = style.getModelController().getExtendedState((IExtendedBlockState) state, world, pos);
-		}
+			ModelRenderState renderState = style.getModelController().getRenderState((IExtendedBlockState) state, world, pos);
+			state = ((IExtendedBlockState)state).withProperty( NiceBlock.MODEL_RENDER_STATE, renderState);
+   		}
+		
 		long end = System.nanoTime();
-		elapsedTime += (end - start);
 		timerCount++;
-		if((timerCount & 0x80) == 0x80){
-			Adversity.log.info("average getExtendedState =" +  elapsedTime / timerCount);
+
+		elapsedTime += (end - start);
+		if((timerCount & 0x800) == 0x800){
+			Adversity.log.info("average getExtendedState =" +  elapsedTime / (timerCount) );
+			timerCount = 0;
+			elapsedTime = 0;
 		}
 		return state;
 	}
@@ -310,7 +334,12 @@ public class NiceBlock extends Block {
 		}
 
 		@Override
-		public boolean testBlock(IBlockState ibs) {
+		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
+			TileEntity te = world.getTileEntity(pos);
+			if(te != null && te instanceof NiceTileEntity && ((NiceTileEntity)te).isDeleted){
+				Adversity.log.info("caught deleted at" + pos.toString());
+				return false;
+			}
 			return ibs.getBlock() == block && ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
 	}
@@ -332,7 +361,7 @@ public class NiceBlock extends Block {
 		}
 
 		@Override
-		public boolean testBlock(IBlockState ibs) {
+		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 			return ibs.getBlock() instanceof NiceBlock && ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
 	}
@@ -358,7 +387,7 @@ public class NiceBlock extends Block {
 		}
 
 		@Override
-		public boolean testBlock(IBlockState ibs) {
+		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 			return ibs.getBlock() instanceof NiceBlock && ((NiceBlock) ibs.getBlock()).style == style;
 		}
 	}
@@ -387,7 +416,7 @@ public class NiceBlock extends Block {
 		}
 
 		@Override
-		public boolean testBlock(IBlockState ibs) {
+		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 			return ibs.getBlock() instanceof NiceBlock && ((NiceBlock) ibs.getBlock()).style == style
 					&& ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}
@@ -407,7 +436,7 @@ public class NiceBlock extends Block {
 		 * of styles passed in at instantiation. Substance taken from block
 		 * state passed in.
 		 */
-		public TestForStyleGroupAndSubstance(IBlockState ibs, NiceStyle... styles) {
+		public TestForStyleGroupAndSubstance(IBlockAccess world, IBlockState ibs, BlockPos pos, NiceStyle... styles) {
 			this.styles = new HashSet(Arrays.asList(styles));
 			if (ibs.getBlock() instanceof NiceBlock) {
 				substanceIndex = ibs.getValue(SUBSTANCE_INDEX);
@@ -417,7 +446,7 @@ public class NiceBlock extends Block {
 		}
 
 		@Override
-		public boolean testBlock(IBlockState ibs) {
+		public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 			return ibs.getBlock() instanceof NiceBlock && styles.contains(((NiceBlock) ibs.getBlock()).style)
 					&& ibs.getValue(SUBSTANCE_INDEX) == substanceIndex;
 		}

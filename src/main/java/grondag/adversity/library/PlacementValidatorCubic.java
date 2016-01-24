@@ -121,7 +121,7 @@ public class PlacementValidatorCubic {
 			return;
 		}
 
-		if (test.testBlock(worldIn.getBlockState(pos))) {
+		if (test.testBlock(worldIn, worldIn.getBlockState(pos), pos)) {
 			updateMeasurements(pos);
 
 			visit(worldIn, pos.up(), test);

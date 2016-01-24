@@ -183,8 +183,8 @@ public abstract class NicePlacement {
 			PlacementValidatorCubic shape = new PlacementValidatorCubic(2, 1, 1);
 
 			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
-			NeighborTestResults results = neighbors.getNeighborTestResults(new TestForStyleGroupAndSubstance(owner
-					.getStateFromMeta(meta), styles));
+			NeighborTestResults results = neighbors.getNeighborTestResults(
+					new TestForStyleGroupAndSubstance(worldIn, owner.getStateFromMeta(meta), pos, styles));
 
 			IBlockState candidate;
 

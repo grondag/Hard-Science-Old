@@ -27,12 +27,10 @@ public class ModelControllerDual implements IModelController {
 	}
 
 	@Override
-	public IExtendedBlockState getExtendedState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-		return state.withProperty(
-				NiceBlock.MODEL_RENDER_STATE, 
-				new ModelRenderState(
+	public ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		return new ModelRenderState(
 						controllerPrimary.getVariantID((IExtendedBlockState) state, world, pos),
-						controllerSecondary.getVariantID((IExtendedBlockState) state, world, pos)));
+						controllerSecondary.getVariantID((IExtendedBlockState) state, world, pos));
 	}
 
 	@Override

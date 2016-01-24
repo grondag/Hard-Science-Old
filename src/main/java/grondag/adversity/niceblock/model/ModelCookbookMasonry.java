@@ -70,7 +70,7 @@ public class ModelCookbookMasonry extends ModelCookbook {
 		NeighborTestResults needsMortar = neighbors.getNeighborTestResults(
 				new IBlockTest() {
 					@Override
-					public boolean testBlock(IBlockState ibs) {
+					public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
 						return ibs.getBlock() instanceof NiceBlock && ibs.getBlock().isFullCube();
 					}
 				});
