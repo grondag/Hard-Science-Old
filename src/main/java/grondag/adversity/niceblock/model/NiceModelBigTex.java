@@ -109,7 +109,7 @@ public class NiceModelBigTex extends NiceModel
                         createNormalQuad(new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0),
                                 EnumFacing.SOUTH, textureSprite, controller.textureRotation, color.base)).build();
             
-                if(i==0 && j == 0){
+                if(i == 0 && j == 0){
                     
                     itemModel = new BigTexFacade(
                     new ImmutableList.Builder<BakedQuad>().add(
@@ -206,7 +206,7 @@ public class NiceModelBigTex extends NiceModel
     @Override
     public IBakedModel handleItemState(ItemStack stack)
     {
-        return facadeModels[0];
+        return itemModel;
     }
 
     private BigTexFacade makeFacadeFromInts(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace){

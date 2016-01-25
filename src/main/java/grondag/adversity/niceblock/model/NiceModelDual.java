@@ -5,6 +5,7 @@ import java.util.List;
 
 import grondag.adversity.niceblock.NiceBlock;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -36,14 +37,20 @@ public class NiceModelDual extends NiceModel {
 	
 	@Override
 	public IBakedModel handleItemState(ItemStack stack) {
-		return modelPrimary.handleItemState(stack);
+	    EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
+	    
+        if(modelPrimary.getController().canRenderInLayer(layer)){
+            return modelPrimary.handleItemState(stack);            
+        } else {
+            return modelSecondary.handleItemState(stack);
+        }
+		
 	}
 
 	@Override
 	public IBakedModel handleBlockState(IBlockState state) {
 
-		// Provide a default to contain the damage if we derp it up.
-		IBakedModel retVal = modelPrimary.itemModel;
+		IBakedModel retVal = null;
 
 		// Really should ALWAYS be a NiceBlock instance but if someone goes
 		// mucking about with the model registry crazy stuff could happen.
@@ -60,6 +67,9 @@ public class NiceModelDual extends NiceModel {
 			}
 		}
 		
+	     // Provide a default to contain the damage if we derp it up.
+		if(retVal == null) retVal = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel();
+
 		// May not be strictly needed, but doing in case something important happens in some model types.
 		if (retVal instanceof ISmartBlockModel) {
 			return ((ISmartBlockModel) retVal).handleBlockState(state);
@@ -137,65 +147,65 @@ public class NiceModelDual extends NiceModel {
 		return null;
 	}
 
-    private class DualModelFacade implements IFlexibleBakedModel
-    {
-        private final IFlexibleBakedModel primaryModel;
-        private final IFlexibleBakedModel secondaryModel;
-        
-        protected DualModelFacade(IFlexibleBakedModel primaryModel, IFlexibleBakedModel secondaryModel)
-        {
-            this.primaryModel = primaryModel;
-            this.secondaryModel = secondaryModel;
-        }
-   
-        @Override
-        public List<BakedQuad> getFaceQuads(EnumFacing face)
-        {
-            return primaryModel.getFaceQuads(face);
-        }
-
-        @Override
-        public List<BakedQuad> getGeneralQuads()
-        {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public boolean isAmbientOcclusion()
-        {
-            return getController().isShaded;
-        }
-
-        @Override
-        public boolean isGui3d()
-        {
-            return true;
-        }
-
-        @Override
-        public boolean isBuiltInRenderer()
-        {
-            return false;
-        }
-
-        @Override
-        public TextureAtlasSprite getParticleTexture()
-        {
-            return primaryModel.getParticleTexture();
-        }
-
-        @Override
-        public ItemCameraTransforms getItemCameraTransforms()
-        {
-            return ItemCameraTransforms.DEFAULT;
-        }
-
-        @Override
-        public VertexFormat getFormat()
-        {
-            return VERTEX_FORMAT;
-        }
-
-    }
+//    private class DualModelFacade implements IFlexibleBakedModel
+//    {
+//        private final IFlexibleBakedModel primaryModel;
+//        private final IFlexibleBakedModel secondaryModel;
+//        
+//        protected DualModelFacade(IFlexibleBakedModel primaryModel, IFlexibleBakedModel secondaryModel)
+//        {
+//            this.primaryModel = primaryModel;
+//            this.secondaryModel = secondaryModel;
+//        }
+//   
+//        @Override
+//        public List<BakedQuad> getFaceQuads(EnumFacing face)
+//        {
+//            return primaryModel.getFaceQuads(face);
+//        }
+//
+//        @Override
+//        public List<BakedQuad> getGeneralQuads()
+//        {
+//            return Collections.emptyList();
+//        }
+//
+//        @Override
+//        public boolean isAmbientOcclusion()
+//        {
+//            return getController().isShaded;
+//        }
+//
+//        @Override
+//        public boolean isGui3d()
+//        {
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean isBuiltInRenderer()
+//        {
+//            return false;
+//        }
+//
+//        @Override
+//        public TextureAtlasSprite getParticleTexture()
+//        {
+//            return primaryModel.getParticleTexture();
+//        }
+//
+//        @Override
+//        public ItemCameraTransforms getItemCameraTransforms()
+//        {
+//            return ItemCameraTransforms.DEFAULT;
+//        }
+//
+//        @Override
+//        public VertexFormat getFormat()
+//        {
+//            return VERTEX_FORMAT;
+//        }
+//
+//    }
 
 }

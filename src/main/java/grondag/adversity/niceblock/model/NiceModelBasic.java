@@ -85,6 +85,9 @@ public class NiceModelBasic extends NiceModel {
 	 */
 	protected final IFlexibleBakedModel[] secondaryModels;
 	
+	
+	protected IBakedModel itemModel;
+	
 	public NiceModelBasic(NiceStyleOld style, int meta) {
 		super(meta);
 		this.style = style;
@@ -103,7 +106,7 @@ public class NiceModelBasic extends NiceModel {
 	public IBakedModel handleBlockState(IBlockState state) {
 
 		// Provide a default to contain the damage if we derp it up.
-		IBakedModel retVal = itemModel;
+		IBakedModel retVal = null;
 
 		// Really should ALWAYS be a NiceBlock instance but if someone goes
 		// mucking about with the model registry crazy stuff could happen.
@@ -118,8 +121,11 @@ public class NiceModelBasic extends NiceModel {
 			} else if (style.secondCookbook != null && layer == style.secondCookbook.getRenderLayer()){
 				retVal = secondaryModels[renderState.variant2];
 			}
+			
 		}
-		
+
+        if(retVal == null) retVal = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel();
+
 		
 		// May not be strictly needed, but doing in case something important happens in some model types.
 		if (retVal instanceof ISmartBlockModel) {
@@ -245,6 +251,13 @@ public class NiceModelBasic extends NiceModel {
 	}
 
 
+    @Override
+    public IBakedModel handleItemState(ItemStack stack)
+    {
+        return itemModel;
+    }
+
+	
 
 	
 	

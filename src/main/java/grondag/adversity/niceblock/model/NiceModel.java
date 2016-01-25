@@ -83,8 +83,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 
 	protected TextureAtlasSprite particleTexture;
 
-	protected IFlexibleBakedModel itemModel;
-	
 	protected final VertexFormat VERTEX_FORMAT = DefaultVertexFormats.ITEM;
 
 	public abstract IModelController getController();
@@ -141,7 +139,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	
 	@Override
 	public ItemCameraTransforms getItemCameraTransforms() {
-		return itemModel.getItemCameraTransforms();
+		return ItemCameraTransforms.DEFAULT;
 	}
 
 	/**
@@ -151,8 +149,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 */
 	@Override
 	public IBakedModel handleBlockState(IBlockState state) {
-		// Provide a default to contain the damage if we derp it up.
-		IBakedModel retVal = itemModel;
+		IBakedModel retVal = null;
 
 		// Really should ALWAYS be a NiceBlock instance but if someone goes
 		// mucking about with the model registry crazy stuff could happen.
@@ -166,7 +163,10 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 				retVal = getModelVariant(renderState.variant1);
 			}
 		}
-		
+	
+	      // Provide a default to contain the damage if we derp it up.
+        if(retVal == null) retVal = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel();
+
 		// May not be strictly needed, but doing in case something important happens in some model types.
 		if (retVal instanceof ISmartBlockModel) {
 			return ((ISmartBlockModel) retVal).handleBlockState(state);
@@ -183,7 +183,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	
 	@Override
 	public IBakedModel handleItemState(ItemStack stack) {
-		return itemModel;
+		return getModelVariant(0);
 	}
 	
 	/**
@@ -270,8 +270,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Supports coloring unlike vanilla quads but has a slight performance hit at render time.
 	 */
 	protected BakedQuad createColoredQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
-
-	    Adversity.log.info("createQuad " + sprite.toString());
 
 		for(int r= 0; r < rotation.index; r++){
 			rotateQuadUV(v1, v2, v3, v4);

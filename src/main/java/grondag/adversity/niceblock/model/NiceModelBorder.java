@@ -54,8 +54,6 @@ public class NiceModelBorder extends NiceModel {
 		
 		TextureAtlasSprite textureSprite = 
 				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(meta, textureOffset));
-
-		Adversity.log.info(textureSprite.toString());
 		
 		List<BakedQuad> retval = Collections.EMPTY_LIST;
 		
@@ -626,7 +624,7 @@ public class NiceModelBorder extends NiceModel {
 
 		@Override
 		public ItemCameraTransforms getItemCameraTransforms() {
-			return itemModel.getItemCameraTransforms();
+			return ItemCameraTransforms.DEFAULT;
 		}
 
 	}

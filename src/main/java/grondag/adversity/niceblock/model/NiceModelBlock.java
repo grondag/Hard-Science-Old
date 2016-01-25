@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -42,7 +43,9 @@ public class NiceModelBlock extends NiceModel {
 	 * extended state. Array is populated during the handleBake event.
 	 */
 	protected final IBakedModel[] models;
-
+	
+	protected IBakedModel itemModel;
+	
 	protected NiceModelBlock(ModelControllerBlock controller, int meta) {
 		super(meta);
 		this.controller = controller;
@@ -54,8 +57,8 @@ public class NiceModelBlock extends NiceModel {
 		if (variantID >= 0 && variantID < controller.expandedAlternateCount) {
 			return models[variantID];
 		} else {		
-			Adversity.log.warn("Array index " + variantID + " out of bounds in " + this.getClass() + ". Using item model to prevent crash." );
-			return itemModel;
+			Adversity.log.warn("Array index " + variantID + " out of bounds in " + this.getClass() + ". Using missing model to prevent crash." );
+			return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel();
 		}
 	}
 
@@ -107,4 +110,10 @@ public class NiceModelBlock extends NiceModel {
 	public ModelController getController() {
 		return controller;
 	}
+
+     @Override
+    public IBakedModel handleItemState(ItemStack stack)
+    {
+        return itemModel;
+    }
 }
