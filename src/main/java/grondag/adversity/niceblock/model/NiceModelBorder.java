@@ -63,7 +63,7 @@ public class NiceModelBorder extends NiceModel {
 		
 		case UP:
 			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createQuad(
+				.add(createNormalQuad(
 					new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0), 
 					EnumFacing.UP, textureSprite, rotation, color.border))
 				.build();
@@ -71,7 +71,7 @@ public class NiceModelBorder extends NiceModel {
 	
 		case DOWN:
 			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createQuad(
+				.add(createNormalQuad(
 						new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0), 
 					EnumFacing.DOWN, textureSprite, rotation.clockwise().clockwise(), color.border))
 				.build();
@@ -79,7 +79,7 @@ public class NiceModelBorder extends NiceModel {
 			
 		case WEST:
 			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createQuad(
+				.add(createNormalQuad(
 					new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0), 
 					EnumFacing.WEST, textureSprite, rotation, color.border))
 				.build();
@@ -87,7 +87,7 @@ public class NiceModelBorder extends NiceModel {
 			
 		case EAST:
 			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createQuad(
+				.add(createNormalQuad(
 					new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1),
 					EnumFacing.EAST, textureSprite, rotation, color.border))
 				.build();
@@ -95,7 +95,7 @@ public class NiceModelBorder extends NiceModel {
 			
 		case NORTH:
 			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createQuad(
+				.add(createNormalQuad(
 					new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1),
 					EnumFacing.NORTH, textureSprite, rotation, color.border))
 				.build();
@@ -103,7 +103,7 @@ public class NiceModelBorder extends NiceModel {
 			
 		case SOUTH:
 			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createQuad(
+				.add(createNormalQuad(
 					new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0), 
 					EnumFacing.SOUTH, textureSprite, rotation, color.border))
 				.build();

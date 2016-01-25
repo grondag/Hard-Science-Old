@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import grondag.adversity.niceblock.NiceBlock;
@@ -7,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
@@ -16,6 +18,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -134,6 +137,65 @@ public class NiceModelDual extends NiceModel {
 		return null;
 	}
 
+    private class DualModelFacade implements IFlexibleBakedModel
+    {
+        private final IFlexibleBakedModel primaryModel;
+        private final IFlexibleBakedModel secondaryModel;
+        
+        protected DualModelFacade(IFlexibleBakedModel primaryModel, IFlexibleBakedModel secondaryModel)
+        {
+            this.primaryModel = primaryModel;
+            this.secondaryModel = secondaryModel;
+        }
+   
+        @Override
+        public List<BakedQuad> getFaceQuads(EnumFacing face)
+        {
+            return primaryModel.getFaceQuads(face);
+        }
 
+        @Override
+        public List<BakedQuad> getGeneralQuads()
+        {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public boolean isAmbientOcclusion()
+        {
+            return getController().isShaded;
+        }
+
+        @Override
+        public boolean isGui3d()
+        {
+            return true;
+        }
+
+        @Override
+        public boolean isBuiltInRenderer()
+        {
+            return false;
+        }
+
+        @Override
+        public TextureAtlasSprite getParticleTexture()
+        {
+            return primaryModel.getParticleTexture();
+        }
+
+        @Override
+        public ItemCameraTransforms getItemCameraTransforms()
+        {
+            return ItemCameraTransforms.DEFAULT;
+        }
+
+        @Override
+        public VertexFormat getFormat()
+        {
+            return VERTEX_FORMAT;
+        }
+
+    }
 
 }

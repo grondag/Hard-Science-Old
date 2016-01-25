@@ -265,7 +265,11 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		}
 	}
 	
-	protected BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
+	/**
+	 * Use this for item models.  
+	 * Supports coloring unlike vanilla quads but has a slight performance hit at render time.
+	 */
+	protected BakedQuad createColoredQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
 
 	    Adversity.log.info("createQuad " + sprite.toString());
 
@@ -323,7 +327,39 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
         }
     }
 	
-	
+    /**
+     * Use this for block models.  Is faster and smaller than (Colored) UnpackedBakedQuads.
+     */
+    protected BakedQuad createNormalQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
+
+        float shade = LightUtil.diffuseLight(side);
+
+        int red = (int) (shade * 255f * ((colorIn >> 16 & 0xFF) / 255f));
+        int green = (int) (shade * 255f * ((colorIn >> 8 & 0xFF) / 255f));
+        int blue = (int) (shade * 255f * ((colorIn & 0xFF) / 255f));
+        int alpha = colorIn >> 24 & 0xFF;
+
+        int colorOut = red | (green << 8) | (blue << 16) | (alpha << 24);
+
+        for(int r= 0; r < rotation.index; r++){
+            rotateQuadUV(v1, v2, v3, v4);
+        }
+        
+        int[] aint = Ints.concat(
+                vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, colorOut, sprite),
+                vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, colorOut, sprite),
+                vertexToInts(v3.xCoord, v3.yCoord, v3.zCoord, v3.u, v3.v, colorOut, sprite),
+                vertexToInts(v4.xCoord, v4.yCoord, v4.zCoord, v4.u, v4.v, colorOut, sprite)
+                );
+        
+        // necessary to support forge lighting model
+        net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
+        
+        return new BakedQuad(aint,-1, side);
+
+    }
+    
+
 	private int[] vertexToInts(double x, double y, double z, float u, float v, int color, TextureAtlasSprite sprite) {
 
 
