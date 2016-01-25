@@ -2,6 +2,12 @@ package grondag.adversity.niceblock.model;
 
 import java.util.List;
 
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
+import javax.vecmath.Vector4f;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.base.Function;
 import com.google.common.primitives.Ints;
 
@@ -11,7 +17,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
@@ -29,7 +38,12 @@ import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.client.model.b3d.B3DModel.Face;
+import net.minecraftforge.client.model.obj.OBJModel.Normal;
+import net.minecraftforge.client.model.obj.OBJModel.TextureCoordinate;
+import net.minecraftforge.client.model.obj.OBJModel.Vertex;
 import net.minecraftforge.client.model.pipeline.LightUtil;
+import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 /**
@@ -60,7 +74,8 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  */
 public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
 
-	/**
+
+    /**
 	 * Provides texture parameters.
 	 */
 	protected final int meta;
@@ -68,6 +83,8 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	protected TextureAtlasSprite particleTexture;
 
 	protected IFlexibleBakedModel itemModel;
+	
+	protected final VertexFormat VERTEX_FORMAT = DefaultVertexFormats.ITEM;
 
 	public abstract IModelController getController();
 	
@@ -249,32 +266,91 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	
 	protected BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
 
-		float shade = LightUtil.diffuseLight(side);
-
-		int red = (int) (shade * 255f * ((colorIn >> 16 & 0xFF) / 255f));
-		int green = (int) (shade * 255f * ((colorIn >> 8 & 0xFF) / 255f));
-		int blue = (int) (shade * 255f * ((colorIn & 0xFF) / 255f));
-		int alpha = colorIn >> 24 & 0xFF;
-
-		int colorOut = red | (green << 8) | (blue << 16) | (alpha << 24);
 
 		for(int r= 0; r < rotation.index; r++){
 			rotateQuadUV(v1, v2, v3, v4);
 		}
+	
 		
-		int[] aint = Ints.concat(
-				vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, colorOut, sprite),
-				vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, colorOut, sprite),
-				vertexToInts(v3.xCoord, v3.yCoord, v3.zCoord, v3.u, v3.v, colorOut, sprite),
-				vertexToInts(v4.xCoord, v4.yCoord, v4.zCoord, v4.u, v4.v, colorOut, sprite)
-				);
+//        float faceNormal[][] = new float[4][4];
+//        Vector3f n1 = new Vector3f(position[3]);
+//        Vector3f t = new Vector3f(position[1]);
+//        Vector3f v2 = new Vector3f(position[2]);
+//        v1.sub(t);
+//        t.set(position[0]);
+//        v2.sub(t);
+//        v1.cross(v2, v1);
+//        v1.normalize();
+//        for(int v = 0; v < 4; v++)
+//        {
+//            normal[v][0] = v1.x;
+//            normal[v][1] = v1.y;
+//            normal[v][2] = v1.z;
+//            normal[v][3] = 0;
+//        }
+        
+		Vec3 faceNormal = v1.subtract(v3).crossProduct(v3.subtract(v4));
+		faceNormal.normalize();
+		
+//		Vector3f faceNormal = (Vector3f) v3.clone();
+//        faceNormal.sub(v1);
+//        Vector3f b = (Vector3f) v4.clone();
+//        b.sub((Vector3f) v2);
+//        faceNormal.cross(faceNormal, b);
+//        faceNormal.normalize();
+  
+		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM);
+		builder.setQuadOrientation(EnumFacing.getFacingFromVector((float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord));
+        builder.setQuadColored();
+		putVertexData(builder, v1, colorIn, side, faceNormal, sprite);
+		putVertexData(builder, v2, colorIn, side, faceNormal, sprite );
+		putVertexData(builder, v3, colorIn, side, faceNormal, sprite );
+		putVertexData(builder, v4, colorIn, side, faceNormal, sprite );
+		return builder.build();
 		
 		// necessary to support forge lighting model
-		net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
-		
-		return new BakedQuad(aint,-1, side);
+		//net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
+	
 
 	}
+	
+    private void putVertexData(UnpackedBakedQuad.Builder builder, Vertex v, int colorIn, EnumFacing side, Vec3 faceNormal, TextureAtlasSprite sprite)
+    {
+        for (int e = 0; e < VERTEX_FORMAT.getElementCount(); e++)
+        {
+            switch (VERTEX_FORMAT.getElement(e).getUsage())
+            {
+                case POSITION:
+                    builder.put(e, (float)v.xCoord, (float)v.yCoord, (float)v.zCoord, 1);
+                    break;
+                case COLOR:
+                    float shade = LightUtil.diffuseLight((float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord);
+    
+                    float red = (shade * ((float)(colorIn >> 16 & 0xFF) / 255f));
+                    float green = (shade * ((float)(colorIn >> 8 & 0xFF) / 255f));
+                    float blue =  (shade * ((float)(colorIn & 0xFF) / 255f));
+                    float alpha = (float)(colorIn >> 24 & 0xFF) / 255f;
+     
+                    builder.put(e, red, green, blue, alpha);
+                     break;
+                     
+                case UV:
+                    builder.put(e,
+                            sprite.getInterpolatedU(v.u),
+                            sprite.getInterpolatedU(v.v),
+                          0, 1);
+                  break;
+                  
+                case NORMAL:
+                    builder.put(e, (float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord, 0);
+                    break;
+                    
+                default:
+                    builder.put(e);
+            }
+        }
+    }
+	
 	
 	public static BakedQuad tintedBakedQuad(BakedQuad quadIn, int tint){
 	    return new BakedQuad(quadIn.getVertexData(), tint, quadIn.getFace());

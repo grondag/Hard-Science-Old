@@ -159,21 +159,21 @@ public class NiceModelBigTex extends NiceModel
             xOff += 7;
         }
         
-        
-        itemModel = new BigTexFacade(
-                new ImmutableList.Builder<BakedQuad>().add(
-                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.UP.ordinal()][0].get(0), color.base)).build(),
-                new ImmutableList.Builder<BakedQuad>().add(
-                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.DOWN.ordinal()][0].get(0), color.base)).build(),
-                new ImmutableList.Builder<BakedQuad>().add(
-                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.EAST.ordinal()][0].get(0), color.base)).build(),
-                new ImmutableList.Builder<BakedQuad>().add(
-                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.WEST.ordinal()][0].get(0), color.base)).build(),                      
-                new ImmutableList.Builder<BakedQuad>().add(
-                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.NORTH.ordinal()][0].get(0), color.base)).build(),
-                new ImmutableList.Builder<BakedQuad>().add(
-                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.SOUTH.ordinal()][0].get(0), color.base)).build()
-        );
+        itemModel = facadeModels[0];
+//        itemModel = new BigTexFacade(
+//                new ImmutableList.Builder<BakedQuad>().add(
+//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.UP.ordinal()][0].get(0), color.base)).build(),
+//                new ImmutableList.Builder<BakedQuad>().add(
+//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.DOWN.ordinal()][0].get(0), color.base)).build(),
+//                new ImmutableList.Builder<BakedQuad>().add(
+//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.EAST.ordinal()][0].get(0), color.base)).build(),
+//                new ImmutableList.Builder<BakedQuad>().add(
+//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.WEST.ordinal()][0].get(0), color.base)).build(),                      
+//                new ImmutableList.Builder<BakedQuad>().add(
+//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.NORTH.ordinal()][0].get(0), color.base)).build(),
+//                new ImmutableList.Builder<BakedQuad>().add(
+//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.SOUTH.ordinal()][0].get(0), color.base)).build()
+//        );
     }
 
     @Override
