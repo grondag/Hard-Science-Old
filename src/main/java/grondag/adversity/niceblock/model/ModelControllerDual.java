@@ -54,10 +54,4 @@ public class ModelControllerDual implements IModelController {
 		return null;
 	}
 
-    @Override
-    public int getItemColor(ItemStack stack, int renderPass)
-    {
-        return controllerPrimary.getItemColor(stack, renderPass);
-    }
-
 }

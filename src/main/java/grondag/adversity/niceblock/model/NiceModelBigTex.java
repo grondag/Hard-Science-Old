@@ -160,20 +160,7 @@ public class NiceModelBigTex extends NiceModel
         }
         
         itemModel = facadeModels[0];
-//        itemModel = new BigTexFacade(
-//                new ImmutableList.Builder<BakedQuad>().add(
-//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.UP.ordinal()][0].get(0), color.base)).build(),
-//                new ImmutableList.Builder<BakedQuad>().add(
-//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.DOWN.ordinal()][0].get(0), color.base)).build(),
-//                new ImmutableList.Builder<BakedQuad>().add(
-//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.EAST.ordinal()][0].get(0), color.base)).build(),
-//                new ImmutableList.Builder<BakedQuad>().add(
-//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.WEST.ordinal()][0].get(0), color.base)).build(),                      
-//                new ImmutableList.Builder<BakedQuad>().add(
-//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.NORTH.ordinal()][0].get(0), color.base)).build(),
-//                new ImmutableList.Builder<BakedQuad>().add(
-//                        NiceModel.tintedBakedQuad(faceQuads[EnumFacing.SOUTH.ordinal()][0].get(0), color.base)).build()
-//        );
+
     }
 
     @Override
@@ -193,7 +180,7 @@ public class NiceModelBigTex extends NiceModel
     @Override
     public IBakedModel handleItemState(ItemStack stack)
     {
-        return itemModel;
+        return facadeModels[0];
     }
 
     private BigTexFacade makeFacadeFromInts(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace){

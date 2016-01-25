@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.base.Function;
 import com.google.common.primitives.Ints;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
 import net.minecraft.block.state.IBlockState;
@@ -266,38 +267,14 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	
 	protected BakedQuad createQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
 
+	    Adversity.log.info("createQuad " + sprite.toString());
 
 		for(int r= 0; r < rotation.index; r++){
 			rotateQuadUV(v1, v2, v3, v4);
 		}
 	
-		
-//        float faceNormal[][] = new float[4][4];
-//        Vector3f n1 = new Vector3f(position[3]);
-//        Vector3f t = new Vector3f(position[1]);
-//        Vector3f v2 = new Vector3f(position[2]);
-//        v1.sub(t);
-//        t.set(position[0]);
-//        v2.sub(t);
-//        v1.cross(v2, v1);
-//        v1.normalize();
-//        for(int v = 0; v < 4; v++)
-//        {
-//            normal[v][0] = v1.x;
-//            normal[v][1] = v1.y;
-//            normal[v][2] = v1.z;
-//            normal[v][3] = 0;
-//        }
-        
 		Vec3 faceNormal = v1.subtract(v3).crossProduct(v3.subtract(v4));
 		faceNormal.normalize();
-		
-//		Vector3f faceNormal = (Vector3f) v3.clone();
-//        faceNormal.sub(v1);
-//        Vector3f b = (Vector3f) v4.clone();
-//        b.sub((Vector3f) v2);
-//        faceNormal.cross(faceNormal, b);
-//        faceNormal.normalize();
   
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM);
 		builder.setQuadOrientation(EnumFacing.getFacingFromVector((float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord));
@@ -307,21 +284,16 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		putVertexData(builder, v3, colorIn, side, faceNormal, sprite );
 		putVertexData(builder, v4, colorIn, side, faceNormal, sprite );
 		return builder.build();
-		
-		// necessary to support forge lighting model
-		//net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
-	
-
 	}
 	
-    private void putVertexData(UnpackedBakedQuad.Builder builder, Vertex v, int colorIn, EnumFacing side, Vec3 faceNormal, TextureAtlasSprite sprite)
+    private void putVertexData(UnpackedBakedQuad.Builder builder, Vertex vertexIn, int colorIn, EnumFacing side, Vec3 faceNormal, TextureAtlasSprite sprite)
     {
         for (int e = 0; e < VERTEX_FORMAT.getElementCount(); e++)
         {
             switch (VERTEX_FORMAT.getElement(e).getUsage())
             {
                 case POSITION:
-                    builder.put(e, (float)v.xCoord, (float)v.yCoord, (float)v.zCoord, 1);
+                    builder.put(e, (float)vertexIn.xCoord, (float)vertexIn.yCoord, (float)vertexIn.zCoord, 1);
                     break;
                 case COLOR:
                     float shade = LightUtil.diffuseLight((float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord);
@@ -336,8 +308,8 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
                      
                 case UV:
                     builder.put(e,
-                            sprite.getInterpolatedU(v.u),
-                            sprite.getInterpolatedU(v.v),
+                            sprite.getInterpolatedU(vertexIn.u),
+                            sprite.getInterpolatedV(vertexIn.v),
                           0, 1);
                   break;
                   
@@ -351,10 +323,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
         }
     }
 	
-	
-	public static BakedQuad tintedBakedQuad(BakedQuad quadIn, int tint){
-	    return new BakedQuad(quadIn.getVertexData(), tint, quadIn.getFace());
-	}
 	
 	private int[] vertexToInts(double x, double y, double z, float u, float v, int color, TextureAtlasSprite sprite) {
 

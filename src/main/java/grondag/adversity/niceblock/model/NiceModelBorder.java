@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
 import grondag.adversity.niceblock.model.NiceModel.Vertex;
@@ -54,6 +55,8 @@ public class NiceModelBorder extends NiceModel {
 		TextureAtlasSprite textureSprite = 
 				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(meta, textureOffset));
 
+		Adversity.log.info(textureSprite.toString());
+		
 		List<BakedQuad> retval = Collections.EMPTY_LIST;
 		
 		switch(face){

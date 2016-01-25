@@ -46,11 +46,6 @@ public interface IModelController {
 	public String[] getAllTextures(int meta);
 	
 	/**
-	 * Used to tint item block models because item renderer ignores color on pre-baked quads.
-	 */
-	public int getItemColor(ItemStack stack, int renderPass);
-	
-	/**
 	 * Texture rotations. Used mainly when rotated textures are used as
 	 * alternate textures.
 	 */

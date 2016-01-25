@@ -19,12 +19,5 @@ public class NiceItemBlock extends ItemBlock {
 	public String getUnlocalizedName(ItemStack stack) {
 		return super.getUnlocalizedName() + "." + ((NiceBlock) block).style.toString() + "_" + stack.getMetadata();
 	}
-
-    @Override
-    public int getColorFromItemStack(ItemStack stack, int renderPass)
-    {
-        return ((NiceBlock)this.block).style.getModelController().getItemColor(stack, renderPass);
-    }
-	
-	
+ 	
 }

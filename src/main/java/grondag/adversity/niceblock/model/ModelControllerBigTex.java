@@ -41,10 +41,5 @@ public class ModelControllerBigTex extends ModelController{
 		return "adversity:blocks/" + textureName;
 	}
 
-    @Override
-    public int getItemColor(ItemStack stack, int renderPass)
-    {
-        return NiceColor.values()[Math.min(firstColor.ordinal() + (stack.getItemDamage() & 0xF), NiceColor.values().length-1)].base;
-    }
 
 }

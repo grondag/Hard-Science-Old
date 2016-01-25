@@ -54,7 +54,10 @@ public abstract class NiceStyle {
 			new ModelControllerDual(
 					new ModelControllerBigTex("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, NiceColor.STONE0),
 					new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.STONE0)));
-	
+
+//     public static final NiceStyle BIG_TEX = new NiceStyleNew(
+//     new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.STONE0));
+
 	
 	public abstract IModelController getModelController();
 	
@@ -150,12 +153,6 @@ public abstract class NiceStyle {
 			// TODO Auto-generated method stub
 			return null;
 		}
-
-        @Override
-        public int getItemColor(ItemStack stack, int renderPass)
-        {
-            return 0xFFFFFFFF;
-        }
 
 	}
 }

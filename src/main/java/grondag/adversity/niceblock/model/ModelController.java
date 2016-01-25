@@ -81,13 +81,7 @@ public abstract class ModelController implements IModelController{
 	public String getFirstTextureName(int meta) {
 		return this.getTextureName(meta, 0);
 	}
-
-    @Override
-    public int getItemColor(ItemStack stack, int renderPass)
-    {
-        return 0xFFFFFFFF;
-    }
-    
+  
 	@Override
 	public ICollisionHandler getCollisionHandler() {
 		return null;
