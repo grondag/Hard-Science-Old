@@ -11,11 +11,13 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
-import grondag.adversity.niceblock.model.NiceModel.Vertex;
+import grondag.adversity.niceblock.model.QuadFactory.CubeInputs;
+import grondag.adversity.niceblock.model.QuadFactory.Vertex;
 
 public class NiceModelBorder extends NiceModel {
 	
@@ -31,6 +33,8 @@ public class NiceModelBorder extends NiceModel {
 	 */
 	protected final BorderFacade[] facadeModels;
 	
+    protected List<BakedQuad> itemQuads;
+    
 	protected final NiceColor color;
 
 	protected NiceModelBorder(ModelControllerBorder controller, int meta, NiceColor color) {
@@ -47,73 +51,52 @@ public class NiceModelBorder extends NiceModel {
 	}
 
 	private List<BakedQuad> makeBorderFace(int textureOffset, Rotation rotation, boolean flipU, boolean flipV, EnumFacing face){
-		float u0 = flipU ? 16 : 0;
-		float v0 = flipV ? 16 : 0;
-		float u1 = flipU ? 0 : 16;
-		float v1 = flipV ? 0 : 16;
-		
-		TextureAtlasSprite textureSprite = 
+	
+	    CubeInputs cubeInputs = new CubeInputs();
+	    cubeInputs.color = color.border;
+	    cubeInputs.textureRotation = rotation;
+	    cubeInputs.rotateBottom = true;
+	    cubeInputs.u0 = flipU ? 16 : 0;
+	    cubeInputs.v0 = flipV ? 16 : 0;
+	    cubeInputs.u1 = flipU ? 0 : 16;
+	    cubeInputs.v1 = flipV ? 0 : 16;
+		cubeInputs.textureSprite = 
 				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(meta, textureOffset));
 		
-		List<BakedQuad> retval = Collections.EMPTY_LIST;
-		
-		switch(face){
-		
-		case UP:
-			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createNormalQuad(
-					new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0), 
-					EnumFacing.UP, textureSprite, rotation, color.border))
-				.build();
-			break;
+		return cubeInputs.makeFace(face);
+	}
 	
-		case DOWN:
-			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createNormalQuad(
-						new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0), 
-					EnumFacing.DOWN, textureSprite, rotation.clockwise().clockwise(), color.border))
-				.build();
-			break;
-			
-		case WEST:
-			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createNormalQuad(
-					new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0), 
-					EnumFacing.WEST, textureSprite, rotation, color.border))
-				.build();
-			break;
-			
-		case EAST:
-			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createNormalQuad(
-					new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1),
-					EnumFacing.EAST, textureSprite, rotation, color.border))
-				.build();
-			break;
-			
-		case NORTH:
-			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createNormalQuad(
-					new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1),
-					EnumFacing.NORTH, textureSprite, rotation, color.border))
-				.build();
-			break;
-			
-		case SOUTH:
-			retval = new ImmutableList.Builder<BakedQuad>()
-				.add(createNormalQuad(
-					new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0), 
-					EnumFacing.SOUTH, textureSprite, rotation, color.border))
-				.build();
-			break;
-		}
-		
-		return retval;
+	private void makeItemQuads(){
+	    
+        CubeInputs cubeInputs = new CubeInputs();
+        cubeInputs.u0 = 0;
+        cubeInputs.v0 = 0;
+        cubeInputs.u1 = 16;
+        cubeInputs.v1 = 16;
+        cubeInputs.isItem = true;
+        cubeInputs.isOverlay = controller.renderLayer != EnumWorldBlockLayer.SOLID;
+        cubeInputs.color = color.border;
+        // offset 4 is all borders
+        cubeInputs.textureSprite = 
+                Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(meta, 4));
+
+        ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
+
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.UP));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.DOWN));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.EAST));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.WEST));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.NORTH));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
+        itemQuads = itemBuilder.build();
+
 	}
 	
 	@Override
 	public void handleBakeEvent(ModelBakeEvent event) {
 
+	    makeItemQuads();
+	    
 		for(EnumFacing face: EnumFacing.values()){
 			faceQuads[face.ordinal()][0] = makeBorderFace( 4, Rotation.ROTATE_NONE, false, false, face);
 			faceQuads[face.ordinal()][1] = makeBorderFace( 3, Rotation.ROTATE_180, false, false, face);
@@ -551,6 +534,8 @@ public class NiceModelBorder extends NiceModel {
 		facadeModels[383] = new BorderFacade(32, 32, 28, 32, 21, 32);
 		facadeModels[384] = new BorderFacade(32, 32, 26, 32, 22, 32);
 		facadeModels[385] = new BorderFacade(32, 32, 28, 32, 22, 32);
+		
+		
 	}
 
 	@Override
@@ -628,5 +613,11 @@ public class NiceModelBorder extends NiceModel {
 		}
 
 	}
+
+    @Override
+    protected List<BakedQuad> getItemQuads()
+    {
+        return itemQuads;
+    }
 
 }

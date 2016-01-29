@@ -1,6 +1,9 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.niceblock.NiceColor;
+import grondag.adversity.niceblock.model.QuadFactory.CubeInputs;
+import grondag.adversity.niceblock.model.QuadFactory.QuadInputs;
+import grondag.adversity.niceblock.model.QuadFactory.Vertex;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +17,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
@@ -33,7 +37,7 @@ public class NiceModelBigTex extends NiceModel
 
     protected final BigTexFacade[] facadeModels;
     
-    protected BigTexFacade itemModel;
+    protected List<BakedQuad> itemQuads;
 
     protected TextureAtlasSprite textureSprite;
 
@@ -73,71 +77,47 @@ public class NiceModelBigTex extends NiceModel
     @Override
     public void handleBakeEvent(ModelBakeEvent event)
     {
-        textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getController().getFirstTextureName(meta));
+        CubeInputs cubeInputs = new CubeInputs();
+        cubeInputs.color = (controller.renderLayer == EnumWorldBlockLayer.SOLID) ? color.base : color.highlight;
+        cubeInputs.textureRotation = controller.textureRotation;
+        cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getController().getFirstTextureName(meta));
 
         for (int i = 0; i < 16; i++)
         {
             for (int j = 0; j < 16; j++)
             {
                 int index = i << 4 | j;
-                float u0 = controller.flipU ? 16 - i : i;
-                float v0 = controller.flipV ? 16 - j : j;
-                float u1 = u0 + (controller.flipU ? -1 : 1);
-                float v1 = v0 + (controller.flipV ? -1 : 1);
+                cubeInputs.u0 = controller.flipU ? 16 - i : i;
+                cubeInputs.v0 = controller.flipV ? 16 - j : j;
+                cubeInputs.u1 = cubeInputs.u0 + (controller.flipU ? -1 : 1);
+                cubeInputs.v1 = cubeInputs.v0 + (controller.flipV ? -1 : 1);
 
-                faceQuads[EnumFacing.UP.ordinal()][index] = new ImmutableList.Builder<BakedQuad>().add(
-                        createNormalQuad(new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0),
-                                EnumFacing.UP, textureSprite, controller.textureRotation, color.base)).build();
-
-                faceQuads[EnumFacing.DOWN.ordinal()][index] = new ImmutableList.Builder<BakedQuad>().add(
-                        createNormalQuad(new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0),
-                                EnumFacing.DOWN, textureSprite, controller.textureRotation, color.base)).build();
-
-                faceQuads[EnumFacing.WEST.ordinal()][index] = new ImmutableList.Builder<BakedQuad>().add(
-                        createNormalQuad(new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0),
-                                EnumFacing.WEST, textureSprite, controller.textureRotation, color.base)).build();
-
-                faceQuads[EnumFacing.EAST.ordinal()][index] = new ImmutableList.Builder<BakedQuad>().add(
-                        createNormalQuad(new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1),
-                                EnumFacing.EAST, textureSprite, controller.textureRotation, color.base)).build();
-
-                faceQuads[EnumFacing.NORTH.ordinal()][index] = new ImmutableList.Builder<BakedQuad>().add(
-                        createNormalQuad(new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1),
-                                EnumFacing.NORTH, textureSprite, controller.textureRotation, color.base)).build();
-
-                faceQuads[EnumFacing.SOUTH.ordinal()][index] = new ImmutableList.Builder<BakedQuad>().add(
-                        createNormalQuad(new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0),
-                                EnumFacing.SOUTH, textureSprite, controller.textureRotation, color.base)).build();
-            
-                if(i == 0 && j == 0){
-                    
-                    itemModel = new BigTexFacade(
-                    new ImmutableList.Builder<BakedQuad>().add(
-                            createColoredQuad(new Vertex(0, 1, 0, u0, v0), new Vertex(0, 1, 1, u0, v1), new Vertex(1, 1, 1, u1, v1), new Vertex(1, 1, 0, u1, v0),
-                                    EnumFacing.UP, textureSprite, controller.textureRotation, color.base)).build(),
-
-                    new ImmutableList.Builder<BakedQuad>().add(
-                            createColoredQuad(new Vertex(1, 0, 1, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 0, 0, u1, v0), new Vertex(1, 0, 0, u0, v0),
-                                    EnumFacing.DOWN, textureSprite, controller.textureRotation, color.base)).build(),
-
-                    new ImmutableList.Builder<BakedQuad>().add(
-                            createColoredQuad(new Vertex(0, 0, 0, u0, v1), new Vertex(0, 0, 1, u1, v1), new Vertex(0, 1, 1, u1, v0), new Vertex(0, 1, 0, u0, v0),
-                                    EnumFacing.WEST, textureSprite, controller.textureRotation, color.base)).build(),
-
-                    new ImmutableList.Builder<BakedQuad>().add(
-                            createColoredQuad(new Vertex(1, 0, 0, u1, v1), new Vertex(1, 1, 0, u1, v0), new Vertex(1, 1, 1, u0, v0), new Vertex(1, 0, 1, u0, v1),
-                                    EnumFacing.EAST, textureSprite, controller.textureRotation, color.base)).build(),
-
-                   new ImmutableList.Builder<BakedQuad>().add(
-                           createColoredQuad(new Vertex(0, 0, 0, u1, v1), new Vertex(0, 1, 0, u1, v0), new Vertex(1, 1, 0, u0, v0), new Vertex(1, 0, 0, u0, v1),
-                                    EnumFacing.NORTH, textureSprite, controller.textureRotation, color.base)).build(),
-
-                   new ImmutableList.Builder<BakedQuad>().add(
-                            createColoredQuad(new Vertex(0, 0, 1, u0, v1), new Vertex(1, 0, 1, u1, v1), new Vertex(1, 1, 1, u1, v0), new Vertex(0, 1, 1, u0, v0),
-                                    EnumFacing.SOUTH, textureSprite, controller.textureRotation, color.base)).build());
-                }
+                faceQuads[EnumFacing.UP.ordinal()][index] = cubeInputs.makeFace(EnumFacing.UP);
+                faceQuads[EnumFacing.DOWN.ordinal()][index] = cubeInputs.makeFace(EnumFacing.DOWN);
+                faceQuads[EnumFacing.EAST.ordinal()][index] = cubeInputs.makeFace(EnumFacing.EAST);
+                faceQuads[EnumFacing.WEST.ordinal()][index] = cubeInputs.makeFace(EnumFacing.WEST);
+                faceQuads[EnumFacing.NORTH.ordinal()][index] = cubeInputs.makeFace(EnumFacing.NORTH);
+                faceQuads[EnumFacing.SOUTH.ordinal()][index] = cubeInputs.makeFace(EnumFacing.SOUTH);
             }
         }
+        
+        // Make item model
+        cubeInputs.u0 = controller.flipU ? 16 : 0;
+        cubeInputs.v0 = controller.flipV ? 16 : 0;
+        cubeInputs.u1 = controller.flipU ? 15 : 1;
+        cubeInputs.v1 = controller.flipV ? 15 : 1;
+        cubeInputs.isItem = true;
+        cubeInputs.isOverlay = controller.renderLayer != EnumWorldBlockLayer.SOLID;
+
+        ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
+
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.UP));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.DOWN));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.EAST));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.WEST));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.NORTH));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
+        itemQuads = itemBuilder.build();
 
         int xOff = 0;
         for (int x = 0; x < 16; x++)
@@ -202,12 +182,6 @@ public class NiceModelBigTex extends NiceModel
     }
 
     
-    
-    @Override
-    public IBakedModel handleItemState(ItemStack stack)
-    {
-        return itemModel;
-    }
 
     private BigTexFacade makeFacadeFromInts(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace){
         return new BigTexFacade(
@@ -255,7 +229,7 @@ public class NiceModelBigTex extends NiceModel
         @Override
         public boolean isGui3d()
         {
-            return true;
+            return false;
         }
 
         @Override
@@ -279,9 +253,15 @@ public class NiceModelBigTex extends NiceModel
         @Override
         public VertexFormat getFormat()
         {
-            return VERTEX_FORMAT;
+            return DefaultVertexFormats.ITEM;
         }
 
+    }
+
+    @Override
+    protected List getItemQuads()
+    {
+        return itemQuads;
     }
 
 }

@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.model;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
@@ -9,11 +11,13 @@ import javax.vecmath.Vector4f;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Function;
-import com.google.common.primitives.Ints;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.model.IModelController.Rotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -24,27 +28,29 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.event.TextureStitchEvent.Post;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.client.model.SimpleModelState;
+import net.minecraftforge.client.model.TRSRTransformation;
+import net.minecraftforge.client.model.ModelLoader.UVLock;
 import net.minecraftforge.client.model.b3d.B3DModel.Face;
 import net.minecraftforge.client.model.obj.OBJModel.Normal;
 import net.minecraftforge.client.model.obj.OBJModel.TextureCoordinate;
 import net.minecraftforge.client.model.obj.OBJModel.Vertex;
-import net.minecraftforge.client.model.pipeline.LightUtil;
-import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 /**
@@ -83,8 +89,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 
 	protected TextureAtlasSprite particleTexture;
 
-	protected final VertexFormat VERTEX_FORMAT = DefaultVertexFormats.ITEM;
-
 	public abstract IModelController getController();
 	
 	/**
@@ -95,9 +99,11 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * See class header and member descriptions for more info on what things do.
 	 */
 	protected NiceModel(int meta) {
-		this.meta= meta;
+		this.meta = meta;
 	}
 
+	private IBakedModel itemModel = null;
+	
 	/**
 	 * The function parameter to bake method presumably provides a way to do
 	 * fancy texture management via inversion of control, but we don't need that
@@ -137,11 +143,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		particleTexture = event.map.getAtlasSprite(getController().getFirstTextureName(meta));
 	}
 	
-	@Override
-	public ItemCameraTransforms getItemCameraTransforms() {
-		return ItemCameraTransforms.DEFAULT;
-	}
-
 	/**
 	 * Does the heavy lifting for the ISmartBlockModel interface. Determines
 	 * block state and returns the appropriate baked model. See class header for
@@ -181,11 +182,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 */
 	public abstract IBakedModel getModelVariant(int variantID);
 	
-	@Override
-	public IBakedModel handleItemState(ItemStack stack) {
-		return getModelVariant(0);
-	}
-	
 	/**
 	 * Used for block-breaking particles.
 	 */
@@ -210,8 +206,9 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 		return null;
 	}
 
+	
 	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
+	 * Only used for item model because we provide a separate IFlexibleBakedModel instance in handleBlockState
 	 */
 	@Override
 	public boolean isAmbientOcclusion() {
@@ -219,7 +216,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	}
 
 	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
+	 * Only used for item model because we provide a separate IFlexibleBakedModel instance in handleBlockState
 	 */
 	@Override
 	public boolean isGui3d() { 
@@ -234,142 +231,75 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	public boolean isBuiltInRenderer() {
 		return false;
 	}
-		
-	// UTILITIES
-	
-	/**
-	 * Rotates face texture 90deg clockwise
-	 */
-	protected static void rotateQuadUV(Vertex v1, Vertex v2, Vertex v3, Vertex v4){
-		float swapU = v1.u;
-		float swapV = v1.v;
-		v1.u = v2.u;
-		v1.v = v2.v;
-		v2.u = v3.u;
-		v2.v = v3.v;
-		v3.u = v4.u;
-		v3.v = v4.v;
-		v4.u = swapU;
-		v4.v = swapV;
-	}
-	
-	
-	protected static class Vertex extends Vec3 {
-		protected float u;
-		protected float v;
 
-		protected Vertex(float x, float y, float z, float u, float v) {
-			super(x, y, z);
-			this.u = u;
-			this.v = v;
-		}
-	}
-	
-	/**
-	 * Use this for item models.  
-	 * Supports coloring unlike vanilla quads but has a slight performance hit at render time.
-	 */
-	protected BakedQuad createColoredQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
-
-		for(int r= 0; r < rotation.index; r++){
-			rotateQuadUV(v1, v2, v3, v4);
-		}
-	
-		Vec3 faceNormal = v1.subtract(v3).crossProduct(v3.subtract(v4));
-		faceNormal.normalize();
-  
-		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM);
-		builder.setQuadOrientation(EnumFacing.getFacingFromVector((float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord));
-        builder.setQuadColored();
-		putVertexData(builder, v1, colorIn, side, faceNormal, sprite);
-		putVertexData(builder, v2, colorIn, side, faceNormal, sprite );
-		putVertexData(builder, v3, colorIn, side, faceNormal, sprite );
-		putVertexData(builder, v4, colorIn, side, faceNormal, sprite );
-		return builder.build();
-	}
-	
-    private void putVertexData(UnpackedBakedQuad.Builder builder, Vertex vertexIn, int colorIn, EnumFacing side, Vec3 faceNormal, TextureAtlasSprite sprite)
-    {
-        for (int e = 0; e < VERTEX_FORMAT.getElementCount(); e++)
-        {
-            switch (VERTEX_FORMAT.getElement(e).getUsage())
-            {
-                case POSITION:
-                    builder.put(e, (float)vertexIn.xCoord, (float)vertexIn.yCoord, (float)vertexIn.zCoord, 1);
-                    break;
-                case COLOR:
-                    float shade = LightUtil.diffuseLight((float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord);
-    
-                    float red = (shade * ((float)(colorIn >> 16 & 0xFF) / 255f));
-                    float green = (shade * ((float)(colorIn >> 8 & 0xFF) / 255f));
-                    float blue =  (shade * ((float)(colorIn & 0xFF) / 255f));
-                    float alpha = (float)(colorIn >> 24 & 0xFF) / 255f;
-     
-                    builder.put(e, red, green, blue, alpha);
-                     break;
-                     
-                case UV:
-                    builder.put(e,
-                            sprite.getInterpolatedU(vertexIn.u),
-                            sprite.getInterpolatedV(vertexIn.v),
-                          0, 1);
-                  break;
-                  
-                case NORMAL:
-                    builder.put(e, (float)faceNormal.xCoord, (float)faceNormal.yCoord, (float)faceNormal.zCoord, 0);
-                    break;
-                    
-                default:
-                    builder.put(e);
-            }
-        }
+   @Override
+    public ItemCameraTransforms getItemCameraTransforms() {
+        return ItemCameraTransforms.DEFAULT;
     }
+
 	
+	////////////////////////////////////////////////////
+    //  ITEM STUFFS
+    ////////////////////////////////////////////////////
+    
     /**
-     * Use this for block models.  Is faster and smaller than (Colored) UnpackedBakedQuads.
+     * All subclass should provide vanilla baked quads for their item models.  
+     * Colored quads are supported.  
      */
-    protected BakedQuad createNormalQuad(Vertex v1, Vertex v2, Vertex v3, Vertex v4, EnumFacing side, TextureAtlasSprite sprite, Rotation rotation, int colorIn) {
-
-        float shade = LightUtil.diffuseLight(side);
-
-        int red = (int) (shade * 255f * ((colorIn >> 16 & 0xFF) / 255f));
-        int green = (int) (shade * 255f * ((colorIn >> 8 & 0xFF) / 255f));
-        int blue = (int) (shade * 255f * ((colorIn & 0xFF) / 255f));
-        int alpha = colorIn >> 24 & 0xFF;
-
-        int colorOut = red | (green << 8) | (blue << 16) | (alpha << 24);
-
-        for(int r= 0; r < rotation.index; r++){
-            rotateQuadUV(v1, v2, v3, v4);
-        }
-        
-        int[] aint = Ints.concat(
-                vertexToInts(v1.xCoord, v1.yCoord, v1.zCoord, v1.u, v1.v, colorOut, sprite),
-                vertexToInts(v2.xCoord, v2.yCoord, v2.zCoord, v2.u, v2.v, colorOut, sprite),
-                vertexToInts(v3.xCoord, v3.yCoord, v3.zCoord, v3.u, v3.v, colorOut, sprite),
-                vertexToInts(v4.xCoord, v4.yCoord, v4.zCoord, v4.u, v4.v, colorOut, sprite)
-                );
-        
-        // necessary to support forge lighting model
-        net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, side);
-        
-        return new BakedQuad(aint,-1, side);
-
-    }
+    protected abstract List<BakedQuad> getItemQuads();
     
+   @Override
+    public final IBakedModel handleItemState(ItemStack stack) {
+       
+       if(itemModel == null){
+           
+           /**
+            * Enable perspective handling.
+            */
+               
+           TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+                   new Vector3f(0, 1.5f / 16, -2.75f / 16),
+                   TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
+                   new Vector3f(0.375f, 0.375f, 0.375f),
+                   null));
 
-	private int[] vertexToInts(double x, double y, double z, float u, float v, int color, TextureAtlasSprite sprite) {
-
-
-		return new int[] {
-				Float.floatToRawIntBits((float) x),
-				Float.floatToRawIntBits((float) y),
-				Float.floatToRawIntBits((float) z),
-				color,
-				Float.floatToRawIntBits(sprite.getInterpolatedU(u)),
-				Float.floatToRawIntBits(sprite.getInterpolatedV(v)),
-				0
-		};
-	}
-
+           IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
+           
+           itemModel = 
+               new IPerspectiveAwareModel.MapWrapper(
+                   new IFlexibleBakedModel.Wrapper(
+                       new SimpleBakedModel(
+                       getItemQuads(), 
+                       // face quads have to be present in list even in empty
+                       new ImmutableList.Builder()
+                           .add(new ImmutableList.Builder<BakedQuad>().build())
+                           .add(new ImmutableList.Builder<BakedQuad>().build())
+                           .add(new ImmutableList.Builder<BakedQuad>().build())
+                           .add(new ImmutableList.Builder<BakedQuad>().build())
+                           .add(new ImmutableList.Builder<BakedQuad>().build())
+                           .add(new ImmutableList.Builder<BakedQuad>().build())
+                           .build(),
+                       NiceModel.this.isAmbientOcclusion(), 
+                       NiceModel.this.isGui3d(),
+                       NiceModel.this.particleTexture, 
+                       NiceModel.this.getItemCameraTransforms()),
+                       DefaultVertexFormats.ITEM),
+                   state);
+       }
+       
+       return itemModel;
+    }
+       
+    /**
+     * Helper method for sub-classes that don't generate their own item quads.
+     */
+    public static List getItemQuadsFromModel(IBakedModel model){
+        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+        for(EnumFacing face: EnumFacing.VALUES)
+        {
+            builder.addAll(model.getFaceQuads(face));
+        }
+        builder.addAll(model.getGeneralQuads());
+        return builder.build();
+    }
 }

@@ -3,6 +3,9 @@ package grondag.adversity.niceblock.model;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -35,17 +38,7 @@ public class NiceModelDual extends NiceModel {
 		this.modelSecondary = modelSecondary;
 	}
 	
-	@Override
-	public IBakedModel handleItemState(ItemStack stack) {
-	    EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-	    
-        if(modelPrimary.getController().canRenderInLayer(layer)){
-            return modelPrimary.handleItemState(stack);            
-        } else {
-            return modelSecondary.handleItemState(stack);
-        }
-		
-	}
+
 
 	@Override
 	public IBakedModel handleBlockState(IBlockState state) {
@@ -146,6 +139,17 @@ public class NiceModelDual extends NiceModel {
 	public IBakedModel getModelVariant(int variantID) {
 		return null;
 	}
+
+
+
+    @Override
+    protected List<BakedQuad> getItemQuads()
+    {
+        return new ImmutableList.Builder()
+                .addAll(modelPrimary.getItemQuads())
+                .addAll(modelSecondary.getItemQuads())
+                .build();
+    }
 
 //    private class DualModelFacade implements IFlexibleBakedModel
 //    {

@@ -11,6 +11,7 @@ import javax.vecmath.Vector3f;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -164,7 +165,6 @@ public class NiceModelBasic extends NiceModel {
 					IModel model = template.retexture(ingredients.textures);
 					primaryModels[style.firstCookbook.calcVariantID(recipe, alt)] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -180,7 +180,6 @@ public class NiceModelBasic extends NiceModel {
 						IModel model = template.retexture(ingredients.textures);
 						secondaryModels[style.secondCookbook.calcVariantID(recipe, alt)] = model.bake(ingredients.state, DefaultVertexFormats.ITEM, textureGetter);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -212,7 +211,6 @@ public class NiceModelBasic extends NiceModel {
 							DefaultVertexFormats.ITEM, textureGetter);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -240,7 +238,6 @@ public class NiceModelBasic extends NiceModel {
 
 	@Override
 	public IBakedModel getModelVariant(int variantID) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -252,14 +249,9 @@ public class NiceModelBasic extends NiceModel {
 
 
     @Override
-    public IBakedModel handleItemState(ItemStack stack)
+    protected List<BakedQuad> getItemQuads()
     {
-        return itemModel;
+        return NiceModel.getItemQuadsFromModel(itemModel);
     }
-
-	
-
-	
-	
 
 }

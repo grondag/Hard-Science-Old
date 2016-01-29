@@ -136,12 +136,7 @@ public class NiceBlock extends Block {
 		placer.setOwner(this);
 		collisionHandler = style.getModelController().getCollisionHandler();
 
-		item = new ItemMultiTexture(this, this, new Function<ItemStack, String>() {
-			@Override
-			public String apply(ItemStack stack) {
-				return String.valueOf(stack.getMetadata());
-			}
-		});
+		item = new NiceItemBlock(this, this);
 
 		// let registrar know to register us when appropriate
 		NiceBlockRegistrar.allBlocks.add(this);

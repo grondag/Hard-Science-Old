@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.model;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.vecmath.Vector3f;
@@ -14,6 +15,7 @@ import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -86,23 +88,22 @@ public class NiceModelBlock extends NiceModel {
 		}
 		
 		/**
-		 * Item model is the same as the first block model, except that we need to handle perspective.
-		 * All the models we use implement IPerspectiveAwareModel but because they aren't loaded via the
-		 * standard loader they don't have an IModelState that includes the necessary key.
-		 * 
-		 * To fix this, we replace the normal block state with a SimpleModelState instance
-		 * that includes a third-person perspective and the normal block state as the default.
-		 * This is retained by the Bake method for that model type and then applied via handlePerspective in that model.
+		 * For overlay models, bump out a bit to prevent depth fighting.
 		 */
-			
-		TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
-				new Vector3f(0, 1.5f / 16, -2.75f / 16),
-				TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
-				new Vector3f(0.375f, 0.375f, 0.375f),
-				null));
-
-		itemModel = getBakedModelForExpandedAlternate(event, 0, 
-				new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity())));
+		if(getController().renderLayer == EnumWorldBlockLayer.SOLID)
+		{
+		    itemModel = models[0];
+		} 
+		else
+		{
+    		TRSRTransformation bumpOut = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+    				new Vector3f(0, 0, 0),
+    				null,
+    				new Vector3f(1.0002f, 1.00021f, 1.0002f),
+    				null));
+    
+    		itemModel = getBakedModelForExpandedAlternate(event, 0, bumpOut);
+		}
 		
 	}
 
@@ -111,9 +112,9 @@ public class NiceModelBlock extends NiceModel {
 		return controller;
 	}
 
-     @Override
-    public IBakedModel handleItemState(ItemStack stack)
+    @Override
+    protected List<BakedQuad> getItemQuads()
     {
-        return itemModel;
+        return NiceModel.getItemQuadsFromModel(itemModel);
     }
 }
