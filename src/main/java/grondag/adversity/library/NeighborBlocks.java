@@ -13,7 +13,7 @@ import net.minecraft.world.IBlockAccess;
  */
 public class NeighborBlocks {
 	
-	private static final int UP 			= 0b1;
+	private static final int UP 			= 0x1;
 	private static final int DOWN 		= UP << 1;
 	private static final int EAST 		= DOWN << 1;
 	private static final int WEST 		= EAST << 1;
