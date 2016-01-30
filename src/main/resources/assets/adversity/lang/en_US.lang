@@ -1,3 +1,15 @@
+flexstone=Flexstone
+durastone=Durastone 
+hyperstone=Hyperstone
+
+raw=Raw
+smooth=Smooth
+square_column=Square Column
+round_column=Round Column
+hot_basalt=Hot Basalt
+raw_basalt=Raw Basalt
+big_tex=Flowing Stone
+
 tile.adversity:raw_1.0.name=Raw Basalt
 tile.adversity:smooth_1.0.name=Smooth Basalt
 tile.adversity:large_brick_1.0.name=Large Basalt Bricks

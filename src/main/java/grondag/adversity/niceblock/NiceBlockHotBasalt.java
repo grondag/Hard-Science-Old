@@ -8,8 +8,8 @@ import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockHotBasalt extends NiceBlock {
 
-	public NiceBlockHotBasalt(String name, NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
-		super(name, style, placer, material, metaCount);
+	public NiceBlockHotBasalt(NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
+		super(style, placer, material, metaCount);
 	}
 
 	@Override

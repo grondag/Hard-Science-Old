@@ -56,11 +56,11 @@ public class NiceBlockRegistrar {
 	private static Multimap<String, NiceBlock> lookupSnM = HashMultimap.create();
 
 	// declare the block instances
-	public static final NiceBlock raw1 = new NiceBlock("raw_1", NiceStyle.RAW, new PlacementSimple(), 
-			BaseMaterial.EXTRUDED_STONE, 1);
+	public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(), 
+			BaseMaterial.FLEXSTONE, 1);
 			
-	public static final NiceBlock smooth1 = new NiceBlock("smooth_1", NiceStyle.SMOOTH, 
-			new PlacementSimple(), BaseMaterial.EXTRUDED_STONE, 1);
+	public static final NiceBlock smooth1 = new NiceBlock(NiceStyle.SMOOTH, 
+			new PlacementSimple(), BaseMaterial.FLEXSTONE, 1);
 //	public static final NiceBlock largeBrick1 = new NiceBlock("large_brick_1", NiceStyle.LARGE_BRICKS,
 //			new PlacementSimple(), BaseMaterial.REFORMED_STONE, 1);
 //	public static final NiceBlock smallBrick1 = new NiceBlock("small_brick_1", NiceStyle.SMALL_BRICKS,
@@ -90,35 +90,35 @@ public class NiceBlockRegistrar {
 //	public static final NiceBlock masonryE1 = new NiceBlock("masonry_e_1", NiceStyle.MASONRY_E,
 //			NicePlacement.makeMasonryPlacer(), BaseMaterial.REFORMED_STONE, 1);
 
-	public static final NiceBlock columnSquareX1 = new NiceBlock("column_square_x_1", NiceStyle.COLUMN_SQUARE_X,
-			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.EXTRUDED_STONE, 1);
-	public static final NiceBlock columnSquareY1 = new NiceBlock("column_square_y_1", NiceStyle.COLUMN_SQUARE_Y,
-			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.EXTRUDED_STONE, 1);
-	public static final NiceBlock columnSquareZ1 = new NiceBlock("column_square_z_1", NiceStyle.COLUMN_SQUARE_Z,
-			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.EXTRUDED_STONE, 1);
+	public static final NiceBlock columnSquareX1 = new NiceBlock(NiceStyle.COLUMN_SQUARE_X,
+			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.FLEXSTONE, 1);
+	public static final NiceBlock columnSquareY1 = new NiceBlock(NiceStyle.COLUMN_SQUARE_Y,
+			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.FLEXSTONE, 1);
+	public static final NiceBlock columnSquareZ1 = new NiceBlock(NiceStyle.COLUMN_SQUARE_Z,
+			NicePlacement.makeColumnPlacerSquare(), BaseMaterial.FLEXSTONE, 1);
 
-	public static final NiceBlockNonCubic columnRoundX1 = new NiceBlockNonCubic("column_round_x_1", NiceStyle.COLUMN_ROUND_X,
-			NicePlacement.makeColumnPlacerRound(), BaseMaterial.EXTRUDED_STONE, 1);
-	public static final NiceBlockNonCubic columnRoundY1 = new NiceBlockNonCubic("column_round_y_1", NiceStyle.COLUMN_ROUND_Y,
-			NicePlacement.makeColumnPlacerRound(), BaseMaterial.EXTRUDED_STONE, 1);
-	public static final NiceBlockNonCubic columnRoundZ1 = new NiceBlockNonCubic("column_round_z_1", NiceStyle.COLUMN_ROUND_Z,
-			NicePlacement.makeColumnPlacerRound(), BaseMaterial.EXTRUDED_STONE, 1);
+	public static final NiceBlockNonCubic columnRoundX1 = new NiceBlockNonCubic(NiceStyle.COLUMN_ROUND_X,
+			NicePlacement.makeColumnPlacerRound(), BaseMaterial.FLEXSTONE, 1);
+	public static final NiceBlockNonCubic columnRoundY1 = new NiceBlockNonCubic(NiceStyle.COLUMN_ROUND_Y,
+			NicePlacement.makeColumnPlacerRound(), BaseMaterial.FLEXSTONE, 1);
+	public static final NiceBlockNonCubic columnRoundZ1 = new NiceBlockNonCubic(NiceStyle.COLUMN_ROUND_Z,
+			NicePlacement.makeColumnPlacerRound(), BaseMaterial.FLEXSTONE, 1);
 
 //	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, new PlacementSimple(),
 //			substance16Group[1]);
 
-	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt("hot_basalt", NiceStyle.HOT_BASALT, 
-			new PlacementSimple(), BaseMaterial.EXTRUDED_STONE, 1);
+	public static final NiceBlock hotBasalt = new NiceBlockHotBasalt(NiceStyle.HOT_BASALT, 
+			new PlacementSimple(), BaseMaterial.FLEXSTONE, 1);
 
-	public static final NiceBlock bigTex = new NiceBlockPlus("bigtex", NiceStyle.BIG_TEX, 
-			new PlacementSimple(), BaseMaterial.EXTRUDED_STONE, 16);
+	public static final NiceBlock bigTex = new NiceBlockPlus(NiceStyle.BIG_TEX, 
+			new PlacementSimple(), BaseMaterial.FLEXSTONE, 16);
 	
 	/**
 	 * Use to generate model resource location names with a consistent
 	 * convention.
 	 */
 	public static String getModelResourceNameFromMeta(NiceBlock block, int meta) {
-		return Adversity.MODID + ":" + block.name + "." + meta;
+		return Adversity.MODID + ":" + block.getUnlocalizedName() + "." + meta;
 	}
 
 	/**
@@ -131,8 +131,8 @@ public class NiceBlockRegistrar {
 	private static void registerBlockCompletely(NiceBlock block, FMLPreInitializationEvent event) {
 
 		// actually register the block! Hurrah!
-		GameRegistry.registerBlock(block, null, block.name);
-		GameRegistry.registerItem(block.item, block.name);
+		GameRegistry.registerBlock(block, null, block.getUnlocalizedName());
+		GameRegistry.registerItem(block.item, block.getUnlocalizedName());
 		GameData.getBlockItemMap().put(block, block.item);
 
 		// iterate all substance variants and add to collections for later

@@ -10,11 +10,11 @@ import net.minecraft.block.material.Material;
  * Determines Minecraft material and other physical properties.
  */
 public enum BaseMaterial {
-	EXTRUDED_STONE("extruded_stone", Material.rock, Block.soundTypeStone),
-	COMPOSITE("composite", Material.rock, Block.soundTypeStone),
-	DURAPLAST("duraplast", Material.iron, Block.soundTypeMetal);
+	FLEXSTONE("flexstone", Material.rock, Block.soundTypeStone),
+	DURASTONE("durastone", Material.rock, Block.soundTypeStone),
+	HYPERSTONE("hyperstone", Material.iron, Block.soundTypeMetal);
 
-	public final String name;
+	public final String materialName;
 	public final Material material;
 	public final SoundType stepSound;
 
@@ -24,7 +24,7 @@ public enum BaseMaterial {
 	public final int harvestLevel;
 
 	BaseMaterial(String name, Material material, SoundType sound) {
-		this.name = name;
+		this.materialName = name;
 		this.material = material;
 		stepSound = sound;
 

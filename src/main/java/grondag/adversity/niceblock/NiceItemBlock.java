@@ -24,17 +24,11 @@ public class NiceItemBlock extends ItemMultiTexture {
 		setHasSubtypes(true);
 	}
 
-    private static Function nameGetter = new Function<ItemStack, String>()
-    {
-        public String apply(ItemStack stack)
-        {
-            return stack.getUnlocalizedName();
-        }
-    }; 
-    
     @Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName() + "." + ((NiceBlock) block).style.toString() + "_" + stack.getMetadata();
-	}
+    public String getItemStackDisplayName(ItemStack stack)
+    {
+        return ((NiceBlock)this.block).getItemStackDisplayName(stack);
+    }
  	
+	
 }

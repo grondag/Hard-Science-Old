@@ -39,6 +39,7 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.common.property.Properties;
+import net.minecraftforge.fml.common.registry.LanguageRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -96,9 +97,6 @@ public class NiceBlock extends Block {
 	 */
 	public final ItemMultiTexture item;
 
-	/** Non-prefixed, unlocalized name of this block */
-	public final String name;
-
 	/**
 	 * Handler for onBlockPlaced event. Given at instantiation. Allows player to
 	 * build large multi-blocks with connected-texture blocks and handles
@@ -116,17 +114,12 @@ public class NiceBlock extends Block {
 	/** number of meta variants to create.  Max is 16. */
 	public final int metaCount;
 	
-	/**
-	 * Assumes first substance is representative of all the substances for
-	 * purposes of setting material-dependent attributes.
-	 */
-	public NiceBlock(String name, NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
+	public NiceBlock(NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
 		super(material.material);
 		this.style = style;
 		this.material = material;
 		this.metaCount = metaCount;
-		this.name = name;
-		setUnlocalizedName(Adversity.MODID + ":" + name);
+		setUnlocalizedName(material.materialName + "." + style.styleName);
 		setCreativeTab(Adversity.tabAdversity);
 		this.setHarvestLevel(material.harvestTool, material.harvestLevel);
 		setStepSound(material.stepSound);
@@ -183,6 +176,26 @@ public class NiceBlock extends Block {
 	public int getMetaFromState(IBlockState state) {
 		return state.getValue(META);
 	}
+	
+	// LOCALIZATION
+    @Override
+    public String getLocalizedName()
+    {
+        // TODO Auto-generated method stub
+        return super.getLocalizedName();
+    }
+
+    /**
+     * Here so that item block class can be generic.
+     */
+    public String getItemStackDisplayName(ItemStack stack){
+        
+        return 
+                LanguageRegistry.instance().getStringLocalization(material.materialName)
+                + " - "
+                + LanguageRegistry.instance().getStringLocalization(style.styleName)
+                + ", " + stack.getItemDamage();
+    }
 
 	// INTERACTION HANDLING
 
@@ -191,7 +204,7 @@ public class NiceBlock extends Block {
 		return state.getValue(META);
 	}
 
-	@Override
+    @Override
 	public IBlockState onBlockPlaced(World worldIn, BlockPos pos,
 			EnumFacing facing, float hitX, float hitY,
 			float hitZ, int meta, EntityLivingBase placer) {

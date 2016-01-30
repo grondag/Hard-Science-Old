@@ -32,25 +32,25 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  */
 public abstract class NiceStyle {
 	
-	public static final NiceStyle RAW = new NiceStyleOld(new ModelCookbook("raw", 4), null);
-	public static final NiceStyle SMOOTH = new NiceStyleOld(new ModelCookbook("polished", 4), null);
+	public static final NiceStyle RAW = new NiceStyleOld("raw", new ModelCookbook("raw", 4), null);
+	public static final NiceStyle SMOOTH = new NiceStyleOld("smooth", new ModelCookbook("polished", 4), null);
 //	public static final NiceStyle MASONRY_A = new NiceStyleOld(new ModelCookbookMasonry(16, 1), null);
 //	public static final NiceStyle MASONRY_B = new NiceStyleOld(new ModelCookbookMasonry(32, 1), null);
 //	public static final NiceStyle MASONRY_C = new NiceStyleOld(new ModelCookbookMasonry(48, 1), null);
 //	public static final NiceStyle MASONRY_D = new NiceStyleOld(new ModelCookbookMasonry(64, 1), null);
 //	public static final NiceStyle MASONRY_E = new NiceStyleOld(new ModelCookbookMasonry(80, 1), null);
-	public static final NiceStyle COLUMN_SQUARE_X = new NiceStyleOld(new ModelCookbookColumnSquare("square_column", 1, Axis.X), null);
-	public static final NiceStyle COLUMN_SQUARE_Y = new NiceStyleOld(new ModelCookbookColumnSquare("square_column", 1, Axis.Y), null);
-	public static final NiceStyle COLUMN_SQUARE_Z = new NiceStyleOld(new ModelCookbookColumnSquare("square_column", 1, Axis.Z), null);
-	public static final NiceStyle COLUMN_ROUND_X = new NiceStyleOld(new ModelCookbookColumnRound("polished", 1, Axis.X), null);
-	public static final NiceStyle COLUMN_ROUND_Y = new NiceStyleOld(new ModelCookbookColumnRound("polished", 1, Axis.Y), null);
-	public static final NiceStyle COLUMN_ROUND_Z = new NiceStyleOld(new ModelCookbookColumnRound("polished", 1, Axis.Z), null);
-	public static final NiceStyle HOT_BASALT = new NiceStyleNew(
+	public static final NiceStyle COLUMN_SQUARE_X = new NiceStyleOld("square_column_x", new ModelCookbookColumnSquare("square_column", 1, Axis.X), null);
+	public static final NiceStyle COLUMN_SQUARE_Y = new NiceStyleOld("square_column_y", new ModelCookbookColumnSquare("square_column", 1, Axis.Y), null);
+	public static final NiceStyle COLUMN_SQUARE_Z = new NiceStyleOld("square_column_z", new ModelCookbookColumnSquare("square_column", 1, Axis.Z), null);
+	public static final NiceStyle COLUMN_ROUND_X = new NiceStyleOld("round_column_x", new ModelCookbookColumnRound("polished", 1, Axis.X), null);
+	public static final NiceStyle COLUMN_ROUND_Y = new NiceStyleOld("round_column_y", new ModelCookbookColumnRound("polished", 1, Axis.Y), null);
+	public static final NiceStyle COLUMN_ROUND_Z = new NiceStyleOld("round_column_z", new ModelCookbookColumnRound("polished", 1, Axis.Z), null);
+	public static final NiceStyle HOT_BASALT = new NiceStyleNew("hot_basalt",
 			new ModelControllerDual(
 					new ModelControllerBlock("raw", 4, EnumWorldBlockLayer.SOLID, true, true),
 					new ModelControllerBlock("hot_basalt_3", 4, EnumWorldBlockLayer.TRANSLUCENT, false, true)));
 
-	public static final NiceStyle BIG_TEX = new NiceStyleNew(
+	public static final NiceStyle BIG_TEX = new NiceStyleNew("big_tex",
 			new ModelControllerDual(
 					new ModelControllerBigTex("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, NiceColor.STONE0),
 					new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.STONE0)));
@@ -58,14 +58,21 @@ public abstract class NiceStyle {
 //     public static final NiceStyle BIG_TEX = new NiceStyleNew(
 //     new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.STONE0));
 
+
+	public final String styleName;
 	
 	public abstract IModelController getModelController();
+	
+	protected NiceStyle(String styleName){
+	    this.styleName = styleName;
+	}
 	
 	public static class NiceStyleNew extends NiceStyle {
 
 		final IModelController controller;
 		
-		public NiceStyleNew(IModelController controller){
+		public NiceStyleNew(String styleName, IModelController controller){
+		    super(styleName);
 			this.controller = controller;
 		}
 		
@@ -102,7 +109,8 @@ public abstract class NiceStyle {
 		/**
 		 * Instantiate a new style.  See elsewhere in this class for what stuff does.
 		 */
-		NiceStyleOld(ModelCookbook firstCookbook, ModelCookbook secondCookbook) {
+		NiceStyleOld(String styleName, ModelCookbook firstCookbook, ModelCookbook secondCookbook) {
+            super(styleName);
 			this.firstCookbook = firstCookbook;
 			this.firstCookbook.setStyle(this);
 		
