@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 
 import java.util.Map;
 

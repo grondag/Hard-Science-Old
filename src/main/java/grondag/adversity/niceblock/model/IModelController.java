@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.model;
 
+import grondag.adversity.niceblock.newmodel.NiceColor;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
@@ -23,7 +24,7 @@ public interface IModelController {
 	/**
 	 * Used by NiceBlock to generate appropriate render state.
 	 */
-	public abstract ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos);
+	public abstract RenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos);
 	
 	/**
 	 * Override if special collision handling is needed due to non-cubic shape.
@@ -38,12 +39,12 @@ public interface IModelController {
 	/**
 	 * Tells NiceModel which texture to use for block-breaking particles.
 	 */
-	public String getFirstTextureName(int meta);
+	public String getParticleTextureName(NiceColor color);
 	
 	/**
 	 * Supports texture stitch event
 	 */
-	public String[] getAllTextures(int meta);
+	public String[] getAllTextures();
 	
 	/**
 	 * Texture rotations. Used mainly when rotated textures are used as

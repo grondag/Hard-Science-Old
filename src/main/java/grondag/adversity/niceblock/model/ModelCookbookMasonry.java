@@ -3,9 +3,9 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblock.NiceBlock.TestForSubstance;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlock.TestForCompleteMatch;
+import grondag.adversity.niceblock.newmodel.NiceBlock.TestForSubstance;
 
 import java.util.Map;
 

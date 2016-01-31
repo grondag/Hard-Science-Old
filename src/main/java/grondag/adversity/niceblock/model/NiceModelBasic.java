@@ -1,8 +1,8 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.NiceStyle.NiceStyleOld;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 
 import java.io.IOException;
 import java.util.List;
@@ -89,8 +89,8 @@ public class NiceModelBasic extends NiceModel {
 	
 	protected IBakedModel itemModel;
 	
-	public NiceModelBasic(NiceStyleOld style, int meta) {
-		super(meta);
+	public NiceModelBasic(RenderStateMapper renderStateMapper, NiceStyleOld style) {
+		super(renderStateMapper);
 		this.style = style;
 		primaryModels = new IFlexibleBakedModel[style.firstCookbook.getAlternateCount() * style.firstCookbook.getRecipeCount()];
 		
@@ -116,7 +116,7 @@ public class NiceModelBasic extends NiceModel {
 			
 			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
 			
-			ModelRenderState renderState = exState.getValue(NiceBlock.MODEL_RENDER_STATE);
+			RenderState renderState = exState.getValue(NiceBlock.MODEL_STATE);
 			if(layer == style.firstCookbook.getRenderLayer()){
 				retVal = primaryModels[renderState.variant1];
 			} else if (style.secondCookbook != null && layer == style.secondCookbook.getRenderLayer()){

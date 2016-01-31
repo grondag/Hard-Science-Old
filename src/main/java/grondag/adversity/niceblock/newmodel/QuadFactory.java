@@ -1,8 +1,9 @@
-package grondag.adversity.niceblock.model;
+package grondag.adversity.niceblock.newmodel;
 
 import java.util.Collections;
 import java.util.List;
 
+import grondag.adversity.niceblock.model.IModelController;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
 
 import javax.vecmath.Matrix4f;

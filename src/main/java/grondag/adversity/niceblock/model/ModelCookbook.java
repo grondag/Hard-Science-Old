@@ -3,8 +3,8 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
-import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.support.CornerRecipeFinder;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 

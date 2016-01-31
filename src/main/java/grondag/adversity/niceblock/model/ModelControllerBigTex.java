@@ -3,8 +3,8 @@ package grondag.adversity.niceblock.model;
 import com.google.common.collect.ImmutableMap;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
+import grondag.adversity.niceblock.newmodel.NiceColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
@@ -37,7 +37,7 @@ public class ModelControllerBigTex extends ModelController{
 		return new NiceModelBigTex(this, meta, NiceColor.values()[firstColor.ordinal() + meta]);
 	}
 
-	protected String getTextureName(int meta, int offset) {
+	protected String getTextureName(int offset) {
 		return "adversity:blocks/" + textureName;
 	}
 

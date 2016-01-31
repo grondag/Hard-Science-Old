@@ -3,8 +3,8 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlock.TestForStyle;
 import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.newmodel.NiceBlock.TestForStyle;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.Map;

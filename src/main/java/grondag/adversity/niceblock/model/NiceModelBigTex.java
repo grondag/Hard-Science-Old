@@ -1,9 +1,9 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.NiceColor;
-import grondag.adversity.niceblock.model.QuadFactory.CubeInputs;
-import grondag.adversity.niceblock.model.QuadFactory.QuadInputs;
-import grondag.adversity.niceblock.model.QuadFactory.Vertex;
+import grondag.adversity.niceblock.newmodel.NiceColor;
+import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
+import grondag.adversity.niceblock.newmodel.QuadFactory.QuadInputs;
+import grondag.adversity.niceblock.newmodel.QuadFactory.Vertex;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,20 +49,18 @@ public class NiceModelBigTex extends NiceModel
     @Override
     public void handleTexturePreStitch(Pre event)
     {
-        event.map.registerSprite(new ResourceLocation(getController().getFirstTextureName(meta)));
+        event.map.registerSprite(new ResourceLocation(controller.getTextureName(0)));
     }
 
     @Override
     public void handleTexturePostStitch(Post event)
     {
-        textureSprite = event.map.getAtlasSprite(getController().getFirstTextureName(meta));
-        particleTexture = textureSprite;
+        textureSprite = event.map.getAtlasSprite(controller.getTextureName(0));
     }
 
-    protected NiceModelBigTex(ModelControllerBigTex controller, int meta, NiceColor color)
+    protected NiceModelBigTex(RenderStateMapper renderStateMapper, ModelControllerBigTex controller)
     {
-        super(meta);
-        this.color = color;
+        super(renderStateMapper);
         this.controller = controller;
         faceQuads = new List[6][256];
         facadeModels = new BigTexFacade[4096];
@@ -80,7 +78,7 @@ public class NiceModelBigTex extends NiceModel
         CubeInputs cubeInputs = new CubeInputs();
         cubeInputs.color = (controller.renderLayer == EnumWorldBlockLayer.SOLID) ? color.base : color.highlight;
         cubeInputs.textureRotation = controller.textureRotation;
-        cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getController().getFirstTextureName(meta));
+        cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(0));
 
         for (int i = 0; i < 16; i++)
         {

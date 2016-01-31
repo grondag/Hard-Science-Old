@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
@@ -27,8 +27,8 @@ public class ModelControllerDual implements IModelController {
 	}
 
 	@Override
-	public ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-		return new ModelRenderState(
+	public RenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		return new RenderState(
 						controllerPrimary.getVariantID((IExtendedBlockState) state, world, pos),
 						controllerSecondary.getVariantID((IExtendedBlockState) state, world, pos));
 	}
@@ -44,13 +44,7 @@ public class ModelControllerDual implements IModelController {
 	}
 
 	@Override
-	public String getFirstTextureName(int meta) {
-		return controllerPrimary.getFirstTextureName(meta);
-	}
-
-	@Override
-	public String[] getAllTextures(int meta) {
-		// TODO Auto-generated method stub
+	public String[] getAllTextures() {
 		return null;
 	}
 

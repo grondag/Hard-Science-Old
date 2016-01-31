@@ -1,4 +1,7 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.newmodel;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public enum NiceColor {
 	STONE0(0xFFF9F8F7, 0xFFF9F8F7, 0xFFF9F8F7),
@@ -61,9 +64,24 @@ public enum NiceColor {
 	public final int highlight;
 	public final int border;
 	
+	private TextureAtlasSprite particleTexture;
+	
 	private NiceColor(int base, int highlight, int border){
 		this.base = base;
 		this.highlight = highlight;
 		this.border = border;
+	}
+	
+	public String getParticleTextureName(){
+	    return "adversity:blocks/raw";
+	}
+	
+	public TextureAtlasSprite getParticleTexture()
+	{
+	    if(particleTexture == null)
+	    {
+	        particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getParticleTextureName());
+	    }
+	    return particleTexture;
 	}
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -33,7 +33,7 @@ public class NiceModelDual extends NiceModel {
 	protected final NiceModel modelSecondary;
 	
 	public NiceModelDual(NiceModel modelPrimary, NiceModel modelSecondary){
-		super(modelPrimary.meta);
+		super(modelPrimary.renderStateMapper);
 		this.modelPrimary = modelPrimary;
 		this.modelSecondary = modelSecondary;
 	}
@@ -51,7 +51,7 @@ public class NiceModelDual extends NiceModel {
 			
 			IExtendedBlockState exState = (IExtendedBlockState) state;
 			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-			ModelRenderState renderState = exState.getValue(NiceBlock.MODEL_RENDER_STATE);
+			RenderState renderState = exState.getValue(NiceBlock.MODEL_STATE);
 
 			if(modelPrimary.getController().canRenderInLayer(layer)){
 				retVal = modelPrimary.getModelVariant(renderState.variant1);				
@@ -143,11 +143,11 @@ public class NiceModelDual extends NiceModel {
 
 
     @Override
-    protected List<BakedQuad> getItemQuads()
+    protected List<BakedQuad> getItemQuads(ItemStack stack)
     {
         return new ImmutableList.Builder()
-                .addAll(modelPrimary.getItemQuads())
-                .addAll(modelSecondary.getItemQuads())
+                .addAll(modelPrimary.getItemQuads(stack))
+                .addAll(modelSecondary.getItemQuads(stack))
                 .build();
     }
 

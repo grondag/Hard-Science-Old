@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.newmodel;
 
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
@@ -8,20 +8,21 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.model.ModelRenderState;
+import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 
-	public NiceBlockPlus(NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
-		super(style, placer, material, metaCount);
+	public NiceBlockPlus(BlockModelHelper blockModelHelper, NicePlacement placer, BaseMaterial material, int metaCount)
+	{
+		super(blockModelHelper, placer, material, metaCount);
 	}
 	
-	private static long elapsedTime;
-	private static int timerCount = 0;
-	private static int hit = 0;
-	private static int miss = 0;
-	private static int dirtyCount = 0;
+	private long elapsedTime;
+	private int timerCount = 0;
+	private int hit = 0;
+	private int miss = 0;
+	private int dirtyCount = 0;
 	
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
@@ -36,8 +37,8 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 	    } else {
     		// should always be an IExtendedBlockState but avoid crash if somehow not
     		if (state instanceof IExtendedBlockState) {
-    			ModelRenderState renderState = style.getModelController().getRenderState((IExtendedBlockState) state, world, pos);
-    			state = ((IExtendedBlockState)state).withProperty( NiceBlock.MODEL_RENDER_STATE, renderState);
+    			ModelState modelState = this.blockModelHelper.getModelStateForBlock(this, state, world, pos);
+    			state = ((IExtendedBlockState)state).withProperty( NiceBlock.MODEL_STATE, modelState);
     			miss++;
 //    	    	Adversity.log.info("cache miss @" + pos.toString());
     			
@@ -61,7 +62,7 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 
 		elapsedTime += (end - start);
 		if((timerCount & 0x800) == 0x800){
-			Adversity.log.info("average getExtendedState =" +  elapsedTime / (timerCount)
+			Adversity.log.info(this.getUnlocalizedName() + " average getExtendedState =" +  elapsedTime / (timerCount)
 					+ " cache hit rate =" + (hit * 100 / (hit + miss)) + "%  dirtyCount =" + dirtyCount );
 			timerCount = 0;
 			elapsedTime = 0;

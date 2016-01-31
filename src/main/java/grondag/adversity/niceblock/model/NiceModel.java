@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -81,14 +81,9 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  */
 public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmartItemModel {
 
-
-    /**
-	 * Provides texture parameters.
-	 */
+	protected final RenderStateMapper renderStateMapper;
 	protected final int meta;
-
-	protected TextureAtlasSprite particleTexture;
-
+	
 	public abstract IModelController getController();
 	
 	/**
@@ -98,11 +93,12 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 *
 	 * See class header and member descriptions for more info on what things do.
 	 */
-	protected NiceModel(int meta) {
+	protected NiceModel(RenderStateMapper renderStateMapper, int meta) {
+		this.renderStateMapper = renderStateMapper;
 		this.meta = meta;
 	}
 
-	private IBakedModel itemModel = null;
+	private IBakedModel itemModels[] = null;
 	
 	/**
 	 * The function parameter to bake method presumably provides a way to do
@@ -130,7 +126,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Happens before model bake.
 	 */
 	public void handleTexturePreStitch(Pre event){
-		for(String tex : getController().getAllTextures(meta)){
+		for(String tex : getController().getAllTextures()){
 			event.map.registerSprite(new ResourceLocation(tex));
 		}
 	}
@@ -140,7 +136,8 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 * Happens before model bake but after texture atlas is created.
 	 */
 	public void handleTexturePostStitch(Post event){
-		particleTexture = event.map.getAtlasSprite(getController().getFirstTextureName(meta));
+
+
 	}
 	
 	/**
@@ -158,7 +155,7 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 			
 			IExtendedBlockState exState = (IExtendedBlockState) state;
 			EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
-			ModelRenderState renderState = exState.getValue(NiceBlock.MODEL_RENDER_STATE);
+			RenderState renderState = exState.getValue(NiceBlock.MODEL_STATE);
 
 			if(getController().canRenderInLayer(layer)){
 				retVal = getModelVariant(renderState.variant1);
@@ -182,61 +179,6 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 	 */
 	public abstract IBakedModel getModelVariant(int variantID);
 	
-	/**
-	 * Used for block-breaking particles.
-	 */
-	@Override
-	public TextureAtlasSprite getParticleTexture(){
-		return particleTexture;
-	}
-	
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public List getFaceQuads(EnumFacing p_177551_1_) {
-		return null;
-	}
-
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public List getGeneralQuads() {
-		return null;
-	}
-
-	
-	/**
-	 * Only used for item model because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public boolean isAmbientOcclusion() {
-		return true;
-	}
-
-	/**
-	 * Only used for item model because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public boolean isGui3d() { 
-		return true;
-	}
-
-
-	/**
-	 * Should never be called because we provide a separate IFlexibleBakedModel instance in handleBlockState
-	 */
-	@Override
-	public boolean isBuiltInRenderer() {
-		return false;
-	}
-
-   @Override
-    public ItemCameraTransforms getItemCameraTransforms() {
-        return ItemCameraTransforms.DEFAULT;
-    }
-
 	
 	////////////////////////////////////////////////////
     //  ITEM STUFFS
@@ -246,12 +188,14 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
      * All subclass should provide vanilla baked quads for their item models.  
      * Colored quads are supported.  
      */
-    protected abstract List<BakedQuad> getItemQuads();
+    protected abstract List<BakedQuad> getItemQuads(ItemStack stack);
     
    @Override
     public final IBakedModel handleItemState(ItemStack stack) {
        
-       if(itemModel == null){
+       int itemModelIndex = renderStateMapper.getItemModelIndex(stack);
+       
+       if(itemModels[itemModelIndex] == null){
            
            /**
             * Enable perspective handling.
@@ -265,11 +209,11 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
 
            IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
            
-           itemModel = 
+           itemModels[itemModelIndex] = 
                new IPerspectiveAwareModel.MapWrapper(
                    new IFlexibleBakedModel.Wrapper(
                        new SimpleBakedModel(
-                       getItemQuads(), 
+                       getItemQuads(stack), 
                        // face quads have to be present in list even in empty
                        new ImmutableList.Builder()
                            .add(new ImmutableList.Builder<BakedQuad>().build())
@@ -279,15 +223,15 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
                            .add(new ImmutableList.Builder<BakedQuad>().build())
                            .add(new ImmutableList.Builder<BakedQuad>().build())
                            .build(),
-                       NiceModel.this.isAmbientOcclusion(), 
-                       NiceModel.this.isGui3d(),
-                       NiceModel.this.particleTexture, 
-                       NiceModel.this.getItemCameraTransforms()),
+                       false, 
+                       false,
+                       renderStateMapper.getColorFromStack(stack).getParticleTexture(),
+                       ItemCameraTransforms.DEFAULT),
                        DefaultVertexFormats.ITEM),
                    state);
        }
        
-       return itemModel;
+       return itemModels[itemModelIndex];
     }
        
     /**
@@ -301,5 +245,56 @@ public abstract class NiceModel implements IBakedModel, ISmartBlockModel, ISmart
         }
         builder.addAll(model.getGeneralQuads());
         return builder.build();
+    }
+    
+    ///// REMAINING METHODS SHOULD NEVER BE CALLED
+    
+    @Override
+    public List<BakedQuad> getFaceQuads(EnumFacing p_177551_1_)
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getFaceQuads()");
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public List<BakedQuad> getGeneralQuads()
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getGeneralQuads()");
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public boolean isAmbientOcclusion()
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.isAmbientOcclusion()");
+        return false;
+    }
+
+    @Override
+    public boolean isGui3d()
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.isGui3d()");
+        return false;
+    }
+
+    @Override
+    public boolean isBuiltInRenderer()
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.isBuiltInRenderer()");
+        return false;
+    }
+
+    @Override
+    public TextureAtlasSprite getParticleTexture()
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getParticleTexture()");
+        return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
+    }
+
+    @Override
+    public ItemCameraTransforms getItemCameraTransforms()
+    {
+        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getItemCameraTransforms()");
+        return ItemCameraTransforms.DEFAULT;
     }
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
-import grondag.adversity.niceblock.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 public abstract class ModelController implements IModelController{
@@ -78,11 +78,6 @@ public abstract class ModelController implements IModelController{
 	}
 	
 	@Override
-	public String getFirstTextureName(int meta) {
-		return this.getTextureName(meta, 0);
-	}
-  
-	@Override
 	public ICollisionHandler getCollisionHandler() {
 		return null;
 	}
@@ -97,8 +92,8 @@ public abstract class ModelController implements IModelController{
 	}
 	
 	@Override
-	public ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
-		return new ModelRenderState(getVariantID((IExtendedBlockState) state, world, pos), -1);
+	public RenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		return new RenderState(getVariantID((IExtendedBlockState) state, world, pos), -1);
 	}
 
 	
@@ -115,22 +110,22 @@ public abstract class ModelController implements IModelController{
 	public ImmutableMap<String, String> getTexturesForExpandedAlternate(int meta, int expanded) {
 		
 		Map<String, String> textures = Maps.newHashMap();
-		textures.put("all", this.getTextureName(meta, calcAlternate(expanded)));
+		textures.put("all", this.getTextureName(calcAlternate(expanded)));
 				
 		return ImmutableMap.copyOf(textures);
 	}
 	
-	protected String getTextureName(int meta, int offset) {
+	protected String getTextureName(int offset) {
 		return "adversity:blocks/" + textureName + "_" + (offset >> 3) + "_" + (offset & 7);
 	}
 	
 	@Override
-	public String[] getAllTextures(int meta){
+	public String[] getAllTextures(){
 		
 		final String retVal[] = new String[alternateTextureCount * textureCount];
 		
 		for(int i = 0 ; i < alternateTextureCount * textureCount ; i++){
-			retVal[i] = this.getTextureName(meta, i);
+			retVal[i] = this.getTextureName(i);
 		}
 		return retVal;
 	}

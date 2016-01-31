@@ -10,9 +10,10 @@ import grondag.adversity.niceblock.model.ModelCookbook;
 import grondag.adversity.niceblock.model.ModelCookbookColumnRound;
 import grondag.adversity.niceblock.model.ModelCookbookColumnSquare;
 import grondag.adversity.niceblock.model.ModelCookbookMasonry;
-import grondag.adversity.niceblock.model.ModelRenderState;
+import grondag.adversity.niceblock.model.RenderState;
 import grondag.adversity.niceblock.model.NiceModel;
 import grondag.adversity.niceblock.model.NiceModelBasic;
+import grondag.adversity.niceblock.newmodel.NiceColor;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -24,7 +25,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 /**
- * Style governs the visual appearance and some behavior of a NiceBlock.
+ * Style governs the texture and some behavior of a NiceBlock.
  * A NiceBlock can have only a single style.
  * Some styles are visually similar or identical but have distinct identities
  * to allow multi-blocks with connected textures that are adjacent to each other.
@@ -139,12 +140,12 @@ public abstract class NiceStyle {
 		}
 		
 		@Override
-		public ModelRenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
+		public RenderState getRenderState(IExtendedBlockState state, IBlockAccess world, BlockPos pos) {
 			
 			if(secondCookbook == null){
-				return new ModelRenderState(firstCookbook.getVariantID((IExtendedBlockState) state, world, pos), -1);
+				return new RenderState(firstCookbook.getVariantID((IExtendedBlockState) state, world, pos), -1);
 			} else {
-				return new ModelRenderState(
+				return new RenderState(
 								firstCookbook.getVariantID((IExtendedBlockState) state, world, pos),
 								secondCookbook.getVariantID((IExtendedBlockState) state, world, pos));
 			}

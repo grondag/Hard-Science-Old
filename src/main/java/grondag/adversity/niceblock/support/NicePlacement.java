@@ -1,13 +1,13 @@
 package grondag.adversity.niceblock.support;
 
+import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
-import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceBlock.TestForCompleteMatch;
-import grondag.adversity.niceblock.NiceBlock.TestForStyleGroupAndSubstance;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.newmodel.BlockTests;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.BlockPos;
@@ -56,21 +56,15 @@ public abstract class NicePlacement {
 	 * */
 	public static class PlacementBigBlock extends NicePlacement {
 
-		/** Blocks that share the same style and meta*/
-		private NiceBlock[] siblingsCache;
-		private boolean isSiblingsCacheDone = false;
-
-		private NiceBlock[] getSiblings() {
-			// substances are grouped consistently across blocks, so the first substance
-			// is sufficient for finding sibling blocks.
-			if (!isSiblingsCacheDone) {
-				siblingsCache = NiceBlockRegistrar.getBlocksForStyleAndMeta(owner.style, 0)
-						.toArray(new NiceBlock[0]);
-				isSiblingsCacheDone = true;
-			}
-			return siblingsCache;
-		}
-
+	    /**
+	     * All possible blocks that the placed block could connect with
+	     */
+	    private IBlockTest siblingTest;
+	    
+	    public PlacementBigBlock(IBlockTest siblingTest, IBlockTest matchTest){
+	        
+	    }
+	    
 		@Override
 		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 				float hitZ, int meta, EntityLivingBase placer) {
@@ -78,55 +72,54 @@ public abstract class NicePlacement {
 			PlacementValidatorCubic shape = new PlacementValidatorCubic(4, 4, 4);
 
 			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
-			NeighborTestResults results = neighbors.getNeighborTestResults(new NiceBlock.TestForStyleAndSubstance(owner
-					.getStateFromMeta(meta)));
+			NeighborTestResults results = neighbors.getNeighborTestResults(siblingTest);
 
 			IBlockState candidate;
+			
+			int speciesInUseFlags = 0;
 
 			if (results.east()) {
 				candidate = neighbors.east();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
 					return candidate;
 				}
 				;
 			}
 			if (results.west()) {
 				candidate = neighbors.west();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
 					return candidate;
 				}
 			}
 			if (results.north()) {
 				candidate = neighbors.north();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
 					return candidate;
 				}
 			}
 			if (results.south()) {
 				candidate = neighbors.south();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
 					return candidate;
 				}
 			}
 			if (results.up()) {
 				candidate = neighbors.up();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
 					return candidate;
 				}
 			}
 			if (results.down()) {
 				candidate = neighbors.down();
-				if (shape.isValidShape(worldIn, pos, new TestForCompleteMatch(candidate))) {
+				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
 					return candidate;
 				}
 			}
 
-			// if no available mates, try to choose a style that will not
+			// if no available mates, choose a species that will not
 			// connect to what is surrounding
-			NeighborTestResults tests[] = new NeighborTestResults[getSiblings().length];
-			boolean match[] = new boolean[getSiblings().length];
 
-			for (int n = 0; n < getSiblings().length; n++) {
+			for (int n = 0; n < 16; n++) {
 				tests[n] = neighbors.getNeighborTestResults(new TestForCompleteMatch(getSiblings()[n]
 						.getStateFromMeta(meta)));
 				match[n] = tests[n].north() || tests[n].south() || tests[n].east() || tests[n].west() || tests[n].up()

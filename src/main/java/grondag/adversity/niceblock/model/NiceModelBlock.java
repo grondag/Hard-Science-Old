@@ -11,8 +11,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceBlock;
 import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -46,10 +46,10 @@ public class NiceModelBlock extends NiceModel {
 	 */
 	protected final IBakedModel[] models;
 	
-	protected IBakedModel itemModel;
+	protected IBakedModel[] itemModels;
 	
-	protected NiceModelBlock(ModelControllerBlock controller, int meta) {
-		super(meta);
+	protected NiceModelBlock(RenderStateMapper renderStateMapper, ModelControllerBlock controller) {
+		super(renderStateMapper);
 		this.controller = controller;
 		models = new IFlexibleBakedModel[controller.expandedAlternateCount];
 	}
@@ -72,7 +72,7 @@ public class NiceModelBlock extends NiceModel {
 		IRetexturableModel template;
 		try {
 			template = (IRetexturableModel) event.modelLoader.getModel(new ResourceLocation(baseModelName + controller.calcRotation(expanded).degrees));
-			IModel model = template.retexture(controller.getTexturesForExpandedAlternate(meta, expanded));
+			IModel model = template.retexture(controller.getTexturesForExpandedAlternate(expanded));
 			return model.bake(state, DefaultVertexFormats.ITEM, textureGetter);
 		} catch (IOException e) {
 			Adversity.log.error("Unable to load model " + baseModelName + " in " + this.getClass(), e);
@@ -116,5 +116,12 @@ public class NiceModelBlock extends NiceModel {
     protected List<BakedQuad> getItemQuads()
     {
         return NiceModel.getItemQuadsFromModel(itemModel);
+    }
+
+    @Override
+    protected List<BakedQuad> getItemQuads(ItemStack stack)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

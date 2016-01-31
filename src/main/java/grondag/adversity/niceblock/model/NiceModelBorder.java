@@ -14,10 +14,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceColor;
 import grondag.adversity.niceblock.model.IModelController.Rotation;
-import grondag.adversity.niceblock.model.QuadFactory.CubeInputs;
-import grondag.adversity.niceblock.model.QuadFactory.Vertex;
+import grondag.adversity.niceblock.newmodel.NiceColor;
+import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
+import grondag.adversity.niceblock.newmodel.QuadFactory.Vertex;
 
 public class NiceModelBorder extends NiceModel {
 	
@@ -34,12 +34,9 @@ public class NiceModelBorder extends NiceModel {
 	protected final BorderFacade[] facadeModels;
 	
     protected List<BakedQuad> itemQuads;
-    
-	protected final NiceColor color;
 
-	protected NiceModelBorder(ModelControllerBorder controller, int meta, NiceColor color) {
-		super(meta);
-		this.color = color;
+	protected NiceModelBorder(RenderStateMapper renderStateMapper, ModelControllerBorder controller) {
+		super(renderStateMapper);
 		this.controller = controller;
 		faceQuads = new List[6][48];
 		facadeModels = new BorderFacade[386];

@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.support;
 
-import grondag.adversity.niceblock.NiceBlock;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
+import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
 
 import java.util.Map;
 
@@ -29,10 +29,10 @@ public class NiceBlockStateMapper extends DefaultStateMapper {
 		if (block instanceof NiceBlock) {
 			NiceBlock niceBlock = (NiceBlock) block;
 
-			for (int i = 0; i < niceBlock.metaCount; i++) {
+			for (int i = 0; i < niceBlock.blockModelHelper.getMetaCount(); i++) {
 				IBlockState state = niceBlock.getDefaultState().withProperty(NiceBlock.META, i);
 				mapLocations.put(state,
-						new ModelResourceLocation(NiceBlockRegistrar.getModelResourceNameFromMeta(niceBlock, i)));
+						new ModelResourceLocation(niceBlock.blockModelHelper.dispatcher.getModelResourceString()));
 			}
 		}
 		return mapLocations;

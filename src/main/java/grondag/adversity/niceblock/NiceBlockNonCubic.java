@@ -1,5 +1,7 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.niceblock.newmodel.BaseMaterial;
+import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;

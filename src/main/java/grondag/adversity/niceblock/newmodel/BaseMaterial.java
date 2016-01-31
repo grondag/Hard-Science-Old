@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Config;
 import net.minecraft.block.Block;

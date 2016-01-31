@@ -1,8 +1,7 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.niceblock.model.ModelRenderState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
