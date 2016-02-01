@@ -29,7 +29,7 @@ public class ModelProxy implements ISmartItemModel
     @Override
     public IBakedModel handleItemState(ItemStack stack)
     {
-        return blockModelHelper.dispatcher.getItemModelForModelState(blockModelHelper.getModelStateForItem(stack).getModelIndex());
+        return blockModelHelper.dispatcher.getItemModelForModelState(blockModelHelper.getModelStateForItem(stack));
     }
 
     // /// REMAINING METHODS SHOULD NEVER BE CALLED

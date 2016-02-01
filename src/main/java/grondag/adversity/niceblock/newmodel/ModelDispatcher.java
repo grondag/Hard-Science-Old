@@ -5,14 +5,28 @@ import grondag.adversity.Adversity;
 import java.util.Collections;
 import java.util.List;
 
+import javax.vecmath.Vector3f;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.client.model.IModelState;
+import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartBlockModel;
+import net.minecraftforge.client.model.SimpleModelState;
+import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -94,9 +108,46 @@ public class ModelDispatcher implements ISmartBlockModel
     }
 
     @SideOnly(Side.CLIENT)
-    public IBakedModel getItemModelForModelState(int modelState)
+    public IBakedModel getItemModelForModelState(ModelState modelState)
     {
-        return null;
+        
+        if(bakedItemModels[modelState.getShapeIndex()] == null){
+            
+            /**
+             * Enable perspective handling.
+             */
+                
+            TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+                    new Vector3f(0, 1.5f / 16, -2.75f / 16),
+                    TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
+                    new Vector3f(0.375f, 0.375f, 0.375f),
+                    null));
+
+            IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
+            
+            bakedItemModels[modelState.getShapeIndex()] = 
+                new IPerspectiveAwareModel.MapWrapper(
+                    new IFlexibleBakedModel.Wrapper(
+                        new SimpleBakedModel(
+                        controller.getBakedModelFactory().getItemQuads(modelState), 
+                        // face quads have to be present in list even in empty
+                        new ImmutableList.Builder()
+                            .add(new ImmutableList.Builder<BakedQuad>().build())
+                            .add(new ImmutableList.Builder<BakedQuad>().build())
+                            .add(new ImmutableList.Builder<BakedQuad>().build())
+                            .add(new ImmutableList.Builder<BakedQuad>().build())
+                            .add(new ImmutableList.Builder<BakedQuad>().build())
+                            .add(new ImmutableList.Builder<BakedQuad>().build())
+                            .build(),
+                        false, 
+                        false,
+                        modelState.getColor().getParticleTexture(),
+                        ItemCameraTransforms.DEFAULT),
+                        DefaultVertexFormats.ITEM),
+                    state);
+        }
+        
+        return bakedItemModels[modelState.getShapeIndex()];
     }
 
     // REMAINING METHODS SHOULD NEVER BE CALLED

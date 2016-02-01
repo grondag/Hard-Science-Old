@@ -159,7 +159,8 @@ public class NiceBlockRegistrar
             {
                 ModelLoader.setCustomStateMapper(block, NiceBlockStateMapper.instance);
                 
-                ModelResourceLocation itemModelResourceLocation = block.item.getModel(null, null, 0);            
+                ModelResourceLocation itemModelResourceLocation = 
+                        new ModelResourceLocation(((NiceBlock)block).getRegistryName(), "inventory");
                 for (int i = 0; i < block.blockModelHelper.getMetaCount(); i++)
                 {
                     ModelLoader.setCustomModelResourceLocation(block.item, i, itemModelResourceLocation);
@@ -206,6 +207,12 @@ public class NiceBlockRegistrar
         {
             dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
             event.modelRegistry.putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
+        }
+        
+        for (NiceBlock block : allBlocks)
+        {
+            event.modelRegistry.putObject(new ModelResourceLocation(block.getRegistryName(), "inventory"),
+                    new ModelProxy(block.blockModelHelper));
         }
     }
 

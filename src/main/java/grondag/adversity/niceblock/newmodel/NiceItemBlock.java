@@ -62,12 +62,6 @@ public class NiceItemBlock extends ItemBlock {
     }
 
     @Override
-    public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int useRemaining)
-    {
-        return new ModelResourceLocation(((NiceBlock)block).blockModelHelper.dispatcher.getModelResourceString(), "inventory");
-    }
-
-    @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
         return ((NiceBlock)this.block).getItemStackDisplayName(stack);
