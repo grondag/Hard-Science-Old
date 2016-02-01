@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.model.IModelController;
-import grondag.adversity.niceblock.model.IModelController.Rotation;
 import grondag.adversity.niceblock.model.ModelControllerBigTex;
 import grondag.adversity.niceblock.model.ModelControllerBlock;
 import grondag.adversity.niceblock.model.ModelControllerBorder;
@@ -14,6 +13,7 @@ import grondag.adversity.niceblock.model.RenderState;
 import grondag.adversity.niceblock.model.NiceModel;
 import grondag.adversity.niceblock.model.NiceModelBasic;
 import grondag.adversity.niceblock.newmodel.NiceColor;
+import grondag.adversity.niceblock.newmodel.Rotation;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelResourceLocation;

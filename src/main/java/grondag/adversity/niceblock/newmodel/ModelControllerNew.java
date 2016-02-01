@@ -3,8 +3,10 @@ package grondag.adversity.niceblock.newmodel;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
@@ -50,23 +52,23 @@ public abstract class ModelControllerNew
      */
     public final boolean isShaded;
 
-    protected ModelControllerNew(String styleName, String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
-            boolean useRotations)
+    protected ModelControllerNew(String styleName, String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
+            boolean useRotatedTexturesAsAlternates)
     {
         this.styleName = styleName;
         this.textureName = textureName;
-        alternateTextureCount = Math.max(1, alternateCount);
+        this.alternateTextureCount = Math.max(1, alternateTextureCount);
         this.renderLayer = renderLayer;
         this.isShaded = isShaded;
-        useRotatedTexturesAsAlternates = useRotations;
+        this.useRotatedTexturesAsAlternates = useRotatedTexturesAsAlternates;
     }
 
     /**
      * used by block helper methods to get shape-related state
      */
-    public abstract int getBlockShapeVariantID(IBlockState state);
+    public abstract int getBlockShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
-    public abstract int getItemShapeVariantID(ItemStack stack);
+    public abstract int getItemShapeIndex(ItemStack stack);
 
     /**
      * used by dispatcher for cache initialization
@@ -122,4 +124,5 @@ public abstract class ModelControllerNew
     {
         return layer == renderLayer;
     }
+    
 }

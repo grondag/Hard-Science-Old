@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import grondag.adversity.niceblock.model.IModelController;
-import grondag.adversity.niceblock.model.IModelController.Rotation;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4f;

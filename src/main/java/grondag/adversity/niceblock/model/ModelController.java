@@ -14,6 +14,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.niceblock.newmodel.NiceBlock;
+import grondag.adversity.niceblock.newmodel.Rotation;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 public abstract class ModelController implements IModelController{
