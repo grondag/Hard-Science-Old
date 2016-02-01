@@ -13,9 +13,9 @@ import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 
-	public NiceBlockPlus(BlockModelHelper blockModelHelper, NicePlacement placer, BaseMaterial material, int metaCount)
+	public NiceBlockPlus(BlockModelHelper blockModelHelper, BaseMaterial material)
 	{
-		super(blockModelHelper, placer, material, metaCount);
+		super(blockModelHelper, material);
 	}
 	
 	private long elapsedTime;

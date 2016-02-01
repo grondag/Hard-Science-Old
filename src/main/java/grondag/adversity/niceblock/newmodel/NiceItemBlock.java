@@ -51,8 +51,7 @@ public class NiceItemBlock extends ItemBlock {
     @Override
     public int getMetadata(int damage)
     {
-        // TODO Auto-generated method stub
-        return super.getMetadata(damage);
+        return damage;
     }
 
     @Override
@@ -65,15 +64,7 @@ public class NiceItemBlock extends ItemBlock {
     @Override
     public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int useRemaining)
     {
-        // TODO Auto-generated method stub
-        return super.getModel(stack, player, useRemaining);
-    }
-
-
-    @Override
-    public int getMetadata(ItemStack stack)
-    {
-        return ((NiceBlock)this.block).blockModelHelper.getModelStateForItem(stack).getMeta();
+        return new ModelResourceLocation(((NiceBlock)block).blockModelHelper.dispatcher.getModelResourceString(), "inventory");
     }
 
     @Override

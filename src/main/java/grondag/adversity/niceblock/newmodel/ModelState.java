@@ -67,7 +67,7 @@ public abstract class ModelState
         @Override
         public NiceColor getColor()
         {
-            return NiceColor.values()[modelIndex - (modelIndex / NiceColor.values().length)];
+            return NiceColor.values()[modelIndex % NiceColor.values().length];
         }
         
         @Override

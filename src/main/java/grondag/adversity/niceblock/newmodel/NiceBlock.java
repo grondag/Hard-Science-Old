@@ -96,6 +96,7 @@ public class NiceBlock extends Block
         setHardness(material.hardness);
         setResistance(material.resistance);
         collisionHandler = blockModelHelper.dispatcher.controller.getCollisionHandler();
+        blockModelHelper.setBlock(this);
 
         item = new NiceItemBlock(this);
 
@@ -175,8 +176,8 @@ public class NiceBlock extends Block
 
         // TODO: we need to replace the last parameter with a reference to simple block with the particle we want
         // This should only matter for blocks with more than 16 colors (tile entity)
-        worldObj.spawnParticle(EnumParticleTypes.BLOCK_DUST, blockPosition.getX(), blockPosition.getY(), blockPosition.getZ(), numberOfParticles, 0.0D, 0.0D,
-                0.0D, 0.15000000596046448D, new int[] { Block.getStateId(iblockstate) });
+        //worldObj.spawnParticle(EnumParticleTypes.BLOCK_DUST, blockPosition.getX(), blockPosition.getY(), blockPosition.getZ(), numberOfParticles, 0.0D, 0.0D,
+        //       0.0D, 0.15000000596046448D, new int[] { Block.getStateId(iblockstate) });
 
         // tells default handler to cancel
         return true;
@@ -186,14 +187,16 @@ public class NiceBlock extends Block
     public boolean addHitEffects(World worldObj, MovingObjectPosition target, EffectRenderer effectRenderer)
     {
         // TODO Add handler for blocks with more than 16 colors
-        return super.addHitEffects(worldObj, target, effectRenderer);
+        //return super.addHitEffects(worldObj, target, effectRenderer);
+        return true;
     }
 
     @Override
     public boolean addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer)
     {
         // TODO Add handler for blocks with more than 16 colors
-        return super.addDestroyEffects(world, pos, effectRenderer);
+        //return super.addDestroyEffects(world, pos, effectRenderer);
+        return true;
     }
 
     @Override

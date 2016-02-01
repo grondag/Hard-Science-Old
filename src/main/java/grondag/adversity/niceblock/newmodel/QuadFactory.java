@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.newmodel;
 import java.util.Collections;
 import java.util.List;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.model.IModelController;
 
 import javax.vecmath.Matrix4f;

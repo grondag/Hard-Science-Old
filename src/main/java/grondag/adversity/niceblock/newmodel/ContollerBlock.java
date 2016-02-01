@@ -19,7 +19,7 @@ public class ContollerBlock extends ModelControllerNew
     {
         super(styleName, textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
-                (byte)((((useRotations ? 4 : 1) * alternateCount) + alternateCount ) & 0xFF));
+                (byte)(((useRotations ? 4 : 1) * alternateCount) & 0xFF));
         this.bakedModelFactory = new ModelFactoryBlock(this);
     }
 
@@ -66,7 +66,7 @@ public class ContollerBlock extends ModelControllerNew
     @Override
     public BakedModelFactory getBakedModelFactory()
     {
-        return null;
+        return bakedModelFactory;
     }
 
     @Override
