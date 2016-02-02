@@ -111,7 +111,7 @@ public class ModelDispatcher implements ISmartBlockModel
     public IBakedModel getItemModelForModelState(ModelState modelState)
     {
         
-        if(bakedItemModels[modelState.getShapeIndex()] == null){
+        if(bakedItemModels[modelState.getModelIndex()] == null){
             
             /**
              * Enable perspective handling.
@@ -125,29 +125,15 @@ public class ModelDispatcher implements ISmartBlockModel
 
             IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
             
-            bakedItemModels[modelState.getShapeIndex()] = 
+            bakedItemModels[modelState.getModelIndex()] = 
                 new IPerspectiveAwareModel.MapWrapper(
-                    new IFlexibleBakedModel.Wrapper(
-                        new SimpleBakedModel(
-                        controller.getBakedModelFactory().getItemQuads(modelState), 
-                        // face quads have to be present in list even in empty
-                        new ImmutableList.Builder()
-                            .add(new ImmutableList.Builder<BakedQuad>().build())
-                            .add(new ImmutableList.Builder<BakedQuad>().build())
-                            .add(new ImmutableList.Builder<BakedQuad>().build())
-                            .add(new ImmutableList.Builder<BakedQuad>().build())
-                            .add(new ImmutableList.Builder<BakedQuad>().build())
-                            .add(new ImmutableList.Builder<BakedQuad>().build())
-                            .build(),
-                        false, 
-                        false,
-                        modelState.getColor().getParticleTexture(),
-                        ItemCameraTransforms.DEFAULT),
-                        DefaultVertexFormats.ITEM),
-                    state);
+                    new SimpleItemModel(
+                            controller.getBakedModelFactory().getItemQuads(modelState), 
+                            controller.isShaded), 
+                state);
         }
         
-        return bakedItemModels[modelState.getShapeIndex()];
+        return bakedItemModels[modelState.getModelIndex()];
     }
 
     // REMAINING METHODS SHOULD NEVER BE CALLED

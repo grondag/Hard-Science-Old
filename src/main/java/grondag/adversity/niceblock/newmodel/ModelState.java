@@ -37,10 +37,7 @@ public abstract class ModelState
         return NiceColor.values()[0];
     }
     
-    public int getShapeIndex()
-    {
-        return 0;
-    }
+    public abstract int getShapeIndex();
     
     public int getSpecies()
     {
