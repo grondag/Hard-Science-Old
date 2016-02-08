@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.newmodel;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
@@ -42,7 +43,8 @@ public class NiceBlockRegistrar
     public static final ModelDispatcher MODEL_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw", 4, EnumWorldBlockLayer.SOLID, true, true));
 
     // DECLARE BLOCK INSTANCES
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, NiceColor.STONE0, 16), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, NiceColor.FLEXSTONE0, 16), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, NiceColor.DURASTONE0, 16), BaseMaterial.DURASTONE);
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
@@ -149,6 +151,11 @@ public class NiceBlockRegistrar
     public static void preInit(FMLPreInitializationEvent event)
     {
 
+        // SET UP COLOR ATLAS
+        {
+            NiceColor2.makeAtlas(event.getModConfigurationDirectory());
+        }
+        
         // REGISTER ALL BLOCKS
         for (NiceBlock block : allBlocks)
         {

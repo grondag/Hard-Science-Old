@@ -12,7 +12,8 @@ import net.minecraft.block.material.Material;
 public enum BaseMaterial {
 	FLEXSTONE("flexstone", Material.rock, Block.soundTypeStone),
 	DURASTONE("durastone", Material.rock, Block.soundTypeStone),
-	HYPERSTONE("hyperstone", Material.iron, Block.soundTypeMetal);
+	HYPERSTONE("hyperstone", Material.iron, Block.soundTypeMetal),
+	SUPERWOOD("superwood", Material.wood, Block.soundTypeWood);
 
 	public final String materialName;
 	public final Material material;

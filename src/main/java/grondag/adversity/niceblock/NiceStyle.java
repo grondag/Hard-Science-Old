@@ -53,8 +53,8 @@ public abstract class NiceStyle {
 
 	public static final NiceStyle BIG_TEX = new NiceStyleNew("big_tex",
 			new ModelControllerDual(
-					new ModelControllerBigTex("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, NiceColor.STONE0),
-					new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.STONE0)));
+					new ModelControllerBigTex("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, Rotation.ROTATE_NONE, false, false, NiceColor.FLEXSTONE0),
+					new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.FLEXSTONE0)));
 
 //     public static final NiceStyle BIG_TEX = new NiceStyleNew(
 //     new ModelControllerBorder("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true, NiceColor.STONE0));

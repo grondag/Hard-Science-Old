@@ -127,27 +127,34 @@ public class Config {
 		substances.clear();
 
 		Substance flexstone = new Substance();
-		flexstone.hardness = config.getInt("dessedStoneHardness", "Substances", 2, 1, 50, "");
-		flexstone.harvestTool = config.getString("extrudedStoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
-		flexstone.harvestLevel = config.getInt("dessedStoneHarvestLevel", "Substances", 1, 1, 3, "");
-		flexstone.resistance = config.getInt("extrudedStoneResistance", "Substances", 10, 1, 50, "");
+		flexstone.hardness = config.getInt("flexstoneHardness", "Substances", 2, 1, 50, "");
+		flexstone.harvestTool = config.getString("flexstoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		flexstone.harvestLevel = config.getInt("flexstoneHarvestLevel", "Substances", 1, 1, 3, "");
+		flexstone.resistance = config.getInt("flexstoneResistance", "Substances", 10, 1, 50, "");
 		substances.put("flexstone", flexstone);
 
 		Substance durastone = new Substance();
-		durastone.hardness = config.getInt("compositeHardness", "Substances", 4, 1, 50, "");
-		durastone.harvestTool = config.getString("compositeHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
-		durastone.harvestLevel = config.getInt("compositeHarvestLevel", "Substances", 2, 1, 3, "");
-		durastone.resistance = config.getInt("compositeResistance", "Substances", 50, 1, 50, "");
+		durastone.hardness = config.getInt("durastoneHardness", "Substances", 4, 1, 50, "");
+		durastone.harvestTool = config.getString("durastoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		durastone.harvestLevel = config.getInt("durastoneHarvestLevel", "Substances", 2, 1, 3, "");
+		durastone.resistance = config.getInt("durastoneResistance", "Substances", 50, 1, 50, "");
 		substances.put("durastone", durastone);
 
 		Substance hyperstone = new Substance();
-		hyperstone.hardness = config.getInt("duraplastHardness", "Substances", 10, 1, 50, "");
-		hyperstone.harvestTool = config.getString("duraplastHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
-		hyperstone.harvestLevel = config.getInt("duraplastHarvestLevel", "Substances", 3, 1, 3, "");
-		hyperstone.resistance = config.getInt("duraplastResistance", "Substances", 200, 1, 50, "");
+		hyperstone.hardness = config.getInt("hyperstoneHardness", "Substances", 10, 1, 50, "");
+		hyperstone.harvestTool = config.getString("hyperstoneHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+		hyperstone.harvestLevel = config.getInt("hyperstoneHarvestLevel", "Substances", 3, 1, 3, "");
+		hyperstone.resistance = config.getInt("hyperstoneResistance", "Substances", 200, 1, 50, "");
 		substances.put("hyperstone", hyperstone);
 
-		// END
+        Substance superwood = new Substance();
+        hyperstone.hardness = config.getInt("superwoodHardness", "Substances", 2, 1, 50, "");
+        hyperstone.harvestTool = config.getString("superwoodHarvestTool", "Substances", "axe", "Tool used to break block", allowedTools);
+        hyperstone.harvestLevel = config.getInt("superwoodHarvestLevel", "Substances", 1, 1, 3, "");
+        hyperstone.resistance = config.getInt("superwoodResistance", "Substances", 10, 1, 50, "");
+        substances.put("superwood", superwood);
+
+        // END
 		config.save();
 
 	}
