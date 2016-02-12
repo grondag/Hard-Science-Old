@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.newmodel.NiceColor;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;

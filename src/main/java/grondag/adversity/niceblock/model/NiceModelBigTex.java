@@ -1,9 +1,9 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.niceblock.newmodel.NiceColor;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.QuadFactory.QuadInputs;
 import grondag.adversity.niceblock.newmodel.QuadFactory.Vertex;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
 
 import java.util.Collections;
 import java.util.List;

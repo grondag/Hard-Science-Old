@@ -1,5 +1,8 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.niceblock.newmodel.color.BlockColors;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
+import grondag.adversity.niceblock.newmodel.color.NiceColor2;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 
@@ -154,6 +157,7 @@ public class NiceBlockRegistrar
         // SET UP COLOR ATLAS
         {
             NiceColor2.makeAtlas(event.getModConfigurationDirectory());
+            BlockColors.INSTANCE.writeColorAtlas(event.getModConfigurationDirectory());
         }
         
         // REGISTER ALL BLOCKS

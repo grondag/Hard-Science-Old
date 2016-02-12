@@ -1,5 +1,7 @@
 package grondag.adversity.library;
 
+import grondag.adversity.Adversity;
+
 /**
  * Simple library for color conversion and manipulation.
  * Less complicated than java.awt.color and has conversions it seems to lack.
@@ -50,9 +52,9 @@ public class Color
         return new Color(x1 * D65X, y1 * D65Y, z1 * D65Z);
     }
     
-    public static Color fromHCL(double h, double c, double l)
+    public static Color fromHCL(double hue, double chroma, double luminance)
     {
-        return fromLab(l, Math.sin(Math.toRadians(h)) * c, Math.cos(Math.toRadians(h)) * c);
+        return fromLab(luminance, Math.sin(Math.toRadians(hue)) * chroma, Math.cos(Math.toRadians(hue)) * chroma);
     }
     
     public static Color fromRGB(int r, int g, int b)
@@ -181,11 +183,11 @@ public class Color
             final double x0 = x / D65X;
             final double y0 = y / D65Y;
             final double z0 = z / D65Z;
+                                    
+            final double x1 = (x0 > 0.008856) ? Math.cbrt(x0) : 7.787 * x0 + (16 / 116);
+            final double y1 = (y0 > 0.008856) ? Math.cbrt(y0) : 7.787 * y0 + (16 / 116);
+            final double z1 = (z0 > 0.008856) ? Math.cbrt(z0) : 7.787 * z0 + (16 / 116);
             
-            final double x1 = (x0 > 0.008856) ? Math.pow(x0 , 1/3) : 7.787 * x0 + (16 / 116);
-            final double y1 = (y0 > 0.008856) ? Math.pow(y0 , 1/3) : 7.787 * y0 + (16 / 116);
-            final double z1 = (z0 > 0.008856) ? Math.pow(z0 , 1/3) : 7.787 * z0 + (16 / 116);
-
             this.LAB_L = (float) (( 116 * y1 ) - 16);
             this.LAB_A = (float) (500 * ( x1 - y1 ));
             this.LAB_B = (float) (200 * ( y1 - z1 ));

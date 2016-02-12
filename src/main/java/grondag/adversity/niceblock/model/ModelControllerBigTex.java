@@ -3,8 +3,8 @@ package grondag.adversity.niceblock.model;
 import com.google.common.collect.ImmutableMap;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.NiceColor;
 import grondag.adversity.niceblock.newmodel.Rotation;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;

@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;

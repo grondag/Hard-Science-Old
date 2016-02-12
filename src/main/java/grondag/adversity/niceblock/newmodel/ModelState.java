@@ -1,5 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
+
 import java.util.function.Function;
 
 import net.minecraft.nbt.NBTTagCompound;

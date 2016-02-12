@@ -6,6 +6,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.model.ModelController;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
 
 public class BlockTests
 {

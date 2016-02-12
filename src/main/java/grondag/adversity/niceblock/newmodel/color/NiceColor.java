@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.newmodel;
+package grondag.adversity.niceblock.newmodel.color;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;

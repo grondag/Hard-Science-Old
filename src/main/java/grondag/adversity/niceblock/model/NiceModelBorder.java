@@ -14,10 +14,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.NiceColor;
 import grondag.adversity.niceblock.newmodel.Rotation;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.QuadFactory.Vertex;
+import grondag.adversity.niceblock.newmodel.color.NiceColor;
 
 public class NiceModelBorder extends NiceModel {
 	
