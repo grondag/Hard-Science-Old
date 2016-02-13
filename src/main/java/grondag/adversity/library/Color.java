@@ -33,8 +33,8 @@ public class Color
     
     /** Can this be displayed on an sRGB display? */
     public final boolean IS_VISIBLE;
-        
-    
+
+    /** CIE D65  noon daylight standard illuminant - appropriate for sRBG color space */
     private static final float D65X = (float) 95.047;
     private static final float D65Y = (float) 100.000;
     private static final float D65Z = (float) 108.833;
