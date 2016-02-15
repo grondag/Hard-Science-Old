@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
 
 public abstract class ModelState
 {
-    static final String TAG_NAME = "mdlIdx";
+    static final String TAG_NAME = "adMdlSt";
     
     public static final int MAX_COLOR_INDEX = 0x03FF;
     protected static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
@@ -32,12 +32,7 @@ public abstract class ModelState
     public ModelState()
     {
     }
-    
-    public int getModelIndex()
-    {
-        return 0;
-    }
-    
+     
     public int getColorIndex()
     {
         return 0;
@@ -53,42 +48,36 @@ public abstract class ModelState
     
     public static class Color extends ModelState
     {
-        protected final int modelIndex;
+        protected final int modelState;
         
         /** use this when creating from block state */
         public Color(int shapeIndex, int colorIndex)
         {
-            this.modelIndex =  (shapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX);
-        }
-        
-        @Override
-        public int getModelIndex()
-        {
-            return modelIndex;
+            this.modelState =  (shapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX);
         }
         
         @Override
         public int getColorIndex()
         {
-            return modelIndex & MAX_COLOR_INDEX;
+            return modelState & MAX_COLOR_INDEX;
         }
         
         @Override
         public int getShapeIndex()
         {
-            return modelIndex >> COLOR_INDEX_BITLENGTH;
+            return modelState >> COLOR_INDEX_BITLENGTH;
         }
         
         @Override
         public void writeToNBT(NBTTagCompound tag) 
         {
-            tag.setInteger(TAG_NAME, modelIndex);
+            tag.setInteger(TAG_NAME, modelState);
         }
         
         /** meta not used because color is always stored in modelIndex */
         public Color(NBTTagCompound tag, int meta) 
         {
-            this.modelIndex = tag.getInteger(TAG_NAME);
+            this.modelState = tag.getInteger(TAG_NAME);
         }
     }
     

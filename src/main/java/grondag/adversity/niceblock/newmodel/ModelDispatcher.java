@@ -85,7 +85,7 @@ public class ModelDispatcher implements ISmartBlockModel
             IExtendedBlockState exState = (IExtendedBlockState) state;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
 
-            retVal = bakedBlockModels[modelState.getModelIndex()];
+            retVal = bakedBlockModels[controller.getModelIndex(modelState)];
 
             if (retVal == null)
             {
@@ -93,7 +93,7 @@ public class ModelDispatcher implements ISmartBlockModel
 
                 synchronized (bakedBlockModels)
                 {
-                    bakedBlockModels[modelState.getModelIndex()] = retVal;
+                    bakedBlockModels[controller.getModelIndex(modelState)] = retVal;
                 }
             }
         }
@@ -110,8 +110,9 @@ public class ModelDispatcher implements ISmartBlockModel
     @SideOnly(Side.CLIENT)
     public IBakedModel getItemModelForModelState(ModelState modelState)
     {
+        IBakedModel retVal = null;
         
-        if(bakedItemModels[modelState.getModelIndex()] == null){
+        if(bakedItemModels[controller.getModelIndex(modelState)] == null){
             
             /**
              * Enable perspective handling.
@@ -125,15 +126,16 @@ public class ModelDispatcher implements ISmartBlockModel
 
             IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
             
-            bakedItemModels[modelState.getModelIndex()] = 
-                new IPerspectiveAwareModel.MapWrapper(
+            retVal = new IPerspectiveAwareModel.MapWrapper(
                     new SimpleItemModel(
                             controller.getBakedModelFactory().getItemQuads(modelState), 
                             controller.isShaded), 
                 state);
+            
+            bakedItemModels[controller.getModelIndex(modelState)] = retVal;
         }
         
-        return bakedItemModels[modelState.getModelIndex()];
+        return retVal;
     }
 
     // REMAINING METHODS SHOULD NEVER BE CALLED

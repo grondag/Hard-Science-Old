@@ -15,7 +15,7 @@ public class ContollerBlock extends ModelControllerNew
     protected final IAlternator alternator;
     
     protected final BakedModelFactory bakedModelFactory;
-    
+        
     protected ContollerBlock(String styleName, String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(styleName, textureName, alternateCount, renderLayer, isShaded, useRotations);
@@ -74,6 +74,12 @@ public class ContollerBlock extends ModelControllerNew
     public ICollisionHandler getCollisionHandler()
     {
         return null;
+    }
+
+    @Override
+    public int getModelIndex(ModelState state)
+    {
+        return (getColorProvider().getColorCount() * state.getShapeIndex()) + state.getColorIndex();
     }
 
 }

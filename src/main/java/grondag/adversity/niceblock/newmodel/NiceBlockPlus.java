@@ -37,7 +37,7 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 	    } else {
     		// should always be an IExtendedBlockState but avoid crash if somehow not
     		if (state instanceof IExtendedBlockState) {
-    			ModelState modelState = this.blockModelHelper.getModelStateForBlock(this, state, world, pos);
+    			ModelState modelState = this.blockModelHelper.getModelStateForBlock(state, world, pos);
     			state = ((IExtendedBlockState)state).withProperty( NiceBlock.MODEL_STATE, modelState);
     			miss++;
 //    	    	Adversity.log.info("cache miss @" + pos.toString());
