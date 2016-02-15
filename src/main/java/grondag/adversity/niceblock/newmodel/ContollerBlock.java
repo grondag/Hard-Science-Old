@@ -55,13 +55,13 @@ public class ContollerBlock extends ModelControllerNew
     @Override
     public int getBakedBlockModelCount()
     {
-        return NiceColor.values().length * this.alternateTextureCount * (this.useRotatedTexturesAsAlternates? 4 : 1);
+        return getColorProvider().getColorCount() * this.alternateTextureCount * (this.useRotatedTexturesAsAlternates? 4 : 1);
     }
 
     @Override
     public int getBakedItemModelCount()
     {
-        return NiceColor.values().length;
+        return getColorProvider().getColorCount();
     }
 
     @Override

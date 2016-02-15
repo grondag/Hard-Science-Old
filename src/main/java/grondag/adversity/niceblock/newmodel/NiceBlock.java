@@ -169,7 +169,7 @@ public class NiceBlock extends Block
     @Override
     public boolean addLandingEffects(WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity, int numberOfParticles)
     {
-        blockModelHelper.getModelStateForBlock(this, iblockstate, worldObj, blockPosition);
+        blockModelHelper.getModelStateForBlock(iblockstate, worldObj, blockPosition);
 
         // packet handler ultimately calls RenderGlobal.spawnEffectParticle
         // that in turn calls net.minecraft.client.particle.EntityDiggingFX
@@ -220,7 +220,7 @@ public class NiceBlock extends Block
         // should always be an IExtendedBlockState but avoid crash if somehow not
         if (state instanceof IExtendedBlockState)
         {
-            ModelState modelState = blockModelHelper.getModelStateForBlock(this, state, world, pos);
+            ModelState modelState = blockModelHelper.getModelStateForBlock(state, world, pos);
             state = ((IExtendedBlockState) state).withProperty(NiceBlock.MODEL_STATE, modelState);
         }
 

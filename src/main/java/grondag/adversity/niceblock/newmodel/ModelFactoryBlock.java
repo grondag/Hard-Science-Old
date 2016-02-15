@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
+import grondag.adversity.niceblock.newmodel.color.ColorVector;
 
 import java.util.List;
 
@@ -27,7 +28,9 @@ public class ModelFactoryBlock extends BakedModelFactory
         
         ContollerBlock controller = (ContollerBlock)this.controller;
         
-        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? modelState.getColor().base : modelState.getColor().highlight;
+        ColorVector colorVector = controller.getColorProvider().getColor(modelState.getColorIndex());
+        
+        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base.RGB_int : colorVector.highlight.RGB_int;
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getShapeIndex());
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getShapeIndex())));
@@ -55,8 +58,10 @@ public class ModelFactoryBlock extends BakedModelFactory
         CubeInputs cubeInputs = new CubeInputs();
         
         ContollerBlock controller = (ContollerBlock)this.controller;
-        
-        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? modelState.getColor().base : modelState.getColor().highlight;
+
+        ColorVector colorVector = controller.getColorProvider().getColor(modelState.getColorIndex());
+
+        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base.RGB_int : colorVector.highlight.RGB_int;
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(0));
 

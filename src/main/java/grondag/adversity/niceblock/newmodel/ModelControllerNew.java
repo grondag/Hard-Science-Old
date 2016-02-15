@@ -1,5 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.niceblock.newmodel.color.BlockColors;
+import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -51,7 +53,7 @@ public abstract class ModelControllerNew
      * If false, faces of the block are not shaded according to light levels.
      */
     public final boolean isShaded;
-
+    
     protected ModelControllerNew(String styleName, String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
             boolean useRotatedTexturesAsAlternates)
     {
@@ -78,6 +80,12 @@ public abstract class ModelControllerNew
     public abstract int getBakedItemModelCount();
 
     public abstract BakedModelFactory getBakedModelFactory();
+    
+    public IColorProvider getColorProvider()
+    {
+        return BlockColors.INSTANCE;
+    }
+
 
     /**
      * used by model for texture lookup
@@ -124,5 +132,4 @@ public abstract class ModelControllerNew
     {
         return layer == renderLayer;
     }
-    
 }

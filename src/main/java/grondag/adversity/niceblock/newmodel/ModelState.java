@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
 
+import java.math.BigInteger;
 import java.util.function.Function;
 
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,9 +12,12 @@ public abstract class ModelState
 {
     static final String TAG_NAME = "mdlIdx";
     
+    public static final int MAX_COLOR_INDEX = 0x03FF;
+    protected static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
+    
     public void writeToNBT(NBTTagCompound tag)
     {
-        // default implementation does nothing
+        //default implementation does nothing
     };
     
     public  int getMeta()
@@ -34,9 +38,9 @@ public abstract class ModelState
         return 0;
     }
     
-    public NiceColor getColor()
+    public int getColorIndex()
     {
-        return NiceColor.values()[0];
+        return 0;
     }
     
     public abstract int getShapeIndex();
@@ -52,9 +56,9 @@ public abstract class ModelState
         protected final int modelIndex;
         
         /** use this when creating from block state */
-        public Color(int shapeIndex, NiceColor color)
+        public Color(int shapeIndex, int colorIndex)
         {
-            this.modelIndex =  (shapeIndex * NiceColor.values().length) + color.ordinal();
+            this.modelIndex =  (shapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX);
         }
         
         @Override
@@ -64,15 +68,15 @@ public abstract class ModelState
         }
         
         @Override
-        public NiceColor getColor()
+        public int getColorIndex()
         {
-            return NiceColor.values()[modelIndex % NiceColor.values().length];
+            return modelIndex & MAX_COLOR_INDEX;
         }
         
         @Override
         public int getShapeIndex()
         {
-            return modelIndex / NiceColor.values().length;
+            return modelIndex >> COLOR_INDEX_BITLENGTH;
         }
         
         @Override
@@ -92,9 +96,9 @@ public abstract class ModelState
     {
         protected final int species;
         
-        public ColorSpecies(int shapeIndex, NiceColor color, int species)
+        public ColorSpecies(int shapeIndex, int colorIndex, int species)
         {
-            super(shapeIndex, color);
+            super(shapeIndex, colorIndex);
             this.species = species;
         }
         

@@ -13,7 +13,7 @@ public class BlockTests
     public static class TestForBigBlockMatch implements IBlockTest
     {
         private final NiceBlock matchBlock;
-        private final NiceColor matchColor;
+        private final int matchColorIndex;
         private final int matchSpecies;
         
         /** pass in the info for the block you want to match */
@@ -25,13 +25,13 @@ public class BlockTests
                 IExtendedBlockState exState = (IExtendedBlockState) ibs;
                 ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
 
-                matchColor = modelState.getColor();
+                matchColorIndex = modelState.getColorIndex();
                 matchSpecies = modelState.getSpecies();
             }
             else
             {
                 matchBlock = null;
-                matchColor = null;
+                matchColorIndex = -1;
                 matchSpecies = 0;
             }
         }
@@ -56,8 +56,8 @@ public class BlockTests
             IExtendedBlockState exState = (IExtendedBlockState) ibs;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
 
-            return matchBlock.blockModelHelper.controller == candidate.blockModelHelper.controller
-                   && matchColor == modelState.getColor()
+            return matchBlock.blockModelHelper.dispatcher.controller == candidate.blockModelHelper.dispatcher.controller
+                   && matchColorIndex == modelState.getColorIndex()
                    && matchSpecies == modelState.getSpecies();
         }
         

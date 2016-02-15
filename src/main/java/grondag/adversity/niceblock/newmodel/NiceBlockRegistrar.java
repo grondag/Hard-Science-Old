@@ -1,8 +1,9 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.niceblock.newmodel.color.BlockColors;
+import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.newmodel.color.NiceHues;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
-import grondag.adversity.niceblock.newmodel.color.NiceColor2;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 
@@ -46,8 +47,8 @@ public class NiceBlockRegistrar
     public static final ModelDispatcher MODEL_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw", 4, EnumWorldBlockLayer.SOLID, true, true));
 
     // DECLARE BLOCK INSTANCES
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, NiceColor.FLEXSTONE0, 16), BaseMaterial.FLEXSTONE);
-    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, NiceColor.DURASTONE0, 16), BaseMaterial.DURASTONE);
+    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, IColorProvider.ColorSubset.FLEXSTONE), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, IColorProvider.ColorSubset.FLEXSTONE), BaseMaterial.DURASTONE);
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
@@ -156,7 +157,6 @@ public class NiceBlockRegistrar
 
         // SET UP COLOR ATLAS
         {
-            NiceColor2.makeAtlas(event.getModConfigurationDirectory());
             NiceHues.INSTANCE.writeColorAtlas(event.getModConfigurationDirectory());
         }
         
@@ -236,10 +236,6 @@ public class NiceBlockRegistrar
         for (ModelDispatcher dispatcher : allDispatchers)
         {
             dispatcher.controller.handleTexturePreStitch(event);
-        }
-        for (NiceColor color : NiceColor.values())
-        {
-            event.map.registerSprite(new ResourceLocation(color.getParticleTextureName()));
         }
     }
 

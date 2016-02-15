@@ -18,63 +18,16 @@ public class NiceHues
 {
     public static final NiceHues INSTANCE = new NiceHues();
     
-    protected final HueSet COLORS[];
-
-//    public static final int COUNT_WHITE = 12;
-//    public static final int COUNT_LIGHT = 32;
-//    public static final int COUNT_MID = 32;
-//    public static final int COUNT_DARK = 12;
-//
-//    public static final int FIRST_WHITE = 0;
-//    public static final int FIRST_LIGHT = FIRST_WHITE + COUNT_WHITE;
-//    public static final int FIRST_MID = FIRST_LIGHT + COUNT_LIGHT;
-//    public static final int FIRST_DARK = FIRST_MID + COUNT_MID;
+    private final HueSet HUES[];
     
-//    public static final int[] SUBSET_FLEXSTONE = 
-//        {
-//            FIRST_WHITE + 5, 
-//            FIRST_WHITE + 6
-//        };
-//    
-//    public static final int[] SUBSET_DURASTONE1 =
-//    {
-//        FIRST_WHITE + 5, 
-//        FIRST_WHITE + 6
-//    };
-//    
-//    public static final int[] SUBSET_DURASTONE2 =
-//    {
-//        FIRST_WHITE + 5, 
-//        FIRST_WHITE + 6
-//    };
-//    
-//    public static final int[] SUBSET_DURASTONE_ALL =
-//    {
-//        FIRST_WHITE + 5, 
-//        FIRST_WHITE + 6
-//    };
-//    
-//    public static final int[] SUBSET_HYPERSTONE =
-//    {
-//        FIRST_WHITE + 5, 
-//        FIRST_WHITE + 6
-//    };
-//
-//    public static final int[] SUBSET_SUPERWOOD =
-//    {
-//        FIRST_WHITE + 5, 
-//        FIRST_WHITE + 6
-//    };
-
-    
-    protected NiceHues()
+    private NiceHues()
     {
         ArrayList<HueSet> colors = new ArrayList<HueSet>();
         for(Hue h : Hue.values())
         {
             colors.add(new HueSet(h.ordinal() * 360 / Hue.values().length));
         }
-        COLORS = colors.toArray(new HueSet[0]);
+        HUES = colors.toArray(new HueSet[0]);
         
         // was used to probe limits of colors across all hues
 //      for(int c = 1; c < 100; c++)
@@ -107,7 +60,12 @@ public class NiceHues
 //      }
     }
     
-     public void writeColorAtlas(File folderName)
+    public HueSet getHueSet(Hue hue)
+    {
+        return HUES[hue.ordinal()];
+    }
+    
+    public void writeColorAtlas(File folderName)
     {
         File output = new File(folderName, "adversity_color_atlas.html");
         try
@@ -158,19 +116,19 @@ public class NiceHues
                     buffer.write("<tr><td>" + t.tintName + "</td>");
 
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t).RGB_int));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.OPPOSITE).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.OPPOSITE).getColor(t).RGB_int));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.FAR_LEFT).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_LEFT).getColor(t).RGB_int));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.NEAR_LEFT).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_LEFT).getColor(t).RGB_int));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t).RGB_int));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(t).RGB_int));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            COLORS[h.ordinal()].getColorSetForHue(HuePosition.FAR_RIGHT).getColor(t).RGB_int));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_RIGHT).getColor(t).RGB_int));
 
                     buffer.write("</tr>");
                 }
@@ -200,8 +158,9 @@ public class NiceHues
         MAGENTA("Magenta"),
         LAVENDER("Lavender"),
         VIOLET("Violet"),
+        ULTRAMARINE("Ultramarine"),
+        COBALT("Cobalt"),
         BLUE("Blue"),
-        SKY("Sky"),
         AZURE("Azure"),
         CERULEAN("Cerulean"),
         TEAL("Teal"),
