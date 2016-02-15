@@ -82,7 +82,7 @@ public abstract class BlockModelHelper
         public ModelState getModelStateForItem(ItemStack stack)
         {
             return new ModelState.Color(dispatcher.controller.getItemShapeIndex(stack),
-                    colorIndexes[stack.getMetadata()]);
+                    colorIndexes[Math.max(0, Math.min(stack.getMetadata(), colorIndexes.length - 1))]);
         }
 
         @Override

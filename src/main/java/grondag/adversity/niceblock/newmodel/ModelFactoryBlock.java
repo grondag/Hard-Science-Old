@@ -30,7 +30,7 @@ public class ModelFactoryBlock extends BakedModelFactory
         
         ColorVector colorVector = controller.getColorProvider().getColor(modelState.getColorIndex());
         
-        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base.RGB_int : colorVector.highlight.RGB_int;
+        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getShapeIndex());
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getShapeIndex())));
@@ -61,7 +61,7 @@ public class ModelFactoryBlock extends BakedModelFactory
 
         ColorVector colorVector = controller.getColorProvider().getColor(modelState.getColorIndex());
 
-        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base.RGB_int : colorVector.highlight.RGB_int;
+        cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(0));
 
@@ -81,7 +81,6 @@ public class ModelFactoryBlock extends BakedModelFactory
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.NORTH));
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
         return itemBuilder.build();        
- 
     }
 
     @Override

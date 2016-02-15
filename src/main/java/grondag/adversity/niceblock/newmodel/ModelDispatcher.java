@@ -85,7 +85,7 @@ public class ModelDispatcher implements ISmartBlockModel
             IExtendedBlockState exState = (IExtendedBlockState) state;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
 
-            retVal = bakedBlockModels[controller.getModelIndex(modelState)];
+            retVal = bakedBlockModels[controller.getBlockModelIndex(modelState)];
 
             if (retVal == null)
             {
@@ -93,7 +93,7 @@ public class ModelDispatcher implements ISmartBlockModel
 
                 synchronized (bakedBlockModels)
                 {
-                    bakedBlockModels[controller.getModelIndex(modelState)] = retVal;
+                    bakedBlockModels[controller.getBlockModelIndex(modelState)] = retVal;
                 }
             }
         }
@@ -109,15 +109,12 @@ public class ModelDispatcher implements ISmartBlockModel
 
     @SideOnly(Side.CLIENT)
     public IBakedModel getItemModelForModelState(ModelState modelState)
-    {
-        IBakedModel retVal = null;
+    {        
+        IBakedModel retVal = bakedItemModels[controller.getItemModelIndex(modelState)];
         
-        if(bakedItemModels[controller.getModelIndex(modelState)] == null){
+        if(retVal == null){
             
-            /**
-             * Enable perspective handling.
-             */
-                
+            // Enable perspective handling.
             TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
                     new Vector3f(0, 1.5f / 16, -2.75f / 16),
                     TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
@@ -131,8 +128,11 @@ public class ModelDispatcher implements ISmartBlockModel
                             controller.getBakedModelFactory().getItemQuads(modelState), 
                             controller.isShaded), 
                 state);
-            
-            bakedItemModels[controller.getModelIndex(modelState)] = retVal;
+
+            synchronized (bakedItemModels)
+            {
+                bakedItemModels[controller.getItemModelIndex(modelState)] = retVal;
+            }
         }
         
         return retVal;

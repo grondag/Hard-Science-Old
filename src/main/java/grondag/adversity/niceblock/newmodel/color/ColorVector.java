@@ -6,11 +6,11 @@ import grondag.adversity.library.Color;
 public class ColorVector
 {
     public final String vectorName;
-    public final Color base;
-    public final Color highlight;
-    public final Color border;
+    public final int base;
+    public final int highlight;
+    public final int border;
 
-    public ColorVector(String vectorName, Color base, Color highlight, Color border)
+    public ColorVector(String vectorName, int base, int highlight, int border)
     {
         this.vectorName = vectorName;
         this.base = base;
@@ -18,12 +18,12 @@ public class ColorVector
         this.border = border;
     }
 
-    public ColorVector(String vectorName, Color base, Color highlight)
+    public ColorVector(String vectorName, int base, int highlight)
     {
         this(vectorName, base, highlight, highlight);
     }
 
-    public ColorVector(String vectorName, Color base)
+    public ColorVector(String vectorName, int base)
     {
         this(vectorName, base, base, base);
     }

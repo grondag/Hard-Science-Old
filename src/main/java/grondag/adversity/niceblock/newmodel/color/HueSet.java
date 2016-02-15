@@ -49,7 +49,7 @@ public class HueSet
        
        public class ColorSet
        {
-           private final Color[] colors = new Color[Tint.values().length];
+           private final int[] colors = new int[Tint.values().length];
 
            protected ColorSet(double hue)
            {
@@ -110,12 +110,12 @@ public class HueSet
                            }
                        }
                    }
-
-                   colors[tint.ordinal()] = Color.fromHCL(hue, chroma, luminance);
+                   
+                   colors[tint.ordinal()] = Color.fromHCL(hue, chroma, luminance).RGB_int | 0xFF000000;
                }
            }
            
-           public Color getColor(Tint tint)
+           public int getColor(Tint tint)
            {
                return colors[tint.ordinal()];
            }

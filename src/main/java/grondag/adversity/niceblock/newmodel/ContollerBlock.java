@@ -77,9 +77,15 @@ public class ContollerBlock extends ModelControllerNew
     }
 
     @Override
-    public int getModelIndex(ModelState state)
+    public int getBlockModelIndex(ModelState state)
     {
         return (getColorProvider().getColorCount() * state.getShapeIndex()) + state.getColorIndex();
+    }
+
+    @Override
+    public int getItemModelIndex(ModelState state)
+    {
+        return state.getColorIndex();
     }
 
 }

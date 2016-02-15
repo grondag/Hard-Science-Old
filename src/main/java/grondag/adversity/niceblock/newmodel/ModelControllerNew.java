@@ -81,7 +81,8 @@ public abstract class ModelControllerNew
 
     public abstract BakedModelFactory getBakedModelFactory();
     
-    public abstract int getModelIndex(ModelState state);
+    public abstract int getBlockModelIndex(ModelState state);
+    public abstract int getItemModelIndex(ModelState state);
     
     public IColorProvider getColorProvider()
     {
