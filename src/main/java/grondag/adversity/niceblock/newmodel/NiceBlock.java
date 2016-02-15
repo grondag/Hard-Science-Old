@@ -143,9 +143,7 @@ public class NiceBlock extends Block
      */
     public String getItemStackDisplayName(ItemStack stack)
     {
-
-        return LanguageRegistry.instance().getStringLocalization(material.materialName) + " - "
-                + LanguageRegistry.instance().getStringLocalization(blockModelHelper.dispatcher.controller.styleName) + ", " + stack.getItemDamage();
+        return blockModelHelper.getItemStackDisplayName(stack);
     }
 
     // INTERACTION HANDLING

@@ -29,7 +29,7 @@ public class BlockColors implements IColorProvider
     }
     private ColorVector makeColorVector(Hue hue, Tint tint)
     {
-        String vectorName = hue.hueName() + "-" + tint.tintName;
+        String vectorName =  tint.tintName + " " + hue.hueName();
                 
         return new ColorVector(vectorName,NiceHues.INSTANCE.getHueSet(hue)
                 .getColorSetForHue(HuePosition.NONE).getColor(tint));

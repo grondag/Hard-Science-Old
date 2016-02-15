@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 /**
 Handles client-side block events and
@@ -60,6 +61,8 @@ public abstract class BlockModelHelper
     
     public abstract int getMetaCount();
     
+    public abstract String getItemStackDisplayName(ItemStack stack);
+    
     public static class ColorMeta extends BlockModelHelper
     {
         protected final int colorIndexes[];
@@ -102,5 +105,14 @@ public abstract class BlockModelHelper
             return colorIndexes.length;
         }
 
+        @Override
+        public String getItemStackDisplayName(ItemStack stack)
+        {
+            return 
+                    LanguageRegistry.instance().getStringLocalization(dispatcher.controller.styleName) + " "
+                    + LanguageRegistry.instance().getStringLocalization(block.material.materialName) 
+                    + ", " 
+                    + dispatcher.controller.getColorProvider().getColor(getModelStateForItem(stack).getColorIndex()).vectorName;
+        }
     }
 }
