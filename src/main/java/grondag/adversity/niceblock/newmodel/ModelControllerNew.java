@@ -84,6 +84,12 @@ public abstract class ModelControllerNew
     public abstract int getBlockModelIndex(ModelState state);
     public abstract int getItemModelIndex(ModelState state);
     
+    public String getParticleTextureName()
+    {
+        return "adversity:blocks/particle";
+        //return this.getTextureName(0);
+    }
+    
     public IColorProvider getColorProvider()
     {
         return BlockColors.INSTANCE;
@@ -103,12 +109,13 @@ public abstract class ModelControllerNew
      */
     public String[] getAllTextureNames()
     {
-        final String retVal[] = new String[alternateTextureCount * textureCount];
+        final String retVal[] = new String[alternateTextureCount * textureCount + 1];
 
         for (int i = 0; i < alternateTextureCount * textureCount; i++)
         {
             retVal[i] = getTextureName(i);
         }
+        retVal[alternateTextureCount * textureCount] = "adversity:blocks/particle";
         return retVal;
     }
 

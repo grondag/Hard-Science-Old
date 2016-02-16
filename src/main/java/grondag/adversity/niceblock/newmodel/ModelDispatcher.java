@@ -47,6 +47,8 @@ public class ModelDispatcher implements ISmartBlockModel
     private final IBakedModel[] bakedItemModels;
     
     public final ModelControllerNew controller;
+    
+    private TextureAtlasSprite particleTexture;
 
     public ModelDispatcher(ModelControllerNew controller)
     {
@@ -137,6 +139,18 @@ public class ModelDispatcher implements ISmartBlockModel
         
         return retVal;
     }
+    
+    @Override
+    public TextureAtlasSprite getParticleTexture()
+    {
+        if(particleTexture == null)
+        {
+            particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
+                    controller.getParticleTextureName());
+        }
+        return particleTexture;
+    }
+
 
     // REMAINING METHODS SHOULD NEVER BE CALLED
 
@@ -174,14 +188,7 @@ public class ModelDispatcher implements ISmartBlockModel
         Adversity.log.warn("Unsupported method call: ModelDispatcher.isBuiltInRenderer()");
         return false;
     }
-
-    @Override
-    public TextureAtlasSprite getParticleTexture()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getParticleTexture()");
-        return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
-    }
-
+    
     @Override
     public ItemCameraTransforms getItemCameraTransforms()
     {

@@ -12,6 +12,7 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.EffectRenderer;
+import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -165,39 +166,6 @@ public class NiceBlock extends Block
     }
 
     @Override
-    public boolean addLandingEffects(WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity, int numberOfParticles)
-    {
-        blockModelHelper.getModelStateForBlock(iblockstate, worldObj, blockPosition);
-
-        // packet handler ultimately calls RenderGlobal.spawnEffectParticle
-        // that in turn calls net.minecraft.client.particle.EntityDiggingFX
-
-        // TODO: we need to replace the last parameter with a reference to simple block with the particle we want
-        // This should only matter for blocks with more than 16 colors (tile entity)
-        //worldObj.spawnParticle(EnumParticleTypes.BLOCK_DUST, blockPosition.getX(), blockPosition.getY(), blockPosition.getZ(), numberOfParticles, 0.0D, 0.0D,
-        //       0.0D, 0.15000000596046448D, new int[] { Block.getStateId(iblockstate) });
-
-        // tells default handler to cancel
-        return true;
-    }
-
-    @Override
-    public boolean addHitEffects(World worldObj, MovingObjectPosition target, EffectRenderer effectRenderer)
-    {
-        // TODO Add handler for blocks with more than 16 colors
-        //return super.addHitEffects(worldObj, target, effectRenderer);
-        return true;
-    }
-
-    @Override
-    public boolean addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer)
-    {
-        // TODO Add handler for blocks with more than 16 colors
-        //return super.addDestroyEffects(world, pos, effectRenderer);
-        return true;
-    }
-
-    @Override
     public boolean canRenderInLayer(EnumWorldBlockLayer layer)
     {
         return blockModelHelper.dispatcher.controller.canRenderInLayer(layer);
@@ -316,6 +284,19 @@ public class NiceBlock extends Block
         {
             return collisionHandler.getCollisionBoundingBox(worldIn, pos, state);
         }
+    }
+
+
+    /**
+     * Implemented only for particle support.
+     * Block model quads are pre-colored with tintIndex = 0,
+     * so this should not be called for block rendering.
+     */
+    @Override
+    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
+    {
+        ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos);
+        return this.blockModelHelper.dispatcher.controller.getColorProvider().getColor(modelState.getColorIndex()).base;
     }
 
     // BLOCK TESTS

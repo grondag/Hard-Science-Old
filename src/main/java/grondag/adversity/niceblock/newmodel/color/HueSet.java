@@ -10,8 +10,6 @@ public class HueSet
 
        private final ColorSet[] colorSets = new ColorSet[HuePosition.values().length];
        
-       private TextureAtlasSprite particleTexture;
-       
        protected static final double MAX = 999.00;
        
        /**
@@ -32,19 +30,6 @@ public class HueSet
        public ColorSet getColorSetForHue(HuePosition offset)
        {
            return colorSets[offset.ordinal()];
-       }
-       
-       public String getParticleTextureName(){
-           return "adversity:blocks/raw_0_0";
-       }
-       
-       public TextureAtlasSprite getParticleTexture()
-       {
-           if(particleTexture == null)
-           {
-               particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getParticleTextureName());
-           }
-           return particleTexture;
        }
        
        public class ColorSet

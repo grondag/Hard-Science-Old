@@ -37,49 +37,49 @@ public class ModelProxy implements ISmartItemModel
     @Override
     public List<BakedQuad> getFaceQuads(EnumFacing p_177551_1_)
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getFaceQuads()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.getFaceQuads()");
         return Collections.EMPTY_LIST;
     }
 
     @Override
     public List<BakedQuad> getGeneralQuads()
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getGeneralQuads()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.getGeneralQuads()");
         return Collections.EMPTY_LIST;
     }
 
     @Override
     public boolean isAmbientOcclusion()
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.isAmbientOcclusion()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.isAmbientOcclusion()");
         return false;
     }
 
     @Override
     public boolean isGui3d()
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.isGui3d()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.isGui3d()");
         return false;
     }
 
     @Override
     public boolean isBuiltInRenderer()
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.isBuiltInRenderer()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.isBuiltInRenderer()");
         return false;
     }
 
     @Override
     public TextureAtlasSprite getParticleTexture()
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getParticleTexture()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.getParticleTexture()");
         return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
     }
 
     @Override
     public ItemCameraTransforms getItemCameraTransforms()
     {
-        Adversity.log.warn("Unsupported method call: NiceModelDispatcher.getItemCameraTransforms()");
+        Adversity.log.warn("Unsupported method call: ModelProxy.getItemCameraTransforms()");
         return ItemCameraTransforms.DEFAULT;
     }
 
