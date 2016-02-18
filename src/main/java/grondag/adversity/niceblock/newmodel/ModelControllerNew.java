@@ -70,7 +70,8 @@ public abstract class ModelControllerNew
      */
     public abstract int getBlockShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
-    public abstract int getItemShapeIndex(ItemStack stack);
+    // not useful?
+    //public abstract int getItemShapeIndex(ItemStack stack);
 
     /**
      * used by dispatcher for cache initialization
@@ -92,7 +93,7 @@ public abstract class ModelControllerNew
     
     public IColorProvider getColorProvider()
     {
-        return BlockColors.INSTANCE;
+        return BlockColors.ALL_BLOCK_COLORS;
     }
 
 

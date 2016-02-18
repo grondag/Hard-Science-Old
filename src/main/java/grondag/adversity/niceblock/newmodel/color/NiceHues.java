@@ -116,19 +116,19 @@ public class NiceHues
                     buffer.write("<tr><td>" + t.tintName + "</td>");
 
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t) & 0xFFFFFF));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.OPPOSITE).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.OPPOSITE).getColor(t) & 0xFFFFFF));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_LEFT).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_LEFT).getColor(t) & 0xFFFFFF));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_LEFT).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_LEFT).getColor(t) & 0xFFFFFF));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t) & 0xFFFFFF));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(t) & 0xFFFFFF));
                     buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_RIGHT).getColor(t)));
+                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_RIGHT).getColor(t) & 0xFFFFFF));
 
                     buffer.write("</tr>");
                 }

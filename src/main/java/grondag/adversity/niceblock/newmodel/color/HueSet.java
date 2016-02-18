@@ -128,12 +128,13 @@ public class HueSet
        public static enum Tint
        {
            GLOW_WHITE("White Glow", 1, MAX),
-           WHITE("White", 1, 94.5),
-           GREY_FAINT("Faint Grey", 1.2, 89),
-           GREY_LIGHT("Light Grey", 1.5, 80),
-           GREY_MID("Mid Grey", 2, 60),
-           GREY_DEEP("Deep Grey", 2.2, 45),
-           GREY_DARK("Dark Grey", 2.5, 30),
+           WHITE("White", 1.5, 90),
+           GREY_BRIGHT("Bright Grey", 1.2, 82),
+           GREY_LIGHT("Light Grey", 1.8, 67.75),
+           GREY_MID("Mid Grey", 2, 53.5),
+           GREY_DEEP("Deep Grey", 2.2, 39.25),
+           GREY_DARK("Dark Grey", 2.5, 25),
+           
            NEUTRAL_GLOW("Glowing Neutral", 5, MAX),
            NEUTRAL_BRIGHT("Bright Neutral", 5, 82),
            NEUTRAL_LIGHT("Light Neutral", 5, 67.75),

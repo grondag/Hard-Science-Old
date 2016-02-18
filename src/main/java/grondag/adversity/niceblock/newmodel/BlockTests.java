@@ -21,12 +21,8 @@ public class BlockTests
             if(ibs.getBlock() instanceof NiceBlock)
             {
                 matchBlock = (NiceBlock)ibs.getBlock();
-                
-                IExtendedBlockState exState = (IExtendedBlockState) ibs;
-                ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
-
-                matchColorIndex = modelState.getColorIndex();
-                matchSpecies = modelState.getSpecies();
+                matchColorIndex = matchBlock.blockModelHelper.getModelStateForBlock(ibs, world, pos).getColorIndex();
+                matchSpecies = ibs.getValue(NiceBlock.META);
             }
             else
             {
@@ -53,12 +49,10 @@ public class BlockTests
             
             NiceBlock candidate = (NiceBlock)ibs.getBlock();
             
-            IExtendedBlockState exState = (IExtendedBlockState) ibs;
-            ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
 
             return matchBlock.blockModelHelper.dispatcher.controller == candidate.blockModelHelper.dispatcher.controller
-                   && matchColorIndex == modelState.getColorIndex()
-                   && matchSpecies == modelState.getSpecies();
+                   && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos).getColorIndex()
+                   && matchSpecies == ibs.getValue(NiceBlock.META);
         }
         
     }

@@ -82,22 +82,20 @@ public class NiceBlock extends Block
 
     public final BlockModelHelper blockModelHelper;
 
-
     public NiceBlock(BlockModelHelper blockModelHelper, BaseMaterial material)
     {
         super(material.material);
-        this.blockModelHelper = blockModelHelper;
         this.material = material;
-        String baseName = material.materialName + "." + blockModelHelper.dispatcher.controller.styleName;
-        setUnlocalizedName(baseName);
-        this.setRegistryName(baseName);
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
         setStepSound(material.stepSound);
         setHardness(material.hardness);
         setResistance(material.resistance);
-        collisionHandler = blockModelHelper.dispatcher.controller.getCollisionHandler();
+        this.blockModelHelper = blockModelHelper;
         blockModelHelper.setBlock(this);
+        setUnlocalizedName(blockModelHelper.getBlockRegistryName());
+        this.setRegistryName(blockModelHelper.getBlockRegistryName());
+        collisionHandler = blockModelHelper.dispatcher.controller.getCollisionHandler();
 
         item = new NiceItemBlock(this);
 
@@ -180,27 +178,7 @@ public class NiceBlock extends Block
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-
-        long start = System.nanoTime();
-
-        // should always be an IExtendedBlockState but avoid crash if somehow not
-        if (state instanceof IExtendedBlockState)
-        {
-            ModelState modelState = blockModelHelper.getModelStateForBlock(state, world, pos);
-            state = ((IExtendedBlockState) state).withProperty(NiceBlock.MODEL_STATE, modelState);
-        }
-
-        long end = System.nanoTime();
-        timerCount++;
-
-        elapsedTime += end - start;
-        if ((timerCount & 0x800) == 0x800)
-        {
-            Adversity.log.info(this.getUnlocalizedName() + " average getExtendedState =" + elapsedTime / timerCount);
-            timerCount = 0;
-            elapsedTime = 0;
-        }
-        return state;
+        return blockModelHelper.getExtendedState(state, world, pos);
     }
 
     /**
@@ -438,5 +416,4 @@ public class NiceBlock extends Block
     // && ibs.getValue(META) == meta;
     // }
     // }
-
 }

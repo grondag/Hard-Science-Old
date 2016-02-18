@@ -29,7 +29,7 @@ public class NiceBlockStateMapper extends DefaultStateMapper {
 		if (block instanceof NiceBlock) {
 			NiceBlock niceBlock = (NiceBlock) block;
 
-			for (int i = 0; i < niceBlock.blockModelHelper.getMetaCount(); i++) {
+			for (int i = 0; i < 16; i++) {
 				IBlockState state = niceBlock.getDefaultState().withProperty(NiceBlock.META, i);
 				mapLocations.put(state,
 						new ModelResourceLocation(niceBlock.blockModelHelper.dispatcher.getModelResourceString()));

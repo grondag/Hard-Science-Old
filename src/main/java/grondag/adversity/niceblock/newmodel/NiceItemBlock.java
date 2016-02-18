@@ -15,6 +15,8 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -35,30 +37,9 @@ public class NiceItemBlock extends ItemBlock {
 	}
 	
     @Override
-    public String getUnlocalizedName(ItemStack stack)
-    {
-        // TODO Auto-generated method stub
-        return super.getUnlocalizedName(stack);
-    }
-
-    @Override
-    public String getUnlocalizedName()
-    {
-        // TODO Auto-generated method stub
-        return super.getUnlocalizedName();
-    }
-
-    @Override
     public int getMetadata(int damage)
     {
         return damage;
-    }
-
-    @Override
-    public int getColorFromItemStack(ItemStack stack, int renderPass)
-    {
-        // TODO Auto-generated method stub
-        return super.getColorFromItemStack(stack, renderPass);
     }
 
     @Override
@@ -67,13 +48,33 @@ public class NiceItemBlock extends ItemBlock {
         return ((NiceBlock)this.block).getItemStackDisplayName(stack);
     }
 
+    /**
+     * Called to actually place the block, after the location is determined
+     * and all permission checks have been made.
+     *
+     * @param stack The item stack that was used to place the block. This can be changed inside the method.
+     * @param player The player who is placing the block. Can be null if the block is not being placed by a player.
+     * @param side The side the player (or machine) right-clicked on.
+     */
     @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ,
-            IBlockState newState)
+    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-        // TODO need to override this to enable multi-block placements
-        return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
-    }
- 	
-	
+        if (!world.setBlockState(pos, newState, 3)) return false;
+
+        IBlockState state = world.getBlockState(pos);
+        if (state.getBlock() == this.block)
+        {
+            if(this.block instanceof NiceBlockPlus)
+            {
+                NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
+                if (niceTE != null) 
+                {
+                    niceTE.modelState.readFromNBT(stack.getTagCompound());
+                }
+            }
+            this.block.onBlockPlacedBy(world, pos, state, player, stack);
+        }
+
+        return true;
+    }	
 }

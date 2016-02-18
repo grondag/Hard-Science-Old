@@ -8,99 +8,80 @@ import java.util.function.Function;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 
-public abstract class ModelState
+public class ModelState
 {
     static final String TAG_NAME = "adMdlSt";
     
     public static final int MAX_COLOR_INDEX = 0x03FF;
+//    public static final int MAX_SPECIES = 0xF;
     protected static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
-    
-    public void writeToNBT(NBTTagCompound tag)
+
+    protected int colorIndex;
+    protected int shapeIndex;
+//    protected int species;
+
+    public void writeToNBT(NBTTagCompound tag) 
     {
-        //default implementation does nothing
-    };
-    
-    public  int getMeta()
-    {
-        return 0;
+        tag.setInteger(TAG_NAME, (shapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX));
     }
     
-    public ModelState(NBTTagCompound tag, int meta)
+    public void readFromNBT(NBTTagCompound tag) 
     {
+        int tagValue = tag.getInteger(TAG_NAME);
+        colorIndex = tagValue & MAX_COLOR_INDEX;
+        shapeIndex = tagValue << COLOR_INDEX_BITLENGTH;
+    }
+    
+    public ModelState(NBTTagCompound tag)
+    {
+        this();
+        readFromNBT(tag);
     }
     
     public ModelState()
     {
+        this(0, 0, 0);
     }
      
+    public ModelState(int shapeIndex, int colorIndex)
+    {
+        this(shapeIndex, colorIndex, 0);
+    }
+    
+    public ModelState(int shapeIndex, int colorIndex, int species)
+    {
+        this.shapeIndex = shapeIndex;
+        this.colorIndex = colorIndex;
+//        this.species = species;
+    }
+    
+     public void setColorIndex(int colorIndex)
+    {
+        this.colorIndex = colorIndex;
+    }
+    
     public int getColorIndex()
     {
-        return 0;
+        return colorIndex;
     }
     
-    public abstract int getShapeIndex();
-    
-    public int getSpecies()
+    public void setShapeIndex(int shapeIndex)
     {
-        return 0;
+        this.shapeIndex = shapeIndex;
     }
-  
-    
-    public static class Color extends ModelState
+ 
+    public int getShapeIndex()
     {
-        protected final int modelState;
-        
-        /** use this when creating from block state */
-        public Color(int shapeIndex, int colorIndex)
-        {
-            this.modelState =  (shapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX);
-        }
-        
-        @Override
-        public int getColorIndex()
-        {
-            return modelState & MAX_COLOR_INDEX;
-        }
-        
-        @Override
-        public int getShapeIndex()
-        {
-            return modelState >> COLOR_INDEX_BITLENGTH;
-        }
-        
-        @Override
-        public void writeToNBT(NBTTagCompound tag) 
-        {
-            tag.setInteger(TAG_NAME, modelState);
-        }
-        
-        /** meta not used because color is always stored in modelIndex */
-        public Color(NBTTagCompound tag, int meta) 
-        {
-            this.modelState = tag.getInteger(TAG_NAME);
-        }
+        return shapeIndex;
     }
     
-    public static class ColorSpecies extends Color
-    {
-        protected final int species;
-        
-        public ColorSpecies(int shapeIndex, int colorIndex, int species)
-        {
-            super(shapeIndex, colorIndex);
-            this.species = species;
-        }
-        
-        @Override
-        public int getSpecies(){
-            return species;
-        }
-        
-        public ColorSpecies(NBTTagCompound tag, int meta) 
-        {
-            super(tag, meta);
-            this.species = meta;   
-        }
-        
-    }
+//    public int getSpecies()
+//    {
+//        return species;
+//    }
+//    
+//    public void setSpecies(int species)
+//    {
+//        this.species = species;
+//    }
 }

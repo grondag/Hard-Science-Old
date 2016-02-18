@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.newmodel;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -11,8 +12,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class NiceTileEntity extends TileEntity{
-	public IExtendedBlockState state;
-	public boolean dirty = true;
+    public ModelState modelState = new ModelState();
+	public IExtendedBlockState exBlockState;
+	public boolean isShapeIndexDirty = true;
 	public boolean isDeleted = false;
 
 	@Override
@@ -33,6 +35,7 @@ public class NiceTileEntity extends TileEntity{
 		super.onLoad();
 		if(this.worldObj.isRemote)
 		{
+		    
 			updateClientRenderState();
 		}
 	}
@@ -40,7 +43,7 @@ public class NiceTileEntity extends TileEntity{
 	@SideOnly(Side.CLIENT)
 	private void updateClientRenderState()
 	{
-		this.dirty = true;
+		this.isShapeIndexDirty = true;
 
 		updatify(pos.up());
 		updatify(pos.down());
@@ -70,11 +73,27 @@ public class NiceTileEntity extends TileEntity{
 	{
 //		Adversity.log.info("updatify attempt @ " + updatePos.toString());
 		TileEntity target = worldObj.getTileEntity(updatePos);
-		if(target != null && target instanceof NiceTileEntity && !((NiceTileEntity)target).dirty)
+		if(target != null && target instanceof NiceTileEntity && !((NiceTileEntity)target).isShapeIndexDirty)
 		{
 //			Adversity.log.info("updatify success @ " + updatePos.toString());
-			((NiceTileEntity)target).dirty = true;
+			((NiceTileEntity)target).isShapeIndexDirty = true;
 			worldObj.markBlockForUpdate(updatePos);
 		}
 	}
+
+    @Override
+    public void readFromNBT(NBTTagCompound compound)
+    {
+        super.readFromNBT(compound);
+        modelState.readFromNBT(compound);
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound compound)
+    {
+        super.writeToNBT(compound);
+        modelState.writeToNBT(compound);
+    }
+	
+	
 }

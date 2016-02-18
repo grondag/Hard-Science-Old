@@ -9,6 +9,9 @@ public interface IColorProvider
     
     public static enum ColorSubset
     {
-        FLEXSTONE;
+        FLEXSTONE_RAW,
+        DURASTONE_RAW,
+        NORMAL_BLOCK_COLORS,
+        ALL_COLORS;
     }
 }

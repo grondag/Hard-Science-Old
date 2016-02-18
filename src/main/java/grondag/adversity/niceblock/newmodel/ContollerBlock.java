@@ -2,6 +2,8 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
+import grondag.adversity.niceblock.newmodel.color.BlockColors;
+import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
@@ -15,13 +17,21 @@ public class ContollerBlock extends ModelControllerNew
     protected final IAlternator alternator;
     
     protected final BakedModelFactory bakedModelFactory;
+    
+    protected final IColorProvider colorProvider;
         
-    protected ContollerBlock(String styleName, String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    public ContollerBlock(String styleName, String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    {
+        this(styleName, textureName, BlockColors.ALL_BLOCK_COLORS, alternateCount, renderLayer, isShaded, useRotations);
+    }
+
+    public ContollerBlock(String styleName, String textureName, IColorProvider colorProvider, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(styleName, textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
                 (byte)(((useRotations ? 4 : 1) * alternateCount) & 0xFF));
         this.bakedModelFactory = new ModelFactoryBlock(this);
+        this.colorProvider = colorProvider;
     }
 
     public int getTextureOffsetFromShapeIndex(int shapeIndex) {
@@ -46,11 +56,13 @@ public class ContollerBlock extends ModelControllerNew
         return alternator.getAlternate(pos);
     }
 
-    @Override
-    public int getItemShapeIndex(ItemStack stack)
-    {
-        return 0;
-    }
+    // can't see any case in which this would be useful
+    // The stack already has an index when created, and if not, no way to figure it out.
+//    @Override
+//    public int getItemShapeIndex(ItemStack stack)
+//    {
+//        return 0;
+//    }
 
     @Override
     public int getBakedBlockModelCount()
@@ -70,6 +82,12 @@ public class ContollerBlock extends ModelControllerNew
         return bakedModelFactory;
     }
 
+    @Override
+    public IColorProvider getColorProvider()
+    {
+        return colorProvider;
+    }
+    
     @Override
     public ICollisionHandler getCollisionHandler()
     {

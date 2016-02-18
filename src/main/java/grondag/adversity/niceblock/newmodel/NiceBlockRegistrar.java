@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.color.BlockColors;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
+import grondag.adversity.niceblock.newmodel.color.IColorProvider.ColorSubset;
 import grondag.adversity.niceblock.newmodel.color.NiceHues;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
@@ -44,11 +45,18 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH INSTANCES
-    public static final ModelDispatcher MODEL_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw", 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw_flexstone", 
+            BlockColors.FLEXSTONE_RAW, 4, EnumWorldBlockLayer.SOLID, true, true));
+    
+    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw_durastone",
+            BlockColors.DURASTONE_RAW, 4, EnumWorldBlockLayer.SOLID, true, true));
+
+    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcher(new ContollerBlock("colored_stone", "colored_stone", 4, EnumWorldBlockLayer.SOLID, true, true));
 
     // DECLARE BLOCK INSTANCES
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, IColorProvider.ColorSubset.FLEXSTONE), BaseMaterial.FLEXSTONE);
-    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_RAW, IColorProvider.ColorSubset.FLEXSTONE), BaseMaterial.DURASTONE);
+    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW, IColorProvider.ColorSubset.ALL_COLORS), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW, IColorProvider.ColorSubset.ALL_COLORS), BaseMaterial.DURASTONE);
+    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new BlockModelHelper.ColorPlus(MODEL_COLORED_STONE, IColorProvider.ColorSubset.NORMAL_BLOCK_COLORS), BaseMaterial.FLEXSTONE);
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
@@ -172,7 +180,7 @@ public class NiceBlockRegistrar
                 
                 ModelResourceLocation itemModelResourceLocation = 
                         new ModelResourceLocation(((NiceBlock)block).getRegistryName(), "inventory");
-                for (int i = 0; i < block.blockModelHelper.getMetaCount(); i++)
+                for (int i = 0; i < block.blockModelHelper.getSubItemCount(); i++)
                 {
                     ModelLoader.setCustomModelResourceLocation(block.item, i, itemModelResourceLocation);
                 }
