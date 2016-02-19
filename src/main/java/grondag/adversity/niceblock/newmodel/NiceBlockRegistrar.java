@@ -2,7 +2,9 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.color.BlockColors;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider.ColorSubset;
+import grondag.adversity.niceblock.newmodel.color.BlockColors.BlockColorsBasic;
+import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
+import grondag.adversity.niceblock.newmodel.color.NiceHues.Hue;
 import grondag.adversity.niceblock.newmodel.color.NiceHues;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
@@ -45,18 +47,19 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH INSTANCES
-    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw_flexstone", 
-            BlockColors.FLEXSTONE_RAW, 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_flexstone", "raw_flexstone", 
+            new BlockColorsBasic(BlockColors.makeColorVector(Hue.YELLOW, Tint.WHITE)), 4, EnumWorldBlockLayer.SOLID, true, true));
     
-    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcher(new ContollerBlock("raw", "raw_durastone",
-            BlockColors.DURASTONE_RAW, 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_durastone", "raw_durastone",
+            new BlockColorsBasic(BlockColors.makeColorVector(Hue.COBALT, Tint.WHITE)), 4, EnumWorldBlockLayer.SOLID, true, true));
 
-    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcher(new ContollerBlock("colored_stone", "colored_stone", 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcher(new ContollerBlock("colored_stone", "colored_stone", 
+            BlockColors.INSTANCE, 4, EnumWorldBlockLayer.SOLID, true, true));
 
     // DECLARE BLOCK INSTANCES
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW, IColorProvider.ColorSubset.ALL_COLORS), BaseMaterial.FLEXSTONE);
-    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW, IColorProvider.ColorSubset.ALL_COLORS), BaseMaterial.DURASTONE);
-    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new BlockModelHelper.ColorPlus(MODEL_COLORED_STONE, IColorProvider.ColorSubset.NORMAL_BLOCK_COLORS), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE);
+    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new BlockModelHelper.ColorPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE);
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
@@ -178,16 +181,13 @@ public class NiceBlockRegistrar
             {
                 ModelLoader.setCustomStateMapper(block, NiceBlockStateMapper.instance);
                 
-                ModelResourceLocation itemModelResourceLocation = 
-                        new ModelResourceLocation(((NiceBlock)block).getRegistryName(), "inventory");
                 for (int i = 0; i < block.blockModelHelper.getSubItemCount(); i++)
                 {
+                    ModelResourceLocation itemModelResourceLocation = 
+                            new ModelResourceLocation(((NiceBlock)block).getRegistryName() + "." + i, "inventory");
                     ModelLoader.setCustomModelResourceLocation(block.item, i, itemModelResourceLocation);
                 }
             }
-            
-
-
         }
 
         GameRegistry.registerTileEntity(NiceTileEntity.class, "nicetileentity");
@@ -224,14 +224,20 @@ public class NiceBlockRegistrar
     {
         for (ModelDispatcher dispatcher : allDispatchers)
         {
-            dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
+            dispatcher.handleBakeEvent(event);
+            //dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
+            
             event.modelRegistry.putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
         }
         
         for (NiceBlock block : allBlocks)
         {
-            event.modelRegistry.putObject(new ModelResourceLocation(block.getRegistryName(), "inventory"),
-                    new ModelProxy(block.blockModelHelper));
+            for (int i = 0; i < block.blockModelHelper.getSubItemCount(); i++)
+            {          
+                event.modelRegistry.putObject(new ModelResourceLocation(block.getRegistryName() + "." + i, "inventory"),
+                        block.blockModelHelper.dispatcher.getItemModelForModelState(new ModelState(0, i)));
+                        //new ModelProxy(block.blockModelHelper));
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.color.BlockColors;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
@@ -93,7 +94,7 @@ public abstract class ModelControllerNew
     
     public IColorProvider getColorProvider()
     {
-        return BlockColors.ALL_BLOCK_COLORS;
+        return BlockColors.INSTANCE;
     }
 
 
@@ -125,6 +126,8 @@ public abstract class ModelControllerNew
      */
     public void handleTexturePreStitch(Pre event)
     {
+        Adversity.log.info("handleTexturePreStitch");
+        
         for (String tex : getAllTextureNames())
         {
             event.map.registerSprite(new ResourceLocation(tex));

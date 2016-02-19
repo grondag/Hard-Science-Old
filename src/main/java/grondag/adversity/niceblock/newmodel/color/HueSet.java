@@ -48,7 +48,7 @@ public class HueSet
 //                       double maxLuminance = 0;
                        double maxChroma = 0;
                        
-                       for (double l = 100; l > 30; l--)
+                       for (double l = 100; l > 20; l--)
                        {
                            for (double c = 100; c > 30; c--)
                            {
@@ -73,7 +73,7 @@ public class HueSet
                    }
                    
                    if(luminance == MAX){
-                       for (double trial = 100; trial > 30; trial-= 0.1)
+                       for (double trial = 100; trial > 20; trial-= 0.1)
                        {
                            Color temp = Color.fromHCL(hue, chroma, trial);
                            if(temp.IS_VISIBLE)

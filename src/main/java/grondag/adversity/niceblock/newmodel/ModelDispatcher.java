@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
@@ -41,10 +42,10 @@ public class ModelDispatcher implements ISmartBlockModel
 {
 
     /** cache for baked block models */
-    private final IBakedModel[] bakedBlockModels;
+    private IBakedModel[] bakedBlockModels;
 
     /** cache for baked item models */
-    private final IBakedModel[] bakedItemModels;
+    private IBakedModel[] bakedItemModels;
     
     public final ModelControllerNew controller;
     
@@ -55,6 +56,21 @@ public class ModelDispatcher implements ISmartBlockModel
         this.controller = controller;
         NiceBlockRegistrar.allDispatchers.add(this);
         
+//        if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
+//        {
+//            bakedBlockModels = new IBakedModel[controller.getBakedBlockModelCount()];
+//            bakedItemModels = new IBakedModel[controller.getBakedItemModelCount()];
+//        }
+//        else
+//        {
+//            bakedBlockModels = null;
+//            bakedItemModels = null;
+//        }
+    }
+    
+    public void handleBakeEvent(ModelBakeEvent event)
+    {
+        // need to clear arrays to force rebaking of cached models
         if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
         {
             bakedBlockModels = new IBakedModel[controller.getBakedBlockModelCount()];
@@ -65,6 +81,7 @@ public class ModelDispatcher implements ISmartBlockModel
             bakedBlockModels = null;
             bakedItemModels = null;
         }
+        controller.getBakedModelFactory().handleBakeEvent(event);
     }
     
     public String getModelResourceString()
@@ -111,7 +128,7 @@ public class ModelDispatcher implements ISmartBlockModel
 
     @SideOnly(Side.CLIENT)
     public IBakedModel getItemModelForModelState(ModelState modelState)
-    {        
+    {
         IBakedModel retVal = bakedItemModels[controller.getItemModelIndex(modelState)];
         
         if(retVal == null){

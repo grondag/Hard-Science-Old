@@ -22,7 +22,7 @@ public class ContollerBlock extends ModelControllerNew
         
     public ContollerBlock(String styleName, String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
-        this(styleName, textureName, BlockColors.ALL_BLOCK_COLORS, alternateCount, renderLayer, isShaded, useRotations);
+        this(styleName, textureName, BlockColors.INSTANCE, alternateCount, renderLayer, isShaded, useRotations);
     }
 
     public ContollerBlock(String styleName, String textureName, IColorProvider colorProvider, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)

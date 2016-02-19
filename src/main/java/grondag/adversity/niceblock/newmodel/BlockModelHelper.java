@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider.ColorSubset;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -57,7 +56,7 @@ public abstract class BlockModelHelper
     }
     
     public abstract ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos);
-    public abstract ModelState getModelStateForItem(ItemStack stack);
+//    public abstract ModelState getModelStateForItem(ItemStack stack);
     public abstract IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos);
     
     public abstract List<ItemStack> getSubItems();
@@ -73,28 +72,22 @@ public abstract class BlockModelHelper
     
     public static class ColorMeta extends BlockModelHelper
     {
-        protected final int colorIndexes[];
-        protected final String subsetName;
-        
-        public ColorMeta(ModelDispatcher dispatcher, ColorSubset colorSubset)
+        public ColorMeta(ModelDispatcher dispatcher)
         {
             super(dispatcher);
-            this.colorIndexes = dispatcher.controller.getColorProvider().getSubset(colorSubset);
-            this.subsetName = colorSubset.name();
         }
 
         @Override
         public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos)
         {
-            return new ModelState(dispatcher.controller.getBlockShapeIndex(block, state, world, pos),
-                    colorIndexes[state.getValue(NiceBlock.META)]);
+            return new ModelState(dispatcher.controller.getBlockShapeIndex(block, state, world, pos),state.getValue(NiceBlock.META));
         }
 
-        @Override
-        public ModelState getModelStateForItem(ItemStack stack)
-        {
-            return new ModelState(0, colorIndexes[Math.max(0, Math.min(stack.getMetadata(), colorIndexes.length - 1))]);
-        }
+//        @Override
+//        public ModelState getModelStateForItem(ItemStack stack)
+//        {
+//            return new ModelState(0, stack.getMetadata());
+//        }
 
         @Override
         public IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -107,7 +100,7 @@ public abstract class BlockModelHelper
         public List<ItemStack> getSubItems()
         {
             ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-            for(int i = 0; i < colorIndexes.length; i++)
+            for(int i = 0; i < dispatcher.controller.getColorProvider().getColorCount(); i++)
             {
                 itemBuilder.add(new ItemStack(block.item, 1, i));
             }
@@ -117,7 +110,7 @@ public abstract class BlockModelHelper
         @Override
         public int getSubItemCount()
         {
-            return colorIndexes.length;
+            return dispatcher.controller.getColorProvider().getColorCount();
         }
 
         @Override
@@ -127,21 +120,21 @@ public abstract class BlockModelHelper
                     LanguageRegistry.instance().getStringLocalization(dispatcher.controller.styleName) + " "
                     + LanguageRegistry.instance().getStringLocalization(block.material.materialName) 
                     + ", " 
-                    + dispatcher.controller.getColorProvider().getColor(getModelStateForItem(stack).getColorIndex()).vectorName;
+                    + dispatcher.controller.getColorProvider().getColor(stack.getMetadata()).vectorName;
         }
 
         @Override
         public String getBlockRegistryName()
         {
-            return super.getBlockRegistryName() + "." + subsetName;
+            return super.getBlockRegistryName();
         }
     }
     
     public static class ColorPlus extends ColorMeta
     {
-        public ColorPlus(ModelDispatcher dispatcher, ColorSubset colorSubset)
+        public ColorPlus(ModelDispatcher dispatcher)
         {
-            super(dispatcher, colorSubset);
+            super(dispatcher);
         }
 
         @Override
@@ -151,46 +144,47 @@ public abstract class BlockModelHelper
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                retVal = niceTE.modelState;
+                Adversity.log.info("ColorPlus getModelStateForBlock found TE with loaded = " + niceTE.isLoaded);
 
                 if(niceTE.isShapeIndexDirty)
                 {
                     int newShapeIndex = dispatcher.controller.getBlockShapeIndex(block, state, world, pos);
-                    if(newShapeIndex != retVal.getShapeIndex())
+                    if(newShapeIndex != niceTE.modelState.getShapeIndex())
                     {
-                        retVal.setShapeIndex(dispatcher.controller.getBlockShapeIndex(block, state, world, pos));
+                        niceTE.modelState.setShapeIndex(dispatcher.controller.getBlockShapeIndex(block, state, world, pos));
                         niceTE.markDirty();
                     }
                     niceTE.isShapeIndexDirty = false;
                 }
+                retVal = niceTE.modelState;
             }
             else
             {
+                Adversity.log.info("ColorPlus getModelStateForBlock modelState found NULL tile entity");
                 retVal = new ModelState(0, 0);
             }
+            Adversity.log.info("colorIndex = " + retVal.getColorIndex() + ", shapeIndex = " + retVal.getShapeIndex());
             return retVal;
         }
         
-        @Override
-        public ModelState getModelStateForItem(ItemStack stack)
-        {
-            return new ModelState(0, stack.getMetadata());
-        }
+//        @Override
+//        public ModelState getModelStateForItem(ItemStack stack)
+//        {
+//            return new ModelState(stack.getTagCompound());
+//        }
         
-        @Override
-        public List<ItemStack> getSubItems()
-        {
-            ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-            for(int i = 0; i < colorIndexes.length; i++)
-            {
-                NBTTagCompound tag = new NBTTagCompound();
-                ModelState modelState = new ModelState(0, this.colorIndexes[i]);
-                modelState.writeToNBT(tag);
-                ItemStack stack = new ItemStack(block.item, 1, 0);
-                stack.setTagCompound(tag);
-                itemBuilder.add(stack);
-            }
-            return itemBuilder.build();
-        }
+//        @Override
+//        public List<ItemStack> getSubItems()
+//        {
+//            ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+//            for(int i = 0; i < dispatcher.controller.getColorProvider().getColorCount(); i++)
+//            {
+//  //              ModelState modelState = new ModelState(0, i);
+// //               ItemStack stack = new ItemStack(block.item, 1, 0);
+// //               stack.setTagCompound(modelState.getNBT());
+//                itemBuilder.add(new ItemStack(block.item, 1, i));
+//            }
+//            return itemBuilder.build();
+//        }
     }
 }
