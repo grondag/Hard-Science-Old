@@ -57,13 +57,13 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
     
     private final ModelControllerNew controllerPrimary;
 
-    public ModelDispatcherLayered(IColorProvider colorProvider, String particleTextureName, ModelControllerNew ... controllers)
+    public ModelDispatcherLayered(IColorProvider colorProvider, String particleTextureName, ModelControllerNew ... controllersIn)
     {
         super(colorProvider, particleTextureName);
-        this.controllerPrimary = controllers[0];
-        for(ModelControllerNew cont : controllers)
+        this.controllerPrimary = controllersIn[0];
+        for(ModelControllerNew cont : controllersIn)
         {
-            if(controllers[cont.renderLayer.ordinal()] != null)
+            if(this.controllers[cont.renderLayer.ordinal()] != null)
             {
                 Adversity.log.warn("Duplicate render layer in controllers passed to ModelDispatherLayered.");
             }

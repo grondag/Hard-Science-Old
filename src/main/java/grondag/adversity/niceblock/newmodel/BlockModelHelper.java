@@ -42,17 +42,23 @@ ModelController
 public abstract class BlockModelHelper
 {
     protected NiceBlock block;
+    
+    protected String baseDisplayName;
+    
     public final ModelDispatcherBase dispatcher;
 
     protected BlockModelHelper(ModelDispatcherBase dispatcher)
     {
         this.dispatcher = dispatcher;
+
     }
     
     /** called by NiceBlock during its constructor */
     public void setBlock(NiceBlock block)
     {
         this.block = block;
+        baseDisplayName = LanguageRegistry.instance().getStringLocalization(block.styleName) + " "
+        + LanguageRegistry.instance().getStringLocalization(block.material.materialName); 
     }
     
     public abstract ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos);
@@ -107,11 +113,8 @@ public abstract class BlockModelHelper
         @Override
         public String getItemStackDisplayName(ItemStack stack)
         {
-            return 
-                    LanguageRegistry.instance().getStringLocalization(block.styleName) + " "
-                    + LanguageRegistry.instance().getStringLocalization(block.material.materialName) 
-                    + ", " 
-                    + dispatcher.getColorProvider().getColor(stack.getMetadata()).vectorName;
+            String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).vectorName;
+            return baseDisplayName + (colorName == "" ? "" : ", " + colorName);
         }
     }
     

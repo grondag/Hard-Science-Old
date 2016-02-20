@@ -1,12 +1,13 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.color.BlockColors;
+import grondag.adversity.niceblock.newmodel.color.FixedColors;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.BlockColors.BlockColorsBasic;
 import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
 import grondag.adversity.niceblock.newmodel.color.NiceHues.Hue;
 import grondag.adversity.niceblock.newmodel.color.NiceHues;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
+import grondag.adversity.niceblock.newmodel.color.NoColor;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 
@@ -46,23 +47,26 @@ public class NiceBlockRegistrar
      */
     public static LinkedList<ModelDispatcherBase> allDispatchers = new LinkedList<ModelDispatcherBase>();
 
-    // DECLARE MODEL DISPATCH INSTANCES
-    public static final ModelDispatcherBase MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new BlockColorsBasic(
+    // DECLARE MODEL DISPATCH & BLOCK INSTANCES
+    public static final ModelDispatcherBase MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColors(
             BlockColors.makeColorVector(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
             new ContollerBlock("raw_flexstone", 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
     
-    public static final ModelDispatcherBase MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new BlockColorsBasic(
+    public static final ModelDispatcherBase MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColors(
             BlockColors.makeColorVector(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
             new ContollerBlock("raw_durastone", 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
 
     public static final ModelDispatcherBase MODEL_COLORED_STONE = new ModelDispatcherBasic(
             BlockColors.INSTANCE, "colored_stone_0_0",
             new ContollerBlock("colored_stone", 4, EnumWorldBlockLayer.SOLID, true, true));
-
-    // DECLARE BLOCK INSTANCES
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
-    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
     public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new BlockModelHelper.ColorPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
+
+    public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(NoColor.INSTANCE, "cool_basalt_0_0",
+            new ContollerBlock("cool_basalt", 4, EnumWorldBlockLayer.SOLID, true, true),
+            new ContollerBlock("hot_basalt_3", 4, EnumWorldBlockLayer.TRANSLUCENT, false, true));
+    public static final NiceBlockHotBasalt BLOCK_HOT_BASALT = new NiceBlockHotBasalt(new BlockModelHelper.ColorMeta(MODEL_HOT_BASALT));
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),

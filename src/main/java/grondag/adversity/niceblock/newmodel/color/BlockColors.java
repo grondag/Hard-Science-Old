@@ -8,7 +8,6 @@ import grondag.adversity.niceblock.newmodel.color.NiceHues.Hue;
 
 public class BlockColors implements IColorProvider
 {
-    
     public static final BlockColors INSTANCE = new BlockColors();
     
     private final int COLOR_COUNT = Hue.values().length * 25;
@@ -72,28 +71,5 @@ public class BlockColors implements IColorProvider
     public ColorVector getColor(int colorIndex)
     {
         return COLORS[Math.max(0, Math.min(COLOR_COUNT-1, colorIndex))];
-    }
-
-    public static class BlockColorsBasic implements IColorProvider
-    {
-        private final ColorVector[] COLORS;
-
-        public BlockColorsBasic(ColorVector... colors)
-        {
-            COLORS = colors;
-        }
-        
-        @Override
-        public int getColorCount()
-        {
-            return COLORS.length;
-        }
-
-        @Override
-        public ColorVector getColor(int colorIndex)
-        {
-            return COLORS[Math.max(0, Math.min(COLORS.length-1, colorIndex))];
-        }
-        
     }
 }
