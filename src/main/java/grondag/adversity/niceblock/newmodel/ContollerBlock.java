@@ -20,14 +20,14 @@ public class ContollerBlock extends ModelControllerNew
     
     protected final IColorProvider colorProvider;
         
-    public ContollerBlock(String styleName, String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    public ContollerBlock(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
-        this(styleName, textureName, BlockColors.INSTANCE, alternateCount, renderLayer, isShaded, useRotations);
+        this(textureName, BlockColors.INSTANCE, alternateCount, renderLayer, isShaded, useRotations);
     }
 
-    public ContollerBlock(String styleName, String textureName, IColorProvider colorProvider, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    public ContollerBlock(String textureName, IColorProvider colorProvider, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
-        super(styleName, textureName, alternateCount, renderLayer, isShaded, useRotations);
+        super(textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
                 (byte)(((useRotations ? 4 : 1) * alternateCount) & 0xFF));
         this.bakedModelFactory = new ModelFactoryBlock(this);
@@ -51,7 +51,7 @@ public class ContollerBlock extends ModelControllerNew
     }
     
     @Override
-    public int getBlockShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return alternator.getAlternate(pos);
     }
@@ -97,7 +97,7 @@ public class ContollerBlock extends ModelControllerNew
     @Override
     public int getBlockModelIndex(ModelState state)
     {
-        return (getColorProvider().getColorCount() * state.getShapeIndex()) + state.getColorIndex();
+        return (getColorProvider().getColorCount() * state.getClientShapeIndex()) + state.getColorIndex();
     }
 
     @Override

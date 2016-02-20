@@ -38,7 +38,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * Is also ISmartBlockModel proxy for handleBlockState
  */
-public class ModelDispatcher implements ISmartBlockModel
+public class ModelDispatcher extends ModelDispatcherBase
 {
 
     /** cache for baked block models */
@@ -68,6 +68,10 @@ public class ModelDispatcher implements ISmartBlockModel
 //        }
     }
     
+    /* (non-Javadoc)
+     * @see grondag.adversity.niceblock.newmodel.IModelDispatcher#handleBakeEvent(net.minecraftforge.client.event.ModelBakeEvent)
+     */
+    @Override
     public void handleBakeEvent(ModelBakeEvent event)
     {
         // need to clear arrays to force rebaking of cached models
@@ -84,11 +88,6 @@ public class ModelDispatcher implements ISmartBlockModel
         controller.getBakedModelFactory().handleBakeEvent(event);
     }
     
-    public String getModelResourceString()
-    {
-        return Adversity.MODID + ":" + controller.styleName;
-    }
-        
 
     @Override
     @SideOnly(Side.CLIENT)
@@ -126,6 +125,7 @@ public class ModelDispatcher implements ISmartBlockModel
         return retVal;
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
     public IBakedModel getItemModelForModelState(ModelState modelState)
     {
@@ -157,6 +157,7 @@ public class ModelDispatcher implements ISmartBlockModel
         return retVal;
     }
     
+
     @Override
     public TextureAtlasSprite getParticleTexture()
     {
@@ -166,51 +167,6 @@ public class ModelDispatcher implements ISmartBlockModel
                     controller.getParticleTextureName());
         }
         return particleTexture;
-    }
-
-
-    // REMAINING METHODS SHOULD NEVER BE CALLED
-
-    @Override
-    public List<BakedQuad> getFaceQuads(EnumFacing p_177551_1_)
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getFaceQuads()");
-        return Collections.EMPTY_LIST;
-    }
-
-    @Override
-    public List<BakedQuad> getGeneralQuads()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getGeneralQuads()");
-        return Collections.EMPTY_LIST;
-    }
-
-    @Override
-    public boolean isAmbientOcclusion()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.isAmbientOcclusion()");
-        return false;
-    }
-
-    @Override
-    public boolean isGui3d()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.isGui3d()");
-        return false;
-    }
-
-    @Override
-    public boolean isBuiltInRenderer()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.isBuiltInRenderer()");
-        return false;
-    }
-    
-    @Override
-    public ItemCameraTransforms getItemCameraTransforms()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getItemCameraTransforms()");
-        return ItemCameraTransforms.DEFAULT;
     }
 
 }

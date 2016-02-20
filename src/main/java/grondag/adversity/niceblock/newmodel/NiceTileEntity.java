@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class NiceTileEntity extends TileEntity{
     public ModelState modelState = new ModelState();
 	public IExtendedBlockState exBlockState;
-	public boolean isShapeIndexDirty = true;
+	public boolean isClientShapeIndexDirty = true;
 	public boolean isLoaded = false;
 //	public boolean isDeleted = false;
 
@@ -103,10 +103,9 @@ public class NiceTileEntity extends TileEntity{
     {
         super.readFromNBT(compound);
         modelState.readFromNBT(compound);
-        Adversity.log.info("NiceTileEntity readFromNBT " + compound.toString());
-        Adversity.log.info("colorIndex = " + modelState.getColorIndex() + ", shapeIndex = " + modelState.getShapeIndex());
+//        Adversity.log.info("NiceTileEntity readFromNBT " + compound.toString());
+//        Adversity.log.info("colorIndex = " + modelState.getColorIndex() + ", shapeIndex = " + modelState.getClientShapeIndex());
         isLoaded = true;
-
     }
 
     @Override
@@ -114,8 +113,8 @@ public class NiceTileEntity extends TileEntity{
     {
         super.writeToNBT(compound);
         modelState.writeToNBT(compound);
-        Adversity.log.info("writeToNBT " + compound.toString());
-        Adversity.log.info("colorIndex = " + modelState.getColorIndex() + ", shapeIndex = " + modelState.getShapeIndex());
+//        Adversity.log.info("writeToNBT " + compound.toString());
+//        Adversity.log.info("colorIndex = " + modelState.getColorIndex() + ", shapeIndex = " + modelState.getClientShapeIndex());
     }
 	
 	

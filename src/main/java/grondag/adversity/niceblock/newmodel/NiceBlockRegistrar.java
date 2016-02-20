@@ -47,19 +47,19 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH INSTANCES
-    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_flexstone", "raw_flexstone", 
+    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_flexstone", 
             new BlockColorsBasic(BlockColors.makeColorVector(Hue.YELLOW, Tint.WHITE)), 4, EnumWorldBlockLayer.SOLID, true, true));
     
-    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_durastone", "raw_durastone",
+    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_durastone",
             new BlockColorsBasic(BlockColors.makeColorVector(Hue.COBALT, Tint.WHITE)), 4, EnumWorldBlockLayer.SOLID, true, true));
 
-    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcher(new ContollerBlock("colored_stone", "colored_stone", 
+    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcher(new ContollerBlock("colored_stone", 
             BlockColors.INSTANCE, 4, EnumWorldBlockLayer.SOLID, true, true));
 
     // DECLARE BLOCK INSTANCES
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE);
-    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE);
-    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new BlockModelHelper.ColorPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE);
+    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
+    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
+    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new BlockModelHelper.ColorPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),

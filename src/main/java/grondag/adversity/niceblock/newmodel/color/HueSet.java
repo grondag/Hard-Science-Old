@@ -157,9 +157,12 @@ public class HueSet
            BOLD_DARK("Dark Bold", 15, 25),
            
            ACCENT_GLOW("Glowing Accent", 25, MAX),
+           ACCENT_BRIGHT("Bright Accent", 25, 82),
            ACCENT_LIGHT("Light Accent", 25, 67.75),
            ACCENT_MID("Mid Accent", 25, 53.5),
            ACCENT_DEEP("Deep Accent", 25, 40),
+           ACCENT_DARK("Dark Accent", 25, 25),
+           
            CHROMA_MAX("Max Chroma", 40, 74),
            ACCENT_ULTRA("Ultra Accent", MAX, MAX);
            

@@ -20,10 +20,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  */
 public abstract class ModelControllerNew
 {
-    /**
-     * Unlocalized name for this shape and texturing of block
-     */
-    public final String styleName;
 
     /**
      * Folder and prefix for textures. Will use first texture as starting point
@@ -55,10 +51,9 @@ public abstract class ModelControllerNew
      */
     public final boolean isShaded;
     
-    protected ModelControllerNew(String styleName, String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
+    protected ModelControllerNew(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
             boolean useRotatedTexturesAsAlternates)
     {
-        this.styleName = styleName;
         this.textureName = textureName;
         this.alternateTextureCount = Math.max(1, alternateTextureCount);
         this.renderLayer = renderLayer;
@@ -69,7 +64,7 @@ public abstract class ModelControllerNew
     /**
      * used by block helper methods to get shape-related state
      */
-    public abstract int getBlockShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
+    public abstract int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
     // not useful?
     //public abstract int getItemShapeIndex(ItemStack stack);

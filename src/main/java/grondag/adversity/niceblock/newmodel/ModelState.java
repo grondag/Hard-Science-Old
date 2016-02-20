@@ -18,28 +18,25 @@ public class ModelState
 
 //    protected short shapeIndex;
 //    protected short colorIndex;
-    protected int[] stateInfo = new int[2];
+    protected int[] clientState = new int[1];
+    protected int[] serverState = new int[1];
     
-    protected final int COLOR_INDEX = 0;
-    protected final int SHAPE_INDEX = 1;
+    protected final int SS_COLOR_INDEX = 0;
+    protected final int CS_SHAPE_INDEX = 0;
     
     
     public void writeToNBT(NBTTagCompound tag) 
     {
  //       tag.setInteger(TAG_NAME, (shapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX));
-        tag.setIntArray(TAG_NAME, stateInfo);
-        Adversity.log.info("ModelState writeToNBT tag = " + tag.toString());
-        Adversity.log.info("colorIndex = " + stateInfo[COLOR_INDEX] + ", shapeIndex = " + stateInfo[SHAPE_INDEX]);
+        tag.setIntArray(TAG_NAME, serverState);
     }
     
     public void readFromNBT(NBTTagCompound tag) 
     {
-        stateInfo = tag.getIntArray(TAG_NAME);
+        serverState = tag.getIntArray(TAG_NAME);
 //        int tagValue = tag.getInteger(TAG_NAME);
 //        colorIndex = tagValue & MAX_COLOR_INDEX;
 //        shapeIndex = tagValue << COLOR_INDEX_BITLENGTH;
-        Adversity.log.info("ModelState readFromNBT tag = " + tag.toString());
-        Adversity.log.info("colorIndex = " + stateInfo[COLOR_INDEX] + ", shapeIndex = " + stateInfo[SHAPE_INDEX]);
     }
     
     /** useful for creating item stacks */
@@ -68,27 +65,27 @@ public class ModelState
     
     public ModelState(int shapeIndex, int colorIndex, int species)
     {
-        stateInfo[SHAPE_INDEX] = shapeIndex;
-        stateInfo[COLOR_INDEX] = colorIndex;
+        clientState[CS_SHAPE_INDEX] = shapeIndex;
+        serverState[SS_COLOR_INDEX] = colorIndex;
     }
     
      public void setColorIndex(int colorIndex)
     {
-         stateInfo[COLOR_INDEX] = colorIndex;
+         serverState[SS_COLOR_INDEX] = colorIndex;
     }
     
     public int getColorIndex()
     {
-        return stateInfo[COLOR_INDEX];
+        return serverState[SS_COLOR_INDEX];
     }
     
-    public void setShapeIndex(int shapeIndex)
+    public void setClientShapeIndex(int shapeIndex)
     {
-        stateInfo[SHAPE_INDEX] = shapeIndex;
+        clientState[CS_SHAPE_INDEX] = shapeIndex;
     }
  
-    public int getShapeIndex()
+    public int getClientShapeIndex()
     {
-        return stateInfo[SHAPE_INDEX];
+        return clientState[CS_SHAPE_INDEX];
     }
 }

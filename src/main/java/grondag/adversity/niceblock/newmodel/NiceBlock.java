@@ -68,6 +68,11 @@ public class NiceBlock extends Block
      * Controls material-dependent properties
      */
     public final BaseMaterial material;
+    
+    /** 
+     * Combined with material name for localization and registration.
+     */
+    protected final String styleName;
 
     /**
      * Item for this block. Will have same meta variants as this block. Instantiated and retained here for convenience and to enable consistent handling.
@@ -82,10 +87,11 @@ public class NiceBlock extends Block
 
     public final BlockModelHelper blockModelHelper;
 
-    public NiceBlock(BlockModelHelper blockModelHelper, BaseMaterial material)
+    public NiceBlock(BlockModelHelper blockModelHelper, BaseMaterial material, String styleName)
     {
         super(material.material);
         this.material = material;
+        this.styleName = styleName;
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
         setStepSound(material.stepSound);
@@ -93,8 +99,8 @@ public class NiceBlock extends Block
         setResistance(material.resistance);
         this.blockModelHelper = blockModelHelper;
         blockModelHelper.setBlock(this);
-        setUnlocalizedName(blockModelHelper.getBlockRegistryName());
-        this.setRegistryName(blockModelHelper.getBlockRegistryName());
+        this.setRegistryName(material.materialName + "." + styleName);
+        setUnlocalizedName(this.getRegistryName());
         collisionHandler = blockModelHelper.dispatcher.controller.getCollisionHandler();
 
         item = new NiceItemBlock(this);

@@ -20,9 +20,9 @@ import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 
-	public NiceBlockPlus(BlockModelHelper blockModelHelper, BaseMaterial material)
+	public NiceBlockPlus(BlockModelHelper blockModelHelper, BaseMaterial material, String styleName)
 	{
-		super(blockModelHelper, material);
+		super(blockModelHelper, material, styleName);
 	}
 		
 	@Override

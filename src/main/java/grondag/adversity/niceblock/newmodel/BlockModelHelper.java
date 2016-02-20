@@ -64,12 +64,7 @@ public abstract class BlockModelHelper
     public abstract int getSubItemCount();
     
     public abstract String getItemStackDisplayName(ItemStack stack);
-    
-    public String getBlockRegistryName()
-    {
-        return this.block.material.materialName + "." + this.dispatcher.controller.styleName;
-    }
-    
+        
     public static class ColorMeta extends BlockModelHelper
     {
         public ColorMeta(ModelDispatcher dispatcher)
@@ -80,7 +75,7 @@ public abstract class BlockModelHelper
         @Override
         public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos)
         {
-            return new ModelState(dispatcher.controller.getBlockShapeIndex(block, state, world, pos),state.getValue(NiceBlock.META));
+            return new ModelState(dispatcher.controller.getClientShapeIndex(block, state, world, pos),state.getValue(NiceBlock.META));
         }
 
 //        @Override
@@ -117,16 +112,10 @@ public abstract class BlockModelHelper
         public String getItemStackDisplayName(ItemStack stack)
         {
             return 
-                    LanguageRegistry.instance().getStringLocalization(dispatcher.controller.styleName) + " "
+                    LanguageRegistry.instance().getStringLocalization(block.styleName) + " "
                     + LanguageRegistry.instance().getStringLocalization(block.material.materialName) 
                     + ", " 
                     + dispatcher.controller.getColorProvider().getColor(stack.getMetadata()).vectorName;
-        }
-
-        @Override
-        public String getBlockRegistryName()
-        {
-            return super.getBlockRegistryName();
         }
     }
     
@@ -146,15 +135,15 @@ public abstract class BlockModelHelper
             {
                 Adversity.log.info("ColorPlus getModelStateForBlock found TE with loaded = " + niceTE.isLoaded);
 
-                if(niceTE.isShapeIndexDirty)
+                if(niceTE.isClientShapeIndexDirty)
                 {
-                    int newShapeIndex = dispatcher.controller.getBlockShapeIndex(block, state, world, pos);
-                    if(newShapeIndex != niceTE.modelState.getShapeIndex())
+                    int newShapeIndex = dispatcher.controller.getClientShapeIndex(block, state, world, pos);
+                    if(newShapeIndex != niceTE.modelState.getClientShapeIndex())
                     {
-                        niceTE.modelState.setShapeIndex(dispatcher.controller.getBlockShapeIndex(block, state, world, pos));
+                        niceTE.modelState.setClientShapeIndex(dispatcher.controller.getClientShapeIndex(block, state, world, pos));
                         niceTE.markDirty();
                     }
-                    niceTE.isShapeIndexDirty = false;
+                    niceTE.isClientShapeIndexDirty = false;
                 }
                 retVal = niceTE.modelState;
             }
@@ -163,7 +152,7 @@ public abstract class BlockModelHelper
                 Adversity.log.info("ColorPlus getModelStateForBlock modelState found NULL tile entity");
                 retVal = new ModelState(0, 0);
             }
-            Adversity.log.info("colorIndex = " + retVal.getColorIndex() + ", shapeIndex = " + retVal.getShapeIndex());
+            Adversity.log.info("colorIndex = " + retVal.getColorIndex() + ", shapeIndex = " + retVal.getClientShapeIndex());
             return retVal;
         }
         

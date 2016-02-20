@@ -1,17 +1,16 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.newmodel;
 
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
-import grondag.adversity.niceblock.newmodel.BaseMaterial;
-import grondag.adversity.niceblock.newmodel.NiceBlock;
+import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockHotBasalt extends NiceBlock {
 
-	public NiceBlockHotBasalt(NiceStyle style, NicePlacement placer, BaseMaterial material, int metaCount) {
-		super(style, placer, material, metaCount);
+	public NiceBlockHotBasalt(BlockModelHelper blockModelHelper) {
+		super(blockModelHelper, BaseMaterial.FLEXSTONE, "hot_basalt");
 	}
 
 	@Override
