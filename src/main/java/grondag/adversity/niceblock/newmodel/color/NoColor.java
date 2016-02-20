@@ -3,14 +3,18 @@ package grondag.adversity.niceblock.newmodel.color;
 public class NoColor implements IColorProvider
 {
     
-    public static NoColor INSTANCE = new NoColor();
-    
-    private final ColorVector WHITE = new ColorVector("", 0xFFFFFFFF);
+    private static final ColorVector WHITE = new ColorVector("", 0xFFFFFFFF);
+    private final int virtualColorCount;
+
+    public NoColor(int virtualColorCount)
+    {
+        this.virtualColorCount = virtualColorCount;
+    }
 
     @Override
     public int getColorCount()
     {
-        return 1;
+        return virtualColorCount;
     }
 
     @Override

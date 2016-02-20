@@ -17,28 +17,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
-/**
-Handles client-side block events and
-provides services related to models
-
-Parameters
-FirstColor
-ColorCount
-
-Handlers
-getItemStackDisplayName
-getLocalizedName
-getExtendedState
-getExtendedStateForItem
-getParticleColor
-
-Handlers via ModelController
-canRenderInLayer
-getCollisionHelper
-
-Holds  references to
-ModelController
- */
 public abstract class BlockModelHelper
 {
     protected NiceBlock block;
@@ -62,12 +40,26 @@ public abstract class BlockModelHelper
     }
     
     public abstract ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos);
-//    public abstract ModelState getModelStateForItem(ItemStack stack);
-    public abstract IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos);
-    
-    public abstract List<ItemStack> getSubItems();
+
+    public IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        ModelState modelState = this.getModelStateForBlock(state, world, pos);
+        return ((IExtendedBlockState) state).withProperty(NiceBlock.MODEL_STATE, modelState);
+    }
     
     public abstract int getSubItemCount();
+
+    public List<ItemStack> getSubItems()
+    {
+        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+        for(int i = 0; i < this.getSubItemCount(); i++)
+        {
+            itemBuilder.add(new ItemStack(block.item, 1, i));
+        }
+        return itemBuilder.build();
+    }    
+    
+    public abstract ModelState getModelStateForItem(int itemIndex);
     
     public abstract String getItemStackDisplayName(ItemStack stack);
         
@@ -87,24 +79,6 @@ public abstract class BlockModelHelper
         }
 
         @Override
-        public IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
-        {
-            ModelState modelState = getModelStateForBlock(state, world, pos);
-            return ((IExtendedBlockState) state).withProperty(NiceBlock.MODEL_STATE, modelState);
-        }
-        
-        @Override
-        public List<ItemStack> getSubItems()
-        {
-            ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-            for(int i = 0; i < dispatcher.getColorProvider().getColorCount(); i++)
-            {
-                itemBuilder.add(new ItemStack(block.item, 1, i));
-            }
-            return itemBuilder.build();
-        }
-
-        @Override
         public int getSubItemCount()
         {
             return dispatcher.getColorProvider().getColorCount();
@@ -115,6 +89,12 @@ public abstract class BlockModelHelper
         {
             String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).vectorName;
             return baseDisplayName + (colorName == "" ? "" : ", " + colorName);
+        }
+
+        @Override
+        public ModelState getModelStateForItem(int itemIndex)
+        {
+            return new ModelState(0, itemIndex);
         }
     }
     
@@ -148,25 +128,5 @@ public abstract class BlockModelHelper
             }
             return retVal;
         }
-        
-//        @Override
-//        public ModelState getModelStateForItem(ItemStack stack)
-//        {
-//            return new ModelState(stack.getTagCompound());
-//        }
-        
-//        @Override
-//        public List<ItemStack> getSubItems()
-//        {
-//            ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-//            for(int i = 0; i < dispatcher.controller.getColorProvider().getColorCount(); i++)
-//            {
-//  //              ModelState modelState = new ModelState(0, i);
-// //               ItemStack stack = new ItemStack(block.item, 1, 0);
-// //               stack.setTagCompound(modelState.getNBT());
-//                itemBuilder.add(new ItemStack(block.item, 1, i));
-//            }
-//            return itemBuilder.build();
-//        }
     }
 }

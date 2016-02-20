@@ -17,7 +17,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 
 public class ModelFactoryBlock extends BakedModelFactory
 {
-    public ModelFactoryBlock(ContollerBlock controller)
+    public ModelFactoryBlock(ControllerBlockColor controller)
     {
         super(controller);
     }
@@ -27,7 +27,7 @@ public class ModelFactoryBlock extends BakedModelFactory
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
-        ContollerBlock controller = (ContollerBlock)this.controller;
+        ControllerBlockColor controller = (ControllerBlockColor)this.controller;
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(layer));
@@ -55,12 +55,12 @@ public class ModelFactoryBlock extends BakedModelFactory
     public List<BakedQuad> getItemQuads(ModelState modelState, int layer, IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
-        ContollerBlock controller = (ContollerBlock)this.controller;
+        ControllerBlockColor controller = (ControllerBlockColor)this.controller;
         ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                controller.getTextureName(0));
+                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(layer))));
 
         cubeInputs.u0 = 0;
         cubeInputs.v0 = 0;

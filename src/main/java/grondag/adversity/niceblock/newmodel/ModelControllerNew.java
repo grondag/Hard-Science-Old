@@ -27,15 +27,16 @@ public abstract class ModelControllerNew
     protected final String textureName;
 
     /**
-     * How many texture are in a complete set of textures used by controller. Total number of textures to be loaded will be textureCount * alternateTextureCount
-     */
-    protected int textureCount = 1;
-
-    /**
      * How many versions of textures are provided in the atlas. (count includes the first texture) Does not include rotations.
      */
     protected final int alternateTextureCount;
 
+    /**
+     * How many texture are in a complete set of textures used by controller. Total number of textures to be loaded will be textureCount * alternateTextureCount
+     * Set this in initialization of subclass and should not need to override getAllTextures;
+     */
+    protected int textureCount = 1;
+    
     /**
      * If true, textures on each face can be rotated. Cookbook must still handle selection of specific textures to match the rotations if the faces have a visible orientation.
      */

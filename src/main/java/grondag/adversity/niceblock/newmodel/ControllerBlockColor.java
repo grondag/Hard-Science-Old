@@ -12,13 +12,13 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 
-public class ContollerBlock extends ModelControllerNew
+public class ControllerBlockColor extends ModelControllerNew
 {
     protected final IAlternator alternator;
     
     protected final BakedModelFactory bakedModelFactory;
     
-    public ContollerBlock(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    public ControllerBlockColor(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
