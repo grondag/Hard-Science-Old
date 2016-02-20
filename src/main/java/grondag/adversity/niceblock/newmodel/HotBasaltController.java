@@ -9,10 +9,10 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 
-public class ControllerHotBasalt extends ControllerBlockColor
+public class HotBasaltController extends ColoredBlockController
 {
     
-    public ControllerHotBasalt()
+    public HotBasaltController()
     {
         super("hot_basalt", 4, EnumWorldBlockLayer.TRANSLUCENT, false, true);
         textureCount = 4;

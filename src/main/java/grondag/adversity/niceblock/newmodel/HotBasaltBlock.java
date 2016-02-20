@@ -7,9 +7,9 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.support.NicePlacement;
 
-public class NiceBlockHotBasalt extends NiceBlock {
+public class HotBasaltBlock extends NiceBlock {
 
-	public NiceBlockHotBasalt(BlockModelHelper blockModelHelper) {
+	public HotBasaltBlock(BlockModelHelper blockModelHelper) {
 		super(blockModelHelper, BaseMaterial.FLEXSTONE, "hot_basalt");
 	}
 

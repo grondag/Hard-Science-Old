@@ -10,10 +10,10 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
-public class BlockModelHelperHotBasalt extends BlockModelHelper
+public class HotBasaltHelper extends BlockModelHelper
 {
 
-    protected BlockModelHelperHotBasalt(ModelDispatcherBase dispatcher)
+    protected HotBasaltHelper(ModelDispatcherBase dispatcher)
     {
         super(dispatcher);
     }

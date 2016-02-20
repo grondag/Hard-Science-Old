@@ -15,9 +15,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraftforge.client.event.ModelBakeEvent;
 
-public class ModelFactoryBlock extends BakedModelFactory
+public class ColoredBlockModelFactory extends BakedModelFactory
 {
-    public ModelFactoryBlock(ControllerBlockColor controller)
+    public ColoredBlockModelFactory(ColoredBlockController controller)
     {
         super(controller);
     }
@@ -27,7 +27,7 @@ public class ModelFactoryBlock extends BakedModelFactory
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
-        ControllerBlockColor controller = (ControllerBlockColor)this.controller;
+        ColoredBlockController controller = (ColoredBlockController)this.controller;
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(layer));
@@ -55,7 +55,7 @@ public class ModelFactoryBlock extends BakedModelFactory
     public List<BakedQuad> getItemQuads(ModelState modelState, int layer, IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
-        ControllerBlockColor controller = (ControllerBlockColor)this.controller;
+        ColoredBlockController controller = (ColoredBlockController)this.controller;
         ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;

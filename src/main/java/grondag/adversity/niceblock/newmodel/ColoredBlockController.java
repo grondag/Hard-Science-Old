@@ -12,18 +12,18 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 
-public class ControllerBlockColor extends ModelControllerNew
+public class ColoredBlockController extends ModelControllerNew
 {
     protected final IAlternator alternator;
     
     protected final BakedModelFactory bakedModelFactory;
     
-    public ControllerBlockColor(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    public ColoredBlockController(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
                 (byte)(((useRotations ? 4 : 1) * alternateCount) & 0xFF));
-        this.bakedModelFactory = new ModelFactoryBlock(this);
+        this.bakedModelFactory = new ColoredBlockModelFactory(this);
     }
 
     public int getTextureOffsetFromShapeIndex(int shapeIndex) {
