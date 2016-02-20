@@ -1,6 +1,9 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.niceblock.newmodel.color.ColorVector;
+import grondag.adversity.niceblock.newmodel.color.IColorProvider;
+import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,8 +23,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IModelState;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
@@ -38,52 +46,42 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * Is also ISmartBlockModel proxy for handleBlockState
  */
-public class ModelDispatcher extends ModelDispatcherBase
+public class ModelDispatcherBasic extends ModelDispatcherBase
 {
 
     /** cache for baked block models */
     private IBakedModel[] bakedBlockModels;
 
-    /** cache for baked item models */
-    private IBakedModel[] bakedItemModels;
-    
-    public final ModelControllerNew controller;
-    
-    private TextureAtlasSprite particleTexture;
+    private final ModelControllerNew controller;
 
-    public ModelDispatcher(ModelControllerNew controller)
+    public ModelDispatcherBasic(IColorProvider colorProvider, String particleTextureName, ModelControllerNew controller)
     {
+        super(colorProvider, particleTextureName);
         this.controller = controller;
         NiceBlockRegistrar.allDispatchers.add(this);
-        
-//        if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
-//        {
-//            bakedBlockModels = new IBakedModel[controller.getBakedBlockModelCount()];
-//            bakedItemModels = new IBakedModel[controller.getBakedItemModelCount()];
-//        }
-//        else
-//        {
-//            bakedBlockModels = null;
-//            bakedItemModels = null;
-//        }
     }
     
-    /* (non-Javadoc)
-     * @see grondag.adversity.niceblock.newmodel.IModelDispatcher#handleBakeEvent(net.minecraftforge.client.event.ModelBakeEvent)
-     */
+    @Override
+    public void handleTexturePreStitch(Pre event)
+    {
+        super.handleTexturePreStitch(event);
+        for (String tex : controller.getAllTextureNames())
+        {
+            event.map.registerSprite(new ResourceLocation(tex));
+        }
+    }
+    
     @Override
     public void handleBakeEvent(ModelBakeEvent event)
     {
         // need to clear arrays to force rebaking of cached models
         if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
         {
-            bakedBlockModels = new IBakedModel[controller.getBakedBlockModelCount()];
-            bakedItemModels = new IBakedModel[controller.getBakedItemModelCount()];
+            bakedBlockModels = new IBakedModel[controller.getShapeCount() * colorProvider.getColorCount()];
         }
         else
         {
             bakedBlockModels = null;
-            bakedItemModels = null;
         }
         controller.getBakedModelFactory().handleBakeEvent(event);
     }
@@ -102,16 +100,18 @@ public class ModelDispatcher extends ModelDispatcherBase
 
             IExtendedBlockState exState = (IExtendedBlockState) state;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
+            int modelIndex = colorProvider.getColorCount() * modelState.getClientShapeIndex(0) + modelState.getColorIndex();
 
-            retVal = bakedBlockModels[controller.getBlockModelIndex(modelState)];
+            retVal = bakedBlockModels[modelIndex];
 
             if (retVal == null)
             {
-                retVal = controller.getBakedModelFactory().getBlockModel(modelState);
+
+                retVal = controller.getBakedModelFactory().getBlockModel(modelState, 0, colorProvider);
 
                 synchronized (bakedBlockModels)
                 {
-                    bakedBlockModels[controller.getBlockModelIndex(modelState)] = retVal;
+                    bakedBlockModels[modelIndex] = retVal;
                 }
             }
         }
@@ -129,44 +129,40 @@ public class ModelDispatcher extends ModelDispatcherBase
     @SideOnly(Side.CLIENT)
     public IBakedModel getItemModelForModelState(ModelState modelState)
     {
-        IBakedModel retVal = bakedItemModels[controller.getItemModelIndex(modelState)];
-        
-        if(retVal == null){
-            
-            // Enable perspective handling.
-            TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
-                    new Vector3f(0, 1.5f / 16, -2.75f / 16),
-                    TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
-                    new Vector3f(0.375f, 0.375f, 0.375f),
-                    null));
+        // Enable perspective handling.
+        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
+                new Vector3f(0, 1.5f / 16, -2.75f / 16),
+                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
+                new Vector3f(0.375f, 0.375f, 0.375f),
+                null));
 
-            IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
-            
-            retVal = new IPerspectiveAwareModel.MapWrapper(
-                    new SimpleItemModel(
-                            controller.getBakedModelFactory().getItemQuads(modelState), 
-                            controller.isShaded), 
-                state);
-
-            synchronized (bakedItemModels)
-            {
-                bakedItemModels[controller.getItemModelIndex(modelState)] = retVal;
-            }
-        }
+        IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
         
-        return retVal;
+        return new IPerspectiveAwareModel.MapWrapper(
+                new SimpleItemModel(
+                        controller.getBakedModelFactory().getItemQuads(modelState, 0, colorProvider), 
+                        controller.isShaded), 
+            state);
     }
-    
 
     @Override
-    public TextureAtlasSprite getParticleTexture()
+    public boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState)
     {
-        if(particleTexture == null)
-        {
-            particleTexture = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                    controller.getParticleTextureName());
-        }
-        return particleTexture;
+        int oldShapeIndex = modelState.getClientShapeIndex(0);
+        modelState.setClientShapeIndex(controller.getClientShapeIndex(block, state, world, pos), 0);
+        return modelState.getClientShapeIndex(0) != oldShapeIndex;
+    }
+
+    @Override
+    public ICollisionHandler getCollisionHandler()
+    {
+        return controller.getCollisionHandler();
+    }
+
+    @Override
+    public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+    {
+        return controller.canRenderInLayer(layer);
     }
 
 }

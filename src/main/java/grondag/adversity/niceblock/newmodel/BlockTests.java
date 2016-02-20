@@ -50,7 +50,7 @@ public class BlockTests
             NiceBlock candidate = (NiceBlock)ibs.getBlock();
             
 
-            return matchBlock.blockModelHelper.dispatcher.controller == candidate.blockModelHelper.dispatcher.controller
+            return matchBlock.blockModelHelper.dispatcher == candidate.blockModelHelper.dispatcher
                    && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos).getColorIndex()
                    && matchSpecies == ibs.getValue(NiceBlock.META);
         }

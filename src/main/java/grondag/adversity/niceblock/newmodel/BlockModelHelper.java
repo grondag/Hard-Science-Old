@@ -42,9 +42,9 @@ ModelController
 public abstract class BlockModelHelper
 {
     protected NiceBlock block;
-    public final ModelDispatcher dispatcher;
+    public final ModelDispatcherBase dispatcher;
 
-    protected BlockModelHelper(ModelDispatcher dispatcher)
+    protected BlockModelHelper(ModelDispatcherBase dispatcher)
     {
         this.dispatcher = dispatcher;
     }
@@ -67,7 +67,7 @@ public abstract class BlockModelHelper
         
     public static class ColorMeta extends BlockModelHelper
     {
-        public ColorMeta(ModelDispatcher dispatcher)
+        public ColorMeta(ModelDispatcherBase dispatcher)
         {
             super(dispatcher);
         }
@@ -75,14 +75,10 @@ public abstract class BlockModelHelper
         @Override
         public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos)
         {
-            return new ModelState(dispatcher.controller.getClientShapeIndex(block, state, world, pos),state.getValue(NiceBlock.META));
+            ModelState retVal = new ModelState(0, state.getValue(NiceBlock.META));
+            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+            return retVal;
         }
-
-//        @Override
-//        public ModelState getModelStateForItem(ItemStack stack)
-//        {
-//            return new ModelState(0, stack.getMetadata());
-//        }
 
         @Override
         public IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -95,7 +91,7 @@ public abstract class BlockModelHelper
         public List<ItemStack> getSubItems()
         {
             ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-            for(int i = 0; i < dispatcher.controller.getColorProvider().getColorCount(); i++)
+            for(int i = 0; i < dispatcher.getColorProvider().getColorCount(); i++)
             {
                 itemBuilder.add(new ItemStack(block.item, 1, i));
             }
@@ -105,7 +101,7 @@ public abstract class BlockModelHelper
         @Override
         public int getSubItemCount()
         {
-            return dispatcher.controller.getColorProvider().getColorCount();
+            return dispatcher.getColorProvider().getColorCount();
         }
 
         @Override
@@ -115,13 +111,13 @@ public abstract class BlockModelHelper
                     LanguageRegistry.instance().getStringLocalization(block.styleName) + " "
                     + LanguageRegistry.instance().getStringLocalization(block.material.materialName) 
                     + ", " 
-                    + dispatcher.controller.getColorProvider().getColor(stack.getMetadata()).vectorName;
+                    + dispatcher.getColorProvider().getColor(stack.getMetadata()).vectorName;
         }
     }
     
     public static class ColorPlus extends ColorMeta
     {
-        public ColorPlus(ModelDispatcher dispatcher)
+        public ColorPlus(ModelDispatcherBase dispatcher)
         {
             super(dispatcher);
         }
@@ -133,14 +129,10 @@ public abstract class BlockModelHelper
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                Adversity.log.info("ColorPlus getModelStateForBlock found TE with loaded = " + niceTE.isLoaded);
-
                 if(niceTE.isClientShapeIndexDirty)
                 {
-                    int newShapeIndex = dispatcher.controller.getClientShapeIndex(block, state, world, pos);
-                    if(newShapeIndex != niceTE.modelState.getClientShapeIndex())
+                    if(dispatcher.refreshClientShapeIndex(block, state, world, pos, niceTE.modelState))
                     {
-                        niceTE.modelState.setClientShapeIndex(dispatcher.controller.getClientShapeIndex(block, state, world, pos));
                         niceTE.markDirty();
                     }
                     niceTE.isClientShapeIndexDirty = false;
@@ -149,10 +141,8 @@ public abstract class BlockModelHelper
             }
             else
             {
-                Adversity.log.info("ColorPlus getModelStateForBlock modelState found NULL tile entity");
-                retVal = new ModelState(0, 0);
+                retVal = new ModelState();
             }
-            Adversity.log.info("colorIndex = " + retVal.getColorIndex() + ", shapeIndex = " + retVal.getClientShapeIndex());
             return retVal;
         }
         

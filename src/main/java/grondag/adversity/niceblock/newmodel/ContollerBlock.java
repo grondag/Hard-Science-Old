@@ -18,20 +18,12 @@ public class ContollerBlock extends ModelControllerNew
     
     protected final BakedModelFactory bakedModelFactory;
     
-    protected final IColorProvider colorProvider;
-        
     public ContollerBlock(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
-    {
-        this(textureName, BlockColors.INSTANCE, alternateCount, renderLayer, isShaded, useRotations);
-    }
-
-    public ContollerBlock(String textureName, IColorProvider colorProvider, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
                 (byte)(((useRotations ? 4 : 1) * alternateCount) & 0xFF));
         this.bakedModelFactory = new ModelFactoryBlock(this);
-        this.colorProvider = colorProvider;
     }
 
     public int getTextureOffsetFromShapeIndex(int shapeIndex) {
@@ -56,24 +48,10 @@ public class ContollerBlock extends ModelControllerNew
         return alternator.getAlternate(pos);
     }
 
-    // can't see any case in which this would be useful
-    // The stack already has an index when created, and if not, no way to figure it out.
-//    @Override
-//    public int getItemShapeIndex(ItemStack stack)
-//    {
-//        return 0;
-//    }
-
     @Override
-    public int getBakedBlockModelCount()
+    public int getShapeCount()
     {
-        return getColorProvider().getColorCount() * this.alternateTextureCount * (this.useRotatedTexturesAsAlternates? 4 : 1);
-    }
-
-    @Override
-    public int getBakedItemModelCount()
-    {
-        return getColorProvider().getColorCount();
+        return this.alternateTextureCount * (this.useRotatedTexturesAsAlternates? 4 : 1);
     }
 
     @Override
@@ -83,27 +61,8 @@ public class ContollerBlock extends ModelControllerNew
     }
 
     @Override
-    public IColorProvider getColorProvider()
-    {
-        return colorProvider;
-    }
-    
-    @Override
     public ICollisionHandler getCollisionHandler()
     {
         return null;
     }
-
-    @Override
-    public int getBlockModelIndex(ModelState state)
-    {
-        return (getColorProvider().getColorCount() * state.getClientShapeIndex()) + state.getColorIndex();
-    }
-
-    @Override
-    public int getItemModelIndex(ModelState state)
-    {
-        return state.getColorIndex();
-    }
-
 }

@@ -45,7 +45,7 @@ public abstract class ModelControllerNew
      * Layer in which block faces should render.
      */
     protected final EnumWorldBlockLayer renderLayer;
-
+    
     /**
      * If false, faces of the block are not shaded according to light levels.
      */
@@ -66,33 +66,13 @@ public abstract class ModelControllerNew
      */
     public abstract int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
-    // not useful?
-    //public abstract int getItemShapeIndex(ItemStack stack);
-
     /**
      * used by dispatcher for cache initialization
      */
-    public abstract int getBakedBlockModelCount();
-
-    public abstract int getBakedItemModelCount();
+    public abstract int getShapeCount();
 
     public abstract BakedModelFactory getBakedModelFactory();
     
-    public abstract int getBlockModelIndex(ModelState state);
-    public abstract int getItemModelIndex(ModelState state);
-    
-    public String getParticleTextureName()
-    {
-        return "adversity:blocks/particle";
-        //return this.getTextureName(0);
-    }
-    
-    public IColorProvider getColorProvider()
-    {
-        return BlockColors.INSTANCE;
-    }
-
-
     /**
      * used by model for texture lookup
      */
@@ -102,31 +82,17 @@ public abstract class ModelControllerNew
     }
 
     /**
-     * identifies all textures needed for texture bake
+     * identifies all textures needed for texture stitch
      */
     public String[] getAllTextureNames()
     {
-        final String retVal[] = new String[alternateTextureCount * textureCount + 1];
+        final String retVal[] = new String[alternateTextureCount * textureCount];
 
         for (int i = 0; i < alternateTextureCount * textureCount; i++)
         {
             retVal[i] = getTextureName(i);
         }
-        retVal[alternateTextureCount * textureCount] = "adversity:blocks/particle";
         return retVal;
-    }
-
-    /**
-     * Registers all textures that will be needed for this controller. Happens before model bake.
-     */
-    public void handleTexturePreStitch(Pre event)
-    {
-        Adversity.log.info("handleTexturePreStitch");
-        
-        for (String tex : getAllTextureNames())
-        {
-            event.map.registerSprite(new ResourceLocation(tex));
-        }
     }
 
     /**

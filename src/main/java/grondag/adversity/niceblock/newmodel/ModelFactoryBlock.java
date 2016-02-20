@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.color.ColorVector;
+import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 
 import java.util.List;
 
@@ -22,18 +23,16 @@ public class ModelFactoryBlock extends BakedModelFactory
     }
 
     @Override
-    public IBakedModel getBlockModel(ModelState modelState)
+    public IBakedModel getBlockModel(ModelState modelState, int layer,  IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
-        
+        ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
         ContollerBlock controller = (ContollerBlock)this.controller;
         
-        ColorVector colorVector = controller.getColorProvider().getColor(modelState.getColorIndex());
-        
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
-        cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex());
+        cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(layer));
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex())));
+                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(layer))));
 
         cubeInputs.u0 = 0;
         cubeInputs.v0 = 0;
@@ -53,14 +52,12 @@ public class ModelFactoryBlock extends BakedModelFactory
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState)
+    public List<BakedQuad> getItemQuads(ModelState modelState, int layer, IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
-        
         ContollerBlock controller = (ContollerBlock)this.controller;
-
-        ColorVector colorVector = controller.getColorProvider().getColor(modelState.getColorIndex());
-
+        ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
+        
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(0));

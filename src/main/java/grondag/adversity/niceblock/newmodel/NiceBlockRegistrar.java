@@ -44,17 +44,20 @@ public class NiceBlockRegistrar
     /**
      * Model dispatchers add themselves here for handling during model bake and texture stitch
      */
-    public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
+    public static LinkedList<ModelDispatcherBase> allDispatchers = new LinkedList<ModelDispatcherBase>();
 
     // DECLARE MODEL DISPATCH INSTANCES
-    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_flexstone", 
-            new BlockColorsBasic(BlockColors.makeColorVector(Hue.YELLOW, Tint.WHITE)), 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcherBase MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new BlockColorsBasic(
+            BlockColors.makeColorVector(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
+            new ContollerBlock("raw_flexstone", 4, EnumWorldBlockLayer.SOLID, true, true));
     
-    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcher(new ContollerBlock("raw_durastone",
-            new BlockColorsBasic(BlockColors.makeColorVector(Hue.COBALT, Tint.WHITE)), 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcherBase MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new BlockColorsBasic(
+            BlockColors.makeColorVector(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
+            new ContollerBlock("raw_durastone", 4, EnumWorldBlockLayer.SOLID, true, true));
 
-    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcher(new ContollerBlock("colored_stone", 
-            BlockColors.INSTANCE, 4, EnumWorldBlockLayer.SOLID, true, true));
+    public static final ModelDispatcherBase MODEL_COLORED_STONE = new ModelDispatcherBasic(
+            BlockColors.INSTANCE, "colored_stone_0_0",
+            new ContollerBlock("colored_stone", 4, EnumWorldBlockLayer.SOLID, true, true));
 
     // DECLARE BLOCK INSTANCES
     public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new BlockModelHelper.ColorMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
@@ -222,7 +225,7 @@ public class NiceBlockRegistrar
     @SubscribeEvent
     public void onModelBakeEvent(ModelBakeEvent event) throws IOException
     {
-        for (ModelDispatcher dispatcher : allDispatchers)
+        for (ModelDispatcherBase dispatcher : allDispatchers)
         {
             dispatcher.handleBakeEvent(event);
             //dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
@@ -236,7 +239,6 @@ public class NiceBlockRegistrar
             {          
                 event.modelRegistry.putObject(new ModelResourceLocation(block.getRegistryName() + "." + i, "inventory"),
                         block.blockModelHelper.dispatcher.getItemModelForModelState(new ModelState(0, i)));
-                        //new ModelProxy(block.blockModelHelper));
             }
         }
     }
@@ -247,9 +249,9 @@ public class NiceBlockRegistrar
     @SubscribeEvent
     public void stitcherEventPre(TextureStitchEvent.Pre event)
     {
-        for (ModelDispatcher dispatcher : allDispatchers)
+        for (ModelDispatcherBase dispatcher : allDispatchers)
         {
-            dispatcher.controller.handleTexturePreStitch(event);
+            dispatcher.handleTexturePreStitch(event);
         }
     }
 

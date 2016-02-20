@@ -101,7 +101,7 @@ public class NiceBlock extends Block
         blockModelHelper.setBlock(this);
         this.setRegistryName(material.materialName + "." + styleName);
         setUnlocalizedName(this.getRegistryName());
-        collisionHandler = blockModelHelper.dispatcher.controller.getCollisionHandler();
+        collisionHandler = blockModelHelper.dispatcher.getCollisionHandler();
 
         item = new NiceItemBlock(this);
 
@@ -172,7 +172,7 @@ public class NiceBlock extends Block
     @Override
     public boolean canRenderInLayer(EnumWorldBlockLayer layer)
     {
-        return blockModelHelper.dispatcher.controller.canRenderInLayer(layer);
+        return blockModelHelper.dispatcher.canRenderInLayer(layer);
     }
 
     private long elapsedTime;
@@ -280,7 +280,7 @@ public class NiceBlock extends Block
     public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
     {
         ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos);
-        return this.blockModelHelper.dispatcher.controller.getColorProvider().getColor(modelState.getColorIndex()).base;
+        return this.blockModelHelper.dispatcher.getColorProvider().getColor(modelState.getColorIndex()).base;
     }
 
     // BLOCK TESTS
