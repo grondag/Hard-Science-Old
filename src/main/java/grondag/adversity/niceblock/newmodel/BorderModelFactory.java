@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.newmodel;
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.color.ColorMap;
+import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 
 import java.util.Collections;
@@ -51,7 +52,7 @@ public class BorderModelFactory extends BakedModelFactory
             }
         }
         
-        ColorMap colorVector = colorProvider.getColor(colorIndex);
+        ColorMap colorMap = colorProvider.getColor(colorIndex);
         BorderController controller = (BorderController)this.controller;
         int facadeIndex = controller.getFacadeIndexFromModelState(modelState);
         int alternateTextureIndex = controller.getAlternateTextureIndexFromModelState(modelState);
@@ -62,7 +63,7 @@ public class BorderModelFactory extends BakedModelFactory
             int faceIndex = FACADE_FACE_SELECTORS[facadeIndex].selectors[face.ordinal()];
             if(faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][faceIndex] == null)
             {
-                List<BakedQuad> newQuads = makeBorderFace(colorVector.border, alternateTextureIndex, faceIndex, face);
+                List<BakedQuad> newQuads = makeBorderFace(colorMap.getColorMap(EnumColorMap.BORDER), alternateTextureIndex, faceIndex, face);
                 synchronized(faceQuads)
                 {
                     faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][faceIndex] = newQuads;
@@ -83,7 +84,7 @@ public class BorderModelFactory extends BakedModelFactory
         cubeInputs.v1 = 16;
         cubeInputs.isItem = true;
         cubeInputs.isOverlay = controller.renderLayer != EnumWorldBlockLayer.SOLID;
-        cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).border;
+        cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BORDER);
         // offset 4 is all borders
         cubeInputs.textureSprite = 
                 Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(4));

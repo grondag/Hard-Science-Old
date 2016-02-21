@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import grondag.adversity.niceblock.support.NicePlacement;
 
@@ -280,7 +281,7 @@ public class NiceBlock extends Block
     public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
     {
         ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos, false);
-        return this.blockModelHelper.dispatcher.getColorProvider().getColor(modelState.getColorIndex()).base;
+        return this.blockModelHelper.dispatcher.getColorProvider().getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
     }
 
     // BLOCK TESTS

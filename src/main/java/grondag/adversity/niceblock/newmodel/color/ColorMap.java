@@ -5,26 +5,29 @@ import grondag.adversity.library.Color;
 
 public class ColorMap
 {
-    public final String vectorName;
-    public final int base;
-    public final int highlight;
-    public final int border;
+    public final String colorMapName;
+    private final int[] colors = new int[EnumColorMap.values().length];
 
-    public ColorMap(String vectorName, int base, int highlight, int border)
+    public ColorMap(String vectorName)
     {
-        this.vectorName = vectorName;
-        this.base = base;
-        this.highlight = highlight;
-        this.border = border;
+        this.colorMapName = vectorName;
     }
 
-    public ColorMap(String vectorName, int base, int highlight)
+    public ColorMap setColor(EnumColorMap whichColor, int colorValue)
     {
-        this(vectorName, base, highlight, highlight);
+        colors[whichColor.ordinal()] = colorValue;
+        return this;
     }
-
-    public ColorMap(String vectorName, int base)
+    
+    public int getColorMap(EnumColorMap whichColor)
     {
-        this(vectorName, base, base, base);
+        return colors[whichColor.ordinal()];
+    }
+    
+    public static enum EnumColorMap
+    {
+        BASE,
+        HIGHLIGHT,
+        BORDER
     }
 }

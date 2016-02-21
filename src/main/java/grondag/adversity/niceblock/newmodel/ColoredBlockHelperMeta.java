@@ -32,7 +32,7 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-        String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).vectorName;
+        String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).colorMapName;
         return baseDisplayName + (colorName == "" ? "" : ", " + colorName);
     }
 
