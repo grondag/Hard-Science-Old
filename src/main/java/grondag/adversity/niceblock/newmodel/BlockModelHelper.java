@@ -39,11 +39,13 @@ public abstract class BlockModelHelper
         + LanguageRegistry.instance().getStringLocalization(block.material.materialName); 
     }
     
-    public abstract ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos);
+    /** set doClientStateRefresh = false to avoid inifinte recursion when getting colorinfo 
+     * or other state potentially from within clientStateRefresh */
+    public abstract ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos, boolean doClientStateRefresh);
 
     public IExtendedBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        ModelState modelState = this.getModelStateForBlock(state, world, pos);
+        ModelState modelState = this.getModelStateForBlock(state, world, pos, true);
         return ((IExtendedBlockState) state).withProperty(NiceBlock.MODEL_STATE, modelState);
     }
     

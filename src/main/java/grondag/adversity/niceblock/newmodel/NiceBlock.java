@@ -279,7 +279,7 @@ public class NiceBlock extends Block
     @Override
     public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
     {
-        ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos);
+        ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos, false);
         return this.blockModelHelper.dispatcher.getColorProvider().getColor(modelState.getColorIndex()).base;
     }
 

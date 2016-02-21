@@ -76,8 +76,27 @@ public class BorderModelFactory extends BakedModelFactory
     @Override
     public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
     {
-        // TODO Auto-generated method stub
-        return null;
+        CubeInputs cubeInputs = new CubeInputs();
+        cubeInputs.u0 = 0;
+        cubeInputs.v0 = 0;
+        cubeInputs.u1 = 16;
+        cubeInputs.v1 = 16;
+        cubeInputs.isItem = true;
+        cubeInputs.isOverlay = controller.renderLayer != EnumWorldBlockLayer.SOLID;
+        cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).border;
+        // offset 4 is all borders
+        cubeInputs.textureSprite = 
+                Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(4));
+
+        ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
+
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.UP));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.DOWN));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.EAST));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.WEST));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.NORTH));
+        itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
+        return itemBuilder.build(); 
     }
 
     private List<BakedQuad> makeBorderFace(int color, int alternateTextureIndex, int faceIndex, EnumFacing face){

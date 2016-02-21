@@ -12,13 +12,13 @@ public class ColoredBlockHelperPlus extends ColoredBlockHelperMeta
     }
 
     @Override
-    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos, boolean doClientStateRefresh)
     {
         ModelState retVal;
         NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
         if (niceTE != null) 
         {
-            if(niceTE.isClientShapeIndexDirty)
+            if(doClientStateRefresh && niceTE.isClientShapeIndexDirty)
             {
                 if(dispatcher.refreshClientShapeIndex(block, state, world, pos, niceTE.modelState))
                 {

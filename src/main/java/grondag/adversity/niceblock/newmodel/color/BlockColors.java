@@ -17,8 +17,11 @@ public class BlockColors implements IColorProvider
     {
         String vectorName =  tint.tintName + " " + hue.hueName();
                 
-        return new ColorVector(vectorName,NiceHues.INSTANCE.getHueSet(hue)
-                .getColorSetForHue(HuePosition.NONE).getColor(tint));
+        return new ColorVector(
+                vectorName,
+                NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.NONE).getColor(tint) | 0xFF000000,
+                NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.FAR_LEFT).getColor(tint) | 0xFF000000,
+                NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(tint) | 0xFF000000);
     }
 
     protected BlockColors()

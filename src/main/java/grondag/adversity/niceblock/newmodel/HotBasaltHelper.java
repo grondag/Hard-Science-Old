@@ -19,10 +19,13 @@ public class HotBasaltHelper extends BlockModelHelper
     }
 
     @Override
-    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos, boolean doClientStateRefresh)
     {
         ModelState retVal = new ModelState();
-        dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+        if(doClientStateRefresh)
+        {
+            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+        }
         return retVal;
     }
 

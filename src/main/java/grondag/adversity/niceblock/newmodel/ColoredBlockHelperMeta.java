@@ -13,10 +13,13 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
     }
 
     @Override
-    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos, boolean doClientStateRefresh)
     {
         ModelState retVal = new ModelState(0, state.getValue(NiceBlock.META));
-        dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+        if(doClientStateRefresh)
+        {
+            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+        }
         return retVal;
     }
 

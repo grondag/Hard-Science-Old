@@ -21,7 +21,8 @@ public class BlockTests
             if(ibs.getBlock() instanceof NiceBlock)
             {
                 matchBlock = (NiceBlock)ibs.getBlock();
-                matchColorIndex = matchBlock.blockModelHelper.getModelStateForBlock(ibs, world, pos).getColorIndex();
+                // important that we not refresh client state here - would cause infinite recursion
+                matchColorIndex = matchBlock.blockModelHelper.getModelStateForBlock(ibs, world, pos, false).getColorIndex();
                 matchSpecies = ibs.getValue(NiceBlock.META);
             }
             else
@@ -51,7 +52,7 @@ public class BlockTests
             
 
             return matchBlock.blockModelHelper.dispatcher == candidate.blockModelHelper.dispatcher
-                   && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos).getColorIndex()
+                   && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos, false).getColorIndex()
                    && matchSpecies == ibs.getValue(NiceBlock.META);
         }
         
