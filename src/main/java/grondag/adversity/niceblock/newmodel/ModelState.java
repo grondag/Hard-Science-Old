@@ -13,7 +13,7 @@ import net.minecraft.util.EnumWorldBlockLayer;
 public class ModelState
 {
     static final String TAG_NAME = "adMdlSt";
-    private static final int MAX_COLOR_INDEX = 0x03FF;
+    public static final int MAX_COLOR_INDEX = 0x03FF;
     private static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
    
     protected int colorIndex = 0;

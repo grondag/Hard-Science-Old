@@ -26,7 +26,7 @@ public class ColoredBlockController extends ModelControllerNew
         this.bakedModelFactory = new ColoredBlockModelFactory(this);
     }
 
-    public int getTextureOffsetFromShapeIndex(int shapeIndex) {
+    protected int getTextureOffsetFromShapeIndex(int shapeIndex) {
         if (useRotatedTexturesAsAlternates) {
             return shapeIndex / 4;
         } else {
@@ -34,7 +34,7 @@ public class ColoredBlockController extends ModelControllerNew
         }
     }
     
-    public Rotation getTextureRotationFromShapeIndex(int shapeIndex){
+    protected Rotation getTextureRotationFromShapeIndex(int shapeIndex){
         if (useRotatedTexturesAsAlternates) {
             return Rotation.values()[shapeIndex & 3];
         } else {
@@ -58,11 +58,5 @@ public class ColoredBlockController extends ModelControllerNew
     public BakedModelFactory getBakedModelFactory()
     {
         return bakedModelFactory;
-    }
-
-    @Override
-    public ICollisionHandler getCollisionHandler()
-    {
-        return null;
     }
 }

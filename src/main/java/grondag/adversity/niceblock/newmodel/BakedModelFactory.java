@@ -29,8 +29,12 @@ public abstract class BakedModelFactory
         this.controller = controller;
     }
     
-    public abstract IBakedModel getBlockModel(ModelState modelState, int layer, IColorProvider colorProvider);
-    public abstract List<BakedQuad> getItemQuads(ModelState modelState, int layer, IColorProvider colorProvider);
-    public abstract void handleBakeEvent(ModelBakeEvent event);
+    public abstract IBakedModel getBlockModel(ModelState modelState, IColorProvider colorProvider);
+    public abstract List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider);
+    
+    public void handleBakeEvent(ModelBakeEvent event)
+    {
+        // NOOP: default implementation assumes lazy baking
+    }
     
 }

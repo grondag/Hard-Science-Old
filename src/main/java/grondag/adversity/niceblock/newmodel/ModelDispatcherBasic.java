@@ -107,7 +107,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
             if (retVal == null)
             {
 
-                retVal = controller.getBakedModelFactory().getBlockModel(modelState, 0, colorProvider);
+                retVal = controller.getBakedModelFactory().getBlockModel(modelState, colorProvider);
 
                 synchronized (bakedBlockModels)
                 {
@@ -140,7 +140,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         
         return new IPerspectiveAwareModel.MapWrapper(
                 new SimpleItemModel(
-                        controller.getBakedModelFactory().getItemQuads(modelState, 0, colorProvider), 
+                        controller.getBakedModelFactory().getItemQuads(modelState, colorProvider), 
                         controller.isShaded), 
             state);
     }

@@ -99,7 +99,10 @@ public abstract class ModelControllerNew
     /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
-    public abstract ICollisionHandler getCollisionHandler();
+    public ICollisionHandler getCollisionHandler()
+    {
+        return null;
+    }
 
     /**
      * Used by NiceBlock to control rendering.

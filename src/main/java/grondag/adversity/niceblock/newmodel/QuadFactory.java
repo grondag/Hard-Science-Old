@@ -134,16 +134,34 @@ public class QuadFactory
     }
 
     public static class CubeInputs{
-        float u0;
-        float v0;
-        float u1;
-        float v1;
-        TextureAtlasSprite textureSprite;
-        int color = 0xFFFFFFFF;
-        Rotation textureRotation = Rotation.ROTATE_NONE;
-        boolean rotateBottom = false;
-        boolean isOverlay = false;
-        boolean isItem = false;
+        public float u0;
+        public float v0;
+        public float u1;
+        public float v1;
+        public TextureAtlasSprite textureSprite;
+        public int color = 0xFFFFFFFF;
+        public Rotation textureRotation = Rotation.ROTATE_NONE;
+        public boolean rotateBottom = false;
+        public boolean isOverlay = false;
+        public boolean isItem = false;
+        
+        public CubeInputs()
+        {
+            //NOOP
+        }
+        public CubeInputs(int color, Rotation textureRotation, TextureAtlasSprite textureSprite, boolean flipU, boolean flipV, boolean isOverlay, boolean isItem)
+        {
+            this.color = color;
+            this.textureRotation = textureRotation;
+            this.textureSprite = textureSprite;
+            this.isOverlay = isOverlay;
+            this.isItem = isItem;
+            this.u0 = flipU ? 16 : 0;
+            this.v0 = flipV ? 16 : 0;
+            this.u1 = flipU ? 0 : 16;
+            this.v1 = flipV ? 0 : 16;
+            this.rotateBottom = true;
+        }
         
         public List<BakedQuad> makeFace(EnumFacing side){
             

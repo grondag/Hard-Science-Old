@@ -126,7 +126,7 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
             if (retVal == null)
             {
 
-                retVal = controllers[layer.ordinal()].getBakedModelFactory().getBlockModel(modelState, layer.ordinal(), colorProvider);
+                retVal = controllers[layer.ordinal()].getBakedModelFactory().getBlockModel(modelState, colorProvider);
 
                 synchronized (bakedBlockModels)
                 {
@@ -163,7 +163,7 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
         {
             if(cont != null)
             {
-                builder.addAll(cont.getBakedModelFactory().getItemQuads(modelState, cont.renderLayer.ordinal(), colorProvider));
+                builder.addAll(cont.getBakedModelFactory().getItemQuads(modelState, colorProvider));
             }
         }
         

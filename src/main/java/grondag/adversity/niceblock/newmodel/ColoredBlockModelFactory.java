@@ -23,16 +23,16 @@ public class ColoredBlockModelFactory extends BakedModelFactory
     }
 
     @Override
-    public IBakedModel getBlockModel(ModelState modelState, int layer,  IColorProvider colorProvider)
+    public IBakedModel getBlockModel(ModelState modelState, IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
         ColoredBlockController controller = (ColoredBlockController)this.controller;
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
-        cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(layer));
+        cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()));
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(layer))));
+                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
 
         cubeInputs.u0 = 0;
         cubeInputs.v0 = 0;
@@ -52,7 +52,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState, int layer, IColorProvider colorProvider)
+    public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColoredBlockController controller = (ColoredBlockController)this.controller;
@@ -60,7 +60,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(layer))));
+                controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
 
         cubeInputs.u0 = 0;
         cubeInputs.v0 = 0;
@@ -78,11 +78,5 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.NORTH));
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
         return itemBuilder.build();        
-    }
-
-    @Override
-    public void handleBakeEvent(ModelBakeEvent event)
-    {
-        // nothing to do, all baking is lazy
     }
 }
