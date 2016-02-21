@@ -49,12 +49,12 @@ public class NiceBlockRegistrar
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
     public static final ModelDispatcherBase MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColors(
-            BlockColors.makeColorVector(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
+            BlockColors.makeColorMap(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
             new ColoredBlockController("raw_flexstone", 4, EnumWorldBlockLayer.SOLID, true, true));
     public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new ColoredBlockHelperMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
     
     public static final ModelDispatcherBase MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColors(
-            BlockColors.makeColorVector(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
+            BlockColors.makeColorMap(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
             new ColoredBlockController("raw_durastone", 4, EnumWorldBlockLayer.SOLID, true, true));
     public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new ColoredBlockHelperMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
 

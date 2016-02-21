@@ -25,7 +25,7 @@ public class NiceHues
         ArrayList<HueSet> colors = new ArrayList<HueSet>();
         for(Hue h : Hue.values())
         {
-            colors.add(new HueSet(h.ordinal() * 360 / Hue.values().length));
+            colors.add(new HueSet(h.hueDegrees()));
         }
         HUES = colors.toArray(new HueSet[0]);
         
@@ -175,6 +175,14 @@ public class NiceHues
         
         private final String hueName;
         
+        /**
+         * Rotate our color cylinder by this many degrees
+         * to tweak which colors we actually get.
+         * A purely aesthetic choice.
+         */
+        private static final double HUE_SALT = 5.12;
+
+        
         Hue(String hueName)
         {
             this.hueName = hueName;
@@ -183,6 +191,11 @@ public class NiceHues
         public String hueName()
         {
             return hueName;
+        }
+        
+        public double hueDegrees()
+        {
+            return this.ordinal() * 360 / this.values().length + HUE_SALT;
         }
     }
 

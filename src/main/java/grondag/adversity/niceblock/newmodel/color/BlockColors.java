@@ -2,6 +2,9 @@ package grondag.adversity.niceblock.newmodel.color;
 
 import java.util.ArrayList;
 
+import grondag.adversity.Adversity;
+import grondag.adversity.library.Color;
+import grondag.adversity.library.Color.EnumHCLFailureMode;
 import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.newmodel.color.HueSet.HuePosition;
 import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
@@ -20,11 +23,24 @@ public class BlockColors implements IColorProvider
                 
         ColorMap newColorMap = new ColorMap(mapName);
 
-        newColorMap.setColor(EnumColorMap.BASE,
-                NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.NONE).getColor(tint) | 0xFF000000);
+        Color baseColor = Color.fromHCL(hue.hueDegrees(), tint.chroma, tint.luminance);
 
-        newColorMap.setColor(EnumColorMap.BORDER,
-                NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.FAR_LEFT).getColor(tint) | 0xFF000000);
+        newColorMap.setColor(EnumColorMap.BASE, baseColor.RGB_int | 0xFF000000);
+
+        // use these for manipulation so can use realistic values for HCL_MAX inputs
+        double chroma = baseColor.HCL_C;
+        double luminance = baseColor.HCL_L;
+
+        // BORDERS
+        Color whichColor = Color.fromHCL(hue.hueDegrees() + 15,
+                chroma < 10 ? chroma + 10 : chroma * 0.5,
+                luminance < 60 ? luminance + 15 : luminance - 15,
+                EnumHCLFailureMode.REDUCE_CHROMA);
+        if(!whichColor.IS_VISIBLE)
+        {
+            Adversity.log.warn("makeColorMap produced invisible border color for hue=" + hue + " tint=" + tint);
+        }
+        newColorMap.setColor(EnumColorMap.BORDER, whichColor.RGB_int | 0xFF000000);
 
         newColorMap.setColor(EnumColorMap.HIGHLIGHT,
                 NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.OPPOSITE).getColor(tint) | 0xFF000000);

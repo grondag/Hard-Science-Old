@@ -10,6 +10,8 @@ import grondag.adversity.Adversity;
  */
 public class Color
 {
+    public final static int HCL_MAX = 999;
+    
     public final int RGB_int;
     public final int RGB_R;
     public final int RGB_G;
@@ -53,6 +55,79 @@ public class Color
     }
     
     public static Color fromHCL(double hue, double chroma, double luminance)
+    {
+        return fromHCL(hue, chroma, luminance, EnumHCLFailureMode.NORMAL);
+    }
+    
+    public static Color fromHCL(double hue, double chroma, double luminance, EnumHCLFailureMode failureMode)
+    { 
+        // if both are max then make as saturated as possible, then find max lightness
+        if(luminance == HCL_MAX && chroma == HCL_MAX){
+//            double maxLuminance = 0;
+            double maxChroma = 0;
+            
+            for (double l = 100; l > 20; l--)
+            {
+                for (double c = 100; c > 30; c--)
+                {
+                    Color temp = fromHCLSimple(hue, c, l);
+                    if(temp.IS_VISIBLE)
+                    {
+//                                 maxLuminance = Math.max(maxLuminance, l);
+                        maxChroma = Math.max(maxChroma, c);
+                    }
+                }
+            }
+//            if(maxLuminance > maxChroma)
+//            {
+//                luminance = maxLuminance;
+//                chroma = MAX;
+//            }
+//            else
+//            {
+                chroma = maxChroma;
+                luminance = HCL_MAX;
+//            }
+        }
+        
+        if(luminance == HCL_MAX){
+            for (double trial = 100; trial > 20; trial-= 0.1)
+            {
+                Color temp = fromHCLSimple(hue, chroma, trial);
+                if(temp.IS_VISIBLE)
+                {
+                    luminance = trial;
+                    break;
+                }
+            }
+        }
+        
+        if(chroma == HCL_MAX){
+            for (double trial = 100; trial > 30; trial-= 0.1)
+            {
+                Color temp = fromHCLSimple(hue, trial, luminance);
+                if(temp.IS_VISIBLE)
+                {
+                    chroma = trial;
+                    break;
+                }
+            }
+        }
+        
+        Color testColor = fromHCLSimple(hue, chroma, luminance);
+        if(!testColor.IS_VISIBLE && failureMode == EnumHCLFailureMode.REDUCE_CHROMA)
+        {
+            while(!testColor.IS_VISIBLE && chroma > 1)
+            {
+                chroma--;
+                testColor = fromHCLSimple(hue, chroma, luminance);
+            }
+        }
+
+        return fromHCLSimple(hue, chroma, luminance);
+    }
+    
+    private static Color fromHCLSimple(double hue, double chroma, double luminance)
     {
         return fromLab(luminance, Math.sin(Math.toRadians(hue)) * chroma, Math.cos(Math.toRadians(hue)) * chroma);
     }
@@ -202,5 +277,11 @@ public class Color
             this.HCL_C = (float) Math.sqrt( Math.pow(this.LAB_A, 2) + Math.pow(this.LAB_B, 2 ));
 
         }
+    }
+    
+    public static enum EnumHCLFailureMode
+    {
+        NORMAL,
+        REDUCE_CHROMA;
     }
 }
