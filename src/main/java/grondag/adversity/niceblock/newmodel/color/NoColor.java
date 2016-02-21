@@ -3,7 +3,7 @@ package grondag.adversity.niceblock.newmodel.color;
 public class NoColor implements IColorProvider
 {
     
-    private static final ColorVector WHITE = new ColorVector("", 0xFFFFFFFF);
+    private static final ColorMap WHITE = new ColorMap("", 0xFFFFFFFF);
     private final int virtualColorCount;
 
     public NoColor(int virtualColorCount)
@@ -18,7 +18,7 @@ public class NoColor implements IColorProvider
     }
 
     @Override
-    public ColorVector getColor(int colorIndex)
+    public ColorMap getColor(int colorIndex)
     {
         return WHITE;
     }

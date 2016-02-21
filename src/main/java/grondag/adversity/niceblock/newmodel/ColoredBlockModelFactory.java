@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
-import grondag.adversity.niceblock.newmodel.color.ColorVector;
+import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
     public IBakedModel getBlockModel(ModelState modelState, IColorProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
-        ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
+        ColorMap colorVector = colorProvider.getColor(modelState.getColorIndex());
         ColoredBlockController controller = (ColoredBlockController)this.controller;
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
@@ -56,7 +56,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColoredBlockController controller = (ColoredBlockController)this.controller;
-        ColorVector colorVector = colorProvider.getColor(modelState.getColorIndex());
+        ColorMap colorVector = colorProvider.getColor(modelState.getColorIndex());
         
         cubeInputs.color = controller.renderLayer == EnumWorldBlockLayer.SOLID ? colorVector.base : colorVector.highlight;
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(

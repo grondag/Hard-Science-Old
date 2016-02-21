@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.niceblock.newmodel.color.ColorVector;
+import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 
 import java.util.List;

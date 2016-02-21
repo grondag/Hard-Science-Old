@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.ColorVector;
+import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 

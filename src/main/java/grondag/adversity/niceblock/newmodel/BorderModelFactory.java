@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
-import grondag.adversity.niceblock.newmodel.color.ColorVector;
+import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 
 import java.util.Collections;
@@ -51,7 +51,7 @@ public class BorderModelFactory extends BakedModelFactory
             }
         }
         
-        ColorVector colorVector = colorProvider.getColor(colorIndex);
+        ColorMap colorVector = colorProvider.getColor(colorIndex);
         BorderController controller = (BorderController)this.controller;
         int facadeIndex = controller.getFacadeIndexFromModelState(modelState);
         int alternateTextureIndex = controller.getAlternateTextureIndexFromModelState(modelState);

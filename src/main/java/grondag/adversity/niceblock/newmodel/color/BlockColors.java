@@ -11,13 +11,13 @@ public class BlockColors implements IColorProvider
     public static final BlockColors INSTANCE = new BlockColors();
     
     private final int COLOR_COUNT = Hue.values().length * 25;
-    private final ColorVector[] COLORS = new ColorVector[COLOR_COUNT];
+    private final ColorMap[] COLORS = new ColorMap[COLOR_COUNT];
 
-    public static ColorVector makeColorVector(Hue hue, Tint tint)
+    public static ColorMap makeColorVector(Hue hue, Tint tint)
     {
         String vectorName =  tint.tintName + " " + hue.hueName();
                 
-        return new ColorVector(
+        return new ColorMap(
                 vectorName,
                 NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.NONE).getColor(tint) | 0xFF000000,
                 NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.FAR_LEFT).getColor(tint) | 0xFF000000,
@@ -71,7 +71,7 @@ public class BlockColors implements IColorProvider
     }
 
     @Override
-    public ColorVector getColor(int colorIndex)
+    public ColorMap getColor(int colorIndex)
     {
         return COLORS[Math.max(0, Math.min(COLOR_COUNT-1, colorIndex))];
     }
