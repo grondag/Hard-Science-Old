@@ -51,7 +51,8 @@ public class BorderController extends ModelControllerNew
     @Override
     public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        TestForBigBlockMatch test = new TestForBigBlockMatch(world, state, pos);
+        int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
+        TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
         NeighborBlocks neighbors = new NeighborBlocks(world, pos);
         NeighborTestResults mates = neighbors.getNeighborTestResults(test);
 

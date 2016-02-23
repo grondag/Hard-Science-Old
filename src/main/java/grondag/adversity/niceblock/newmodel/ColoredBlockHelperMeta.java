@@ -1,6 +1,10 @@
 package grondag.adversity.niceblock.newmodel;
 
+import java.util.List;
+
+import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -24,7 +28,7 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
     }
 
     @Override
-    public int getSubItemCount()
+    public int getItemModelCount()
     {
         return dispatcher.getColorProvider().getColorCount();
     }
@@ -32,13 +36,24 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-        String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).colorMapName;
-        return baseDisplayName + (colorName == "" ? "" : ", " + colorName);
+        return baseDisplayName;
     }
 
     @Override
-    public ModelState getModelStateForItem(int itemIndex)
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    {
+        String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).colorMapName;
+        if(colorName !="")
+        {
+            tooltip.add(colorName);
+        }
+        
+    }
+    @Override
+    public ModelState getModelStateForItemModel(int itemIndex)
     {
         return new ModelState(0, itemIndex);
     }
+
+
 }

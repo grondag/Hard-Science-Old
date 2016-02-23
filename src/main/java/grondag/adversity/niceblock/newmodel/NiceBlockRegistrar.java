@@ -72,7 +72,7 @@ public class NiceBlockRegistrar
     public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColoredBlockController("colored_stone", 4, EnumWorldBlockLayer.SOLID, true, true),
             new BorderController("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true));
-    public static final NiceBlockPlus BLOCK_BORDER_TEST = new NiceBlockPlus(new ColoredBlockHelperPlus(MODEL_BORDER_TEST), BaseMaterial.FLEXSTONE, "bordered");
+    public static final NiceBlockPlus BLOCK_BORDER_TEST = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST), BaseMaterial.FLEXSTONE, "bordered");
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
@@ -194,7 +194,7 @@ public class NiceBlockRegistrar
             {
                 ModelLoader.setCustomStateMapper(block, NiceBlockStateMapper.instance);
                 
-                for (int i = 0; i < block.blockModelHelper.getSubItemCount(); i++)
+                for (int i = 0; i < block.blockModelHelper.getItemModelCount(); i++)
                 {
                     ModelResourceLocation itemModelResourceLocation = 
                             new ModelResourceLocation(((NiceBlock)block).getRegistryName() + "." + i, "inventory");
@@ -245,9 +245,9 @@ public class NiceBlockRegistrar
         
         for (NiceBlock block : allBlocks)
         {
-            for (int i = 0; i < block.blockModelHelper.getSubItemCount(); i++)
+            for (int i = 0; i < block.blockModelHelper.getItemModelCount(); i++)
             {          
-                ModelState modelState = block.blockModelHelper.getModelStateForItem(i);
+                ModelState modelState = block.blockModelHelper.getModelStateForItemModel(i);
                 event.modelRegistry.putObject(new ModelResourceLocation(block.getRegistryName() + "." + i, "inventory"),
                         block.blockModelHelper.dispatcher.getItemModelForModelState(modelState));
             }

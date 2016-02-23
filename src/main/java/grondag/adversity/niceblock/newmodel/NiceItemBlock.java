@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.base.Function;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -27,6 +28,7 @@ import net.minecraft.world.World;
  * Doesn't do much else.
  */
 public class NiceItemBlock extends ItemBlock {
+
 	public NiceItemBlock(Block block) {
 		super(block);
 		setHasSubtypes(true);
@@ -46,35 +48,37 @@ public class NiceItemBlock extends ItemBlock {
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-        return ((NiceBlock)this.block).getItemStackDisplayName(stack);
+        return ((NiceBlock)this.block).blockModelHelper.getItemStackDisplayName(stack);
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    {
+        ((NiceBlock)this.block).blockModelHelper.addInformation(stack, playerIn, tooltip, advanced);
     }
 
     @Override
     public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        Block block = iblockstate.getBlock();
-
         if (!block.isReplaceable(worldIn, pos))
         {
             pos = pos.offset(side);
         }
-
+        
         if (stack.stackSize == 0)
         {
             return false;
-        }
+        }        
         else if (!playerIn.canPlayerEdit(pos, side, stack))
         {
             return false;
         }
+        
         else if (worldIn.canBlockBePlaced(this.block, pos, false, side, (Entity)null, stack))
         {
-            // Can't pass metadata to block state for blocks that are meant to be tile entities
-            // because value will be out of range.  placeBlockAt will give the value to the TE state.
-            int i = this.block instanceof NiceBlockPlus ? 0 : this.getMetadata(stack.getMetadata());
+            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, pos, side, stack);
             
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, i, playerIn);
+            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, newMeta, playerIn);
 
             if (placeBlockAt(stack, playerIn, worldIn, pos, side, hitX, hitY, hitZ, iblockstate1))
             {
@@ -91,6 +95,16 @@ public class NiceItemBlock extends ItemBlock {
     }
 
     
+    /* (non-Javadoc)
+     * @see net.minecraft.item.Item#getHighlightTip(net.minecraft.item.ItemStack, java.lang.String)
+     */
+    @Override
+    public String getHighlightTip(ItemStack item, String displayName)
+    {
+        // TODO Auto-generated method stub
+        return super.getHighlightTip(item, displayName);
+    }
+
     /**
      * Called to actually place the block, after the location is determined
      * and all permission checks have been made.
@@ -102,6 +116,8 @@ public class NiceItemBlock extends ItemBlock {
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
+        NiceBlock block = (NiceBlock)(this.block);
+ 
         if (!world.setBlockState(pos, newState, 3)) return false;
 
         if(newState.getBlock() instanceof NiceBlockPlus)
@@ -113,8 +129,8 @@ public class NiceItemBlock extends ItemBlock {
                 niceTE.markDirty();
             }
         }
-        this.block.onBlockPlacedBy(world, pos, newState, player, stack);
 
+        this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
     }	
 }

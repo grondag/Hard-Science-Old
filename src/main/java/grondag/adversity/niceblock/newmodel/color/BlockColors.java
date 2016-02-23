@@ -38,7 +38,7 @@ public class BlockColors implements IColorProvider
                 EnumHCLFailureMode.REDUCE_CHROMA);
         if(!whichColor.IS_VISIBLE)
         {
-            Adversity.log.warn("makeColorMap produced invisible border color for hue=" + hue + " tint=" + tint);
+            Adversity.log.debug("makeColorMap produced invisible border color for hue=" + hue + " tint=" + tint);
         }
         newColorMap.setColor(EnumColorMap.BORDER, whichColor.RGB_int | 0xFF000000);
 

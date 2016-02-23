@@ -144,14 +144,6 @@ public class NiceBlock extends Block
         return super.getLocalizedName();
     }
 
-    /**
-     * Here so that item block class can be generic.
-     */
-    public String getItemStackDisplayName(ItemStack stack)
-    {
-        return blockModelHelper.getItemStackDisplayName(stack);
-    }
-
     // INTERACTION HANDLING
 
     @Override

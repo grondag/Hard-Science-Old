@@ -1,15 +1,19 @@
 package grondag.adversity.niceblock.support;
 
+import org.apache.commons.lang3.BitField;
+
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.newmodel.BlockModelHelper;
 import grondag.adversity.niceblock.newmodel.BlockTests;
 import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -28,27 +32,29 @@ public abstract class NicePlacement {
 		this.owner = owner;
 	}
 
-	/** call from Block class after setting up **/
-	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-			float hitZ, int meta, EntityLivingBase placer);
+//	/** call from Block class after setting up **/
+//	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+//			float hitZ, int meta, EntityLivingBase placer);
 
+	public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack);
+	
 //	/** convenience factory method */
 //	public static NicePlacement makeMasonryPlacer() {
 //		return new PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
 //				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
 //	}
 
-	/** convenience factory method */
-	public static NicePlacement makeColumnPlacerRound() {
-		return new PlacementColumn(NiceStyle.COLUMN_ROUND_X, NiceStyle.COLUMN_ROUND_Y,
-				NiceStyle.COLUMN_ROUND_Z);
-	}
-
-	/** convenience factory method */
-	public static NicePlacement makeColumnPlacerSquare() {
-		return new PlacementColumn(NiceStyle.COLUMN_SQUARE_X, NiceStyle.COLUMN_SQUARE_Y,
-				NiceStyle.COLUMN_SQUARE_Z);
-	}
+//	/** convenience factory method */
+//	public static NicePlacement makeColumnPlacerRound() {
+//		return new PlacementColumn(NiceStyle.COLUMN_ROUND_X, NiceStyle.COLUMN_ROUND_Y,
+//				NiceStyle.COLUMN_ROUND_Z);
+//	}
+//
+//	/** convenience factory method */
+//	public static NicePlacement makeColumnPlacerSquare() {
+//		return new PlacementColumn(NiceStyle.COLUMN_SQUARE_X, NiceStyle.COLUMN_SQUARE_Y,
+//				NiceStyle.COLUMN_SQUARE_Z);
+//	}
 
 	/**
 	 * Handles placement of blocks that join together in appearance and have
@@ -56,82 +62,48 @@ public abstract class NicePlacement {
 	 * */
 	public static class PlacementBigBlock extends NicePlacement {
 
-	    /**
-	     * All possible blocks that the placed block could connect with
-	     */
-	    private IBlockTest siblingTest;
+	    private final PlacementValidatorCubic shape;
 	    
-	    public PlacementBigBlock(IBlockTest siblingTest, IBlockTest matchTest){
-	        
+        public PlacementBigBlock()
+        {
+            this(new PlacementValidatorCubic(4, 4, 4));
+        }
+
+	    public PlacementBigBlock(PlacementValidatorCubic shape){
+	        this.shape = shape;
 	    }
 	    
 		@Override
-		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-				float hitZ, int meta, EntityLivingBase placer) {
-
-			PlacementValidatorCubic shape = new PlacementValidatorCubic(4, 4, 4);
-
-			NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
-			NeighborTestResults results = neighbors.getNeighborTestResults(siblingTest);
-
-			IBlockState candidate;
+		public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack)
+		{
+		    int colorIndex = owner.blockModelHelper.getColorIndexFromItemStack(stack);
+            int speciesInUseFlags = 0;
+            int species;
+            NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
+			NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.TestForBlockColorMatch(owner, colorIndex));
 			
-			int speciesInUseFlags = 0;
-
-			if (results.east()) {
-				candidate = neighbors.east();
-				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
-					return candidate;
-				}
-				;
-			}
-			if (results.west()) {
-				candidate = neighbors.west();
-				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
-					return candidate;
-				}
-			}
-			if (results.north()) {
-				candidate = neighbors.north();
-				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
-					return candidate;
-				}
-			}
-			if (results.south()) {
-				candidate = neighbors.south();
-				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
-					return candidate;
-				}
-			}
-			if (results.up()) {
-				candidate = neighbors.up();
-				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
-					return candidate;
-				}
-			}
-			if (results.down()) {
-				candidate = neighbors.down();
-				if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(worldIn, candidate, pos))) {
-					return candidate;
-				}
+			for(EnumFacing face : EnumFacing.VALUES)		    
+			{
+		         if (results.result(face)) 
+		         {
+		             species = neighbors.getByFace(face).getValue(NiceBlock.META);
+		             speciesInUseFlags |= (1 << species);
+		             if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(owner, colorIndex, species))) {
+		                 return species;
+		             }
+		         }
 			}
 
 			// if no available mates, choose a species that will not
 			// connect to what is surrounding
-
-			for (int n = 0; n < 16; n++) {
-				tests[n] = neighbors.getNeighborTestResults(new TestForCompleteMatch(getSiblings()[n]
-						.getStateFromMeta(meta)));
-				match[n] = tests[n].north() || tests[n].south() || tests[n].east() || tests[n].west() || tests[n].up()
-						|| tests[n].down();
+			for(species = 15; species >= 0; species--)
+			{
+			    if((speciesInUseFlags & (1 << species)) > 0)
+			    {
+			        return species;
+			    }
 			}
-
-			for (int n = 0; n < getSiblings().length - 1; n++) {
-				if (match[n] && !match[n + 1]) {
-					return getSiblings()[n + 1].getStateFromMeta(meta);
-				}
-			}
-			return getSiblings()[0].getStateFromMeta(meta);
+			return 0;
 		}
 	}
 
@@ -240,71 +212,71 @@ public abstract class NicePlacement {
 //		}
 //	}
 
-	/**
-	 * Handles placement of axis-aligned blocks like columns. Switches to
-	 * different style of block automatically based on axis of placement using
-	 * the styles passed in.
-	 */
-	public static class PlacementColumn extends NicePlacement {
-
-		private final NiceStyle styleX;
-		private final NiceStyle styleY;
-		private final NiceStyle styleZ;
-
-		private NiceBlock blockX;
-		private NiceBlock blockY;
-		private NiceBlock blockZ;
-		private boolean areSiblingBlocksFound = false;
-
-		public PlacementColumn(NiceStyle styleX, NiceStyle styleY, NiceStyle styleZ) {
-			super();
-			this.styleX = styleX;
-			this.styleY = styleY;
-			this.styleZ = styleZ;
-		}
-
-		@Override
-		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-				float hitZ, int meta, EntityLivingBase placer) {
-
-			/**
-			 * Have to do this now instead of during set owner because some
-			 * blocks may not yet be created at that time.
-			 */
-			if (!areSiblingBlocksFound) {
-				blockX = NiceBlockRegistrar.getBlockForStyleAndMeta(styleX, 0);
-				blockY = NiceBlockRegistrar.getBlockForStyleAndMeta(styleY, 0);
-				blockZ = NiceBlockRegistrar.getBlockForStyleAndMeta(styleZ, 0);
-				areSiblingBlocksFound = true;
-			}
-
-			switch (facing.getAxis()) {
-			case X:
-				return blockX.getStateFromMeta(meta);
-
-			case Y:
-				return blockY.getStateFromMeta(meta);
-
-			case Z:
-				return blockZ.getStateFromMeta(meta);
-
-			default:
-				// should be impossible to get here, but silences eclipse warning
-				return owner.getStateFromMeta(meta);
-			}
-		}
-	}
-
-	/**
-	 * For blocks that require no special handling.
-	 */
-	public static class PlacementSimple extends NicePlacement {
-
-		@Override
-		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-				float hitZ, int meta, EntityLivingBase placer) {
-
-			return owner.getStateFromMeta(meta);
-		}
-	}
+//	/**
+//	 * Handles placement of axis-aligned blocks like columns. Switches to
+//	 * different style of block automatically based on axis of placement using
+//	 * the styles passed in.
+//	 */
+//	public static class PlacementColumn extends NicePlacement {
+//
+//		private final NiceStyle styleX;
+//		private final NiceStyle styleY;
+//		private final NiceStyle styleZ;
+//
+//		private NiceBlock blockX;
+//		private NiceBlock blockY;
+//		private NiceBlock blockZ;
+//		private boolean areSiblingBlocksFound = false;
+//
+//		public PlacementColumn(NiceStyle styleX, NiceStyle styleY, NiceStyle styleZ) {
+//			super();
+//			this.styleX = styleX;
+//			this.styleY = styleY;
+//			this.styleZ = styleZ;
+//		}
+//
+//		@Override
+//		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+//				float hitZ, int meta, EntityLivingBase placer) {
+//
+//			/**
+//			 * Have to do this now instead of during set owner because some
+//			 * blocks may not yet be created at that time.
+//			 */
+//			if (!areSiblingBlocksFound) {
+//				blockX = NiceBlockRegistrar.getBlockForStyleAndMeta(styleX, 0);
+//				blockY = NiceBlockRegistrar.getBlockForStyleAndMeta(styleY, 0);
+//				blockZ = NiceBlockRegistrar.getBlockForStyleAndMeta(styleZ, 0);
+//				areSiblingBlocksFound = true;
+//			}
+//
+//			switch (facing.getAxis()) {
+//			case X:
+//				return blockX.getStateFromMeta(meta);
+//
+//			case Y:
+//				return blockY.getStateFromMeta(meta);
+//
+//			case Z:
+//				return blockZ.getStateFromMeta(meta);
+//
+//			default:
+//				// should be impossible to get here, but silences eclipse warning
+//				return owner.getStateFromMeta(meta);
+//			}
+//		}
+//	}
+//
+//	/**
+//	 * For blocks that require no special handling.
+//	 */
+//	public static class PlacementSimple extends NicePlacement {
+//
+//		@Override
+//		public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+//				float hitZ, int meta, EntityLivingBase placer) {
+//
+//			return owner.getStateFromMeta(meta);
+//		}
+//	}
 }

@@ -3,6 +3,7 @@ package grondag.adversity.library;
 import grondag.adversity.Adversity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 
 /**
@@ -54,6 +55,27 @@ public class NeighborBlocks {
 		this.pos = pos;
 	}
 
+	public IBlockState getByFace(EnumFacing face)
+	{
+        switch(face)
+        {
+        case UP:
+            return this.up();
+        case DOWN:
+            return this.down();
+        case EAST:
+            return this.east();
+        case NORTH:
+            return this.north();
+        case SOUTH:
+            return this.south();
+        case WEST:
+            return this.west();
+        default:
+            return null;
+        }
+	}
+	
 	public IBlockState up(){
 		if(up == null){
 			up = world.getBlockState(pos.up());
@@ -131,6 +153,28 @@ public class NeighborBlocks {
 
 		protected NeighborTestResults(IBlockTest test) {
 			this.test = test;
+		}
+		
+		/** Use when enumeration of all faces is needed */
+		public boolean result(EnumFacing face)
+		{
+            switch(face)
+            {
+            case UP:
+                return this.up();
+            case DOWN:
+                return this.down();
+            case EAST:
+                return this.east();
+            case NORTH:
+                return this.north();
+            case SOUTH:
+                return this.south();
+            case WEST:
+                return this.west();
+            default:
+                return false;
+            }
 		}
 		
 		public boolean up(){

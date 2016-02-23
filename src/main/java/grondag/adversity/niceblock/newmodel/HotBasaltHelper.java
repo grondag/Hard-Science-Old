@@ -30,7 +30,7 @@ public class HotBasaltHelper extends BlockModelHelper
     }
 
     @Override
-    public int getSubItemCount()
+    public int getItemModelCount()
     {
         return 4;
     }
@@ -58,7 +58,7 @@ public class HotBasaltHelper extends BlockModelHelper
     }
 
     @Override
-    public ModelState getModelStateForItem(int itemIndex)
+    public ModelState getModelStateForItemModel(int itemIndex)
     {
         return new ModelState().setClientShapeIndex(itemIndex * 16, EnumWorldBlockLayer.TRANSLUCENT.ordinal());
     }

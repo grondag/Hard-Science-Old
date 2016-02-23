@@ -1,8 +1,12 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class ColoredBlockHelperPlus extends ColoredBlockHelperMeta
 {
@@ -34,4 +38,15 @@ public class ColoredBlockHelperPlus extends ColoredBlockHelperMeta
         }
         return retVal;
     }
+
+    // Can't pass metadata to block state for blocks that are meant to be tile entities
+    // because the item metadata value (colorIndex) will be out of range.  
+    // placeBlockAt will give the colorIndex value to the TE state.
+    @Override
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack)
+    {
+        return 0;
+    }
+    
+    
 }
