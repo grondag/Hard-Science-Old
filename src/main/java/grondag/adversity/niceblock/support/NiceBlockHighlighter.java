@@ -5,6 +5,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -25,11 +26,11 @@ public class NiceBlockHighlighter {
 	@SubscribeEvent
 	public void onDrawBlockHighlightEvent(DrawBlockHighlightEvent event) {
 	    
-	    // getting weird NPE in rare cases, thus the try block
-	    try
-	    {
-    		IBlockState bs = event.player.worldObj.getBlockState(event.target.getBlockPos());
-    		if (bs.getBlock() instanceof NiceBlock) {
+        BlockPos pos = event.target.getBlockPos();
+        if(pos != null && event.player != null)
+        {
+    		IBlockState bs = event.player.worldObj.getBlockState(pos);
+    		if (bs != null && bs.getBlock() instanceof NiceBlock) {
     			NiceBlock nb = (NiceBlock) bs.getBlock();
     			if (nb.needsCustomHighlight()) {
     
@@ -43,7 +44,7 @@ public class NiceBlockHighlighter {
     				double d1 = event.player.lastTickPosY + (event.player.posY - event.player.lastTickPosY) * event.partialTicks;
     				double d2 = event.player.lastTickPosZ + (event.player.posZ - event.player.lastTickPosZ) * event.partialTicks;
     
-    				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.player.worldObj, event.target.getBlockPos(), bs)) {
+    				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.player.worldObj, pos, bs)) {
     					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
     				}
     
@@ -54,12 +55,7 @@ public class NiceBlockHighlighter {
     
     				event.setCanceled(true);
     			}
- 			}
+    		}
 		}
-	    finally
-	    {
-	        //NOOP
-	    }
-
 	}
 }

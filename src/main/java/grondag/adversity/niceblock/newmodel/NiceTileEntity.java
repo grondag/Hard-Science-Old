@@ -50,7 +50,7 @@ public class NiceTileEntity extends TileEntity{
 	private void updateClientRenderState()
 	{
 		this.isClientShapeIndexDirty = true;
-
+		
 		updatify(pos.up());
 		updatify(pos.down());
 		updatify(pos.east());
@@ -97,7 +97,15 @@ public class NiceTileEntity extends TileEntity{
 
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+        int oldColorIndex = modelState.colorIndex;
         doReadFromNBT(pkt.getNbtCompound());
+        
+        // the description packet often arrives after initial render on client
+        // so need up refresh render state once we have the server-side info
+        if(oldColorIndex != modelState.colorIndex && this.worldObj.isRemote)
+        {
+            worldObj.markBlockForUpdate(pos);
+        }
     }
 	    
     @Override
