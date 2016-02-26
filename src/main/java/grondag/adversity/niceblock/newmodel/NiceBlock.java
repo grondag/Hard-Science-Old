@@ -1,12 +1,16 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.IWailaProvider;
 import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import grondag.adversity.niceblock.support.NicePlacement;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
@@ -51,7 +55,7 @@ import com.google.common.collect.ImmutableList;
  * usage of metadata bits. If each NiceBlock instance has 16 meta variants then no metadata bits are wasted. Slabs, stairs, etc. do not necessarily consume four metadata bits and
  * this also system means all niceblocks can be fully consistent in the way they use metadata.
  */
-public class NiceBlock extends Block
+public class NiceBlock extends Block implements IWailaProvider
 {
 
     /**
@@ -274,6 +278,14 @@ public class NiceBlock extends Block
     {
         ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos, false);
         return this.blockModelHelper.dispatcher.getColorProvider().getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
+    }
+
+    @Override
+    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+    {
+        List<String> retVal = new ArrayList<String>();
+        retVal.add("I'm a Nice Block!");
+        return retVal;
     }
 
     // BLOCK TESTS

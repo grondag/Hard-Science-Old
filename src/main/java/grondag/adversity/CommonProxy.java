@@ -13,6 +13,7 @@ import grondag.adversity.feature.volcano.Volcano;
 //import grondag.adversity.world.AdversityWorldType;
 
 import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -30,7 +31,9 @@ public class CommonProxy {
 		Volcano.preInit(event);
 		NiceBlockRegistrar.preInit(event);
 //		Unobtanium.preInit(event);
-
+        if (Loader.isModLoaded("Waila")){
+            WailaDataProvider.register();
+        }
 	}
 
 	public void init(FMLInitializationEvent event) {
