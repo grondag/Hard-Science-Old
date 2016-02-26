@@ -97,11 +97,11 @@ public class NiceTileEntity extends TileEntity{
 
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+
+        // The description packet often arrives after render state is first cached on client
+        // so we need to refresh render state once we have the server-side info.
         int oldColorIndex = modelState.colorIndex;
         doReadFromNBT(pkt.getNbtCompound());
-        
-        // the description packet often arrives after initial render on client
-        // so need up refresh render state once we have the server-side info
         if(oldColorIndex != modelState.colorIndex && this.worldObj.isRemote)
         {
             worldObj.markBlockForUpdate(pos);

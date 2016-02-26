@@ -50,8 +50,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ModelDispatcherLayered extends ModelDispatcherBase
 {
 
-    /** cache for baked block models */
-    private IBakedModel[][] bakedBlockModels = new IBakedModel[EnumWorldBlockLayer.values().length][];
+    /** 
+     * Cache for baked block models 
+     * Dimensions are render layer, color, shape.
+     * Conserves memory to put color first because most colors will never
+     * be instantiated, but many shapes within a color probably will.
+     */
+    private IBakedModel[][][] bakedBlockModels = new IBakedModel[EnumWorldBlockLayer.values().length][][];
 
     private final ModelControllerNew controllers[] = new ModelControllerNew[EnumWorldBlockLayer.values().length];
     
@@ -98,7 +103,7 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
             {
                 if(controllers[i] != null)
                 {
-                    bakedBlockModels[i] = new IBakedModel[controllers[i].getShapeCount() * colorProvider.getColorCount()];
+                    bakedBlockModels[i] = new IBakedModel[colorProvider.getColorCount()][];
                     controllers[i].getBakedModelFactory().handleBakeEvent(event);
                 }
             }
@@ -119,18 +124,23 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
             
             IExtendedBlockState exState = (IExtendedBlockState) state;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
-            int modelIndex = colorProvider.getColorCount() * modelState.getClientShapeIndex(layer.ordinal()) + modelState.getColorIndex();
 
-            retVal = bakedBlockModels[layer.ordinal()][modelIndex];
+            if(bakedBlockModels[layer.ordinal()][modelState.getColorIndex()] != null)
+            {
+                retVal = bakedBlockModels[layer.ordinal()][modelState.getColorIndex()][modelState.getClientShapeIndex(layer.ordinal())];
+            }
 
             if (retVal == null)
             {
-
                 retVal = controllers[layer.ordinal()].getBakedModelFactory().getBlockModel(modelState, colorProvider);
 
                 synchronized (bakedBlockModels)
                 {
-                    bakedBlockModels[layer.ordinal()][modelIndex] = retVal;
+                    if(bakedBlockModels[layer.ordinal()][modelState.getColorIndex()] == null)
+                    {
+                        bakedBlockModels[layer.ordinal()][modelState.getColorIndex()] = new IBakedModel[controllers[layer.ordinal()].getShapeCount()];
+                    }
+                    bakedBlockModels[layer.ordinal()][modelState.getColorIndex()][modelState.getClientShapeIndex(layer.ordinal())] = retVal;
                 }
             }
         }

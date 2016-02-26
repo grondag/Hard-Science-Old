@@ -48,6 +48,7 @@ public class BorderController extends ModelControllerNew
     {
             return modelState.getClientShapeIndex(this.renderLayer.ordinal()) / alternateTextureCount;
     }
+    
     @Override
     public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {

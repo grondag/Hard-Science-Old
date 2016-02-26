@@ -127,8 +127,7 @@ public class NiceModelBigTex extends NiceModel
                 for (int z = 0; z < 16; z++)
                 {
 
-                    // Really can't be null because all cases handled.
-                    // Initializing to silence eclipse warning.
+                    // Initializing with null to silence eclipse warning even though all cases handled.
                     BigTexFacade facade = null;
 
                     // clockwise rotations

@@ -49,8 +49,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ModelDispatcherBasic extends ModelDispatcherBase
 {
 
-    /** cache for baked block models */
-    private IBakedModel[] bakedBlockModels;
+    /** 
+     * Cache for baked block models 
+     * Dimensions are color, shape.
+     * Conserves memory to put color first because most colors will never
+     * be instantiated, but many shapes within a color probably will.
+     */
+    private IBakedModel[][] bakedBlockModels;
 
     private final ModelControllerNew controller;
 
@@ -77,7 +82,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         // need to clear arrays to force rebaking of cached models
         if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
         {
-            bakedBlockModels = new IBakedModel[controller.getShapeCount() * colorProvider.getColorCount()];
+            bakedBlockModels = new IBakedModel[colorProvider.getColorCount()][];
         }
         else
         {
@@ -97,21 +102,25 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         // mucking about with the model registry crazy stuff could happen.
         if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock)
         {
-
             IExtendedBlockState exState = (IExtendedBlockState) state;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
-            int modelIndex = colorProvider.getColorCount() * modelState.getClientShapeIndex(0) + modelState.getColorIndex();
 
-            retVal = bakedBlockModels[modelIndex];
-
+            if(bakedBlockModels[modelState.getColorIndex()] != null)
+            {
+                retVal = bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)];
+            }
+            
             if (retVal == null)
             {
-
                 retVal = controller.getBakedModelFactory().getBlockModel(modelState, colorProvider);
 
                 synchronized (bakedBlockModels)
                 {
-                    bakedBlockModels[modelIndex] = retVal;
+                    if(bakedBlockModels[modelState.getColorIndex()] == null)
+                    {
+                        bakedBlockModels[modelState.getColorIndex()] = new IBakedModel[controller.getShapeCount()];
+                    }
+                    bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)] = retVal;
                 }
             }
         }
