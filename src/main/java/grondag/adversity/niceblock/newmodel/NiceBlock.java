@@ -284,7 +284,7 @@ public class NiceBlock extends Block implements IWailaProvider
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
     {
         List<String> retVal = new ArrayList<String>();
-        retVal.add("I'm a Nice Block!");
+        this.blockModelHelper.addInformation(itemStack, null, retVal, false);
         return retVal;
     }
 
