@@ -6,7 +6,9 @@ import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.IBlockAccess;
 
 public class ColoredBlockHelperMeta extends BlockModelHelper
@@ -42,13 +44,14 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
+        super.addInformation(stack, playerIn, tooltip, advanced);
         String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).colorMapName;
         if(colorName !="")
         {
             tooltip.add(colorName);
         }
-        
     }
+    
     @Override
     public ModelState getModelStateForItemModel(int itemIndex)
     {

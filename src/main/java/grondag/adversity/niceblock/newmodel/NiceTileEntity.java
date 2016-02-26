@@ -16,6 +16,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class NiceTileEntity extends TileEntity{
     public ModelState modelState = new ModelState();
+    
+    /** used by big blocks */
+    public int placementShape;
 	public IExtendedBlockState exBlockState;
 	public boolean isClientShapeIndexDirty = true;
 	public boolean isLoaded = false;
@@ -87,33 +90,41 @@ public class NiceTileEntity extends TileEntity{
    @Override
     public Packet getDescriptionPacket() {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        modelState.writeToNBT(nbtTagCompound);
+        doWriteToNBT(nbtTagCompound);
         int metadata = getBlockMetadata();
         return new S35PacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
     }
 
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
-        modelState.readFromNBT(pkt.getNbtCompound());
+        doReadFromNBT(pkt.getNbtCompound());
     }
 	    
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
-        modelState.readFromNBT(compound);
-//        Adversity.log.info("NiceTileEntity readFromNBT " + compound.toString());
-//        Adversity.log.info("colorIndex = " + modelState.getColorIndex() + ", shapeIndex = " + modelState.getClientShapeIndex());
+        doReadFromNBT(compound);
         isLoaded = true;
     }
 
+    private void doReadFromNBT(NBTTagCompound compound)
+    {
+        modelState.readFromNBT(compound);
+        placementShape = compound.getInteger(BigBlockHelper.PLACEMENT_SHAPE_TAG);
+    }
+    
     @Override
     public void writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
+        doWriteToNBT(compound);
+    }
+    
+    private void doWriteToNBT(NBTTagCompound compound)
+    {
         modelState.writeToNBT(compound);
-//        Adversity.log.info("writeToNBT " + compound.toString());
-//        Adversity.log.info("colorIndex = " + modelState.getColorIndex() + ", shapeIndex = " + modelState.getClientShapeIndex());
+        compound.setInteger(BigBlockHelper.PLACEMENT_SHAPE_TAG, placementShape);
     }
 	
 	

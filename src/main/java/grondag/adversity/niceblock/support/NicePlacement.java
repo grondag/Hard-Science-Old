@@ -1,5 +1,7 @@
 package grondag.adversity.niceblock.support;
 
+import java.util.Random;
+
 import org.apache.commons.lang3.BitField;
 
 import grondag.adversity.library.IBlockTest;
@@ -24,19 +26,14 @@ import net.minecraft.world.World;
  * decorative multiblocks with connected textures/geometry.
  */
 public abstract class NicePlacement {
-
-	protected NiceBlock owner;
-
-	/** call from Block class on initialization **/
-	public void setOwner(NiceBlock owner) {
-		this.owner = owner;
-	}
+    
+    protected static final Random SALT_SHAKER = new Random();
 
 //	/** call from Block class after setting up **/
 //	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 //			float hitZ, int meta, EntityLivingBase placer);
 
-	public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack);
+	public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, BlockModelHelper helper);
 	
 //	/** convenience factory method */
 //	public static NicePlacement makeMasonryPlacer() {
@@ -74,13 +71,13 @@ public abstract class NicePlacement {
 	    }
 	    
 		@Override
-		public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack)
+		public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, BlockModelHelper helper)
 		{
-		    int colorIndex = owner.blockModelHelper.getColorIndexFromItemStack(stack);
+		    int colorIndex = helper.getColorIndexFromItemStack(stack);
             int speciesInUseFlags = 0;
             int species;
             NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
-			NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.TestForBlockColorMatch(owner, colorIndex));
+			NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.TestForBlockColorMatch(helper.block, colorIndex));
 			
 			for(EnumFacing face : EnumFacing.VALUES)		    
 			{
@@ -88,17 +85,19 @@ public abstract class NicePlacement {
 		         {
 		             species = neighbors.getByFace(face).getValue(NiceBlock.META);
 		             speciesInUseFlags |= (1 << species);
-		             if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(owner, colorIndex, species))) {
+		             if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(helper.block, colorIndex, species))) {
 		                 return species;
 		             }
 		         }
 			}
 
-			// if no available mates, choose a species that will not
-			// connect to what is surrounding
-			for(species = 15; species >= 0; species--)
+			// if no available mates, randomly choose a species 
+			//that will not connect to what is surrounding
+			int salt = SALT_SHAKER.nextInt(16);
+			for(int i = 0; i < 16; i++)
 			{
-			    if((speciesInUseFlags & (1 << species)) > 0)
+			    species = (i + salt) % 16;
+			    if((speciesInUseFlags & (1 << species)) == 0)
 			    {
 			        return species;
 			    }
@@ -204,7 +203,7 @@ public abstract class NicePlacement {
 //			}
 //
 //			for (int n = 0; n < getSiblings().length - 1; n++) {
-//				if (match[n] && !match[n + 1]) {
+//				if (match[n] && !match[n + 1]) {)
 //					return getSiblings()[n + 1].getStateFromMeta(meta);
 //				}
 //			}

@@ -38,12 +38,17 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
         {
             return null;
         }
-
+        ItemStack stack = new ItemStack(item, 1, 0);
+        
         IBlockState blockState = world.getBlockState(pos);
         ModelState modelState = blockModelHelper.getModelStateForBlock(blockState, world, pos, false);
-        ItemStack retVal = new ItemStack(item, 1, modelState.getColorIndex());
- //       retVal.setTagCompound(modelState.getNBT());
-        return retVal;
+        NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
+        if (niceTE != null) 
+        {
+            blockModelHelper.updateItemStackForPickBlock(stack, blockState, modelState, niceTE);
+        }
+
+        return stack;
     }
  
 }

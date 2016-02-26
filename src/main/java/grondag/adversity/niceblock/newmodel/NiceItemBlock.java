@@ -125,11 +125,10 @@ public class NiceItemBlock extends ItemBlock {
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                niceTE.modelState.setColorIndex(stack.getMetadata());
-                niceTE.markDirty();
+                block.blockModelHelper.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
             }
         }
-
+        
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
     }	

@@ -11,6 +11,7 @@ import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -23,7 +24,7 @@ import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 public abstract class BlockModelHelper
 {
-    protected NiceBlock block;
+    public NiceBlock block;
     
     protected String baseDisplayName;
     
@@ -71,11 +72,20 @@ public abstract class BlockModelHelper
         return stack.getMetadata();
     }
     
+    public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, NiceTileEntity niceTE)
+    {
+        // default is NOOP
+    }
+    
     public int getColorIndexFromItemStack(ItemStack stack)
     {
         return stack.getMetadata();
     }
     
+    public void updateItemStackForPickBlock(ItemStack stack, IBlockState blockState, ModelState modelState, NiceTileEntity niceTE)
+    {
+        // default is NOOP
+    }
     
     public abstract String getItemStackDisplayName(ItemStack stack);
     
