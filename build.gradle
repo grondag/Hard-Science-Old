@@ -25,7 +25,7 @@ group= "grondag.adversity" // http://maven.apache.org/guides/mini/guide-naming-c
 archivesBaseName = "adversity"
 
 minecraft {
-    version = "1.8.9-11.15.1.1751"
+    version = "1.8.9-11.15.1.1762"
     runDir = "run"
     useDepAts = true
     
@@ -39,9 +39,14 @@ minecraft {
 }
 
 repositories {
-  maven {
-    url "http://dvs1.progwml6.com/files/maven"
-  }
+    maven {
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+  
+    maven { 
+        name "Mobius Repo"
+        url "http://mobiusstrip.eu/maven"
+    }
 }
 
 dependencies {
@@ -61,6 +66,8 @@ dependencies {
     // except that these dependencies get remapped to your current MCP mappings
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    deobfCompile "mcp.mobius.waila:Waila:1.6.0-B3_1.8.8"
     deobfCompile "mezz.jei:jei_1.8.9:2.27.0.157"
     
     // for more info...
