@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.newmodel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -8,6 +9,8 @@ import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.support.NicePlacement;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -100,4 +103,12 @@ public abstract class BlockModelHelper
     {
         // NOOP is default implementation
     }
+    
+    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+    {
+        List<String> retVal = new ArrayList<String>();
+        this.addInformation(itemStack, null, retVal, false);
+        return retVal;
+    }
+
 }

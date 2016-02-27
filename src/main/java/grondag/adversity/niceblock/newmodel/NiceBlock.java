@@ -283,9 +283,7 @@ public class NiceBlock extends Block implements IWailaProvider
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
     {
-        List<String> retVal = new ArrayList<String>();
-        this.blockModelHelper.addInformation(itemStack, null, retVal, false);
-        return retVal;
+        return this.blockModelHelper.getWailaBody(itemStack, currenttip, accessor, config);
     }
 
     // BLOCK TESTS
