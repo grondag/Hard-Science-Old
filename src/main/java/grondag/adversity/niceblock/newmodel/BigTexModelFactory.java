@@ -26,12 +26,17 @@ public class BigTexModelFactory extends BakedModelFactory
 {
 
     /**
-     * Dimensions are color index, face ID, and texture variant.
-     * Everything is instantiated lazily.
+     * Dimensions are color index, facing (up, down, etc.), and baked face index.
+     * The face index bits in HSB order are:
+     *      2 bits texture rotation, meaning coordinates in 8 LSB are on a rotated texture
+     *      2 bits uv/flip indicators, meaning coordinates in 8 LSB are on a flipped texture
+     *      8 bit selector corresponding to uv texture coordinates
+     * All face quads are instantiated lazily.
      */
     protected final List<BakedQuad>[][][] faceQuads;
 
-    protected final static FacadeFaceSelector[] FACADE_FACE_SELECTORS = new FacadeFaceSelector[4096];
+    /** Dimensions are rotation index and facade index */
+    protected final static FacadeFaceSelector[] FACADE_FACE_SELECTORS = new FacadeFaceSelector[16 * 4096];
     
     public BigTexModelFactory(ModelControllerNew controller)
     {
@@ -49,7 +54,14 @@ public class BigTexModelFactory extends BakedModelFactory
         {
             synchronized(faceQuads)
             {
-                faceQuads[colorIndex] = new List[6][256];
+                if(((BigTexController)controller).hasMetaVariants)
+                {
+                    faceQuads[colorIndex] = new List[6][256 * 16];
+                }
+                else
+                {
+                    faceQuads[colorIndex] = new List[6][256];
+                }
             }
         }
         
@@ -105,10 +117,15 @@ public class BigTexModelFactory extends BakedModelFactory
         
         CubeInputs cubeInputs = new CubeInputs();
         cubeInputs.color = color;
-        cubeInputs.u0 = i;
-        cubeInputs.v0 = j;
-        cubeInputs.u1 = i + 1;
-        cubeInputs.v1 = j + 1;
+        cubeInputs.textureRotation = Rotation.values()[(faceIndex >> 10) & 3];
+        
+        boolean flipU = ((faceIndex >> 8) & 1) == 1;
+        boolean flipV = ((faceIndex >> 9) & 1) == 1;
+        cubeInputs.u0 = flipU ? 16 - i : i;
+        cubeInputs.v0 = flipV ? 16 - j : j;
+        cubeInputs.u1 = cubeInputs.u0 + (flipU ? -1 : 1);
+        cubeInputs.v1 = cubeInputs.v0 + (flipV ? -1 : 1);
+        
         cubeInputs.textureSprite = 
                 Minecraft.getMinecraft().getTextureMapBlocks()
                     .getAtlasSprite(controller.getTextureName(0));
@@ -176,12 +193,39 @@ public class BigTexModelFactory extends BakedModelFactory
                 int zOff = 0;
                 for (int z = 0; z < 16; z++)
                 {
-                    FACADE_FACE_SELECTORS[x << 8 | y << 4 | z] = 
-                            new FacadeFaceSelector((x + yOff & 0xF) << 4 | z + yOff & 0xF, (~(x + yOff) & 0xF) << 4 | z + yOff & 0xF, ~(y + xOff) & 0xF
-                                | (~(z + xOff) & 0xF) << 4, ~(y + xOff) & 0xF | (z + xOff & 0xF) << 4, (~(x + zOff) & 0xF) << 4 | ~(y + zOff) & 0xF,
-                                (x + zOff & 0xF) << 4 | ~(y + zOff) & 0xF);
- 
-                    zOff += 7;
+
+                    for (int meta = 0; meta < 16; meta++)
+                    {
+                
+                        int facadeIndex = meta << 12 | x << 8 | y << 4 | z;
+                        int faceIndexOffset = meta * 256;
+                       
+                        switch (Rotation.values()[(meta >> 2) & 3])
+                        {
+                        case ROTATE_NONE:
+                            FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((x + yOff & 0xF) << 4 | z + yOff & 0xF, (~(x + yOff) & 0xF) << 4 | z + yOff & 0xF, ~(y + xOff) & 0xF
+                                    | (~(z + xOff) & 0xF) << 4, ~(y + xOff) & 0xF | (z + xOff & 0xF) << 4, (~(x + zOff) & 0xF) << 4 | ~(y + zOff) & 0xF,
+                                    (x + zOff & 0xF) << 4 | ~(y + zOff) & 0xF, faceIndexOffset);
+                            break;
+                        case ROTATE_90:
+                            FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((z + yOff & 0xF) << 4 | ~(x + yOff) & 0xF, (z + yOff & 0xF) << 4 | x + yOff & 0xF, z + xOff & 0xF
+                                    | (~(y + xOff) & 0xF) << 4, ~(z + xOff) & 0xF | (~(y + xOff) & 0xF) << 4, (~(y + zOff) & 0xF) << 4 | x + zOff & 0xF,
+                                    (~(y + zOff) & 0xF) << 4 | ~(x + zOff) & 0xF, faceIndexOffset);
+                            break;
+                        case ROTATE_180:
+                            FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((~(x + yOff) & 0xF) << 4 | ~(z + yOff) & 0xF, (x + yOff & 0xF) << 4 | ~(z + yOff) & 0xF, y + xOff & 0xF
+                                    | (z + xOff & 0xF) << 4, y + xOff & 0xF | (~(z + xOff) & 0xF) << 4, (x + zOff & 0xF) << 4 | y + zOff & 0xF,
+                                    (~(x + zOff) & 0xF) << 4 | y + zOff & 0xF, faceIndexOffset);
+                            break;
+                        case ROTATE_270:
+                            FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((~(z + yOff) & 0xF) << 4 | x + yOff & 0xF, (~(z + yOff) & 0xF) << 4 | ~(x + yOff) & 0xF, ~(z + xOff) & 0xF
+                                    | (y + xOff & 0xF) << 4, z + xOff & 0xF | (y + xOff & 0xF) << 4, (y + zOff & 0xF) << 4 | ~(x + zOff) & 0xF,
+                                    (y + zOff & 0xF) << 4 | x + zOff & 0xF, faceIndexOffset);
+                            break;
+                        }
+                    }
+                    
+                   zOff += 7;
                 }
                 yOff += 7;
             }
