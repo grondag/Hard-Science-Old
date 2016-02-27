@@ -121,7 +121,6 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
         // mucking about with the model registry crazy stuff could happen.
         if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock && controllers[layer.ordinal()] != null)
         {
-            
             IExtendedBlockState exState = (IExtendedBlockState) state;
             ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
 

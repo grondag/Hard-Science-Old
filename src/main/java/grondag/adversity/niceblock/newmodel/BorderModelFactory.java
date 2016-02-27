@@ -54,7 +54,7 @@ public class BorderModelFactory extends BakedModelFactory
         
         ColorMap colorMap = colorProvider.getColor(colorIndex);
         BorderController controller = (BorderController)this.controller;
-        int facadeIndex = controller.getFacadeIndexFromModelState(modelState);
+        int facadeIndex = modelState.getClientShapeIndex(controller.renderLayer.ordinal()) / controller.alternateTextureCount;
         int alternateTextureIndex = controller.getAlternateTextureIndexFromModelState(modelState);
 
         // ensure all needed faces are baked
@@ -172,36 +172,6 @@ public class BorderModelFactory extends BakedModelFactory
             return ItemCameraTransforms.DEFAULT;
         }
 
-    }
-    
-    private static class FaceQuadInputs
-    {
-        protected final int textureOffset;
-        protected final Rotation rotation;
-        protected final boolean flipU;
-        protected final boolean flipV;
-        
-        protected FaceQuadInputs(int textureOffset, Rotation rotation, boolean flipU, boolean flipV)
-        {
-            this.textureOffset = textureOffset;
-            this.rotation = rotation;
-            this.flipU = flipU;
-            this.flipV = flipV;
-        }
-    }
-    
-    private static class FacadeFaceSelector
-    {
-        protected final byte[] selectors = new byte[EnumFacing.values().length];
-        
-        protected FacadeFaceSelector(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace) {
-            selectors[EnumFacing.UP.ordinal()] = (byte) upFace;
-            selectors[EnumFacing.DOWN.ordinal()] = (byte) downFace;
-            selectors[EnumFacing.EAST.ordinal()] = (byte) eastFace;
-            selectors[EnumFacing.WEST.ordinal()] = (byte) westFace;
-            selectors[EnumFacing.NORTH.ordinal()] = (byte) northFace;
-            selectors[EnumFacing.SOUTH.ordinal()] = (byte) southFace;
-        }
     }
     
     static

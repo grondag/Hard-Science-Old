@@ -39,8 +39,12 @@ public abstract class BlockModelHelper
     public void setBlock(NiceBlock block)
     {
         this.block = block;
-        baseDisplayName = LanguageRegistry.instance().getStringLocalization(block.styleName) + " "
-        + LanguageRegistry.instance().getStringLocalization(block.material.materialName); 
+        String styleName = LanguageRegistry.instance().getStringLocalization(block.styleName);
+        if(styleName == null || styleName == "")
+        {
+            styleName = block.styleName;
+        }
+        baseDisplayName = styleName + " " + LanguageRegistry.instance().getStringLocalization(block.material.materialName); 
     }
     
     /** set doClientStateRefresh = false to avoid inifinte recursion when getting colorinfo 
@@ -87,8 +91,11 @@ public abstract class BlockModelHelper
         // default is NOOP
     }
     
-    public abstract String getItemStackDisplayName(ItemStack stack);
-    
+    public String getItemStackDisplayName(ItemStack stack)
+    {
+        return baseDisplayName;
+    }
+
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         // NOOP is default implementation

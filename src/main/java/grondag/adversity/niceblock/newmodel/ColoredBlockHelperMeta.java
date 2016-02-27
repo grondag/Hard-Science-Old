@@ -36,12 +36,6 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack)
-    {
-        return baseDisplayName;
-    }
-
-    @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);

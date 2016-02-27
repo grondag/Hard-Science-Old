@@ -73,12 +73,6 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack)
-    {
-        return super.getItemStackDisplayName(stack);
-    }
-
-    @Override
     public List<ItemStack> getSubItems()
     {
         List<ItemStack> subItems = super.getSubItems();
