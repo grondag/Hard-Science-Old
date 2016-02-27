@@ -58,31 +58,28 @@ public class NiceItemBlock extends ItemBlock {
     }
 
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos onPos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!block.isReplaceable(worldIn, pos))
-        {
-            pos = pos.offset(side);
-        }
+        BlockPos placedPos = block.isReplaceable(worldIn, onPos) ? onPos : onPos.offset(side);
         
         if (stack.stackSize == 0)
         {
             return false;
         }        
-        else if (!playerIn.canPlayerEdit(pos, side, stack))
+        else if (!playerIn.canPlayerEdit(placedPos, side, stack))
         {
             return false;
         }
         
-        else if (worldIn.canBlockBePlaced(this.block, pos, false, side, (Entity)null, stack))
+        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, side, (Entity)null, stack))
         {
-            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, pos, side, stack);
+            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, placedPos, onPos, side, stack, playerIn);
             
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, newMeta, playerIn);
+            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, side, hitX, hitY, hitZ, newMeta, playerIn);
 
-            if (placeBlockAt(stack, playerIn, worldIn, pos, side, hitX, hitY, hitZ, iblockstate1))
+            if (placeBlockAt(stack, playerIn, worldIn, placedPos, side, hitX, hitY, hitZ, iblockstate1))
             {
-                worldIn.playSoundEffect((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), this.block.stepSound.getPlaceSound(), (this.block.stepSound.getVolume() + 1.0F) / 2.0F, this.block.stepSound.getFrequency() * 0.8F);
+                worldIn.playSoundEffect((double)((float)placedPos.getX() + 0.5F), (double)((float)placedPos.getY() + 0.5F), (double)((float)placedPos.getZ() + 0.5F), this.block.stepSound.getPlaceSound(), (this.block.stepSound.getVolume() + 1.0F) / 2.0F, this.block.stepSound.getFrequency() * 0.8F);
                 --stack.stackSize;
             }
 
@@ -93,18 +90,7 @@ public class NiceItemBlock extends ItemBlock {
             return false;
         }
     }
-
-    
-    /* (non-Javadoc)
-     * @see net.minecraft.item.Item#getHighlightTip(net.minecraft.item.ItemStack, java.lang.String)
-     */
-    @Override
-    public String getHighlightTip(ItemStack item, String displayName)
-    {
-        // TODO Auto-generated method stub
-        return super.getHighlightTip(item, displayName);
-    }
-
+ 
     /**
      * Called to actually place the block, after the location is determined
      * and all permission checks have been made.
@@ -120,12 +106,18 @@ public class NiceItemBlock extends ItemBlock {
  
         if (!world.setBlockState(pos, newState, 3)) return false;
 
+        Adversity.log.info("placeBlockAt world.isRemote = " + world.isRemote);
         if(newState.getBlock() instanceof NiceBlockPlus)
         {
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
                 block.blockModelHelper.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+                if(world.isRemote)
+                {
+                    Adversity.log.info("client color index after place = " + niceTE.modelState.getColorIndex());
+                    world.markBlockForUpdate(pos);
+                }
             }
         }
         

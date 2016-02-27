@@ -32,8 +32,19 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
     // because the item metadata value (colorIndex) will be out of range.  
     // placeBlockAt will give the colorIndex value to the TE state.
     @Override
-    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack)
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
+
+        // if player is sneaking and placing on same block with same color, force matching metadata
+        if(player.isSneaking())
+        {
+            IBlockState placedOn = worldIn.getBlockState(posOn);
+            if(placedOn.getBlock() == this.block && this.getModelStateForBlock(placedOn, worldIn, posOn, false).getColorIndex() == stack.getMetadata())
+            {
+                return placedOn.getValue(NiceBlock.META);
+            }
+        }
+        
         NBTTagCompound tag = stack.getTagCompound();
         
         if(tag != null && tag.hasKey(PLACEMENT_SHAPE_TAG))
@@ -44,7 +55,7 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
             NicePlacement placer = new NicePlacement.PlacementBigBlock(
                     new PlacementValidatorCubic(shape & 0xFF, (shape >> 8) & 0xFF, (shape >> 16) & 0xFF));
             
-            return placer.getMetaForPlacedStack(worldIn, pos, facing, stack, this);
+            return placer.getMetaForPlacedStack(worldIn, posPlaced, facing, stack, this);
         }
 
         return 0;

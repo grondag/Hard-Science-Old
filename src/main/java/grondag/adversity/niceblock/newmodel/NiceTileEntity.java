@@ -104,6 +104,7 @@ public class NiceTileEntity extends TileEntity{
         doReadFromNBT(pkt.getNbtCompound());
         if(oldColorIndex != modelState.colorIndex && this.worldObj.isRemote)
         {
+            Adversity.log.info("ColorIndex different! Old = " + oldColorIndex + " New = " + modelState.colorIndex);
             worldObj.markBlockForUpdate(pos);
         }
     }

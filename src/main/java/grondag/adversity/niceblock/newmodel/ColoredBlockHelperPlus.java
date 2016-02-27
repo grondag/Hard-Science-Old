@@ -44,7 +44,7 @@ public class ColoredBlockHelperPlus extends ColoredBlockHelperMeta
     // because the item metadata value (colorIndex) will be out of range.  
     // updateTileEntityOnPlacedBlockFromStack will give the colorIndex value to the TE state.
     @Override
-    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack)
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
         return 0;
     }
@@ -62,7 +62,6 @@ public class ColoredBlockHelperPlus extends ColoredBlockHelperMeta
         super.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
         niceTE.modelState.setColorIndex(stack.getMetadata());
         niceTE.markDirty();
-
     }
     
     

@@ -71,7 +71,7 @@ public abstract class BlockModelHelper
     
     public abstract ModelState getModelStateForItemModel(int itemIndex);
     
-    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack)
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
         return stack.getMetadata();
     }
