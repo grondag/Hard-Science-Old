@@ -10,7 +10,7 @@ import net.minecraft.world.IBlockAccess;
  * matter. Used specifically in the case of connected textures with outside
  * borders.
  */
-public class CornerRecipeFinder {
+public class CornerStateFinder {
 
 	public final int baseRecipe;
 	private BlockPos[] offsets;
@@ -36,7 +36,7 @@ public class CornerRecipeFinder {
 	 *            Corners that modify this recipe.
 	 */
 
-	public CornerRecipeFinder(int baseRecipe, String... corners) {
+	public CornerStateFinder(int baseRecipe, String... corners) {
 		this.baseRecipe = baseRecipe;
 		hasTests = corners.length > 0;
 
