@@ -21,7 +21,7 @@ public class MasonryController extends ModelControllerNew
         super(textureName, alternateTextureCount, renderLayer, isShaded, false);
         this.alternator = Alternator.getAlternator((byte)(alternateTextureCount & 0xFF));
         this.bakedModelFactory = new MasonryModelFactory(this);
-        this.textureCount = 16;
+        this.textureCount = 6;
     }
 
     @Override

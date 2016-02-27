@@ -21,11 +21,12 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
     public static final String PLACEMENT_SHAPE_TAG = "BBPlace";
     
     //tried using a byte array here but kept reading as a string tag for reason I couldn't fathom
-    private static final int STACK_PLACEMENT_DEFAULT_SHAPE = (3 << 16) | (3 << 8) | 3;
+    private int defaultPlacementShape;
     
-    public BigBlockHelper(ModelDispatcherBase dispatcher)
+    public BigBlockHelper(ModelDispatcherBase dispatcher, int placementShape)
     {
         super(dispatcher);
+        defaultPlacementShape = placementShape;
     }
 
     // Can't pass metadata to block state for blocks that are meant to be tile entities
@@ -79,7 +80,7 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
     public void updateItemStackForPickBlock(ItemStack stack, IBlockState blockState, ModelState modelState, NiceTileEntity niceTE)
     {
         super.updateItemStackForPickBlock(stack, blockState, modelState, niceTE);
-        int placementShape = niceTE.placementShape != 0 ? niceTE.placementShape : STACK_PLACEMENT_DEFAULT_SHAPE;
+        int placementShape = niceTE.placementShape != 0 ? niceTE.placementShape : defaultPlacementShape;
         updateStackPlacementShape(stack, placementShape);
     }
 
@@ -89,7 +90,7 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
         List<ItemStack> subItems = super.getSubItems();
         for(ItemStack stack : subItems)
         {
-            updateStackPlacementShape(stack, STACK_PLACEMENT_DEFAULT_SHAPE);
+            updateStackPlacementShape(stack, defaultPlacementShape);
         }
             
         return subItems;

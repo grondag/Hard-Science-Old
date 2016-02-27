@@ -72,8 +72,13 @@ public class NiceBlockRegistrar
     public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
             new BigTexController("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, true),
             new BorderController("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true));
-    public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST), BaseMaterial.FLEXSTONE, "bordered");
-    
+    public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
+
+    public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
+            new BigTexController("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, true),
+            new MasonryController("masonrytest", 1, EnumWorldBlockLayer.CUTOUT_MIPPED, true));
+    public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
+
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
     // BaseMaterial.FLEXSTONE, 1);
