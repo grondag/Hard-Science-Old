@@ -21,7 +21,7 @@ public class MasonryController extends ModelControllerNew
         super(textureName, alternateTextureCount, renderLayer, isShaded, false);
         this.alternator = Alternator.getAlternator((byte)(alternateTextureCount & 0xFF));
         this.bakedModelFactory = new MasonryModelFactory(this);
-        this.textureCount = 6;
+        this.textureCount = 5;
         this.useCachedClientState = false;
     }
 
@@ -42,16 +42,12 @@ public class MasonryController extends ModelControllerNew
                 });
 
         return ModelReference.SIMPLE_JOIN_STATE_LOOKUP
- //               [(neighbors.up().getBlock() != block) && needsMortar.up() && !mates.up() ? 1 : 0]   
-                [needsMortar.up() && !mates.up() ? 1 : 0]//[(!needsMortar.up()) || mates.up() ? 1 : 0]
-                [needsMortar.down() && !mates.down() ? 1 : 0] //[(!needsMortar.down()) || mates.down() ? 1 : 0]
-                [needsMortar.east() && !mates.east() ? 1 : 0] //[(!needsMortar.east()) || mates.east() ? 1 : 0]
-                [needsMortar.west() && !mates.west() ? 1 : 0] //[(!needsMortar.west()) || mates.west() ? 1 : 0]
-//                [(neighbors.west().getBlock() != block) && needsMortar.west() && !mates.west() ? 1 : 0]
-                [needsMortar.north() && !mates.north() ? 1 : 0] //[(!needsMortar.north()) || mates.north() ? 1 : 0]
-                [needsMortar.south() && !mates.south() ? 1 : 0]; //[(!needsMortar.south()) || mates.south() ? 1 : 0]
-               // [(neighbors.south().getBlock() != block) && needsMortar.south() && !mates.south() ? 1 : 0];
-        
+                [needsMortar.up() && !mates.up() && (neighbors.up().getBlock() != block) ? 1 : 0]
+                [needsMortar.down() && !mates.down() ? 1 : 0] 
+                [needsMortar.east() && !mates.east() && (neighbors.east().getBlock() != block) ? 1 : 0]
+                [needsMortar.west() && !mates.west() ? 1 : 0] 
+                [needsMortar.north() && !mates.north() && (neighbors.north().getBlock() != block) ? 1 : 0]
+                [needsMortar.south() && !mates.south() ? 1 : 0]; 
     }
 
     protected int getAlternateTextureIndexFromModelState(ModelState modelState) 
