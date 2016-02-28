@@ -1,6 +1,9 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.Adversity;
+import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.PlacementValidatorCubic;
+import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.util.ArrayList;
@@ -41,15 +44,47 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
     public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
 
-        // if player is sneaking and placing on same block with same color, force matching metadata
+        // If player is sneaking and placing on same block with same color, force matching metadata.
+        // Or, if player is sneaking and places on a block that cannot mate, force non-matching metadata
         if(player.isSneaking())
         {
             IBlockState placedOn = worldIn.getBlockState(posOn);
             if(placedOn.getBlock() == this.block && this.getModelStateForBlock(placedOn, worldIn, posOn, false).getColorIndex() == stack.getMetadata())
             {
+                // Force match the metadata of the block on which we are placed
                 return placedOn.getValue(NiceBlock.META);
             }
+            else
+            {
+                // Force non-match of metadata for any neighboring blocks
+                
+                int colorIndex = this.getColorIndexFromItemStack(stack);
+                int speciesInUseFlags = 0;
+                NeighborBlocks neighbors = new NeighborBlocks(worldIn, posPlaced);
+                NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.TestForBlockColorMatch(this.block, colorIndex));
+                
+                for(EnumFacing face : EnumFacing.VALUES)            
+                {
+                     if (results.result(face)) 
+                     {
+                         speciesInUseFlags |= (1 << neighbors.getByFace(face).getValue(NiceBlock.META));
+                     }
+                }
+    
+                // now randomly choose a species 
+                //that will not connect to what is surrounding
+                int salt = ModelReference.SALT_SHAKER.nextInt(16);
+                for(int i = 0; i < 16; i++)
+                {
+                    int species = (i + salt) % 16;
+                    if((speciesInUseFlags & (1 << species)) == 0)
+                    {
+                        return species;
+                    }
+                }
+            }
         }
+        
         
         NBTTagCompound tag = stack.getTagCompound();
         

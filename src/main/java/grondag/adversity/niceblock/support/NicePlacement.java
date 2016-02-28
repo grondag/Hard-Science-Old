@@ -11,6 +11,7 @@ import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.newmodel.BlockModelHelper;
 import grondag.adversity.niceblock.newmodel.BlockTests;
+import grondag.adversity.niceblock.newmodel.ModelReference;
 import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
@@ -27,7 +28,6 @@ import net.minecraft.world.World;
  */
 public abstract class NicePlacement {
     
-    protected static final Random SALT_SHAKER = new Random();
 
 //	/** call from Block class after setting up **/
 //	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
@@ -52,6 +52,7 @@ public abstract class NicePlacement {
 //		return new PlacementColumn(NiceStyle.COLUMN_SQUARE_X, NiceStyle.COLUMN_SQUARE_Y,
 //				NiceStyle.COLUMN_SQUARE_Z);
 //	}
+
 
 	/**
 	 * Handles placement of blocks that join together in appearance and have
@@ -93,7 +94,7 @@ public abstract class NicePlacement {
 
 			// if no available mates, randomly choose a species 
 			//that will not connect to what is surrounding
-			int salt = SALT_SHAKER.nextInt(16);
+			int salt = ModelReference.SALT_SHAKER.nextInt(16);
 			for(int i = 0; i < 16; i++)
 			{
 			    species = (i + salt) % 16;

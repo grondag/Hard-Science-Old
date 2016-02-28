@@ -1,10 +1,15 @@
 package grondag.adversity.niceblock.newmodel;
 
+import java.util.Random;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.support.CornerStateFinder;
 
 public class ModelReference
 {
+    /** for misc. non-deterministic random number generation */
+    public static final Random SALT_SHAKER = new Random();
+
     /**
      * Use with NeighborBlocks test for lookup of state index for connected blocks
      * that depend on adjacent blocks and do require corner tests. (Blocks with
