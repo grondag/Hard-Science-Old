@@ -11,7 +11,6 @@ import net.minecraft.world.IBlockAccess;
 
 public class BigTexController extends ModelControllerNew
 {
-    protected final BakedModelFactory bakedModelFactory;
     protected final boolean hasMetaVariants;
 
     protected BigTexController(String textureName, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean hasMetaVariants)
@@ -47,12 +46,6 @@ public class BigTexController extends ModelControllerNew
     public int getShapeCount()
     {
         return this.hasMetaVariants ? 4096 * 16 : 4096;
-    }
-
-    @Override
-    public BakedModelFactory getBakedModelFactory()
-    {
-        return this.bakedModelFactory;
     }
 
     @Override

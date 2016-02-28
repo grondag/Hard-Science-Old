@@ -13,7 +13,6 @@ import net.minecraft.world.IBlockAccess;
 
 public class MasonryController extends ModelControllerNew
 {
-    protected final BakedModelFactory bakedModelFactory;
     protected final IAlternator alternator;
 
     protected MasonryController(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded)
@@ -60,11 +59,4 @@ public class MasonryController extends ModelControllerNew
     {
         return 64 * alternateTextureCount;
     }
-
-    @Override
-    public BakedModelFactory getBakedModelFactory()
-    {
-        return this.bakedModelFactory;
-    }
-
 }

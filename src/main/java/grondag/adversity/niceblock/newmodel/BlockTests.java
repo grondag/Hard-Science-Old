@@ -84,6 +84,40 @@ public class BlockTests
             return matchBlock.blockModelHelper.dispatcher == candidate.blockModelHelper.dispatcher
                    && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos, false).getColorIndex();
         }
+    }
+    
+    public static class TestForBlockMetaMatch implements IBlockTest
+    {
+        private final NiceBlock matchBlock;
+        private final int meta;
+        
+        /** pass in the info for the block you want to match */
+        public TestForBlockMetaMatch(IBlockState ibs){
+            this.matchBlock = (NiceBlock)ibs.getBlock();
+            this.meta = this.matchBlock != null ? ibs.getValue(NiceBlock.META) : 0;
+         }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            if(matchBlock == null)
+            {
+                // not initialized with a NiceBlock instance
+                return false;
+            }
+            
+            if(!(ibs.getBlock() instanceof NiceBlock))
+            {
+                // can only match with other NiceBlocks
+                return false;
+            }
+            
+            NiceBlock candidate = (NiceBlock)ibs.getBlock();
+            
+
+            return matchBlock.blockModelHelper.dispatcher == candidate.blockModelHelper.dispatcher
+                   && meta == ibs.getValue(NiceBlock.META);
+        }
         
     }
 //    Started to port this to new system but not sure about use case.  

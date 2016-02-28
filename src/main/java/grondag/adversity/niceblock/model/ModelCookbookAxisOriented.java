@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.NiceStyle;
+import grondag.adversity.niceblock.newmodel.ModelReference;
 import grondag.adversity.niceblock.newmodel.NiceBlock.TestForStyle;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -217,9 +218,9 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 		case X:
 			for (int i = 0; i < 64; i++) {
 				Quat4f rotation = new Quat4f(0, 0, 0, 1);
-				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].yCoord));
-				rotation.mul(rotationForAxis(Axis.Y, ROTATION_LOOKUP_Y[i].xCoord));
-				rotation.mul(rotationForAxis(Axis.Z, 90.0));
+				rotation.mul(ModelReference.rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].yCoord));
+				rotation.mul(ModelReference.rotationForAxis(Axis.Y, ROTATION_LOOKUP_Y[i].xCoord));
+				rotation.mul(ModelReference.rotationForAxis(Axis.Z, 90.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 				setModelBoundsForRecipe(i);
 			}
@@ -293,8 +294,8 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 		case Y:
 			for (int i = 0; i < 64; i++) {
 				Quat4f rotation = new Quat4f(0, 0, 0, 1);
-				rotation.mul(rotationForAxis(Axis.Y, -ROTATION_LOOKUP_Y[i].yCoord));
-				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord));
+				rotation.mul(ModelReference.rotationForAxis(Axis.Y, -ROTATION_LOOKUP_Y[i].yCoord));
+				rotation.mul(ModelReference.rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 				setModelBoundsForRecipe(i);
 			}
@@ -369,9 +370,9 @@ public abstract class ModelCookbookAxisOriented extends ModelCookbook implements
 		case Z:
 			for (int i = 0; i < 64; i++) {
 				Quat4f rotation = new Quat4f(0, 0, 0, 1);
-				rotation.mul(rotationForAxis(Axis.Z, -ROTATION_LOOKUP_Y[i].yCoord));
-				rotation.mul(rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord + 90));
-				rotation.mul(rotationForAxis(Axis.Y, 180.0));
+				rotation.mul(ModelReference.rotationForAxis(Axis.Z, -ROTATION_LOOKUP_Y[i].yCoord));
+				rotation.mul(ModelReference.rotationForAxis(Axis.X, ROTATION_LOOKUP_Y[i].xCoord + 90));
+				rotation.mul(ModelReference.rotationForAxis(Axis.Y, 180.0));
 				ROTATION_LOOKUP[i] = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, rotation, null, null));
 				setModelBoundsForRecipe(i);
 			}

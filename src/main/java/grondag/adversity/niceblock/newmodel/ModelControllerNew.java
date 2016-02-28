@@ -20,6 +20,10 @@ import net.minecraftforge.common.property.IExtendedBlockState;
  */
 public abstract class ModelControllerNew
 {
+    /**
+     * MUST BE SET IN INITIALIZER!
+     */
+    protected BakedModelFactory bakedModelFactory;
 
     /**
      * Folder and prefix for textures. Will use first texture as starting point
@@ -80,7 +84,10 @@ public abstract class ModelControllerNew
      */
     public abstract int getShapeCount();
 
-    public abstract BakedModelFactory getBakedModelFactory();
+    public BakedModelFactory getBakedModelFactory()
+    {
+        return this.bakedModelFactory;
+    }
     
     /**
      * used by model for texture lookup

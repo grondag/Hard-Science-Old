@@ -2,12 +2,62 @@ package grondag.adversity.niceblock.newmodel;
 
 import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Quat4f;
+
+import com.google.common.base.Function;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.EnumFacing.Axis;
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.support.CornerStateFinder;
 
 public class ModelReference
 {
+    /**
+     * Texture rotations. Used mainly when rotated textures are used as
+     * alternate textures.
+     */
+    public static enum Rotation {
+    	ROTATE_NONE(0, 0),
+    	ROTATE_90(1, 90),
+    	ROTATE_180(2, 180),
+    	ROTATE_270(3, 270);
+    
+    	/**
+    	 * May be useful for dynamic manipulations.
+    	 */
+    	public final int index;
+    
+    	/**
+    	 * Useful for locating model file names that use degrees as a suffix.
+    	 */
+    	public final int degrees;
+    
+    	Rotation(int index, int degrees) {
+    		this.index = index;
+    		this.degrees = degrees;
+    	}
+    
+    }
+
+    /**
+     * The function parameter to bake method presumably provides a way to do
+     * fancy texture management via inversion of control, but we don't need that
+     * because we register all our textures in texture bake. This function
+     * simply provides access to the vanilla texture maps.
+     */
+    public static Function<ResourceLocation, TextureAtlasSprite> DEFAULT_TEXTURE_GETTER = new Function<ResourceLocation, TextureAtlasSprite>(){
+        @Override
+        public TextureAtlasSprite apply(ResourceLocation location)
+        {
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
+        }
+    };
+
     /** for misc. non-deterministic random number generation */
     public static final Random SALT_SHAKER = new Random();
 
@@ -623,5 +673,25 @@ public class ModelReference
         MASONRY_FACADE_FACE_SELECTORS[61] = new FacadeFaceSelector(15, 15, 15, 15, 0, 15);
         MASONRY_FACADE_FACE_SELECTORS[62] = new FacadeFaceSelector(15, 15, 15, 15, 15, 0);
         MASONRY_FACADE_FACE_SELECTORS[63] = new FacadeFaceSelector(15, 15, 15, 15, 15, 15);
+    }
+
+    /**
+     * Builds the appropriate quaternion to rotate around the given axis.
+     */
+    public final static Quat4f rotationForAxis(EnumFacing.Axis axis, double degrees)
+    {
+    	Quat4f retVal = new Quat4f();
+    	switch (axis) {
+    	case X:
+    		retVal.set(new AxisAngle4d(1, 0, 0, Math.toRadians(degrees)));
+    		break;
+    	case Y:
+    		retVal.set(new AxisAngle4d(0, 1, 0, Math.toRadians(degrees)));
+    		break;
+    	case Z:
+    		retVal.set(new AxisAngle4d(0, 0, 1, Math.toRadians(degrees)));
+    		break;
+    	}
+    	return retVal;
     }
 }

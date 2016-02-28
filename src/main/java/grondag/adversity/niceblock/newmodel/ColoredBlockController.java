@@ -16,8 +16,6 @@ public class ColoredBlockController extends ModelControllerNew
 {
     protected final IAlternator alternator;
     
-    protected final BakedModelFactory bakedModelFactory;
-    
     public ColoredBlockController(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(textureName, alternateCount, renderLayer, isShaded, useRotations);
@@ -52,11 +50,5 @@ public class ColoredBlockController extends ModelControllerNew
     public int getShapeCount()
     {
         return this.alternateTextureCount * (this.useRotatedTexturesAsAlternates? 4 : 1);
-    }
-
-    @Override
-    public BakedModelFactory getBakedModelFactory()
-    {
-        return bakedModelFactory;
     }
 }

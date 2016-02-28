@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.model;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.niceblock.newmodel.ModelReference;
 import grondag.adversity.niceblock.newmodel.NiceBlock;
 import grondag.adversity.niceblock.newmodel.NiceBlock.TestForCompleteMatch;
 import grondag.adversity.niceblock.newmodel.NiceBlock.TestForSubstance;
@@ -45,7 +46,7 @@ public class ModelCookbookMasonry extends ModelCookbook {
 	@Override
 	public Ingredients getIngredients(int meta, int recipe, int alternate) {
 
-		Rotation rotation = calcRotation(alternate);
+		ModelReference.Rotation rotation = calcRotation(alternate);
 		String modelName = "adversity:block/cube_rotate_" + calcRotation(alternate).degrees;
 		int baseOffset = getTextureCount() * calcAlternate(alternate);
 		Map<String, String> textures = Maps.newHashMap();

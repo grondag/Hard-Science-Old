@@ -24,6 +24,27 @@ import com.google.common.primitives.Ints;
 public class QuadFactory
 {
 
+    /**
+     * Takes a normal vanilla quad and recolors it to return a normal quad.
+     */
+    public static BakedQuad recolorVanillaQuad(BakedQuad quadIn, int color)
+    {
+        float shade = LightUtil.diffuseLight(quadIn.getFace());
+        int red = (int) (shade * 255f * ((color >> 16 & 0xFF) / 255f));
+        int green = (int) (shade * 255f * ((color >> 8 & 0xFF) / 255f));
+        int blue = (int) (shade * 255f * ((color & 0xFF) / 255f));
+        int alpha = color >> 24 & 0xFF;
+        int colorOut = red | green << 8 | blue << 16 | alpha << 24;
+
+        int[] aint = quadIn.getVertexData();
+        aint[3] = colorOut;
+        aint[3 + 7] = colorOut;
+        aint[3 + 14] = colorOut;
+        aint[3 + 21] = colorOut;
+                
+        return new BakedQuad(aint, quadIn.getTintIndex(), quadIn.getFace());
+    }
+    
     public static class QuadInputs
     {
         // yes, this is ugly

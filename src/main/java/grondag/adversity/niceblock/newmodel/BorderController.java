@@ -16,7 +16,6 @@ public class BorderController extends ModelControllerNew
 {
 
     protected final IAlternator alternator;
-    protected final BakedModelFactory bakedModelFactory;
 
     protected BorderController(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded)
     {
@@ -54,9 +53,4 @@ public class BorderController extends ModelControllerNew
         return 386 * alternateTextureCount;
     }
 
-    @Override
-    public BakedModelFactory getBakedModelFactory()
-    {
-        return this.bakedModelFactory;
-    }
 }
