@@ -22,6 +22,7 @@ public class MasonryController extends ModelControllerNew
         this.alternator = Alternator.getAlternator((byte)(alternateTextureCount & 0xFF));
         this.bakedModelFactory = new MasonryModelFactory(this);
         this.textureCount = 6;
+        this.useCachedClientState = false;
     }
 
     @Override
@@ -36,17 +37,20 @@ public class MasonryController extends ModelControllerNew
                 new IBlockTest() {
                     @Override
                     public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
-                        return ibs.getBlock() instanceof NiceBlock && ibs.getBlock().isFullCube();
+                        return ibs.getBlock().isOpaqueCube();
                     }
                 });
 
         return ModelReference.SIMPLE_JOIN_STATE_LOOKUP
-                [(neighbors.up().getBlock() != block) && needsMortar.up() && !mates.up() ? 1 : 0]   
-                [!mates.down() ? 1 : 0]
-                [!mates.east() ? 1 : 0]
-                [(neighbors.west().getBlock() != block) && needsMortar.west() && !mates.west() ? 1 : 0]
-                [!mates.north() ? 1 : 0]
-                [(neighbors.south().getBlock() != block) && needsMortar.south() && !mates.south() ? 1 : 0];
+ //               [(neighbors.up().getBlock() != block) && needsMortar.up() && !mates.up() ? 1 : 0]   
+                [needsMortar.up() && !mates.up() ? 1 : 0]//[(!needsMortar.up()) || mates.up() ? 1 : 0]
+                [needsMortar.down() && !mates.down() ? 1 : 0] //[(!needsMortar.down()) || mates.down() ? 1 : 0]
+                [needsMortar.east() && !mates.east() ? 1 : 0] //[(!needsMortar.east()) || mates.east() ? 1 : 0]
+                [needsMortar.west() && !mates.west() ? 1 : 0] //[(!needsMortar.west()) || mates.west() ? 1 : 0]
+//                [(neighbors.west().getBlock() != block) && needsMortar.west() && !mates.west() ? 1 : 0]
+                [needsMortar.north() && !mates.north() ? 1 : 0] //[(!needsMortar.north()) || mates.north() ? 1 : 0]
+                [needsMortar.south() && !mates.south() ? 1 : 0]; //[(!needsMortar.south()) || mates.south() ? 1 : 0]
+               // [(neighbors.south().getBlock() != block) && needsMortar.south() && !mates.south() ? 1 : 0];
         
     }
 

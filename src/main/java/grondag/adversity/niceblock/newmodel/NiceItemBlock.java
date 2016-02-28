@@ -106,7 +106,6 @@ public class NiceItemBlock extends ItemBlock {
  
         if (!world.setBlockState(pos, newState, 3)) return false;
 
-        Adversity.log.info("placeBlockAt world.isRemote = " + world.isRemote);
         if(newState.getBlock() instanceof NiceBlockPlus)
         {
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
@@ -115,7 +114,6 @@ public class NiceItemBlock extends ItemBlock {
                 block.blockModelHelper.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
                 if(world.isRemote)
                 {
-                    Adversity.log.info("client color index after place = " + niceTE.modelState.getColorIndex());
                     world.markBlockForUpdate(pos);
                 }
             }

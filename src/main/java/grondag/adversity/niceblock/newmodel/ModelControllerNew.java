@@ -52,6 +52,14 @@ public abstract class ModelControllerNew
      */
     public final boolean isShaded;
     
+    /** 
+     * For tile entity blocks, can this conroller's client state be cached 
+     * in the client-side TE?  Set to false if state depends on neighbor blocks
+     * that are NOT nice blocks that invalidate the cached state.
+     * The block handlers for neighbor block updates are server-side, so they don't help us.
+     */
+    public boolean useCachedClientState = true;
+    
     protected ModelControllerNew(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
             boolean useRotatedTexturesAsAlternates)
     {

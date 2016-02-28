@@ -48,7 +48,7 @@ public abstract class ModelDispatcherBase implements ISmartBlockModel
     /** Calls controllers to update client state index(es)
      * in passed modelState.  Returns true if the client state changed.
      */
-    public abstract boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState);
+    public abstract boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState, boolean isCachedStateDirty);
 
     /**
      * Override if special collision handling is needed due to non-cubic shape.

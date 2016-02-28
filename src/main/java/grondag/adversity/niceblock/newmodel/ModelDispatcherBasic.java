@@ -155,11 +155,18 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
     }
 
     @Override
-    public boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState)
+    public boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState, boolean isCachedStateDirty)
     {
-        int oldShapeIndex = modelState.getClientShapeIndex(0);
-        modelState.setClientShapeIndex(controller.getClientShapeIndex(block, state, world, pos), 0);
-        return modelState.getClientShapeIndex(0) != oldShapeIndex;
+        if(isCachedStateDirty || !controller.useCachedClientState)
+        {
+            int oldShapeIndex = modelState.getClientShapeIndex(0);
+            modelState.setClientShapeIndex(controller.getClientShapeIndex(block, state, world, pos), 0);
+            return modelState.getClientShapeIndex(0) != oldShapeIndex;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override

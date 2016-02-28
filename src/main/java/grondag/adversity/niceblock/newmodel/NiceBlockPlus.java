@@ -50,5 +50,4 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 
         return stack;
     }
- 
 }

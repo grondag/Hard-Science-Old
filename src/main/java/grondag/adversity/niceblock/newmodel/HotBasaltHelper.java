@@ -24,7 +24,7 @@ public class HotBasaltHelper extends BlockModelHelper
         ModelState retVal = new ModelState();
         if(doClientStateRefresh)
         {
-            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal, true);
         }
         return retVal;
     }

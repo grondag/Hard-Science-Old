@@ -628,7 +628,7 @@ public class ModelReference
             {
                 if(fs.selectors[i] == 32)
                 {
-                    fs.selectors[i] = 15;
+                    fs.selectors[i] = 0;
                 }
             }
         }

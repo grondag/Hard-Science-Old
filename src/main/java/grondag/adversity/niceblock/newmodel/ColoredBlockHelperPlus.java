@@ -23,12 +23,15 @@ public class ColoredBlockHelperPlus extends ColoredBlockHelperMeta
         NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
         if (niceTE != null) 
         {
-            if(doClientStateRefresh && niceTE.isClientShapeIndexDirty)
+            if(doClientStateRefresh)
             {
-                if(dispatcher.refreshClientShapeIndex(block, state, world, pos, niceTE.modelState))
-                {
-                    niceTE.markDirty();
-                }
+                dispatcher.refreshClientShapeIndex(block, state, world, pos, niceTE.modelState, niceTE.isClientShapeIndexDirty);
+
+                // why was TE marked dirty?
+//                if(dispatcher.refreshClientShapeIndex(block, state, world, pos, niceTE.modelState, niceTE.isClientShapeIndexDirty))
+//                {
+//                     niceTE.markDirty();
+//                }
                 niceTE.isClientShapeIndexDirty = false;
             }
             retVal = niceTE.modelState;

@@ -24,7 +24,7 @@ public class ColoredBlockHelperMeta extends BlockModelHelper
         ModelState retVal = new ModelState(0, state.getValue(NiceBlock.META));
         if(doClientStateRefresh)
         {
-            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal);
+            dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal, true);
         }
         return retVal;
     }

@@ -16,6 +16,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
@@ -126,6 +127,10 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
     {
         List<String> retVal = super.getWailaBody(itemStack, currenttip, accessor, config);
         retVal.add(LanguageRegistry.instance().getStringLocalization("species" + accessor.getMetadata()));
+        if(accessor.getTileEntity() != null && accessor.getTileEntity() instanceof NiceTileEntity)
+        {
+            retVal.add("Client Shape " + ((NiceTileEntity) accessor.getTileEntity()).modelState.getClientShapeIndex(EnumWorldBlockLayer.CUTOUT_MIPPED.ordinal()));
+        }
         return retVal;
     }
 
