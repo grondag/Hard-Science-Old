@@ -70,7 +70,23 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
                          speciesInUseFlags |= (1 << neighbors.getByFace(face).getValue(NiceBlock.META));
                      }
                 }
-    
+
+                // try to avoid corners also if picking a species that won't connect
+                if (results.downEast()) speciesInUseFlags |= (1 << neighbors.downEast().getValue(NiceBlock.META));
+                if (results.downNorth()) speciesInUseFlags |= (1 << neighbors.downNorth().getValue(NiceBlock.META));
+                if (results.downSouth()) speciesInUseFlags |= (1 << neighbors.downSouth().getValue(NiceBlock.META));
+                if (results.downWest()) speciesInUseFlags |= (1 << neighbors.downWest().getValue(NiceBlock.META));
+
+                if (results.upEast()) speciesInUseFlags |= (1 << neighbors.upEast().getValue(NiceBlock.META));
+                if (results.upNorth()) speciesInUseFlags |= (1 << neighbors.upNorth().getValue(NiceBlock.META));
+                if (results.upSouth()) speciesInUseFlags |= (1 << neighbors.upSouth().getValue(NiceBlock.META));
+                if (results.upWest()) speciesInUseFlags |= (1 << neighbors.upWest().getValue(NiceBlock.META));
+
+                if (results.northEast()) speciesInUseFlags |= (1 << neighbors.northEast().getValue(NiceBlock.META));
+                if (results.northWest()) speciesInUseFlags |= (1 << neighbors.northWest().getValue(NiceBlock.META));
+                if (results.southEast()) speciesInUseFlags |= (1 << neighbors.southEast().getValue(NiceBlock.META));
+                if (results.southWest()) speciesInUseFlags |= (1 << neighbors.southWest().getValue(NiceBlock.META));
+                
                 // now randomly choose a species 
                 //that will not connect to what is surrounding
                 int salt = ModelReference.SALT_SHAKER.nextInt(16);

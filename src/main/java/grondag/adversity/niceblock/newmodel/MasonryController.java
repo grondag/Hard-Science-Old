@@ -42,8 +42,8 @@ public class MasonryController extends ModelControllerNew
                 });
 
         return ModelReference.SIMPLE_JOIN_STATE_LOOKUP
-                [needsMortar.up() && !mates.up() && (neighbors.up().getBlock() != block) ? 1 : 0]
-                [needsMortar.down() && !mates.down() ? 1 : 0] 
+                [needsMortar.up() && !mates.up()? 1 : 0]
+                [needsMortar.down() && !mates.down()  && (neighbors.down().getBlock() != block) ? 1 : 0] 
                 [needsMortar.east() && !mates.east() && (neighbors.east().getBlock() != block) ? 1 : 0]
                 [needsMortar.west() && !mates.west() ? 1 : 0] 
                 [needsMortar.north() && !mates.north() && (neighbors.north().getBlock() != block) ? 1 : 0]

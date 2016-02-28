@@ -70,7 +70,7 @@ public class PlacementValidatorCubic {
 	 */
 	public PlacementValidatorCubic(int i, int j, int k) {
 
-		validShape = Useful.sortedBlockPos(new BlockPos(Math.min(i, 255), Math.min(j, 255), Math.min(j, 255)));
+		validShape = Useful.sortedBlockPos(new BlockPos(Math.min(i, 255), Math.min(j, 255), Math.min(k, 255)));
 
 		// Relabeling the longest dimension to prevent confusion 
 		// because it may not actually be X.
