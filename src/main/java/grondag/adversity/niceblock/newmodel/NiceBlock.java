@@ -172,6 +172,28 @@ public class NiceBlock extends Block implements IWailaProvider
         return blockModelHelper.dispatcher.canRenderInLayer(layer);
     }
 
+
+    @Override
+    public boolean isOpaqueCube() {
+        //null handling needed here because called during initialization
+        return blockModelHelper == null ? true : blockModelHelper.isOpaqueCube();
+    }
+
+    @Override
+    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
+        return blockModelHelper.isNormalCube(world, pos);
+    }
+
+    @Override
+    public boolean isFullBlock() {
+        return blockModelHelper.isFullBlock();
+    }
+
+    @Override
+    public boolean isFullCube() {
+        return blockModelHelper.isFullCube();
+    }
+    
     private long elapsedTime;
     private int timerCount = 0;
 

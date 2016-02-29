@@ -10,7 +10,7 @@ import net.minecraft.util.BlockPos;
  * position. We don't use the MineCraft alternate functionality because it is
  * non-deterministic for different block states. This causes undesirable changes
  * to alternate selection when neighbor blocks change. Uses bytes to save space,
- * so can only have up to 256 alternates.
+ * so can only have up to 127 alternates.
  *
  * "Local" means values repeat every 32 blocks in all directions. Most of our
  * textures aren't noisy enough for repeating patterns to be visible when far
@@ -28,11 +28,11 @@ public class Alternator implements IAlternator {
 	/**
 	 * Convenience factory method. Instances are immutable, so caches them for reuse.
 	 */
-	public static IAlternator getAlternator(byte alternateCount) {
-		if (alternateCount == (byte) 1) {
+	public static IAlternator getAlternator(int alternateCount) {
+		if (alternateCount == 1) {
 			return noAlternative;
 		} else {
-			Integer key = (int) alternateCount;
+			Integer key = Math.min(2, Math.max(alternateCount, 127));
 			if (cache.containsKey(key)) {
 				return cache.get(key);
 			} else {
@@ -48,7 +48,7 @@ public class Alternator implements IAlternator {
 	 * values between 0 and alternateCount - 1. Do not call directly. Use
 	 * getAlternator instead.
 	 */
-	private Alternator(byte alternateCount) {
+	private Alternator(int alternateCount) {
 		final Random r = new Random(471958271);
 		for (int i = 0; i < 32; i++) {
 			for (int j = 0; j < 32; j++) {

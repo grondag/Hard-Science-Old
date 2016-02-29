@@ -20,7 +20,7 @@ public class BorderController extends ModelControllerNew
     protected BorderController(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded)
     {
         super(textureName, alternateTextureCount, renderLayer, isShaded, false);
-        this.alternator = Alternator.getAlternator((byte)(alternateTextureCount & 0xFF));
+        this.alternator = Alternator.getAlternator((byte)(alternateTextureCount));
         this.bakedModelFactory = new BorderModelFactory(this);
         // Only the first 15 textures actually used. 
         // The padding is only to make texture file production easier.

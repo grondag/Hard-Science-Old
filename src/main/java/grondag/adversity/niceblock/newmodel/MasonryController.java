@@ -18,7 +18,7 @@ public class MasonryController extends ModelControllerNew
     protected MasonryController(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded)
     {
         super(textureName, alternateTextureCount, renderLayer, isShaded, false);
-        this.alternator = Alternator.getAlternator((byte)(alternateTextureCount & 0xFF));
+        this.alternator = Alternator.getAlternator((byte)(alternateTextureCount));
         this.bakedModelFactory = new MasonryModelFactory(this);
         this.textureCount = 5;
         this.useCachedClientState = false;

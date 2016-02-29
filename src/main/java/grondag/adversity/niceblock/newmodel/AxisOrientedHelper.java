@@ -17,57 +17,49 @@ public class AxisOrientedHelper extends ColoredBlockHelperPlus
     {
         super(dispatcher);
     }
-
-    @Override
-    public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos, boolean doClientStateRefresh)
-    {
-        // TODO Auto-generated method stub
-        return super.getModelStateForBlock(state, world, pos, doClientStateRefresh);
-    }
-
+ 
     @Override
     public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
-        // TODO Auto-generated method stub
-        return super.getMetaForPlacedBlockFromStack(worldIn, posPlaced, posOn, facing, stack, player);
-    }
-
-    @Override
-    public void updateItemStackForPickBlock(ItemStack stack, IBlockState blockState, ModelState modelState, NiceTileEntity niceTE)
-    {
-        // TODO Auto-generated method stub
-        super.updateItemStackForPickBlock(stack, blockState, modelState, niceTE);
-    }
-
-    @Override
-    public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState,
-            NiceTileEntity niceTE)
-    {
-        // TODO Auto-generated method stub
-        super.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+        return facing.getAxis().ordinal();
     }
 
     @Override
     public int getItemModelCount()
     {
-        // TODO Auto-generated method stub
-        return super.getItemModelCount();
+        return dispatcher.getColorProvider().getColorCount();
     }
 
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
-        // TODO Auto-generated method stub
         super.addInformation(stack, playerIn, tooltip, advanced);
     }
 
     @Override
     public ModelState getModelStateForItemModel(int itemIndex)
     {
-        ModelState modelState = new ModelState(0, itemIndex & 3);
-        modelState.setClientShapeIndex(itemIndex / 3, EnumWorldBlockLayer.SOLID.ordinal());
+        ModelState modelState = new ModelState(0, itemIndex);
+        modelState.setClientShapeIndex(62, EnumWorldBlockLayer.SOLID.ordinal());
         return modelState;
     }
+    @Override
+    public boolean isOpaqueCube() {
+        return false;
+    }
 
+    @Override
+    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
+        return false;
+    }
 
+    @Override
+    public boolean isFullBlock() {
+        return false;
+    }
+
+    @Override
+    public boolean isFullCube() {
+        return false;
+    }
 }

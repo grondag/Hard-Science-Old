@@ -20,7 +20,7 @@ public class ColoredBlockController extends ModelControllerNew
     {
         super(textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(
-                (byte)(((useRotations ? 4 : 1) * alternateCount) & 0xFF));
+                (byte)((useRotations ? 4 : 1) * alternateCount));
         this.bakedModelFactory = new ColoredBlockModelFactory(this);
     }
 

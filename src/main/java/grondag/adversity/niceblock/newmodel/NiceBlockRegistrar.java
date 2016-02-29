@@ -79,6 +79,10 @@ public class NiceBlockRegistrar
             new MasonryController("masonrytest", 1, EnumWorldBlockLayer.CUTOUT_MIPPED, true));
     public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
 
+    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
+            new ColumnSquareController("column_square", 1, true));
+    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE), BaseMaterial.FLEXSTONE, "column_square");
+
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),
     // BaseMaterial.FLEXSTONE, 1);

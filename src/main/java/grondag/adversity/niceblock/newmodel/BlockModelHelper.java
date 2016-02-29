@@ -111,4 +111,19 @@ public abstract class BlockModelHelper
         return retVal;
     }
 
+    public boolean isOpaqueCube() {
+        return true;
+    }
+
+    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
+        return true;
+    }
+
+    public boolean isFullBlock() {
+        return true;
+    }
+
+    public boolean isFullCube() {
+        return true;
+    }
 }

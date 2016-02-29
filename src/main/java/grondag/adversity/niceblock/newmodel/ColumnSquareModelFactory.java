@@ -46,25 +46,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
     {
         IBakedModel template = templateModels[modelState.getClientShapeIndex(controller.renderLayer.ordinal())];
         int color = colorProvider.getColor(modelState.colorIndex).getColorMap(EnumColorMap.BASE);
-        
-        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder();
-        for( BakedQuad quad : template.getGeneralQuads())
-        {
-            general.add(QuadFactory.recolorVanillaQuad(quad, color));
-        }
-
-        ImmutableList<BakedQuad>[] faces = new ImmutableList[6];
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            ImmutableList.Builder<BakedQuad> faceList = new ImmutableList.Builder();
-            for( BakedQuad quad : template.getFaceQuads(face))
-            {
-                faceList.add(QuadFactory.recolorVanillaQuad(quad, color));
-            }
-            faces[face.ordinal()] = faceList.build();
-        }
-        
-        return new SimpleModel(faces, general.build(), controller.isShaded);
+        return new SimpleModel(template, color);
     }
 
     @Override
