@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "normal": { "model": "adversity:column_no_faces_half" }
+    }
+}

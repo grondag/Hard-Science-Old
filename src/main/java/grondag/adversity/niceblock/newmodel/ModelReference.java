@@ -694,4 +694,39 @@ public class ModelReference
     	}
     	return retVal;
     }
+    
+    public static class ModelJoin
+    {
+        
+        private final static byte[] FACE_FLAGS = new byte[]{1, 2, 4, 8, 16, 32};
+        
+        private final byte joins;
+        
+        public ModelJoin(boolean up, boolean down, boolean east, boolean west, boolean north, boolean south)
+        {
+            byte j = 0;
+            if(up) j |= FACE_FLAGS[EnumFacing.UP.ordinal()];
+            if(down) j |= FACE_FLAGS[EnumFacing.DOWN.ordinal()];
+            if(east) j |= FACE_FLAGS[EnumFacing.EAST.ordinal()];
+            if(west) j |= FACE_FLAGS[EnumFacing.WEST.ordinal()];
+            if(north) j |= FACE_FLAGS[EnumFacing.NORTH.ordinal()];
+            if(south) j |= FACE_FLAGS[EnumFacing.SOUTH.ordinal()];
+            this.joins = j;
+        }
+        
+        public ModelJoin(int index)
+        {
+            this.joins = (byte)index;
+        }
+        
+        public boolean isJoined(EnumFacing face)
+        {
+            return (joins & FACE_FLAGS[face.ordinal()]) == FACE_FLAGS[face.ordinal()];
+        }
+        
+        public int getIndex()
+        {
+            return (int) joins;
+        }
+    }
 }

@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "normal": { "model": "adversity:column_opposite_faces_full" }
+    }
+}
