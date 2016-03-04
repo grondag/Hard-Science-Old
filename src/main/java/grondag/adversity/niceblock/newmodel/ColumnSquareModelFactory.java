@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.model.ModelCookbook;
 import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
@@ -11,6 +12,7 @@ import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -61,102 +63,94 @@ public class ColumnSquareModelFactory extends BakedModelFactory
 
         List<BakedQuad>[] faceQuads = new List[6];
 
-        faceQuads[EnumFacing.UP.ordinal()] = makeFace(EnumFacing.UP, quadInputs);
-        faceQuads[EnumFacing.DOWN.ordinal()] = makeFace(EnumFacing.DOWN, quadInputs);
-        faceQuads[EnumFacing.EAST.ordinal()] = makeFace(EnumFacing.EAST, quadInputs);
-        faceQuads[EnumFacing.WEST.ordinal()] = makeFace(EnumFacing.WEST, quadInputs);
-        faceQuads[EnumFacing.NORTH.ordinal()] = makeFace(EnumFacing.NORTH, quadInputs);
-        faceQuads[EnumFacing.SOUTH.ordinal()] = makeFace(EnumFacing.SOUTH, quadInputs);
+        faceQuads[EnumFacing.UP.ordinal()] = makeCapFace(EnumFacing.UP, quadInputs);
+        faceQuads[EnumFacing.DOWN.ordinal()] = makeCapFace(EnumFacing.DOWN, quadInputs);
+        faceQuads[EnumFacing.EAST.ordinal()] = makeSideFace(EnumFacing.EAST, quadInputs);
+        faceQuads[EnumFacing.WEST.ordinal()] = makeSideFace(EnumFacing.WEST, quadInputs);
+        faceQuads[EnumFacing.NORTH.ordinal()] = makeSideFace(EnumFacing.NORTH, quadInputs);
+        faceQuads[EnumFacing.SOUTH.ordinal()] = makeSideFace(EnumFacing.SOUTH, quadInputs);
         
         return new SimpleCubeModel(faceQuads, controller.isShaded);
     }
 
-    private List<BakedQuad> makeFace(EnumFacing face, QuadInputs qi)
+    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi)
     {
-       ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-       
-       setupFaceQuad(face, qi, 0.25F, 0.0F, 0.75F, 1.0F, 0.05F);
+        float capHeight = 0.2F;
+        float marginWidth = 0.2F;
+        float cutDepth = 0.05F;
+        int cutCount = 4;
+        EnumFacing topFace = EnumFacing.UP; //Useful.rightOf(face, EnumFacing.UP);
+        float cutWidth = (1 - marginWidth * 2) / (cutCount * 2 - 1);
 
-       builder.add(qi.createNormalQuad());
+        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+          qi.setupFaceQuad(face, 0.2F, 0.5F, 0.8F, 0.95F, 0.0F, topFace, false);
+//          qi.setupFaceQuad(face, 0.3F, 0.1F, 0.7F, 0.9F, 0.0F, topFace, false);
+
+          builder.add(qi.createNormalQuad());
+
+       
+//       //top and bottom
+//       qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, capHeight, 0.0F);
+//       builder.add(qi.createNormalQuad());
+//       qi.setupFaceQuad(face, 0.0F, 1.0F - capHeight, 1.0F, 1.0F, 0.0F);
+//       builder.add(qi.createNormalQuad());
+//
+//       //margins
+//       qi.setupFaceQuad(face, 0.0F, capHeight, marginWidth, 1.0F - capHeight, 0.0F);
+//       builder.add(qi.createNormalQuad());
+//       qi.setupFaceQuad(face, 1.0F - marginWidth, capHeight, 1.0F, 1.0F - capHeight, 0.0F);
+//       builder.add(qi.createNormalQuad());
+//
+//       //cuts
+//       QuadInputs qiCut = qi.clone();
+//       qiCut.color = QuadFactory.shadeColor(qi.color, 0.85F, false); 
+//       for(int i = 0; i < cutCount; i++)
+//       {
+//           // bottom
+//           float sx0 = marginWidth + cutWidth * 2 * i;
+//           float sx1 = marginWidth + cutWidth * 2 * i + cutWidth;
+//           
+//           qiCut.setupFaceQuad(face, sx0, capHeight, sx1, 1.0F - capHeight, cutDepth);
+//           builder.add(qiCut.createNormalQuad());
+
+//           // left face
+//           qi.setupFaceQuad(Useful.rightOf(face, axis), 0, capHeight, cutDepth, 1.0F - capHeight, 1 - sx0);
+//           builder.add(qi.createNormalQuad());
+//
+//           // right face
+//           qi.setupFaceQuad(Useful.leftOf(face, axis), 1.0F - cutDepth, capHeight, 1.0F, 1.0F - capHeight, sx1);
+//           builder.add(qi.createNormalQuad());
+
+//           // top face
+//           qi.setupFaceQuad(Useful.bottomOf(face, axis), sx0, 1.0F - cutDepth, sx1, 1.0F, 1-capHeight);
+//           builder.add(qi.createNormalQuad());
+
+//       }
+//       
+//       //splines
+//       for(int i = 0; i < cutCount - 1; i++)
+//       {
+//           qi.setupFaceQuad(face, marginWidth + cutWidth * 2 * i + cutWidth, capHeight, marginWidth + cutWidth * 2 * (i + 1), 1.0F - capHeight, 0.0F);
+//           builder.add(qi.createNormalQuad());
+//       }
        return builder.build();
     }
     
-//case DOWN:
-//    f3 = f * 16.0F;
-//    f4 = (1.0F - f2) * 16.0F;
-//    break;
-//case UP:
-//    f3 = f * 16.0F;
-//    f4 = f2 * 16.0F;
-//    break;
-//case NORTH:
-//    f3 = (1.0F - f) * 16.0F;
-//    f4 = (1.0F - f1) * 16.0F;
-//    break;
-//case SOUTH:
-//    f3 = f * 16.0F;
-//    f4 = (1.0F - f1) * 16.0F;
-//    break;
-//case WEST:
-//    f3 = f2 * 16.0F;
-//    f4 = (1.0F - f1) * 16.0F;
-//    break;
-//case EAST:
-//    f3 = (1.0F - f2) * 16.0F;
-//    f4 = (1.0F - f1) * 16.0F;
-    
-    private void setupFaceQuad(EnumFacing face, QuadInputs qi, float x0, float y0, float x1, float y1, float depth)
+    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi)
     {
-        switch(face)
-        {
-        case UP:
-            qi.v1 = new Vertex(x0, 1-depth, y0, x0 * 16.0F, y0 * 16.0F);
-            qi.v2 = new Vertex(x0, 1-depth, y1, x0 * 16.0F, y1 * 16.0F);
-            qi.v3 = new Vertex(x1, 1-depth, y1, x1 * 16.0F, y1 * 16.0F);
-            qi.v4 = new Vertex(x1, 1-depth, y0, x1 * 16.0F, y0 * 16.0F);
-            qi.side = EnumFacing.UP;
-            break;
+        float marginWidth = 0.2F;
+        float cutDepth = 0.05F;
+        int cutCount = 4;
+        float cutWidth = (1 - marginWidth * 2) / (cutCount * 2 - 1);
 
-        case DOWN:     
-            qi.v1 = new Vertex(x1, depth, y1, x1 * 16.0F, (1-y1) * 16.0F);
-            qi.v2 = new Vertex(x0, depth, y1, x0 * 16.0F, (1-y1) * 16.0F); 
-            qi.v3 = new Vertex(x0, depth, y0, x0 * 16.0F, (1-y0) * 16.0F); 
-            qi.v4 = new Vertex(x1, depth, y0, x1 * 16.0F, (1-y0) * 16.0F);
-            qi.side = EnumFacing.DOWN;
-            break;
+        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+       
+       //temporary
+       qi.setupFaceQuad(face, 0.2F, 0.5F, 0.8F, 0.95F, 0.0F, EnumFacing.NORTH, true);
+//       qi.setupFaceQuad(face, 0.3F, 0.1F, 0.7F, 0.9F, 0.0F, Useful.rightOf(EnumFacing.UP, EnumFacing.NORTH), false);
 
-        case WEST:
-            qi.v1 = new Vertex(depth, y0, x0, x0 * 16.0F, (1-y0) * 16.0F);
-            qi.v2 = new Vertex(depth, y0, x1, x1 * 16.0F, (1-y0) * 16.0F);
-            qi.v3 = new Vertex(depth, y1, x1, x1 * 16.0F, (1-y1) * 16.0F);
-            qi.v4 = new Vertex(depth, y1, x0, x0 * 16.0F, (1-y1) * 16.0F);
-            qi.side = EnumFacing.WEST;
-            break;
-            
-        case EAST:
-            qi.v1 = new Vertex(1-depth, y0, x0, (1-x0) * 16.0F, (1-y0) * 16.0F);
-            qi.v2 = new Vertex(1-depth, y1, x0, (1-x0) * 16.0F, (1-y1) * 16.0F);
-            qi.v3 = new Vertex(1-depth, y1, x1, (1-x1) * 16.0F, (1-y1) * 16.0F);
-            qi.v4 = new Vertex(1-depth, y0, x1, (1-x1) * 16.0F, (1-y0) * 16.0F);
-            qi.side = EnumFacing.EAST;
-            break;
-
-        case NORTH:
-            qi.v1 = new Vertex(x0, y0, depth, (1-x0) * 16.0F, (1-y0) * 16.0F);
-            qi.v2 = new Vertex(x0, y1, depth, (1-x0) * 16.0F, (1-y1) * 16.0F);
-            qi.v3 = new Vertex(x1, y1, depth, (1-x1) * 16.0F, (1-y1) * 16.0F);
-            qi.v4 = new Vertex(x1, y0, depth, (1-x1) * 16.0F, (1-y0) * 16.0F);
-            qi.side = EnumFacing.NORTH;
-            break;
-
-        case SOUTH:
-            qi.v1 = new Vertex(x0, y0, 1-depth, x0 * 16.0F, (1-y0) * 16.0F);
-            qi.v2 = new Vertex(x1, y0, 1-depth, x1 * 16.0F, (1-y0) * 16.0F);
-            qi.v3 = new Vertex(x1, y1, 1-depth, x1 * 16.0F, (1-y1) * 16.0F);
-            qi.v4 = new Vertex(x0, y1, 1-depth, x0 * 16.0F, (1-y1) * 16.0F);
-            qi.side = EnumFacing.SOUTH;
-            break;
-        }
+       builder.add(qi.createNormalQuad());
+       return builder.build();
     }
     
     @Override

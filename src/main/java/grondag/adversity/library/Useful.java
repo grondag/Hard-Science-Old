@@ -57,4 +57,32 @@ public class Useful {
 				maxPos.x, maxPos.y, maxPos.z);
 	}
 	
+	/** returns the face that is normally the "top" of the given face */
+	public static EnumFacing defaultTopOf(EnumFacing faceIn)
+	{
+	    switch(faceIn)
+	    {
+        case UP:
+            return EnumFacing.NORTH;
+        case DOWN:
+            return EnumFacing.SOUTH;
+        default:
+            return EnumFacing.UP;
+	    }
+	}
+
+   public static EnumFacing rightOf(EnumFacing faceIn, EnumFacing topFace)
+   {
+       return topFace.rotateAround(faceIn.getAxis());
+   }
+   
+   public static EnumFacing bottomOf(EnumFacing faceIn, EnumFacing topFace)
+   {
+       return topFace.getOpposite();
+   }
+   
+   public static EnumFacing leftOf(EnumFacing faceIn, EnumFacing topFace)
+   {
+       return rightOf(faceIn, topFace).getOpposite();
+   }
 }

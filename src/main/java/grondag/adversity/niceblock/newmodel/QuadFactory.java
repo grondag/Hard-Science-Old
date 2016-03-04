@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.model.IModelController;
 
 import javax.vecmath.Matrix4f;
@@ -31,11 +32,7 @@ public class QuadFactory
     public static BakedQuad recolorVanillaQuad(BakedQuad quadIn, int color)
     {
         float shade = LightUtil.diffuseLight(quadIn.getFace());
-        int red = (int) (shade * 255f * ((color >> 16 & 0xFF) / 255f));
-        int green = (int) (shade * 255f * ((color >> 8 & 0xFF) / 255f));
-        int blue = (int) (shade * 255f * ((color & 0xFF) / 255f));
-        int alpha = color >> 24 & 0xFF;
-        int colorOut = red | green << 8 | blue << 16 | alpha << 24;
+        int colorOut = shadeColor(color, shade, true);
 
         int[] aint = quadIn.getVertexData();
         aint[3] = colorOut;
@@ -44,6 +41,16 @@ public class QuadFactory
         aint[3 + 21] = colorOut;
                 
         return new BakedQuad(aint, quadIn.getTintIndex(), quadIn.getFace());
+    }
+    
+    public static int shadeColor(int color, float shade, boolean glOrder)
+    {
+        int red = (int) (shade * 255f * ((color >> 16 & 0xFF) / 255f));
+        int green = (int) (shade * 255f * ((color >> 8 & 0xFF) / 255f));
+        int blue = (int) (shade * 255f * ((color & 0xFF) / 255f));
+        int alpha = color >> 24 & 0xFF;
+
+        return glOrder ? red  | green << 8 | blue << 16 | alpha << 24 : red << 16 | green << 8 | blue | alpha << 24;
     }
     
     public static class QuadInputs
@@ -72,6 +79,116 @@ public class QuadFactory
             return retval;
         }
         
+        /** 
+         * Sets up a quad with standard semantics.  
+         * x0,y0 are at lower left and x1, y1 are top right.
+         * topFace establishes a reference for "up" in these semantics.
+         * Depth represents how far recessed into the surface of the face the quad should be.
+         * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
+         * means the UV coordinates *are* rotated so that a different part of the texture shows through.
+         */
+        public void setupFaceQuad(EnumFacing face, float x0, float y0, float x1, float y1, float depth, EnumFacing topFace, boolean lockUV)
+        {
+            
+            this.side = face;
+            EnumFacing defaultTop = Useful.defaultTopOf(face);
+            float rx0;
+            float rx1;
+            float ry0;
+            float ry1;
+            int uvRotationCount = 0;
+            
+            if(topFace == defaultTop)
+            {
+                rx0 = x0;
+                ry0 = y0;
+                rx1 = x1;
+                ry1 = y1;
+            }
+            else if(topFace == Useful.rightOf(face, defaultTop))
+            {
+                rx0 = y0;
+                ry0 = 1-x1;
+                rx1 = y1;
+                ry1 = 1-x0;
+                uvRotationCount = lockUV ? 0 : 1;
+            }
+            else if(topFace == Useful.bottomOf(face, defaultTop))
+            {
+                rx0 = 1-x1;
+                ry0 = 1-y1;
+                rx1 = 1-x0;
+                ry1 = 1-y0;
+                uvRotationCount = lockUV ? 0 : 2;
+            }
+            else // left of
+            {
+                rx0 = 1-y1;
+                ry0 = x0;
+                rx1 = 1-y0;
+                ry1 = x1;
+                uvRotationCount = lockUV ? 0 : 3;
+            }
+            
+            if(lockUV)
+            {
+                x0 = rx0;
+                x1 = rx1;
+                y0 = ry0;
+                y1 = ry1;
+            }
+            
+            switch(face)
+            {
+            case UP:
+                this.v1 = new Vertex(rx0, 1-depth, ry0, x0 * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(rx0, 1-depth, ry1, x0 * 16.0F, (1-y1) * 16.0F);
+                this.v3 = new Vertex(rx1, 1-depth, ry1, x1 * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(rx1, 1-depth, ry0, x1 * 16.0F, (1-y0) * 16.0F);
+                break;
+
+            case DOWN:     
+                this.v1 = new Vertex(rx0, depth, ry0, x0 * 16.0F, y0 * 16.0F); 
+                this.v2 = new Vertex(rx1, depth, ry0, x1 * 16.0F, y0 * 16.0F);
+                this.v3 = new Vertex(rx1, depth, ry1, x1 * 16.0F, y1 * 16.0F);
+                this.v4 = new Vertex(rx0, depth, ry1, x0 * 16.0F, y1 * 16.0F); 
+                break;
+
+            case EAST:
+                this.v1 = new Vertex(1-depth, ry0, rx0, (1-x0) * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(1-depth, ry1, rx0, (1-x0) * 16.0F, (1-y1) * 16.0F);
+                this.v3 = new Vertex(1-depth, ry1, rx1, (1-x1) * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(1-depth, ry0, rx1, (1-x1) * 16.0F, (1-y0) * 16.0F);
+                break;
+
+            case WEST:
+                this.v1 = new Vertex(depth, ry0, rx0, x0 * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(depth, ry0, rx1, x1 * 16.0F, (1-y0) * 16.0F);
+                this.v3 = new Vertex(depth, ry1, rx1, x1 * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(depth, ry1, rx0, x0 * 16.0F, (1-y1) * 16.0F);
+                break;
+
+            case NORTH:
+                this.v1 = new Vertex(rx0, ry0, depth, (1-x0) * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(rx0, ry1, depth, (1-x0) * 16.0F, (1-y1) * 16.0F);
+                this.v3 = new Vertex(rx1, ry1, depth, (1-x1) * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(rx1, ry0, depth, (1-x1) * 16.0F, (1-y0) * 16.0F);
+                break;
+
+            case SOUTH:
+                this.v1 = new Vertex(rx0, ry0, 1-depth, x0 * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(rx1, ry0, 1-depth, x1 * 16.0F, (1-y0) * 16.0F);
+                this.v3 = new Vertex(rx1, ry1, 1-depth, x1 * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(rx0, ry1, 1-depth, x0 * 16.0F, (1-y1) * 16.0F);
+                break;
+            }
+            
+            for (int r = 0; r < uvRotationCount; r++)
+            {
+                rotateQuadUV(this.v1, this.v2, this.v3, this.v4);
+            }
+        }
+        
         /**
          * Use this for block models. Is faster and smaller than (Colored) UnpackedBakedQuads.
          */
@@ -79,13 +196,7 @@ public class QuadFactory
         {
 
             float shade = LightUtil.diffuseLight(this.side);
-
-            int red = (int) (shade * 255f * ((this.color >> 16 & 0xFF) / 255f));
-            int green = (int) (shade * 255f * ((this.color >> 8 & 0xFF) / 255f));
-            int blue = (int) (shade * 255f * ((this.color & 0xFF) / 255f));
-            int alpha = this.color >> 24 & 0xFF;
-
-            int colorOut = red | green << 8 | blue << 16 | alpha << 24;
+            int colorOut = shadeColor(color, shade, true);
 
             for (int r = 0; r < this.rotation.index; r++)
             {
