@@ -79,12 +79,11 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         float marginWidth = 0.2F;
         float cutDepth = 0.05F;
         int cutCount = 4;
-        EnumFacing topFace = EnumFacing.UP; //Useful.rightOf(face, EnumFacing.UP);
+        EnumFacing topFace = Useful.bottomOf(face, EnumFacing.UP);
         float cutWidth = (1 - marginWidth * 2) / (cutCount * 2 - 1);
 
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-          qi.setupFaceQuad(face, 0.2F, 0.5F, 0.8F, 0.95F, 0.0F, topFace, false);
-//          qi.setupFaceQuad(face, 0.3F, 0.1F, 0.7F, 0.9F, 0.0F, topFace, false);
+          qi.setupFaceQuad(face, 0.3F, 0.3F, 1.0F, 1.0F, 0.0F, topFace, true);
 
           builder.add(qi.createNormalQuad());
 
@@ -146,8 +145,8 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
        
        //temporary
-       qi.setupFaceQuad(face, 0.2F, 0.5F, 0.8F, 0.95F, 0.0F, EnumFacing.NORTH, true);
-//       qi.setupFaceQuad(face, 0.3F, 0.1F, 0.7F, 0.9F, 0.0F, Useful.rightOf(EnumFacing.UP, EnumFacing.NORTH), false);
+//       qi.setupFaceQuad(face, 0.5F, 0.5F, 1.0F, 1.0F, 0.0F, Useful.rightOf(EnumFacing.UP, EnumFacing.NORTH), false);
+        qi.setupFaceQuad(face, 0.3F, 0.3F, 1.0F, 1.0F, 0.0F, EnumFacing.NORTH, false);
 
        builder.add(qi.createNormalQuad());
        return builder.build();
