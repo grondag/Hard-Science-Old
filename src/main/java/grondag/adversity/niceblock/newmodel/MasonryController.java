@@ -8,6 +8,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.newmodel.BlockTests.TestForBigBlockMatch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 
@@ -41,12 +42,12 @@ public class MasonryController extends ModelControllerNew
                 });
 
         return ModelReference.SIMPLE_JOIN_STATE_LOOKUP
-                [needsMortar.up() && !mates.up()? 1 : 0]
-                [needsMortar.down() && !mates.down()  && (neighbors.down().getBlock() != block) ? 1 : 0] 
-                [needsMortar.east() && !mates.east() && (neighbors.east().getBlock() != block) ? 1 : 0]
-                [needsMortar.west() && !mates.west() ? 1 : 0] 
-                [needsMortar.north() && !mates.north() && (neighbors.north().getBlock() != block) ? 1 : 0]
-                [needsMortar.south() && !mates.south() ? 1 : 0]; 
+                [needsMortar.result(EnumFacing.UP) && !mates.result(EnumFacing.UP) ? 1 : 0]
+                [needsMortar.result(EnumFacing.DOWN) && !mates.result(EnumFacing.DOWN)  && (neighbors.getBlockState(EnumFacing.DOWN) != block) ? 1 : 0] 
+                [needsMortar.result(EnumFacing.EAST) && !mates.result(EnumFacing.EAST) && (neighbors.getBlockState(EnumFacing.EAST) != block) ? 1 : 0]
+                [needsMortar.result(EnumFacing.WEST) && !mates.result(EnumFacing.WEST) ? 1 : 0] 
+                [needsMortar.result(EnumFacing.NORTH) && !mates.result(EnumFacing.NORTH) && (neighbors.getBlockState(EnumFacing.NORTH) != block) ? 1 : 0]
+                [needsMortar.result(EnumFacing.SOUTH) && !mates.result(EnumFacing.SOUTH) ? 1 : 0]; 
     }
 
     protected int getAlternateTextureIndexFromModelState(ModelState modelState) 

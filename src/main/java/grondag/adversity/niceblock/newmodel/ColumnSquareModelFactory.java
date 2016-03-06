@@ -60,96 +60,119 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         quadInputs.color = colorMap.getColorMap(controller.renderLayer == EnumWorldBlockLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(myController.getTextureFromModelIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
-
+        ModelReference.SimpleJoin modelJoin = new ModelReference.SimpleJoin(modelState.getClientShapeIndex(controller.renderLayer.ordinal()));
+        
         List<BakedQuad>[] faceQuads = new List[6];
 
-        faceQuads[EnumFacing.UP.ordinal()] = makeCapFace(EnumFacing.UP, quadInputs);
-        faceQuads[EnumFacing.DOWN.ordinal()] = makeCapFace(EnumFacing.DOWN, quadInputs);
-        faceQuads[EnumFacing.EAST.ordinal()] = makeSideFace(EnumFacing.EAST, quadInputs);
-        faceQuads[EnumFacing.WEST.ordinal()] = makeSideFace(EnumFacing.WEST, quadInputs);
-        faceQuads[EnumFacing.NORTH.ordinal()] = makeSideFace(EnumFacing.NORTH, quadInputs);
-        faceQuads[EnumFacing.SOUTH.ordinal()] = makeSideFace(EnumFacing.SOUTH, quadInputs);
+        faceQuads[EnumFacing.UP.ordinal()] = makeCapFace(EnumFacing.UP, quadInputs, modelJoin);
+        faceQuads[EnumFacing.DOWN.ordinal()] = makeCapFace(EnumFacing.DOWN, quadInputs, modelJoin);
+        faceQuads[EnumFacing.EAST.ordinal()] = makeSideFace(EnumFacing.EAST, quadInputs, modelJoin);
+        faceQuads[EnumFacing.WEST.ordinal()] = makeSideFace(EnumFacing.WEST, quadInputs, modelJoin);
+        faceQuads[EnumFacing.NORTH.ordinal()] = makeSideFace(EnumFacing.NORTH, quadInputs, modelJoin);
+        faceQuads[EnumFacing.SOUTH.ordinal()] = makeSideFace(EnumFacing.SOUTH, quadInputs, modelJoin);
         
         return new SimpleCubeModel(faceQuads, controller.isShaded);
     }
 
-    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi)
+    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, ModelReference.SimpleJoin modelJoin)
     {
-        float capHeight = 0.2F;
-        float marginWidth = 0.2F;
-        float cutDepth = 0.05F;
-        int cutCount = 4;
-        EnumFacing topFace = Useful.bottomOf(face, EnumFacing.UP);
-        float cutWidth = (1 - marginWidth * 2) / (cutCount * 2 - 1);
-
+        EnumFacing topFace = EnumFacing.UP;
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-          qi.setupFaceQuad(face, 0.3F, 0.3F, 1.0F, 1.0F, 0.0F, topFace, true);
+        
+        if(modelJoin.isJoined(face))
+        {
+            qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, topFace, true);
+            builder.add(qi.createNormalQuad());
+            return builder.build();
+        }
 
-          builder.add(qi.createNormalQuad());
+        int baseCutCount = 5;
+        int actualCutCount = baseCutCount;
+        if (modelJoin.isJoined(Useful.leftOf(face, topFace))) actualCutCount++;
+        if (modelJoin.isJoined(Useful.rightOf(face, topFace))) actualCutCount++;
+        float cutWidth = 0.5F / (baseCutCount + 2.0F);
+        float baseMarginWidth = 2.5F * cutWidth;
+        float leftMarginWidth = modelJoin.isJoined(Useful.leftOf(face, topFace)) ? 0.5F * cutWidth : baseMarginWidth;
+        float rightMarginWidth = modelJoin.isJoined(Useful.rightOf(face, topFace)) ? 0.5F * cutWidth : baseMarginWidth;
+        float topCapHeight = modelJoin.isJoined(topFace) ? 0 : baseMarginWidth;
+        float bottomCapHeight = modelJoin.isJoined(topFace.getOpposite()) ? 0 : baseMarginWidth;;
+        float cutDepth = 0.05F;
 
-       
-//       //top and bottom
-//       qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, capHeight, 0.0F);
-//       builder.add(qi.createNormalQuad());
-//       qi.setupFaceQuad(face, 0.0F, 1.0F - capHeight, 1.0F, 1.0F, 0.0F);
-//       builder.add(qi.createNormalQuad());
-//
-//       //margins
-//       qi.setupFaceQuad(face, 0.0F, capHeight, marginWidth, 1.0F - capHeight, 0.0F);
-//       builder.add(qi.createNormalQuad());
-//       qi.setupFaceQuad(face, 1.0F - marginWidth, capHeight, 1.0F, 1.0F - capHeight, 0.0F);
-//       builder.add(qi.createNormalQuad());
-//
-//       //cuts
-//       QuadInputs qiCut = qi.clone();
-//       qiCut.color = QuadFactory.shadeColor(qi.color, 0.85F, false); 
-//       for(int i = 0; i < cutCount; i++)
-//       {
-//           // bottom
-//           float sx0 = marginWidth + cutWidth * 2 * i;
-//           float sx1 = marginWidth + cutWidth * 2 * i + cutWidth;
-//           
-//           qiCut.setupFaceQuad(face, sx0, capHeight, sx1, 1.0F - capHeight, cutDepth);
-//           builder.add(qiCut.createNormalQuad());
+        //top and bottom
+        qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, bottomCapHeight, 0.0F, topFace, true);
+        builder.add(qi.createNormalQuad());
+        qi.setupFaceQuad(face, 0.0F, 1.0F - topCapHeight, 1.0F, 1.0F, 0.0F, topFace, true);
+        builder.add(qi.createNormalQuad());
 
-//           // left face
-//           qi.setupFaceQuad(Useful.rightOf(face, axis), 0, capHeight, cutDepth, 1.0F - capHeight, 1 - sx0);
-//           builder.add(qi.createNormalQuad());
-//
-//           // right face
-//           qi.setupFaceQuad(Useful.leftOf(face, axis), 1.0F - cutDepth, capHeight, 1.0F, 1.0F - capHeight, sx1);
-//           builder.add(qi.createNormalQuad());
+        //margins
+        qi.setupFaceQuad(face, 0.0F, bottomCapHeight, leftMarginWidth, 1.0F - topCapHeight, 0.0F, topFace, true);
+        builder.add(qi.createNormalQuad());
+        qi.setupFaceQuad(face, 1.0F - rightMarginWidth, bottomCapHeight, 1.0F, 1.0F - topCapHeight, 0.0F, topFace, true);
+        builder.add(qi.createNormalQuad());
 
-//           // top face
-//           qi.setupFaceQuad(Useful.bottomOf(face, axis), sx0, 1.0F - cutDepth, sx1, 1.0F, 1-capHeight);
-//           builder.add(qi.createNormalQuad());
+        //cuts
+        QuadInputs qiCut = qi.clone();
+        qiCut.color = QuadFactory.shadeColor(qi.color, 0.85F, false); 
+        for(int i = 0; i < actualCutCount; i++)
+        {
+            // bottom
+            float sx0 = leftMarginWidth + cutWidth * 2 * i;
+            float sx1 = leftMarginWidth + cutWidth * 2 * i + cutWidth;
 
-//       }
-//       
-//       //splines
-//       for(int i = 0; i < cutCount - 1; i++)
-//       {
-//           qi.setupFaceQuad(face, marginWidth + cutWidth * 2 * i + cutWidth, capHeight, marginWidth + cutWidth * 2 * (i + 1), 1.0F - capHeight, 0.0F);
-//           builder.add(qi.createNormalQuad());
-//       }
-       return builder.build();
+            qiCut.setupFaceQuad(face, sx0, bottomCapHeight, sx1, 1.0F - topCapHeight, cutDepth, topFace, true);
+            builder.add(qiCut.createNormalQuad());
+
+            // left face
+            qi.setupFaceQuad(Useful.rightOf(face, topFace), bottomCapHeight, 1.0F-cutDepth, 1.0F-topCapHeight, 1.0F, 1 - sx0, face, true);
+            builder.add(qi.createNormalQuad());
+
+            // right face
+            qi.setupFaceQuad(Useful.leftOf(face, topFace), topCapHeight, 1.0F-cutDepth, 1.0F-bottomCapHeight, 1.0F, sx1, face, true);
+            builder.add(qi.createNormalQuad());
+
+            // top face
+            if(topCapHeight > 0)
+            {
+                qi.setupFaceQuad(Useful.bottomOf(face, topFace), sx0, 1.0F-cutDepth, sx1, 1.0F, 1-topCapHeight, face, true);
+                builder.add(qi.createNormalQuad());
+            }
+
+            if(bottomCapHeight > 0)
+            {
+                // bottom face
+                qi.setupFaceQuad(topFace, 1-sx1, 1.0F-cutDepth, 1-sx0, 1.0F, 1-bottomCapHeight, face, true);
+                builder.add(qi.createNormalQuad());
+            }
+        }
+
+        //splines
+        for(int i = 0; i < actualCutCount - 1; i++)
+        {
+            qi.setupFaceQuad(face, leftMarginWidth + cutWidth * 2 * i + cutWidth, bottomCapHeight, leftMarginWidth + cutWidth * 2 * (i + 1), 1.0F - topCapHeight, 0.0F, topFace, true);
+            builder.add(qi.createNormalQuad());
+        }
+        return builder.build();
     }
     
-    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi)
+    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, ModelReference.SimpleJoin modelJoin)
     {
         float marginWidth = 0.2F;
         float cutDepth = 0.05F;
         int cutCount = 4;
         float cutWidth = (1 - marginWidth * 2) / (cutCount * 2 - 1);
 
+        if(modelJoin.isJoined(face))
+        {
+            return Collections.EMPTY_LIST;
+        }
+        
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
        
-       //temporary
-//       qi.setupFaceQuad(face, 0.5F, 0.5F, 1.0F, 1.0F, 0.0F, Useful.rightOf(EnumFacing.UP, EnumFacing.NORTH), false);
-        qi.setupFaceQuad(face, 0.3F, 0.3F, 1.0F, 1.0F, 0.0F, EnumFacing.NORTH, false);
-
-       builder.add(qi.createNormalQuad());
-       return builder.build();
+        //temporary
+        qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, EnumFacing.NORTH, true);
+       
+        builder.add(qi.createNormalQuad());
+        return builder.build();
     }
     
     @Override

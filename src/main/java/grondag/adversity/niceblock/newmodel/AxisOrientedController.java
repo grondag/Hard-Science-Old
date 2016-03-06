@@ -245,7 +245,8 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
     {
         int axis = Math.max(2, Math.min(0, state.getValue(NiceBlock.META)));
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(new BlockTests.TestForBlockMetaMatch(state));
-       int shapeIndex = new ModelReference.ModelJoin(tests.up(), tests.down(), tests.east(), tests.west(), tests.north(), tests.south()).getIndex();
+       int shapeIndex = new ModelReference.SimpleJoin(tests.result(EnumFacing.UP), tests.result(EnumFacing.DOWN),
+               tests.result(EnumFacing.EAST), tests.result(EnumFacing.WEST), tests.result(EnumFacing.NORTH), tests.result(EnumFacing.SOUTH)).getIndex();
         // int shapeIndex = SHAPE_INDEX_LOOKUPS[axis][tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
         int textureAlternate = this.alternator.getAlternate(pos);
         

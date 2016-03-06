@@ -9,6 +9,7 @@ import grondag.adversity.niceblock.support.CornerStateFinder;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 
@@ -40,9 +41,9 @@ public class BorderController extends ModelControllerNew
         NeighborBlocks neighbors = new NeighborBlocks(world, pos);
         NeighborTestResults mates = neighbors.getNeighborTestResults(test);
 
-        CornerStateFinder finder = ModelReference.CONNECTED_CORNER_STATE_LOOKUP[mates.upBit()][mates.downBit()]
-                [mates.eastBit()][mates.westBit()]
-                [mates.northBit()][mates.southBit()];
+        CornerStateFinder finder = ModelReference.CONNECTED_CORNER_STATE_LOOKUP[mates.resultBit(EnumFacing.UP)][mates.resultBit(EnumFacing.DOWN)]
+                [mates.resultBit(EnumFacing.EAST)][mates.resultBit(EnumFacing.WEST)]
+                [mates.resultBit(EnumFacing.NORTH)][mates.resultBit(EnumFacing.SOUTH)];
 
         return (finder.getRecipe(test, world, pos) * this.alternateTextureCount + alternator.getAlternate(pos));
     }

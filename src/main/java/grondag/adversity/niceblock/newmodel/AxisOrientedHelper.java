@@ -40,7 +40,7 @@ public class AxisOrientedHelper extends ColoredBlockHelperPlus
     public ModelState getModelStateForItemModel(int itemIndex)
     {
         ModelState modelState = new ModelState(0, itemIndex);
-        modelState.setClientShapeIndex(62, EnumWorldBlockLayer.SOLID.ordinal());
+        modelState.setClientShapeIndex(0, EnumWorldBlockLayer.SOLID.ordinal());
         return modelState;
     }
     @Override

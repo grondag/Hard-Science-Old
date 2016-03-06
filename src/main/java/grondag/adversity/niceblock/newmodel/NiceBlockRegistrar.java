@@ -80,7 +80,7 @@ public class NiceBlockRegistrar
     public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
 
     public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
-            new ColumnSquareController("test", 1, EnumWorldBlockLayer.SOLID, true));
+            new ColumnSquareController("colored_stone", 1, EnumWorldBlockLayer.SOLID, true));
     public static final NiceBlockPlus BLOCK_COLUMN_SQUARE = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE), BaseMaterial.FLEXSTONE, "column_square");
 
     // declare the block instances
@@ -187,7 +187,6 @@ public class NiceBlockRegistrar
 
     public static void preInit(FMLPreInitializationEvent event)
     {
-
         // SET UP COLOR ATLAS
         {
             NiceHues.INSTANCE.writeColorAtlas(event.getModConfigurationDirectory());

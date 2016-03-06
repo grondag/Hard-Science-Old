@@ -73,8 +73,89 @@ public class Useful {
 
    public static EnumFacing rightOf(EnumFacing faceIn, EnumFacing topFace)
    {
-       return topFace.rotateAround(faceIn.getAxis());
-   }
+       switch (faceIn)
+       {
+           case NORTH:
+               switch (topFace)
+               {
+                   case UP:
+                       return EnumFacing.WEST;
+                   case EAST:
+                       return EnumFacing.UP;
+                   case DOWN:
+                       return EnumFacing.EAST;
+                   case WEST:
+                   default:
+                       return EnumFacing.DOWN;
+               }
+           case SOUTH:
+               switch (topFace)
+               {
+                   case UP:
+                       return EnumFacing.EAST;
+                   case EAST:
+                       return EnumFacing.DOWN;
+                   case DOWN:
+                       return EnumFacing.WEST;
+                   case WEST:
+                   default:
+                       return EnumFacing.UP;
+               }
+           case EAST:
+               switch (topFace)
+               {
+                   case UP:
+                       return EnumFacing.NORTH;
+                   case NORTH:
+                       return EnumFacing.DOWN;
+                   case DOWN:
+                       return EnumFacing.SOUTH;
+                   case SOUTH:
+                   default:
+                       return EnumFacing.UP;
+               }
+           case WEST:
+               switch (topFace)
+               {
+                   case UP:
+                       return EnumFacing.SOUTH;
+                   case NORTH:
+                       return EnumFacing.UP;
+                   case DOWN:
+                       return EnumFacing.NORTH;
+                   case SOUTH:
+                   default:
+                       return EnumFacing.DOWN;
+               }
+           case UP:
+               switch (topFace)
+               {
+                   case NORTH:
+                       return EnumFacing.EAST;
+                   case EAST:
+                       return EnumFacing.SOUTH;
+                   case SOUTH:
+                       return EnumFacing.WEST;
+                   case WEST:
+                   default:
+                       return EnumFacing.NORTH;
+               }
+           case DOWN:
+           default:
+               switch (topFace)
+               {
+                   case NORTH:
+                       return EnumFacing.WEST;
+                   case EAST:
+                       return EnumFacing.NORTH;
+                   case SOUTH:
+                       return EnumFacing.EAST;
+                   case WEST:
+                   default:
+                       return EnumFacing.SOUTH;
+               }
+       }
+   }   
    
    public static EnumFacing bottomOf(EnumFacing faceIn, EnumFacing topFace)
    {
@@ -85,4 +166,5 @@ public class Useful {
    {
        return rightOf(faceIn, topFace).getOpposite();
    }
+   
 }

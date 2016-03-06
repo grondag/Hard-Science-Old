@@ -6,6 +6,7 @@ import org.apache.commons.lang3.BitField;
 
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
+import grondag.adversity.library.NeighborBlocks.FaceCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.NiceStyle;
@@ -84,7 +85,7 @@ public abstract class NicePlacement {
 			{
 		         if (results.result(face)) 
 		         {
-		             species = neighbors.getByFace(face).getValue(NiceBlock.META);
+		             species = neighbors.getBlockState(face).getValue(NiceBlock.META);
 		             speciesInUseFlags |= (1 << species);
 		             if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(helper.block, colorIndex, species))) {
 		                 return species;
@@ -92,21 +93,13 @@ public abstract class NicePlacement {
 		         }
 			}
 
-            // try to avoid corners also if picking a species that won't connect
-			if (results.downEast()) speciesInUseFlags |= (1 << neighbors.downEast().getValue(NiceBlock.META));
-            if (results.downNorth()) speciesInUseFlags |= (1 << neighbors.downNorth().getValue(NiceBlock.META));
-            if (results.downSouth()) speciesInUseFlags |= (1 << neighbors.downSouth().getValue(NiceBlock.META));
-            if (results.downWest()) speciesInUseFlags |= (1 << neighbors.downWest().getValue(NiceBlock.META));
-
-            if (results.upEast()) speciesInUseFlags |= (1 << neighbors.upEast().getValue(NiceBlock.META));
-            if (results.upNorth()) speciesInUseFlags |= (1 << neighbors.upNorth().getValue(NiceBlock.META));
-            if (results.upSouth()) speciesInUseFlags |= (1 << neighbors.upSouth().getValue(NiceBlock.META));
-            if (results.upWest()) speciesInUseFlags |= (1 << neighbors.upWest().getValue(NiceBlock.META));
-
-            if (results.northEast()) speciesInUseFlags |= (1 << neighbors.northEast().getValue(NiceBlock.META));
-            if (results.northWest()) speciesInUseFlags |= (1 << neighbors.northWest().getValue(NiceBlock.META));
-            if (results.southEast()) speciesInUseFlags |= (1 << neighbors.southEast().getValue(NiceBlock.META));
-            if (results.southWest()) speciesInUseFlags |= (1 << neighbors.southWest().getValue(NiceBlock.META));
+            for(FaceCorner corner : FaceCorner.values())
+            {
+                if(results.result(corner))
+                {
+                    speciesInUseFlags |= (1 << neighbors.getBlockState(corner).getValue(NiceBlock.META));
+                }
+            }
 
             
             // if no available mates, randomly choose a species 

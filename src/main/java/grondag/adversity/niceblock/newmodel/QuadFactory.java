@@ -78,6 +78,7 @@ public class QuadFactory
             retval.color = this.color;
             return retval;
         }
+
         
         /** 
          * Sets up a quad with standard semantics.  
@@ -89,7 +90,7 @@ public class QuadFactory
          */
         public void setupFaceQuad(EnumFacing face, float x0, float y0, float x1, float y1, float depth, EnumFacing topFace, boolean lockUV)
         {
-            
+            final float EPSILON = 0.00005F;
             this.side = face;
             EnumFacing defaultTop = Useful.defaultTopOf(face);
             float rx0;
@@ -138,6 +139,11 @@ public class QuadFactory
                 y1 = ry1;
             }
             
+            rx0 -= EPSILON;
+            ry0 -= EPSILON;
+            rx1 += EPSILON;
+            ry1 += EPSILON;
+            
             switch(face)
             {
             case UP:
@@ -148,17 +154,17 @@ public class QuadFactory
                 break;
 
             case DOWN:     
-                this.v1 = new Vertex(rx0, depth, ry0, x0 * 16.0F, y0 * 16.0F); 
-                this.v2 = new Vertex(rx1, depth, ry0, x1 * 16.0F, y0 * 16.0F);
-                this.v3 = new Vertex(rx1, depth, ry1, x1 * 16.0F, y1 * 16.0F);
-                this.v4 = new Vertex(rx0, depth, ry1, x0 * 16.0F, y1 * 16.0F); 
+                this.v1 = new Vertex(rx0, depth, ry0, (1-x0) * 16.0F, y0 * 16.0F); 
+                this.v2 = new Vertex(rx1, depth, ry0, (1-x1) * 16.0F, y0 * 16.0F);
+                this.v3 = new Vertex(rx1, depth, ry1, (1-x1) * 16.0F, y1 * 16.0F);
+                this.v4 = new Vertex(rx0, depth, ry1, (1-x0) * 16.0F, y1 * 16.0F); 
                 break;
 
             case EAST:
-                this.v1 = new Vertex(1-depth, ry0, 1-rx0, (x0) * 16.0F, (1-y0) * 16.0F);
-                this.v2 = new Vertex(1-depth, ry0, 1-rx1, (x1) * 16.0F, (1-y0) * 16.0F);
-                this.v3 = new Vertex(1-depth, ry1, 1-rx1, (x1) * 16.0F, (1-y1) * 16.0F);
-                this.v4 = new Vertex(1-depth, ry1, 1-rx0, (x0) * 16.0F, (1-y1) * 16.0F);
+                this.v1 = new Vertex(1-depth, ry0, 1-rx0, x0 * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(1-depth, ry0, 1-rx1, x1 * 16.0F, (1-y0) * 16.0F);
+                this.v3 = new Vertex(1-depth, ry1, 1-rx1, x1 * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(1-depth, ry1, 1-rx0, x0 * 16.0F, (1-y1) * 16.0F);
                 break;
 
             case WEST:
@@ -169,10 +175,10 @@ public class QuadFactory
                 break;
 
             case NORTH:
-                this.v1 = new Vertex(1-rx0, ry0, depth, (x0) * 16.0F, (1-y0) * 16.0F);
-                this.v2 = new Vertex(1-rx1, ry0, depth, (x1) * 16.0F, (1-y0) * 16.0F);
-                this.v3 = new Vertex(1-rx1, ry1, depth, (x1) * 16.0F, (1-y1) * 16.0F);
-                this.v4 = new Vertex(1-rx0, ry1, depth, (x0) * 16.0F, (1-y1) * 16.0F);
+                this.v1 = new Vertex(1-rx0, ry0, depth, x0 * 16.0F, (1-y0) * 16.0F);
+                this.v2 = new Vertex(1-rx1, ry0, depth, x1 * 16.0F, (1-y0) * 16.0F);
+                this.v3 = new Vertex(1-rx1, ry1, depth, x1 * 16.0F, (1-y1) * 16.0F);
+                this.v4 = new Vertex(1-rx0, ry1, depth, x0 * 16.0F, (1-y1) * 16.0F);
                 break;
 
             case SOUTH:
