@@ -702,20 +702,7 @@ public class ModelReference
     public static class SimpleJoin
     {
         
-        
         private final byte joins;
-        
-        public SimpleJoin(boolean up, boolean down, boolean east, boolean west, boolean north, boolean south)
-        {
-            byte j = 0;
-            if(up) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.UP.ordinal()];
-            if(down) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.DOWN.ordinal()];
-            if(east) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.EAST.ordinal()];
-            if(west) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.WEST.ordinal()];
-            if(north) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.NORTH.ordinal()];
-            if(south) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.SOUTH.ordinal()];
-            this.joins = j;
-        }
         
         public SimpleJoin(NeighborBlocks.NeighborTestResults testResults)
         {
@@ -729,9 +716,66 @@ public class ModelReference
             }
             this.joins = j;
         }
+        
         public SimpleJoin(int index)
         {
             this.joins = (byte)index;
+        }
+        
+        public boolean isJoined(EnumFacing face)
+        {
+            return (joins & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
+        }
+        
+        public int getIndex()
+        {
+            return (int) joins;
+        }
+    }
+    
+    public static class AxisJoin
+    {
+        
+        private final byte joins;
+        public final EnumFacing.Axis axis;
+        
+        public AxisJoin(NeighborBlocks.NeighborTestResults testResults, EnumFacing.Axis axis)
+        {
+            byte j = 0;
+            this.axis = axis;
+            
+            for(EnumFacing face : EnumFacing.values())
+            {
+                if(testResults.result(face))
+                {
+                    // Like a simple join, except along axis connections
+                    // adjacent faces must also connect (or not) consistently.
+                    boolean isConsistent = true;
+                    
+                    if(face.getAxis() == this.axis)
+                    {
+                        for(EnumFacing adjacent : EnumFacing.values())
+                        {
+                            if(adjacent.getAxis() != face.getAxis() && testResults.result(adjacent) != testResults.result(face, adjacent))
+                            {
+                                isConsistent = false;
+                            }
+                        }
+                    }
+                    
+                    if(isConsistent)
+                    {
+                        j |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
+                    }
+                }
+            }
+            this.joins = j;
+        }
+        
+        public AxisJoin(int index, EnumFacing.Axis axis)
+        {
+            this.joins = (byte)index;
+            this.axis = axis;
         }
         
         public boolean isJoined(EnumFacing face)
@@ -798,7 +842,7 @@ public class ModelReference
                     stateIndex++;
                 }
             }
-         }
+        }
         
         private final int stateIndex;
         
@@ -851,4 +895,16 @@ public class ModelReference
         }
     }
     
+    public static EnumFacing getAxisTop(EnumFacing.Axis axis)
+    {
+        switch(axis)
+        {
+        case Y: 
+            return EnumFacing.UP;
+        case X:
+            return EnumFacing.EAST;
+        default:
+            return EnumFacing.NORTH;
+        }
+    }
 }

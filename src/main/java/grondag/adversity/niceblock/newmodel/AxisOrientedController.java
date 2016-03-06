@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
@@ -243,13 +244,13 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
     @Override
     public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        int axis = Math.max(2, Math.min(0, state.getValue(NiceBlock.META)));
+        int axis = Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(new BlockTests.TestForBlockMetaMatch(state));
-       int shapeIndex = new ModelReference.SimpleJoin(tests.result(EnumFacing.UP), tests.result(EnumFacing.DOWN),
-               tests.result(EnumFacing.EAST), tests.result(EnumFacing.WEST), tests.result(EnumFacing.NORTH), tests.result(EnumFacing.SOUTH)).getIndex();
+        int shapeIndex = new ModelReference.AxisJoin(tests, EnumFacing.Axis.values()[axis]).getIndex();
+        
         // int shapeIndex = SHAPE_INDEX_LOOKUPS[axis][tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
         int textureAlternate = this.alternator.getAlternate(pos);
-        
+
         return (textureAlternate * 3 + axis) << 6 | shapeIndex;
     }
 

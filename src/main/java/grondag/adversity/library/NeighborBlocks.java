@@ -50,9 +50,9 @@ public class NeighborBlocks {
 	    {
 	        if(cornerStates[corner.ordinal()] == null)
 	        {
-	            blockStates[corner.ordinal()] = world.getBlockState(pos.add(corner.getDirectionVec()));
+	            cornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.getDirectionVec()));
 	        }
-	        return blockStates[corner.ordinal()];
+	        return cornerStates[corner.ordinal()];
 	    }
 	/**
 	 * Apply given test to neighboring block states.

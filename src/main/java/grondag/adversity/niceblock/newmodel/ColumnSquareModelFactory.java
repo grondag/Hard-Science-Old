@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.model.ModelCookbook;
 import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
@@ -58,25 +59,32 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         QuadInputs quadInputs = new QuadInputs();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         quadInputs.color = colorMap.getColorMap(controller.renderLayer == EnumWorldBlockLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
-        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                controller.getTextureName(myController.getTextureFromModelIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
-        ModelReference.SimpleJoin modelJoin = new ModelReference.SimpleJoin(modelState.getClientShapeIndex(controller.renderLayer.ordinal()));
+        int clientShapeIndex = modelState.getClientShapeIndex(controller.renderLayer.ordinal());
+        EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
+        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
+        ModelReference.AxisJoin modelJoin = new ModelReference.AxisJoin(myController.getShapeFromModelIndex(clientShapeIndex), axis);
+
         
         List<BakedQuad>[] faceQuads = new List[6];
 
-        faceQuads[EnumFacing.UP.ordinal()] = makeCapFace(EnumFacing.UP, quadInputs, modelJoin);
-        faceQuads[EnumFacing.DOWN.ordinal()] = makeCapFace(EnumFacing.DOWN, quadInputs, modelJoin);
-        faceQuads[EnumFacing.EAST.ordinal()] = makeSideFace(EnumFacing.EAST, quadInputs, modelJoin);
-        faceQuads[EnumFacing.WEST.ordinal()] = makeSideFace(EnumFacing.WEST, quadInputs, modelJoin);
-        faceQuads[EnumFacing.NORTH.ordinal()] = makeSideFace(EnumFacing.NORTH, quadInputs, modelJoin);
-        faceQuads[EnumFacing.SOUTH.ordinal()] = makeSideFace(EnumFacing.SOUTH, quadInputs, modelJoin);
+        for(EnumFacing face : EnumFacing.values())
+        {
+            if(face.getAxis() == axis)
+            {
+                faceQuads[face.ordinal()] = makeCapFace(face, quadInputs, modelJoin);
+            }
+            else
+            {
+                faceQuads[face.ordinal()] = makeSideFace(face, quadInputs, modelJoin);
+            }
+        }
         
         return new SimpleCubeModel(faceQuads, controller.isShaded);
     }
 
-    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, ModelReference.SimpleJoin modelJoin)
+    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, ModelReference.AxisJoin modelJoin)
     {
-        EnumFacing topFace = EnumFacing.UP;
+        EnumFacing topFace = ModelReference.getAxisTop(modelJoin.axis);
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         
         if(modelJoin.isJoined(face))
@@ -154,7 +162,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         return builder.build();
     }
     
-    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, ModelReference.SimpleJoin modelJoin)
+    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, ModelReference.AxisJoin modelJoin)
     {
         float marginWidth = 0.2F;
         float cutDepth = 0.05F;
@@ -169,7 +177,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
        
         //temporary
-        qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, EnumFacing.NORTH, true);
+        qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, face, true);
        
         builder.add(qi.createNormalQuad());
         return builder.build();
