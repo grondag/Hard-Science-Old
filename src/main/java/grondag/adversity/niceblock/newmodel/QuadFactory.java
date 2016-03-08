@@ -79,6 +79,129 @@ public class QuadFactory
             return retval;
         }
 
+        /** 
+         * Sets up a quad with standard semantics.  
+         * Vertices should be given clockwise from lower left.
+         * This is a human-friendly order, not MC or OpenGL order.
+         * 
+         * topFace establishes a reference for "up" in these semantics.
+         * Depth represents how far recessed into the surface of the face the quad should be.
+         * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
+         * means the UV coordinates *are* rotated so that a different part of the texture shows through.
+         */
+        public void setupFaceQuad(EnumFacing face, Vec2f v0, Vec2f v1, Vec2f v2, Vec2f v3, float depth, EnumFacing topFace, boolean lockUV)
+        {
+            final float EPSILON = 0.00005F;
+            this.side = face;
+            EnumFacing defaultTop = Useful.defaultTopOf(face);
+            Vec2f rv0;
+            Vec2f rv1;
+            Vec2f rv2;
+            Vec2f rv3;
+            int uvRotationCount = 0;
+            
+            if(topFace == defaultTop)
+            {
+                rv0 = v0.clone();
+                rv1 = v1.clone();
+                rv2 = v2.clone();
+                rv3 = v3.clone();
+            }
+            else if(topFace == Useful.rightOf(face, defaultTop))
+            {
+                rv0 = new Vec2f(v3.y, 1.0F - v3.x);
+                rv1 = new Vec2f(v0.y, 1.0F - v0.x);
+                rv2 = new Vec2f(v1.y, 1.0F - v1.x);
+                rv3 = new Vec2f(v2.y, 1.0F - v2.x);
+                uvRotationCount = lockUV ? 0 : 1;
+            }
+            else if(topFace == Useful.bottomOf(face, defaultTop))
+            {
+                rv0 = new Vec2f(1.0F - v2.x, 1.0F - v2.y);
+                rv1 = new Vec2f(1.0F - v3.x, 1.0F - v3.y);
+                rv2 = new Vec2f(1.0F - v0.x, 1.0F - v0.y);
+                rv3 = new Vec2f(1.0F - v1.x, 1.0F - v1.y);
+                uvRotationCount = lockUV ? 0 : 2;
+            }
+            else // left of
+            {
+                rv0 = new Vec2f(1.0F - v1.y, v1.x);
+                rv1 = new Vec2f(1.0F - v2.y, v2.x);
+                rv2 = new Vec2f(1.0F - v3.y, v3.x);
+                rv3 = new Vec2f(1.0F - v0.y, v0.x);
+                uvRotationCount = lockUV ? 0 : 3;
+            }
+            
+            if(lockUV)
+            {
+                v0 = rv0;
+                v1 = rv1;
+                v2 = rv2;
+                v3 = rv3;
+            }
+            
+            v0.x -= EPSILON;
+            v1.x -= EPSILON;
+            v0.y -= EPSILON;
+            v3.y -= EPSILON;
+            
+            v2.x += EPSILON;
+            v3.x += EPSILON;
+            v1.y += EPSILON;
+            v2.y += EPSILON;
+            
+            switch(face)
+            {
+            case UP:
+                this.v1 = new Vertex(rv0.x, 1-depth, 1-rv0.y, v0.x * 16.0F, (1-v0.y) * 16.0F);
+                this.v2 = new Vertex(rv3.x, 1-depth, 1-rv3.y, v3.x * 16.0F, (1-v3.y) * 16.0F);
+                this.v3 = new Vertex(rv2.x, 1-depth, 1-rv2.y, v2.x * 16.0F, (1-v2.y) * 16.0F);
+                this.v4 = new Vertex(rv1.x, 1-depth, 1-rv1.y, v1.x * 16.0F, (1-v1.y) * 16.0F);
+                break;
+
+            case DOWN:     
+                this.v1 = new Vertex(rv0.x, depth, rv0.y, (1.0F-v0.x) * 16.0F, v0.y * 16.0F);
+                this.v2 = new Vertex(rv3.x, depth, rv3.y, (1.0F-v3.x) * 16.0F, v3.y * 16.0F);
+                this.v3 = new Vertex(rv2.x, depth, rv2.y, (1.0F-v2.x) * 16.0F, v2.y * 16.0F);
+                this.v4 = new Vertex(rv1.x, depth, rv1.y, (1.0F-v1.x) * 16.0F, v1.y * 16.0F);
+                break;
+
+            case EAST:
+                
+                
+                this.v1 = new Vertex(1-depth, rv0.y, 1-rv0.x, v0.x * 16.0F, (1-v0.y) * 16.0F);
+                this.v2 = new Vertex(1-depth, rv3.y, 1-rv3.x, v3.x * 16.0F, (1-v3.y) * 16.0F);
+                this.v3 = new Vertex(1-depth, rv2.y, 1-rv2.x, v2.x * 16.0F, (1-v2.y) * 16.0F);
+                this.v4 = new Vertex(1-depth, rv1.y, 1-rv1.x, v1.x * 16.0F, (1-v1.y) * 16.0F);
+                break;
+
+            case WEST:
+                this.v1 = new Vertex(depth, rv0.y, rv0.x, v0.x * 16.0F, (1-v0.y) * 16.0F);
+                this.v2 = new Vertex(depth, rv3.y, rv3.x, v3.x * 16.0F, (1-v3.y) * 16.0F);
+                this.v3 = new Vertex(depth, rv2.y, rv2.x, v2.x * 16.0F, (1-v2.y) * 16.0F);
+                this.v4 = new Vertex(depth, rv1.y, rv1.x, v1.x * 16.0F, (1-v1.y) * 16.0F);
+                break;
+
+            case NORTH:
+                this.v1 = new Vertex(1-rv0.x, rv0.y, depth, rv0.x * 16.0F, (1-rv0.y) * 16.0F);
+                this.v2 = new Vertex(1-rv3.x, rv3.y, depth, rv3.x * 16.0F, (1-rv3.y) * 16.0F);
+                this.v3 = new Vertex(1-rv2.x, rv2.y, depth, rv2.x * 16.0F, (1-rv2.y) * 16.0F);
+                this.v4 = new Vertex(1-rv1.x, rv1.y, depth, rv1.x * 16.0F, (1-rv1.y) * 16.0F);
+                break;
+
+            case SOUTH:
+                this.v1 = new Vertex(rv0.x, rv0.y, 1-depth, rv0.x * 16.0F, (1-rv0.y) * 16.0F);
+                this.v2 = new Vertex(rv3.x, rv3.y, 1-depth, rv3.x * 16.0F, (1-rv3.y) * 16.0F);
+                this.v3 = new Vertex(rv2.x, rv2.y, 1-depth, rv2.x * 16.0F, (1-rv2.y) * 16.0F);
+                this.v4 = new Vertex(rv1.x, rv1.y, 1-depth, rv1.x * 16.0F, (1-rv1.y) * 16.0F);
+                break;
+            }
+            
+            for (int r = 0; r < uvRotationCount; r++)
+            {
+                rotateQuadUV(this.v1, this.v2, this.v3, this.v4);
+            }
+        }
         
         /** 
          * Sets up a quad with standard semantics.  
@@ -437,6 +560,23 @@ public class QuadFactory
             default:
                 builder.put(e);
             }
+        }
+    }
+    
+    public static class Vec2f
+    {
+        public float x;
+        public float y;
+        
+        public Vec2f(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        
+        public Vec2f clone()
+        {
+            return new Vec2f(x, y);
         }
     }
 }

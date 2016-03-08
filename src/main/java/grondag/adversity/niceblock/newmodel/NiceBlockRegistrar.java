@@ -79,9 +79,21 @@ public class NiceBlockRegistrar
             new MasonryController("masonrytest", 1, EnumWorldBlockLayer.CUTOUT_MIPPED, true));
     public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
 
-    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
-            new ColumnSquareController("colored_stone", 1, EnumWorldBlockLayer.SOLID, true));
-    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE), BaseMaterial.FLEXSTONE, "column_square");
+    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_2 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
+            new ColumnSquareController("colored_stone", 1, EnumWorldBlockLayer.SOLID, true, 2, true));
+    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_2 = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2");
+
+    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_3 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
+            new ColumnSquareController("colored_stone", 1, EnumWorldBlockLayer.SOLID, true, 3, true));
+    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_3 = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_3), BaseMaterial.FLEXSTONE, "column_square_3");
+
+    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_4 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
+            new ColumnSquareController("colored_stone", 1, EnumWorldBlockLayer.SOLID, true, 4, true));
+    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_4 = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4");
+
+    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_5 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
+            new ColumnSquareController("colored_stone", 1, EnumWorldBlockLayer.SOLID, true, 5, false));
+    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_5 = new NiceBlockPlus(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_5), BaseMaterial.FLEXSTONE, "column_square_5");
 
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),

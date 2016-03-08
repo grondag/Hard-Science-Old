@@ -246,33 +246,40 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
     {
         int axis = Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(new BlockTests.TestForBlockMetaMatch(state));
+        
+        //TODO should probably just use a regular simple join
         int shapeIndex = new ModelReference.AxisJoin(tests, EnumFacing.Axis.values()[axis]).getIndex();
         
         // int shapeIndex = SHAPE_INDEX_LOOKUPS[axis][tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
         int textureAlternate = this.alternator.getAlternate(pos);
 
         return (textureAlternate * 3 + axis) << 6 | shapeIndex;
+        //return (textureAlternate * 3 + axis) << 386 | shapeIndex;
     }
 
     @Override
     public int getShapeCount()
     {
         return 64 * 3 * alternateTextureCount;
+        //return 386 * 3 * alternateTextureCount;
     }
 
     protected static int getAxisFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex >> 6) % 3;
+        //return (clientShapeIndex / 386) % 3;
     }
 
     protected static int getTextureFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex >> 6) / 3;
+        //return (clientShapeIndex / 386) / 3;
     }
     
     protected static int getShapeFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex & 63);
+        //return (clientShapeIndex % 386);
     }
 
 //    static

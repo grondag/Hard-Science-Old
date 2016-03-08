@@ -752,16 +752,41 @@ public class ModelReference
                     // adjacent faces must also connect (or not) consistently.
                     boolean isConsistent = true;
                     
-                    if(face.getAxis() == this.axis)
-                    {
-                        for(EnumFacing adjacent : EnumFacing.values())
-                        {
-                            if(adjacent.getAxis() != face.getAxis() && testResults.result(adjacent) != testResults.result(face, adjacent))
-                            {
-                                isConsistent = false;
-                            }
-                        }
-                    }
+//                    if(face.getAxis() == this.axis)
+//                    {
+//                        for(EnumFacing adjacent : EnumFacing.values())
+//                        {
+//                            if(adjacent.getAxis() != face.getAxis())
+//                            {
+//                                // side face
+//                                
+//                                // verify that side face is same adjacent and on connecting
+//                                if (testResults.result(adjacent) != testResults.result(face, adjacent))
+//                                {
+//                                    isConsistent = false;
+//                                    break;
+//                                }
+////                                
+////                                // verify that corner is same on connecting
+////                                EnumFacing right = adjacent.rotateAround(axis);
+////                                if (testResults.result(adjacent, right) != testResults.result(face, adjacent, right))
+////                                {
+////                                    isConsistent = false;
+////                                    break;
+////                                }
+//                                
+//                            }
+//                        }
+//                    }
+//                    else
+//                    {
+//                        EnumFacing side1 = face.rotateAround(this.axis);
+//                        EnumFacing side2 = side1.getOpposite();
+//                        if(testResults.result(side1) != testResults.result(face, side1) || testResults.result(side2) != testResults.result(face, side2))
+//                        {
+//                            isConsistent = false;
+//                        }
+//                    }
                     
                     if(isConsistent)
                     {
