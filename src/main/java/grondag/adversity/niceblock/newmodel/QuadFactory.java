@@ -82,7 +82,6 @@ public class QuadFactory
         /** 
          * Sets up a quad with standard semantics.  
          * Vertices should be given clockwise from lower left.
-         * This is a human-friendly order, not MC or OpenGL order.
          * 
          * topFace establishes a reference for "up" in these semantics.
          * Depth represents how far recessed into the surface of the face the quad should be.

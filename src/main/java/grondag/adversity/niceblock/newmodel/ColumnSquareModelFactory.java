@@ -48,7 +48,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
     private final float cutWidth;
     private final float baseMarginWidth;
     private final float marginOffset;
-    private float cutDepth = 0.05F;
+    private final float cutDepth;
 
     
 //    protected IBakedModel[] templateModels;
@@ -63,12 +63,14 @@ public class ColumnSquareModelFactory extends BakedModelFactory
             cutWidth = 0.5F / (myController.cutCount + 1.0F);
             baseMarginWidth = 1.5F * cutWidth;
             marginOffset = -0.5F;
+            cutDepth = cutWidth * 0.8F;
         }
         else
         {
             cutWidth = 0.5F / (myController.cutCount + 2.0F);
             baseMarginWidth = 2.5F * cutWidth;
             marginOffset = 0.5F;
+            cutDepth = cutWidth / 2;
         }
     }
 
@@ -130,7 +132,14 @@ public class ColumnSquareModelFactory extends BakedModelFactory
             {
                 qi.setupFaceQuad(face, 1.0F - cutDepth, 0.0F, 1.0F, 1.0F, 0.0F, topFace, true);
                 builder.add(qi.createNormalQuad());
-            }   
+            }
+            
+            //models joined at cap need privacy panels on joined sides for cap cuts that may run into them
+            if(modelJoin.isJoined(topFace))
+            {
+                qi.setupFaceQuad(face, this.baseMarginWidth, 0.0F, 1-this.baseMarginWidth, 1.0F, 0.0F, topFace, true);
+                builder.add(qi.createNormalQuad());
+            }
         }
         else
         {
@@ -282,6 +291,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                     // privacy screen for cuts
                     float minX = !myController.areCutsOnEdge || modelJoin.isJoined(Useful.rightOf(face, side)) ? 0 : cutDepth;
                     float maxX = !myController.areCutsOnEdge || modelJoin.isJoined(Useful.leftOf(face, side)) ? 1 : 1-cutDepth;
+
                     qi.setupFaceQuad(face, 
                             new Vec2f(minX, 0),  new Vec2f(minX, cutDepth), 
                             new Vec2f(maxX, cutDepth), new Vec2f(maxX, 0),
@@ -296,11 +306,15 @@ public class ColumnSquareModelFactory extends BakedModelFactory
             
             //cut bottom can be a single poly
             QuadInputs qiCut = qi.clone();
+            EnumFacing topFace = Useful.defaultTopOf(face);
             qiCut.color = QuadFactory.shadeColor(qi.color, 0.85F, false); 
             qiCut.setupFaceQuad(face, 
-                    new Vec2f(baseMarginWidth, baseMarginWidth), new Vec2f(baseMarginWidth, 1-baseMarginWidth),
-                    new Vec2f(1-baseMarginWidth, 1-baseMarginWidth), new Vec2f(1-baseMarginWidth, baseMarginWidth),
-                    cutDepth, Useful.defaultTopOf(face), true);
+                    modelJoin.isJoined(Useful.leftOf(face, topFace)) ? 0 : baseMarginWidth, 
+                    modelJoin.isJoined(Useful.bottomOf(face, topFace)) ? 0 : baseMarginWidth, 
+                    modelJoin.isJoined(Useful.rightOf(face, topFace)) ? 1 : 1-baseMarginWidth, 
+                    modelJoin.isJoined(topFace) ? 1 : 1-baseMarginWidth, 
+                    cutDepth, 
+                    topFace, true);
             builder.add(qiCut.createNormalQuad());
 
             // build quarter slice of cap for each side separately
@@ -311,38 +325,97 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                if(side.getAxis() != modelJoin.axis)
                {
                     
-                    // outer margin
-                    qi.setupFaceQuad(face, 
-                            new Vec2f(baseMarginWidth, 1-baseMarginWidth),  new Vec2f(0, 1), 
-                            new Vec2f(1, 1), new Vec2f(1-baseMarginWidth, 1-baseMarginWidth),
-                            0.0F, side, true);
-                    builder.add(qi.createNormalQuad());     
-                    
-                    // outer face
-                    for(int i = 0; i < (myController.cutCount + 1) / 2; i++)
-                    {
-                        float offset = baseMarginWidth + (cutWidth * 2.0F * i);
-            
-                        qi.setupFaceQuad(side.getOpposite(), offset, 1-cutDepth, 1-offset, 1.0F, 1-offset, face, true);
-                        builder.add(qi.createNormalQuad());
-                        
-                    }
-                    
-                    for(int i = 0; i < myController.cutCount / 2; i++)
-                    {
-                        // inner face
+                   if(modelJoin.isJoined(side))
+                   {
+                       //This side is joined, so connect cuts to other block on this side.
+                       
+                       // margin corners /w face
+                       qi.setupFaceQuad(face, 
+                               new Vec2f(baseMarginWidth, 1-baseMarginWidth),  new Vec2f(0, 1), 
+                               new Vec2f(baseMarginWidth, 1), new Vec2f(baseMarginWidth, 1-baseMarginWidth),
+                               0.0F, side, true);
+                       builder.add(qi.createNormalQuad());
+                       qi.setupFaceQuad(Useful.rightOf(face, side), 1-baseMarginWidth, 1-cutDepth, 1, 1, 1-baseMarginWidth, face, true);
+                       builder.add(qi.createNormalQuad());
+                       
+                       qi.setupFaceQuad(face, 
+                               new Vec2f(1-baseMarginWidth, 1),  new Vec2f(1, 1), 
+                               new Vec2f(1-baseMarginWidth, 1-baseMarginWidth), new Vec2f(1-baseMarginWidth, 1),
+                               0.0F, side, true);
+                       builder.add(qi.createNormalQuad());                
+                       qi.setupFaceQuad(Useful.leftOf(face, side), 0, 1-cutDepth, baseMarginWidth, 1, 1-baseMarginWidth, face, true);
+                       builder.add(qi.createNormalQuad());
+                       
+                       //splines
+                       for (int i = 0; i < myController.cutCount / 2; i++)
+                       {
+                           float xLeft = baseMarginWidth + (i * 2 + 1) * this.cutWidth;
+                           float xRight = Math.min(xLeft + cutWidth, 0.5F);
+                           qi.setupFaceQuad(face, 
+                                   new Vec2f(xLeft, 1-xLeft),  new Vec2f(xLeft, 1), 
+                                   new Vec2f(xRight, 1), new Vec2f(xRight, 1-xRight),
+                                   0.0F, side, true);
+                           builder.add(qi.createNormalQuad());
 
-                        float offset = baseMarginWidth + (cutWidth * (2.0F * i + 1));
-                        qi.setupFaceQuad(side, offset, 1-cutDepth, 1-offset, 1.0F, offset, face, true);
-                        builder.add(qi.createNormalQuad());
+                           qi.setupFaceQuad(Useful.leftOf(face, side), 0, 1-cutDepth, xLeft, 1, xLeft, face, true);
+                           builder.add(qi.createNormalQuad());
+                           qi.setupFaceQuad(Useful.rightOf(face, side), 1-xRight, 1-cutDepth, 1, 1, 1-xRight, face, true);
+                           builder.add(qi.createNormalQuad());
 
-                        // spline / center
+                         
+                           
+                           // mirror on right side, reverse winding order
+                           builder.add(qi.createNormalQuad());                             
+                           qi.setupFaceQuad(face, 
+                                   new Vec2f(1-xRight, 1-xRight),  new Vec2f(1-xRight, 1), 
+                                   new Vec2f(1-xLeft, 1), new Vec2f(1-xLeft, 1-xLeft),
+                                   0.0F, side, true);
+                           builder.add(qi.createNormalQuad());
+                           
+                           qi.setupFaceQuad(Useful.leftOf(face, side), 0, 1-cutDepth, xRight, 1, 1-xRight, face, true);
+                           builder.add(qi.createNormalQuad());
+                           qi.setupFaceQuad(Useful.rightOf(face, side), 1-xLeft, 1-cutDepth, 1, 1, xLeft, face, true);
+                           builder.add(qi.createNormalQuad());
+
+                       }
+                   }
+                   else  
+                   {    
+                       // This side isn't joined, so don't connect cuts to other block on this side.
+                       
+                        // outer margin
                         qi.setupFaceQuad(face, 
-                                new Vec2f(offset+cutWidth, 1-offset-cutWidth),  new Vec2f(offset, 1-offset), 
-                                new Vec2f(1-offset, 1-offset), new Vec2f(1-offset-cutWidth, 1-offset-cutWidth),
+                                new Vec2f(baseMarginWidth, 1-baseMarginWidth),  new Vec2f(0, 1), 
+                                new Vec2f(1, 1), new Vec2f(1-baseMarginWidth, 1-baseMarginWidth),
                                 0.0F, side, true);
-                        builder.add(qi.createNormalQuad());                             
-                    }
+                        builder.add(qi.createNormalQuad());     
+                        
+                        // outer face
+                        for(int i = 0; i < (myController.cutCount + 1) / 2; i++)
+                        {
+                            float offset = baseMarginWidth + (cutWidth * 2.0F * i);
+                
+                            qi.setupFaceQuad(side.getOpposite(), offset, 1-cutDepth, 1-offset, 1.0F, 1-offset, face, true);
+                            builder.add(qi.createNormalQuad());
+                            
+                        }
+                        
+                        for(int i = 0; i < myController.cutCount / 2; i++)
+                        {
+                            // inner face
+    
+                            float offset = baseMarginWidth + (cutWidth * (2.0F * i + 1));
+                            qi.setupFaceQuad(side, offset, 1-cutDepth, 1-offset, 1.0F, offset, face, true);
+                            builder.add(qi.createNormalQuad());
+    
+                            // spline / center
+                            qi.setupFaceQuad(face, 
+                                    new Vec2f(offset+cutWidth, 1-offset-cutWidth),  new Vec2f(offset, 1-offset), 
+                                    new Vec2f(1-offset, 1-offset), new Vec2f(1-offset-cutWidth, 1-offset-cutWidth),
+                                    0.0F, side, true);
+                            builder.add(qi.createNormalQuad());                             
+                        }
+                   }
                 }
             }
         }
