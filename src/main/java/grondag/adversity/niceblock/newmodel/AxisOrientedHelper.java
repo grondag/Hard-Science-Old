@@ -10,6 +10,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 public class AxisOrientedHelper extends ColoredBlockHelperPlus
 {
@@ -61,5 +62,17 @@ public class AxisOrientedHelper extends ColoredBlockHelperPlus
     @Override
     public boolean isFullCube() {
         return false;
+    }
+    
+    @Override 
+    public boolean hasCustomBrightness()
+    {
+        // lamp blocks have two layers, and the inner (lamp) layer is solid
+        return this.dispatcher instanceof ModelDispatcherLayered && MinecraftForgeClient.getRenderLayer() == EnumWorldBlockLayer.SOLID;
+    }
+    
+    @Override
+    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
+        return 0xFFFFFFFF; 
     }
 }

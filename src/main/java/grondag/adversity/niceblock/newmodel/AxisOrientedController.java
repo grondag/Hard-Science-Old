@@ -11,6 +11,7 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.niceblock.newmodel.AxisOrientedController.ModelType;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import com.google.common.collect.ImmutableList;
@@ -102,11 +103,16 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
 //            AxisAlignedModel.TWO_OPPOSITE_CLOSED, AxisAlignedModel.TWO_OPPOSITE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.FOUR_CLOSED, AxisAlignedModel.NONE_CLOSED
 //    };
 
-    protected AxisOrientedController(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded)
+    public final ModelType modelType;
+    
+  
+        
+    protected AxisOrientedController(String textureName, int alternateTextureCount, ModelType modelType, boolean isShaded)
     {
-        super(textureName, alternateTextureCount, renderLayer, isShaded, false);
+        super(textureName, alternateTextureCount, modelType == ModelType.LAMP_OVERLAY ? EnumWorldBlockLayer.CUTOUT_MIPPED : EnumWorldBlockLayer.SOLID, isShaded, false);
         this.alternator = Alternator.getAlternator((byte)(alternateTextureCount));
   //      populateModelNames();
+        this.modelType = modelType;
         for (int i = 0; i < 64; i++) {
             this.setModelBoundsForShape(EnumFacing.Axis.X, i);
             this.setModelBoundsForShape(EnumFacing.Axis.Y, i);
@@ -507,4 +513,11 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
 //        SHAPE_INDEX_LOOKUPS[EnumFacing.Axis.Z.ordinal()][0][0][0][0][0][0] = 62;
 //        SHAPE_INDEX_LOOKUPS[EnumFacing.Axis.Z.ordinal()][1][1][1][1][0][0] = 63;
 //    }
+    
+    public static enum ModelType
+    {
+        NORMAL,
+        LAMP_BASE,
+        LAMP_OVERLAY;
+    }
 }

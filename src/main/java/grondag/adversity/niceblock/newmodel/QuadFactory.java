@@ -317,14 +317,17 @@ public class QuadFactory
             }
         }
         
+        public BakedQuad createNormalQuad()
+        {
+            return createNormalQuad(true);
+        }
+
         /**
          * Use this for block models. Is faster and smaller than (Colored) UnpackedBakedQuads.
          */
-        public BakedQuad createNormalQuad()
+        public BakedQuad createNormalQuad(boolean isShaded)
         {
-
-            float shade = LightUtil.diffuseLight(this.side);
-            int colorOut = shadeColor(color, shade, true);
+            int colorOut = isShaded ? shadeColor(color, LightUtil.diffuseLight(this.side), true) : color;
 
             for (int r = 0; r < this.rotation.index; r++)
             {

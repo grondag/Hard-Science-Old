@@ -35,6 +35,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
@@ -172,7 +173,15 @@ public class NiceBlock extends Block implements IWailaProvider
         return blockModelHelper.dispatcher.canRenderInLayer(layer);
     }
 
-
+    @Override
+    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
+        if(blockModelHelper.hasCustomBrightness()){
+            return blockModelHelper.getMixedBrightnessForBlock(worldIn, pos); 
+        } else {
+            return super.getMixedBrightnessForBlock(worldIn, pos);
+        }
+    }
+    
     @Override
     public boolean isOpaqueCube() {
         //null handling needed here because called during initialization

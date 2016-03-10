@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
@@ -63,4 +64,14 @@ public class HotBasaltHelper extends BlockModelHelper
         return new ModelState().setClientShapeIndex(itemIndex * 16, EnumWorldBlockLayer.TRANSLUCENT.ordinal());
     }
 
+    @Override 
+    public boolean hasCustomBrightness()
+    {
+        return MinecraftForgeClient.getRenderLayer() != EnumWorldBlockLayer.SOLID;
+    }
+    
+    @Override
+    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
+        return 0xFFFFFFFF; 
+    }
 }

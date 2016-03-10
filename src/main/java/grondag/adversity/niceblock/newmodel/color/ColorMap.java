@@ -28,6 +28,7 @@ public class ColorMap
     {
         BASE,
         HIGHLIGHT,
-        BORDER
+        BORDER,
+        LAMP
     }
 }

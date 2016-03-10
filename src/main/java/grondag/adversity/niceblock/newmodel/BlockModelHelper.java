@@ -126,4 +126,16 @@ public abstract class BlockModelHelper
     public boolean isFullCube() {
         return true;
     }
+    
+    public boolean hasCustomBrightness()
+    {
+        return false;
+    }
+    
+    /** won't be called unless hasCustomBrightness is true */
+    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) 
+    {
+        return 0xFFFFFFFF;
+    }
+    
 }
