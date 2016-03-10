@@ -327,7 +327,7 @@ public class QuadFactory
          */
         public BakedQuad createNormalQuad(boolean isShaded)
         {
-            int colorOut = isShaded ? shadeColor(color, LightUtil.diffuseLight(this.side), true) : color;
+            int colorOut = shadeColor(color, isShaded ? LightUtil.diffuseLight(this.side) : 1, true);
 
             for (int r = 0; r < this.rotation.index; r++)
             {

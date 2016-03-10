@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
@@ -82,8 +83,8 @@ public class NiceBlockRegistrar
     public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 2, true));
-    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_2 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2");
-
+    public static final Block BLOCK_COLUMN_SQUARE_2 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2")
+        .setLightLevel(1/15);
     public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_3 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 3, true));
     public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_3 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_3), BaseMaterial.FLEXSTONE, "column_square_3");
@@ -91,7 +92,8 @@ public class NiceBlockRegistrar
     public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_4 = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 4, true),
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 4, true));
-    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_4 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4");
+    public static final Block BLOCK_COLUMN_SQUARE_4 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4")
+            .setLightLevel(1/15);
 
     public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_5 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 5, false));

@@ -81,6 +81,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         QuadInputs quadInputs = new QuadInputs();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
+//        quadInputs.color = 0xFFAAAA00;
         int clientShapeIndex = modelState.getClientShapeIndex(controller.renderLayer.ordinal());
         EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
@@ -88,6 +89,8 @@ public class ColumnSquareModelFactory extends BakedModelFactory
 
         int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
                 ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
+//        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
+//                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : 0xFFFFFF00;
     
         
         List<BakedQuad>[] faceQuads = new List[6];

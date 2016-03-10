@@ -45,7 +45,11 @@ public class BlockColors implements IColorProvider
         newColorMap.setColor(EnumColorMap.HIGHLIGHT,
                 NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.OPPOSITE).getColor(tint) | 0xFF000000);
         
-        Color lampColor = Color.fromHCL(hue.hueDegrees(), tint.chroma, Color.HCL_MAX);
+        Color lampColor = Color.fromHCL(hue.hueDegrees(), Math.min(tint.chroma * 0.65, 25), Color.HCL_MAX);
+        if(lampColor.RGB_int == 0)
+        {
+            Adversity.log.info("whoops hcl" + hue.hueDegrees() + " " + tint.chroma / 2 + " " + Color.HCL_MAX);
+        }
         newColorMap.setColor(EnumColorMap.LAMP, lampColor.RGB_int | 0xFF000000);
 
         return newColorMap;

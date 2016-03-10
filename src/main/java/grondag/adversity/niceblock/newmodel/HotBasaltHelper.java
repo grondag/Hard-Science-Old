@@ -72,6 +72,6 @@ public class HotBasaltHelper extends BlockModelHelper
     
     @Override
     public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
-        return 0xFFFFFFFF; 
+        return 15 << 20 | 15 << 4;
     }
 }
