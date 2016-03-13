@@ -114,26 +114,26 @@ public class QuadFactory
             }
             else if(topFace == Useful.rightOf(this.side, defaultTop))
             {
-                rv0 = new FaceVertex(tv1.y, 1.0F - tv1.x);
-                rv1 = new FaceVertex(tv2.y, 1.0F - tv2.x);
-                rv2 = new FaceVertex(tv3.y, 1.0F - tv3.x);
-                rv3 = new FaceVertex(tv0.y, 1.0F - tv0.x);
+                rv0 = new FaceVertex.Colored(tv1.y, 1.0F - tv1.x, tv1.getColor(this.color));
+                rv1 = new FaceVertex.Colored(tv2.y, 1.0F - tv2.x, tv2.getColor(this.color));
+                rv2 = new FaceVertex.Colored(tv3.y, 1.0F - tv3.x, tv3.getColor(this.color));
+                rv3 = new FaceVertex.Colored(tv0.y, 1.0F - tv0.x, tv0.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 1;
             }
             else if(topFace == Useful.bottomOf(this.side, defaultTop))
             {
-                rv0 = new FaceVertex(1.0F - tv2.x, 1.0F - tv2.y);
-                rv1 = new FaceVertex(1.0F - tv3.x, 1.0F - tv3.y);
-                rv2 = new FaceVertex(1.0F - tv0.x, 1.0F - tv0.y);
-                rv3 = new FaceVertex(1.0F - tv1.x, 1.0F - tv1.y);
+                rv0 = new FaceVertex.Colored(1.0F - tv2.x, 1.0F - tv2.y, tv2.getColor(this.color));
+                rv1 = new FaceVertex.Colored(1.0F - tv3.x, 1.0F - tv3.y, tv3.getColor(this.color));
+                rv2 = new FaceVertex.Colored(1.0F - tv0.x, 1.0F - tv0.y, tv0.getColor(this.color));
+                rv3 = new FaceVertex.Colored(1.0F - tv1.x, 1.0F - tv1.y, tv1.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 2;
             }
             else // left of
             {
-                rv0 = new FaceVertex(1.0F - tv3.y, tv3.x);
-                rv1 = new FaceVertex(1.0F - tv0.y, tv0.x);
-                rv2 = new FaceVertex(1.0F - tv1.y, tv1.x);
-                rv3 = new FaceVertex(1.0F - tv2.y, tv2.x);
+                rv0 = new FaceVertex.Colored(1.0F - tv3.y, tv3.x, tv3.getColor(this.color));
+                rv1 = new FaceVertex.Colored(1.0F - tv0.y, tv0.x, tv0.getColor(this.color));
+                rv2 = new FaceVertex.Colored(1.0F - tv1.y, tv1.x, tv1.getColor(this.color));
+                rv3 = new FaceVertex.Colored(1.0F - tv2.y, tv2.x, tv2.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 3;
             }
             

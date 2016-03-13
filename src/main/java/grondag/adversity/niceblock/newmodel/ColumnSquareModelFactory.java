@@ -127,115 +127,158 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         
         if(modelJoin.isJoined(face))
         {
-            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+            if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
             {
                 //models that have cuts on the edge need privacy panels at corners
-                qi.side = face;
 
                 if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.leftOf(face, topFace)))
                 {
-                    qi.setupFaceQuad(0.0F, 0.0F, cutDepth, 1.0F, 0.0F, topFace);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(face, 0, 1.0F-cutDepth, 1, 1, 0.0F, Useful.leftOf(face, topFace)));
                     builder.add(qi.createNormalQuad());
                 }
                 if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.rightOf(face, topFace)))
                 {
-                    qi.setupFaceQuad(1.0F - cutDepth, 0.0F, 1.0F, 1.0F, 0.0F, topFace);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(face, 0, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, Useful.rightOf(face, topFace)));
                     builder.add(qi.createNormalQuad());
                 }
-                
+
                 //models joined at cap need privacy panels on joined sides for cap cuts that may run into them
                 if(modelJoin.isJoined(topFace))
                 {
-                    qi.setupFaceQuad(this.baseMarginWidth, 0.0F, 1-this.baseMarginWidth, 1.0F, 0.0F, topFace);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(face, this.baseMarginWidth, 1-cutDepth, 1-this.baseMarginWidth, 1.0F, 0.0F, topFace));
                     builder.add(qi.createNormalQuad());
                 }
+
+                if(modelJoin.isJoined(topFace.getOpposite()))
+                {
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(face, this.baseMarginWidth, 1-cutDepth, 1-this.baseMarginWidth, 1.0F, 0.0F, topFace.getOpposite()));
+                    builder.add(qi.createNormalQuad());
+                 }
+
             }
         }
         else
         {
         
-            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+ 
+            //bottom
+            if(bottomCapHeight > 0.0F)
             {
-
-                //bottom
-                if(bottomCapHeight > 0.0F)
+                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
                 {
-                    qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, bottomCapHeight, 0.0F, topFace);
+                   qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, bottomCapHeight, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
-    
-                    if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.leftOf(face, topFace)))
-                    {
-                        //privacy screen
-                        qi.setupFaceQuad(Useful.leftOf(face, topFace), 1.0F - bottomCapHeight, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
-                    if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.rightOf(face, topFace)))
-                    {
-                        //privacy screen
-                        qi.setupFaceQuad(Useful.rightOf(face, topFace), 0.0F, 1.0F - cutDepth, bottomCapHeight, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
-                }              
+                }
                 
-                //top
-                if(topCapHeight > 0.0F)
+                if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.leftOf(face, topFace))
+                        && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
                 {
+                    //privacy screen
+//                    qi.setupFaceQuad(Useful.leftOf(face, topFace), 1.0F - bottomCapHeight, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, face);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(Useful.leftOf(face, topFace), 1.0F - bottomCapHeight, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, face));
+                    builder.add(qi.createNormalQuad());
+                }
+                if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.rightOf(face, topFace))
+                        && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                {
+                    //privacy screen
+//                    qi.setupFaceQuad(Useful.rightOf(face, topFace), 0.0F, 1.0F - cutDepth, bottomCapHeight, 1.0F, 0.0F, face);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(Useful.rightOf(face, topFace), 0.0F, 1.0F - cutDepth, bottomCapHeight, 1.0F, 0.0F, face));
+                    builder.add(qi.createNormalQuad());
+                }
+            }              
+                
+            //top
+            if(topCapHeight > 0.0F)
+            {
+                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                {                
                     qi.setupFaceQuad(face, 0.0F, 1.0F - topCapHeight, 1.0F, 1.0F, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
-                    
-                    if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.leftOf(face, topFace)))
-                    {
-                        //privacy screen
-                        qi.setupFaceQuad(Useful.leftOf(face, topFace), 0.0F, 1.0F - cutDepth, topCapHeight, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
-                    if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.rightOf(face, topFace)))
-                    {
-                        //privacy screen
-                        qi.setupFaceQuad(Useful.rightOf(face, topFace), 1.0F - topCapHeight, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
+                }
+
+                if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.leftOf(face, topFace))
+                        && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                {
+                    //privacy screen
+//                    qi.setupFaceQuad(Useful.leftOf(face, topFace), 0.0F, 1.0F - cutDepth, topCapHeight, 1.0F, 0.0F, face);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(Useful.leftOf(face, topFace), 0.0F, 1.0F - cutDepth, topCapHeight, 1.0F, 0.0F, face));
+                    builder.add(qi.createNormalQuad());
                 }
                 
-                //left margin
-                if(leftMarginWidth > 0)
+                if(myController.areCutsOnEdge && modelJoin.isJoined(Useful.rightOf(face, topFace))
+                        && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
                 {
+                    //privacy screen
+//                    qi.setupFaceQuad(Useful.rightOf(face, topFace), 1.0F - topCapHeight, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, face);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(Useful.rightOf(face, topFace), 1.0F - topCapHeight, 1.0F - cutDepth, 1.0F, 1.0F, 0.0F, face));
+                    builder.add(qi.createNormalQuad());
+                }
+            }
+                
+            //left margin
+            if(leftMarginWidth > 0)
+            {
+                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                {                
                     qi.setupFaceQuad(face, 0.0F, bottomCapHeight, leftMarginWidth, 1.0F - topCapHeight, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
-                    
-                    // privacy screens
-                    if(modelJoin.isJoined(topFace))
-                    {
-                        qi.setupFaceQuad(topFace, 1.0F-leftMarginWidth, 1.0F-cutDepth, 1.0F, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
-                    if(modelJoin.isJoined(topFace.getOpposite()))
-                    {
-                        qi.setupFaceQuad(topFace.getOpposite(), 0.0F, 1.0F-cutDepth, leftMarginWidth, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
                 }
                 
-                // right margin
-                if(rightMarginWidth > 0)
+                // privacy screens
+                if(modelJoin.isJoined(topFace) && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
                 {
+//                    qi.setupFaceQuad(topFace, 1.0F-leftMarginWidth, 1.0F-cutDepth, 1.0F, 1.0F, 0.0F, face);
+//                    setupCutSideQuad(qi, cutColor,
+//                            new SimpleQuadBounds(topFace, 1.0F-leftMarginWidth, 1.0F-cutDepth, 1.0F, 1.0F, 0.0F, face));
+//                    builder.add(qi.createNormalQuad());
+                }
+                if(modelJoin.isJoined(topFace.getOpposite()) && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                {
+//                    qi.setupFaceQuad(topFace.getOpposite(), 0.0F, 1.0F-cutDepth, leftMarginWidth, 1.0F, 0.0F, face);
+//                    setupCutSideQuad(qi, cutColor,
+//                            new SimpleQuadBounds(topFace.getOpposite(), 0.0F, 1.0F-cutDepth, leftMarginWidth, 1.0F, 0.0F, face));
+//                    builder.add(qi.createNormalQuad());
+                }
+            }
+                
+            // right margin
+            if(rightMarginWidth > 0)
+            {
+                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                {                
                     qi.setupFaceQuad(face, 1.0F - rightMarginWidth, bottomCapHeight, 1.0F, 1.0F - topCapHeight, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
-                    
-                    // privacy screens
-                    if(modelJoin.isJoined(topFace))
-                    {
-                        qi.setupFaceQuad(topFace, 0.0F, 1.0F-cutDepth, rightMarginWidth, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
-                    if(modelJoin.isJoined(topFace.getOpposite()))
-                    {
-                        qi.setupFaceQuad(topFace.getOpposite(), 1.0F - rightMarginWidth, 1.0F-cutDepth, 1.0F, 1.0F, 0.0F, face);
-                        builder.add(qi.createNormalQuad());
-                    }
-    
                 }
                 
+                // privacy screens
+                if(modelJoin.isJoined(topFace) && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                {
+//                    qi.setupFaceQuad(topFace, 0.0F, 1.0F-cutDepth, rightMarginWidth, 1.0F, 0.0F, face);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(topFace, 0.0F, 1.0F-cutDepth, rightMarginWidth, 1.0F, 0.0F, face));
+                    builder.add(qi.createNormalQuad());
+                }
+                if(modelJoin.isJoined(topFace.getOpposite()) && myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                {
+//                    qi.setupFaceQuad(topFace.getOpposite(), 1.0F - rightMarginWidth, 1.0F-cutDepth, 1.0F, 1.0F, 0.0F, face);
+                    setupCutSideQuad(qi, cutColor,
+                            new SimpleQuadBounds(topFace.getOpposite(), 1.0F - rightMarginWidth, 1.0F-cutDepth, 1.0F, 1.0F, 0.0F, face));
+                    builder.add(qi.createNormalQuad());
+                }
+
+            }
+            
+            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+            {                
                 //splines
                 for(int i = 0; i < actualCutCount - 1; i++)
                 {
@@ -254,28 +297,32 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                     // left face
                     if(sx0 > 0.0001)
                     {
-                        qi.setupFaceQuad(Useful.rightOf(face, topFace), bottomCapHeight, 1.0F-cutDepth, 1.0F-topCapHeight, 1.0F, 1 - sx0, face);
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(Useful.rightOf(face, topFace), bottomCapHeight, 1.0F-cutDepth, 1.0F-topCapHeight, 1.0F, 1 - sx0, face));
                         builder.add(qi.createNormalQuad());
                     }
         
                     // right face
                     if(sx1 < 0.9999)
                     {
-                        qi.setupFaceQuad(Useful.leftOf(face, topFace), topCapHeight, 1.0F-cutDepth, 1.0F-bottomCapHeight, 1.0F, sx1, face);
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(Useful.leftOf(face, topFace), topCapHeight, 1.0F-cutDepth, 1.0F-bottomCapHeight, 1.0F, sx1, face));
                         builder.add(qi.createNormalQuad());
                     }
                     
                     // top face
                     if(topCapHeight > 0)
                     {
-                        qi.setupFaceQuad(topFace.getOpposite(), sx0, 1.0F-cutDepth, sx1, 1.0F, 1-topCapHeight, face);
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(topFace.getOpposite(), sx0, 1.0F-cutDepth, sx1, 1.0F, 1-topCapHeight, face));
                         builder.add(qi.createNormalQuad());
                     }
         
                     if(bottomCapHeight > 0)
                     {
                         // bottom face
-                        qi.setupFaceQuad(topFace, 1-sx1, 1.0F-cutDepth, 1-sx0, 1.0F, 1-bottomCapHeight, face);
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(topFace, 1-sx1, 1.0F-cutDepth, 1-sx0, 1.0F, 1-bottomCapHeight, face));
                         builder.add(qi.createNormalQuad());
                     }
                 }
