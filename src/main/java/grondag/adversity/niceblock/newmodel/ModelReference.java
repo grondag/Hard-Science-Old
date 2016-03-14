@@ -817,57 +817,58 @@ public class ModelReference
     
     public static class CornerJoin
     {
-        private final static int[] JOIN_STATES = new int[386];
-        private final static int[] BASE_STATES = new int[64];
-        private final static ImmutableList<NeighborBlocks.FaceCorner> [] CORNER_TESTS = new ImmutableList[64];
-        
-        static
-        {
-            int stateIndex = 0;
-            for(int faceBits = 0; faceBits < 64; faceBits++)
-            {
-                BASE_STATES[faceBits] = stateIndex;
-                JOIN_STATES[stateIndex] = faceBits;
-                stateIndex++;
-                
-                ImmutableList.Builder<NeighborBlocks.FaceCorner> builder = new ImmutableList.Builder<NeighborBlocks.FaceCorner>();
-                
-                // max possible number of corner tests would be 12, but no more than 4 are ever needed
-                for(NeighborBlocks.FaceCorner corner : NeighborBlocks.FaceCorner.values())
-                {
-                    int adjacentCount = 0;
-                    int coveredCount = 0;
-                    for (EnumFacing face : EnumFacing.values())
-                    {
-                        //at least one side of the associated axis must be uncovered
-                        if(corner.axis == face.getAxis() && (faceBits & NeighborBlocks.FACE_FLAGS[face.ordinal()]) != 0)
-                        {
-                            coveredCount++;
-                        }
-                        else if(face == corner.face1 || face == corner.face2) 
-                        {
-                            adjacentCount++;
-                        }
-                    }
-                    if(adjacentCount == 2 && coveredCount < 2)
-                    {
-                        builder.add(corner);
-                    }
-                }
-                
-                CORNER_TESTS[faceBits] = builder.build();
-                
-                for(int i = 0; i < (1 << CORNER_TESTS[faceBits].size()); i++)
-                {
-                    JOIN_STATES[stateIndex] = faceBits;
-                    JOIN_STATES[stateIndex] |= (i & 1) != 0 ? CORNER_TESTS[faceBits].get(0).bitFlag : 0;
-                    JOIN_STATES[stateIndex] |= (i & 2) != 0 ? CORNER_TESTS[faceBits].get(1).bitFlag : 0;
-                    JOIN_STATES[stateIndex] |= (i & 4) != 0 ? CORNER_TESTS[faceBits].get(2).bitFlag : 0;
-                    JOIN_STATES[stateIndex] |= (i & 8) != 0 ? CORNER_TESTS[faceBits].get(3).bitFlag : 0;
-                    stateIndex++;
-                }
-            }
-        }
+        public static final int STATE_COUNT = 1 << 18;
+//        private final static int[] JOIN_STATES = new int[386];
+//        private final static int[] BASE_STATES = new int[64];
+//        private final static ImmutableList<NeighborBlocks.FaceCorner> [] CORNER_TESTS = new ImmutableList[64];
+//        
+//        static
+//        {
+//            int stateIndex = 0;
+//            for(int faceBits = 0; faceBits < 64; faceBits++)
+//            {
+//                BASE_STATES[faceBits] = stateIndex;
+//                JOIN_STATES[stateIndex] = faceBits;
+//                stateIndex++;
+//                
+//                ImmutableList.Builder<NeighborBlocks.FaceCorner> builder = new ImmutableList.Builder<NeighborBlocks.FaceCorner>();
+//                
+//                // max possible number of corner tests would be 12, but no more than 4 are ever needed
+//                for(NeighborBlocks.FaceCorner corner : NeighborBlocks.FaceCorner.values())
+//                {
+//                    int adjacentCount = 0;
+//                    int coveredCount = 0;
+//                    for (EnumFacing face : EnumFacing.values())
+//                    {
+//                        //at least one side of the associated axis must be uncovered
+//                        if(corner.axis == face.getAxis() && (faceBits & NeighborBlocks.FACE_FLAGS[face.ordinal()]) != 0)
+//                        {
+//                            coveredCount++;
+//                        }
+//                        else if(face == corner.face1 || face == corner.face2) 
+//                        {
+//                            adjacentCount++;
+//                        }
+//                    }
+//                    if(adjacentCount == 2 && coveredCount < 2)
+//                    {
+//                        builder.add(corner);
+//                    }
+//                }
+//                
+//                CORNER_TESTS[faceBits] = builder.build();
+//                
+//                for(int i = 0; i < (1 << CORNER_TESTS[faceBits].size()); i++)
+//                {
+//                    JOIN_STATES[stateIndex] = faceBits;
+//                    JOIN_STATES[stateIndex] |= (i & 1) != 0 ? CORNER_TESTS[faceBits].get(0).bitFlag : 0;
+//                    JOIN_STATES[stateIndex] |= (i & 2) != 0 ? CORNER_TESTS[faceBits].get(1).bitFlag : 0;
+//                    JOIN_STATES[stateIndex] |= (i & 4) != 0 ? CORNER_TESTS[faceBits].get(2).bitFlag : 0;
+//                    JOIN_STATES[stateIndex] |= (i & 8) != 0 ? CORNER_TESTS[faceBits].get(3).bitFlag : 0;
+//                    stateIndex++;
+//                }
+//            }
+//        }
         
         private final int stateIndex;
         
@@ -881,17 +882,15 @@ public class ModelReference
                     baseStateIndex |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
                 }
             }
-            int baseState = BASE_STATES[baseStateIndex];
             
-            int cornerOffset = 0;
-            for(int i = 0; i < CORNER_TESTS[baseStateIndex].size(); i++)
+            for(NeighborBlocks.FaceCorner corner : NeighborBlocks.FaceCorner.values())
             {
-                if(testResults.result(CORNER_TESTS[baseStateIndex].get(i)))
+                if(testResults.result(corner))
                 {
-                    cornerOffset |= (1 << i);
+                    baseStateIndex |= corner.bitFlag;
                 }
             }
-            this.stateIndex = baseState + cornerOffset;
+            this.stateIndex = baseStateIndex;
         }
         
         public CornerJoin(int index)
@@ -901,7 +900,7 @@ public class ModelReference
         
         public boolean isJoined(EnumFacing face)
         {
-            return (JOIN_STATES[stateIndex] & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
+            return (stateIndex & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
         }
         
         public boolean isCornerPresent(EnumFacing face1, EnumFacing face2)
@@ -911,7 +910,7 @@ public class ModelReference
         
         public boolean isCornerPresent(FaceCorner corner)
         {
-            return (JOIN_STATES[stateIndex] & corner.bitFlag) == corner.bitFlag;
+            return (stateIndex & corner.bitFlag) == corner.bitFlag;
         } 
         
         public int getIndex()
