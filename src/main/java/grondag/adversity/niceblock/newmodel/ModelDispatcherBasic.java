@@ -59,11 +59,14 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
 
     private final ModelControllerNew controller;
 
+    private final boolean isColorCountBiggerThanShapeCount;
+
     public ModelDispatcherBasic(IColorProvider colorProvider, String particleTextureName, ModelControllerNew controller)
     {
         super(colorProvider, particleTextureName);
         this.controller = controller;
         NiceBlockRegistrar.allDispatchers.add(this);
+        this.isColorCountBiggerThanShapeCount = controller.getShapeCount() > colorProvider.getColorCount();
     }
     
     @Override
@@ -82,7 +85,14 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         // need to clear arrays to force rebaking of cached models
         if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
         {
-            bakedBlockModels = new IBakedModel[colorProvider.getColorCount()][];
+            if(isColorCountBiggerThanShapeCount)
+            {
+                bakedBlockModels = new IBakedModel[colorProvider.getColorCount()][];
+            }
+            else
+            {
+                bakedBlockModels = new IBakedModel[controller.getShapeCount()][];
+            }
         }
         else
         {
@@ -110,17 +120,41 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
                 retVal = bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)];
             }
             
+            if(isColorCountBiggerThanShapeCount)
+            {
+                if(bakedBlockModels[modelState.getColorIndex()] != null)
+                {                    
+                    retVal = bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)];
+                }
+            }
+            else if(bakedBlockModels[modelState.getClientShapeIndex(0)] != null)
+            {
+                retVal = bakedBlockModels[modelState.getClientShapeIndex(0)][modelState.getColorIndex()];
+            }
+            
+            
             if (retVal == null)
             {
                 retVal = controller.getBakedModelFactory().getBlockModel(modelState, colorProvider);
 
                 synchronized (bakedBlockModels)
                 {
-                    if(bakedBlockModels[modelState.getColorIndex()] == null)
+                    if(isColorCountBiggerThanShapeCount)
                     {
-                        bakedBlockModels[modelState.getColorIndex()] = new IBakedModel[controller.getShapeCount()];
+                        if(bakedBlockModels[modelState.getColorIndex()] == null)
+                        {
+                            bakedBlockModels[modelState.getColorIndex()] = new IBakedModel[controller.getShapeCount()];
+                        }
+                        bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)] = retVal;
                     }
-                    bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)] = retVal;
+                    else
+                    {
+                        if(bakedBlockModels[modelState.getClientShapeIndex(0)] == null)
+                        {
+                            bakedBlockModels[modelState.getClientShapeIndex(0)] = new IBakedModel[this.colorProvider.getColorCount()];
+                        }
+                        bakedBlockModels[modelState.getClientShapeIndex(0)][modelState.getColorIndex()] = retVal;
+                    }
                 }
             }
         }
