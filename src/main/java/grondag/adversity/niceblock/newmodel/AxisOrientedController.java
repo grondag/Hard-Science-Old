@@ -266,7 +266,7 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
     @Override
     public int getShapeCount()
     {
-        return ModelReference.CornerJoin.STATE_COUNT * 3 * alternateTextureCount;
+        return ModelReference.CornerJoin.getStateCount() * 3 * alternateTextureCount;
         //return 386 * 3 * alternateTextureCount;
     }
 
@@ -284,7 +284,7 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
     
     protected static int getShapeFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex & (ModelReference.CornerJoin.STATE_COUNT - 1));
+        return (clientShapeIndex & (ModelReference.CornerJoin.getStateCount() - 1));
         //return (clientShapeIndex % 386);
     }
 

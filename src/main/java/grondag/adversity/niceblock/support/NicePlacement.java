@@ -6,7 +6,7 @@ import org.apache.commons.lang3.BitField;
 
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.FaceCorner;
+import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.NiceStyle;
@@ -93,7 +93,7 @@ public abstract class NicePlacement {
 		         }
 			}
 
-            for(FaceCorner corner : FaceCorner.values())
+            for(BlockCorner corner : BlockCorner.values())
             {
                 if(results.result(corner))
                 {

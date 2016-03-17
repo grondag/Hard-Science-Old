@@ -1,7 +1,11 @@
 package grondag.adversity;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 //import grondag.adversity.event.CommonEventHandler;
 //import grondag.adversity.event.OreGenEventHandler;
@@ -11,8 +15,12 @@ import net.minecraftforge.common.MinecraftForge;
 import grondag.adversity.feature.volcano.Volcano;
 //import grondag.adversity.world.AdversityWorldProvider;
 //import grondag.adversity.world.AdversityWorldType;
-
+import grondag.adversity.niceblock.newmodel.ModelReference.CornerJoin;
 import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
+import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinState;
+import grondag.adversity.niceblock.newmodel.joinstate.FaceCorner;
+import grondag.adversity.niceblock.newmodel.joinstate.FaceJoinState;
+import grondag.adversity.niceblock.newmodel.joinstate.FaceSide;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -26,7 +34,9 @@ public class CommonProxy {
 
 		Adversity.log = event.getModLog();
 		Config.init(event.getSuggestedConfigurationFile());
-
+		
+		BlockJoinState bjs = BlockJoinState.get(0);
+		
 //		Drylands.preInit(event);
 		Volcano.preInit(event);
 		NiceBlockRegistrar.preInit(event);

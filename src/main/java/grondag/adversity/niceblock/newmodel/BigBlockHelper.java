@@ -3,7 +3,7 @@ package grondag.adversity.niceblock.newmodel;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.PlacementValidatorCubic;
-import grondag.adversity.library.NeighborBlocks.FaceCorner;
+import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.support.NicePlacement;
 
@@ -73,7 +73,7 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
                 }
 
                 // try to avoid corners also if picking a species that won't connect
-                for(FaceCorner corner : FaceCorner.values())
+                for(BlockCorner corner : BlockCorner.values())
                 {
                     if(results.result(corner))
                     {
