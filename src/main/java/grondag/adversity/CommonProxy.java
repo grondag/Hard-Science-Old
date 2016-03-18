@@ -17,7 +17,7 @@ import grondag.adversity.feature.volcano.Volcano;
 //import grondag.adversity.world.AdversityWorldType;
 import grondag.adversity.niceblock.newmodel.ModelReference.CornerJoin;
 import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
-import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinState;
+import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinPrototype;
 import grondag.adversity.niceblock.newmodel.joinstate.FaceCorner;
 import grondag.adversity.niceblock.newmodel.joinstate.FaceJoinState;
 import grondag.adversity.niceblock.newmodel.joinstate.FaceSide;
@@ -35,7 +35,7 @@ public class CommonProxy {
 		Adversity.log = event.getModLog();
 		Config.init(event.getSuggestedConfigurationFile());
 		
-		BlockJoinState bjs = BlockJoinState.get(0);
+		BlockJoinPrototype bjs = BlockJoinPrototype.get(0);
 		
 //		Drylands.preInit(event);
 		Volcano.preInit(event);
