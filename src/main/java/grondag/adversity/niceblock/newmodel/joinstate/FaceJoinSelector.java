@@ -6,7 +6,7 @@ import net.minecraft.util.EnumFacing;
 
 public class FaceJoinSelector
 {
-    private final EnumFacing myFace;
+    public final EnumFacing face;
     
     public final int faceCount;
     public final FaceJoinState[] faceJoins;
@@ -14,7 +14,7 @@ public class FaceJoinSelector
     
     public FaceJoinSelector(EnumFacing face, SimpleJoin baseJoinState)
     {
-        myFace = face;
+        this.face = face;
         faceJoins = FaceJoinState.find(face, baseJoinState).getSubStates();
         this.faceCount = faceJoins.length;
         
@@ -26,7 +26,7 @@ public class FaceJoinSelector
 
     public int getIndexFromNeighbors(NeighborTestResults tests)
     {
-        return joinIndex[FaceJoinState.find(myFace, tests).ordinal()];
+        return joinIndex[FaceJoinState.find(face, tests).ordinal()];
     }
     
     public FaceJoinState getFaceJoinFromIndex(int index)

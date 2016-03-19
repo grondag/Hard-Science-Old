@@ -12,6 +12,10 @@ import grondag.adversity.niceblock.newmodel.QuadFactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.newmodel.QuadFactory.Vertex;
 import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
+import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
+import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector.BlockJoinState;
+import grondag.adversity.niceblock.newmodel.joinstate.FaceJoinState;
+import grondag.adversity.niceblock.newmodel.joinstate.FaceSide;
 import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 
 import java.io.IOException;
@@ -87,7 +91,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         int clientShapeIndex = modelState.getClientShapeIndex(controller.renderLayer.ordinal());
         EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
-        ModelReference.CornerJoin modelJoin = new ModelReference.CornerJoin(myController.getShapeFromModelIndex(clientShapeIndex));
+        BlockJoinState bjs = BlockJoinSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
 
         int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
                 ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
@@ -99,36 +103,35 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         {
             if(face.getAxis() == axis)
             {
-                faceQuads[face.ordinal()] = makeCapFace(face, quadInputs, modelJoin, cutColor, axis);
+                faceQuads[face.ordinal()] = makeCapFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
             }
             else
             {
-                faceQuads[face.ordinal()] = makeSideFace(face, quadInputs, modelJoin, cutColor, axis);
+                faceQuads[face.ordinal()] = makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
             }
         }
         
         return new SimpleCubeModel(faceQuads, controller.isShaded);
     }
 
-    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, ModelReference.CornerJoin modelJoin, int cutColor, EnumFacing.Axis axis)
+    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         
-        if(!modelJoin.isJoined(face))
+        if(fjs != FaceJoinState.NO_FACE)
         {
-
             EnumFacing topFace = ModelReference.getAxisTop(axis);
             int actualCutCount = myController.cutCount;
-            boolean hasLeftJoin = modelJoin.isJoined(Useful.leftOf(face, topFace)) && !modelJoin.isCornerPresent(Useful.leftOf(face, topFace), face);
-            boolean hasRightJoin = modelJoin.isJoined(Useful.rightOf(face, topFace)) && !modelJoin.isCornerPresent(Useful.rightOf(face, topFace), face);
+            boolean hasLeftJoin = fjs.isJoined(Useful.leftOf(face, topFace), face);
+            boolean hasRightJoin = fjs.isJoined(Useful.rightOf(face, topFace), face);
             
             if (hasLeftJoin) actualCutCount++;
             if (hasRightJoin) actualCutCount++;
             
             float leftMarginWidth = hasLeftJoin ? marginOffset * cutWidth : baseMarginWidth;
             float rightMarginWidth = hasRightJoin ? marginOffset * cutWidth : baseMarginWidth;
-            float topCapHeight = modelJoin.isJoined(topFace) && !modelJoin.isCornerPresent(topFace, face) ? 0 : baseMarginWidth;
-            float bottomCapHeight = modelJoin.isJoined(topFace.getOpposite()) && !modelJoin.isCornerPresent(topFace.getOpposite(), face) ? 0 : baseMarginWidth;;
+            float topCapHeight = fjs.isJoined(topFace, face) ? 0 : baseMarginWidth;
+            float bottomCapHeight = fjs.isJoined(topFace.getOpposite(), face) ? 0 : baseMarginWidth;;
             
             //bottom
             if(bottomCapHeight > 0.0F)
@@ -230,50 +233,26 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         return builder.build();
     }
     
-    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, ModelReference.CornerJoin modelJoin, int cutColor, EnumFacing.Axis axis)
+    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)
     {
 
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 
-        if(modelJoin.isJoined(face))
-        {
-//            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-//            {
-//                for(EnumFacing side : EnumFacing.values())
-//                {
-//                    if(side.getAxis() != axis && modelJoin.isJoined(side))
-//                    {
-//                        // privacy screen for cuts
-//                        float minX = !myController.areCutsOnEdge || modelJoin.isJoined(Useful.rightOf(face, side)) ? 0 : cutDepth;
-//                        float maxX = !myController.areCutsOnEdge || modelJoin.isJoined(Useful.leftOf(face, side)) ? 1 : 1-cutDepth;
-//    
-//                        qi.setupFaceQuad(face, 
-//                                new FaceVertex(minX, 0),  
-//                                new FaceVertex(maxX, 0),
-//                                new FaceVertex(maxX, cutDepth), 
-//                                new FaceVertex(minX, cutDepth), 
-//                                0.0F, side.getOpposite());
-//                        builder.add(qi.createNormalQuad());     
-//                    }
-//                }
-//            }
-        }
-        else
+        if(fjs != FaceJoinState.NO_FACE)
         {
 
             if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
             {
                 //cut bottom can be a single poly
-                EnumFacing topFace = Useful.defaultTopOf(face);
                 QuadInputs qiCut = qi.clone();
                 qiCut.color = cutColor; 
                 qiCut.setupFaceQuad(face, 
-                        modelJoin.isJoined(Useful.leftOf(face, topFace)) ? 0 : baseMarginWidth, 
-                        modelJoin.isJoined(Useful.bottomOf(face, topFace)) ? 0 : baseMarginWidth, 
-                        modelJoin.isJoined(Useful.rightOf(face, topFace)) ? 1 : 1-baseMarginWidth, 
-                        modelJoin.isJoined(topFace) ? 1 : 1-baseMarginWidth, 
+                        fjs.isJoined(FaceSide.LEFT) ? 0 : baseMarginWidth, 
+                        fjs.isJoined(FaceSide.BOTTOM) ? 0 : baseMarginWidth, 
+                        fjs.isJoined(FaceSide.RIGHT) ? 1 : 1-baseMarginWidth, 
+                        fjs.isJoined(FaceSide.TOP) ? 1 : 1-baseMarginWidth, 
                         cutDepth, 
-                        topFace);
+                        FaceSide.TOP.getRelativeFace(face));
                 builder.add(qiCut.createNormalQuad());
             }
 
@@ -281,156 +260,156 @@ public class ColumnSquareModelFactory extends BakedModelFactory
             // build quarter slice of cap for each side separately
             // specifications below are oriented with the side at top of cap face
 
-            for(EnumFacing side : EnumFacing.values())
+            for(FaceSide joinSide : FaceSide.values())
             {
-               if(side.getAxis() != axis)
-               {
-                    
-                   if(modelJoin.isJoined(side) && !modelJoin.isCornerPresent(face, side))
-                   {
-                       //This side is joined, so connect cuts to other block on this side.
-                       
-                       if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-                       {
-                           // margin corner faces
-                           qi.setupFaceQuad(face, 
-                                   new FaceVertex(baseMarginWidth, 1-baseMarginWidth),
-                                   new FaceVertex(baseMarginWidth, 1-baseMarginWidth),
-                                   new FaceVertex(baseMarginWidth, 1),
-                                   new FaceVertex(0, 1), 
-                                   0.0F, side);
-                           builder.add(qi.createNormalQuad());
-                           qi.setupFaceQuad(face, 
-                                   new FaceVertex(1-baseMarginWidth, 1),  
-                                   new FaceVertex(1-baseMarginWidth, 1),
-                                   new FaceVertex(1-baseMarginWidth, 1-baseMarginWidth), 
-                                   new FaceVertex(1, 1), 
-                                   0.0F, side);
-                           builder.add(qi.createNormalQuad());                
-                       }
-                       
-                       if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
-                       {
-                           // margin corner sides
-                           setupCutSideQuad(qi, cutColor, 
-                                   new SimpleQuadBounds(Useful.rightOf(face, side), 1-baseMarginWidth, 1-cutDepth, 1, 1, 1-baseMarginWidth, face));
-                           builder.add(qi.createNormalQuad());
- 
-                           setupCutSideQuad(qi, cutColor, 
-                                   new SimpleQuadBounds(Useful.leftOf(face, side), 0, 1-cutDepth, baseMarginWidth, 1, 1-baseMarginWidth, face));
-                           builder.add(qi.createNormalQuad());
-                       }
-                       
-                       //splines
-                       for (int i = 0; i < myController.cutCount / 2; i++)
-                       {
-                           float xLeft = baseMarginWidth + (i * 2 + 1) * this.cutWidth;
-                           float xRight = Math.min(xLeft + cutWidth, 0.5F);
 
-                           if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-                           {
-                               qi.setupFaceQuad(face, 
-                                       new FaceVertex(xLeft, 1-xLeft),  
-                                       new FaceVertex(xRight, 1-xRight),
-                                       new FaceVertex(xRight, 1), 
-                                       new FaceVertex(xLeft, 1), 
-                                       0.0F, side);
-                               builder.add(qi.createNormalQuad());
-                               // mirror on right side, reverse winding order
-                               builder.add(qi.createNormalQuad());                             
-                               qi.setupFaceQuad(face, 
-                                       new FaceVertex(1-xRight, 1-xRight),  
-                                       new FaceVertex(1-xLeft, 1-xLeft),
-                                       new FaceVertex(1-xLeft, 1), 
-                                       new FaceVertex(1-xRight, 1), 
-                                       0.0F, side);
-                               builder.add(qi.createNormalQuad());
-                           }
+                EnumFacing side = joinSide.getRelativeFace(face);
+                
+                if(fjs.isJoined(joinSide))
+                {
+                    //This side is joined, so connect cuts to other block on this side.
 
-                           if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
-                           {
-                               // cut sides
-                               
-                               // with odd number of cuts, these overlap in middle, avoid with this check
-                               if(xLeft < 0.49999)
-                               {
-                                   setupCutSideQuad(qi, cutColor, 
-                                           new SimpleQuadBounds(Useful.leftOf(face, side), 0, 1-cutDepth, xLeft, 1, xLeft, face));
-                                   builder.add(qi.createNormalQuad());
-                                   
-                                   setupCutSideQuad(qi, cutColor, 
-                                           new SimpleQuadBounds(Useful.rightOf(face, side), 1-xLeft, 1-cutDepth, 1, 1, xLeft, face));
-                                   builder.add(qi.createNormalQuad());
-                               }
-                               if(xRight < 0.49999)
-                               {
-                                   setupCutSideQuad(qi, cutColor, 
-                                           new SimpleQuadBounds(Useful.rightOf(face, side), 1-xRight, 1-cutDepth, 1, 1, 1-xRight, face));
-                                   builder.add(qi.createNormalQuad());
-                    
-                                   setupCutSideQuad(qi, cutColor, 
-                                           new SimpleQuadBounds(Useful.leftOf(face, side), 0, 1-cutDepth, xRight, 1, 1-xRight, face));
-                                  
-                                   builder.add(qi.createNormalQuad());
-                               }
-                           }
-                       }
-                   }
-                   else  
-                   {    
-                       // This side isn't joined, so don't connect cuts to other block on this side.
-                       
-                       if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE) 
-                       {
-                            // outer face
-                            qi.setupFaceQuad(face, 
-                                    new FaceVertex(baseMarginWidth, 1-baseMarginWidth),  
-                                    new FaceVertex(1-baseMarginWidth, 1-baseMarginWidth),
-                                    new FaceVertex(1, 1), 
-                                    new FaceVertex(0, 1), 
-                                    0.0F, side);
-                            builder.add(qi.createNormalQuad());   
-                       }
-                        
-                       if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
-                       {
-                            // outer cut sides
-                            for(int i = 0; i < (myController.cutCount + 1) / 2; i++)
-                            {
-                                float offset = baseMarginWidth + (cutWidth * 2.0F * i);
-                    
-                                setupCutSideQuad(qi, cutColor,
-                                        new SimpleQuadBounds(side.getOpposite(), offset, 1-cutDepth, 1-offset, 1.0F, 1-offset, face));
-                                builder.add(qi.createNormalQuad());
-                                
-                            }
-                       }
-                        
-                        for(int i = 0; i < myController.cutCount / 2; i++)
+                    if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                    {
+                        // margin corner faces
+                        qi.setupFaceQuad(face, 
+                                new FaceVertex(baseMarginWidth, 1-baseMarginWidth),
+                                new FaceVertex(baseMarginWidth, 1-baseMarginWidth),
+                                new FaceVertex(baseMarginWidth, 1),
+                                new FaceVertex(0, 1), 
+                                0.0F, side);
+                        builder.add(qi.createNormalQuad());
+                        qi.setupFaceQuad(face, 
+                                new FaceVertex(1-baseMarginWidth, 1),  
+                                new FaceVertex(1-baseMarginWidth, 1),
+                                new FaceVertex(1-baseMarginWidth, 1-baseMarginWidth), 
+                                new FaceVertex(1, 1), 
+                                0.0F, side);
+                        builder.add(qi.createNormalQuad());                
+                    }
+
+                    if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                    {
+                        // margin corner sides
+                        setupCutSideQuad(qi, cutColor, 
+                                new SimpleQuadBounds(Useful.rightOf(face, side), 1-baseMarginWidth, 1-cutDepth, 1, 1, 1-baseMarginWidth, face));
+                        builder.add(qi.createNormalQuad());
+
+                        setupCutSideQuad(qi, cutColor, 
+                                new SimpleQuadBounds(Useful.leftOf(face, side), 0, 1-cutDepth, baseMarginWidth, 1, 1-baseMarginWidth, face));
+                        builder.add(qi.createNormalQuad());
+                    }
+
+                    //splines
+                    for (int i = 0; i < myController.cutCount / 2; i++)
+                    {
+                        float xLeft = baseMarginWidth + (i * 2 + 1) * this.cutWidth;
+                        float xRight = Math.min(xLeft + cutWidth, 0.5F);
+
+                        if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
                         {
-                            float offset = baseMarginWidth + (cutWidth * (2.0F * i + 1));
-                            
-                            if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                            qi.setupFaceQuad(face, 
+                                    new FaceVertex(xLeft, 1-xLeft),  
+                                    new FaceVertex(xRight, 1-xRight),
+                                    new FaceVertex(xRight, 1), 
+                                    new FaceVertex(xLeft, 1), 
+                                    0.0F, side);
+                            builder.add(qi.createNormalQuad());
+                            // mirror on right side, reverse winding order
+                            builder.add(qi.createNormalQuad());                             
+                            qi.setupFaceQuad(face, 
+                                    new FaceVertex(1-xRight, 1-xRight),  
+                                    new FaceVertex(1-xLeft, 1-xLeft),
+                                    new FaceVertex(1-xLeft, 1), 
+                                    new FaceVertex(1-xRight, 1), 
+                                    0.0F, side);
+                            builder.add(qi.createNormalQuad());
+                        }
+
+                        if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                        {
+                            // cut sides
+
+                            // with odd number of cuts, these overlap in middle, avoid with this check
+                            if(xLeft < 0.49999)
                             {
-                                // inner cut sides
-                                setupCutSideQuad(qi, cutColor,
-                                        new SimpleQuadBounds(side, offset, 1-cutDepth, 1-offset, 1.0F, offset, face));
+                                setupCutSideQuad(qi, cutColor, 
+                                        new SimpleQuadBounds(Useful.leftOf(face, side), 0, 1-cutDepth, xLeft, 1, xLeft, face));
+                                builder.add(qi.createNormalQuad());
+
+                                setupCutSideQuad(qi, cutColor, 
+                                        new SimpleQuadBounds(Useful.rightOf(face, side), 1-xLeft, 1-cutDepth, 1, 1, xLeft, face));
                                 builder.add(qi.createNormalQuad());
                             }
-
-                            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                            if(xRight < 0.49999)
                             {
-                                // spline / center
-                                qi.setupFaceQuad(face, 
-                                        new FaceVertex(offset+cutWidth, 1-offset-cutWidth),  
-                                        new FaceVertex(1-offset-cutWidth, 1-offset-cutWidth),
-                                        new FaceVertex(1-offset, 1-offset), 
-                                        new FaceVertex(offset, 1-offset), 
-                                        0.0F, side);
-                                builder.add(qi.createNormalQuad());  
+                                setupCutSideQuad(qi, cutColor, 
+                                        new SimpleQuadBounds(Useful.rightOf(face, side), 1-xRight, 1-cutDepth, 1, 1, 1-xRight, face));
+                                builder.add(qi.createNormalQuad());
+
+                                setupCutSideQuad(qi, cutColor, 
+                                        new SimpleQuadBounds(Useful.leftOf(face, side), 0, 1-cutDepth, xRight, 1, 1-xRight, face));
+
+                                builder.add(qi.createNormalQuad());
                             }
                         }
-                   }
+                    }
+                }
+                else  
+                {    
+                    // This side isn't joined, so don't connect cuts to other block on this side.
+
+                    if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE) 
+                    {
+                        // outer face
+                        qi.setupFaceQuad(face, 
+                                new FaceVertex(baseMarginWidth, 1-baseMarginWidth),  
+                                new FaceVertex(1-baseMarginWidth, 1-baseMarginWidth),
+                                new FaceVertex(1, 1), 
+                                new FaceVertex(0, 1), 
+                                0.0F, side);
+                        builder.add(qi.createNormalQuad());   
+                    }
+
+                    if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                    {
+                        // outer cut sides
+                        for(int i = 0; i < (myController.cutCount + 1) / 2; i++)
+                        {
+                            float offset = baseMarginWidth + (cutWidth * 2.0F * i);
+
+                            setupCutSideQuad(qi, cutColor,
+                                    new SimpleQuadBounds(side.getOpposite(), offset, 1-cutDepth, 1-offset, 1.0F, 1-offset, face));
+                            builder.add(qi.createNormalQuad());
+
+                        }
+                    }
+
+                    for(int i = 0; i < myController.cutCount / 2; i++)
+                    {
+                        float offset = baseMarginWidth + (cutWidth * (2.0F * i + 1));
+
+                        if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
+                        {
+                            // inner cut sides
+                            setupCutSideQuad(qi, cutColor,
+                                    new SimpleQuadBounds(side, offset, 1-cutDepth, 1-offset, 1.0F, offset, face));
+                            builder.add(qi.createNormalQuad());
+                        }
+
+                        if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                        {
+                            // spline / center
+                            qi.setupFaceQuad(face, 
+                                    new FaceVertex(offset+cutWidth, 1-offset-cutWidth),  
+                                    new FaceVertex(1-offset-cutWidth, 1-offset-cutWidth),
+                                    new FaceVertex(1-offset, 1-offset), 
+                                    new FaceVertex(offset, 1-offset), 
+                                    0.0F, side);
+                            builder.add(qi.createNormalQuad());  
+                        }
+
+                    }
                 }
             }
         }

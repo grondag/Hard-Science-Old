@@ -2,15 +2,14 @@ package grondag.adversity.niceblock.newmodel.joinstate;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.newmodel.ModelReference.CornerJoin;
 import grondag.adversity.niceblock.newmodel.ModelReference.SimpleJoin;
 import net.minecraft.util.EnumFacing;
 
 public class BlockJoinSelector
 {
     // STATIC MEMBERS START
-
-    private static final BlockJoinState BLOCK_JOIN_STATES[] = new BlockJoinState[20115];
+    public static final int BLOCK_JOIN_STATE_COUNT = 20115;
+    private static final BlockJoinState BLOCK_JOIN_STATES[] = new BlockJoinState[BLOCK_JOIN_STATE_COUNT];
     private static final BlockJoinSelector BLOCK_JOIN_SELECTOR[] = new BlockJoinSelector[64];
     
     static
@@ -29,8 +28,6 @@ public class BlockJoinSelector
 
             firstIndex += BLOCK_JOIN_SELECTOR[i].getStateCount();
         }
-        
-        Adversity.log.info("firstIndex=" + firstIndex);
     }
     
     public static int findIndex(NeighborTestResults tests)
@@ -71,26 +68,38 @@ public class BlockJoinSelector
     
     private int getIndexFromNeighbors(NeighborTestResults tests)
     {
-        int index = 1;
+        int index = 0;
         int shift = 1;
         for(EnumFacing face : EnumFacing.values())
         {
-            index += shift * faceSelector[face.ordinal()].getIndexFromNeighbors(tests);
-            shift *= faceSelector[face.ordinal()].faceCount;
+            if(faceSelector[face.ordinal()].faceCount > 1)
+            {
+                index += shift * faceSelector[face.ordinal()].getIndexFromNeighbors(tests);
+                shift *= faceSelector[face.ordinal()].faceCount;
+            }
         }
-        return index;
+        return index + firstIndex;
     }
     
     private BlockJoinState getJoinFromIndex(int index)
     {
         int shift = 1;
+        int localIndex = index - firstIndex;
+        
         BlockJoinState retVal = new BlockJoinState();
         
         for(EnumFacing face : EnumFacing.values())
         {
-            int faceIndex = (index / shift) % faceSelector[face.ordinal()].faceCount;
-            retVal.setFaceJoinState(face, faceSelector[face.ordinal()].getFaceJoinFromIndex(faceIndex));
-            shift *= faceSelector[face.ordinal()].faceCount;
+            if(faceSelector[face.ordinal()].faceCount == 1)
+            {
+                retVal.setFaceJoinState(face, faceSelector[face.ordinal()].getFaceJoinFromIndex(0));
+            }
+            else
+            {
+                int faceIndex = (localIndex / shift) % faceSelector[face.ordinal()].faceCount;
+                retVal.setFaceJoinState(face, faceSelector[face.ordinal()].getFaceJoinFromIndex(faceIndex));
+                shift *= faceSelector[face.ordinal()].faceCount;
+            }
         }       
 
         return retVal;

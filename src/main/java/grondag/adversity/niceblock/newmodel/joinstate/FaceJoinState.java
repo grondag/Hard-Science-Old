@@ -198,6 +198,12 @@ public enum FaceJoinState
         return (this.bitFlags & side.bitFlag) == side.bitFlag;
     }
     
+    public boolean isJoined(EnumFacing toFace, EnumFacing onFace)
+    {
+        FaceSide side = FaceSide.lookup(toFace, onFace);
+        return side == null ? false : this.isJoined(side);
+    }
+    
     public boolean isCornerPresent(FaceCorner corner)
     {
         return ((this.bitFlags >> 4) & corner.bitFlag) == corner.bitFlag;

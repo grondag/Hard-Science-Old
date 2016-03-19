@@ -734,179 +734,179 @@ public class ModelReference
         }
     }
     
-    public static class AxisJoin
-    {
-        
-        private final byte joins;
-        public final EnumFacing.Axis axis;
-        
-        public AxisJoin(NeighborBlocks.NeighborTestResults testResults, EnumFacing.Axis axis)
-        {
-            byte j = 0;
-            this.axis = axis;
-            
-            for(EnumFacing face : EnumFacing.values())
-            {
-                if(testResults.result(face))
-                {
-                    // Like a simple join, except along axis connections
-                    // adjacent faces must also connect (or not) consistently.
-                    boolean isConsistent = true;
-                    
-//                    if(face.getAxis() == this.axis)
-//                    {
-//                        for(EnumFacing adjacent : EnumFacing.values())
-//                        {
-//                            if(adjacent.getAxis() != face.getAxis())
-//                            {
-//                                // side face
-//                                
-//                                // verify that side face is same adjacent and on connecting
-//                                if (testResults.result(adjacent) != testResults.result(face, adjacent))
-//                                {
-//                                    isConsistent = false;
-//                                    break;
-//                                }
+//    public static class AxisJoin
+//    {
+//        
+//        private final byte joins;
+//        public final EnumFacing.Axis axis;
+//        
+//        public AxisJoin(NeighborBlocks.NeighborTestResults testResults, EnumFacing.Axis axis)
+//        {
+//            byte j = 0;
+//            this.axis = axis;
+//            
+//            for(EnumFacing face : EnumFacing.values())
+//            {
+//                if(testResults.result(face))
+//                {
+//                    // Like a simple join, except along axis connections
+//                    // adjacent faces must also connect (or not) consistently.
+//                    boolean isConsistent = true;
+//                    
+////                    if(face.getAxis() == this.axis)
+////                    {
+////                        for(EnumFacing adjacent : EnumFacing.values())
+////                        {
+////                            if(adjacent.getAxis() != face.getAxis())
+////                            {
+////                                // side face
 ////                                
-////                                // verify that corner is same on connecting
-////                                EnumFacing right = adjacent.rotateAround(axis);
-////                                if (testResults.result(adjacent, right) != testResults.result(face, adjacent, right))
+////                                // verify that side face is same adjacent and on connecting
+////                                if (testResults.result(adjacent) != testResults.result(face, adjacent))
 ////                                {
 ////                                    isConsistent = false;
 ////                                    break;
 ////                                }
-//                                
-//                            }
-//                        }
-//                    }
-//                    else
+//////                                
+//////                                // verify that corner is same on connecting
+//////                                EnumFacing right = adjacent.rotateAround(axis);
+//////                                if (testResults.result(adjacent, right) != testResults.result(face, adjacent, right))
+//////                                {
+//////                                    isConsistent = false;
+//////                                    break;
+//////                                }
+////                                
+////                            }
+////                        }
+////                    }
+////                    else
+////                    {
+////                        EnumFacing side1 = face.rotateAround(this.axis);
+////                        EnumFacing side2 = side1.getOpposite();
+////                        if(testResults.result(side1) != testResults.result(face, side1) || testResults.result(side2) != testResults.result(face, side2))
+////                        {
+////                            isConsistent = false;
+////                        }
+////                    }
+//                    
+//                    if(isConsistent)
 //                    {
-//                        EnumFacing side1 = face.rotateAround(this.axis);
-//                        EnumFacing side2 = side1.getOpposite();
-//                        if(testResults.result(side1) != testResults.result(face, side1) || testResults.result(side2) != testResults.result(face, side2))
-//                        {
-//                            isConsistent = false;
-//                        }
+//                        j |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
 //                    }
-                    
-                    if(isConsistent)
-                    {
-                        j |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
-                    }
-                }
-            }
-            this.joins = j;
-        }
-        
-        public AxisJoin(int index, EnumFacing.Axis axis)
-        {
-            this.joins = (byte)index;
-            this.axis = axis;
-        }
-        
-        public boolean isJoined(EnumFacing face)
-        {
-            return (joins & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
-        }
-        
-        public int getIndex()
-        {
-            return (int) joins;
-        }
-    }
+//                }
+//            }
+//            this.joins = j;
+//        }
+//        
+//        public AxisJoin(int index, EnumFacing.Axis axis)
+//        {
+//            this.joins = (byte)index;
+//            this.axis = axis;
+//        }
+//        
+//        public boolean isJoined(EnumFacing face)
+//        {
+//            return (joins & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
+//        }
+//        
+//        public int getIndex()
+//        {
+//            return (int) joins;
+//        }
+//    }
     
     
-    public static class CornerJoin
-    {
-        protected int stateIndex;
-        
-        public CornerJoin(NeighborTestResults testResults)
-        {
-            stateIndex = 0;
-            for(EnumFacing face : EnumFacing.values())
-            {
-                if(testResults.result(face))
-                {
-                    stateIndex |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
-                }
-            }
-            
-            for(NeighborBlocks.BlockCorner corner : NeighborBlocks.BlockCorner.values())
-            {
-                if(testResults.result(corner))
-                {
-                    stateIndex |= corner.bitFlag;
-                }
-            }
-        }
-        
-        public CornerJoin(int index)
-        {
-            this.stateIndex = index;
-        }
-        
-        public static int getStateCount()
-        {
-            return 1 << 18;
-        }
-        
-        public boolean isJoined(EnumFacing face)
-        {
-            return (stateIndex & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
-        }
-        
-        public boolean isCornerPresent(EnumFacing face1, EnumFacing face2)
-        {
-            return isCornerPresent(BlockCorner.find(face1, face2));
-        } 
-        
-        public boolean isCornerPresent(BlockCorner corner)
-        {
-            return (stateIndex & corner.bitFlag) == corner.bitFlag;
-        } 
-        
-        public int getIndex()
-        {
-            return stateIndex;
-        }
-        
-        public static class Far extends CornerJoin
-        {
-            public Far(NeighborTestResults testResults)
-            {
-                super(testResults);
-
-                
-                for(NeighborBlocks.FarCorner farCorner : NeighborBlocks.FarCorner.values())
-                {
-                    if(testResults.result(farCorner))
-                    {
-                        stateIndex |= farCorner.bitFlag;
-                    }
-                }
-            }
-            
-            public Far(int index)
-            {
-                super(index);
-            }
-            
-            public static int getStateCount()
-            {
-                return 1 << 26;
-            }
-            
-            public boolean isCornerPresent(EnumFacing face1, EnumFacing face2, EnumFacing face3)
-            {
-                return isCornerPresent(FarCorner.find(face1, face2, face3));
-            } 
-            
-            public boolean isCornerPresent(FarCorner corner)
-            {
-                return (stateIndex & corner.bitFlag) == corner.bitFlag;
-            } 
-        }
-    }
+//    public static class CornerJoin
+//    {
+//        protected int stateIndex;
+//        
+//        public CornerJoin(NeighborTestResults testResults)
+//        {
+//            stateIndex = 0;
+//            for(EnumFacing face : EnumFacing.values())
+//            {
+//                if(testResults.result(face))
+//                {
+//                    stateIndex |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
+//                }
+//            }
+//            
+//            for(NeighborBlocks.BlockCorner corner : NeighborBlocks.BlockCorner.values())
+//            {
+//                if(testResults.result(corner))
+//                {
+//                    stateIndex |= corner.bitFlag;
+//                }
+//            }
+//        }
+//        
+//        public CornerJoin(int index)
+//        {
+//            this.stateIndex = index;
+//        }
+//        
+//        public static int getStateCount()
+//        {
+//            return 1 << 18;
+//        }
+//        
+//        public boolean isJoined(EnumFacing face)
+//        {
+//            return (stateIndex & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
+//        }
+//        
+//        public boolean isCornerPresent(EnumFacing face1, EnumFacing face2)
+//        {
+//            return isCornerPresent(BlockCorner.find(face1, face2));
+//        } 
+//        
+//        public boolean isCornerPresent(BlockCorner corner)
+//        {
+//            return (stateIndex & corner.bitFlag) == corner.bitFlag;
+//        } 
+//        
+//        public int getIndex()
+//        {
+//            return stateIndex;
+//        }
+//        
+//        public static class Far extends CornerJoin
+//        {
+//            public Far(NeighborTestResults testResults)
+//            {
+//                super(testResults);
+//
+//                
+//                for(NeighborBlocks.FarCorner farCorner : NeighborBlocks.FarCorner.values())
+//                {
+//                    if(testResults.result(farCorner))
+//                    {
+//                        stateIndex |= farCorner.bitFlag;
+//                    }
+//                }
+//            }
+//            
+//            public Far(int index)
+//            {
+//                super(index);
+//            }
+//            
+//            public static int getStateCount()
+//            {
+//                return 1 << 26;
+//            }
+//            
+//            public boolean isCornerPresent(EnumFacing face1, EnumFacing face2, EnumFacing face3)
+//            {
+//                return isCornerPresent(FarCorner.find(face1, face2, face3));
+//            } 
+//            
+//            public boolean isCornerPresent(FarCorner corner)
+//            {
+//                return (stateIndex & corner.bitFlag) == corner.bitFlag;
+//            } 
+//        }
+//    }
     
     public static EnumFacing getAxisTop(EnumFacing.Axis axis)
     {

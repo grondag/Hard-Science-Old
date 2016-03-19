@@ -12,6 +12,7 @@ import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.newmodel.AxisOrientedController.ModelType;
+import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import com.google.common.collect.ImmutableList;
@@ -253,39 +254,32 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
         int axis = Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(new BlockTests.TestForBlockMetaMatch(state));
         
-//        int shapeIndex = new ModelReference.AxisJoin(tests, EnumFacing.Axis.values()[axis]).getIndex();
-        int shapeIndex = new ModelReference.CornerJoin(tests).getIndex();
+        int shapeIndex = BlockJoinSelector.findIndex(tests);
         
-        // int shapeIndex = SHAPE_INDEX_LOOKUPS[axis][tests.upBit()][tests.downBit()][tests.eastBit()][tests.westBit()][tests.northBit()][tests.southBit()];
         int textureAlternate = this.alternator.getAlternate(pos);
 
-        return (textureAlternate * 3 + axis) << 18 | shapeIndex;
-        //return (textureAlternate * 3 + axis) << 386 | shapeIndex;
+        return (textureAlternate * 3 + axis) * BlockJoinSelector.BLOCK_JOIN_STATE_COUNT + shapeIndex;
     }
 
     @Override
     public int getShapeCount()
     {
-        return ModelReference.CornerJoin.getStateCount() * 3 * alternateTextureCount;
-        //return 386 * 3 * alternateTextureCount;
+        return BlockJoinSelector.BLOCK_JOIN_STATE_COUNT * 3 * alternateTextureCount;
     }
 
     protected static int getAxisFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex >> 18) % 3;
-        //return (clientShapeIndex / 386) % 3;
+        return (clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) % 3;
     }
 
     protected static int getTextureFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex >> 18) / 3;
-        //return (clientShapeIndex / 386) / 3;
+        return (clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) / 3;
     }
     
     protected static int getShapeFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex & (ModelReference.CornerJoin.getStateCount() - 1));
-        //return (clientShapeIndex % 386);
+        return (clientShapeIndex % BlockJoinSelector.BLOCK_JOIN_STATE_COUNT);
     }
 
 //    static

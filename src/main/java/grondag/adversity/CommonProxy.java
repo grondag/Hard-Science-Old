@@ -15,13 +15,7 @@ import java.util.HashSet;
 import grondag.adversity.feature.volcano.Volcano;
 //import grondag.adversity.world.AdversityWorldProvider;
 //import grondag.adversity.world.AdversityWorldType;
-import grondag.adversity.niceblock.newmodel.ModelReference.CornerJoin;
 import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
-import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
-import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector.BlockJoinState;
-import grondag.adversity.niceblock.newmodel.joinstate.FaceCorner;
-import grondag.adversity.niceblock.newmodel.joinstate.FaceJoinState;
-import grondag.adversity.niceblock.newmodel.joinstate.FaceSide;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -35,19 +29,6 @@ public class CommonProxy {
 
 		Adversity.log = event.getModLog();
 		Config.init(event.getSuggestedConfigurationFile());
-		
-		for(int i = 0; i < 20115; i++)
-		{
-		    BlockJoinState bjs = BlockJoinSelector.getJoinState(i);
-		    Adversity.log.info(bjs.getFaceJoinState(EnumFacing.UP).name() + ", " 
-		            + bjs.getFaceJoinState(EnumFacing.DOWN).name() + ", "
-                    + bjs.getFaceJoinState(EnumFacing.EAST).name() + ", "
-                    + bjs.getFaceJoinState(EnumFacing.WEST).name() + ", "
-                    + bjs.getFaceJoinState(EnumFacing.NORTH).name() + ", "
-                    + bjs.getFaceJoinState(EnumFacing.SOUTH).name()
-		            );
-		    
-		}
 		
 //		Drylands.preInit(event);
 		Volcano.preInit(event);
