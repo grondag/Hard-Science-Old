@@ -204,8 +204,19 @@ public enum FaceJoinState
         return side == null ? false : this.isJoined(side);
     }
     
-    public boolean isCornerPresent(FaceCorner corner)
+    /**
+     * True if connected-texture/shape blocks need to render corner due
+     * to missing/covered block in adjacent corner.
+     */
+    public boolean needsCorner(FaceCorner corner)
     {
         return ((this.bitFlags >> 4) & corner.bitFlag) == corner.bitFlag;
+    }
+    
+    public boolean needsCorner(EnumFacing face1, EnumFacing face2, EnumFacing onFace)
+    {
+        FaceSide side1 = FaceSide.lookup(face1, onFace);
+        FaceSide side2 = FaceSide.lookup(face2, onFace);
+        return side1 == null || side2 == null ? false : this.needsCorner(FaceCorner.find(side1, side2));
     }
 }

@@ -121,64 +121,87 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         if(fjs != FaceJoinState.NO_FACE)
         {
             EnumFacing topFace = ModelReference.getAxisTop(axis);
+            EnumFacing bottomFace = topFace.getOpposite();
+            EnumFacing leftFace = Useful.leftOf(face, topFace);
+            EnumFacing rightFace = Useful.rightOf(face, topFace);
+            
             int actualCutCount = myController.cutCount;
-            boolean hasLeftJoin = fjs.isJoined(Useful.leftOf(face, topFace), face);
-            boolean hasRightJoin = fjs.isJoined(Useful.rightOf(face, topFace), face);
+            
+            boolean hasLeftJoin = fjs.isJoined(leftFace, face);
+            boolean hasRightJoin = fjs.isJoined(rightFace, face);
+            boolean hasTopJoin = fjs.isJoined(topFace, face);
+            boolean hasBottomJoin = fjs.isJoined(bottomFace, face);
             
             if (hasLeftJoin) actualCutCount++;
             if (hasRightJoin) actualCutCount++;
             
             float leftMarginWidth = hasLeftJoin ? marginOffset * cutWidth : baseMarginWidth;
             float rightMarginWidth = hasRightJoin ? marginOffset * cutWidth : baseMarginWidth;
-            float topCapHeight = fjs.isJoined(topFace, face) ? 0 : baseMarginWidth;
-            float bottomCapHeight = fjs.isJoined(topFace.getOpposite(), face) ? 0 : baseMarginWidth;;
+            float topCapHeight = hasTopJoin ? 0 : baseMarginWidth;
+            float bottomCapHeight = hasBottomJoin ? 0 : baseMarginWidth;;
             
-            //bottom
-            if(bottomCapHeight > 0.0F)
+            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
             {
-                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
+                //bottom
+                if(!hasBottomJoin)
                 {
-                   qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, bottomCapHeight, 0.0F, topFace);
+                    qi.setupFaceQuad(face, 0.0F, 0.0F, 1.0F, bottomCapHeight, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
-                }
-            }              
-                
-            //top
-            if(topCapHeight > 0.0F)
-            {
-                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-                {                
+                }              
+
+                //top
+                if(!hasTopJoin)
+                {
                     qi.setupFaceQuad(face, 0.0F, 1.0F - topCapHeight, 1.0F, 1.0F, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
                 }
-            }
-                
-            //left margin
-            if(leftMarginWidth > 0)
-            {
-                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-                {                
+
+                //left margin
+                if(leftMarginWidth > 0)
+                {
                     qi.setupFaceQuad(face, 0.0F, bottomCapHeight, leftMarginWidth, 1.0F - topCapHeight, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
                 }
-            }
-                
-            // right margin
-            if(rightMarginWidth > 0)
-            {
-                if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-                {                
+
+                // right margin
+                if(rightMarginWidth > 0)
+                {
                     qi.setupFaceQuad(face, 1.0F - rightMarginWidth, bottomCapHeight, 1.0F, 1.0F - topCapHeight, 0.0F, topFace);
                     builder.add(qi.createNormalQuad());
                 }
-            }
-            
-            if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
-            {                
+
                 //splines
                 for(int i = 0; i < actualCutCount - 1; i++)
                 {
                     qi.setupFaceQuad(face, leftMarginWidth + cutWidth * 2 * i + cutWidth, bottomCapHeight, leftMarginWidth + cutWidth * 2 * (i + 1), 1.0F - topCapHeight, 0.0F, topFace);
+                    builder.add(qi.createNormalQuad());
+                }
+                
+                // top left corner
+                if(fjs.needsCorner(topFace, leftFace, face))
+                {
+                    qi.setupFaceQuad(face, Math.max(leftMarginWidth, 0), 1 - baseMarginWidth, leftMarginWidth + cutWidth, 1, 0, topFace);
+                    builder.add(qi.createNormalQuad());
+                }
+                
+                // bottom left corner
+                if(fjs.needsCorner(bottomFace, leftFace, face))
+                {
+                    qi.setupFaceQuad(face, Math.max(leftMarginWidth, 0), 0, leftMarginWidth + cutWidth, baseMarginWidth, 0, topFace);
+                    builder.add(qi.createNormalQuad());
+                }
+         
+                // top right corner
+                if(fjs.needsCorner(topFace, rightFace, face))
+                {
+                    qi.setupFaceQuad(face, 1 - rightMarginWidth - cutWidth, 1 - baseMarginWidth, Math.min(1 - rightMarginWidth, 1), 1, 0, topFace);
+                    builder.add(qi.createNormalQuad());
+                }
+                
+                // bottom right corner
+                if(fjs.needsCorner(bottomFace, rightFace, face))
+                {
+                    qi.setupFaceQuad(face, 1 - rightMarginWidth - cutWidth, 0, Math.min(1 - rightMarginWidth, 1), baseMarginWidth, 0, topFace);
                     builder.add(qi.createNormalQuad());
                 }
             }
@@ -194,7 +217,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                     if(sx0 > 0.0001)
                     {
                         setupCutSideQuad(qi, cutColor,
-                                new SimpleQuadBounds(Useful.rightOf(face, topFace), bottomCapHeight, 1.0F-cutDepth, 1.0F-topCapHeight, 1.0F, 1 - sx0, face));
+                                new SimpleQuadBounds(rightFace, bottomCapHeight, 1.0F-cutDepth, 1.0F-topCapHeight, 1.0F, 1 - sx0, face));
                         builder.add(qi.createNormalQuad());
                     }
         
@@ -202,7 +225,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                     if(sx1 < 0.9999)
                     {
                         setupCutSideQuad(qi, cutColor,
-                                new SimpleQuadBounds(Useful.leftOf(face, topFace), topCapHeight, 1.0F-cutDepth, 1.0F-bottomCapHeight, 1.0F, sx1, face));
+                                new SimpleQuadBounds(leftFace, topCapHeight, 1.0F-cutDepth, 1.0F-bottomCapHeight, 1.0F, sx1, face));
                         builder.add(qi.createNormalQuad());
                     }
                     
@@ -210,15 +233,48 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                     if(topCapHeight > 0)
                     {
                         setupCutSideQuad(qi, cutColor,
-                                new SimpleQuadBounds(topFace.getOpposite(), sx0, 1.0F-cutDepth, sx1, 1.0F, 1-topCapHeight, face));
+                                new SimpleQuadBounds(bottomFace, sx0, 1.0F-cutDepth, sx1, 1.0F, 1-topCapHeight, face));
                         builder.add(qi.createNormalQuad());
                     }
         
+                    // bottom face
                     if(bottomCapHeight > 0)
                     {
-                        // bottom face
                         setupCutSideQuad(qi, cutColor,
                                 new SimpleQuadBounds(topFace, 1-sx1, 1.0F-cutDepth, 1-sx0, 1.0F, 1-bottomCapHeight, face));
+                        builder.add(qi.createNormalQuad());
+                    }
+                    
+                    // top left corner
+                    if(fjs.needsCorner(topFace, leftFace, face))
+                    {
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(bottomFace, Math.max(leftMarginWidth, 0), 1.0F-cutDepth, leftMarginWidth + cutWidth, 1.0F, 1-baseMarginWidth, face));
+                        builder.add(qi.createNormalQuad());
+                    }
+                    
+                    // bottom left corner
+                    if(fjs.needsCorner(bottomFace, leftFace, face))
+                    {
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(topFace, 1 - leftMarginWidth - cutWidth, 1.0F-cutDepth, Math.min(1 - leftMarginWidth, 1), 1.0F, 1-baseMarginWidth, face));
+                        builder.add(qi.createNormalQuad());
+
+                    }
+             
+                    // top right corner
+                    if(fjs.needsCorner(topFace, rightFace, face))
+                    {
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(bottomFace, 1 - rightMarginWidth - cutWidth, 1.0F-cutDepth, Math.min(1 - rightMarginWidth, 1), 1.0F, 1-baseMarginWidth, face));
+                        builder.add(qi.createNormalQuad());
+                    }
+                    
+                    // bottom right corner
+                    if(fjs.needsCorner(bottomFace, rightFace, face))
+                    {
+                        setupCutSideQuad(qi, cutColor,
+                                new SimpleQuadBounds(topFace, Math.max(rightMarginWidth, 0), 1.0F-cutDepth, rightMarginWidth + cutWidth, 1.0F, 1-baseMarginWidth, face));
                         builder.add(qi.createNormalQuad());
                     }
                 }

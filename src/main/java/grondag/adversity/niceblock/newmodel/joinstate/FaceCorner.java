@@ -29,7 +29,7 @@ public enum FaceCorner
         this.bitFlag = 1 << this.ordinal();
     }
     
-    public FaceCorner find(FaceSide side1, FaceSide side2)
+    public static FaceCorner find(FaceSide side1, FaceSide side2)
     {
         return LOOKUP[side1.ordinal()][side2.ordinal()];
     }
