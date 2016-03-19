@@ -7,28 +7,26 @@ import net.minecraft.util.EnumFacing;
 public class FaceJoinSelector
 {
     private final EnumFacing myFace;
-    private final int firstIndex;
     
     public final int faceCount;
     public final FaceJoinState[] faceJoins;
+    public final int[] joinIndex = new int[48];
     
-    public FaceJoinSelector(EnumFacing face, SimpleJoin baseJoinState, int firstIndex)
+    public FaceJoinSelector(EnumFacing face, SimpleJoin baseJoinState)
     {
         myFace = face;
-        this.firstIndex = firstIndex;
-        this.faceCount = 1;
-        this.faceJoins = new FaceJoinState[faceCount];
+        faceJoins = FaceJoinState.find(face, baseJoinState).getSubStates();
+        this.faceCount = faceJoins.length;
         
-        //identify join tests & join cover tests
-        
-        //identify corner tests & corner cover tests
-        
-        //iterate through the combinations and identify all possible faces
+        for(int i = 0; i < faceCount; i++)
+        {
+            joinIndex[faceJoins[i].ordinal()] = i;
+        }
     }
 
     public int getIndexFromNeighbors(NeighborTestResults tests)
     {
-        return 0;
+        return joinIndex[FaceJoinState.find(myFace, tests).ordinal()];
     }
     
     public FaceJoinState getFaceJoinFromIndex(int index)

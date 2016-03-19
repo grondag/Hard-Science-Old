@@ -11,6 +11,7 @@ public enum FaceCorner
 
     public final FaceSide side1;
     public final FaceSide side2;
+    public final int bitFlag;
     
     static
     {
@@ -25,15 +26,11 @@ public enum FaceCorner
     {
         this.side1 = side1;
         this.side2 = side2;
+        this.bitFlag = 1 << this.ordinal();
     }
     
     public FaceCorner find(FaceSide side1, FaceSide side2)
     {
         return LOOKUP[side1.ordinal()][side2.ordinal()];
-    }
-    
-    public int bitFlag()
-    {
-        return 1 << this.ordinal();
     }
 }

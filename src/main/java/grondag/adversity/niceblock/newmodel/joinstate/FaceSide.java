@@ -20,15 +20,14 @@ public enum FaceSide
         RELATIVE_LOOKUP[EnumFacing.WEST.ordinal()] = west;
         RELATIVE_LOOKUP[EnumFacing.NORTH.ordinal()] = north;
         RELATIVE_LOOKUP[EnumFacing.SOUTH.ordinal()] = south;
+        
+        this.bitFlag = 1 << this.ordinal();
     }
+    
+    public final int bitFlag;
     
     public EnumFacing getRelativeFace(EnumFacing face)
     {
         return RELATIVE_LOOKUP[face.ordinal()];
-    }
-    
-    public int bitFlag()
-    {
-        return 1 << this.ordinal();
-    }
+    }  
 }
