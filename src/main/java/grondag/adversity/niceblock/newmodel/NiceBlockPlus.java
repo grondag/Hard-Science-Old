@@ -15,7 +15,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {

@@ -5,7 +5,6 @@ import java.util.List;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.model.IModelController;
 import grondag.adversity.niceblock.newmodel.QuadFactory.FaceVertex;
 
 import javax.vecmath.Matrix4f;

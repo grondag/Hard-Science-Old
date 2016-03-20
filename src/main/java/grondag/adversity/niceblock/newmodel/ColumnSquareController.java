@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.niceblock.model.ModelCookbookAxisOriented.AxisAlignedModel;
 import net.minecraft.util.EnumWorldBlockLayer;
 
 public class ColumnSquareController extends AxisOrientedController

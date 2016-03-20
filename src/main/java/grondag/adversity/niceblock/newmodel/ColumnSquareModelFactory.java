@@ -2,8 +2,6 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.model.ModelCookbook;
-import grondag.adversity.niceblock.model.ModelCookbook.Ingredients;
 import grondag.adversity.niceblock.newmodel.AxisOrientedController.ModelType;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.QuadFactory.QuadInputs;

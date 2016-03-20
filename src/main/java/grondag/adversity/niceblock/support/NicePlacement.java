@@ -9,7 +9,6 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
-import grondag.adversity.niceblock.NiceStyle;
 import grondag.adversity.niceblock.newmodel.BlockModelHelper;
 import grondag.adversity.niceblock.newmodel.BlockTests;
 import grondag.adversity.niceblock.newmodel.ModelReference;
