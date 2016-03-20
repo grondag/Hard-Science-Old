@@ -72,6 +72,16 @@ public class NiceTileEntity extends TileEntity{
 		updatify(pos.north().west());
 		updatify(pos.south().east());
 		updatify(pos.south().west());
+		
+		updatify(pos.up().north().east());
+        updatify(pos.up().south().east());
+        updatify(pos.up().north().west());
+        updatify(pos.up().south().west());
+        
+        updatify(pos.down().north().east());
+        updatify(pos.down().south().east());
+        updatify(pos.down().north().west());
+        updatify(pos.down().south().west());
 	}
 	
 	@SideOnly(Side.CLIENT)
