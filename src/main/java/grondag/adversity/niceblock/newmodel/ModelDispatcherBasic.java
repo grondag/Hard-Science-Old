@@ -84,6 +84,8 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 
     {
+		if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
+		
     	ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
     	int firstIndex;
     	int secondIndex;
@@ -110,6 +112,17 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
             }
         }
         
+        if(bakedQuads[firstIndex][secondIndex] == null)
+        {
+            synchronized (bakedQuads)
+            {
+            	// first check was not synchronized, so confirm
+	            if(bakedQuads[firstIndex][secondIndex] == null)
+	            {
+	            	bakedQuads[firstIndex][secondIndex] = new QuadContainer();
+	            }
+            }
+        }
         List<BakedQuad> retVal = bakedQuads[firstIndex][secondIndex].getQuads(side);
         if(retVal == null)
         {

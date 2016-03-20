@@ -108,6 +108,7 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
     @SideOnly(Side.CLIENT)
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 
     {
+		if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
 
         BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
 
@@ -135,6 +136,18 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
 	            if(bakedQuads[layer.ordinal()][firstIndex] == null)
 	            {
 	            	bakedQuads[layer.ordinal()][firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controllers[layer.ordinal()].getShapeCount()];
+	            }
+            }
+        }
+        
+        if(bakedQuads[layer.ordinal()][firstIndex][secondIndex] == null)
+        {
+            synchronized (bakedQuads)
+            {
+            	// first check was not synchronized, so confirm
+	            if(bakedQuads[layer.ordinal()][firstIndex][secondIndex] == null)
+	            {
+	            	bakedQuads[layer.ordinal()][firstIndex][secondIndex] = new QuadContainer();
 	            }
             }
         }

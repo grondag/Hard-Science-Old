@@ -211,8 +211,6 @@ public class NiceBlockRegistrar
         {
             GameRegistry.registerBlock(block, null, block.getRegistryName());
             block.item.registerSelf();
-            Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block, block);
-            Minecraft.getMinecraft().getItemColors().registerItemColorHandler(block.item, block);
 
             if (event.getSide() == Side.CLIENT)
             {
@@ -248,14 +246,12 @@ public class NiceBlockRegistrar
 
     public static void init(FMLInitializationEvent event)
     {
-//        for (NiceBlock block : allBlocks)
-//        {
-//            ModelResourceLocation itemModelResourceLocation = block.item.getModel(null, null, 0);
-//            for (int i = 0; i < block.blockModelHelper.getMetaCount(); i++)
-//            {
-//                ModelLoader.setCustomModelResourceLocation(block.item, i, itemModelResourceLocation);
-//            }
-//        }
+        for (NiceBlock block : allBlocks)
+        {
+        	// won't work in pre-init because BlockColors/ItemColors aren't instantiated yet
+            Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block, block);
+            Minecraft.getMinecraft().getItemColors().registerItemColorHandler(block.item, block);
+        }
     }
 
     /**
