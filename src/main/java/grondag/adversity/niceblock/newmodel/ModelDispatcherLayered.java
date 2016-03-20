@@ -1,42 +1,21 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
-import java.util.Collections;
 import java.util.List;
 
-import javax.vecmath.Vector3f;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
-import net.minecraftforge.client.model.IModelState;
-import net.minecraftforge.client.model.IPerspectiveAwareModel;
-import net.minecraftforge.client.model.ISmartBlockModel;
-import net.minecraftforge.client.model.SimpleModelState;
-import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -56,9 +35,9 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
      * Conserves memory to put shape first because most shapes in large-count shape models will never
      * be instantiated.
      */
-    private IBakedModel[][][] bakedBlockModels = new IBakedModel[EnumWorldBlockLayer.values().length][][];
+    private QuadContainer[][][] bakedQuads = new QuadContainer[BlockRenderLayer.values().length][][];
 
-    private final ModelControllerNew controllers[] = new ModelControllerNew[EnumWorldBlockLayer.values().length];
+    private final ModelControllerNew controllers[] = new ModelControllerNew[BlockRenderLayer.values().length];
     
     private final ModelControllerNew controllerPrimary;
     
@@ -113,11 +92,11 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
                 {
                     if(isColorCountBiggerThanShapeCount)
                     {
-                        bakedBlockModels[i] = new IBakedModel[colorProvider.getColorCount()][];
+                        bakedQuads[i] = new QuadContainer[colorProvider.getColorCount()][];
                     }
                     else
                     {
-                        bakedBlockModels[i] = new IBakedModel[controllers[i].getShapeCount()][];
+                        bakedQuads[i] = new QuadContainer[controllers[i].getShapeCount()][];
                     }
                     controllers[i].getBakedModelFactory().handleBakeEvent(event);
                 }
@@ -127,93 +106,52 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
 
     @Override
     @SideOnly(Side.CLIENT)
-    public IBakedModel handleBlockState(IBlockState state)
+	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 
     {
-        IBakedModel retVal = null;
-        EnumWorldBlockLayer layer = MinecraftForgeClient.getRenderLayer();
 
-        // Really should ALWAYS be a NiceBlock instance but if someone goes
-        // mucking about with the model registry crazy stuff could happen.
-        if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock && controllers[layer.ordinal()] != null)
-        {
-            IExtendedBlockState exState = (IExtendedBlockState) state;
-            ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
-            
-            if(isColorCountBiggerThanShapeCount)
-            {
-                if(bakedBlockModels[layer.ordinal()][modelState.getColorIndex()] != null)
-                {                    
-                    retVal = bakedBlockModels[layer.ordinal()][modelState.getColorIndex()][modelState.getClientShapeIndex(layer.ordinal())];
-                }
-            }
-            else if(bakedBlockModels[layer.ordinal()][modelState.getClientShapeIndex(layer.ordinal())] != null)
-            {
-                retVal = bakedBlockModels[layer.ordinal()][modelState.getClientShapeIndex(layer.ordinal())][modelState.getColorIndex()];
-            }
+        BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+
+        if (controllers[layer.ordinal()] == null) return QuadFactory.EMPTY_QUAD_LIST;
         
-            if (retVal == null)
+        ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+    	int firstIndex;
+    	int secondIndex;
+    	if(isColorCountBiggerThanShapeCount)
+		{
+    		firstIndex = modelState.getColorIndex();
+    		secondIndex = modelState.getClientShapeIndex(0);
+		}
+    	else
+    	{
+    		firstIndex = modelState.getClientShapeIndex(0);
+    		secondIndex = modelState.getColorIndex();
+    	}
+    	
+        if(bakedQuads[layer.ordinal()][firstIndex] == null)
+        {
+            synchronized (bakedQuads)
             {
-                retVal = controllers[layer.ordinal()].getBakedModelFactory().getBlockModel(modelState, colorProvider);
-                
-                synchronized (bakedBlockModels)
-                {
-                    if(isColorCountBiggerThanShapeCount)
-                    {
-                        if(bakedBlockModels[layer.ordinal()][modelState.getColorIndex()] == null)
-                        {
-                            bakedBlockModels[layer.ordinal()][modelState.getColorIndex()] = new IBakedModel[controllers[layer.ordinal()].getShapeCount()];
-                        }
-                        bakedBlockModels[layer.ordinal()][modelState.getColorIndex()][modelState.getClientShapeIndex(layer.ordinal())] = retVal;
-                    }
-                    else
-                    {
-                        if(bakedBlockModels[layer.ordinal()][modelState.getClientShapeIndex(layer.ordinal())] == null)
-                        {
-                            bakedBlockModels[layer.ordinal()][modelState.getClientShapeIndex(layer.ordinal())] = new IBakedModel[this.colorProvider.getColorCount()];
-                        }
-                        bakedBlockModels[layer.ordinal()][modelState.getClientShapeIndex(layer.ordinal())][modelState.getColorIndex()] = retVal;
-                    }
-                }
+            	// first check was not synchronized, so confirm
+	            if(bakedQuads[layer.ordinal()][firstIndex] == null)
+	            {
+	            	bakedQuads[layer.ordinal()][firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controllers[layer.ordinal()].getShapeCount()];
+	            }
             }
         }
-
-        // Provide a default to contain the damage if we have somehow still derped it up.
-        if (retVal == null)
+        
+        List<BakedQuad> retVal = bakedQuads[layer.ordinal()][firstIndex][secondIndex].getQuads(side);
+        if(retVal == null)
         {
-            retVal = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel();
+        	retVal = controllers[layer.ordinal()].getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
+        	synchronized (bakedQuads)
+            {
+            	bakedQuads[layer.ordinal()][firstIndex][secondIndex].setQuads(side, retVal);
+            }
         }
-
         return retVal;
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IBakedModel getItemModelForModelState(ModelState modelState)
-    {
-        // Enable perspective handling.
-        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
-                new Vector3f(0, 1.5f / 16, -2.75f / 16),
-                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
-                new Vector3f(0.375f, 0.375f, 0.375f),
-                null));
-
-        IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
-        
-        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder();
-        
-        for(ModelControllerNew cont : controllers)
-        {
-            if(cont != null)
-            {
-                builder.addAll(cont.getBakedModelFactory().getItemQuads(modelState, colorProvider));
-            }
-        }
-        
-        return new IPerspectiveAwareModel.MapWrapper(
-                new SimpleItemModel(builder.build(),controllerPrimary.isShaded), state);
-    }
-
-    @Override
+     @Override
     public boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState, boolean isCachedStateDirty)
     {
         boolean updated = false;
@@ -239,9 +177,14 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
     }
 
     @Override
-    public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+    public boolean canRenderInLayer(BlockRenderLayer layer)
     {
         return controllers[layer.ordinal()] != null;
     }
+
+	@Override
+	public boolean isAmbientOcclusion() {
+		return controllerPrimary.isShaded;
+	}
 
 }

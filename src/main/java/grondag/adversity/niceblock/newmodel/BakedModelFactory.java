@@ -5,6 +5,7 @@ import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import java.util.List;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.event.ModelBakeEvent;
 
 /**
@@ -27,7 +28,7 @@ public abstract class BakedModelFactory
         this.controller = controller;
     }
     
-    public abstract IQuadProvider getBlockQuads(ModelState modelState, IColorProvider colorProvider);
+    public abstract List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face);
     public abstract List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider);
     
     public void handleBakeEvent(ModelBakeEvent event)

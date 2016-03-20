@@ -1,9 +1,6 @@
 package grondag.adversity.niceblock.newmodel.color;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Color;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public class HueSet
    {

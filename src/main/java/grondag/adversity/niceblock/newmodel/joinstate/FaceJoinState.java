@@ -2,7 +2,6 @@ package grondag.adversity.niceblock.newmodel.joinstate;
 
 import java.util.ArrayList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.newmodel.ModelReference.SimpleJoin;
@@ -69,7 +68,6 @@ public enum FaceJoinState
     ALL_1111(FaceSide.TOP.bitFlag | FaceSide.BOTTOM.bitFlag | FaceSide.LEFT.bitFlag | FaceSide.RIGHT.bitFlag, FaceCorner.BOTTOM_RIGHT.bitFlag | FaceCorner.BOTTOM_LEFT.bitFlag | FaceCorner.TOP_RIGHT.bitFlag | FaceCorner.TOP_LEFT.bitFlag);
     
     private static final FaceJoinState[] LOOKUP = new FaceJoinState[256];
-    private static final FaceJoinState[][] SUBFACES = new FaceJoinState[FaceJoinState.values().length][];
 
     private final int bitFlags;
     private final FaceCorner[] cornerTests;

@@ -1,8 +1,5 @@
 package grondag.adversity.niceblock.newmodel.color;
 
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import grondag.adversity.library.Color;
-
 public class ColorMap
 {
     public final String colorMapName;

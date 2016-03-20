@@ -18,6 +18,7 @@ import com.google.common.primitives.Ints;
 public class QuadFactory
 {
 
+	public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();
     /**
      * Takes a normal vanilla quad and recolors it to return a normal quad.
      */

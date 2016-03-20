@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.newmodel.joinstate;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.newmodel.ModelReference.SimpleJoin;
 import net.minecraft.util.EnumFacing;

@@ -1,7 +1,5 @@
 package grondag.adversity.niceblock.newmodel.color;
 
-import java.util.ArrayList;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Color;
 import grondag.adversity.library.Color.EnumHCLFailureMode;

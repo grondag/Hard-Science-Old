@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
@@ -13,12 +12,8 @@ import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraft.util.BlockRenderLayer;
 
 public class BorderModelFactory extends BakedModelFactory
 {
@@ -30,47 +25,52 @@ public class BorderModelFactory extends BakedModelFactory
     protected final List<BakedQuad>[][][][] faceQuads;
     
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[6][48];
+    
+    /** typed convenience reference */
+    private final BorderController myController; 
 
-    public BorderModelFactory(BorderController controller)
+
+    @SuppressWarnings("unchecked")
+	public BorderModelFactory(BorderController controller)
     {
         super(controller);
-        faceQuads = new List[ModelState.MAX_COLOR_INDEX][][][];
+        faceQuads = (List<BakedQuad>[][][][]) new List[ModelState.MAX_COLOR_INDEX][][][];
+        myController = (BorderController)this.controller;
     }
 
-    @Override
-    public IBakedModel getBlockModel(ModelState modelState, IColorProvider colorProvider)
+    @SuppressWarnings("unchecked")
+	@Override
+    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
     {
-        int colorIndex = modelState.getColorIndex();
+    	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
+    	
+    	int colorIndex = modelState.getColorIndex();
         
         // allocate face quads for this color if not already done
         if(faceQuads[colorIndex] == null)
         {
             synchronized(faceQuads)
             {
-                faceQuads[colorIndex] = new List[controller.alternateTextureCount][6][48];
+                faceQuads[colorIndex] = (List<BakedQuad>[][][]) new List[controller.alternateTextureCount][6][48];
             }
         }
         
-        ColorMap colorMap = colorProvider.getColor(colorIndex);
-        BorderController controller = (BorderController)this.controller;
         int facadeIndex = modelState.getClientShapeIndex(controller.renderLayer.ordinal()) / controller.alternateTextureCount;
-        int alternateTextureIndex = controller.getAlternateTextureIndexFromModelState(modelState);
+        int alternateTextureIndex = myController.getAlternateTextureIndexFromModelState(modelState);
+        int faceIndex = ModelReference.BORDER_FACADE_FACE_SELECTORS[facadeIndex].selectors[face.ordinal()];
 
-        // ensure all needed faces are baked
-        for(EnumFacing face : EnumFacing.values())
+        // ensure face is baked
+        List<BakedQuad> retVal = faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][faceIndex];
+        if(retVal == null)
         {
-            int faceIndex = ModelReference.BORDER_FACADE_FACE_SELECTORS[facadeIndex].selectors[face.ordinal()];
-            if(faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][faceIndex] == null)
+            ColorMap colorMap = colorProvider.getColor(colorIndex);
+            retVal = makeBorderFace(colorMap.getColorMap(EnumColorMap.BORDER), alternateTextureIndex, faceIndex, face);
+            synchronized(faceQuads)
             {
-                List<BakedQuad> newQuads = makeBorderFace(colorMap.getColorMap(EnumColorMap.BORDER), alternateTextureIndex, faceIndex, face);
-                synchronized(faceQuads)
-                {
-                    faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][faceIndex] = newQuads;
-                }
+                faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][faceIndex] = retVal;
             }
         }
- 
-        return new BorderFacade(colorIndex, alternateTextureIndex, facadeIndex);
+        return retVal;
     }
 
     @Override
@@ -82,7 +82,7 @@ public class BorderModelFactory extends BakedModelFactory
         cubeInputs.u1 = 16;
         cubeInputs.v1 = 16;
         cubeInputs.isItem = true;
-        cubeInputs.isOverlay = controller.renderLayer != EnumWorldBlockLayer.SOLID;
+        cubeInputs.isOverlay = controller.renderLayer != BlockRenderLayer.SOLID;
         cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BORDER);
         // offset 4 is all borders
         cubeInputs.textureSprite = 
@@ -121,56 +121,6 @@ public class BorderModelFactory extends BakedModelFactory
                     .getAtlasSprite(controller.getTextureName(alternateTextureIndex * 16 + inputs.textureOffset));
         
         return cubeInputs.makeFace(face);
-    }
-
-    private class BorderFacade implements IBakedModel 
-    {
-        private final int colorIndex; 
-        private final int alternateTextureIndex;
-        private final int facadeIndex;
-        
-        public BorderFacade(int colorIndex, int alternateTextureIndex, int facadeIndex) {
-            this.colorIndex = colorIndex;
-            this.alternateTextureIndex = alternateTextureIndex;
-            this.facadeIndex = facadeIndex;
-        }
-
-        @Override
-        public List<BakedQuad> getFaceQuads(EnumFacing face) {
-            return faceQuads[colorIndex][alternateTextureIndex][face.ordinal()][ModelReference.BORDER_FACADE_FACE_SELECTORS[facadeIndex].selectors[face.ordinal()]];
-        }
-
-        @Override
-        public List<BakedQuad> getGeneralQuads() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public boolean isAmbientOcclusion() {
-            return controller.isShaded;
-        }
-
-        @Override
-        public boolean isGui3d() {
-            return true;
-        }
-
-        @Override
-        public boolean isBuiltInRenderer() {
-            return false;
-        }
-
-        @Override
-        public TextureAtlasSprite getParticleTexture() {
-            Adversity.log.warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
-            return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
-        }
-
-        @Override
-        public ItemCameraTransforms getItemCameraTransforms() {
-            return ItemCameraTransforms.DEFAULT;
-        }
-
     }
     
     static

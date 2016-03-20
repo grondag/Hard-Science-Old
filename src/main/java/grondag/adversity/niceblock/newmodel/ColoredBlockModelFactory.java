@@ -21,9 +21,8 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         super(controller);
     }
 
-    @SuppressWarnings("unchecked")
 	@Override
-	public IQuadProvider getBlockQuads(ModelState modelState, IColorProvider colorProvider) 
+	public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
@@ -39,17 +38,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         cubeInputs.u1 = 16;
         cubeInputs.v1 = 16;
         
-        List<BakedQuad>[] faceQuads = (List<BakedQuad>[]) new List[6];
-        faceQuads[6] = new ImmutableList.Builder<BakedQuad>().build();
-
-        faceQuads[EnumFacing.UP.ordinal()] = cubeInputs.makeFace(EnumFacing.UP);
-        faceQuads[EnumFacing.DOWN.ordinal()] = cubeInputs.makeFace(EnumFacing.DOWN);
-        faceQuads[EnumFacing.EAST.ordinal()] = cubeInputs.makeFace(EnumFacing.EAST);
-        faceQuads[EnumFacing.WEST.ordinal()] = cubeInputs.makeFace(EnumFacing.WEST);
-        faceQuads[EnumFacing.NORTH.ordinal()] = cubeInputs.makeFace(EnumFacing.NORTH);
-        faceQuads[EnumFacing.SOUTH.ordinal()] = cubeInputs.makeFace(EnumFacing.SOUTH);
-        
-        return new SimpleQuadProvider(faceQuads);
+        return cubeInputs.makeFace(face);
     }
 
     @Override

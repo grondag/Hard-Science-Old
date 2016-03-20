@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.newmodel.color;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.library.Color;
 import grondag.adversity.niceblock.newmodel.color.HueSet.HuePosition;
 import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
 
@@ -11,8 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 public class NiceHues 
 {
@@ -195,7 +192,7 @@ public class NiceHues
         
         public double hueDegrees()
         {
-            return this.ordinal() * 360 / this.values().length + HUE_SALT;
+            return this.ordinal() * 360 / Hue.values().length + HUE_SALT;
         }
     }
 

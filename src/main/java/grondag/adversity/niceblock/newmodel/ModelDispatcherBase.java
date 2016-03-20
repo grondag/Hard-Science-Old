@@ -4,19 +4,16 @@ import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
-import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -38,8 +35,6 @@ public abstract class ModelDispatcherBase implements IBakedModel
     
     public abstract void handleBakeEvent(ModelBakeEvent event);
     
-    protected abstract IQuadProvider getQuadProvider(IBlockState state);
-
     /** Calls controllers to update client state index(es)
      * in passed modelState.  Returns true if the client state changed.
      */
@@ -84,11 +79,6 @@ public abstract class ModelDispatcherBase implements IBakedModel
     {
         event.map.registerSprite(new ResourceLocation(particleTextureName));
     }
-
-	@Override
-	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		return getQuadProvider(state).getQuads(side);
-	}
 
     @Override
     public boolean isBuiltInRenderer()

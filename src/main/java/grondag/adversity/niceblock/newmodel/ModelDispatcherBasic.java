@@ -1,11 +1,15 @@
 package grondag.adversity.niceblock.newmodel;
 
+import java.util.List;
+
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -29,7 +33,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
      * Conserves memory to put color first because most colors will never
      * be instantiated, but many shapes within a color probably will.
      */
-    private IQuadProvider[][] bakedQuads;
+    private QuadContainer[][] bakedQuads;
 
     private final ModelControllerNew controller;
 
@@ -61,11 +65,11 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         {
             if(isColorCountBiggerThanShapeCount)
             {
-                bakedQuads = new IQuadProvider[colorProvider.getColorCount()][];
+                bakedQuads = new QuadContainer[colorProvider.getColorCount()][];
             }
             else
             {
-                bakedQuads = new IQuadProvider[controller.getShapeCount()][];
+                bakedQuads = new QuadContainer[controller.getShapeCount()][];
             }
         }
         else
@@ -77,8 +81,8 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
     
 
 	@SideOnly(Side.CLIENT)
-    @Override
-    protected IQuadProvider getQuadProvider(IBlockState state)
+	@Override
+	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 
     {
     	ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
     	int firstIndex;
@@ -101,19 +105,21 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
             	// first check was not synchronized, so confirm
 	            if(bakedQuads[firstIndex] == null)
 	            {
-	            	bakedQuads[firstIndex] = new IQuadProvider[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controller.getShapeCount()];
+	            	bakedQuads[firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controller.getShapeCount()];
 	            }
             }
         }
         
-        if(bakedQuads[firstIndex][secondIndex] == null)
+        List<BakedQuad> retVal = bakedQuads[firstIndex][secondIndex].getQuads(side);
+        if(retVal == null)
         {
-            synchronized (bakedQuads)
+        	retVal = controller.getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
+        	synchronized (bakedQuads)
             {
-            	bakedQuads[firstIndex][secondIndex] = controller.getBakedModelFactory().getBlockQuads(modelState, colorProvider);
+            	bakedQuads[firstIndex][secondIndex].setQuads(side, retVal);
             }
         }
-        return bakedQuads[firstIndex][secondIndex];
+        return retVal;
   
     }
 

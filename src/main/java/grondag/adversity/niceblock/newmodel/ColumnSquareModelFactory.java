@@ -55,9 +55,11 @@ public class ColumnSquareModelFactory extends BakedModelFactory
     }
 
     @Override
-	public IQuadProvider getBlockQuads(ModelState modelState, IColorProvider colorProvider) 
+    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
     {
-        QuadInputs quadInputs = new QuadInputs();
+        if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
+        
+    	QuadInputs quadInputs = new QuadInputs();
         quadInputs.lockUV = true;
         quadInputs.isShaded = myController.modelType != ColumnSquareController.ModelType.LAMP_BASE;
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
@@ -70,24 +72,15 @@ public class ColumnSquareModelFactory extends BakedModelFactory
         int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
                 ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
     
-        
-        @SuppressWarnings("unchecked")
-		List<BakedQuad>[] faceQuads = (List<BakedQuad>[]) new List[7];
-        faceQuads[6] = new ImmutableList.Builder<BakedQuad>().build();
-
-        for(EnumFacing face : EnumFacing.values())
+        if(face.getAxis() == axis)
         {
-            if(face.getAxis() == axis)
-            {
-                faceQuads[face.ordinal()] = makeCapFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
-            }
-            else
-            {
-                faceQuads[face.ordinal()] = makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
-            }
+            return makeCapFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
+        }
+        else
+        {
+            return makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
         }
         
-        return new SimpleQuadProvider(faceQuads);
     }
 
     private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)
@@ -472,12 +465,10 @@ public class ColumnSquareModelFactory extends BakedModelFactory
     @Override
     public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
     {
-        IQuadProvider template = getBlockQuads(modelState, colorProvider);
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
-        general.addAll(template.getQuads(null));
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.addAll(template.getQuads(face));
+            general.addAll(this.getFaceQuads(modelState, colorProvider, face));
         }        
         return general.build();
     }
