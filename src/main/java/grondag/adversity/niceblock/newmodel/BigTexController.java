@@ -1,19 +1,15 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.library.Alternator;
-import grondag.adversity.library.IAlternator;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.world.IBlockAccess;
 
 public class BigTexController extends ModelControllerNew
 {
     protected final boolean hasMetaVariants;
 
-    protected BigTexController(String textureName, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean hasMetaVariants)
+    protected BigTexController(String textureName, BlockRenderLayer renderLayer, boolean isShaded, boolean hasMetaVariants)
     {
         super(textureName, 1, renderLayer, isShaded, false);
         this.bakedModelFactory = new BigTexModelFactory(this);
@@ -33,8 +29,7 @@ public class BigTexController extends ModelControllerNew
         
         if(this.hasMetaVariants)
         {
-            int meta = state.getValue(NiceBlock.META);
-            return state.getValue(NiceBlock.META) << 12 | ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);
+             return state.getValue(NiceBlock.META) << 12 | ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);
         }
         else
         {

@@ -1,11 +1,9 @@
 package grondag.adversity.niceblock.newmodel;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.niceblock.newmodel.color.NiceColor;
 
 public class BlockTests
 {

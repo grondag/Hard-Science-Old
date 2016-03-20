@@ -1,13 +1,9 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.newmodel.AxisOrientedController.ModelType;
-import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.newmodel.QuadFactory.QuadInputs;
 import grondag.adversity.niceblock.newmodel.QuadFactory.FaceVertex;
 import grondag.adversity.niceblock.newmodel.QuadFactory.SimpleQuadBounds;
-import grondag.adversity.niceblock.newmodel.QuadFactory.Vertex;
 import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
@@ -16,35 +12,12 @@ import grondag.adversity.niceblock.newmodel.joinstate.FaceJoinState;
 import grondag.adversity.niceblock.newmodel.joinstate.FaceSide;
 import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ModelBlock;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.IRetexturableModel;
-import net.minecraftforge.client.model.ISmartBlockModel;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.client.model.pipeline.LightUtil;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ColumnSquareModelFactory extends BakedModelFactory
 {
@@ -82,7 +55,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
     }
 
     @Override
-    public IBakedModel getBlockModel(ModelState modelState, IColorProvider colorProvider)
+	public IQuadProvider getBlockQuads(ModelState modelState, IColorProvider colorProvider) 
     {
         QuadInputs quadInputs = new QuadInputs();
         quadInputs.lockUV = true;
@@ -98,7 +71,9 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                 ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
     
         
-        List<BakedQuad>[] faceQuads = new List[6];
+        @SuppressWarnings("unchecked")
+		List<BakedQuad>[] faceQuads = (List<BakedQuad>[]) new List[7];
+        faceQuads[6] = new ImmutableList.Builder<BakedQuad>().build();
 
         for(EnumFacing face : EnumFacing.values())
         {
@@ -112,7 +87,7 @@ public class ColumnSquareModelFactory extends BakedModelFactory
             }
         }
         
-        return new SimpleCubeModel(faceQuads, controller.isShaded);
+        return new SimpleQuadProvider(faceQuads);
     }
 
     private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)
@@ -492,18 +467,17 @@ public class ColumnSquareModelFactory extends BakedModelFactory
                 new FaceVertex.Colored(qb.x1, qb.y1, qi.color),
                 new FaceVertex.Colored(qb.x0, qb.y1, qi.color), 
                 qb.depth, qb.topFace);
-        
     }    
     
     @Override
     public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
     {
-        IBakedModel template = getBlockModel(modelState, colorProvider);
-        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder();
-        general.addAll(template.getGeneralQuads());
+        IQuadProvider template = getBlockQuads(modelState, colorProvider);
+        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
+        general.addAll(template.getQuads(null));
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.addAll(template.getFaceQuads(face));
+            general.addAll(template.getQuads(face));
         }        
         return general.build();
     }

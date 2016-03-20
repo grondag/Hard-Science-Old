@@ -1,14 +1,11 @@
 package grondag.adversity.niceblock.newmodel;
 
-import java.util.List;
-
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 public class HotBasaltHelper extends BlockModelHelper
@@ -61,17 +58,17 @@ public class HotBasaltHelper extends BlockModelHelper
     @Override
     public ModelState getModelStateForItemModel(int itemIndex)
     {
-        return new ModelState().setClientShapeIndex(itemIndex * 16, EnumWorldBlockLayer.TRANSLUCENT.ordinal());
+        return new ModelState().setClientShapeIndex(itemIndex * 16, BlockRenderLayer.TRANSLUCENT.ordinal());
     }
 
     @Override 
     public boolean hasCustomBrightness()
     {
-        return MinecraftForgeClient.getRenderLayer() != EnumWorldBlockLayer.SOLID;
+        return MinecraftForgeClient.getRenderLayer() != BlockRenderLayer.SOLID;
     }
     
     @Override
-    public int getCustomBrightness(IBlockAccess worldIn, BlockPos pos) {
+    public int getCustomBrightness(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         return 15 << 20 | 15 << 4;
     }
 }

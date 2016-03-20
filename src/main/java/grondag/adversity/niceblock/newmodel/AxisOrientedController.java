@@ -40,7 +40,8 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
      * other than standard cubes.  Has to be here and not in parent because
      * the number of models is specific to cookbook.
      */
-    public final ImmutableList<AxisAlignedBB>[][] MODEL_BOUNDS = new ImmutableList[3][64];
+    @SuppressWarnings("unchecked")
+	public final ImmutableList<AxisAlignedBB>[][] MODEL_BOUNDS = new ImmutableList[3][64];
     
     /**
      * Cached union of model bounds.  
@@ -259,17 +260,17 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
         return BlockJoinSelector.BLOCK_JOIN_STATE_COUNT * 3 * alternateTextureCount;
     }
 
-    protected static int getAxisFromModelIndex(int clientShapeIndex)
+    protected int getAxisFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) % 3;
     }
 
-    protected static int getTextureFromModelIndex(int clientShapeIndex)
+    protected int getTextureFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) / 3;
     }
     
-    protected static int getShapeFromModelIndex(int clientShapeIndex)
+    protected int getShapeFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex % BlockJoinSelector.BLOCK_JOIN_STATE_COUNT);
     }

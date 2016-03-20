@@ -1,14 +1,11 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.library.NeighborBlocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
@@ -50,42 +47,43 @@ public class NiceTileEntity extends TileEntity{
 	private void updateClientRenderState()
 	{
 		this.isClientShapeIndexDirty = true;
+		worldObj.markBlockRangeForRenderUpdate(pos.up().north().east(), pos.down().south().west());
 		
-		updatify(pos.up());
-		updatify(pos.down());
-		updatify(pos.east());
-		updatify(pos.west());
-		updatify(pos.north());
-		updatify(pos.south());
+		invalidateClientCache(pos.up());
+		invalidateClientCache(pos.down());
+		invalidateClientCache(pos.east());
+		invalidateClientCache(pos.west());
+		invalidateClientCache(pos.north());
+		invalidateClientCache(pos.south());
 
-		updatify(pos.up().east());
-		updatify(pos.up().west());
-		updatify(pos.up().north());
-		updatify(pos.up().south());
+		invalidateClientCache(pos.up().east());
+		invalidateClientCache(pos.up().west());
+		invalidateClientCache(pos.up().north());
+		invalidateClientCache(pos.up().south());
 
-		updatify(pos.down().east());
-		updatify(pos.down().west());
-		updatify(pos.down().north());
-		updatify(pos.down().south());
+		invalidateClientCache(pos.down().east());
+		invalidateClientCache(pos.down().west());
+		invalidateClientCache(pos.down().north());
+		invalidateClientCache(pos.down().south());
 
-		updatify(pos.north().east());
-		updatify(pos.north().west());
-		updatify(pos.south().east());
-		updatify(pos.south().west());
+		invalidateClientCache(pos.north().east());
+		invalidateClientCache(pos.north().west());
+		invalidateClientCache(pos.south().east());
+		invalidateClientCache(pos.south().west());
 		
-		updatify(pos.up().north().east());
-        updatify(pos.up().south().east());
-        updatify(pos.up().north().west());
-        updatify(pos.up().south().west());
+		invalidateClientCache(pos.up().north().east());
+        invalidateClientCache(pos.up().south().east());
+        invalidateClientCache(pos.up().north().west());
+        invalidateClientCache(pos.up().south().west());
         
-        updatify(pos.down().north().east());
-        updatify(pos.down().south().east());
-        updatify(pos.down().north().west());
-        updatify(pos.down().south().west());
+        invalidateClientCache(pos.down().north().east());
+        invalidateClientCache(pos.down().south().east());
+        invalidateClientCache(pos.down().north().west());
+        invalidateClientCache(pos.down().south().west());
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private void updatify(BlockPos updatePos)
+	private void invalidateClientCache(BlockPos updatePos)
 	{
 //		Adversity.log.info("updatify attempt @ " + updatePos.toString());
 		TileEntity target = worldObj.getTileEntity(updatePos);
@@ -93,20 +91,19 @@ public class NiceTileEntity extends TileEntity{
 		{
 //			Adversity.log.info("updatify success @ " + updatePos.toString());
 			((NiceTileEntity)target).isClientShapeIndexDirty = true;
-			worldObj.markBlockForUpdate(updatePos);
 		}
 	}
 
    @Override
-    public Packet getDescriptionPacket() {
+    public SPacketUpdateTileEntity getDescriptionPacket() {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         doWriteToNBT(nbtTagCompound);
         int metadata = getBlockMetadata();
-        return new S35PacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
+        return new SPacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
 
         // The description packet often arrives after render state is first cached on client
         // so we need to refresh render state once we have the server-side info.
@@ -114,7 +111,7 @@ public class NiceTileEntity extends TileEntity{
         doReadFromNBT(pkt.getNbtCompound());
         if(oldColorIndex != modelState.colorIndex && this.worldObj.isRemote)
         {
-            worldObj.markBlockForUpdate(pos);
+            worldObj.markBlockRangeForRenderUpdate(pos, pos);
         }
     }
 	    

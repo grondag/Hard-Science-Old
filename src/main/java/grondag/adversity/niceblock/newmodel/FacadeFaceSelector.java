@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
 import net.minecraft.util.EnumFacing;
 
 public class FacadeFaceSelector

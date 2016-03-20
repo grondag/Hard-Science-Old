@@ -1,41 +1,15 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.ColorMap;
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.vecmath.Vector3f;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
-import net.minecraftforge.client.model.IModelState;
-import net.minecraftforge.client.model.IPerspectiveAwareModel;
-import net.minecraftforge.client.model.ISmartBlockModel;
-import net.minecraftforge.client.model.SimpleModelState;
-import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -55,7 +29,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
      * Conserves memory to put color first because most colors will never
      * be instantiated, but many shapes within a color probably will.
      */
-    private IBakedModel[][] bakedBlockModels;
+    private IQuadProvider[][] bakedQuads;
 
     private final ModelControllerNew controller;
 
@@ -78,8 +52,8 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
             event.map.registerSprite(new ResourceLocation(tex));
         }
     }
-    
-    @Override
+
+	@Override
     public void handleBakeEvent(ModelBakeEvent event)
     {
         // need to clear arrays to force rebaking of cached models
@@ -87,108 +61,63 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         {
             if(isColorCountBiggerThanShapeCount)
             {
-                bakedBlockModels = new IBakedModel[colorProvider.getColorCount()][];
+                bakedQuads = new IQuadProvider[colorProvider.getColorCount()][];
             }
             else
             {
-                bakedBlockModels = new IBakedModel[controller.getShapeCount()][];
+                bakedQuads = new IQuadProvider[controller.getShapeCount()][];
             }
         }
         else
         {
-            bakedBlockModels = null;
+        	bakedQuads = null;
         }
         controller.getBakedModelFactory().handleBakeEvent(event);
     }
     
 
+	@SideOnly(Side.CLIENT)
     @Override
-    @SideOnly(Side.CLIENT)
-    public IBakedModel handleBlockState(IBlockState state)
+    protected IQuadProvider getQuadProvider(IBlockState state)
     {
-        IBakedModel retVal = null;
-
-        // Really should ALWAYS be a NiceBlock instance but if someone goes
-        // mucking about with the model registry crazy stuff could happen.
-        if (state instanceof IExtendedBlockState && state.getBlock() instanceof NiceBlock)
+    	ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+    	int firstIndex;
+    	int secondIndex;
+    	if(isColorCountBiggerThanShapeCount)
+		{
+    		firstIndex = modelState.getColorIndex();
+    		secondIndex = modelState.getClientShapeIndex(0);
+		}
+    	else
+    	{
+    		firstIndex = modelState.getClientShapeIndex(0);
+    		secondIndex = modelState.getColorIndex();
+    	}
+    	
+        if(bakedQuads[firstIndex] == null)
         {
-            IExtendedBlockState exState = (IExtendedBlockState) state;
-            ModelState modelState = exState.getValue(NiceBlock.MODEL_STATE);
-
-            if(bakedBlockModels[modelState.getColorIndex()] != null)
+            synchronized (bakedQuads)
             {
-                retVal = bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)];
-            }
-            
-            if(isColorCountBiggerThanShapeCount)
-            {
-                if(bakedBlockModels[modelState.getColorIndex()] != null)
-                {                    
-                    retVal = bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)];
-                }
-            }
-            else if(bakedBlockModels[modelState.getClientShapeIndex(0)] != null)
-            {
-                retVal = bakedBlockModels[modelState.getClientShapeIndex(0)][modelState.getColorIndex()];
-            }
-            
-            
-            if (retVal == null)
-            {
-                retVal = controller.getBakedModelFactory().getBlockModel(modelState, colorProvider);
-
-                synchronized (bakedBlockModels)
-                {
-                    if(isColorCountBiggerThanShapeCount)
-                    {
-                        if(bakedBlockModels[modelState.getColorIndex()] == null)
-                        {
-                            bakedBlockModels[modelState.getColorIndex()] = new IBakedModel[controller.getShapeCount()];
-                        }
-                        bakedBlockModels[modelState.getColorIndex()][modelState.getClientShapeIndex(0)] = retVal;
-                    }
-                    else
-                    {
-                        if(bakedBlockModels[modelState.getClientShapeIndex(0)] == null)
-                        {
-                            bakedBlockModels[modelState.getClientShapeIndex(0)] = new IBakedModel[this.colorProvider.getColorCount()];
-                        }
-                        bakedBlockModels[modelState.getClientShapeIndex(0)][modelState.getColorIndex()] = retVal;
-                    }
-                }
+            	// first check was not synchronized, so confirm
+	            if(bakedQuads[firstIndex] == null)
+	            {
+	            	bakedQuads[firstIndex] = new IQuadProvider[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controller.getShapeCount()];
+	            }
             }
         }
-
-        // Provide a default to contain the damage if we have somehow still derped it up.
-        if (retVal == null)
-        {
-            retVal = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel();
-        }
-
-        return retVal;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IBakedModel getItemModelForModelState(ModelState modelState)
-    {
-        // Enable perspective handling.
-        TRSRTransformation thirdperson = TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
-                new Vector3f(0, 1.5f / 16, -2.75f / 16),
-                TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)),
-                new Vector3f(0.375f, 0.375f, 0.375f),
-                null));
-
-        IModelState state = new SimpleModelState(ImmutableMap.of(TransformType.THIRD_PERSON, thirdperson), Optional.of(TRSRTransformation.identity()));
         
-        return new IPerspectiveAwareModel.MapWrapper(
-                new SimpleItemModel(
-                        controller.getBakedModelFactory().getItemQuads(modelState, colorProvider), 
-                        controller.isShaded), 
-            state);
+        if(bakedQuads[firstIndex][secondIndex] == null)
+        {
+            synchronized (bakedQuads)
+            {
+            	bakedQuads[firstIndex][secondIndex] = controller.getBakedModelFactory().getBlockQuads(modelState, colorProvider);
+            }
+        }
+        return bakedQuads[firstIndex][secondIndex];
+  
     }
 
-    @Override
+     @Override
     public boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState, boolean isCachedStateDirty)
     {
         if(isCachedStateDirty || !controller.useCachedClientState)
@@ -210,9 +139,14 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
     }
 
     @Override
-    public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+    public boolean canRenderInLayer(BlockRenderLayer layer)
     {
         return controller.canRenderInLayer(layer);
     }
+
+	@Override
+	public boolean isAmbientOcclusion() {
+		return controller.isShaded;
+	}
 
 }

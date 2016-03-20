@@ -2,23 +2,20 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.niceblock.newmodel.color.BlockColors;
 import grondag.adversity.niceblock.newmodel.color.FixedColors;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
 import grondag.adversity.niceblock.newmodel.color.NiceHues.Hue;
 import grondag.adversity.niceblock.newmodel.color.NiceHues;
-import grondag.adversity.niceblock.newmodel.color.NiceColor;
 import grondag.adversity.niceblock.newmodel.color.NoColor;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -214,6 +211,8 @@ public class NiceBlockRegistrar
         {
             GameRegistry.registerBlock(block, null, block.getRegistryName());
             block.item.registerSelf();
+            Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block, block);
+            Minecraft.getMinecraft().getItemColors().registerItemColorHandler(block.item, block);
 
             if (event.getSide() == Side.CLIENT)
             {
@@ -277,7 +276,6 @@ public class NiceBlockRegistrar
         {
             for (int i = 0; i < block.blockModelHelper.getItemModelCount(); i++)
             {          
-                ModelState modelState = block.blockModelHelper.getModelStateForItemModel(i);
                 event.getModelRegistry().putObject(new ModelResourceLocation(block.getRegistryName() + "." + i, "inventory"),
                         block.blockModelHelper.dispatcher);
             }

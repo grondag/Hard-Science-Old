@@ -15,7 +15,7 @@ public class ModelStateProperty implements IUnlistedProperty<ModelState> {
 	}
 
 	@Override
-	public Class getType() {
+	public Class<ModelState> getType() {
 		return ModelState.class;
 	}
 

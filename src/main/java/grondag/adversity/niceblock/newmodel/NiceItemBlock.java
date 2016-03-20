@@ -2,32 +2,24 @@ package grondag.adversity.niceblock.newmodel;
 
 import java.util.List;
 
-import com.google.common.base.Function;
-
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 /**
  * Exists to provide sub-items for NiceBlocks.
  * Doesn't do much else.
  */
-public class NiceItemBlock extends ItemBlock {
+public class NiceItemBlock extends ItemBlock implements IItemColor{
 
 	public NiceItemBlock(Block block) {
 		super(block);
@@ -58,36 +50,36 @@ public class NiceItemBlock extends ItemBlock {
     }
 
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos onPos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        BlockPos placedPos = block.isReplaceable(worldIn, onPos) ? onPos : onPos.offset(side);
+        BlockPos placedPos = block.isReplaceable(worldIn, pos) ? pos : pos.offset(facing);
         
         if (stack.stackSize == 0)
         {
-            return false;
+            return EnumActionResult.FAIL;
         }        
-        else if (!playerIn.canPlayerEdit(placedPos, side, stack))
+        else if (!playerIn.canPlayerEdit(placedPos, facing, stack))
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
         
-        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, side, (Entity)null, stack))
+        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))
         {
-            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, placedPos, onPos, side, stack, playerIn);
+            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
             
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, side, hitX, hitY, hitZ, newMeta, playerIn);
+            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, newMeta, playerIn);
 
-            if (placeBlockAt(stack, playerIn, worldIn, placedPos, side, hitX, hitY, hitZ, iblockstate1))
+            if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
             {
-                worldIn.playSoundEffect((double)((float)placedPos.getX() + 0.5F), (double)((float)placedPos.getY() + 0.5F), (double)((float)placedPos.getZ() + 0.5F), this.block.stepSound.getPlaceSound(), (this.block.stepSound.getVolume() + 1.0F) / 2.0F, this.block.stepSound.getFrequency() * 0.8F);
+                worldIn.playSound((double)((float)placedPos.getX() + 0.5F), (double)((float)placedPos.getY() + 0.5F), (double)((float)placedPos.getZ() + 0.5F), this.block.getStepSound().getPlaceSound(), null, (this.block.getStepSound().getVolume() + 1.0F) / 2.0F, this.block.getStepSound().getPitch() * 0.8F, true);
                 --stack.stackSize;
             }
 
-            return true;
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
     }
  
@@ -114,12 +106,17 @@ public class NiceItemBlock extends ItemBlock {
                 block.blockModelHelper.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
                 if(world.isRemote)
                 {
-                    world.markBlockForUpdate(pos);
+                    world.markBlockRangeForRenderUpdate(pos, pos);
                 }
             }
         }
         
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
-    }	
+    }
+
+	@Override
+	public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+		return 0xFFFFFFFF;
+	}	
 }

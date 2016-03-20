@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.ItemLayerModel.BakedModel;
 
 public class SimpleModel extends SimpleCubeModel
 {
@@ -33,7 +33,7 @@ public class SimpleModel extends SimpleCubeModel
     
     private static List<BakedQuad> extractGeneralQuads(IBakedModel modelIn, int color)
     {
-        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder();
+        ImmutableList.Builder<BakedQuad> general = new Builder<BakedQuad>();
         for( BakedQuad quad : modelIn.getGeneralQuads())
         {
             general.add(QuadFactory.recolorVanillaQuad(quad, color));
@@ -43,7 +43,8 @@ public class SimpleModel extends SimpleCubeModel
     
     private static List<BakedQuad>[] extractFaceQuads(IBakedModel modelIn, int color)
     {
-        ImmutableList<BakedQuad>[] faces = new ImmutableList[6];
+        @SuppressWarnings("unchecked")
+		ImmutableList<BakedQuad>[] faces = (ImmutableList<BakedQuad>[]) new ImmutableList[6];
         for(EnumFacing face : EnumFacing.VALUES)
         {
             ImmutableList.Builder<BakedQuad> faceList = new ImmutableList.Builder();

@@ -1,14 +1,8 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.NiceColor;
-
 import java.math.BigInteger;
-import java.util.function.Function;
-
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
 
 public class ModelState
 {

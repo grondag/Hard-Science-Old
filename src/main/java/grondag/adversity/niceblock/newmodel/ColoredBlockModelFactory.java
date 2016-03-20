@@ -11,10 +11,8 @@ import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraft.util.BlockRenderLayer;
 
 public class ColoredBlockModelFactory extends BakedModelFactory
 {
@@ -23,14 +21,15 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         super(controller);
     }
 
-    @Override
-    public IBakedModel getBlockModel(ModelState modelState, IColorProvider colorProvider)
+    @SuppressWarnings("unchecked")
+	@Override
+	public IQuadProvider getBlockQuads(ModelState modelState, IColorProvider colorProvider) 
     {
         CubeInputs cubeInputs = new CubeInputs();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         ColoredBlockController controller = (ColoredBlockController)this.controller;
         
-        cubeInputs.color = colorMap.getColorMap(controller.renderLayer == EnumWorldBlockLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
+        cubeInputs.color = colorMap.getColorMap(controller.renderLayer == BlockRenderLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()));
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
@@ -40,7 +39,8 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         cubeInputs.u1 = 16;
         cubeInputs.v1 = 16;
         
-        List<BakedQuad>[] faceQuads = new List[6];
+        List<BakedQuad>[] faceQuads = (List<BakedQuad>[]) new List[6];
+        faceQuads[6] = new ImmutableList.Builder<BakedQuad>().build();
 
         faceQuads[EnumFacing.UP.ordinal()] = cubeInputs.makeFace(EnumFacing.UP);
         faceQuads[EnumFacing.DOWN.ordinal()] = cubeInputs.makeFace(EnumFacing.DOWN);
@@ -49,7 +49,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         faceQuads[EnumFacing.NORTH.ordinal()] = cubeInputs.makeFace(EnumFacing.NORTH);
         faceQuads[EnumFacing.SOUTH.ordinal()] = cubeInputs.makeFace(EnumFacing.SOUTH);
         
-        return new SimpleCubeModel(faceQuads, controller.isShaded);
+        return new SimpleQuadProvider(faceQuads);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         ColoredBlockController controller = (ColoredBlockController)this.controller;
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         
-        cubeInputs.color = colorMap.getColorMap(controller.renderLayer == EnumWorldBlockLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
+        cubeInputs.color = colorMap.getColorMap(controller.renderLayer == BlockRenderLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
 
@@ -68,7 +68,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         cubeInputs.u1 = 16;
         cubeInputs.v1 = 16;
         cubeInputs.isItem = true;
-        cubeInputs.isOverlay = controller.renderLayer != EnumWorldBlockLayer.SOLID;
+        cubeInputs.isOverlay = controller.renderLayer != BlockRenderLayer.SOLID;
 
         ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
 
@@ -80,4 +80,6 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
         return itemBuilder.build();        
     }
+
+
 }

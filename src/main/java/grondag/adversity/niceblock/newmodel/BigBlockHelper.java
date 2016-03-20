@@ -1,28 +1,22 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.support.NicePlacement;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
+//import mcp.mobius.waila.api.IWailaConfigHandler;
+//import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 public class BigBlockHelper extends ColoredBlockHelperPlus
 {
@@ -167,17 +161,17 @@ public class BigBlockHelper extends ColoredBlockHelperPlus
         }
     }
     
-    @Override
-    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
-    {
-        List<String> retVal = super.getWailaBody(itemStack, currenttip, accessor, config);
-        retVal.add(LanguageRegistry.instance().getStringLocalization("species" + accessor.getMetadata()));
-        if(accessor.getTileEntity() != null && accessor.getTileEntity() instanceof NiceTileEntity)
-        {
-            retVal.add("Client Shape " + ((NiceTileEntity) accessor.getTileEntity()).modelState.getClientShapeIndex(EnumWorldBlockLayer.CUTOUT_MIPPED.ordinal()));
-        }
-        return retVal;
-    }
+//    @Override
+//    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+//    {
+//        List<String> retVal = super.getWailaBody(itemStack, currenttip, accessor, config);
+//        retVal.add(LanguageRegistry.instance().getStringLocalization("species" + accessor.getMetadata()));
+//        if(accessor.getTileEntity() != null && accessor.getTileEntity() instanceof NiceTileEntity)
+//        {
+//            retVal.add("Client Shape " + ((NiceTileEntity) accessor.getTileEntity()).modelState.getClientShapeIndex(BlockRenderLayer.CUTOUT_MIPPED.ordinal()));
+//        }
+//        return retVal;
+//    }
 
 
 }

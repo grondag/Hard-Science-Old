@@ -1,25 +1,17 @@
 package grondag.adversity.niceblock.newmodel;
 
-import java.util.Collections;
 import java.util.List;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.newmodel.QuadFactory.FaceVertex;
-
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4f;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
-import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Ints;
 
@@ -40,7 +32,7 @@ public class QuadFactory
         aint[3 + 14] = colorOut;
         aint[3 + 21] = colorOut;
                 
-        return new BakedQuad(aint, quadIn.getTintIndex(), quadIn.getFace());
+        return new BakedQuad(aint, colorOut, quadIn.getFace(), quadIn.getSprite(), quadIn.shouldApplyDiffuseLighting(), quadIn.getFormat());
     }
     
     public static int shadeColor(int color, float shade, boolean glOrder)
@@ -256,36 +248,13 @@ public class QuadFactory
             // necessary to support forge lighting model
             net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, this.side);
 
-            return new BakedQuad(aint, -1, this.side);
+            return new BakedQuad(aint, color, side, textureSprite, isShaded, DefaultVertexFormats.ITEM);
 
         }
         
-        /**
-         * Use this for item models. Supports coloring unlike vanilla quads but has a slight performance hit at render time.
-         */
-        public BakedQuad createColoredQuad()
-        {
-
-            for (int r = 0; r < this.rotation.index; r++)
-            {
-                rotateQuadUV(this.v1, this.v2, this.v3, this.v4);
-            }
-
-            Vec3 faceNormal = this.v1.subtract(this.v3).crossProduct(this.v3.subtract(this.v4));
-            faceNormal.normalize();
-
-            UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM);
-            builder.setQuadOrientation(EnumFacing.getFacingFromVector((float) faceNormal.xCoord, (float) faceNormal.yCoord, (float) faceNormal.zCoord));
-            builder.setQuadColored();
-            putVertexData(builder, this.v1, v1.color, this.side, faceNormal, this.textureSprite);
-            putVertexData(builder, this.v2, v2.color, this.side, faceNormal, this.textureSprite);
-            putVertexData(builder, this.v3, v3.color, this.side, faceNormal, this.textureSprite);
-            putVertexData(builder, this.v4, v4.color, this.side, faceNormal, this.textureSprite);
-            return builder.build();
-        }
     }
-
-    public static class Vertex extends Vec3
+    
+    public static class Vertex extends Vec3d
     {
         protected double u;
         protected double v;
@@ -402,13 +371,8 @@ public class QuadFactory
                 break;
             }
  
-            if(this.isItem){
-                builder.add(qi.createColoredQuad()).build();
-            }
-            else 
-            {
-                builder.add(qi.createNormalQuad()).build();
-            }
+ 
+            builder.add(qi.createNormalQuad()).build();
  
             return builder.build();
         }
@@ -440,43 +404,6 @@ public class QuadFactory
                 Float.floatToRawIntBits(sprite.getInterpolatedU(u)), Float.floatToRawIntBits(sprite.getInterpolatedV(v)), 0 };
     }
 
-
-
-    private static void putVertexData(UnpackedBakedQuad.Builder builder, QuadFactory.Vertex vertexIn, int colorIn, EnumFacing side, Vec3 faceNormal,
-            TextureAtlasSprite sprite)
-    {
-        for (int e = 0; e < DefaultVertexFormats.ITEM.getElementCount(); e++)
-        {
-            switch (DefaultVertexFormats.ITEM.getElement(e).getUsage())
-            {
-            case POSITION:
-                builder.put(e, (float) vertexIn.xCoord, (float) vertexIn.yCoord, (float) vertexIn.zCoord, 1);
-                break;
-            case COLOR:
-                float shade = LightUtil.diffuseLight((float) faceNormal.xCoord, (float) faceNormal.yCoord, (float) faceNormal.zCoord);
-
-                float red = shade * ((colorIn >> 16 & 0xFF) / 255f);
-                float green = shade * ((colorIn >> 8 & 0xFF) / 255f);
-                float blue = shade * ((colorIn & 0xFF) / 255f);
-                float alpha = (colorIn >> 24 & 0xFF) / 255f;
-
-                builder.put(e, red, green, blue, alpha);
-                break;
-
-            case UV:
-                builder.put(e, sprite.getInterpolatedU(vertexIn.u), sprite.getInterpolatedV(vertexIn.v), 0, 1);
-                break;
-
-            case NORMAL:
-                builder.put(e, (float) faceNormal.xCoord, (float) faceNormal.yCoord, (float) faceNormal.zCoord, 0);
-                break;
-
-            default:
-                builder.put(e);
-            }
-        }
-    }
-    
     public static class FaceVertex
     {
         public double x;
