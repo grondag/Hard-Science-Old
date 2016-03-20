@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -51,33 +51,33 @@ public class NiceBlockRegistrar
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
     public static final ModelDispatcherBase MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColors(
             BlockColors.makeColorMap(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
-            new ColoredBlockController("raw_flexstone", 4, EnumWorldBlockLayer.SOLID, true, true));
+            new ColoredBlockController("raw_flexstone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new ColoredBlockHelperMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
     
     public static final ModelDispatcherBase MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColors(
             BlockColors.makeColorMap(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
-            new ColoredBlockController("raw_durastone", 4, EnumWorldBlockLayer.SOLID, true, true));
+            new ColoredBlockController("raw_durastone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new ColoredBlockHelperMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
 
     public static final ModelDispatcherBase MODEL_COLORED_STONE = new ModelDispatcherBasic(
             BlockColors.INSTANCE, "colored_stone_0_0",
-            new ColoredBlockController("colored_stone", 4, EnumWorldBlockLayer.SOLID, true, true));
+            new ColoredBlockController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new ColoredBlockHelperPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
 
     public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColor(4), "cool_basalt_0_0",
-            new ColoredBlockController("cool_basalt", 4, EnumWorldBlockLayer.SOLID, true, true),
+            new ColoredBlockController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
             new HotBasaltController());
     public static final NiceBlock BLOCK_HOT_BASALT = new NiceBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
 
 
     public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
-            new BigTexController("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, true),
-            new BorderController("bordertest", 1, EnumWorldBlockLayer.TRANSLUCENT, true));
+            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
+            new BorderController("bordertest", 1, BlockRenderLayer.TRANSLUCENT, true));
     public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
 
     public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
-            new BigTexController("bigtex_rock_test", EnumWorldBlockLayer.SOLID, true, true),
-            new MasonryController("masonrytest", 1, EnumWorldBlockLayer.CUTOUT_MIPPED, true));
+            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
+            new MasonryController("masonrytest", 1, BlockRenderLayer.CUTOUT_MIPPED, true));
     public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
 
     public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
@@ -270,7 +270,7 @@ public class NiceBlockRegistrar
             dispatcher.handleBakeEvent(event);
             //dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
             
-            event.modelRegistry.putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
+            event.getModelRegistry().putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
         }
         
         for (NiceBlock block : allBlocks)
@@ -278,8 +278,8 @@ public class NiceBlockRegistrar
             for (int i = 0; i < block.blockModelHelper.getItemModelCount(); i++)
             {          
                 ModelState modelState = block.blockModelHelper.getModelStateForItemModel(i);
-                event.modelRegistry.putObject(new ModelResourceLocation(block.getRegistryName() + "." + i, "inventory"),
-                        block.blockModelHelper.dispatcher.getItemModelForModelState(modelState));
+                event.getModelRegistry().putObject(new ModelResourceLocation(block.getRegistryName() + "." + i, "inventory"),
+                        block.blockModelHelper.dispatcher);
             }
         }
     }

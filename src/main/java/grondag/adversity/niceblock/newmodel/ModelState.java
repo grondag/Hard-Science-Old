@@ -17,7 +17,7 @@ public class ModelState
     private static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
    
     protected int colorIndex = 0;
-    protected int[] clientShapeIndex = new int[EnumWorldBlockLayer.values().length];
+    protected int[] clientShapeIndex = new int[BlockRenderLayer.values().length];
     protected int serverShapeIndex = 0;
     
     public void writeToNBT(NBTTagCompound tag) 

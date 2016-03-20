@@ -1,7 +1,5 @@
 package grondag.adversity.library;
 
-import grondag.adversity.Adversity;
-
 /**
  * Simple library for color conversion and manipulation.
  * Less complicated than java.awt.color and has conversions it seems to lack.

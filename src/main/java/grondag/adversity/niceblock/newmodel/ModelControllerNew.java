@@ -1,17 +1,10 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.BlockColors;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.event.TextureStitchEvent.Pre;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
 /**
  * Manages model state parameters for texture and physical shape. Single instance per texture set shared by multiple models/blocks.
@@ -49,7 +42,7 @@ public abstract class ModelControllerNew
     /**
      * Layer in which block faces should render.
      */
-    protected final EnumWorldBlockLayer renderLayer;
+    protected final BlockRenderLayer renderLayer;
     
     /**
      * If false, faces of the block are not shaded according to light levels.
@@ -64,7 +57,7 @@ public abstract class ModelControllerNew
      */
     public boolean useCachedClientState = true;
     
-    protected ModelControllerNew(String textureName, int alternateTextureCount, EnumWorldBlockLayer renderLayer, boolean isShaded,
+    protected ModelControllerNew(String textureName, int alternateTextureCount, BlockRenderLayer renderLayer, boolean isShaded,
             boolean useRotatedTexturesAsAlternates)
     {
         this.textureName = textureName;
@@ -122,7 +115,7 @@ public abstract class ModelControllerNew
     /**
      * Used by NiceBlock to control rendering.
      */
-    public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+    public boolean canRenderInLayer(BlockRenderLayer layer)
     {
         return layer == renderLayer;
     }

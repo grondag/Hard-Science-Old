@@ -11,21 +11,21 @@ import java.util.UUID;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
-import net.minecraftforge.client.model.ISmartBlockModel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class ModelDispatcherBase implements ISmartBlockModel
+public abstract class ModelDispatcherBase implements IBakedModel
 {
 
     protected final String resourceName = UUID.randomUUID().toString();
@@ -41,10 +41,6 @@ public abstract class ModelDispatcherBase implements ISmartBlockModel
     
     public abstract void handleBakeEvent(ModelBakeEvent event);
 
-    public abstract IBakedModel getItemModelForModelState(ModelState modelState);
-
-    public abstract IBakedModel handleBlockState(IBlockState state);
-
     /** Calls controllers to update client state index(es)
      * in passed modelState.  Returns true if the client state changed.
      */
@@ -58,7 +54,7 @@ public abstract class ModelDispatcherBase implements ISmartBlockModel
     /**
      * Used by NiceBlock to control rendering.
      */
-    public abstract boolean canRenderInLayer(EnumWorldBlockLayer layer);
+    public abstract boolean canRenderInLayer(BlockRenderLayer layer);
     
     public String getModelResourceString()
     {
@@ -70,6 +66,7 @@ public abstract class ModelDispatcherBase implements ISmartBlockModel
         return colorProvider;
     }
 
+    @Override
     public TextureAtlasSprite getParticleTexture()
     {
         if(particleTexture == null)
@@ -88,52 +85,17 @@ public abstract class ModelDispatcherBase implements ISmartBlockModel
     {
         event.map.registerSprite(new ResourceLocation(particleTextureName));
     }
-    
-    // REMAINING METHODS SHOULD NEVER BE CALLED
-
-    @Override
-    public List<BakedQuad> getFaceQuads(EnumFacing p_177551_1_)
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getFaceQuads()");
-        return Collections.EMPTY_LIST;
-    }
-
-
-    @Override
-    public List<BakedQuad> getGeneralQuads()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getGeneralQuads()");
-        return Collections.EMPTY_LIST;
-    }
-
-
-    @Override
-    public boolean isAmbientOcclusion()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.isAmbientOcclusion()");
-        return false;
-    }
-
-
-    @Override
-    public boolean isGui3d()
-    {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.isGui3d()");
-        return false;
-    }
 
 
     @Override
     public boolean isBuiltInRenderer()
     {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.isBuiltInRenderer()");
         return false;
     }
     
     @Override
     public ItemCameraTransforms getItemCameraTransforms()
     {
-        Adversity.log.warn("Unsupported method call: ModelDispatcher.getItemCameraTransforms()");
         return ItemCameraTransforms.DEFAULT;
     }
 

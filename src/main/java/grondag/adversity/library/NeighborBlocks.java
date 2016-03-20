@@ -1,10 +1,9 @@
 package grondag.adversity.library;
 
-import grondag.adversity.Adversity;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3i;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.IBlockAccess;
 
 /**

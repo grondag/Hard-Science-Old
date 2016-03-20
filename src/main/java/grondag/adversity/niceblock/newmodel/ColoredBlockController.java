@@ -2,21 +2,17 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
-import grondag.adversity.niceblock.newmodel.color.BlockColors;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.NiceColor;
-import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
+
 import net.minecraft.world.IBlockAccess;
 
 public class ColoredBlockController extends ModelControllerNew
 {
     protected final IAlternator alternator;
     
-    public ColoredBlockController(String textureName, int alternateCount, EnumWorldBlockLayer renderLayer, boolean isShaded, boolean useRotations)
+    public ColoredBlockController(String textureName, int alternateCount, BlockRenderLayer renderLayer, boolean isShaded, boolean useRotations)
     {
         super(textureName, alternateCount, renderLayer, isShaded, useRotations);
         this.alternator = Alternator.getAlternator(

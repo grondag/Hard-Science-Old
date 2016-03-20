@@ -1,7 +1,7 @@
 package grondag.adversity.library;
 
 import gnu.trove.set.hash.TIntHashSet;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 /**
  * Validates building of simple cubic multi-block structures

@@ -1,24 +1,15 @@
 package grondag.adversity.niceblock.newmodel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.NiceColor;
-import grondag.adversity.niceblock.support.NicePlacement;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
+//import mcp.mobius.waila.api.IWailaConfigHandler;
+//import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -104,26 +95,26 @@ public abstract class BlockModelHelper
         // NOOP is default implementation
     }
     
-    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
-    {
-        List<String> retVal = new ArrayList<String>();
-        this.addInformation(itemStack, null, retVal, false);
-        return retVal;
-    }
+//    public List<String> getWailaBody(ItemStack itemStack, List<String> current tip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+//    {
+//        List<String> retVal = new ArrayList<String>();
+//        this.addInformation(itemStack, null, retVal, false);
+//        return retVal;
+//    }
 
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return true;
     }
 
-    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
+    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
         return true;
     }
 
-    public boolean isFullBlock() {
+    public boolean isFullBlock(IBlockState state) {
         return true;
     }
 
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return true;
     }
     
@@ -133,7 +124,7 @@ public abstract class BlockModelHelper
     }
     
     /** won't be called unless hasCustomBrightness is true */
-    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) 
+    public int getCustomBrightness(IBlockState state, IBlockAccess source, BlockPos pos) 
     {
         return 0xFFFFFFFF;
     }

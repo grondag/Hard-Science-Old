@@ -1,8 +1,7 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Config;
-import net.minecraft.block.Block;
-import net.minecraft.block.Block.SoundType;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 
 /**
@@ -10,10 +9,10 @@ import net.minecraft.block.material.Material;
  * Determines Minecraft material and other physical properties.
  */
 public enum BaseMaterial {
-	FLEXSTONE("flexstone", Material.rock, Block.soundTypeStone),
-	DURASTONE("durastone", Material.rock, Block.soundTypeStone),
-	HYPERSTONE("hyperstone", Material.iron, Block.soundTypeMetal),
-	SUPERWOOD("superwood", Material.wood, Block.soundTypeWood);
+	FLEXSTONE("flexstone", Material.rock, SoundType.STONE),
+	DURASTONE("durastone", Material.rock, SoundType.STONE),
+	HYPERSTONE("hyperstone", Material.iron, SoundType.WOOD),
+	SUPERWOOD("superwood", Material.wood, SoundType.METAL);
 
 	public final String materialName;
 	public final Material material;

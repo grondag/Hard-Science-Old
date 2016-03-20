@@ -3,7 +3,8 @@ package grondag.adversity.library;
 import java.util.HashMap;
 import java.util.Random;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+
 
 /**
  * Fast local randomizer, intended for randomizing block alternates for a block

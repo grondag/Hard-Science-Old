@@ -9,12 +9,12 @@ import grondag.adversity.niceblock.support.NicePlacement;
 import java.util.ArrayList;
 import java.util.List;
 
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
+//import mcp.mobius.waila.api.IWailaConfigHandler;
+//import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityDiggingFX;
@@ -25,13 +25,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -116,7 +116,7 @@ public class NiceBlock extends Block implements IWailaProvider
     }
 
     @Override
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
         return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_STATE });
     }
@@ -125,7 +125,7 @@ public class NiceBlock extends Block implements IWailaProvider
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
         list.addAll(blockModelHelper.getSubItems());
     }
@@ -162,49 +162,50 @@ public class NiceBlock extends Block implements IWailaProvider
     // (Ray tracing and collisions, mainly.)
 
     @Override
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.SOLID;
+        return BlockRenderLayer.SOLID;
     }
 
     @Override
-    public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+    public boolean canRenderInLayer(BlockRenderLayer layer)
     {
         return blockModelHelper.dispatcher.canRenderInLayer(layer);
     }
 
     @Override
-    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
+    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
         if(blockModelHelper.hasCustomBrightness()){
-            return blockModelHelper.getMixedBrightnessForBlock(worldIn, pos); 
+            return blockModelHelper.getCustomBrightness(state, source, pos); 
         } else {
-            return super.getMixedBrightnessForBlock(worldIn, pos);
+            return super.getPackedLightmapCoords(state, source, pos);
         }
     }
     
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         //null handling needed here because called during initialization
-        return blockModelHelper == null ? true : blockModelHelper.isOpaqueCube();
+        return blockModelHelper == null ? true : blockModelHelper.isOpaqueCube(state);
     }
 
     @Override
-    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
-        return blockModelHelper.isNormalCube(world, pos);
+    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return blockModelHelper.isNormalCube(state, world, pos);
     }
 
     @Override
-    public boolean isFullBlock() {
-        return blockModelHelper.isFullBlock();
+    public boolean isFullBlock(IBlockState state) {
+        return blockModelHelper.isFullBlock(state);
     }
 
     @Override
-    public boolean isFullCube() {
-        return blockModelHelper.isFullCube();
+    public boolean isFullCube(IBlockState state) {
+        return blockModelHelper.isFullCube(state);
     }
     
-    private long elapsedTime;
-    private int timerCount = 0;
+//    private long elapsedTime;
+//    private int timerCount = 0;
 
     /**
      * Determines which model should be displayed via MODEL_STATE. Handling is delegated to the block model helper.
@@ -230,9 +231,7 @@ public class NiceBlock extends Block implements IWailaProvider
     {
         if (collisionHandler == null)
         {
-            return new ImmutableList.Builder().add(
-                    new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY, pos.getZ() + maxZ))
-                    .build();
+            return new ImmutableList.Builder<AxisAlignedBB>().add(this.getBoundingBox(state, worldIn, pos)).build();
         }
         else
         {
@@ -241,34 +240,15 @@ public class NiceBlock extends Block implements IWailaProvider
     }
 
     @Override
-    public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end)
+    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
         if (collisionHandler == null)
         {
-            return super.collisionRayTrace(worldIn, pos, start, end);
+            return super.collisionRayTrace(blockState, worldIn, pos, start, end);
         }
         else
         {
-            return collisionHandler.collisionRayTrace(worldIn, pos, start, end);
-        }
-    }
-
-    @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        if (collisionHandler == null)
-        {
-            super.setBlockBoundsBasedOnState(worldIn, pos);
-        }
-        else
-        {
-            AxisAlignedBB aabb = collisionHandler.getCollisionBoundingBox(worldIn, pos, worldIn.getBlockState(pos));
-            minX = aabb.minX;
-            minY = aabb.minY;
-            minZ = aabb.minZ;
-            maxX = aabb.maxX;
-            maxY = aabb.maxY;
-            maxZ = aabb.maxZ;
+            return collisionHandler.collisionRayTrace(blockState, worldIn, pos, start, end);
         }
     }
 

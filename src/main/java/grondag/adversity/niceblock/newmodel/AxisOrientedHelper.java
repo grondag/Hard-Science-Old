@@ -72,7 +72,7 @@ public class AxisOrientedHelper extends ColoredBlockHelperPlus
     }
     
     @Override
-    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos) {
+    public int getCustomBrightness(IBlockAccess worldIn, BlockPos pos) {
         return 15 << 20 | 15 << 4; 
     }
 }

@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.support;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.IBlockTest;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 /**

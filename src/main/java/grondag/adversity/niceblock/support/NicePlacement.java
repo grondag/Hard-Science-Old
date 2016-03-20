@@ -1,10 +1,5 @@
 package grondag.adversity.niceblock.support;
 
-import java.util.Random;
-
-import org.apache.commons.lang3.BitField;
-
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
@@ -13,11 +8,8 @@ import grondag.adversity.niceblock.newmodel.BlockModelHelper;
 import grondag.adversity.niceblock.newmodel.BlockTests;
 import grondag.adversity.niceblock.newmodel.ModelReference;
 import grondag.adversity.niceblock.newmodel.NiceBlock;
-import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 

@@ -1,12 +1,5 @@
 package grondag.adversity;
 
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.MinecraftForge;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-
 //import grondag.adversity.event.CommonEventHandler;
 //import grondag.adversity.event.OreGenEventHandler;
 //import grondag.adversity.event.TerrainGenEventHandler;
@@ -21,7 +14,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 public class CommonProxy {
 
@@ -35,7 +27,7 @@ public class CommonProxy {
 		NiceBlockRegistrar.preInit(event);
 //		Unobtanium.preInit(event);
         if (Loader.isModLoaded("Waila")){
-            WailaDataProvider.register();
+       //     WailaDataProvider.register();
         }
 	}
 

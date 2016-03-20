@@ -1,12 +1,9 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.library.Alternator;
-import grondag.adversity.library.IAlternator;
-import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
+
 import net.minecraft.world.IBlockAccess;
 
 public class HotBasaltController extends ColoredBlockController
@@ -14,7 +11,7 @@ public class HotBasaltController extends ColoredBlockController
     
     public HotBasaltController()
     {
-        super("hot_basalt", 4, EnumWorldBlockLayer.TRANSLUCENT, false, true);
+        super("hot_basalt", 4, BlockRenderLayer.TRANSLUCENT, false, true);
         textureCount = 4;
     }
     

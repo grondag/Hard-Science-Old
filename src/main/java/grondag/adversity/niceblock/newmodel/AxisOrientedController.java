@@ -3,15 +3,10 @@ package grondag.adversity.niceblock.newmodel;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Quat4f;
-
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.newmodel.AxisOrientedController.ModelType;
 import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -19,17 +14,14 @@ import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.TRSRTransformation;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
 public abstract class AxisOrientedController extends ModelControllerNew implements ICollisionHandler
 {
@@ -110,7 +102,7 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
         
     protected AxisOrientedController(String textureName, int alternateTextureCount, ModelType modelType, boolean isShaded)
     {
-        super(textureName, alternateTextureCount, modelType == ModelType.LAMP_OVERLAY ? EnumWorldBlockLayer.CUTOUT_MIPPED : EnumWorldBlockLayer.SOLID, isShaded, false);
+        super(textureName, alternateTextureCount, modelType == ModelType.LAMP_OVERLAY ? BlockRenderLayer.CUTOUT_MIPPED : BlockRenderLayer.SOLID, isShaded, false);
         this.alternator = Alternator.getAlternator((byte)(alternateTextureCount));
   //      populateModelNames();
         this.modelType = modelType;
@@ -146,25 +138,25 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
 
     /** Override this and getCollisionHandler to implement non-standard collision bounds*/
     protected ImmutableList<AxisAlignedBB> getModelBounds(EnumFacing.Axis axis, int shapeIndex) {
-        ImmutableList defaultList = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, 1, 1)).build();
+        ImmutableList<AxisAlignedBB> defaultList = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, 1, 1)).build();
         return defaultList;
     }
     
     /** won't be called unless getCollisionHandler is overriden */
     @Override
-    public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end) {
+    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
 
-        ArrayList<AxisAlignedBB> bounds = new ArrayList();
+        ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
 
         addCollisionBoxesToList(worldIn, pos, worldIn.getBlockState(pos),
                 new AxisAlignedBB(start.xCoord, start.yCoord, start.zCoord, end.xCoord, end.yCoord, end.zCoord),
                 bounds, null);
 
-        MovingObjectPosition retval = null;
+        RayTraceResult retval = null;
         double distance = 1;
 
         for (AxisAlignedBB aabb : bounds) {
-            MovingObjectPosition candidate = aabb.calculateIntercept(start, end);
+        	RayTraceResult candidate = aabb.calculateIntercept(start, end);
             if (candidate != null) {
                 double checkDist = candidate.hitVec.squareDistanceTo(start);
                 if (retval == null || checkDist < distance) {
@@ -173,7 +165,7 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
                 }
             }
         }
-        return retval == null ? null : new MovingObjectPosition(retval.hitVec.addVector(pos.getX(), pos.getY(), pos.getZ()), retval.sideHit, pos);
+        return retval == null ? null : new RayTraceResult(retval.hitVec.addVector(pos.getX(), pos.getY(), pos.getZ()), retval.sideHit, pos);
     }
 
     /**
@@ -212,7 +204,7 @@ public abstract class AxisOrientedController extends ModelControllerNew implemen
         int clientShapeIndex = ((NiceBlock)state.getBlock()).blockModelHelper.getModelStateForBlock(state, worldIn, pos, true)
                 .getClientShapeIndex(this.renderLayer.ordinal());
 
-        ImmutableList.Builder builder = new ImmutableList.Builder<AxisAlignedBB>();
+        ImmutableList.Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
 
         for (AxisAlignedBB aabb : MODEL_BOUNDS[getAxisFromModelIndex(clientShapeIndex)][getShapeFromModelIndex(clientShapeIndex)]) {
             builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));

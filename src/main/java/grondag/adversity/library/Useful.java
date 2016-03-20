@@ -4,12 +4,10 @@ import javax.vecmath.Matrix4f;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
+
 
 /**
  * Random utilities that have not yet found a more appropriate home.

@@ -6,18 +6,11 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4f;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.EnumFacing.Axis;
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.BlockCorner;
-import grondag.adversity.library.NeighborBlocks.FarCorner;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.support.CornerStateFinder;
 
 public class ModelReference

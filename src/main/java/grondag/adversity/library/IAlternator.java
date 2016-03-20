@@ -1,6 +1,6 @@
 package grondag.adversity.library;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 /** Public interface for Alternator class. Look there for details. */
 public interface IAlternator {
