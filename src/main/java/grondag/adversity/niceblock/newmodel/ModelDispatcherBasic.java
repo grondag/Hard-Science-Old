@@ -37,6 +37,8 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
      * be instantiated, but many shapes within a color probably will.
      */
     private QuadContainer[][] bakedQuads;
+    
+    private SimpleItemModel[] itemModels;
 
     private final ModelControllerNew controller;
 
@@ -46,6 +48,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
     {
         super(colorProvider, particleTextureName);
         this.controller = controller;
+        this.itemModels = new SimpleItemModel[colorProvider.getColorCount()];
         NiceBlockRegistrar.allDispatchers.add(this);
         this.isColorCountBiggerThanShapeCount = controller.getShapeCount() > colorProvider.getColorCount();
     }
@@ -157,10 +160,19 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
      @Override
      public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
      {
-    	 BlockModelHelper helper = ((NiceBlock)((NiceItemBlock)stack.getItem()).block).blockModelHelper;
-    	 ModelState modelState = helper.getModelStateForItemModel(stack.getMetadata());
-      	 return new SimpleItemModel(controller.getBakedModelFactory().getItemQuads(modelState, colorProvider), this.isAmbientOcclusion());
-    } 
+    	 if(itemModels[stack.getMetadata()] == null)
+    	 {
+
+	    	 BlockModelHelper helper = ((NiceBlock)((NiceItemBlock)stack.getItem()).block).blockModelHelper;
+	    	 ModelState modelState = helper.getModelStateForItemModel(stack.getMetadata());
+
+	    	 synchronized(itemModels)
+	    	 {
+	    		 itemModels[stack.getMetadata()] = new SimpleItemModel(controller.getBakedModelFactory().getItemQuads(modelState, colorProvider), this.isAmbientOcclusion());
+	    	 }
+    	 }
+    	 return itemModels[stack.getMetadata()];
+	 } 
 
     @Override
     public ICollisionHandler getCollisionHandler()

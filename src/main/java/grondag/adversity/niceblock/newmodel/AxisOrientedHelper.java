@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.newmodel;
 
 import java.util.List;
 
+import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -41,7 +42,10 @@ public class AxisOrientedHelper extends ColoredBlockHelperPlus
     public ModelState getModelStateForItemModel(int itemIndex)
     {
         ModelState modelState = new ModelState(0, itemIndex);
-        modelState.setClientShapeIndex(0, BlockRenderLayer.SOLID.ordinal());
+        modelState.setClientShapeIndex(BlockJoinSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.SOLID.ordinal());
+        modelState.setClientShapeIndex(BlockJoinSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT.ordinal());
+        modelState.setClientShapeIndex(BlockJoinSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT_MIPPED.ordinal());
+        modelState.setClientShapeIndex(BlockJoinSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.TRANSLUCENT.ordinal());
         return modelState;
     }
     

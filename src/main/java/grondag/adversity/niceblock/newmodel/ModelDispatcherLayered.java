@@ -41,6 +41,8 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
      * be instantiated.
      */
     private QuadContainer[][][] bakedQuads = new QuadContainer[BlockRenderLayer.values().length][][];
+    
+    private SimpleItemModel[] itemModels;
 
     private final ModelControllerNew controllers[] = new ModelControllerNew[BlockRenderLayer.values().length];
     
@@ -52,6 +54,7 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
     {
         super(colorProvider, particleTextureName);
         this.controllerPrimary = controllersIn[0];
+        this.itemModels = new SimpleItemModel[colorProvider.getColorCount()];
         boolean testColorCountBiggerThanShapeCount = true;
         for(ModelControllerNew cont : controllersIn)
         {
@@ -191,19 +194,26 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
      @Override
      public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
      {
-    	 BlockModelHelper helper = ((NiceBlock)((NiceItemBlock)stack.getItem()).block).blockModelHelper;
-    	 ModelState modelState = helper.getModelStateForItemModel(stack.getMetadata());
-    	 ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-
-    	 for(ModelControllerNew cont : controllers)
+    	 if(itemModels[stack.getMetadata()] == null)
     	 {
-    		 if(cont != null)
-    		 {
-    			 builder.addAll(cont.getBakedModelFactory().getItemQuads(modelState, colorProvider));
-    		 }
+	    	 BlockModelHelper helper = ((NiceBlock)((NiceItemBlock)stack.getItem()).block).blockModelHelper;
+	    	 ModelState modelState = helper.getModelStateForItemModel(stack.getMetadata());
+	    	 ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+	
+	    	 for(ModelControllerNew cont : controllers)
+	    	 {
+	    		 if(cont != null)
+	    		 {
+	    			 builder.addAll(cont.getBakedModelFactory().getItemQuads(modelState, colorProvider));
+	    		 }
+	    	 }
+	
+	    	 synchronized(itemModels)
+	    	 {
+	    		 itemModels[stack.getMetadata()] = new SimpleItemModel(builder.build(), this.isAmbientOcclusion());
+	    	 }
     	 }
-
-    	 return new SimpleItemModel(builder.build(), this.isAmbientOcclusion());
+    	 return itemModels[stack.getMetadata()];
      } 
      
     @Override
