@@ -25,9 +25,9 @@ group= "grondag.adversity" // http://maven.apache.org/guides/mini/guide-naming-c
 archivesBaseName = "adversity"
 
 minecraft {
-    version = "1.9-12.16.0.1773-1.9"
+    version = "1.9-12.16.0.1782-1.9"
     runDir = "run"
-   // useDepAts = true
+    useDepAts = true
     
     // the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
@@ -39,14 +39,21 @@ minecraft {
 }
 
 repositories {
-//    maven {
-//        url "http://dvs1.progwml6.com/files/maven"
-//    }
-  
-//    maven { 
-//        name "Mobius Repo"
-//        url "http://mobiusstrip.eu/maven"
-//    }
+    maven { // The repo from which to get waila
+        name "Mobius Repo"
+        url "http://mobiusstrip.eu/maven"
+    }
+    maven { // JEI
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+    maven {
+        name 'OC Repo'
+        url "http://maven.cil.li/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
 }
 
 dependencies {
@@ -68,7 +75,7 @@ dependencies {
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
  //   deobfCompile "mcp.mobius.waila:Waila:1.6.0-B3_1.8.8"
- //   deobfCompile "mezz.jei:jei_1.8.9:2.27.0.157"
+    deobfCompile "mezz.jei:jei_1.9:3.0.2.164"
     
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

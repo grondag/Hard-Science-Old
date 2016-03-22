@@ -7,11 +7,15 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -26,7 +30,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ModelDispatcherBasic extends ModelDispatcherBase
 {
-
     /** 
      * Cache for baked block models 
      * Dimensions are color, shape.
@@ -77,8 +80,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         	bakedQuads = null;
         }
         controller.getBakedModelFactory().handleBakeEvent(event);
-    }
-    
+    }   
 
 	@SideOnly(Side.CLIENT)
 	@Override
@@ -123,6 +125,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
 	            }
             }
         }
+        
         List<BakedQuad> retVal = bakedQuads[firstIndex][secondIndex].getQuads(side);
         if(retVal == null)
         {
@@ -150,6 +153,14 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
             return false;
         }
     }
+     
+     @Override
+     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
+     {
+    	 BlockModelHelper helper = ((NiceBlock)((NiceItemBlock)stack.getItem()).block).blockModelHelper;
+    	 ModelState modelState = helper.getModelStateForItemModel(stack.getMetadata());
+      	 return new SimpleItemModel(controller.getBakedModelFactory().getItemQuads(modelState, colorProvider), this.isAmbientOcclusion());
+    } 
 
     @Override
     public ICollisionHandler getCollisionHandler()
@@ -167,5 +178,4 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
 	public boolean isAmbientOcclusion() {
 		return controller.isShaded;
 	}
-
 }

@@ -6,13 +6,18 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
@@ -183,6 +188,24 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
         return updated;
     }
 
+     @Override
+     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
+     {
+    	 BlockModelHelper helper = ((NiceBlock)((NiceItemBlock)stack.getItem()).block).blockModelHelper;
+    	 ModelState modelState = helper.getModelStateForItemModel(stack.getMetadata());
+    	 ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+
+    	 for(ModelControllerNew cont : controllers)
+    	 {
+    		 if(cont != null)
+    		 {
+    			 builder.addAll(cont.getBakedModelFactory().getItemQuads(modelState, colorProvider));
+    		 }
+    	 }
+
+    	 return new SimpleItemModel(builder.build(), this.isAmbientOcclusion());
+     } 
+     
     @Override
     public ICollisionHandler getCollisionHandler()
     {
@@ -197,7 +220,9 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
 
 	@Override
 	public boolean isAmbientOcclusion() {
-		return controllerPrimary.isShaded;
+		BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+        if (layer == null || controllers[layer.ordinal()] == null) return true;
+		return controllers[layer.ordinal()].isShaded;
 	}
 
 }

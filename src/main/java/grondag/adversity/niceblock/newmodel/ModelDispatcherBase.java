@@ -12,10 +12,13 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 
@@ -26,7 +29,7 @@ public abstract class ModelDispatcherBase implements IBakedModel
     protected final IColorProvider colorProvider;
     protected final String particleTextureName;
     protected TextureAtlasSprite particleTexture;
-
+    
     public ModelDispatcherBase(IColorProvider colorProvider, String particleTextureName)
     {
         this.colorProvider = colorProvider;
@@ -70,6 +73,9 @@ public abstract class ModelDispatcherBase implements IBakedModel
         return particleTexture;
     }
     
+    public abstract IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity);
+ 
+    
     /**
      * Override to registers all textures that will be needed for associated controllers. 
      * Be sure to call super so that parent implementation handles particle texture.
@@ -95,10 +101,10 @@ public abstract class ModelDispatcherBase implements IBakedModel
 	@Override
 	public ItemOverrideList getOverrides()
 	{
-		return ItemOverrideList.NONE ;
+		return new ItemModelDelegate(this) ;
 	}
-    
-    @Override
+	
+	@Override
     public ItemCameraTransforms getItemCameraTransforms()
     {
         return ItemCameraTransforms.DEFAULT;
