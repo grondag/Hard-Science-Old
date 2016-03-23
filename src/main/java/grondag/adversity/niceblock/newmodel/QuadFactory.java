@@ -293,6 +293,7 @@ public class QuadFactory
         public boolean rotateBottom = false;
         public boolean isOverlay = false;
         public boolean isItem = false;
+        public boolean isShaded = true;
         
         public CubeInputs()
         {
@@ -319,7 +320,7 @@ public class QuadFactory
             qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
             qi.textureSprite = this.textureSprite;
             
-            int shadedColor = shadeColor(this.color, LightUtil.diffuseLight(side), true);
+            int shadedColor = shadeColor(this.color, this.isShaded ? LightUtil.diffuseLight(side) : 1.0F, true);
             
             double minBound = this.isOverlay ? -0.0002 : 0.0;
             double maxBound = this.isOverlay ? 1.0002 : 1.0;

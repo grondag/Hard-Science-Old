@@ -64,11 +64,28 @@ public class HotBasaltHelper extends BlockModelHelper
     @Override 
     public boolean hasCustomBrightness()
     {
-        return MinecraftForgeClient.getRenderLayer() != BlockRenderLayer.SOLID;
+        return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT;
     }
     
     @Override
     public int getCustomBrightness(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         return 15 << 20 | 15 << 4;
     }
+    
+    // helps to prevent some weird lighting artifacts
+    @Override
+    public boolean isTranslucent(IBlockState state)
+    {
+    	return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT;
+    }
+    
+    // necessary to offset the AO lighting effects of a fully lit translucent layer
+    // values >= 15 are changed to 1 by rendering code
+	public int getLightOpacity(IBlockState state) {
+		return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT ? 0 : 255;
+	}
+
+	public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return getLightOpacity(state);
+	}
 }

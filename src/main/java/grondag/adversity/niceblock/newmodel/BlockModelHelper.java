@@ -123,6 +123,11 @@ public abstract class BlockModelHelper
         return false;
     }
     
+    public boolean isTranslucent(IBlockState state)
+    {
+    	return false;
+    }
+    
     /** won't be called unless hasCustomBrightness is true */
     public int getCustomBrightness(IBlockState state, IBlockAccess source, BlockPos pos) 
     {

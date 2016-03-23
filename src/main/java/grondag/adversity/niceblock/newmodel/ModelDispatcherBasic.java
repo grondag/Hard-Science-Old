@@ -3,7 +3,6 @@ package grondag.adversity.niceblock.newmodel;
 import java.util.List;
 
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import net.minecraft.block.state.IBlockState;

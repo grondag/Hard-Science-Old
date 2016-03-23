@@ -34,7 +34,7 @@ public class ColoredBlockModelFactory extends BakedModelFactory
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()));
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getTextureOffsetFromShapeIndex(modelState.getClientShapeIndex(controller.renderLayer.ordinal()))));
-
+        cubeInputs.isShaded = controller.isShaded;
         cubeInputs.u0 = 0;
         cubeInputs.v0 = 0;
         cubeInputs.u1 = 16;

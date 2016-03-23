@@ -39,6 +39,10 @@ import com.google.common.collect.ImmutableList;
  * NiceBlocks does it this way beause Adversity has MANY building blocks with many variants and I wanted to avoid creating tile entities in most cases and to be fully efficient in
  * usage of metadata bits. If each NiceBlock instance has 16 meta variants then no metadata bits are wasted. Slabs, stairs, etc. do not necessarily consume four metadata bits and
  * this also system means all niceblocks can be fully consistent in the way they use metadata.
+ * 
+ * NB: Vanilla Bug / Feature
+ * If block getLightValue > 0 and lightOpacity > 0
+ * then block stays lit when nearby light sources are removed.
  */
 public class NiceBlock extends Block // implements IWailaProvider
 {
@@ -145,10 +149,14 @@ public class NiceBlock extends Block // implements IWailaProvider
     // Note that some of the methods here are called server-side.
     // (Ray tracing and collisions, mainly.)
 
+    /** Only meaningful use is for itemRenderer which 
+    * checks this to know if it should do depth checking on item renders
+    */
     @Override
     public BlockRenderLayer getBlockLayer()
     {
-        return BlockRenderLayer.SOLID;
+        return blockModelHelper.dispatcher.canRenderInLayer(BlockRenderLayer.TRANSLUCENT)
+        		? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
     }
 
     @Override
@@ -169,18 +177,17 @@ public class NiceBlock extends Block // implements IWailaProvider
     
     @Override
     public boolean isOpaqueCube(IBlockState state) {
-        //null handling needed here because called during initialization
         return blockModelHelper == null ? true : blockModelHelper.isOpaqueCube(state);
     }
 
-    @Override
+	@Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
         return blockModelHelper.isNormalCube(state, world, pos);
     }
 
     @Override
     public boolean isFullBlock(IBlockState state) {
-        return blockModelHelper.isFullBlock(state);
+    	return blockModelHelper.isFullBlock(state);
     }
 
     @Override
@@ -188,10 +195,17 @@ public class NiceBlock extends Block // implements IWailaProvider
         return blockModelHelper.isFullCube(state);
     }
     
-//    private long elapsedTime;
-//    private int timerCount = 0;
+    @Override
+    public boolean isTranslucent(IBlockState state)
+    {
+    	return blockModelHelper.isTranslucent(state);
+    }
 
-    /**
+
+//  private long elapsedTime;
+//  private int timerCount = 0;
+
+	/**
      * Determines which model should be displayed via MODEL_STATE. Handling is delegated to the block model helper.
      */
     @Override
