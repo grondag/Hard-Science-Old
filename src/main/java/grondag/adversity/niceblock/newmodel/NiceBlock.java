@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -42,7 +40,7 @@ import com.google.common.collect.ImmutableList;
  * usage of metadata bits. If each NiceBlock instance has 16 meta variants then no metadata bits are wasted. Slabs, stairs, etc. do not necessarily consume four metadata bits and
  * this also system means all niceblocks can be fully consistent in the way they use metadata.
  */
-public class NiceBlock extends Block implements IBlockColor //IWailaProvider
+public class NiceBlock extends Block // implements IWailaProvider
 {
 
     /**
@@ -265,16 +263,6 @@ public class NiceBlock extends Block implements IBlockColor //IWailaProvider
     }
 
 
-    /**
-     * Implemented only for particle support.
-     * Block model quads are pre-colored with tintIndex = 0,
-     * so this should not be called for block rendering.
-     */
-	@Override
-	public int colorMultiplier(IBlockState state, IBlockAccess worldIn, BlockPos pos, int renderPass) {
-        ModelState modelState = this.blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos, false);
-        return this.blockModelHelper.dispatcher.getColorProvider().getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
-	}
 
 //    @Override
 //    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)

@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.newmodel;
 import java.util.List;
 
 import grondag.adversity.niceblock.newmodel.color.IColorProvider;
+import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import net.minecraft.block.state.IBlockState;
@@ -50,7 +51,7 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         this.controller = controller;
         this.itemModels = new SimpleItemModel[colorProvider.getColorCount()];
         NiceBlockRegistrar.allDispatchers.add(this);
-        this.isColorCountBiggerThanShapeCount = controller.getShapeCount() > colorProvider.getColorCount();
+        this.isColorCountBiggerThanShapeCount =  colorProvider.getColorCount() > controller.getShapeCount();
     }
     
     @Override
@@ -85,6 +86,12 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         controller.getBakedModelFactory().handleBakeEvent(event);
     }   
 
+//	@Override
+//	public int colorMultiplier(IBlockState state, IBlockAccess worldIn, BlockPos pos, int renderPass) {
+//        ModelState modelState = ((NiceBlock)state.getBlock()).blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos, false);
+//        return getColorProvider().getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
+//	}
+	
 	@SideOnly(Side.CLIENT)
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 

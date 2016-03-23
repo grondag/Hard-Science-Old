@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 
-public abstract class ModelDispatcherBase implements IBakedModel
+public abstract class ModelDispatcherBase implements IBakedModel //, IBlockColor
 {
 
     protected final String resourceName = UUID.randomUUID().toString();

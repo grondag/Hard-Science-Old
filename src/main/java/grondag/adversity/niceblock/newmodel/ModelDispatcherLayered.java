@@ -118,9 +118,9 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
     {
 		if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
 
-        BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+        int layer = MinecraftForgeClient.getRenderLayer().ordinal();
 
-        if (controllers[layer.ordinal()] == null) return QuadFactory.EMPTY_QUAD_LIST;
+        if (controllers[layer] == null) return QuadFactory.EMPTY_QUAD_LIST;
         
         ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
     	int firstIndex;
@@ -128,45 +128,45 @@ public class ModelDispatcherLayered extends ModelDispatcherBase
     	if(isColorCountBiggerThanShapeCount)
 		{
     		firstIndex = modelState.getColorIndex();
-    		secondIndex = modelState.getClientShapeIndex(0);
+    		secondIndex = modelState.getClientShapeIndex(layer);
 		}
     	else
     	{
-    		firstIndex = modelState.getClientShapeIndex(0);
+    		firstIndex = modelState.getClientShapeIndex(layer);
     		secondIndex = modelState.getColorIndex();
     	}
     	
-        if(bakedQuads[layer.ordinal()][firstIndex] == null)
+        if(bakedQuads[layer][firstIndex] == null)
         {
             synchronized (bakedQuads)
             {
             	// first check was not synchronized, so confirm
-	            if(bakedQuads[layer.ordinal()][firstIndex] == null)
+	            if(bakedQuads[layer][firstIndex] == null)
 	            {
-	            	bakedQuads[layer.ordinal()][firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controllers[layer.ordinal()].getShapeCount()];
+	            	bakedQuads[layer][firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? this.colorProvider.getColorCount() : controllers[layer].getShapeCount()];
 	            }
             }
         }
         
-        if(bakedQuads[layer.ordinal()][firstIndex][secondIndex] == null)
+        if(bakedQuads[layer][firstIndex][secondIndex] == null)
         {
             synchronized (bakedQuads)
             {
             	// first check was not synchronized, so confirm
-	            if(bakedQuads[layer.ordinal()][firstIndex][secondIndex] == null)
+	            if(bakedQuads[layer][firstIndex][secondIndex] == null)
 	            {
-	            	bakedQuads[layer.ordinal()][firstIndex][secondIndex] = new QuadContainer();
+	            	bakedQuads[layer][firstIndex][secondIndex] = new QuadContainer();
 	            }
             }
         }
         
-        List<BakedQuad> retVal = bakedQuads[layer.ordinal()][firstIndex][secondIndex].getQuads(side);
+        List<BakedQuad> retVal = bakedQuads[layer][firstIndex][secondIndex].getQuads(side);
         if(retVal == null)
         {
-        	retVal = controllers[layer.ordinal()].getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
+        	retVal = controllers[layer].getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
         	synchronized (bakedQuads)
             {
-            	bakedQuads[layer.ordinal()][firstIndex][secondIndex].setQuads(side, retVal);
+            	bakedQuads[layer][firstIndex][secondIndex].setQuads(side, retVal);
             }
         }
         return retVal;

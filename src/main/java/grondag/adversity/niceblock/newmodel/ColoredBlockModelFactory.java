@@ -24,6 +24,8 @@ public class ColoredBlockModelFactory extends BakedModelFactory
 	@Override
 	public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
     {
+        if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
+
         CubeInputs cubeInputs = new CubeInputs();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         ColoredBlockController controller = (ColoredBlockController)this.controller;

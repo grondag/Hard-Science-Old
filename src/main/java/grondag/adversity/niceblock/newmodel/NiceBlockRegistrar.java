@@ -249,7 +249,7 @@ public class NiceBlockRegistrar
         for (NiceBlock block : allBlocks)
         {
         	// won't work in pre-init because BlockColors/ItemColors aren't instantiated yet
-            Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block, block);
+            //Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block.blockModelHelper.dispatcher, block);
             Minecraft.getMinecraft().getItemColors().registerItemColorHandler(block.item, block);
         }
     }
