@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.newmodel.color;
+package grondag.adversity.niceblock.color;
 
 import grondag.adversity.library.Color;
 

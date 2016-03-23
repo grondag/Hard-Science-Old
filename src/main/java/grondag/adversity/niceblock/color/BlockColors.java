@@ -1,12 +1,12 @@
-package grondag.adversity.niceblock.newmodel.color;
+package grondag.adversity.niceblock.color;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Color;
 import grondag.adversity.library.Color.EnumHCLFailureMode;
-import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.newmodel.color.HueSet.HuePosition;
-import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
-import grondag.adversity.niceblock.newmodel.color.NiceHues.Hue;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.color.HueSet.HuePosition;
+import grondag.adversity.niceblock.color.HueSet.Tint;
+import grondag.adversity.niceblock.color.NiceHues.Hue;
 
 public class BlockColors implements IColorProvider
 {

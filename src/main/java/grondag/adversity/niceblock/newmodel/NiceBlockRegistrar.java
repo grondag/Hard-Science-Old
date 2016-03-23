@@ -1,11 +1,11 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.niceblock.newmodel.color.BlockColors;
-import grondag.adversity.niceblock.newmodel.color.FixedColors;
-import grondag.adversity.niceblock.newmodel.color.HueSet.Tint;
-import grondag.adversity.niceblock.newmodel.color.NiceHues.Hue;
-import grondag.adversity.niceblock.newmodel.color.NiceHues;
-import grondag.adversity.niceblock.newmodel.color.NoColor;
+import grondag.adversity.niceblock.color.BlockColors;
+import grondag.adversity.niceblock.color.FixedColors;
+import grondag.adversity.niceblock.color.NiceHues;
+import grondag.adversity.niceblock.color.NoColor;
+import grondag.adversity.niceblock.color.HueSet.Tint;
+import grondag.adversity.niceblock.color.NiceHues.Hue;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 

@@ -29,10 +29,12 @@ public class Adversity {
 
 	public static WorldType adversityWorld;
 
-	public static CreativeTabs tabAdversity = new CreativeTabs("Adversity") {
+	public static CreativeTabs tabAdversity = new CreativeTabs("Adversity") 
+	{
 		@Override
 		@SideOnly(Side.CLIENT)
-		public Item getTabIconItem() {
+		public Item getTabIconItem() 
+		{
 			//TODO need a real Icon
 			return Items.baked_potato;
 		}

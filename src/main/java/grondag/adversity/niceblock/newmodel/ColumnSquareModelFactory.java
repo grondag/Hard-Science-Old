@@ -2,15 +2,15 @@ package grondag.adversity.niceblock.newmodel;
 
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.newmodel.QuadFactory.QuadInputs;
+import grondag.adversity.niceblock.color.ColorMap;
+import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.newmodel.QuadFactory.FaceVertex;
 import grondag.adversity.niceblock.newmodel.QuadFactory.SimpleQuadBounds;
-import grondag.adversity.niceblock.newmodel.color.ColorMap;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
 import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector;
 import grondag.adversity.niceblock.newmodel.joinstate.BlockJoinSelector.BlockJoinState;
 import grondag.adversity.niceblock.newmodel.joinstate.FaceJoinState;
 import grondag.adversity.niceblock.newmodel.joinstate.FaceSide;
-import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;

@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.newmodel.color;
+package grondag.adversity.niceblock.color;
 
 public class FixedColors implements IColorProvider
 {

@@ -7,13 +7,6 @@ import net.minecraftforge.common.config.Configuration;
 
 public class Config {
 
-	public static class BiomeIDs {
-		public static int drylandHills = 51;
-		public static int drylandMesa = 52;
-		public static int drylandFlats = 53;
-		public static int volcano = 54;
-	}
-
 	public static class Unobtanium {
 		public static boolean enabled = true;
 		public static boolean logging = false;
@@ -52,14 +45,6 @@ public class Config {
 	public static void load() {
 		// START
 		config.load();
-
-		// BIOMES
-		config.addCustomCategoryComment("BiomeIDs", "Change these to prevent Biome ID conflicts.");
-
-		BiomeIDs.drylandHills = config.getInt("drylandHills", "BiomeIDs", 51, 1, 255, "");
-		BiomeIDs.drylandMesa = config.getInt("drylandMesa", "BiomeIDs", 52, 1, 255, "");
-		BiomeIDs.drylandFlats = config.getInt("drylandFlats", "BiomeIDs", 53, 1, 255, "");
-		BiomeIDs.volcano = config.getInt("volcano", "BiomeIDs", 54, 1, 255, "");
 
 		// UNOBTANIUM
 		config.addCustomCategoryComment("Unobtanium", "General settings for Unobtanium.");

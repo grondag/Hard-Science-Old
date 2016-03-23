@@ -1,6 +1,6 @@
-package grondag.adversity.niceblock.newmodel.color;
+package grondag.adversity.niceblock.color;
 
-import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 
 public class NoColor implements IColorProvider
 {

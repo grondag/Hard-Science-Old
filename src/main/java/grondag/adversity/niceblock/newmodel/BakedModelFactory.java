@@ -1,9 +1,8 @@
 package grondag.adversity.niceblock.newmodel;
 
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-
 import java.util.List;
 
+import grondag.adversity.niceblock.color.IColorProvider;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.event.ModelBakeEvent;

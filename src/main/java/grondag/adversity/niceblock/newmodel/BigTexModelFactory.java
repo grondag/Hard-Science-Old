@@ -1,8 +1,8 @@
 package grondag.adversity.niceblock.newmodel;
 
+import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.newmodel.QuadFactory.CubeInputs;
-import grondag.adversity.niceblock.newmodel.color.IColorProvider;
-import grondag.adversity.niceblock.newmodel.color.ColorMap.EnumColorMap;
 
 import java.util.List;
 
