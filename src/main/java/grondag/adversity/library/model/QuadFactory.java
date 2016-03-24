@@ -322,7 +322,9 @@ public class QuadFactory
             qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
             qi.textureSprite = this.textureSprite;
             
-            int shadedColor = shadeColor(this.color, this.isShaded ? LightUtil.diffuseLight(side) : 1.0F, true);
+            //int shadedColor = shadeColor(this.color, this.isShaded ? LightUtil.diffuseLight(side) : 1.0F, true);
+            // quads have diffuse lighting applied later it seems
+            int shadedColor = shadeColor(this.color, 1.0F, true);
             
             double minBound = this.isOverlay ? -0.0002 : 0.0;
             double maxBound = this.isOverlay ? 1.0002 : 1.0;

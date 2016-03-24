@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.QuadFactory.FaceVertex;
@@ -103,13 +102,7 @@ public class ColumnSquareModelFactory extends ModelFactory
 	        {
 	        	faceCache.put(cacheKey, retVal);
 	        }
-	        Adversity.log.info("cache miss!");
         }
-        else
-        {
-        	Adversity.log.info("cache hit!");
-        }
-        
         return retVal;
     }
 
