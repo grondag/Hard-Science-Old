@@ -4,6 +4,7 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.item.ItemStack;
@@ -93,7 +94,7 @@ public abstract class NicePlacement {
             
             // if no available mates, randomly choose a species 
 			//that will not connect to what is surrounding
-			int salt = ModelReference.SALT_SHAKER.nextInt(16);
+			int salt = Useful.SALT_SHAKER.nextInt(16);
 			for(int i = 0; i < 16; i++)
 			{
 			    species = (i + salt) % 16;

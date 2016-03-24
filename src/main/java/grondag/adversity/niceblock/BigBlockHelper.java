@@ -2,6 +2,7 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.PlacementValidatorCubic;
+import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.base.ModelDispatcherBase;
@@ -9,7 +10,6 @@ import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.support.BlockTests;
-import grondag.adversity.niceblock.support.ModelReference;
 import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.util.List;
@@ -83,7 +83,7 @@ public class BigBlockHelper extends ColorHelperPlus
                 
                 // now randomly choose a species 
                 //that will not connect to what is surrounding
-                int salt = ModelReference.SALT_SHAKER.nextInt(16);
+                int salt = Useful.SALT_SHAKER.nextInt(16);
                 for(int i = 0; i < 16; i++)
                 {
                     int species = (i + salt) % 16;

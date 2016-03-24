@@ -49,64 +49,12 @@ public abstract class AxisOrientedController extends ModelController implements 
      */
     public final AxisAlignedBB[][] COMBINED_BOUNDS = new AxisAlignedBB[3][64];
 
-//    /**
-//     * Shape lookups for axis-aligned models.
-//     * First dimension is axis.
-//     */
-//    protected final static Integer[][][][][][][] SHAPE_INDEX_LOOKUPS = new Integer[3][2][2][2][2][2][2];
-//    
-//    /**
-//     * Rotations needed to reorient models properly for a given recipe.
-//     * Could generate this programmatically but did these by hand before deciding to 
-//     * make it generic and it weren't broke, so... 
-//     * First dimenions is axis.
-//     */
-//    protected final static TRSRTransformation[][] ROTATION_LOOKUPS;
-//    
-//    protected final static Vec3[] ROTATION_LOOKUP_Y = {
-//            new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 0.0, 0.0),
-//            new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 0.0, 0.0),
-//            new Vec3(180.0, 270.0, 0.0), new Vec3(180.0, 90.0, 0.0), new Vec3(180.0, 180.0, 0.0), new Vec3(180.0, 0.0, 0.0),
-//            new Vec3(180.0, 270.0, 0.0), new Vec3(180.0, 180.0, 0.0), new Vec3(180.0, 0.0, 0.0), new Vec3(180.0, 90.0, 0.0),
-//            new Vec3(180.0, 0.0, 0.0), new Vec3(180.0, 90.0, 0.0), new Vec3(180.0, 180.0, 0.0), new Vec3(180.0, 0.0, 0.0),
-//            new Vec3(180.0, 270.0, 0.0), new Vec3(180.0, 90.0, 0.0), new Vec3(180.0, 0.0, 0.0), new Vec3(180.0, 0.0, 0.0),
-//            new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 180.0, 0.0),
-//            new Vec3(0.0, 90.0, 0.0), new Vec3(0.0, 270.0, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 0.0, 0.0)
-//    };
-
-    /**
-     * Maps which base model (out of 18) to use with each shape index (out of
-     * 64). Also used to map bounding boxes for each shape because these
-     * generally correspond with model.
-     */
-//    protected static final AxisAlignedModel[] MODEL_FOR_SHAPE_INDEX = {
-//            AxisAlignedModel.ONE_OPEN, AxisAlignedModel.ONE_OPEN, AxisAlignedModel.ONE_OPEN, AxisAlignedModel.ONE_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN, AxisAlignedModel.TWO_ADJACENT_OPEN,
-//            AxisAlignedModel.TWO_OPPOSITE_OPEN, AxisAlignedModel.TWO_OPPOSITE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.THREE_OPEN, AxisAlignedModel.FOUR_OPEN, AxisAlignedModel.NONE_OPEN,
-//            AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED,
-//            AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.FOUR_TOP_CLOSED, AxisAlignedModel.NONE_TOP_CLOSED,
-//            AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.ONE_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED, AxisAlignedModel.TWO_ADJACENT_TOP_CLOSED,
-//            AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.TWO_OPPOSITE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.THREE_TOP_CLOSED, AxisAlignedModel.FOUR_TOP_CLOSED, AxisAlignedModel.NONE_TOP_CLOSED,
-//            AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.ONE_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED, AxisAlignedModel.TWO_ADJACENT_CLOSED,
-//            AxisAlignedModel.TWO_OPPOSITE_CLOSED, AxisAlignedModel.TWO_OPPOSITE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.THREE_CLOSED, AxisAlignedModel.FOUR_CLOSED, AxisAlignedModel.NONE_CLOSED
-//    };
-
     public final ModelType modelType;
     
-  
-        
     protected AxisOrientedController(String textureName, int alternateTextureCount, ModelType modelType, boolean isShaded)
     {
         super(textureName, alternateTextureCount, modelType == ModelType.LAMP_OVERLAY ? BlockRenderLayer.CUTOUT_MIPPED : BlockRenderLayer.SOLID, isShaded, false);
         this.alternator = Alternator.getAlternator((byte)(alternateTextureCount));
-  //      populateModelNames();
         this.modelType = modelType;
         for (int i = 0; i < 64; i++) {
             this.setModelBoundsForShape(EnumFacing.Axis.X, i);
@@ -132,11 +80,7 @@ public abstract class AxisOrientedController extends ModelController implements 
         }
         COMBINED_BOUNDS[axis.ordinal()][shapeIndex] = compositeBounds;
     }
-    
-//    /**
-//     * Implementation-specific, to allow for different model types/layouts.
-//     */
-//    protected abstract void populateModelNames();
+
 
     /** Override this and getCollisionHandler to implement non-standard collision bounds*/
     protected ImmutableList<AxisAlignedBB> getModelBounds(EnumFacing.Axis axis, int shapeIndex) {
@@ -213,34 +157,6 @@ public abstract class AxisOrientedController extends ModelController implements 
         }
         return builder.build();
     }
-
-//    public enum AxisAlignedModel {
-//        FOUR_CLOSED(0),
-//        FOUR_TOP_CLOSED(1),
-//        FOUR_OPEN(2),
-//        THREE_CLOSED(3),
-//        THREE_TOP_CLOSED(4),
-//        THREE_OPEN(5),
-//        TWO_ADJACENT_CLOSED(6),
-//        TWO_ADJACENT_TOP_CLOSED(7),
-//        TWO_ADJACENT_OPEN(8),
-//        TWO_OPPOSITE_CLOSED(9),
-//        TWO_OPPOSITE_TOP_CLOSED(10),
-//        TWO_OPPOSITE_OPEN(11),
-//        ONE_CLOSED(12),
-//        ONE_TOP_CLOSED(13),
-//        ONE_OPEN(14),
-//        NONE_CLOSED(15),
-//        NONE_TOP_CLOSED(16),
-//        NONE_OPEN(17);
-//
-//        public final int index;
-//
-//        private AxisAlignedModel(int index) {
-//            this.index = index;
-//        }
-//
-//    }
     
     @Override
     public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)

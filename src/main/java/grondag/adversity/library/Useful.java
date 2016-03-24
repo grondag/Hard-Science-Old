@@ -1,5 +1,7 @@
 package grondag.adversity.library;
 
+import java.util.Random;
+
 import javax.vecmath.Matrix4f;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -13,6 +15,9 @@ import net.minecraft.util.EnumFacing;
  * Random utilities that have not yet found a more appropriate home.
  */
 public class Useful {
+	
+    /** for misc. non-deterministic random number generation */
+    public static final Random SALT_SHAKER = new Random();
 	
 	/** 
 	 * Sorts members of the BlockPos vector so that x is largest and z is smallest.
@@ -165,4 +170,16 @@ public class Useful {
        return rightOf(faceIn, topFace).getOpposite();
    }
    
+   public static EnumFacing getAxisTop(EnumFacing.Axis axis)
+   {
+       switch(axis)
+       {
+       case Y: 
+           return EnumFacing.UP;
+       case X:
+           return EnumFacing.EAST;
+       default:
+           return EnumFacing.NORTH;
+       }
+   }
 }

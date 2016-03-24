@@ -14,7 +14,6 @@ import grondag.adversity.niceblock.joinstate.BlockJoinSelector;
 import grondag.adversity.niceblock.joinstate.FaceJoinState;
 import grondag.adversity.niceblock.joinstate.FaceSide;
 import grondag.adversity.niceblock.joinstate.BlockJoinSelector.BlockJoinState;
-import grondag.adversity.niceblock.support.ModelReference;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;
@@ -93,7 +92,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         
         if(fjs != FaceJoinState.NO_FACE)
         {
-            EnumFacing topFace = ModelReference.getAxisTop(axis);
+            EnumFacing topFace = Useful.getAxisTop(axis);
             EnumFacing bottomFace = topFace.getOpposite();
             EnumFacing leftFace = Useful.leftOf(face, topFace);
             EnumFacing rightFace = Useful.rightOf(face, topFace);
