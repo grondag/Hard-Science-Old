@@ -45,7 +45,7 @@ public class MasonryModelFactory extends ModelFactory
     	offset *= SimpleJoinFaceState.values().length;
     	key += textureIndex * offset;
     	offset *= controller.getAlternateTextureCount();
-    	key += colorIndex;
+    	key += colorIndex * offset;
     	return key;
     }
     

@@ -19,16 +19,17 @@ public class BigTexController extends ModelController
         this.hasMetaVariants = hasMetaVariants;
     }
 
+
     @Override
+    /**
+    * normally a 12 bit number that selects one of 4096 models in a repeating 16x16x16 volume
+    * if meta alternates are enabled, becomes a 16-bit number, where bits in HSB order are:
+    *      2 bit rotation index
+    *      2 bits uv texture flip indicators
+    *      12 bit facade index
+    */
     public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        
-        // normally an 12 bit number that selects one of 4096 facade models
-        // if meta alternates are enabled, becomes a 16-bit number, where bits in HSB order are:
-        //      2 bit rotation index
-        //      2 bits uv texture flip indicators
-        //      12 bit facade index
-        
         if(this.hasMetaVariants)
         {
              return state.getValue(NiceBlock.META) << 12 | ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);

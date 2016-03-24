@@ -68,7 +68,7 @@ public class ColumnSquareModelFactory extends ModelFactory
     	offset *= CornerJoinFaceState.values().length;
     	key += textureIndex * offset;
     	offset *= controller.getAlternateTextureCount();
-    	key += colorIndex;
+    	key += colorIndex * offset;
     	return key;
     }
 

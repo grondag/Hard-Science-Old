@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.library.Rotation;
-import grondag.adversity.library.joinstate.FacadeFaceSelector;
 import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.base.ModelFactory;
@@ -14,6 +13,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
@@ -22,65 +22,56 @@ import net.minecraft.util.BlockRenderLayer;
 public class BigTexModelFactory extends ModelFactory
 {
 
-	/**
-	 * Dimensions are color index, facing (up, down, etc.), and baked face index.
-	 * The face index bits in HSB order are:
-	 *      2 bits texture rotation, meaning coordinates in 8 LSB are on a rotated texture
-	 *      2 bits uv/flip indicators, meaning coordinates in 8 LSB are on a flipped texture
-	 *      8 bit selector corresponding to uv texture coordinates
-	 * All face quads are instantiated lazily.
+    /** typed convenience reference */
+    private final BigTexController myController;
+	
+    private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
+	
+	/** Tells us which face to select for each block within a 16x16x16 
+	 * space for up to 16 different meta values.
+	 * 
+	 * See also BigTexController.getClientShapeIndex.
 	 */
-	protected final List<BakedQuad>[][][] faceQuads;
+	protected final static FaceSelector[] FACE_SELECTORS = new FaceSelector[16 * 4096];
 
-	/** Dimensions are rotation index and facade index */
-	protected final static FacadeFaceSelector[] FACADE_FACE_SELECTORS = new FacadeFaceSelector[16 * 4096];
-
-	@SuppressWarnings("unchecked")
 	public BigTexModelFactory(ModelController controller)
 	{
 		super(controller);
-		faceQuads = (List<BakedQuad>[][][]) new List[ModelState.MAX_COLOR_INDEX][][];
+		myController = (BigTexController)controller;
 	}
 
-	@SuppressWarnings("unchecked")
+    private int makeCacheKey(EnumFacing face, int faceIndex, int colorIndex)
+    {
+    	int key = face.ordinal();
+    	int offset = EnumFacing.values().length;
+    	key += faceIndex * offset;
+    	// a big texture has 16x16=256 faces.  
+    	// If meta variants enabled, then we have 16 versions of the 256.
+    	offset *= myController.hasMetaVariants ? 256 * 16 : 256;
+    	key += colorIndex * offset;
+    	return key;
+    }
+	
 	@Override
 	public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
 	{
 		if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
-		int colorIndex = modelState.getColorIndex();
-
-		// allocate face quads for this color if not already done
-		if(faceQuads[colorIndex] == null)
-		{
-			synchronized(faceQuads)
-			{
-				if(((BigTexController)controller).hasMetaVariants)
-				{
-					faceQuads[colorIndex] = (List<BakedQuad>[][]) new List[6][256 * 16];
-				}
-				else
-				{
-					faceQuads[colorIndex] = (List<BakedQuad>[][]) new List[6][256];
-				}
-			}
-		}
-
-		int facadeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
-
-		// ensure face is baked
-
-		int faceIndex = FACADE_FACE_SELECTORS[facadeIndex].selectors[face.ordinal()];
-		List<BakedQuad> retVal = faceQuads[colorIndex][face.ordinal()][faceIndex];
-		
-		if(retVal == null)
-		{
-			retVal = makeBigTexFace(colorProvider.getColor(colorIndex).getColorMap(EnumColorMap.BASE), faceIndex, face);
-			synchronized(faceQuads)
-			{
-				faceQuads[colorIndex][face.ordinal()][faceIndex] = retVal;
-			}
-		}
+        int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int faceIndex = FACE_SELECTORS[clientShapeIndex].selectors[face.ordinal()];
+        int cacheKey = makeCacheKey(face, faceIndex, modelState.getColorIndex());
+        
+        List<BakedQuad> retVal = faceCache.get(cacheKey);
+        
+        if(retVal == null)
+        {
+			retVal = makeBigTexFace(colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE), faceIndex, face);
+            synchronized(faceCache)
+            {
+                faceCache.put(cacheKey, retVal);
+            }
+        }
+	
 		return retVal;
 	}
 
@@ -153,22 +144,22 @@ public class BigTexModelFactory extends ModelFactory
 						switch (Rotation.values()[(meta >> 2) & 3])
 						{
 						case ROTATE_NONE:
-							FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((x + yOff & 0xF) << 4 | z + yOff & 0xF, (~(x + yOff) & 0xF) << 4 | z + yOff & 0xF, ~(y + xOff) & 0xF
+							FACE_SELECTORS[facadeIndex] = new FaceSelector((x + yOff & 0xF) << 4 | z + yOff & 0xF, (~(x + yOff) & 0xF) << 4 | z + yOff & 0xF, ~(y + xOff) & 0xF
 									| (~(z + xOff) & 0xF) << 4, ~(y + xOff) & 0xF | (z + xOff & 0xF) << 4, (~(x + zOff) & 0xF) << 4 | ~(y + zOff) & 0xF,
 									(x + zOff & 0xF) << 4 | ~(y + zOff) & 0xF, faceIndexOffset);
 							break;
 						case ROTATE_90:
-							FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((z + yOff & 0xF) << 4 | ~(x + yOff) & 0xF, (z + yOff & 0xF) << 4 | x + yOff & 0xF, z + xOff & 0xF
+							FACE_SELECTORS[facadeIndex] = new FaceSelector((z + yOff & 0xF) << 4 | ~(x + yOff) & 0xF, (z + yOff & 0xF) << 4 | x + yOff & 0xF, z + xOff & 0xF
 									| (~(y + xOff) & 0xF) << 4, ~(z + xOff) & 0xF | (~(y + xOff) & 0xF) << 4, (~(y + zOff) & 0xF) << 4 | x + zOff & 0xF,
 									(~(y + zOff) & 0xF) << 4 | ~(x + zOff) & 0xF, faceIndexOffset);
 							break;
 						case ROTATE_180:
-							FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((~(x + yOff) & 0xF) << 4 | ~(z + yOff) & 0xF, (x + yOff & 0xF) << 4 | ~(z + yOff) & 0xF, y + xOff & 0xF
+							FACE_SELECTORS[facadeIndex] = new FaceSelector((~(x + yOff) & 0xF) << 4 | ~(z + yOff) & 0xF, (x + yOff & 0xF) << 4 | ~(z + yOff) & 0xF, y + xOff & 0xF
 									| (z + xOff & 0xF) << 4, y + xOff & 0xF | (~(z + xOff) & 0xF) << 4, (x + zOff & 0xF) << 4 | y + zOff & 0xF,
 									(~(x + zOff) & 0xF) << 4 | y + zOff & 0xF, faceIndexOffset);
 							break;
 						case ROTATE_270:
-							FACADE_FACE_SELECTORS[facadeIndex] = new FacadeFaceSelector((~(z + yOff) & 0xF) << 4 | x + yOff & 0xF, (~(z + yOff) & 0xF) << 4 | ~(x + yOff) & 0xF, ~(z + xOff) & 0xF
+							FACE_SELECTORS[facadeIndex] = new FaceSelector((~(z + yOff) & 0xF) << 4 | x + yOff & 0xF, (~(z + yOff) & 0xF) << 4 | ~(x + yOff) & 0xF, ~(z + xOff) & 0xF
 									| (y + xOff & 0xF) << 4, z + xOff & 0xF | (y + xOff & 0xF) << 4, (y + zOff & 0xF) << 4 | ~(x + zOff) & 0xF,
 									(y + zOff & 0xF) << 4 | x + zOff & 0xF, faceIndexOffset);
 							break;
@@ -181,6 +172,25 @@ public class BigTexModelFactory extends ModelFactory
 			}
 			xOff += 7;
 		}
+	}
+	
+	private static class FaceSelector
+	{
+	    public final short[] selectors = new short[EnumFacing.values().length];
+	    
+	    private FaceSelector(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace, int faceOffset) {
+	        selectors[EnumFacing.UP.ordinal()] = (short) (upFace + faceOffset);
+	        selectors[EnumFacing.DOWN.ordinal()] = (short) (downFace + faceOffset);
+	        selectors[EnumFacing.EAST.ordinal()] = (short) (eastFace + faceOffset);
+	        selectors[EnumFacing.WEST.ordinal()] = (short) (westFace + faceOffset);
+	        selectors[EnumFacing.NORTH.ordinal()] = (short) (northFace + faceOffset);
+	        selectors[EnumFacing.SOUTH.ordinal()] = (short) (southFace + faceOffset);
+	    }
+	    
+	    private FaceSelector(int upFace, int downFace, int eastFace, int westFace, int northFace, int southFace) {
+	        this(upFace, downFace, eastFace, westFace, northFace, southFace, 0);
+	    }
+
 	}
 
 }
