@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 
-public abstract class ModelDispatcherBase implements IBakedModel //, IBlockColor
+public abstract class ModelDispatcher implements IBakedModel //, IBlockColor
 {
 
     protected final String resourceName = UUID.randomUUID().toString();
@@ -31,7 +31,7 @@ public abstract class ModelDispatcherBase implements IBakedModel //, IBlockColor
     protected final String particleTextureName;
     protected TextureAtlasSprite particleTexture;
     
-    public ModelDispatcherBase(IColorProvider colorProvider, String particleTextureName)
+    public ModelDispatcher(IColorProvider colorProvider, String particleTextureName)
     {
         this.colorProvider = colorProvider;
         this.particleTextureName = "adversity:blocks/" + particleTextureName;

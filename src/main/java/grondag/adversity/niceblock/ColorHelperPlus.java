@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import net.minecraft.block.state.IBlockState;
@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 
 public class ColorHelperPlus extends ColorHelperMeta
 {
-    public ColorHelperPlus(ModelDispatcherBase dispatcher)
+    public ColorHelperPlus(ModelDispatcher dispatcher)
     {
         super(dispatcher);
     }

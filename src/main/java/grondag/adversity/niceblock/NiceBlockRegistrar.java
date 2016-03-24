@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.library.joinstate.ModelReference;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceTileEntity;
@@ -49,20 +49,20 @@ public class NiceBlockRegistrar
     /**
      * Model dispatchers add themselves here for handling during model bake and texture stitch
      */
-    public static LinkedList<ModelDispatcherBase> allDispatchers = new LinkedList<ModelDispatcherBase>();
+    public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
-    public static final ModelDispatcherBase MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColors(
+    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColors(
             BlockColors.makeColorMap(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
             new ColorController("raw_flexstone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
     
-    public static final ModelDispatcherBase MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColors(
+    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColors(
             BlockColors.makeColorMap(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
             new ColorController("raw_durastone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
 
-    public static final ModelDispatcherBase MODEL_COLORED_STONE = new ModelDispatcherBasic(
+    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcherBasic(
             BlockColors.INSTANCE, "colored_stone_0_0",
             new ColorController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new ColorHelperPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
@@ -70,7 +70,7 @@ public class NiceBlockRegistrar
     public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColor(4), "cool_basalt_0_0",
             new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
             new HotBasaltController());
-    public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new NiceBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
+    public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
 
     public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
             new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
@@ -265,7 +265,7 @@ public class NiceBlockRegistrar
     @SubscribeEvent
     public void onModelBakeEvent(ModelBakeEvent event) throws IOException
     {
-        for (ModelDispatcherBase dispatcher : allDispatchers)
+        for (ModelDispatcher dispatcher : allDispatchers)
         {
             dispatcher.handleBakeEvent(event);
             //dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
@@ -289,7 +289,7 @@ public class NiceBlockRegistrar
     @SubscribeEvent
     public void stitcherEventPre(TextureStitchEvent.Pre event)
     {
-        for (ModelDispatcherBase dispatcher : allDispatchers)
+        for (ModelDispatcher dispatcher : allDispatchers)
         {
             dispatcher.handleTexturePreStitch(event);
         }

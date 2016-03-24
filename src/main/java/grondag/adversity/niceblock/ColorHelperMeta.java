@@ -3,7 +3,7 @@ package grondag.adversity.niceblock;
 import java.util.List;
 
 import grondag.adversity.niceblock.base.BlockModelHelper;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.block.state.IBlockState;
@@ -14,7 +14,7 @@ import net.minecraft.world.IBlockAccess;
 
 public class ColorHelperMeta extends BlockModelHelper
 {
-    public ColorHelperMeta(ModelDispatcherBase dispatcher)
+    public ColorHelperMeta(ModelDispatcher dispatcher)
     {
         super(dispatcher);
     }

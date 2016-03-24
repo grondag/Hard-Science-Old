@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.base.BlockModelHelper;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.registry.LanguageRegistry;
 public class HotBasaltHelper extends BlockModelHelper
 {
 
-    public HotBasaltHelper(ModelDispatcherBase dispatcher)
+    public HotBasaltHelper(ModelDispatcher dispatcher)
     {
         super(dispatcher);
     }
@@ -73,13 +73,6 @@ public class HotBasaltHelper extends BlockModelHelper
     @Override
     public int getCustomBrightness(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         return 15 << 20 | 15 << 4;
-    }
-    
-    // helps to prevent some weird lighting artifacts
-    @Override
-    public boolean isTranslucent(IBlockState state)
-    {
-    	return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT;
     }
     
     // necessary to offset the AO lighting effects of a fully lit translucent layer

@@ -5,7 +5,7 @@ import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
@@ -32,7 +32,7 @@ public class BigBlockHelper extends ColorHelperPlus
     //tried using a byte array here but kept reading as a string tag for reason I couldn't fathom
     private int defaultPlacementShape;
     
-    public BigBlockHelper(ModelDispatcherBase dispatcher, int placementShape)
+    public BigBlockHelper(ModelDispatcher dispatcher, int placementShape)
     {
         super(dispatcher);
         defaultPlacementShape = placementShape;

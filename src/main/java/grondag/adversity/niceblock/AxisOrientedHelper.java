@@ -3,7 +3,7 @@ package grondag.adversity.niceblock;
 import java.util.List;
 
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,7 +17,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 
 public class AxisOrientedHelper extends ColorHelperPlus
 {
-    public AxisOrientedHelper(ModelDispatcherBase dispatcher)
+    public AxisOrientedHelper(ModelDispatcher dispatcher)
     {
         super(dispatcher);
     }
@@ -49,26 +49,6 @@ public class AxisOrientedHelper extends ColorHelperPlus
         modelState.setClientShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT_MIPPED.ordinal());
         modelState.setClientShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.TRANSLUCENT.ordinal());
         return modelState;
-    }
-    
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullBlock(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
     }
     
     @Override 

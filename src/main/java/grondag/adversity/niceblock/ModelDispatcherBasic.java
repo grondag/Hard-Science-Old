@@ -7,7 +7,7 @@ import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelController;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -37,7 +37,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * Is also ISmartBlockModel proxy for handleBlockState
  */
-public class ModelDispatcherBasic extends ModelDispatcherBase
+public class ModelDispatcherBasic extends ModelDispatcher
 {
     /** 
      * Cache for baked block models 
@@ -94,12 +94,6 @@ public class ModelDispatcherBasic extends ModelDispatcherBase
         controller.getBakedModelFactory().handleBakeEvent(event);
     }   
 
-//	@Override
-//	public int colorMultiplier(IBlockState state, IBlockAccess worldIn, BlockPos pos, int renderPass) {
-//        ModelState modelState = ((NiceBlock)state.getBlock()).blockModelHelper.getModelStateForBlock(worldIn.getBlockState(pos), worldIn, pos, false);
-//        return getColorProvider().getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
-//	}
-	
 	@SideOnly(Side.CLIENT)
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 

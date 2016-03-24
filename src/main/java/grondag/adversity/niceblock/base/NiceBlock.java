@@ -176,34 +176,7 @@ public class NiceBlock extends Block // implements IWailaProvider
             return super.getPackedLightmapCoords(state, source, pos);
         }
     }
-    
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return blockModelHelper == null ? true : blockModelHelper.isOpaqueCube(state);
-    }
-
-	@Override
-    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return blockModelHelper.isNormalCube(state, world, pos);
-    }
-
-    @Override
-    public boolean isFullBlock(IBlockState state) {
-    	return blockModelHelper.isFullBlock(state);
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return blockModelHelper.isFullCube(state);
-    }
-    
-    @Override
-    public boolean isTranslucent(IBlockState state)
-    {
-    	return blockModelHelper.isTranslucent(state);
-    }
-
-
+  
 //  private long elapsedTime;
 //  private int timerCount = 0;
 

@@ -22,9 +22,9 @@ public abstract class BlockModelHelper
     
     protected String baseDisplayName;
     
-    public final ModelDispatcherBase dispatcher;
+    public final ModelDispatcher dispatcher;
     
-    protected BlockModelHelper(ModelDispatcherBase dispatcher)
+    protected BlockModelHelper(ModelDispatcher dispatcher)
     {
         this.dispatcher = dispatcher;
     }
@@ -102,32 +102,11 @@ public abstract class BlockModelHelper
 //        return retVal;
 //    }
 
-    public boolean isOpaqueCube(IBlockState state) {
-        return true;
-    }
-
-    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return true;
-    }
-
-    public boolean isFullBlock(IBlockState state) {
-        return true;
-    }
-
-    public boolean isFullCube(IBlockState state) {
-        return true;
-    }
-    
     public boolean hasCustomBrightness()
     {
         return false;
     }
-    
-    public boolean isTranslucent(IBlockState state)
-    {
-    	return false;
-    }
-    
+       
     /** won't be called unless hasCustomBrightness is true */
     public int getCustomBrightness(IBlockState state, IBlockAccess source, BlockPos pos) 
     {

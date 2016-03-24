@@ -6,7 +6,7 @@ import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelController;
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -40,7 +40,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * Is also ISmartBlockModel proxy for handleBlockState
  */
-public class ModelDispatcherLayered extends ModelDispatcherBase
+public class ModelDispatcherLayered extends ModelDispatcher
 {
 
     /** 

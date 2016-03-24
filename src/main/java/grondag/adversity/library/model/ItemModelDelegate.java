@@ -2,7 +2,7 @@ package grondag.adversity.library.model;
 
 import com.google.common.collect.Lists;
 
-import grondag.adversity.niceblock.base.ModelDispatcherBase;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
@@ -12,9 +12,9 @@ import net.minecraft.world.World;
 
 public class ItemModelDelegate extends ItemOverrideList
 {
-	private final ModelDispatcherBase dispatcher;
+	private final ModelDispatcher dispatcher;
 	
-	public ItemModelDelegate(ModelDispatcherBase dispatcher) {
+	public ItemModelDelegate(ModelDispatcher dispatcher) {
 		super(Lists.<ItemOverride>newArrayList());
 		this.dispatcher = dispatcher;
 	}
