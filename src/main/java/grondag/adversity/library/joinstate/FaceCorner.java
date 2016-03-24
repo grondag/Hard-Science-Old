@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.joinstate;
+package grondag.adversity.library.joinstate;
 
 public enum FaceCorner
 {

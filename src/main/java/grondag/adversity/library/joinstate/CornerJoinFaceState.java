@@ -1,16 +1,15 @@
-package grondag.adversity.niceblock.joinstate;
+package grondag.adversity.library.joinstate;
 
 import java.util.ArrayList;
 
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.support.ModelReference.SimpleJoin;
 import net.minecraft.util.EnumFacing;
 
 /**
  * Corner bits indicate that a corner is needed, not that the corner is present. (These are normally inverse.)
  */
-public enum FaceJoinState
+public enum CornerJoinFaceState
 {
     NO_FACE(0, 0),
     NONE(0, 0), //must be after NO_FACE, overwrites NO_FACE in lookup table, should never be found by lookup
@@ -70,19 +69,19 @@ public enum FaceJoinState
     ALL_TR_BL_BR(FaceSide.TOP.bitFlag | FaceSide.BOTTOM.bitFlag | FaceSide.LEFT.bitFlag | FaceSide.RIGHT.bitFlag, FaceCorner.BOTTOM_RIGHT.bitFlag | FaceCorner.BOTTOM_LEFT.bitFlag | FaceCorner.TOP_RIGHT.bitFlag),
     ALL_TL_TR_BL_BR(FaceSide.TOP.bitFlag | FaceSide.BOTTOM.bitFlag | FaceSide.LEFT.bitFlag | FaceSide.RIGHT.bitFlag, FaceCorner.BOTTOM_RIGHT.bitFlag | FaceCorner.BOTTOM_LEFT.bitFlag | FaceCorner.TOP_RIGHT.bitFlag | FaceCorner.TOP_LEFT.bitFlag);
     
-    private static final FaceJoinState[] LOOKUP = new FaceJoinState[256];
+    private static final CornerJoinFaceState[] LOOKUP = new CornerJoinFaceState[256];
 
     private final int bitFlags;
     private final FaceCorner[] cornerTests;
-    private FaceJoinState[] subStates;
+    private CornerJoinFaceState[] subStates;
 
     static
     {
-        for(FaceJoinState state : FaceJoinState.values())
+        for(CornerJoinFaceState state : CornerJoinFaceState.values())
         {
             LOOKUP[state.bitFlags] = state;
             
-            ArrayList<FaceJoinState> subStateList = new ArrayList<FaceJoinState>();
+            ArrayList<CornerJoinFaceState> subStateList = new ArrayList<CornerJoinFaceState>();
             
             if(state == NO_FACE)
             {
@@ -90,7 +89,7 @@ public enum FaceJoinState
             }
             else
             {
-                for(FaceJoinState subState : FaceJoinState.values())
+                for(CornerJoinFaceState subState : CornerJoinFaceState.values())
                 {
                     if(subState != NO_FACE && (subState.bitFlags & state.bitFlags & 15) == (subState.bitFlags & 15))
                     {
@@ -98,30 +97,30 @@ public enum FaceJoinState
                     }
                 }
             }
-            state.subStates = subStateList.toArray(new FaceJoinState[subStateList.size()]);
+            state.subStates = subStateList.toArray(new CornerJoinFaceState[subStateList.size()]);
         }
     }
     
-    private FaceJoinState(int faceBits, int cornerBits, FaceCorner... cornerTests)
+    private CornerJoinFaceState(int faceBits, int cornerBits, FaceCorner... cornerTests)
     {
         this.bitFlags = faceBits | (cornerBits << 4);
         this.cornerTests = cornerTests;
     }
     
-    private static FaceJoinState find(int faceBits, int cornerBits)
+    private static CornerJoinFaceState find(int faceBits, int cornerBits)
     {
         return LOOKUP[(faceBits & 15) | ((cornerBits & 15) << 4)];
     }
     
-    public static FaceJoinState find(EnumFacing face, SimpleJoin join)
+    public static CornerJoinFaceState find(EnumFacing face, SimpleJoin join)
     {
         int faceFlags = 0;
         
-        FaceJoinState fjs;
+        CornerJoinFaceState fjs;
         
         if(join.isJoined(face))
         {
-            fjs = FaceJoinState.NO_FACE;
+            fjs = CornerJoinFaceState.NO_FACE;
         }
         else
         {                   
@@ -133,21 +132,21 @@ public enum FaceJoinState
                 }
             }
         
-            fjs = FaceJoinState.find(faceFlags, 0);
+            fjs = CornerJoinFaceState.find(faceFlags, 0);
         }
         return fjs;
     }
     
-    public static FaceJoinState find(EnumFacing face, NeighborTestResults tests)
+    public static CornerJoinFaceState find(EnumFacing face, NeighborTestResults tests)
     {
         int faceFlags = 0;
         int cornerFlags = 0;
         
-        FaceJoinState fjs;
+        CornerJoinFaceState fjs;
         
         if(tests.result(face))
         {
-            fjs = FaceJoinState.NO_FACE;
+            fjs = CornerJoinFaceState.NO_FACE;
         }
         else
         {                   
@@ -160,7 +159,7 @@ public enum FaceJoinState
                 }
             }
         
-            fjs = FaceJoinState.find(faceFlags, cornerFlags);
+            fjs = CornerJoinFaceState.find(faceFlags, cornerFlags);
 
             if(fjs.hasCornerTests())
             {
@@ -173,7 +172,7 @@ public enum FaceJoinState
                     }
                 }
                 
-                fjs = FaceJoinState.find(faceFlags, cornerFlags);
+                fjs = CornerJoinFaceState.find(faceFlags, cornerFlags);
             }
         }
         return fjs;
@@ -189,7 +188,7 @@ public enum FaceJoinState
         return cornerTests;
     }
     
-    public FaceJoinState[] getSubStates()
+    public CornerJoinFaceState[] getSubStates()
     {
         return subStates;
     }

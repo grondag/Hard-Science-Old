@@ -7,7 +7,7 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.joinstate.BlockJoinSelector;
+import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -164,32 +164,32 @@ public abstract class AxisOrientedController extends ModelController implements 
         int axis = Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(new BlockTests.TestForBlockMetaMatch(state));
         
-        int shapeIndex = BlockJoinSelector.findIndex(tests);
+        int shapeIndex = CornerJoinBlockStateSelector.findIndex(tests);
         
         int textureAlternate = this.alternator.getAlternate(pos);
 
-        return (textureAlternate * 3 + axis) * BlockJoinSelector.BLOCK_JOIN_STATE_COUNT + shapeIndex;
+        return (textureAlternate * 3 + axis) * CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT + shapeIndex;
     }
 
     @Override
     public int getShapeCount()
     {
-        return BlockJoinSelector.BLOCK_JOIN_STATE_COUNT * 3 * getAlternateTextureCount();
+        return CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT * 3 * getAlternateTextureCount();
     }
 
     public int getAxisFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) % 3;
+        return (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) % 3;
     }
 
     public int getTextureFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) / 3;
+        return (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) / 3;
     }
     
     public int getShapeFromModelIndex(int clientShapeIndex)
     {
-        return (clientShapeIndex % BlockJoinSelector.BLOCK_JOIN_STATE_COUNT);
+        return (clientShapeIndex % CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
     }
 
     public static enum ModelType

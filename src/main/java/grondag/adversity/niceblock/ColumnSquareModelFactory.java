@@ -1,6 +1,10 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.library.Useful;
+import grondag.adversity.library.joinstate.CornerJoinBlockState;
+import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
+import grondag.adversity.library.joinstate.CornerJoinFaceState;
+import grondag.adversity.library.joinstate.FaceSide;
 import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.QuadFactory.FaceVertex;
 import grondag.adversity.library.model.QuadFactory.QuadInputs;
@@ -10,10 +14,6 @@ import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.IColorProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.joinstate.BlockJoinSelector;
-import grondag.adversity.niceblock.joinstate.FaceJoinState;
-import grondag.adversity.niceblock.joinstate.FaceSide;
-import grondag.adversity.niceblock.joinstate.BlockJoinSelector.BlockJoinState;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;
@@ -58,9 +58,9 @@ public class ColumnSquareModelFactory extends ModelFactory
         }
     }
     
-    private int makeCacheKey(EnumFacing face, EnumFacing.Axis axis, FaceJoinState fjs, int colorIndex)
+    private int makeCacheKey(EnumFacing face, EnumFacing.Axis axis, CornerJoinFaceState fjs, int colorIndex)
     {
-    	return colorIndex * EnumFacing.values().length * FaceJoinState.values().length * EnumFacing.Axis.values().length
+    	return colorIndex * EnumFacing.values().length * CornerJoinFaceState.values().length * EnumFacing.Axis.values().length
     			+ fjs.ordinal() * EnumFacing.values().length * EnumFacing.Axis.values().length
     			+ face.ordinal() * EnumFacing.Axis.values().length
     			+ axis.ordinal();
@@ -72,7 +72,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
         
         int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
-        BlockJoinState bjs = BlockJoinSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
+        CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
         EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
 
         int cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), modelState.getColorIndex());
@@ -107,11 +107,11 @@ public class ColumnSquareModelFactory extends ModelFactory
         return retVal;
     }
 
-    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)
+    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, CornerJoinFaceState fjs, int cutColor, EnumFacing.Axis axis)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         
-        if(fjs != FaceJoinState.NO_FACE)
+        if(fjs != CornerJoinFaceState.NO_FACE)
         {
             EnumFacing topFace = Useful.getAxisTop(axis);
             EnumFacing bottomFace = topFace.getOpposite();
@@ -283,11 +283,11 @@ public class ColumnSquareModelFactory extends ModelFactory
         return builder.build();
     }
     
-    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)
+    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, CornerJoinFaceState fjs, int cutColor, EnumFacing.Axis axis)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 
-        if(fjs != FaceJoinState.NO_FACE)
+        if(fjs != CornerJoinFaceState.NO_FACE)
         {
 
             if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)

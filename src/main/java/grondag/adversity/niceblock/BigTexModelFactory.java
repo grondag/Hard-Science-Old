@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.library.Rotation;
+import grondag.adversity.library.joinstate.FacadeFaceSelector;
 import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.base.ModelFactory;
@@ -8,7 +9,6 @@ import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.color.IColorProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.joinstate.FacadeFaceSelector;
 
 import java.util.List;
 

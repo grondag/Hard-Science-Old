@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.library.joinstate.ModelReference;
 import grondag.adversity.niceblock.base.ModelDispatcherBase;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
@@ -11,7 +12,6 @@ import grondag.adversity.niceblock.color.NoColor;
 import grondag.adversity.niceblock.color.HueSet.Tint;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
 import grondag.adversity.niceblock.support.BaseMaterial;
-import grondag.adversity.niceblock.support.ModelReference;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 

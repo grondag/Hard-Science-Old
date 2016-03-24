@@ -4,9 +4,9 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.joinstate.BlockJoinSelector;
 import grondag.adversity.niceblock.support.BlockTests.TestForBigBlockMatch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -35,22 +35,22 @@ public class BorderController extends ModelController
         TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
         NeighborTestResults mates = new NeighborBlocks(world, pos).getNeighborTestResults(test);
 
-        return (this.alternator.getAlternate(pos)  * BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) + BlockJoinSelector.findIndex(mates);
+        return (this.alternator.getAlternate(pos)  * CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) + CornerJoinBlockStateSelector.findIndex(mates);
     }
 
     @Override
     public int getShapeCount()
     {
-        return BlockJoinSelector.BLOCK_JOIN_STATE_COUNT * getAlternateTextureCount();
+        return CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT * getAlternateTextureCount();
     }
 
     public int getTextureFromModelIndex(int clientShapeIndex)
     {
-        return clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT;
+        return clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT;
     }
     
     public int getShapeFromModelIndex(int clientShapeIndex)
     {
-        return clientShapeIndex % BlockJoinSelector.BLOCK_JOIN_STATE_COUNT;
+        return clientShapeIndex % CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT;
     }
 }

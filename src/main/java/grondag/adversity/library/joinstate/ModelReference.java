@@ -1,11 +1,7 @@
-package grondag.adversity.niceblock.support;
+package grondag.adversity.library.joinstate;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4f;
-
-import net.minecraft.util.EnumFacing;
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.niceblock.joinstate.FacadeFaceSelector;
 
 public class ModelReference
 {
@@ -158,60 +154,6 @@ public class ModelReference
         MASONRY_FACADE_FACE_SELECTORS[61] = new FacadeFaceSelector(15, 15, 15, 15, 0, 15);
         MASONRY_FACADE_FACE_SELECTORS[62] = new FacadeFaceSelector(15, 15, 15, 15, 15, 0);
         MASONRY_FACADE_FACE_SELECTORS[63] = new FacadeFaceSelector(15, 15, 15, 15, 15, 15);
-    }
-
-    /**
-     * Builds the appropriate quaternion to rotate around the given axis.
-     */
-    public final static Quat4f rotationForAxis(EnumFacing.Axis axis, double degrees)
-    {
-    	Quat4f retVal = new Quat4f();
-    	switch (axis) {
-    	case X:
-    		retVal.set(new AxisAngle4d(1, 0, 0, Math.toRadians(degrees)));
-    		break;
-    	case Y:
-    		retVal.set(new AxisAngle4d(0, 1, 0, Math.toRadians(degrees)));
-    		break;
-    	case Z:
-    		retVal.set(new AxisAngle4d(0, 0, 1, Math.toRadians(degrees)));
-    		break;
-    	}
-    	return retVal;
-    }
-    
-    public static class SimpleJoin
-    {
-        
-        private final byte joins;
-        
-        public SimpleJoin(NeighborBlocks.NeighborTestResults testResults)
-        {
-            byte j = 0;
-            for(EnumFacing face : EnumFacing.values())
-            {
-                if(testResults.result(face))
-                {
-                    j |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
-                }
-            }
-            this.joins = j;
-        }
-        
-        public SimpleJoin(int index)
-        {
-            this.joins = (byte)index;
-        }
-        
-        public boolean isJoined(EnumFacing face)
-        {
-            return (joins & NeighborBlocks.FACE_FLAGS[face.ordinal()]) == NeighborBlocks.FACE_FLAGS[face.ordinal()];
-        }
-        
-        public int getIndex()
-        {
-            return (int) joins;
-        }
     }
     
 

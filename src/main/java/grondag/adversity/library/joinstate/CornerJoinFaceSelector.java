@@ -1,21 +1,20 @@
-package grondag.adversity.niceblock.joinstate;
+package grondag.adversity.library.joinstate;
 
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.support.ModelReference.SimpleJoin;
 import net.minecraft.util.EnumFacing;
 
-public class FaceJoinSelector
+public class CornerJoinFaceSelector
 {
     public final EnumFacing face;
     
     public final int faceCount;
-    public final FaceJoinState[] faceJoins;
+    public final CornerJoinFaceState[] faceJoins;
     public final int[] joinIndex = new int[48];
     
-    public FaceJoinSelector(EnumFacing face, SimpleJoin baseJoinState)
+    public CornerJoinFaceSelector(EnumFacing face, SimpleJoin baseJoinState)
     {
         this.face = face;
-        faceJoins = FaceJoinState.find(face, baseJoinState).getSubStates();
+        faceJoins = CornerJoinFaceState.find(face, baseJoinState).getSubStates();
         this.faceCount = faceJoins.length;
         
         for(int i = 0; i < faceCount; i++)
@@ -26,10 +25,10 @@ public class FaceJoinSelector
 
     public int getIndexFromNeighbors(NeighborTestResults tests)
     {
-        return joinIndex[FaceJoinState.find(face, tests).ordinal()];
+        return joinIndex[CornerJoinFaceState.find(face, tests).ordinal()];
     }
     
-    public FaceJoinState getFaceJoinFromIndex(int index)
+    public CornerJoinFaceState getFaceJoinFromIndex(int index)
     {
         return faceJoins[index];
     }

@@ -2,7 +2,9 @@ package grondag.adversity.library;
 
 import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Quat4f;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -181,5 +183,25 @@ public class Useful {
        default:
            return EnumFacing.NORTH;
        }
+   }
+   
+   /**
+    * Builds the appropriate quaternion to rotate around the given axis.
+    */
+   public final static Quat4f rotationForAxis(EnumFacing.Axis axis, double degrees)
+   {
+   	Quat4f retVal = new Quat4f();
+   	switch (axis) {
+   	case X:
+   		retVal.set(new AxisAngle4d(1, 0, 0, Math.toRadians(degrees)));
+   		break;
+   	case Y:
+   		retVal.set(new AxisAngle4d(0, 1, 0, Math.toRadians(degrees)));
+   		break;
+   	case Z:
+   		retVal.set(new AxisAngle4d(0, 0, 1, Math.toRadians(degrees)));
+   		break;
+   	}
+   	return retVal;
    }
 }

@@ -1,15 +1,14 @@
-package grondag.adversity.niceblock.joinstate;
+package grondag.adversity.library.joinstate;
 
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.support.ModelReference.SimpleJoin;
 import net.minecraft.util.EnumFacing;
 
-public class BlockJoinSelector
+public class CornerJoinBlockStateSelector
 {
     // STATIC MEMBERS START
     public static final int BLOCK_JOIN_STATE_COUNT = 20115;
-    private static final BlockJoinState BLOCK_JOIN_STATES[] = new BlockJoinState[BLOCK_JOIN_STATE_COUNT];
-    private static final BlockJoinSelector BLOCK_JOIN_SELECTOR[] = new BlockJoinSelector[64];
+    private static final CornerJoinBlockState BLOCK_JOIN_STATES[] = new CornerJoinBlockState[BLOCK_JOIN_STATE_COUNT];
+    private static final CornerJoinBlockStateSelector BLOCK_JOIN_SELECTOR[] = new CornerJoinBlockStateSelector[64];
     
     static
     {
@@ -18,7 +17,7 @@ public class BlockJoinSelector
         for(int i = 0; i < 64; i++)
         {
             SimpleJoin baseJoin = new SimpleJoin(i);
-            BLOCK_JOIN_SELECTOR[i] = new BlockJoinSelector(baseJoin, firstIndex);
+            BLOCK_JOIN_SELECTOR[i] = new CornerJoinBlockStateSelector(baseJoin, firstIndex);
             
             for(int j = 0; j < BLOCK_JOIN_SELECTOR[i].getStateCount(); j++)
             {
@@ -35,7 +34,7 @@ public class BlockJoinSelector
         return BLOCK_JOIN_SELECTOR[baseJoin.getIndex()].getIndexFromNeighbors(tests);
     }
     
-    public static BlockJoinState getJoinState(int index)
+    public static CornerJoinBlockState getJoinState(int index)
     {
         return BLOCK_JOIN_STATES[index];
     }
@@ -44,14 +43,14 @@ public class BlockJoinSelector
     
     private final int firstIndex;
     
-    private FaceJoinSelector faceSelector[] = new FaceJoinSelector[EnumFacing.values().length];
+    private CornerJoinFaceSelector faceSelector[] = new CornerJoinFaceSelector[EnumFacing.values().length];
     
-    private BlockJoinSelector(SimpleJoin baseJoinState, int firstIndex)
+    private CornerJoinBlockStateSelector(SimpleJoin baseJoinState, int firstIndex)
     {
         this.firstIndex = firstIndex;
         for(EnumFacing face : EnumFacing.values())
         {
-            faceSelector[face.ordinal()] = new FaceJoinSelector(face, baseJoinState);
+            faceSelector[face.ordinal()] = new CornerJoinFaceSelector(face, baseJoinState);
         }
     }
 
@@ -80,12 +79,12 @@ public class BlockJoinSelector
         return index + firstIndex;
     }
     
-    private BlockJoinState getJoinFromIndex(int index)
+    private CornerJoinBlockState getJoinFromIndex(int index)
     {
         int shift = 1;
         int localIndex = index - firstIndex;
         
-        BlockJoinState retVal = new BlockJoinState();
+        CornerJoinBlockState retVal = new CornerJoinBlockState();
         
         for(EnumFacing face : EnumFacing.values())
         {
@@ -102,20 +101,5 @@ public class BlockJoinSelector
         }       
 
         return retVal;
-    }
-    
-    public static class BlockJoinState
-    {
-        private byte faceJoinIndex[] = new byte[EnumFacing.values().length];
-        
-        private void setFaceJoinState(EnumFacing face, FaceJoinState state)
-        {
-            faceJoinIndex[face.ordinal()]=(byte)state.ordinal();
-        }
-        
-        public FaceJoinState getFaceJoinState(EnumFacing face)
-        {
-            return FaceJoinState.values()[faceJoinIndex[face.ordinal()]];
-        }
     }
 }
