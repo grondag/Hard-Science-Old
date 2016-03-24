@@ -58,11 +58,12 @@ public class ColumnSquareModelFactory extends ModelFactory
         }
     }
     
-    private int makeCacheKey(EnumFacing face, FaceJoinState fjs, int colorIndex)
+    private int makeCacheKey(EnumFacing face, EnumFacing.Axis axis, FaceJoinState fjs, int colorIndex)
     {
-    	return colorIndex * EnumFacing.values().length * FaceJoinState.values().length 
-    			+ fjs.ordinal() * EnumFacing.values().length 
-    			+ face.ordinal();
+    	return colorIndex * EnumFacing.values().length * FaceJoinState.values().length * EnumFacing.Axis.values().length
+    			+ fjs.ordinal() * EnumFacing.values().length * EnumFacing.Axis.values().length
+    			+ face.ordinal() * EnumFacing.Axis.values().length
+    			+ axis.ordinal();
     }
 
     @Override
@@ -72,8 +73,9 @@ public class ColumnSquareModelFactory extends ModelFactory
         
         int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
         BlockJoinState bjs = BlockJoinSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
+        EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
 
-        int cacheKey = makeCacheKey(face, bjs.getFaceJoinState(face), modelState.getColorIndex());
+        int cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), modelState.getColorIndex());
         
         List<BakedQuad> retVal = faceCache.get(cacheKey);
 
@@ -86,7 +88,6 @@ public class ColumnSquareModelFactory extends ModelFactory
 	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
 	        quadInputs.lockUV = true;
 	        quadInputs.isShaded = myController.modelType != ColumnSquareController.ModelType.LAMP_BASE;
-	        EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
 	        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
 	
 	        if(face.getAxis() == axis)
