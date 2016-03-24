@@ -55,11 +55,16 @@ public class BorderModelFactory extends ModelFactory
         myController = (BorderController)this.controller;
     }
     
-    private int makeCacheKey(EnumFacing face, CornerJoinFaceState fjs, int colorIndex)
+    private int makeCacheKey(EnumFacing face, CornerJoinFaceState fjs, int colorIndex, int textureIndex)
     {
-    	return colorIndex * EnumFacing.values().length * CornerJoinFaceState.values().length 
-    			+ fjs.ordinal() * EnumFacing.values().length 
-    			+ face.ordinal();
+    	int key = face.ordinal();
+    	int offset = EnumFacing.values().length;
+    	key += fjs.ordinal() * offset;
+    	offset *= CornerJoinFaceState.values().length;
+    	key += textureIndex * offset;
+    	offset *= controller.getAlternateTextureCount();
+    	key += colorIndex;
+    	return key;
     }
     
     @Override
@@ -68,16 +73,17 @@ public class BorderModelFactory extends ModelFactory
     	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
     	
         int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int altTextureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
         CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
 
-        int cacheKey = makeCacheKey(face, bjs.getFaceJoinState(face), modelState.getColorIndex());
+        int cacheKey = makeCacheKey(face, bjs.getFaceJoinState(face), modelState.getColorIndex(), altTextureIndex);
         
         List<BakedQuad> retVal = faceCache.get(cacheKey);
 
         if(retVal == null)
         {
             ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
-            retVal = makeBorderFace(colorMap.getColorMap(EnumColorMap.BORDER), myController.getTextureFromModelIndex(clientShapeIndex), bjs.getFaceJoinState(face), face);
+            retVal = makeBorderFace(colorMap.getColorMap(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
             synchronized(faceCache)
             {
                 faceCache.put(cacheKey, retVal);

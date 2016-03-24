@@ -166,9 +166,7 @@ public abstract class AxisOrientedController extends ModelController implements 
         
         int shapeIndex = CornerJoinBlockStateSelector.findIndex(tests);
         
-        int textureAlternate = this.alternator.getAlternate(pos);
-
-        return (textureAlternate * 3 + axis) * CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT + shapeIndex;
+         return (this.alternator.getAlternate(pos) * 3 + axis) * CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT + shapeIndex;
     }
 
     @Override
@@ -182,7 +180,7 @@ public abstract class AxisOrientedController extends ModelController implements 
         return (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) % 3;
     }
 
-    public int getTextureFromModelIndex(int clientShapeIndex)
+    public int getAltTextureFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) / 3;
     }

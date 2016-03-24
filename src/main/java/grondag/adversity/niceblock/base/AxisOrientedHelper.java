@@ -1,10 +1,10 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.base;
 
 import java.util.List;
 
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelState;
+import grondag.adversity.niceblock.ColorHelperPlus;
+import grondag.adversity.niceblock.ModelDispatcherLayered;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.library.joinstate.ModelReference;
+import grondag.adversity.niceblock.base.AxisOrientedHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
@@ -230,11 +230,6 @@ public class NiceBlockRegistrar
             }
         }
         
-        // Here because model generation is multi-threaded.
-        // Was in a static{} block but want to ensure render thread 
-        // does not access members before they can be initialized.
-        ModelReference.setup();
-
         GameRegistry.registerTileEntity(NiceTileEntity.class, "nicetileentity");
 
         if (event.getSide() == Side.CLIENT)

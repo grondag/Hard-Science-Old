@@ -8,6 +8,8 @@ public class SimpleJoin
     
     private final byte joins;
     
+    public static final int STATE_COUNT = 64; // 2^6
+    
     public SimpleJoin(NeighborBlocks.NeighborTestResults testResults)
     {
         byte j = 0;
@@ -18,6 +20,18 @@ public class SimpleJoin
                 j |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
             }
         }
+        this.joins = j;
+    }
+    
+    public SimpleJoin(boolean up, boolean down, boolean east, boolean west, boolean north, boolean south)
+    {
+    	byte j = 0;
+    	if(up) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.UP.ordinal()];
+    	if(down) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.DOWN.ordinal()];
+    	if(east) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.EAST.ordinal()];
+    	if(west) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.WEST.ordinal()];
+    	if(north) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.NORTH.ordinal()];
+    	if(south) j |= NeighborBlocks.FACE_FLAGS[EnumFacing.SOUTH.ordinal()];
         this.joins = j;
     }
     

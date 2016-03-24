@@ -58,12 +58,18 @@ public class ColumnSquareModelFactory extends ModelFactory
         }
     }
     
-    private int makeCacheKey(EnumFacing face, EnumFacing.Axis axis, CornerJoinFaceState fjs, int colorIndex)
+    private int makeCacheKey(EnumFacing face, EnumFacing.Axis axis, CornerJoinFaceState fjs, int colorIndex, int textureIndex)
     {
-    	return colorIndex * EnumFacing.values().length * CornerJoinFaceState.values().length * EnumFacing.Axis.values().length
-    			+ fjs.ordinal() * EnumFacing.values().length * EnumFacing.Axis.values().length
-    			+ face.ordinal() * EnumFacing.Axis.values().length
-    			+ axis.ordinal();
+    	int key = axis.ordinal();
+    	int offset = EnumFacing.Axis.values().length;
+    	key += face.ordinal() * offset;
+    	offset *= EnumFacing.values().length;
+    	key += fjs.ordinal() * offset;
+    	offset *= CornerJoinFaceState.values().length;
+    	key += textureIndex * offset;
+    	offset *= controller.getAlternateTextureCount();
+    	key += colorIndex;
+    	return key;
     }
 
     @Override
@@ -72,10 +78,11 @@ public class ColumnSquareModelFactory extends ModelFactory
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
         
         int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int textureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
         CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
         EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
 
-        int cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), modelState.getColorIndex());
+        int cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), modelState.getColorIndex(), textureIndex);
         
         List<BakedQuad> retVal = faceCache.get(cacheKey);
 
@@ -88,7 +95,7 @@ public class ColumnSquareModelFactory extends ModelFactory
 	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
 	        quadInputs.lockUV = true;
 	        quadInputs.isShaded = myController.modelType != ColumnSquareController.ModelType.LAMP_BASE;
-	        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
+	        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(textureIndex));
 	
 	        if(face.getAxis() == axis)
 	        {

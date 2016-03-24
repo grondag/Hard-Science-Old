@@ -44,7 +44,7 @@ public class BorderController extends ModelController
         return CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT * getAlternateTextureCount();
     }
 
-    public int getTextureFromModelIndex(int clientShapeIndex)
+    public int getAltTextureFromModelIndex(int clientShapeIndex)
     {
         return clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT;
     }
