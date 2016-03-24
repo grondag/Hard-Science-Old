@@ -61,8 +61,10 @@ public class BorderModelFactory extends ModelFactory
             }
         }
         
-        int facadeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal()) / controller.getAlternateTextureCount();
-        int alternateTextureIndex = myController.getAlternateTextureIndexFromModelState(modelState);
+        int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int facadeIndex = clientShapeIndex / controller.getAlternateTextureCount();
+        int alternateTextureIndex = myController.getTextureFromModelIndex(clientShapeIndex);
+        
         int faceIndex = ModelReference.BORDER_FACADE_FACE_SELECTORS[facadeIndex].selectors[face.ordinal()];
 
         // ensure face is baked

@@ -72,10 +72,10 @@ public class NiceBlockRegistrar
             new HotBasaltController());
     public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new NiceBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
 
-    public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
-            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
-            new BorderController("bordertest", 1, BlockRenderLayer.TRANSLUCENT, true));
-    public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
+//    public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
+//            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
+//            new BorderController("bordertest", 1, BlockRenderLayer.TRANSLUCENT, true));
+//    public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
 
     public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
             new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),

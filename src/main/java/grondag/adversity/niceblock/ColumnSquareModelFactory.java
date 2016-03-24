@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.QuadFactory.FaceVertex;
@@ -17,6 +18,8 @@ import grondag.adversity.niceblock.joinstate.BlockJoinSelector.BlockJoinState;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;
+
+import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
@@ -34,8 +37,7 @@ public class ColumnSquareModelFactory extends ModelFactory
     /** overextend some quads by this amount to prevent pinholes */
     private static final double CAULK = 0.0001;
 
-    
-//    protected IBakedModel[] templateModels;
+    private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
     
     public ColumnSquareModelFactory(ColumnSquareController controller)
     {
@@ -56,34 +58,59 @@ public class ColumnSquareModelFactory extends ModelFactory
             cutDepth = cutWidth / 2.0;
         }
     }
+    
+    private int makeCacheKey(EnumFacing face, FaceJoinState fjs, int colorIndex)
+    {
+    	return colorIndex * EnumFacing.values().length * FaceJoinState.values().length 
+    			+ fjs.ordinal() * EnumFacing.values().length 
+    			+ face.ordinal();
+    }
 
     @Override
     public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
     {
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
         
-    	QuadInputs quadInputs = new QuadInputs();
-        quadInputs.lockUV = true;
-        quadInputs.isShaded = myController.modelType != ColumnSquareController.ModelType.LAMP_BASE;
-        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
-        quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
         int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
-        EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
-        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
         BlockJoinState bjs = BlockJoinSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
 
-        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
-                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
-    
-        if(face.getAxis() == axis)
+        int cacheKey = makeCacheKey(face, bjs.getFaceJoinState(face), modelState.getColorIndex());
+        
+        List<BakedQuad> retVal = faceCache.get(cacheKey);
+
+        if(retVal == null)
         {
-            return makeCapFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
+	    	QuadInputs quadInputs = new QuadInputs();
+	        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
+	        quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
+	        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
+	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
+	        quadInputs.lockUV = true;
+	        quadInputs.isShaded = myController.modelType != ColumnSquareController.ModelType.LAMP_BASE;
+	        EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
+	        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(myController.getTextureFromModelIndex(clientShapeIndex)));
+	
+	        if(face.getAxis() == axis)
+	        {
+	            retVal = makeCapFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
+	        }
+	        else
+	        {
+	            retVal = makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
+	        }
+	        
+	        synchronized(faceCache)
+	        {
+	        	faceCache.put(cacheKey, retVal);
+	        }
+	        Adversity.log.info("cache miss!");
         }
         else
         {
-            return makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
+        	Adversity.log.info("cache hit!");
         }
         
+        return retVal;
     }
 
     private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, FaceJoinState fjs, int cutColor, EnumFacing.Axis axis)

@@ -5,14 +5,11 @@ import grondag.adversity.library.IAlternator;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.base.ModelController;
-import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.CornerStateFinder;
-import grondag.adversity.niceblock.support.ModelReference;
+import grondag.adversity.niceblock.joinstate.BlockJoinSelector;
 import grondag.adversity.niceblock.support.BlockTests.TestForBigBlockMatch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.world.IBlockAccess;
 
@@ -31,30 +28,29 @@ public class BorderController extends ModelController
         this.textureCount = 16;
     }
     
-    protected int getAlternateTextureIndexFromModelState(ModelState modelState) 
-    {
-            return modelState.getClientShapeIndex(this.getRenderLayer().ordinal()) % getAlternateTextureCount();
-    }
-
     @Override
     public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
         TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
-        NeighborBlocks neighbors = new NeighborBlocks(world, pos);
-        NeighborTestResults mates = neighbors.getNeighborTestResults(test);
+        NeighborTestResults mates = new NeighborBlocks(world, pos).getNeighborTestResults(test);
 
-        CornerStateFinder finder = ModelReference.CONNECTED_CORNER_STATE_LOOKUP[mates.resultBit(EnumFacing.UP)][mates.resultBit(EnumFacing.DOWN)]
-                [mates.resultBit(EnumFacing.EAST)][mates.resultBit(EnumFacing.WEST)]
-                [mates.resultBit(EnumFacing.NORTH)][mates.resultBit(EnumFacing.SOUTH)];
-
-        return (finder.getRecipe(test, world, pos) * this.getAlternateTextureCount() + alternator.getAlternate(pos));
+        return (this.alternator.getAlternate(pos)  * BlockJoinSelector.BLOCK_JOIN_STATE_COUNT) + BlockJoinSelector.findIndex(mates);
     }
 
     @Override
     public int getShapeCount()
     {
-        return 386 * getAlternateTextureCount();
+        return BlockJoinSelector.BLOCK_JOIN_STATE_COUNT * getAlternateTextureCount();
     }
 
+    public int getTextureFromModelIndex(int clientShapeIndex)
+    {
+        return clientShapeIndex / BlockJoinSelector.BLOCK_JOIN_STATE_COUNT;
+    }
+    
+    public int getShapeFromModelIndex(int clientShapeIndex)
+    {
+        return clientShapeIndex % BlockJoinSelector.BLOCK_JOIN_STATE_COUNT;
+    }
 }
