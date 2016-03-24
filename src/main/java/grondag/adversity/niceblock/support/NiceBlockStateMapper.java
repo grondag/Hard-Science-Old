@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.support;
 
-import grondag.adversity.niceblock.newmodel.NiceBlock;
 import java.util.Map;
 
 import net.minecraft.block.Block;
@@ -10,6 +9,8 @@ import net.minecraft.client.renderer.block.statemap.DefaultStateMapper;
 //import net.minecraft.client.resources.model.ModelResourceLocation;
 
 import com.google.common.collect.Maps;
+
+import grondag.adversity.niceblock.base.NiceBlock;
 
 /**
  * Niceblocks generally only have Substance as part of block state.

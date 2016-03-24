@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.support;
 
-import grondag.adversity.niceblock.newmodel.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -10,6 +9,8 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import org.lwjgl.opengl.GL11;
+
+import grondag.adversity.niceblock.base.NiceBlock;
 
 /**
  * Common event handler for NiceBlocks for things that don't belong in a block instance.

@@ -2,7 +2,7 @@ package grondag.adversity;
 
 
 import grondag.adversity.feature.volcano.Volcano;
-import grondag.adversity.niceblock.newmodel.NiceBlockRegistrar;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
