@@ -69,7 +69,7 @@ public class Adversity {
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
 		System.out.println("Config changed!");
-		if (event.modID.equals(MODID)) {
+		if (event.getModID().equals(MODID)) {
 			Config.load();
 		}
 	}

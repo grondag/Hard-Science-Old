@@ -25,7 +25,7 @@ group= "grondag.adversity" // http://maven.apache.org/guides/mini/guide-naming-c
 archivesBaseName = "adversity"
 
 minecraft {
-    version = "1.9-12.16.0.1782-1.9"
+    version = "1.9-12.16.0.1807-1.9"
     runDir = "run"
     useDepAts = true
     
@@ -75,7 +75,7 @@ dependencies {
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
  //   deobfCompile "mcp.mobius.waila:Waila:1.6.0-B3_1.8.8"
-    deobfCompile "mezz.jei:jei_1.9:3.0.2.164"
+    deobfCompile "mezz.jei:jei_1.9:3.1.0.170"
     
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

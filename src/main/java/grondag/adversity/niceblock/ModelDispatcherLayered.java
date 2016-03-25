@@ -91,7 +91,7 @@ public class ModelDispatcherLayered extends ModelDispatcher
             {
                 for (String tex : cont.getAllTextureNames())
                 {
-                    event.map.registerSprite(new ResourceLocation(tex));
+                    event.getMap().registerSprite(new ResourceLocation(tex));
                 }
             }
         }

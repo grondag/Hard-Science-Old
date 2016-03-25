@@ -68,7 +68,7 @@ public class ModelDispatcherBasic extends ModelDispatcher
         super.handleTexturePreStitch(event);
         for (String tex : controller.getAllTextureNames())
         {
-            event.map.registerSprite(new ResourceLocation(tex));
+            event.getMap().registerSprite(new ResourceLocation(tex));
         }
     }
 

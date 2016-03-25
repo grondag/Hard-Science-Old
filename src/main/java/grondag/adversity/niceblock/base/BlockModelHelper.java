@@ -10,11 +10,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 public abstract class BlockModelHelper
 {
@@ -33,12 +33,13 @@ public abstract class BlockModelHelper
     public void setBlock(NiceBlock block)
     {
         this.block = block;
-        String styleName = LanguageRegistry.instance().getStringLocalization(block.getStyleName());
+        String styleName = I18n.translateToLocal(block.getStyleName());
+
         if(styleName == null || styleName == "")
         {
             styleName = block.getStyleName();
         }
-        baseDisplayName = styleName + " " + LanguageRegistry.instance().getStringLocalization(block.material.materialName); 
+        baseDisplayName = styleName + " " + I18n.translateToLocal(block.material.materialName); 
     }
     
     /** set doClientStateRefresh = false to avoid inifinte recursion when getting colorinfo 

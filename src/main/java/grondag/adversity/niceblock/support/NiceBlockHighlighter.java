@@ -27,10 +27,10 @@ public class NiceBlockHighlighter {
 	@SubscribeEvent
 	public void onDrawBlockHighlightEvent(DrawBlockHighlightEvent event) {
 	    
-        BlockPos pos = event.target.getBlockPos();
-        if(pos != null && event.player != null)
+        BlockPos pos = event.getTarget().getBlockPos();
+        if(pos != null && event.getPlayer() != null)
         {
-    		IBlockState bs = event.player.worldObj.getBlockState(pos);
+    		IBlockState bs = event.getPlayer().worldObj.getBlockState(pos);
     		if (bs != null && bs.getBlock() instanceof NiceBlock) {
     			NiceBlock nb = (NiceBlock) bs.getBlock();
     			if (nb.needsCustomHighlight()) {
@@ -41,11 +41,11 @@ public class NiceBlockHighlighter {
     				GL11.glLineWidth(2.0F);
     				GlStateManager.disableTexture2D();
     				GlStateManager.depthMask(false);
-    				double d0 = event.player.lastTickPosX + (event.player.posX - event.player.lastTickPosX) * event.partialTicks;
-    				double d1 = event.player.lastTickPosY + (event.player.posY - event.player.lastTickPosY) * event.partialTicks;
-    				double d2 = event.player.lastTickPosZ + (event.player.posZ - event.player.lastTickPosZ) * event.partialTicks;
+    				double d0 = event.getPlayer().lastTickPosX + (event.getPlayer().posX - event.getPlayer().lastTickPosX) * event.getPartialTicks();
+    				double d1 = event.getPlayer().lastTickPosY + (event.getPlayer().posY - event.getPlayer().lastTickPosY) * event.getPartialTicks();
+    				double d2 = event.getPlayer().lastTickPosZ + (event.getPlayer().posZ - event.getPlayer().lastTickPosZ) * event.getPartialTicks();
     
-    				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.player.worldObj, pos, bs)) {
+    				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.getPlayer().worldObj, pos, bs)) {
     					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
     				}
     

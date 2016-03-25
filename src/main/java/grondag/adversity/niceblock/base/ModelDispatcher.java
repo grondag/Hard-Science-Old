@@ -84,7 +84,7 @@ public abstract class ModelDispatcher implements IBakedModel //, IBlockColor
      */
     public void handleTexturePreStitch(Pre event)
     {
-        event.map.registerSprite(new ResourceLocation(particleTextureName));
+        event.getMap().registerSprite(new ResourceLocation(particleTextureName));
     }
 
     @Override

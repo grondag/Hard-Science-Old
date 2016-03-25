@@ -6,10 +6,10 @@ import grondag.adversity.niceblock.base.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.fml.common.registry.LanguageRegistry;
 
 public class HotBasaltHelper extends BlockModelHelper
 {
@@ -54,8 +54,7 @@ public class HotBasaltHelper extends BlockModelHelper
         default:
             prefix = "very_hot";
         }
-        return LanguageRegistry.instance().getStringLocalization(prefix)
-                + " " + LanguageRegistry.instance().getStringLocalization("basalt");
+        return "" + I18n.translateToLocal(prefix) + " " + I18n.translateToLocal("basalt");
     }
 
     @Override
