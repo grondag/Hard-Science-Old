@@ -3,6 +3,7 @@ package grondag.adversity;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -28,6 +29,8 @@ public class Adversity {
 	public static Logger log;
 
 	public static WorldType adversityWorld;
+	
+	public WorldSavedData thing;
 
 	public static CreativeTabs tabAdversity = new CreativeTabs("Adversity") 
 	{

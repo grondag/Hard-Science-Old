@@ -23,6 +23,17 @@ public class AdversityWorldProvider extends WorldProvider {
 	private final AdversityWeatherRenderer	weatherRenderer	= new AdversityWeatherRenderer();
 	private final AdversityCloudRenderer	cloudRenderer	= new AdversityCloudRenderer();
 
+	/** can probably use this to implement dim light in volcano biome */
+	@Override
+	getLightBrightnessTable
+	
+	/** or maybe this one */
+	@Override
+    public float getSunBrightnessFactor(float par1)
+    {
+        return worldObj.getSunBrightnessFactor(par1);
+    }
+	
 	@Override
 	/** tells Minecraft to use our new Terrain Generator */
 	public IChunkProvider createChunkGenerator() {

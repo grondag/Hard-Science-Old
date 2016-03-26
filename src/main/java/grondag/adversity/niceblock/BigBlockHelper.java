@@ -26,9 +26,6 @@ import net.minecraft.world.World;
 
 public class BigBlockHelper extends ColorHelperPlus
 {
-    //TODO: I'm sure this doesn't belong here
-    public static final String PLACEMENT_SHAPE_TAG = "BBPlace";
-    
     //tried using a byte array here but kept reading as a string tag for reason I couldn't fathom
     private int defaultPlacementShape;
     
@@ -98,9 +95,9 @@ public class BigBlockHelper extends ColorHelperPlus
         
         NBTTagCompound tag = stack.getTagCompound();
         
-        if(tag != null && tag.hasKey(PLACEMENT_SHAPE_TAG))
+        if(tag != null && tag.hasKey(NiceTileEntity.PLACEMENT_SHAPE_TAG))
         {
-            int shape = tag.getInteger(PLACEMENT_SHAPE_TAG);
+            int shape = tag.getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG);
             
             //tried using a byte array here but kept reading as a string tag for reason I couldn't fathom
             NicePlacement placer = new NicePlacement.PlacementBigBlock(
@@ -119,9 +116,9 @@ public class BigBlockHelper extends ColorHelperPlus
         super.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
 
         NBTTagCompound tag = stack.getTagCompound();
-        if(tag != null && tag.hasKey(PLACEMENT_SHAPE_TAG))
+        if(tag != null && tag.hasKey(NiceTileEntity.PLACEMENT_SHAPE_TAG))
         {
-            niceTE.placementShape = tag.getInteger(PLACEMENT_SHAPE_TAG);
+            niceTE.setPlacementShape(tag.getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG));
             niceTE.markDirty();
         }
     }
@@ -130,7 +127,7 @@ public class BigBlockHelper extends ColorHelperPlus
     public void updateItemStackForPickBlock(ItemStack stack, IBlockState blockState, ModelState modelState, NiceTileEntity niceTE)
     {
         super.updateItemStackForPickBlock(stack, blockState, modelState, niceTE);
-        int placementShape = niceTE.placementShape != 0 ? niceTE.placementShape : defaultPlacementShape;
+        int placementShape = niceTE.getPlacementShape() != 0 ? niceTE.getPlacementShape() : defaultPlacementShape;
         updateStackPlacementShape(stack, placementShape);
     }
 
@@ -153,14 +150,14 @@ public class BigBlockHelper extends ColorHelperPlus
             tag = new NBTTagCompound();
             stack.setTagCompound(tag);
         }
-        tag.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
+        tag.setInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG, placementShape);
     }
 
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);
-        int placementShape = stack.getTagCompound().getInteger(PLACEMENT_SHAPE_TAG);
+        int placementShape = stack.getTagCompound().getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG);
         if(placementShape != 0)
         {
             tooltip.add(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));

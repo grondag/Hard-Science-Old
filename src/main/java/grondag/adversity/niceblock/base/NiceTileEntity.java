@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.base;
 
-import grondag.adversity.niceblock.BigBlockHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -13,14 +12,23 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class NiceTileEntity extends TileEntity{
+	
+    public static final String PLACEMENT_SHAPE_TAG = "BBPlace";
+    public static final String DAMAGE_TAG = "BBPlace";
+
     public ModelState modelState = new ModelState();
     
     /** used by big blocks */
-    public int placementShape;
+    private int placementShape;
+    
+    /** used by hyperstone */
+	private byte damage = 0;
+	
 	public IExtendedBlockState exBlockState;
 	public boolean isClientShapeIndexDirty = true;
 	public boolean isLoaded = false;
 	public boolean isDeleted = false;
+
 
 	@Override
 	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
@@ -127,7 +135,8 @@ public class NiceTileEntity extends TileEntity{
     private void doReadFromNBT(NBTTagCompound compound)
     {
         modelState.readFromNBT(compound);
-        placementShape = compound.getInteger(BigBlockHelper.PLACEMENT_SHAPE_TAG);
+        placementShape = compound.getInteger(PLACEMENT_SHAPE_TAG);
+        damage = compound.getByte(DAMAGE_TAG);
     }
     
     @Override
@@ -140,8 +149,13 @@ public class NiceTileEntity extends TileEntity{
     private void doWriteToNBT(NBTTagCompound compound)
     {
         modelState.writeToNBT(compound);
-        compound.setInteger(BigBlockHelper.PLACEMENT_SHAPE_TAG, placementShape);
+        if(damage != 0) compound.setByte(DAMAGE_TAG, damage);
+        if(placementShape != 0) compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
     }
 	
+	public byte getDamage() { return damage; }
+	public void setDamage( byte damage) { this.damage = damage; }
+	public int getPlacementShape() { return placementShape; }
+	public void setPlacementShape( int placementShape) { this.placementShape = placementShape; }
 	
 }

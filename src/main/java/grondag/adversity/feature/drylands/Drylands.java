@@ -1,23 +1,25 @@
-package com.grondag.adversity.feature.drylands;
+package grondag.adversity.feature.drylands;
 
 import java.util.Random;
 
+import grondag.adversity.Config;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeManager;
 import net.minecraftforge.common.BiomeManager.BiomeEntry;
 import net.minecraftforge.common.BiomeManager.BiomeType;
-
-import com.grondag.adversity.Config;
-
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.event.terraingen.ChunkGeneratorEvent.ReplaceBiomeBlocks;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class Drylands {
 	private static long					seed;
@@ -69,11 +71,9 @@ public class Drylands {
 		return biome == BiomeGenBase.ocean || biome == BiomeGenBase.deepOcean;
 	}
 
-	private static boolean isSolid(World world, int x, int y, int z) {
-		if (world.isAirBlock(x, y, z))
-			return false;
-		final Block block = world.getBlock(x, y, z);
-		return block.getMaterial().blocksMovement();
+	private static boolean isSolid(World world, BlockPos pos) {
+		if (world.isAirBlock(pos)) return false;
+		return world.getBlockState(pos).getMaterial().blocksMovement();
 	}
 
 	private static void dryLandify(int posIndex, BiomeGenBase oldBiome, Block[] blockArray, byte[] metaArray) {
@@ -153,9 +153,22 @@ public class Drylands {
 		}
 	}
 
-	public static void replaceBiomeBlocks(IChunkProvider chunkProvider, int chunkX, int chunkZ, Block[] blockArray,
-			byte[] metaArray, BiomeGenBase[] biomeArray, World world) {
+	public static void replaceBiomeBlocks(ReplaceBiomeBlocks.ReplaceBiomeBlocks event)
+	{
+			//IChunkProvider chunkProvider, int chunkX, int chunkZ, Block[] blockArray,
+			//byte[] metaArray, BiomeGenBase[] biomeArray, World world) {
+//		
+//		Drylands.replaceBiomeBlocks(event.chunkProvider, event.chunkX, event.chunkZ, event.blockArray,
+//				event.metaArray, event.biomeArray, event.world
+		
+		//IChunkGenerator chunkProvider, int x, int z, ChunkPrimer primer, World world
 
+		World world = event.getWorld();
+		int chunkX = event.getX();
+		int chunkZ = event.getZ();
+		IChunkGenerator chunkProvider = event.getGen();
+		ChunkPrimer primer = event.getPrimer();
+		
 		if (seed != world.getSeed()) {
 			seed = world.getSeed();
 			rand = new Random(world.getSeed());
@@ -173,7 +186,7 @@ public class Drylands {
 		for (int k = 0; k < 16; ++k) {
 			for (int l = 0; l < 16; ++l) {
 
-				final int posIndex = (l * 16 + k) * blockArray.length / 256;
+				final int posIndex = (l * 16 + k) * primer.blockArray.length / 256;
 				// int heightIndex = k*16+l;
 				//
 				for (int y = 254; y > 0; --y) {
