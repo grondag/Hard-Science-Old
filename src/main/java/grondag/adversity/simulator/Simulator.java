@@ -1,0 +1,330 @@
+package grondag.adversity.simulator;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import grondag.adversity.Adversity;
+import grondag.adversity.simulator.base.INode;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+
+/**
+ * Events are processed from a queue in the order they arrive.
+ * 
+ * World events are always added to the queue as soon as they arrive.
+ * 
+ * Simulation ticks are generated as the world clock advances
+ * at the rate of one simulation tick per world tick.
+ * 
+ * Simulation ticks are added to the queue by a special task 
+ * that is added at the end of simulation tick.  No new 
+ * simulation ticks are added until all tasks in the last tick are complete.
+ * 
+ * No simulation ticks are ever skipped. This means that if players
+ * sleep and the work clock advances, the simulation will continue
+ * running as quickly as possible until caught up.  
+ * 
+ * However, world events will continue to be processed as soon as they
+ * arrive.  This means that a player waking up and interacting with
+ * machines immediately may not see that all processing is complete but
+ * will observe that the machines are running very quickly.
+ * 
+ */
+public class Simulator implements INode{
+
+	public static final Simulator instance = new Simulator();
+	
+	private static class TaskCounter
+	{
+	    private final AtomicInteger activeTaskCount = new AtomicInteger(0);
+	    
+	    public synchronized void waitUntilAllTasksComplete()
+	    {
+	        while(activeTaskCount.get() > 0) {
+	            try {
+	                wait();
+	            } catch (InterruptedException e) {}
+	        }
+	    }
+
+	    /**
+	     * Attempts to CAS-increment the active task count.
+	     */
+	    private boolean tryIncrementActiveTasks(int expect) {
+	        return activeTaskCount.compareAndSet(expect, expect + 1);
+	    }
+
+	    /**
+	     * Attempts to CAS-decrement active task count.
+	     */
+	    private boolean tryDecrementActiveTasks(int expect) {
+	        return activeTaskCount.compareAndSet(expect, expect - 1);
+	    }
+
+	    /**
+	     * Reliably increments active task count.
+	     */
+	    public void incrementActiveTasks() {
+	        do {} while (! tryIncrementActiveTasks(activeTaskCount.get()));
+	    }
+
+	    /**
+	     * Reliably decrements active task count.
+	     */
+	    public void decrementActiveTasks() {
+	        do {} while (! tryDecrementActiveTasks(activeTaskCount.get()));
+	        synchronized(this)
+	        {
+	            this.notifyAll();
+	        }
+	    }
+	    
+	}
+	
+    private static ExecutorService executor;
+    
+    /** used for world time */
+    private World world;
+    
+    private volatile boolean isDirty;
+    private volatile boolean isRunning = false;
+    
+    private final TaskCounter taskCounter = new TaskCounter();
+
+    private volatile int nextNodeID = 1;
+    private static final String TAG_NEXT_NODE_ID = "nxid";
+	
+    /** Last tick that is executing or has completed.
+     * If = lastSimTick, means simulation is caught up or catching up with most recent activity.
+     */
+	private AtomicInteger currentSimTick = new AtomicInteger(0);
+    private static final String TAG_CURRENT_SIM_TICK = "cstk";
+	
+    /** 
+     * Set to worldTickOffset + lastWorldTick at end of server tick.
+     * If equal to currentSimTick, means simulation is caught up with world ticks.
+     */
+    private volatile int lastSimTick = 0;
+    private static final String TAG_LAST_SIM_TICK = "lstk";
+
+    /** worldTickOffset + lastWorldTick = max value of current simulation tick.
+	 * Updated on server post tick, *after* all world tick events should be submitted.
+	 */
+	private volatile long worldTickOffset = 0; 
+    private static final String TAG_WORLD_TICK_OFFSET= "wtos";
+
+
+	// Main control
+	public void start()
+	{
+        Adversity.log.info("starting sim");
+	    synchronized(this)
+	    {
+	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
+	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
+	        
+            if(!PersistenceManager.loadNode(world, this))
+    	    {
+                Adversity.log.info("creating sim");
+                // Not found, assume new game and new simulation
+    	        this.worldTickOffset = -world.getWorldTime();
+    	        this.setSaveDirty(true);
+    	        PersistenceManager.registerNode(world, this);
+
+    	    }
+    		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    		this.isRunning = true;
+            Adversity.log.info("starting first frame");
+    		executor.execute(new FrameStarter());
+	    }
+	}
+	
+    /** 
+     * Called from ServerStopping event.
+     * Should be no more ticks after that.
+     */
+	public synchronized void stop()
+	{
+        Adversity.log.info("stopping server");
+		this.isRunning = false;
+        
+		// wait for simulation to catch up
+		while(this.currentSimTick.get() < this.lastSimTick)
+		{
+		    try
+            {
+	            Adversity.log.info("waiting for catch up");
+                this.wait();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+		}
+        Adversity.log.info("waiting for last frame task completion");
+		this.taskCounter.waitUntilAllTasksComplete();
+        Adversity.log.info("shutting down thread pool");
+	    executor.shutdown();
+	    this.world = null;
+	}
+	
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent event) {
+
+        
+        // thought it might offer more determinism if we run after block/entity ticks
+        if(event.phase == TickEvent.Phase.END && this.isRunning)
+        {
+
+            int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
+
+            // Simulation clock can't move backwards.
+            // NB: don't need CAS because only ever changed by game thread in this method
+            if(newLastSimTick > lastSimTick)
+            {
+                if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
+                this.isDirty = true;
+                this.lastSimTick = newLastSimTick;
+            }
+        }
+    }
+
+    /**
+     * Attempts to CAS-increment the current sim tick.
+     */
+    private boolean tryIncrementSimTick(int expect) {
+        return currentSimTick.compareAndSet(expect, expect + 1);
+    }
+ 
+    /**
+     * Reliably increments active task count.
+     * Notify is for stop method, which may be waiting for count to catch up.
+     */
+    private void incrementSimTick() {
+        setSaveDirty(true);
+        do {} while (! tryIncrementSimTick(currentSimTick.get()));
+        synchronized(this)
+        {
+            this.notifyAll();
+        }
+    }
+ 
+	// Node interface implementation
+	
+    @Override
+    public int getID()
+    {
+        return 0;
+    }
+
+    @Override
+    public boolean isSaveDirty()
+    {
+        return isDirty;
+    }
+
+    @Override
+    public void setSaveDirty(boolean isDirty)
+    {
+        this.isDirty = isDirty;        
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt)
+    {
+        this.nextNodeID = nbt.getInteger(TAG_NEXT_NODE_ID);
+        this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
+        this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
+        this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
+        
+        // TODO: load all sub nodes
+
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound nbt)
+    {
+        Adversity.log.info("saving simulation state");
+        nbt.setInteger(TAG_NEXT_NODE_ID, nextNodeID);
+        nbt.setInteger(TAG_CURRENT_SIM_TICK, currentSimTick.get());
+        nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
+        nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
+    }
+
+
+    private class FrameStarter implements Runnable
+    {
+        /** 
+         * Sets up a new simulation frame.  This includes:
+         * 
+         * 1) Wait for all tasks from previous simulation frame to finish.
+         * Known by checking active activeTaskCount
+         * 
+         * 2) Check for world ticks to process.
+         * Known by comparing current sim tick with last sim tick.
+         * If no ticks are available, wait for world clock to advance,
+         * unless the simulation is shutting down.  In that case, exit.
+         * 
+         * 3) Generate and execute node tasks for all nodes that activate in this tick.
+         * Increment activeTaskCount for each one.
+         * 
+         * 4) Advance the frame.
+         * 
+         * 5) Create and execute a new FrameStarter for the frame after this.
+         * Do NOT increment activeTaskCount.  
+         * The new FrameStarter will wait for tasks from this frame to complete.
+         * It cannot wait for itself to complete.
+         */
+        @Override
+        public void run()
+        {
+            if((currentSimTick.get() & 31) == 31) Adversity.log.info("starting frame with currentSimTick=" + currentSimTick.get());
+            // wait for any previous frames to finish
+            taskCounter.waitUntilAllTasksComplete();
+            
+            // wait for world tick to advance or for the server to stop
+            while(isRunning)
+            {
+                if((currentSimTick.get() == lastSimTick))
+                {
+                    try
+                    {
+                        Thread.sleep(10);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    // do all the things!
+                    this.startNodeTasks();
+                    
+                    // advance the frame counter
+                    incrementSimTick();
+                    
+                    // start the next frame
+                    executor.execute(this);
+                    
+                    return;
+                }
+            }
+        }
+        
+        private void startNodeTasks()
+        {
+            ;
+        }
+ 
+        
+    }
+}

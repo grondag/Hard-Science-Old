@@ -1,8 +1,8 @@
-package grondag.adversity.taskmaster.base;
+package grondag.adversity.simulator.base;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public abstract class NodeBase
+public interface INode
 {
     public abstract int getID();
     public abstract boolean isSaveDirty();

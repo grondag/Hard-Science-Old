@@ -1,9 +1,12 @@
 package grondag.adversity;
 
+import grondag.adversity.simulator.Simulator;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 public class ServerProxy extends CommonProxy {
 
@@ -23,7 +26,12 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public void serverLoad(FMLServerStartingEvent event) {
-		super.serverLoad(event);
-	}
+    public void serverStarted(FMLServerStartedEvent event) {
+        super.serverStarted(event);
+    }
+
+	@Override
+    public void serverStopping(FMLServerStoppingEvent event) {
+        super.serverStopping(event);
+    }
 }

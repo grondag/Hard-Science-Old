@@ -1,4 +1,4 @@
-package grondag.adversity.taskmaster.base;
+package grondag.adversity.simulator.base;
 
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -11,10 +11,10 @@ public abstract class Delegate
 	private NBTTagCompound state;
 	private boolean hasUpdate = false;
 	
-	public void postEvent(NodeEvent event);
-	public NodeEvent[] pullEvents()
+	public abstract void postEvent(NodeEvent event);
+	public abstract NodeEvent[] pullEvents();
 	
-	public boolean hasUpdate() { return state != null
+	public boolean hasUpdate() { return hasUpdate; }
 	
 	public NBTTagCompound getState() { return state; }
 }
