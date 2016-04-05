@@ -1,19 +1,23 @@
 package grondag.adversity.simulator;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Lists;
+
 import grondag.adversity.Adversity;
-import grondag.adversity.simulator.base.INode;
+import grondag.adversity.simulator.base.SimulationNode;
+import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 /**
@@ -38,10 +42,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * will observe that the machines are running very quickly.
  * 
  */
-public class Simulator implements INode{
+public class Simulator extends SimulationNode{
 
-	public static final Simulator instance = new Simulator();
+	protected Simulator()
+    {
+        super(NodeRoots.SIMULATION.ordinal());
+    }
+
+    public static final Simulator instance = new Simulator();
 	
+    private VolcanoManager volcanoManager;
+    
 	private static class TaskCounter
 	{
 	    private final AtomicInteger activeTaskCount = new AtomicInteger(0);
@@ -55,32 +66,33 @@ public class Simulator implements INode{
 	        }
 	    }
 
-	    /**
-	     * Attempts to CAS-increment the active task count.
-	     */
-	    private boolean tryIncrementActiveTasks(int expect) {
-	        return activeTaskCount.compareAndSet(expect, expect + 1);
-	    }
+//	    /**
+//	     * Attempts to CAS-increment the active task count.
+//	     */
+//	    private boolean tryIncrementActiveTasks(int expect) {
+//	        return activeTaskCount.compareAndSet(expect, expect + 1);
+//	    }
 
-	    /**
-	     * Attempts to CAS-decrement active task count.
-	     */
-	    private boolean tryDecrementActiveTasks(int expect) {
-	        return activeTaskCount.compareAndSet(expect, expect - 1);
-	    }
+//	    /**
+//	     * Attempts to CAS-decrement active task count.
+//	     */
+//	    private boolean tryDecrementActiveTasks(int expect) {
+//	        return activeTaskCount.compareAndSet(expect, expect - 1);
+//	        activeTaskCount.decrementAndGet()
+//	    }
 
 	    /**
 	     * Reliably increments active task count.
 	     */
 	    public void incrementActiveTasks() {
-	        do {} while (! tryIncrementActiveTasks(activeTaskCount.get()));
+	        activeTaskCount.incrementAndGet();
 	    }
 
 	    /**
 	     * Reliably decrements active task count.
 	     */
 	    public void decrementActiveTasks() {
-	        do {} while (! tryDecrementActiveTasks(activeTaskCount.get()));
+	        activeTaskCount.decrementAndGet();
 	        synchronized(this)
 	        {
 	            this.notifyAll();
@@ -94,12 +106,11 @@ public class Simulator implements INode{
     /** used for world time */
     private World world;
     
-    private volatile boolean isDirty;
     private volatile boolean isRunning = false;
     
     private final TaskCounter taskCounter = new TaskCounter();
 
-    private volatile int nextNodeID = 1;
+ //   private AtomicInteger nextNodeID = new AtomicInteger(NodeRoots.FIRST_NORMAL_NODE_ID);
     private static final String TAG_NEXT_NODE_ID = "nxid";
 	
     /** Last tick that is executing or has completed.
@@ -194,71 +205,74 @@ public class Simulator implements INode{
                 this.isDirty = true;
                 this.lastSimTick = newLastSimTick;
             }
+            
+            // accesses world, so needs to run on server thread
+            volcanoManager.updateChunkLoading();
         }
+        
+
     }
 
     /**
-     * Attempts to CAS-increment the current sim tick.
-     */
-    private boolean tryIncrementSimTick(int expect) {
-        return currentSimTick.compareAndSet(expect, expect + 1);
-    }
- 
-    /**
-     * Reliably increments active task count.
+     * Increments active task count.
+     * Call whenever adding another task to the queue.
      * Notify is for stop method, which may be waiting for count to catch up.
      */
     private void incrementSimTick() {
         setSaveDirty(true);
-        do {} while (! tryIncrementSimTick(currentSimTick.get()));
+        currentSimTick.incrementAndGet();
         synchronized(this)
         {
             this.notifyAll();
         }
     }
+    
+//    /**
+//     * Call to claim a new ID for all created nodes.
+//     * Node #0 is reserved for the simulation object itself.
+//     * Claiming a node ID does not cause it to be ticked or persisted.
+//     */
+//    private int getNewNodeID()
+//    {
+//        this.setSaveDirty(true);
+//        return this.nextNodeID.getAndIncrement();
+//    }
  
 	// Node interface implementation
 	
+
     @Override
-    public int getID()
+    public void readFromNBT(NBTTagCompound nbt)
     {
-        return 0;
+  //      this.nextNodeID.set(nbt.getInteger(TAG_NEXT_NODE_ID));
+        this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
+        this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
+        this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
+        
+        this.volcanoManager = new VolcanoManager();
+        volcanoManager.readFromNBT(nbt);
+        
+
     }
 
     @Override
     public boolean isSaveDirty()
     {
-        return isDirty;
-    }
-
-    @Override
-    public void setSaveDirty(boolean isDirty)
-    {
-        this.isDirty = isDirty;        
-    }
-
-    @Override
-    public void readFromNBT(NBTTagCompound nbt)
-    {
-        this.nextNodeID = nbt.getInteger(TAG_NEXT_NODE_ID);
-        this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
-        this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
-        this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
-        
-        // TODO: load all sub nodes
-
+        return super.isSaveDirty() || volcanoManager.isSaveDirty();
     }
 
     @Override
     public void writeToNBT(NBTTagCompound nbt)
     {
         Adversity.log.info("saving simulation state");
-        nbt.setInteger(TAG_NEXT_NODE_ID, nextNodeID);
+    //    nbt.setInteger(TAG_NEXT_NODE_ID, nextNodeID.get());
         nbt.setInteger(TAG_CURRENT_SIM_TICK, currentSimTick.get());
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
+        volcanoManager.writeToNBT(nbt);
     }
 
+    // Frame execution logic
 
     private class FrameStarter implements Runnable
     {
@@ -322,9 +336,64 @@ public class Simulator implements INode{
         
         private void startNodeTasks()
         {
-            ;
+            /**
+             * Things to add:
+             * Adversary thinking
+             * Mining manager
+             * Power transfer manager
+             * Material/fluid transfer manager
+             * Inventory manager/monitor
+             * Redstone manager
+             * Crafting manager
+             * Material processing
+             * Meteor manager
+             * Storm manager
+             * Computer processing
+             * Plant growth
+             * Plant production
+             * 
+             * Hypermaterial Manager? - probably best to leave this world-side
+             */
+            if((currentSimTick.get() & 1023) == 1023)
+            {
+                volcanoManager.run();
+            }
         }
  
         
     }
+    
+    public class ChunkloadCallback implements ForgeChunkManager.OrderedLoadingCallback {
+        @Override
+        public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
+            for (ForgeChunkManager.Ticket ticket : tickets) {
+                int quarryX = ticket.getModData().getInteger("quarryX");
+                int quarryY = ticket.getModData().getInteger("quarryY");
+                int quarryZ = ticket.getModData().getInteger("quarryZ");
+                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
+
+                Block block = world.getBlockState(pos).getBlock();
+                if (block == quarryBlock) {
+                    TileQuarry tq = (TileQuarry) world.getTileEntity(pos);
+                    tq.forceChunkLoading(ticket);
+                }
+            }
+        }
+
+        @Override
+        public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world, int maxTicketCount) {
+            List<ForgeChunkManager.Ticket> validTickets = Lists.newArrayList();
+            for (ForgeChunkManager.Ticket ticket : tickets) {
+                int quarryX = ticket.getModData().getInteger("quarryX");
+                int quarryY = ticket.getModData().getInteger("quarryY");
+                int quarryZ = ticket.getModData().getInteger("quarryZ");
+                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
+
+                Block block = world.getBlockState(pos).getBlock();
+                if (block == quarryBlock) {
+                    validTickets.add(ticket);
+                }
+            }
+            return validTickets;
+        }
 }

@@ -1,28 +1,21 @@
-package com.grondag.adversity.feature.volcano;
+package grondag.adversity.feature.volcano;
 
 import java.util.Random;
 
+import grondag.adversity.Adversity;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 
-import com.grondag.adversity.Adversity;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 public class BlockVolcanicLava extends BlockFluidClassic {
-
-	@SideOnly(Side.CLIENT)
-	protected IIcon	stillIcon;
-	@SideOnly(Side.CLIENT)
-	protected IIcon	flowingIcon;
 
 	public BlockVolcanicLava(Fluid fluid, Material material) {
 		super(fluid, material);
@@ -30,45 +23,40 @@ public class BlockVolcanicLava extends BlockFluidClassic {
 		defaultDisplacements.put(Blocks.reeds, true);
 	}
 
-	@Override
-	public IIcon getIcon(int side, int meta) {
-		return side == 0 || side == 1 ? this.stillIcon : this.flowingIcon;
-	}
-
-	@SideOnly(Side.CLIENT)
-	@Override
-	public void registerBlockIcons(IIconRegister register) {
-		this.stillIcon = register.registerIcon(Adversity.MODID + ":volcanic_lava_still");
-		this.flowingIcon = register.registerIcon(Adversity.MODID + ":volcanic_lava_flow");
-	}
 
 	@Override
-	public boolean canDisplace(IBlockAccess world, int x, int y, int z) {
-		return super.canDisplace(world, x, y, z);
-	}
+    public boolean canDisplace(IBlockAccess world, BlockPos pos)
+    {
+        return super.canDisplace(world, pos);
+    }
+
+
+    @Override
+    public boolean displaceIfPossible(World world, BlockPos pos)
+    {
+        return super.displaceIfPossible(world, pos);
+    }
+
 
 	@Override
-	public boolean displaceIfPossible(World world, int x, int y, int z) {
-		return super.displaceIfPossible(world, x, y, z);
-	}
-
-	@Override
-	protected boolean canFlowInto(IBlockAccess world, int x, int y, int z) {
-		if (world.getBlock(x, y, z).isAir(world, x, y, z))
+    protected boolean canFlowInto(IBlockAccess world, BlockPos pos)
+    {
+		if (world.isAirBlock(pos))
 			return true;
 
-		final Block block = world.getBlock(x, y, z);
+		final IBlockState state = world.getBlockState(pos);
+		final Block block = state.getBlock();
 		if (block == this)
 			return true;
 
 		if (this.displacements.containsKey(block))
 			return this.displacements.get(block);
 
-		final Material material = block.getMaterial();
+		final Material material = block.getMaterial(state);
 		if (material.blocksMovement() || material == Material.portal)
 			return false;
 
-		final int density = getDensity(world, x, y, z);
+		final int density = getDensity(world, pos);
 		if (density == Integer.MAX_VALUE)
 			return true;
 
@@ -79,42 +67,44 @@ public class BlockVolcanicLava extends BlockFluidClassic {
 	}
 
 	private boolean isBasalt(Block b) {
-		return b == Volcano.blockHotBasalt || b == Volcano.blockBasalt;
+		return b == NiceBlockRegistrar.BLOCK_HOT_BASALT || b == NiceBlockRegistrar.BLOCK_COOL_BASALT;
 	}
 
+	
 	@Override
-	public void updateTick(World world, int x, int y, int z, Random rand) {
+    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand)
+    {
+		super.updateTick(world, pos, state, rand);
 
-		super.updateTick(world, x, y, z, rand);
-
-		if (!(world.getBlock(x, y - 1, z) == this || this.canDisplace(world, x, y - 1, z))) {
+		if (!(world.getBlockState(pos.down()).getBlock() == this || this.canDisplace(world, pos.down()))) {
 			int bonusChance = 0;
-			if (isBasalt(world.getBlock(x - 1, y, z))) ++ bonusChance;
-			if (isBasalt(world.getBlock(x + 1, y, z))) ++ bonusChance;
-			if (isBasalt(world.getBlock(x, y, z - 1))) ++ bonusChance;
-			if (isBasalt(world.getBlock(x, y, z + 1))) ++ bonusChance;
+			if (isBasalt(world.getBlockState(pos.east()).getBlock())) ++ bonusChance;
+			if (isBasalt(world.getBlockState(pos.west()).getBlock())) ++ bonusChance;
+			if (isBasalt(world.getBlockState(pos.north()).getBlock())) ++ bonusChance;
+			if (isBasalt(world.getBlockState(pos.south()).getBlock())) ++ bonusChance;
 			if (bonusChance == 4) 
 				bonusChance = 15;
 			else if (bonusChance == 3)
 				bonusChance = 9;
 
-			if (rand.nextInt(16) <= world.getBlockMetadata(x, y, z) + bonusChance) {
-				world.setBlock(x, y, z, Volcano.blockHotBasalt, 4, 3);
+			if (rand.nextInt(16) <= world.getBlockState(pos).getValue(NiceBlock.META) + bonusChance) {
+				world.setBlockState(pos, NiceBlockRegistrar.BLOCK_HOT_BASALT.getDefaultState().withProperty(NiceBlock.META, 3));
 			}
 		}
 	}
 
+	
 	@Override
-	public boolean isBurning(IBlockAccess world, int x, int y, int z) {
-		return true;
-	}
+    public boolean isBurning(IBlockAccess world, BlockPos pos)
+    {
+        return true;
+    }
 
-	@Override
-	public int getMixedBrightnessForBlock(IBlockAccess p_149677_1_, int p_149677_2_, int p_149677_3_, int p_149677_4_) {
-		// Always render at full brightness.
-		// Value is equivalent to 15 << 20 | 15 << 4
-		// No, I don't know why this works either, it just does.
-		return 15728880;
+	
+    @Override
+    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return 15 << 20 | 15 << 4;
 	}
 
 }

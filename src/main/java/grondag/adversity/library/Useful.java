@@ -10,6 +10,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 
 
@@ -203,5 +206,50 @@ public class Useful {
    		break;
    	}
    	return retVal;
+   }
+   
+   public static void fill2dCircleInPlaneXZ(World worldObj, int x0, int y, int z0, int radius, IBlockState state) {
+
+       // uses midpoint circle algorithm
+
+       if (radius <= 0)
+           return;
+
+       worldObj.setBlockState(new BlockPos(x0, y, z0), state);
+
+       for (int r = 1; r <= radius; ++r) {
+
+           int x = r;
+           int z = 0;
+           int decisionOver2 = 1 - r;
+
+           while (z <= x) {
+               
+               worldObj.setBlockState(new BlockPos(x + x0, y, z + z0), state); // Octant 1
+               worldObj.setBlockState(new BlockPos(z + x0, y, x + z0), state); // Octant 2
+               worldObj.setBlockState(new BlockPos(-x + x0, y, z + z0), state); // Octant 3
+               worldObj.setBlockState(new BlockPos(-z + x0, y, x + z0), state); // Octant 4
+               worldObj.setBlockState(new BlockPos(-x + x0, y, -z + z0), state); // Octant 5
+               worldObj.setBlockState(new BlockPos(-z + x0, y, -x + z0), state); // Octant 6
+               worldObj.setBlockState(new BlockPos(x + x0, y, -z + z0), state); // Octant 7
+               worldObj.setBlockState(new BlockPos(z + x0, y, -x + z0), state); // Octant 8
+               z++;
+
+               if (decisionOver2 <= 0) {
+                   decisionOver2 += 2 * z + 1; // Change in decision criterion for y -> y+1
+               } else {
+                   worldObj.setBlockState(new BlockPos(x + x0, y, z + z0), state); // Octant 1
+                   worldObj.setBlockState(new BlockPos(z + x0, y, x + z0), state); // Octant 2
+                   worldObj.setBlockState(new BlockPos(-x + x0, y, z + z0), state); // Octant 3
+                   worldObj.setBlockState(new BlockPos(-z + x0, y, x + z0), state); // Octant 4
+                   worldObj.setBlockState(new BlockPos(-x + x0, y, -z + z0), state); // Octant 5
+                   worldObj.setBlockState(new BlockPos(-z + x0, y, -x + z0), state); // Octant 6
+                   worldObj.setBlockState(new BlockPos(x + x0, y, -z + z0), state); // Octant 7
+                   worldObj.setBlockState(new BlockPos(z + x0, y, -x + z0), state); // Octant 8
+                   x--;
+                   decisionOver2 += 2 * (z - x) + 1; // Change for y -> y+1, x -> x-1
+               }
+           }
+       }
    }
 }

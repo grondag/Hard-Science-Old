@@ -1,12 +1,12 @@
 package grondag.adversity.simulator;
 
-import grondag.adversity.simulator.base.INode;
+import grondag.adversity.simulator.base.SimulationNode;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
 
 public class PersistenceDelegate extends WorldSavedData
 {
-    private INode node;
+    private SimulationNode node;
     /** saves initial nbt load until we know our node reference */
     private NBTTagCompound nbtCache;
     
@@ -14,7 +14,7 @@ public class PersistenceDelegate extends WorldSavedData
         super(name);
     }
     
-    public void setNode(INode node) { this.node = node; }
+    public void setNode(SimulationNode node) { this.node = node; }
 
     @Override
     public void readFromNBT(NBTTagCompound nbt)

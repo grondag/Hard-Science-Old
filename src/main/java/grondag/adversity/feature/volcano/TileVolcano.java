@@ -1,15 +1,18 @@
-package com.grondag.adversity.feature.volcano;
+package grondag.adversity.feature.volcano;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import Reika.DragonAPI.Instantiable.FlyingBlocksExplosion;
-import Reika.DragonAPI.Libraries.IO.ReikaChatHelper;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
+import grondag.adversity.Adversity;
+import grondag.adversity.library.Useful;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 
-import com.grondag.adversity.lib.OddUtils;
 
-public class TileVolcano extends TileEntity {
+public class TileVolcano extends TileEntity implements ITickable{
 
 	// Activity cycle.
 	private int						state;
@@ -31,15 +34,15 @@ public class TileVolcano extends TileEntity {
 	public final int				TESTING_OUTER	= 3;
 	public final int				DORMANT			= 5;
 
-	private void placeBlockIfNeeded(int x, int y, int z, Block block, int meta) {
-		final Block existing = this.worldObj.getBlock(x, y, z);
-		if (block != existing) {
-			this.worldObj.setBlock(x, y, z, block, meta, 3);
+	private void placeBlockIfNeeded(BlockPos pos, IBlockState state) {
+	    if(worldObj.getBlockState(pos) != state)
+		{
+			this.worldObj.setBlockState(pos, state);
 		}
 	}
 
-	private boolean isBlockOpen(int x, int y, int z, boolean allowSourceLava) {
-		final Block b = this.worldObj.getBlock(x, y, z);
+	private boolean isBlockOpen(BlockPos pos, boolean allowSourceLava) {
+		final Block b = this.worldObj.getBlockState(pos).getBlock();
 		final int lavaMeta = allowSourceLava ? -1 : 0;
 		final int m = this.worldObj.getBlockMetadata(x, y, z);
 		return b == Volcano.blockVolcanicLava && m != lavaMeta || b.getMaterial() == Material.air;
@@ -135,8 +138,8 @@ public class TileVolcano extends TileEntity {
 		}
 		final int x = this.xCoord + dx * distanceFromCenter;
 		final int z = this.zCoord + dz * distanceFromCenter;
-		new FlyingBlocksExplosion(this.worldObj, x, this.level - 1, z, blastRadius).doExplosion();
-		OddUtils.fill2dCircleInPlaneXZ(this.worldObj, x, this.level - 2, z, blastRadius, Volcano.blockVolcanicLava, 0);
+		//new FlyingBlocksExplosion(this.worldObj, x, this.level - 1, z, blastRadius).doExplosion();
+		Useful.fill2dCircleInPlaneXZ(this.worldObj, x, this.level - 2, z, blastRadius, NiceBlockRegistrar.BLOCK_HOT_BASALT.getDefaultState());
 	}
 
 	private void makeHaze() {
@@ -154,12 +157,12 @@ public class TileVolcano extends TileEntity {
 	}
 
 	@Override
-	public void updateEntity() {
+	public void update() {
 		if (!this.worldObj.isRemote) {
 			this.markDirty();
 
 			if (this.chatTimer <= 0) {
-				ReikaChatHelper.sendChatToAllOnServer("State=" + this.state + "  Timer=" + this.timer);
+				Adversity.log.info("State=" + this.state + "  Timer=" + this.timer);
 				this.chatTimer = 200;
 
 			} else {
@@ -172,7 +175,7 @@ public class TileVolcano extends TileEntity {
 				--this.timer;
 			} else if (this.state == this.INACTIVE) {
 
-				this.level = this.yCoord;
+				this.level = this.getPos().getY();
 
 				++this.level;
 
