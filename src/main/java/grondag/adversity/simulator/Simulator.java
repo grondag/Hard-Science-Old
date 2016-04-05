@@ -271,6 +271,8 @@ public class Simulator extends SimulationNode{
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
         volcanoManager.writeToNBT(nbt);
     }
+    
+    public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
 
     // Frame execution logic
 
@@ -363,37 +365,38 @@ public class Simulator extends SimulationNode{
         
     }
     
-    public class ChunkloadCallback implements ForgeChunkManager.OrderedLoadingCallback {
-        @Override
-        public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
-            for (ForgeChunkManager.Ticket ticket : tickets) {
-                int quarryX = ticket.getModData().getInteger("quarryX");
-                int quarryY = ticket.getModData().getInteger("quarryY");
-                int quarryZ = ticket.getModData().getInteger("quarryZ");
-                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
-
-                Block block = world.getBlockState(pos).getBlock();
-                if (block == quarryBlock) {
-                    TileQuarry tq = (TileQuarry) world.getTileEntity(pos);
-                    tq.forceChunkLoading(ticket);
-                }
-            }
-        }
-
-        @Override
-        public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world, int maxTicketCount) {
-            List<ForgeChunkManager.Ticket> validTickets = Lists.newArrayList();
-            for (ForgeChunkManager.Ticket ticket : tickets) {
-                int quarryX = ticket.getModData().getInteger("quarryX");
-                int quarryY = ticket.getModData().getInteger("quarryY");
-                int quarryZ = ticket.getModData().getInteger("quarryZ");
-                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
-
-                Block block = world.getBlockState(pos).getBlock();
-                if (block == quarryBlock) {
-                    validTickets.add(ticket);
-                }
-            }
-            return validTickets;
-        }
+//    public class ChunkloadCallback implements ForgeChunkManager.OrderedLoadingCallback {
+//        @Override
+//        public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
+//            for (ForgeChunkManager.Ticket ticket : tickets) {
+//                int quarryX = ticket.getModData().getInteger("quarryX");
+//                int quarryY = ticket.getModData().getInteger("quarryY");
+//                int quarryZ = ticket.getModData().getInteger("quarryZ");
+//                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
+//
+//                Block block = world.getBlockState(pos).getBlock();
+//                if (block == quarryBlock) {
+//                    TileQuarry tq = (TileQuarry) world.getTileEntity(pos);
+//                    tq.forceChunkLoading(ticket);
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world, int maxTicketCount) {
+//            List<ForgeChunkManager.Ticket> validTickets = Lists.newArrayList();
+//            for (ForgeChunkManager.Ticket ticket : tickets) {
+//                int quarryX = ticket.getModData().getInteger("quarryX");
+//                int quarryY = ticket.getModData().getInteger("quarryY");
+//                int quarryZ = ticket.getModData().getInteger("quarryZ");
+//                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
+//
+//                Block block = world.getBlockState(pos).getBlock();
+//                if (block == quarryBlock) {
+//                    validTickets.add(ticket);
+//                }
+//            }
+//            return validTickets;
+//        }
+//    }
 }
