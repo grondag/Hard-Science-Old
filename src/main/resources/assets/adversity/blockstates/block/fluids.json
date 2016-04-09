@@ -1,0 +1,12 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "model": "adversity:fluid",
+        "transform": "forge:default-item"
+    },
+    "variants": {
+        "volcanic_lava": [{
+            "custom": { "fluid": "volcanic_lava" }
+        }]
+    }
+}

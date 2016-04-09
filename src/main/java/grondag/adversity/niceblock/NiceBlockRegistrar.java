@@ -74,7 +74,7 @@ public class NiceBlockRegistrar
 
     public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(1), "cool_basalt_0_0",
             new ColorController("cool_basalt", 1, BlockRenderLayer.SOLID, true, true));
-    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new NiceBlock(new ColorHelperMeta(MODEL_COOL_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
+    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new NiceBlock(new ColorHelperMeta(MODEL_COOL_BASALT), BaseMaterial.FLEXSTONE, "cool_basalt");
 
     
     public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
