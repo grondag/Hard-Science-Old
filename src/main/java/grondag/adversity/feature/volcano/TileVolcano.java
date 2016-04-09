@@ -28,7 +28,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 	
 	private VolcanoNode             node;
 
-	private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
+	//private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
 
 	// these are all derived or ephemeral - not saved to NBT
 	private int						hazeTimer		= 60;
@@ -157,7 +157,8 @@ public class TileVolcano extends TileEntity implements ITickable{
 			--this.hazeTimer;
 		} else {
 			this.hazeTimer = 5;
-			this.hazeMaker.update(this.worldObj, this.pos.getX(), this.pos.getZ());
+			//this.hazeMaker.update(this.worldObj, this.pos.getX(), this.pos.getZ());
+			
 			// if(worldObj.rand.nextInt(3)==0){
 			// worldObj.setBlock(xCoord+2-worldObj.rand.nextInt(5), level+2, zCoord+2-worldObj.rand.nextInt(5),
 			// Adversity.blockHazeRising, 0, 2);
@@ -304,7 +305,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 		    this.markDirty();
 		}
 
-		this.hazeMaker.readFromNBT(tagCompound);
+		//this.hazeMaker.readFromNBT(tagCompound);
 	}
 
 	@Override
@@ -317,7 +318,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 		tagCompound.setInteger("levelsTilDormant", this.levelsTilDormant);
 		tagCompound.setInteger("nodeId", this.node.getID());
 
-		this.hazeMaker.writeToNBT(tagCompound);
+		//this.hazeMaker.writeToNBT(tagCompound);
 
 	}
 }

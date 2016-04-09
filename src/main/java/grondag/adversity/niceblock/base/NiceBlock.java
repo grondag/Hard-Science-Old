@@ -96,7 +96,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         this.blockModelHelper = blockModelHelper;
         blockModelHelper.setBlock(this);
         this.setRegistryName(material.materialName + "." + styleName);
-        setUnlocalizedName(this.getRegistryName());
+        this.setUnlocalizedName(this.getRegistryName().toString());
         collisionHandler = blockModelHelper.dispatcher.getCollisionHandler();
 
         item = new NiceItemBlock(this);

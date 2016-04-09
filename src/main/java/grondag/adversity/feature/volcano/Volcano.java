@@ -59,8 +59,8 @@ public class Volcano {
 		FluidRegistry.registerFluid(fluidVolcanicLava);
 		blockVolcanicLava = (BlockVolcanicLava) new BlockVolcanicLava(Volcano.fluidVolcanicLava, Material.lava)
 				.setRegistryName("volcanic_lava");
-		GameRegistry.registerBlock(blockVolcanicLava);
-        GameRegistry.registerItem(new ItemBlock(blockVolcanicLava).setRegistryName(blockVolcanicLava.getRegistryName()));
+		GameRegistry.register(blockVolcanicLava);
+        GameRegistry.register(new ItemBlock(blockVolcanicLava).setRegistryName(blockVolcanicLava.getRegistryName()));
 
         if(event.getSide() == Side.CLIENT)
         {
