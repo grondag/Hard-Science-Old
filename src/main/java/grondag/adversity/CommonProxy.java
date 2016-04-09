@@ -4,6 +4,7 @@ package grondag.adversity;
 import grondag.adversity.feature.volcano.Volcano;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.simulator.Simulator;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -26,6 +27,7 @@ public class CommonProxy {
        //     WailaDataProvider.register();
         }
         
+        ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.MODID, Simulator.instance);
         MinecraftForge.EVENT_BUS.register(Simulator.instance);
 	}
 

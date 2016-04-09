@@ -13,8 +13,9 @@ import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
@@ -42,7 +43,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
  * will observe that the machines are running very quickly.
  * 
  */
-public class Simulator extends SimulationNode{
+public class Simulator extends SimulationNode implements ForgeChunkManager.OrderedLoadingCallback
+{
 
 	protected Simulator()
     {
@@ -53,55 +55,7 @@ public class Simulator extends SimulationNode{
 	
     private VolcanoManager volcanoManager;
     
-	private static class TaskCounter
-	{
-	    private final AtomicInteger activeTaskCount = new AtomicInteger(0);
-	    
-	    public synchronized void waitUntilAllTasksComplete()
-	    {
-	        while(activeTaskCount.get() > 0) {
-	            try {
-	                wait();
-	            } catch (InterruptedException e) {}
-	        }
-	    }
-
-//	    /**
-//	     * Attempts to CAS-increment the active task count.
-//	     */
-//	    private boolean tryIncrementActiveTasks(int expect) {
-//	        return activeTaskCount.compareAndSet(expect, expect + 1);
-//	    }
-
-//	    /**
-//	     * Attempts to CAS-decrement active task count.
-//	     */
-//	    private boolean tryDecrementActiveTasks(int expect) {
-//	        return activeTaskCount.compareAndSet(expect, expect - 1);
-//	        activeTaskCount.decrementAndGet()
-//	    }
-
-	    /**
-	     * Reliably increments active task count.
-	     */
-	    public void incrementActiveTasks() {
-	        activeTaskCount.incrementAndGet();
-	    }
-
-	    /**
-	     * Reliably decrements active task count.
-	     */
-	    public void decrementActiveTasks() {
-	        activeTaskCount.decrementAndGet();
-	        synchronized(this)
-	        {
-	            this.notifyAll();
-	        }
-	    }
-	    
-	}
-	
-    private static ExecutorService executor;
+	private static ExecutorService executor;
     
     /** used for world time */
     private World world;
@@ -249,7 +203,7 @@ public class Simulator extends SimulationNode{
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
         
-        this.volcanoManager = new VolcanoManager();
+        this.volcanoManager = new VolcanoManager(this.taskCounter);
         volcanoManager.readFromNBT(nbt);
         
 
@@ -271,6 +225,9 @@ public class Simulator extends SimulationNode{
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
         volcanoManager.writeToNBT(nbt);
     }
+    
+    public World getWorld() { return this.world; }
+    public int getCurrentSimTick() { return this.currentSimTick.get(); }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
 
@@ -358,45 +315,31 @@ public class Simulator extends SimulationNode{
              */
             if((currentSimTick.get() & 1023) == 1023)
             {
-                volcanoManager.run();
+                executor.execute(volcanoManager);
             }
         }
  
         
     }
     
-//    public class ChunkloadCallback implements ForgeChunkManager.OrderedLoadingCallback {
-//        @Override
-//        public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
-//            for (ForgeChunkManager.Ticket ticket : tickets) {
-//                int quarryX = ticket.getModData().getInteger("quarryX");
-//                int quarryY = ticket.getModData().getInteger("quarryY");
-//                int quarryZ = ticket.getModData().getInteger("quarryZ");
-//                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
-//
-//                Block block = world.getBlockState(pos).getBlock();
-//                if (block == quarryBlock) {
-//                    TileQuarry tq = (TileQuarry) world.getTileEntity(pos);
-//                    tq.forceChunkLoading(ticket);
-//                }
-//            }
-//        }
-//
-//        @Override
-//        public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world, int maxTicketCount) {
-//            List<ForgeChunkManager.Ticket> validTickets = Lists.newArrayList();
-//            for (ForgeChunkManager.Ticket ticket : tickets) {
-//                int quarryX = ticket.getModData().getInteger("quarryX");
-//                int quarryY = ticket.getModData().getInteger("quarryY");
-//                int quarryZ = ticket.getModData().getInteger("quarryZ");
-//                BlockPos pos = new BlockPos(quarryX, quarryY, quarryZ);
-//
-//                Block block = world.getBlockState(pos).getBlock();
-//                if (block == quarryBlock) {
-//                    validTickets.add(ticket);
-//                }
-//            }
-//            return validTickets;
-//        }
-//    }
+    // CHUNK LOADING START UP HANDLERS
+    
+    @Override
+    public void ticketsLoaded(List<Ticket> tickets, World world)
+    {
+        // For volcanos we re-force chunks when simulation loaded
+        // or when activation changes. Should get no tickets.
+        ;
+    }
+
+    @Override
+    public List<Ticket> ticketsLoaded(List<Ticket> tickets, World world, int maxTicketCount)
+    {
+        // For volcanos we re-force chunks when simulation loaded
+        // or when activation changes. Dispose of all tickets.
+        List<ForgeChunkManager.Ticket> validTickets = Lists.newArrayList();
+        return validTickets;
+    }
+
+ 
 }

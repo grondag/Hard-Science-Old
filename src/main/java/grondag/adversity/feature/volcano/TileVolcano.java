@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -17,32 +18,38 @@ import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 public class TileVolcano extends TileEntity implements ITickable{
 
 	// Activity cycle.
-	private int						state;
+	private VolcanoStage stage = VolcanoStage.NEW;
 	private int						level;
-	private int						timer;
 	private int						buildLevel;
 	private int						levelsTilDormant;
+	/** Weight used by simulation to calculate odds of activation. 
+	 * Incremented whenever this TE is loaded and ticks. */
+	private int                     weight = 2400000;
+	
 	private VolcanoNode             node;
 
 	private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
 
 	// these are all derived or ephemeral - not saved to NBT
-	private int						chatTimer;
 	private int						hazeTimer		= 60;
-
-	public final int				INACTIVE		= 0;
-	public final int				NEW_LEVEL		= 4;
-	public final int				BUILDING_INNER	= 1;
-	public final int				BUILDING_LOWER	= 2;
-	public final int				TESTING_OUTER	= 3;
-	public final int				DORMANT			= 5;
-
-	private void placeBlockIfNeeded(BlockPos pos, IBlockState state) {
-	    if(worldObj.getBlockState(pos) != state)
-		{
-			this.worldObj.setBlockState(pos, state);
-		}
+	
+	private static enum VolcanoStage
+	{
+	    NEW,
+	    DORMANT,
+	    NEW_LEVEL,
+	    BUILDING_INNER,
+	    BUILDING_LOWER,
+	    TESTING_OUTER,
+	    DEAD
 	}
+
+//	private void placeBlockIfNeeded(BlockPos pos, IBlockState state) {
+//	    if(worldObj.getBlockState(pos) != state)
+//		{
+//			this.worldObj.setBlockState(pos, state);
+//		}
+//	}
 
 	private boolean isBlockOpen(BlockPos pos, boolean allowSourceLava) {
 	    final IBlockState state = this.worldObj.getBlockState(pos);
@@ -161,54 +168,76 @@ public class TileVolcano extends TileEntity implements ITickable{
 
 	@Override
 	public void update() {
-		if (!this.worldObj.isRemote) {
-			this.markDirty();
+	    if(this.worldObj.isRemote) return;
+	    
+	    // dead volcanoes don't do anything
+	    if(stage == VolcanoStage.DEAD) return;
+        
+        if(weight < Integer.MAX_VALUE) weight++;
+	    
+        // everything after this point only happens 1x every 16 ticks.
+        if ((this.worldObj.getTotalWorldTime() & 15) != 15) return;
 
-			if (this.chatTimer <= 0) {
-				Adversity.log.info("State=" + this.state + "  Timer=" + this.timer);
-				this.chatTimer = 200;
+        this.markDirty();
 
-			} else {
-				--this.chatTimer;
+        if (node.isActive()) {
+
+            this.markDirty();
+
+			if ((this.worldObj.getTotalWorldTime() & 255) == 255) {
+				Adversity.log.info("Volcanot State @" + this.pos.toString() + " = " + this.stage);
 			}
 
 			this.makeHaze();
-
-			if (this.timer > 0) {
-				--this.timer;
-			} else if (this.state == this.INACTIVE) {
-
+			
+			if (this.stage == VolcanoStage.NEW) 
+			{
 				this.level = this.getPos().getY();
 
 				++this.level;
 
 				this.levelsTilDormant = 80 - this.level;
-				this.state = this.NEW_LEVEL;
-				this.timer = 20;
+				this.stage = VolcanoStage.NEW_LEVEL;
+			}
+			else if (this.stage == VolcanoStage.DORMANT) 
+			{
 
-			} else if (this.state == this.DORMANT) {
-
-				if (this.level >= 240) {
-					this.timer = 10000;
+			    // Simulation shouldn't reactivate a volcano that is already at build limit
+			    // but deactivate if it somehow does.
+				if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
+				{
+				    this.weight = 0;
+				    this.stage = VolcanoStage.DEAD;
+					this.node.deActivate();
 					return;
 				}
-				this.levelsTilDormant = this.worldObj.rand.nextInt(3);// + Math.max(0, (80-level)/2);
+				
+				int window = VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT - this.level;
+				int interval = Math.min(1, window / 10);
+				
+                // always grow at least 10% of the available window
+                // plus 0 to 36% with a total average around 28%
+				this.levelsTilDormant = Math.min(window,
+				        interval
+				        + this.worldObj.rand.nextInt(interval)
+				        + this.worldObj.rand.nextInt(interval)
+				        + this.worldObj.rand.nextInt(interval)
+				        + this.worldObj.rand.nextInt(interval));
+
 				if (this.level >= 70) {
 					this.blowOut(4, 5);
 				}
-				this.state = this.BUILDING_INNER;
-				this.timer = 20;
-
-			} else if (this.state == this.NEW_LEVEL) {
-
+				this.stage = VolcanoStage.BUILDING_INNER;
+			} 
+			else if (this.stage == VolcanoStage.NEW_LEVEL) 
+			{
 				if (!this.areInnerBlocksOpen(this.level)) {
 				    this.worldObj.createExplosion(null, this.pos.getX(), this.level - 1, this.pos.getZ(), 5, true);
 				}
-				this.state = this.BUILDING_INNER;
-				this.timer = 20;
-
-			} else if (this.state == this.BUILDING_INNER) {
-
+				this.stage = VolcanoStage.BUILDING_INNER;
+			} 
+			else if (this.stage == VolcanoStage.BUILDING_INNER) 
+			{
 				if (this.buildLevel <= this.pos.getY() || this.buildLevel > this.level) {
 					this.buildLevel = this.pos.getY() + 1;
 				}
@@ -218,51 +247,43 @@ public class TileVolcano extends TileEntity implements ITickable{
 					++this.buildLevel;
 				} else {
 					this.buildLevel = 0;
-					this.state = this.TESTING_OUTER;
-				}
-				this.timer = 20;
-
-			} else if (this.state == this.TESTING_OUTER) {
-
-				if (this.areOuterBlocksOpen(this.level)) {
-					this.state = this.BUILDING_INNER;
-					this.timer = 20;
-				} else if (this.levelsTilDormant == 0) {
-					this.state = this.DORMANT;
-					this.timer = 20 * 60 * 25;
-				} else {
-					++this.level;
-					--this.levelsTilDormant;
-					this.state = this.NEW_LEVEL;
-					this.timer = 20;
+					this.stage = VolcanoStage.TESTING_OUTER;
 				}
 			}
-
+			else if (this.stage == VolcanoStage.TESTING_OUTER)
+			{
+				if (this.areOuterBlocksOpen(this.level))
+				{
+					this.stage = VolcanoStage.BUILDING_INNER;
+				}
+				else if (this.levelsTilDormant == 0)
+				{
+					this.stage = VolcanoStage.DORMANT;
+					if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
+	                {
+	                    this.weight = 0;
+	                    this.stage = VolcanoStage.DEAD;
+	                }
+					this.node.deActivate();
+				}
+				else 
+				{
+					++this.level;
+					--this.levelsTilDormant;
+					this.stage = VolcanoStage.NEW_LEVEL;
+				}
+			}
 		}
+        
+        node.updateWorldState(this.weight, this.level);
 	}
 	
-	
-
-	@Override
-    public void validate()
-    {
-        // TODO Auto-generated method stub
-        super.validate();
-    }
-
-    @Override
-    public void onLoad()
-    {
-        // TODO Auto-generated method stub
-        super.onLoad();
-    }
-
     @Override
 	public void readFromNBT(NBTTagCompound tagCompound) {
 		super.readFromNBT(tagCompound);
-		this.state = tagCompound.getInteger("state");
+		this.stage = VolcanoStage.values()[tagCompound.getInteger("stage")];
 		this.level = tagCompound.getInteger("level");
-		this.timer = tagCompound.getInteger("timer");
+		this.weight= tagCompound.getInteger("weight");
 		this.buildLevel = tagCompound.getInteger("buildLevel");
 		this.levelsTilDormant = tagCompound.getInteger("levelsTilDormant");
 		int nodeId = tagCompound.getInteger("nodeId");
@@ -289,9 +310,9 @@ public class TileVolcano extends TileEntity implements ITickable{
 	@Override
 	public void writeToNBT(NBTTagCompound tagCompound) {
 		super.writeToNBT(tagCompound);
-		tagCompound.setInteger("state", this.state);
+		tagCompound.setInteger("stage", this.stage.ordinal());
 		tagCompound.setInteger("level", this.level);
-		tagCompound.setInteger("timer", this.timer);
+	    tagCompound.setInteger("weight", this.weight);
 		tagCompound.setInteger("buildLevel", this.buildLevel);
 		tagCompound.setInteger("levelsTilDormant", this.levelsTilDormant);
 		tagCompound.setInteger("nodeId", this.node.getID());

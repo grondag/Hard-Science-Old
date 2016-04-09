@@ -39,6 +39,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ModelDispatcherBasic extends ModelDispatcher
 {
+    //TODO More memory-efficient data structure (needs to be concurrent) for cache
     /** 
      * Cache for baked block models 
      * Dimensions are color, shape.

@@ -1,26 +1,24 @@
 package grondag.adversity.simulator;
 
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.collect.Lists;
-
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Useful;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
+import grondag.adversity.simulator.base.SimulationNodeRunnable;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-public class VolcanoManager extends SimulationNode implements Runnable
+public class VolcanoManager extends SimulationNodeRunnable
 {
 
     private static int MAX_NODES = 1024;
@@ -38,21 +36,13 @@ public class VolcanoManager extends SimulationNode implements Runnable
     private LinkedList<Ticket> tickets = new LinkedList<Ticket>();
     private  AtomicBoolean isChunkloadingDirty = new AtomicBoolean(true);
     
-    protected VolcanoManager()
+    protected VolcanoManager(TaskCounter taskCounter)
     {
-        super(NodeRoots.VOLCANO_MANAGER.ordinal());
+        super(NodeRoots.VOLCANO_MANAGER.ordinal(), taskCounter);
     }
 
     private NBTTagCompound nbtVolcanoManager;
-    
-    /** 
-     * Tracks the total weight of all known volcanoes.
-     * Maintaining this values as we go allows us to do a random
-     * weighted selection for activation with only a single traversal of the map.
-     * Otherwise we'd have to iterate an additional time to add up all the weights.
-     */
-    private AtomicInteger totalWeight = new AtomicInteger(0);
-    
+        
     /** not thread-safe - to be called on world sever thread */
     public void updateChunkLoading()
     {
@@ -98,13 +88,47 @@ public class VolcanoManager extends SimulationNode implements Runnable
         
     }
     
-    
+    /**
+     * Checks for activation if no volcanos are active,
+     * or updates the active volcano is there is one.
+     */
     @Override
-    public void run()
+    public void doStuff()
     {
-        // if a volcano is active, check for inactivity
         
-        if(this.activeIndex != NO_ACTIVE_INDEX)
+        if(this.activeIndex == NO_ACTIVE_INDEX)
+        {
+            ArrayList<VolcanoNode> candidates = new ArrayList<VolcanoNode>(MAX_NODES);
+            long totalWeight = 0;
+            
+            for ( int i = 0; i <= maxIdInUse.get(); i++) {
+                VolcanoNode node = nodes[i];
+                if(node != null && !node.isDeleted()
+                        && node.getWeight() > 0
+                        && node.wantsToActivate())
+                {
+                    candidates.add(node);
+                    totalWeight += node.getWeight();
+                }
+            }
+            
+            if(!candidates.isEmpty())
+            {
+                long targetWeight = (long) (Useful.SALT_SHAKER.nextFloat() * totalWeight);
+                
+                for(VolcanoNode candidate : candidates)
+                {
+                    targetWeight -= candidate.getWeight();
+                    if(targetWeight < 0)
+                    {
+                        candidate.activate();
+                        return;
+                    }
+                }
+            }
+            
+        }
+        else
         {
             VolcanoNode active = nodes[this.activeIndex];
             if(active==null)
@@ -126,6 +150,9 @@ public class VolcanoManager extends SimulationNode implements Runnable
     
     public VolcanoNode createNode()
     {
+        
+        // TODO: expand array or switch to a concurrent structure
+        
         if(maxIdInUse.get() == MAX_NODES -1) return null;
         
         Integer nodeID;
@@ -145,12 +172,6 @@ public class VolcanoManager extends SimulationNode implements Runnable
         return nodes[nodeID];
     }
     
-    /** to be called by nodes whenever their TE gives them a new weight value */
-    private void updateWeight(int oldWeight, int newWeight)
-    {
-        totalWeight.addAndGet(newWeight - oldWeight);
-    }
-
     /**
      * Not thread-safe.  
      * Should only ever be called from server thread during server start up.
@@ -160,7 +181,6 @@ public class VolcanoManager extends SimulationNode implements Runnable
     {
         nbtVolcanoManager = nbt.getCompoundTag(NodeRoots.VOLCANO_MANAGER.getTagKey());
         NBTTagCompound nbtSubNodes;
-        totalWeight.set(0);
         this.maxIdInUse.set(-1);
         nodes = new VolcanoNode[MAX_NODES];
         availableIDs = new ConcurrentLinkedQueue<Integer>();
@@ -243,9 +263,9 @@ public class VolcanoManager extends SimulationNode implements Runnable
 
     public class VolcanoNode extends SimulationNode
     {
-        private static final int MAX_VOLCANO_HEIGHT = 180;
-        private static final int AVERAGE_TICKS_TO_ACTIVE = 20 * 24000;
-        private static final int MIN_ACTIVE_TICKS = 4 * 24000;
+        public static final int MAX_VOLCANO_HEIGHT = 180;
+        private static final int MIN_DORMANT_TICKS = 4 * 24000;
+        private static final int MAX_DORMANT_TICKS = 20 * 24000;
         
         private volatile boolean isDeleted = false;
         
@@ -276,6 +296,9 @@ public class VolcanoManager extends SimulationNode implements Runnable
         private volatile boolean isActive = false;
         private static final String TAG_ACTIVE = "a";
         
+        /** stores total world time of last TE update */
+        private volatile long keepAlive;
+        
         /** 
          * Last time (sim ticks) this volcano became active.
          * If 0, has never been active.
@@ -298,14 +321,12 @@ public class VolcanoManager extends SimulationNode implements Runnable
         }
         
         /** 
-         * Called by TE from server tick thread.
-         * Not thread-safe.
+         * Called by TE from world tick thread.
          */
-        public void setInWorldStats(int newWeight, int newHeight)
+        public void updateWorldState(int newWeight, int newHeight)
         {
             if(newWeight != weight)
             {
-                updateWeight(weight, newWeight);
                 this.weight = newWeight;
                 this.setSaveDirty(true);
             }
@@ -314,21 +335,26 @@ public class VolcanoManager extends SimulationNode implements Runnable
                 this.height = newHeight;
                 this.setSaveDirty(true);
             }
+            this.keepAlive = Simulator.instance.getWorld().getTotalWorldTime();
         }
         
-        /** called periodically by volcano manager when this is the active node */
-        public void update(int currentSimTick)
+        
+        /** called periodically on server tick thread by volcano manager when this is the active node */
+        public void update()
         {
-            // check for inactivity
-            
-            
+            if(this.isActive && this.keepAlive + 2048L < Simulator.instance.getWorld().getTotalWorldTime())
+            {
+                Adversity.log.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
+                + " has not reported in. Deactivating and removing volcano simulation node.");
+                this.deActivate();
+                this.delete();
+            }
         }
         
         @Override
         public void readFromNBT(NBTTagCompound nbt)
         {
-            this.weight = nbt.getInteger(TAG_WEIGHT);                
-            updateWeight(0, weight);   
+            this.weight = nbt.getInteger(TAG_WEIGHT);                  
             this.height = nbt.getInteger(TAG_HEIGHT);
             this.x = nbt.getInteger(TAG_X);
             this.y = nbt.getInteger(TAG_Y);
@@ -360,15 +386,10 @@ public class VolcanoManager extends SimulationNode implements Runnable
         public void delete() 
         { 
             this.isDeleted = true; 
-            this.setWeight(0);
+            this.weight = 0;
             this.deActivate();
             this.setSaveDirty(true);
         }
-        
-        public int getX() { return this.x; }
-        public int getY() { return this.y; }
-        public int getZ() { return this.z; }
-        public int getDimension() { return this.dimension; }
 
         public void setLocation(int x, int y, int z, int dimension) 
         { 
@@ -382,10 +403,22 @@ public class VolcanoManager extends SimulationNode implements Runnable
             }
         }
         
-        public boolean isActive() { return this.isActive; }
-        public int getLastActivationTick() { return this.lastActivationTick; }
+        public boolean wantsToActivate()
+        {
+            if(this.isActive || this.isDeleted || this.height == VolcanoNode.MAX_VOLCANO_HEIGHT) return false;
+            
+            int dormantTime = Simulator.instance.getCurrentSimTick() - this.lastActivationTick;
+            
+            if(dormantTime < VolcanoNode.MIN_DORMANT_TICKS) return false;
+            
+            float chance = dormantTime / MAX_DORMANT_TICKS;
+            chance = chance * chance * chance;
+            
+            return Useful.SALT_SHAKER.nextFloat() <= chance;
+
+        }
         
-        public void activate( int activationTick)
+        public void activate()
         {
             // should really be handled by caller but in case not
             if(VolcanoManager.this.activeIndex != NO_ACTIVE_INDEX && VolcanoManager.this.activeIndex != this.nodeID)
@@ -402,10 +435,11 @@ public class VolcanoManager extends SimulationNode implements Runnable
                 if(!this.isActive)
                 {
                     this.isActive = true;
-                    this.lastActivationTick = activationTick;
+                    this.lastActivationTick = Simulator.instance.getCurrentSimTick();
                     this.setSaveDirty(true);
                     VolcanoManager.this.activeIndex = this.nodeID;
                     VolcanoManager.this.isChunkloadingDirty.set(true);
+                    this.keepAlive = Simulator.instance.getWorld().getTotalWorldTime();
                 }
             }
         }
@@ -423,5 +457,14 @@ public class VolcanoManager extends SimulationNode implements Runnable
                 }
             }
         }
+        
+        public int getX() { return this.x; }
+        public int getY() { return this.y; }
+        public int getZ() { return this.z; }
+        public int getDimension() { return this.dimension; }
+        public int getWeight() { return this.weight; }
+        public boolean isActive() { return this.isActive; }
+        public int getLastActivationTick() { return this.lastActivationTick; }
+
     }
 }
