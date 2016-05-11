@@ -49,6 +49,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	protected Simulator()
     {
         super(NodeRoots.SIMULATION.ordinal());
+        this.volcanoManager = new VolcanoManager(this.taskCounter);
     }
 
     public static final Simulator instance = new Simulator();
@@ -155,7 +156,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
             // NB: don't need CAS because only ever changed by game thread in this method
             if(newLastSimTick > lastSimTick)
             {
-                if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
+               // if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
                 this.isDirty = true;
                 this.lastSimTick = newLastSimTick;
             }
@@ -198,15 +199,11 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
-  //      this.nextNodeID.set(nbt.getInteger(TAG_NEXT_NODE_ID));
         this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
         
-        this.volcanoManager = new VolcanoManager(this.taskCounter);
         volcanoManager.readFromNBT(nbt);
-        
-
     }
 
     @Override
@@ -219,7 +216,6 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public void writeToNBT(NBTTagCompound nbt)
     {
         Adversity.log.info("saving simulation state");
-    //    nbt.setInteger(TAG_NEXT_NODE_ID, nextNodeID.get());
         nbt.setInteger(TAG_CURRENT_SIM_TICK, currentSimTick.get());
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
@@ -259,7 +255,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         @Override
         public void run()
         {
-            if((currentSimTick.get() & 31) == 31) Adversity.log.info("starting frame with currentSimTick=" + currentSimTick.get());
+            //if((currentSimTick.get() & 31) == 31) Adversity.log.info("starting frame with currentSimTick=" + currentSimTick.get());
             // wait for any previous frames to finish
             taskCounter.waitUntilAllTasksComplete();
             

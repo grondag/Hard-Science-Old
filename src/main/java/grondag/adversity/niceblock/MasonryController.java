@@ -71,6 +71,7 @@ public class MasonryController extends ModelController
         return 64 * getAlternateTextureCount();
     }
     
+    @Override
     public int getAltTextureFromModelIndex(int clientShapeIndex)
     {
         return clientShapeIndex / SimpleJoin.STATE_COUNT;

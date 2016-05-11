@@ -26,7 +26,8 @@ public class HotBasaltController extends ColorController
         return "adversity:blocks/hot_basalt_" + ((offset >> 2) & 0x3) + "_0_" + (offset & 0x3);
     }
 
-    public int getTextureOffsetFromShapeIndex(int shapeIndex) {
+    @Override
+    public int getAltTextureFromModelIndex(int shapeIndex) {
         return (shapeIndex >> 2) & 15;
     }
     

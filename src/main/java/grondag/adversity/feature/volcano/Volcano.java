@@ -53,18 +53,18 @@ public class Volcano {
 		//GameRegistry.registerBlock(Volcano.blockAsh = new BlockAsh("Ash", Material.snow), "Ash");
 
 		// FLUIDS
-	    Volcano.fluidVolcanicLava = new Fluid("volcanic_lova", new ResourceLocation(Adversity.MODID, "blocks/lava_still"), new ResourceLocation(Adversity.MODID, "blocks/lava_flowing"))
-	            .setLuminosity(15).setDensity(3000).setViscosity(6000).setTemperature(1300);
+	    Volcano.fluidVolcanicLava = new Fluid("volcanic_lava", new ResourceLocation(Adversity.MODID, "blocks/volcanic_lava_still"), new ResourceLocation(Adversity.MODID, "blocks/volcanic_lava_flow"))
+	            .setLuminosity(0).setDensity(3000).setViscosity(12000).setTemperature(2000);
         
 		FluidRegistry.registerFluid(fluidVolcanicLava);
 		blockVolcanicLava = (BlockVolcanicLava) new BlockVolcanicLava(Volcano.fluidVolcanicLava, Material.lava)
 				.setRegistryName("volcanic_lava");
 		GameRegistry.register(blockVolcanicLava);
-        GameRegistry.register(new ItemBlock(blockVolcanicLava).setRegistryName(blockVolcanicLava.getRegistryName()));
-
+        GameRegistry.register(new ItemBlock(blockVolcanicLava).setRegistryName(blockVolcanicLava.getRegistryName().getResourcePath()));
+        FluidRegistry.addBucketForFluid(fluidVolcanicLava);
         if(event.getSide() == Side.CLIENT)
         {
-            final ModelResourceLocation volcanicLavaLocation = new ModelResourceLocation(Adversity.MODID.toLowerCase() + ":" + blockVolcanicLava.getRegistryName(), "fluids");
+            final ModelResourceLocation volcanicLavaLocation = new ModelResourceLocation(Adversity.MODID.toLowerCase() + ":block/fluids", "volcanic_lava");
 
             Item volcanicLavaItem = Item.getItemFromBlock(blockVolcanicLava);
              // no need to pass the locations here, since they'll be loaded by the block model logic.

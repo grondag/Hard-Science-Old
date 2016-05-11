@@ -94,7 +94,9 @@ public class ColumnSquareModelFactory extends ModelFactory
 	        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
 	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
 	        quadInputs.lockUV = true;
-	        quadInputs.isShaded = myController.modelType != ColumnSquareController.ModelType.LAMP_BASE;
+	        quadInputs.lightingMode = myController.modelType == ColumnSquareController.ModelType.LAMP_BASE 
+	                ? QuadInputs.LightingMode.FULLBRIGHT 
+                    : QuadInputs.LightingMode.SHADED;
 	        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(textureIndex));
 	
 	        if(face.getAxis() == axis)
@@ -329,18 +331,18 @@ public class ColumnSquareModelFactory extends ModelFactory
                     {
                         // margin corner faces
                         qi.setupFaceQuad(face, 
-                                new FaceVertex(baseMarginWidth - CAULK, 1.0 - baseMarginWidth - CAULK),
-                                new FaceVertex(baseMarginWidth + CAULK, 1.0 - baseMarginWidth - CAULK),
-                                new FaceVertex(baseMarginWidth + CAULK, 1.0 + CAULK),
-                                new FaceVertex(0.0 - CAULK, 1.0 + CAULK), 
-                                0.0, side);
+                                new FaceVertex(baseMarginWidth - CAULK, 1.0 - baseMarginWidth - CAULK, 0),
+                                new FaceVertex(baseMarginWidth + CAULK, 1.0 - baseMarginWidth - CAULK, 0),
+                                new FaceVertex(baseMarginWidth + CAULK, 1.0 + CAULK, 0),
+                                new FaceVertex(0.0 - CAULK, 1.0 + CAULK, 0), 
+                                side);
                         builder.add(qi.createNormalQuad());
                         qi.setupFaceQuad(face, 
-                                new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 + CAULK),  
-                                new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 -baseMarginWidth - CAULK),
-                                new FaceVertex(1.0 - baseMarginWidth + CAULK, 1.0 -baseMarginWidth - CAULK), 
-                                new FaceVertex(1.0 + CAULK, 1.0 + CAULK), 
-                                0.0, side);
+                                new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 + CAULK, 0),  
+                                new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 -baseMarginWidth - CAULK, 0),
+                                new FaceVertex(1.0 - baseMarginWidth + CAULK, 1.0 -baseMarginWidth - CAULK, 0), 
+                                new FaceVertex(1.0 + CAULK, 1.0 + CAULK, 0), 
+                                side);
                         builder.add(qi.createNormalQuad());                
                     }
 
@@ -365,20 +367,20 @@ public class ColumnSquareModelFactory extends ModelFactory
                         if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
                         {
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(xLeft - CAULK, 1.0 -xLeft - CAULK),  
-                                    new FaceVertex(xRight + CAULK, 1.0 -xRight - CAULK),
-                                    new FaceVertex(xRight + CAULK, 1.0 + CAULK), 
-                                    new FaceVertex(xLeft - CAULK, 1.0 + CAULK), 
-                                    0.0, side);
+                                    new FaceVertex(xLeft - CAULK, 1.0 -xLeft - CAULK, 0),  
+                                    new FaceVertex(xRight + CAULK, 1.0 -xRight - CAULK, 0),
+                                    new FaceVertex(xRight + CAULK, 1.0 + CAULK, 0), 
+                                    new FaceVertex(xLeft - CAULK, 1.0 + CAULK, 0), 
+                                    side);
                             builder.add(qi.createNormalQuad());
                             // mirror on right side, reverse winding order
                             builder.add(qi.createNormalQuad());                             
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(1.0 - xRight - CAULK, 1.0 - xRight  - CAULK),  
-                                    new FaceVertex(1.0 - xLeft + CAULK, 1.0 -xLeft - CAULK),
-                                    new FaceVertex(1.0 - xLeft + CAULK, 1.0 + CAULK), 
-                                    new FaceVertex(1.0 - xRight - CAULK, 1.0 + CAULK), 
-                                    0.0, side);
+                                    new FaceVertex(1.0 - xRight - CAULK, 1.0 - xRight  - CAULK, 0),  
+                                    new FaceVertex(1.0 - xLeft + CAULK, 1.0 -xLeft - CAULK, 0),
+                                    new FaceVertex(1.0 - xLeft + CAULK, 1.0 + CAULK, 0), 
+                                    new FaceVertex(1.0 - xRight - CAULK, 1.0 + CAULK, 0), 
+                                    side);
                             builder.add(qi.createNormalQuad());
                         }
 
@@ -419,11 +421,11 @@ public class ColumnSquareModelFactory extends ModelFactory
                     {
                         // outer face
                         qi.setupFaceQuad(face, 
-                                new FaceVertex(baseMarginWidth-CAULK, 1.0 -baseMarginWidth),  
-                                new FaceVertex(1.0 -baseMarginWidth+CAULK, 1.0 -baseMarginWidth),
-                                new FaceVertex(1.0 +CAULK, 1.0), 
-                                new FaceVertex(0-CAULK, 1.0), 
-                                0.0, side);
+                                new FaceVertex(baseMarginWidth-CAULK, 1.0 -baseMarginWidth, 0),  
+                                new FaceVertex(1.0 -baseMarginWidth+CAULK, 1.0 -baseMarginWidth, 0),
+                                new FaceVertex(1.0 +CAULK, 1.0, 0), 
+                                new FaceVertex(0-CAULK, 1.0, 0), 
+                                side);
                         builder.add(qi.createNormalQuad());   
                     }
 
@@ -457,11 +459,11 @@ public class ColumnSquareModelFactory extends ModelFactory
                         {
                             // spline / center
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(offset + cutWidth - CAULK, 1.0 - offset - cutWidth - CAULK),  
-                                    new FaceVertex(1.0 - offset - cutWidth + CAULK, 1.0 - offset - cutWidth - CAULK),
-                                    new FaceVertex(1.0 - offset + CAULK, 1.0 - offset + CAULK ), 
-                                    new FaceVertex(offset - CAULK, 1.0 - offset + CAULK), 
-                                    0.0, side);
+                                    new FaceVertex(offset + cutWidth - CAULK, 1.0 - offset - cutWidth - CAULK, 0),  
+                                    new FaceVertex(1.0 - offset - cutWidth + CAULK, 1.0 - offset - cutWidth - CAULK, 0),
+                                    new FaceVertex(1.0 - offset + CAULK, 1.0 - offset + CAULK, 0), 
+                                    new FaceVertex(offset - CAULK, 1.0 - offset + CAULK, 0), 
+                                    side);
                             builder.add(qi.createNormalQuad());  
                         }
 
@@ -476,7 +478,7 @@ public class ColumnSquareModelFactory extends ModelFactory
     private void setupCutSideQuad(QuadInputs qi, int cutColor, SimpleQuadBounds qb)
     {
         int cutSideColor;
-        if(qi.isShaded)
+        if(qi.lightingMode == QuadInputs.LightingMode.SHADED)
         {
             cutSideColor = qi.color;
         }
@@ -486,11 +488,11 @@ public class ColumnSquareModelFactory extends ModelFactory
         }
         
         qi.setupFaceQuad(qb.face,
-                new FaceVertex.Colored(qb.x0, qb.y0, cutSideColor),
-                new FaceVertex.Colored(qb.x1, qb.y0, cutSideColor),
-                new FaceVertex.Colored(qb.x1, qb.y1, qi.color),
-                new FaceVertex.Colored(qb.x0, qb.y1, qi.color), 
-                qb.depth, qb.topFace);
+                new FaceVertex.Colored(qb.x0, qb.y0, qb.depth, cutSideColor),
+                new FaceVertex.Colored(qb.x1, qb.y0, qb.depth, cutSideColor),
+                new FaceVertex.Colored(qb.x1, qb.y1, qb.depth, qi.color),
+                new FaceVertex.Colored(qb.x0, qb.y1, qb.depth, qi.color), 
+                qb.topFace);
     }    
     
     @Override

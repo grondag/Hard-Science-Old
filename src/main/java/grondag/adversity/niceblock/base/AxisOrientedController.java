@@ -180,6 +180,7 @@ public abstract class AxisOrientedController extends ModelController implements 
         return (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) % 3;
     }
 
+    @Override
     public int getAltTextureFromModelIndex(int clientShapeIndex)
     {
         return (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) / 3;

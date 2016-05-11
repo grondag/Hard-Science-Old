@@ -3,6 +3,7 @@ package grondag.adversity.niceblock;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
+import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -22,7 +23,7 @@ public class HotBasaltHelper extends BlockModelHelper
     @Override
     public ModelState getModelStateForBlock(IBlockState state, IBlockAccess world, BlockPos pos, boolean doClientStateRefresh)
     {
-        ModelState retVal = new ModelState();
+        ModelState retVal = new ModelState(0, state.getValue(NiceBlock.META));
         if(doClientStateRefresh)
         {
             dispatcher.refreshClientShapeIndex(block, state, world, pos, retVal, true);

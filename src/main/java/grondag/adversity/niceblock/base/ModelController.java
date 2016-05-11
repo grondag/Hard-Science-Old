@@ -105,6 +105,15 @@ public abstract class ModelController
     }
 
     /**
+     * Useful when alternate texture ID is baked into the client or shape index.
+     * Simply returns zero if not overriden.
+     */
+    public int getAltTextureFromModelIndex(int modelIndex)
+    {
+        return 0;
+    }
+    
+    /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
     public ICollisionHandler getCollisionHandler()

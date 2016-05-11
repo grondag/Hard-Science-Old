@@ -2,15 +2,18 @@ package grondag.adversity.library.model;
 
 import java.util.List;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
@@ -19,6 +22,8 @@ import com.google.common.primitives.Ints;
 
 public class QuadFactory
 {
+    private static final double EPSILON = 0.0000005;
+
 
 	public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();
     /**
@@ -51,29 +56,40 @@ public class QuadFactory
     public static class QuadInputs
     {
         // yes, this is ugly
-        public Vertex v1;
-        public Vertex v2;
-        public Vertex v3;
-        public Vertex v4;
+        public Vertex[] vertex = new Vertex[4];
+//        public Vertex v2;
+//        public Vertex v3;
+//        public Vertex v4;
         public EnumFacing side;
         public TextureAtlasSprite textureSprite;
         public Rotation rotation = Rotation.ROTATE_NONE;
         public int color;
-        public boolean isShaded = true;
+        public LightingMode lightingMode = LightingMode.SHADED;
         public boolean lockUV = false;
+        
+        public static enum LightingMode
+        {
+            FLAT,
+            SHADED,
+            FULLBRIGHT;
+            
+            public VertexFormat vertexFormat = DefaultVertexFormats.ITEM;
+            
+            static
+            {
+                FULLBRIGHT.vertexFormat = DefaultVertexFormats.BLOCK;
+            }
+        }
         
         public QuadInputs clone()
         {
             QuadInputs retval = new QuadInputs();
-            retval.v1 = this.v1;
-            retval.v2 = this.v2;
-            retval.v3 = this.v3;
-            retval.v4 = this.v4;
+            retval.vertex = this.vertex.clone();
             retval.side = this.side;
             retval.textureSprite = this.textureSprite;
             retval.rotation = this.rotation;
             retval.color = this.color;
-            retval.isShaded = this.isShaded;
+            retval.lightingMode = this.lightingMode;
             retval.lockUV = this.lockUV;
             return retval;
         }
@@ -87,10 +103,10 @@ public class QuadFactory
          * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
          * means the UV coordinates *are* rotated so that a different part of the texture shows through.
          */
-        public void setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, double depth, EnumFacing topFace)
+        public void setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
         {
-            final double EPSILON = 0.0000005;
-            float shade = isShaded ? LightUtil.diffuseLight(this.side) : 1;
+            //Note: used to apply face shading here but no longer seems necessary for block models.
+//            float shade = 1; //isShaded ? LightUtil.diffuseLight(this.side) : 1;
 
             EnumFacing defaultTop = Useful.defaultTopOf(this.side);
             FaceVertex rv0;
@@ -108,26 +124,26 @@ public class QuadFactory
             }
             else if(topFace == Useful.rightOf(this.side, defaultTop))
             {
-                rv0 = new FaceVertex.Colored(tv1.y, 1.0 - tv1.x, tv1.getColor(this.color));
-                rv1 = new FaceVertex.Colored(tv2.y, 1.0 - tv2.x, tv2.getColor(this.color));
-                rv2 = new FaceVertex.Colored(tv3.y, 1.0 - tv3.x, tv3.getColor(this.color));
-                rv3 = new FaceVertex.Colored(tv0.y, 1.0 - tv0.x, tv0.getColor(this.color));
+                rv0 = new FaceVertex.Colored(tv1.y, 1.0 - tv1.x, tv1.depth, tv1.getColor(this.color));
+                rv1 = new FaceVertex.Colored(tv2.y, 1.0 - tv2.x, tv2.depth, tv2.getColor(this.color));
+                rv2 = new FaceVertex.Colored(tv3.y, 1.0 - tv3.x, tv3.depth, tv3.getColor(this.color));
+                rv3 = new FaceVertex.Colored(tv0.y, 1.0 - tv0.x, tv0.depth, tv0.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 1;
             }
             else if(topFace == Useful.bottomOf(this.side, defaultTop))
             {
-                rv0 = new FaceVertex.Colored(1.0 - tv2.x, 1.0 - tv2.y, tv2.getColor(this.color));
-                rv1 = new FaceVertex.Colored(1.0 - tv3.x, 1.0 - tv3.y, tv3.getColor(this.color));
-                rv2 = new FaceVertex.Colored(1.0 - tv0.x, 1.0 - tv0.y, tv0.getColor(this.color));
-                rv3 = new FaceVertex.Colored(1.0 - tv1.x, 1.0 - tv1.y, tv1.getColor(this.color));
+                rv0 = new FaceVertex.Colored(1.0 - tv2.x, 1.0 - tv2.y, tv2.depth, tv2.getColor(this.color));
+                rv1 = new FaceVertex.Colored(1.0 - tv3.x, 1.0 - tv3.y, tv3.depth, tv3.getColor(this.color));
+                rv2 = new FaceVertex.Colored(1.0 - tv0.x, 1.0 - tv0.y, tv0.depth, tv0.getColor(this.color));
+                rv3 = new FaceVertex.Colored(1.0 - tv1.x, 1.0 - tv1.y, tv1.depth, tv1.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 2;
             }
             else // left of
             {
-                rv0 = new FaceVertex.Colored(1.0 - tv3.y, tv3.x, tv3.getColor(this.color));
-                rv1 = new FaceVertex.Colored(1.0 - tv0.y, tv0.x, tv0.getColor(this.color));
-                rv2 = new FaceVertex.Colored(1.0 - tv1.y, tv1.x, tv1.getColor(this.color));
-                rv3 = new FaceVertex.Colored(1.0 - tv2.y, tv2.x, tv2.getColor(this.color));
+                rv0 = new FaceVertex.Colored(1.0 - tv3.y, tv3.x, tv3.depth, tv3.getColor(this.color));
+                rv1 = new FaceVertex.Colored(1.0 - tv0.y, tv0.x, tv0.depth, tv0.getColor(this.color));
+                rv2 = new FaceVertex.Colored(1.0 - tv1.y, tv1.x, tv1.depth, tv1.getColor(this.color));
+                rv3 = new FaceVertex.Colored(1.0 - tv2.y, tv2.x, tv2.depth, tv2.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 3;
             }
             
@@ -152,60 +168,60 @@ public class QuadFactory
             switch(this.side)
             {
             case UP:
-                this.v1 = new Vertex(rv0.x, 1-depth, 1-rv0.y, tv0.x * 16.0, (1-tv0.y) * 16.0, shadeColor(rv0.getColor(this.color), shade, true));
-                this.v2 = new Vertex(rv1.x, 1-depth, 1-rv1.y, tv1.x * 16.0, (1-tv1.y) * 16.0, shadeColor(rv1.getColor(this.color), shade, true));
-                this.v3 = new Vertex(rv2.x, 1-depth, 1-rv2.y, tv2.x * 16.0, (1-tv2.y) * 16.0, shadeColor(rv2.getColor(this.color), shade, true));
-                this.v4 = new Vertex(rv3.x, 1-depth, 1-rv3.y, tv3.x * 16.0, (1-tv3.y) * 16.0, shadeColor(rv3.getColor(this.color), shade, true));
+                this.vertex[0] = new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, tv0.x * 16.0, (1-tv0.y) * 16.0, rv0.getColor(this.color));
+                this.vertex[1] = new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, tv1.x * 16.0, (1-tv1.y) * 16.0, rv1.getColor(this.color));
+                this.vertex[2] = new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, tv2.x * 16.0, (1-tv2.y) * 16.0, rv2.getColor(this.color));
+                this.vertex[3] = new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, tv3.x * 16.0, (1-tv3.y) * 16.0, rv3.getColor(this.color));
                 break;
 
             case DOWN:     
-                this.v1 = new Vertex(rv0.x, depth, rv0.y, (1.0-tv0.x) * 16.0, tv0.y * 16.0, shadeColor(rv0.getColor(this.color), shade, true));
-                this.v2 = new Vertex(rv1.x, depth, rv1.y, (1.0-tv1.x) * 16.0, tv1.y * 16.0, shadeColor(rv1.getColor(this.color), shade, true));
-                this.v3 = new Vertex(rv2.x, depth, rv2.y, (1.0-tv2.x) * 16.0, tv2.y * 16.0, shadeColor(rv2.getColor(this.color), shade, true));
-                this.v4 = new Vertex(rv3.x, depth, rv3.y, (1.0-tv3.x) * 16.0, tv3.y * 16.0, shadeColor(rv3.getColor(this.color), shade, true));
+                this.vertex[0] = new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-tv0.x) * 16.0, tv0.y * 16.0, rv0.getColor(this.color));
+                this.vertex[1] = new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-tv1.x) * 16.0, tv1.y * 16.0, rv1.getColor(this.color));
+                this.vertex[2] = new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-tv2.x) * 16.0, tv2.y * 16.0, rv2.getColor(this.color));
+                this.vertex[3] = new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-tv3.x) * 16.0, tv3.y * 16.0, rv3.getColor(this.color));
                 break;
 
             case EAST:
                 
                 
-                this.v1 = new Vertex(1-depth, rv0.y, 1-rv0.x, tv0.x * 16.0, (1-tv0.y) * 16.0, shadeColor(rv0.getColor(this.color), shade, true));
-                this.v2 = new Vertex(1-depth, rv1.y, 1-rv1.x, tv1.x * 16.0, (1-tv1.y) * 16.0, shadeColor(rv1.getColor(this.color), shade, true));
-                this.v3 = new Vertex(1-depth, rv2.y, 1-rv2.x, tv2.x * 16.0, (1-tv2.y) * 16.0, shadeColor(rv2.getColor(this.color), shade, true));
-                this.v4 = new Vertex(1-depth, rv3.y, 1-rv3.x, tv3.x * 16.0, (1-tv3.y) * 16.0, shadeColor(rv3.getColor(this.color), shade, true));
+                this.vertex[0] = new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, tv0.x * 16.0, (1-tv0.y) * 16.0, rv0.getColor(this.color));
+                this.vertex[1] = new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, tv1.x * 16.0, (1-tv1.y) * 16.0, rv1.getColor(this.color));
+                this.vertex[2] = new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, tv2.x * 16.0, (1-tv2.y) * 16.0, rv2.getColor(this.color));
+                this.vertex[3] = new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, tv3.x * 16.0, (1-tv3.y) * 16.0, rv3.getColor(this.color));
                 break;
 
             case WEST:
-                this.v1 = new Vertex(depth, rv0.y, rv0.x, tv0.x * 16.0, (1-tv0.y) * 16.0, shadeColor(rv0.getColor(this.color), shade, true));
-                this.v2 = new Vertex(depth, rv1.y, rv1.x, tv1.x * 16.0, (1-tv1.y) * 16.0, shadeColor(rv1.getColor(this.color), shade, true));
-                this.v3 = new Vertex(depth, rv2.y, rv2.x, tv2.x * 16.0, (1-tv2.y) * 16.0, shadeColor(rv2.getColor(this.color), shade, true));
-                this.v4 = new Vertex(depth, rv3.y, rv3.x, tv3.x * 16.0, (1-tv3.y) * 16.0, shadeColor(rv3.getColor(this.color), shade, true));
+                this.vertex[0] = new Vertex(rv0.depth, rv0.y, rv0.x, tv0.x * 16.0, (1-tv0.y) * 16.0, rv0.getColor(this.color));
+                this.vertex[1] = new Vertex(rv1.depth, rv1.y, rv1.x, tv1.x * 16.0, (1-tv1.y) * 16.0, rv1.getColor(this.color));
+                this.vertex[2] = new Vertex(rv2.depth, rv2.y, rv2.x, tv2.x * 16.0, (1-tv2.y) * 16.0, rv2.getColor(this.color));
+                this.vertex[3] = new Vertex(rv3.depth, rv3.y, rv3.x, tv3.x * 16.0, (1-tv3.y) * 16.0, rv3.getColor(this.color));
                 break;
 
             case NORTH:
-                this.v1 = new Vertex(1-rv0.x, rv0.y, depth, rv0.x * 16.0, (1-rv0.y) * 16.0, shadeColor(rv0.getColor(this.color), shade, true));
-                this.v2 = new Vertex(1-rv1.x, rv1.y, depth, rv1.x * 16.0, (1-rv1.y) * 16.0, shadeColor(rv1.getColor(this.color), shade, true));
-                this.v3 = new Vertex(1-rv2.x, rv2.y, depth, rv2.x * 16.0, (1-rv2.y) * 16.0, shadeColor(rv2.getColor(this.color), shade, true));
-                this.v4 = new Vertex(1-rv3.x, rv3.y, depth, rv3.x * 16.0, (1-rv3.y) * 16.0, shadeColor(rv3.getColor(this.color), shade, true));
+                this.vertex[0] = new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color));
+                this.vertex[1] = new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color));
+                this.vertex[2] = new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color));
+                this.vertex[3] = new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color));
                 break;
 
             case SOUTH:
-                this.v1 = new Vertex(rv0.x, rv0.y, 1-depth, rv0.x * 16.0, (1-rv0.y) * 16.0, shadeColor(rv0.getColor(this.color), shade, true));
-                this.v2 = new Vertex(rv1.x, rv1.y, 1-depth, rv1.x * 16.0, (1-rv1.y) * 16.0, shadeColor(rv1.getColor(this.color), shade, true));
-                this.v3 = new Vertex(rv2.x, rv2.y, 1-depth, rv2.x * 16.0, (1-rv2.y) * 16.0, shadeColor(rv2.getColor(this.color), shade, true));
-                this.v4 = new Vertex(rv3.x, rv3.y, 1-depth, rv3.x * 16.0, (1-rv3.y) * 16.0, shadeColor(rv3.getColor(this.color), shade, true));
+                this.vertex[0] = new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color));
+                this.vertex[1] = new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color));
+                this.vertex[2] = new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color));
+                this.vertex[3] = new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color));
                 break;
             }
             
             for (int r = 0; r < uvRotationCount; r++)
             {
-                rotateQuadUV(this.v1, this.v2, this.v3, this.v4);
+                rotateQuadUV(this.vertex[0], this.vertex[1], this.vertex[2], this.vertex[3]);
             }
         }
         
-        public void setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, double depth, EnumFacing topFace)
+        public void setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
         {
             this.side = side;
-            this.setupFaceQuad(tv0, tv1, tv2, tv3, depth, topFace);
+            this.setupFaceQuad(tv0, tv1, tv2, tv3, topFace);
         }
         
         /** 
@@ -219,11 +235,11 @@ public class QuadFactory
         public void setupFaceQuad(double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
         {
             this.setupFaceQuad(
-                    new FaceVertex(x0, y0),
-                    new FaceVertex(x1, y0),
-                    new FaceVertex(x1, y1),
-                    new FaceVertex(x0, y1), 
-                    depth, topFace);
+                    new FaceVertex(x0, y0, depth),
+                    new FaceVertex(x1, y0, depth),
+                    new FaceVertex(x1, y1, depth),
+                    new FaceVertex(x0, y1, depth), 
+                    topFace);
         }
         
         public void setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
@@ -240,23 +256,96 @@ public class QuadFactory
         {
             for (int r = 0; r < this.rotation.index; r++)
             {
-                rotateQuadUV(this.v1, this.v2, this.v3, this.v4);
+                rotateQuadUV(this.vertex[0], this.vertex[1], this.vertex[2], this.vertex[3]);
             }
 
-            int[] aint = Ints.concat(vertexToInts(this.v1.xCoord, this.v1.yCoord, this.v1.zCoord, this.v1.u, this.v1.v, v1.color, this.textureSprite),
-                    vertexToInts(this.v2.xCoord, this.v2.yCoord, this.v2.zCoord, this.v2.u, this.v2.v, v2.color, this.textureSprite),
-                    vertexToInts(this.v3.xCoord, this.v3.yCoord, this.v3.zCoord, this.v3.u, this.v3.v, v3.color, this.textureSprite),
-                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
+            int[] vertexData = new int[28];
+            
+            float[] faceNormal = this.calcNormal();
+            
+            for(int v = 0; v < 4; v++)
+            {
+//                BLOCK.addElement(POSITION_3F);
+//                BLOCK.addElement(COLOR_4UB);
+//                BLOCK.addElement(TEX_2F);
 
-            // necessary to support forge lighting model
-            net.minecraftforge.client.ForgeHooksClient.fillNormal(aint, this.side);
+                
+//                BLOCK.addElement(TEX_2S);                
+//                ITEM.addElement(NORMAL_3B);
+//                ITEM.addElement(PADDING_1B);
+                
+                for(int e = 0; e < lightingMode.vertexFormat.getElementCount(); e++)
+                {
+                    switch(lightingMode.vertexFormat.getElement(e).getUsage())
+                    {
+                        case POSITION:
+                            LightUtil.pack(vertex[v].toFloatArray(), vertexData, lightingMode.vertexFormat, v, e);
+                            break;
+                            
+                        case NORMAL: 
+                            LightUtil.pack(faceNormal, vertexData, lightingMode.vertexFormat, v, e);
+                            break;
+                        
+                        case COLOR:
+                            float[] colorRGBA = new float[4];
+                            colorRGBA[0] = ((float) (vertex[v].color >> 16 & 0xFF)) / 255f;
+                            colorRGBA[1] = ((float) (vertex[v].color >> 8 & 0xFF)) / 255f;
+                            colorRGBA[2] = ((float) (vertex[v].color  & 0xFF)) / 255f;
+                            colorRGBA[3] = ((float) (vertex[v].color >> 24 & 0xFF)) / 255f;
 
-            return new BakedQuad(aint, color, side, textureSprite, isShaded, DefaultVertexFormats.ITEM);
+//                            colorRGBA[0] = ((float) (0xFFFFFFFF >> 16 & 0xFF)) / 255f;
+//                            colorRGBA[1] = ((float) (0xFFFFFFFF >> 8 & 0xFF)) / 255f;
+//                            colorRGBA[2] = ((float) (0xFFFFFFFF  & 0xFF)) / 255f;
+//                            colorRGBA[3] = ((float) (0xFFFFFFFF >> 24 & 0xFF)) / 255f;
+                            LightUtil.pack(colorRGBA, vertexData, lightingMode.vertexFormat, v, e);
+                            break;
+
+                        case UV: 
+                            if(lightingMode.vertexFormat.getElement(e).getIndex() == 1)
+                            {
+                                float[] fullBright = {1.0f, 1.0f};
+                                LightUtil.pack(fullBright, vertexData, lightingMode.vertexFormat, v, e);
+                            }
+                            else
+                            {
+                                float[] uvData = new float[2];
+                                uvData[0] = this.textureSprite.getInterpolatedU(vertex[v].u);
+                                uvData[1] = this.textureSprite.getInterpolatedV(vertex[v].v);
+                                LightUtil.pack(uvData, vertexData, lightingMode.vertexFormat, v, e);
+                            }
+                            break;
+                            
+                        default:
+                        // NOOP, padding or weirdness
+                    }
+                }
+            }
+
+//            int[] aint = Ints.concat(vertexToInts(this.v1.xCoord, this.v1.yCoord, this.v1.zCoord, this.v1.u, this.v1.v, v1.color, this.textureSprite),
+//                    vertexToInts(this.v2.xCoord, this.v2.yCoord, this.v2.zCoord, this.v2.u, this.v2.v, v2.color, this.textureSprite),
+//                    vertexToInts(this.v3.xCoord, this.v3.yCoord, this.v3.zCoord, this.v3.u, this.v3.v, v3.color, this.textureSprite),
+//                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
+
+
+            return new BakedQuad(vertexData, color, side, textureSprite, lightingMode == LightingMode.SHADED, lightingMode.vertexFormat);
 
         }
         
+        private float[] calcNormal()
+        {
+            Vec3d normal = (vertex[2].subtract(vertex[0]).crossProduct(vertex[3].subtract(vertex[1]))).normalize();
+            
+            float[] retval = new float[3];
+            
+            retval[0] = (float)(normal.xCoord);
+            retval[1] = (float)(normal.yCoord);
+            retval[2] = (float)(normal.zCoord);
+            return retval;
+        }
     }
     
+    
+
     public static class Vertex extends Vec3d
     {
         protected double u;
@@ -271,6 +360,11 @@ public class QuadFactory
             this.color = color;
         }
 
+        public Vertex clone()
+        {
+            return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color);
+        }
+        
         public Vertex transform(Matrix4f matrix, boolean rescaleToUnitCube)
         {
 
@@ -281,6 +375,15 @@ public class QuadFactory
                 tmp.scale(1f / tmp.w);
             }
             return new Vertex(tmp.x, tmp.y, tmp.z, u, v, color);
+        }
+        
+        public float[] toFloatArray()
+        {
+            float[] retVal = new float[3];
+            retVal[0] = (float)this.xCoord;
+            retVal[1] = (float)this.yCoord;
+            retVal[2] = (float)this.zCoord;
+            return retVal;
         }
     }
 
@@ -322,10 +425,6 @@ public class QuadFactory
             qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
             qi.textureSprite = this.textureSprite;
             
-            //int shadedColor = shadeColor(this.color, this.isShaded ? LightUtil.diffuseLight(side) : 1.0F, true);
-            // quads have diffuse lighting applied later it seems
-            int shadedColor = shadeColor(this.color, 1.0F, true);
-            
             double minBound = this.isOverlay ? -0.0002 : 0.0;
             double maxBound = this.isOverlay ? 1.0002 : 1.0;
             qi.side = side;
@@ -335,45 +434,45 @@ public class QuadFactory
             switch(side)
             {
             case UP:
-                qi.v1 = new Vertex(minBound, maxBound, minBound, u0, v0, shadedColor);
-                qi.v2 = new Vertex(minBound, maxBound, maxBound, u0, v1, shadedColor);
-                qi.v3 = new Vertex(maxBound, maxBound, maxBound, u1, v1, shadedColor);
-                qi.v4 = new Vertex(maxBound, maxBound, minBound, u1, v0, shadedColor);
+                qi.vertex[0] = new Vertex(minBound, maxBound, minBound, u0, v0, this.color);
+                qi.vertex[1] = new Vertex(minBound, maxBound, maxBound, u0, v1, this.color);
+                qi.vertex[2] = new Vertex(maxBound, maxBound, maxBound, u1, v1, this.color);
+                qi.vertex[3] = new Vertex(maxBound, maxBound, minBound, u1, v0, this.color);
                 break;
     
             case DOWN:     
-                qi.v1 = new Vertex(maxBound, minBound, maxBound, u0, v1, shadedColor);
-                qi.v2 = new Vertex(minBound, minBound, maxBound, u1, v1, shadedColor); 
-                qi.v3 = new Vertex(minBound, minBound, minBound, u1, v0, shadedColor); 
-                qi.v4 = new Vertex(maxBound, minBound, minBound, u0, v0, shadedColor);
+                qi.vertex[0] = new Vertex(maxBound, minBound, maxBound, u0, v1, this.color);
+                qi.vertex[1] = new Vertex(minBound, minBound, maxBound, u1, v1, this.color); 
+                qi.vertex[2] = new Vertex(minBound, minBound, minBound, u1, v0, this.color); 
+                qi.vertex[3] = new Vertex(maxBound, minBound, minBound, u0, v0, this.color);
                 break;
     
             case WEST:
-                qi.v1 = new Vertex(minBound, minBound, minBound, u0, v1, shadedColor);
-                qi.v2 = new Vertex(minBound, minBound, maxBound, u1, v1, shadedColor);
-                qi.v3 = new Vertex(minBound, maxBound, maxBound, u1, v0, shadedColor);
-                qi.v4 = new Vertex(minBound, maxBound, minBound, u0, v0, shadedColor);
+                qi.vertex[0] = new Vertex(minBound, minBound, minBound, u0, v1, this.color);
+                qi.vertex[1] = new Vertex(minBound, minBound, maxBound, u1, v1, this.color);
+                qi.vertex[2] = new Vertex(minBound, maxBound, maxBound, u1, v0, this.color);
+                qi.vertex[3] = new Vertex(minBound, maxBound, minBound, u0, v0, this.color);
                 break;
                 
             case EAST:
-                qi.v1 = new Vertex(maxBound, minBound, minBound, u1, v1, shadedColor);
-                qi.v2 = new Vertex(maxBound, maxBound, minBound, u1, v0, shadedColor);
-                qi.v3 = new Vertex(maxBound, maxBound, maxBound, u0, v0, shadedColor);
-                qi.v4 = new Vertex(maxBound, minBound, maxBound, u0, v1, shadedColor);
+                qi.vertex[0] = new Vertex(maxBound, minBound, minBound, u1, v1, this.color);
+                qi.vertex[1] = new Vertex(maxBound, maxBound, minBound, u1, v0, this.color);
+                qi.vertex[2] = new Vertex(maxBound, maxBound, maxBound, u0, v0, this.color);
+                qi.vertex[3] = new Vertex(maxBound, minBound, maxBound, u0, v1, this.color);
                 break;
     
             case NORTH:
-                qi.v1 = new Vertex(minBound, minBound, minBound, u1, v1, shadedColor);
-                qi.v2 = new Vertex(minBound, maxBound, minBound, u1, v0, shadedColor);
-                qi.v3 = new Vertex(maxBound, maxBound, minBound, u0, v0, shadedColor);
-                qi.v4 = new Vertex(maxBound, minBound, minBound, u0, v1, shadedColor);
+                qi.vertex[0] = new Vertex(minBound, minBound, minBound, u1, v1, this.color);
+                qi.vertex[1] = new Vertex(minBound, maxBound, minBound, u1, v0, this.color);
+                qi.vertex[2] = new Vertex(maxBound, maxBound, minBound, u0, v0, this.color);
+                qi.vertex[3] = new Vertex(maxBound, minBound, minBound, u0, v1, this.color);
                 break;
     
             case SOUTH:
-                qi.v1 = new Vertex(minBound, minBound, maxBound, u0, v1, shadedColor);
-                qi.v2 = new Vertex(maxBound, minBound, maxBound, u1, v1, shadedColor);
-                qi.v3 = new Vertex(maxBound, maxBound, maxBound, u1, v0, shadedColor);
-                qi.v4 = new Vertex(minBound, maxBound, maxBound, u0, v0, shadedColor);
+                qi.vertex[0] = new Vertex(minBound, minBound, maxBound, u0, v1, this.color);
+                qi.vertex[1] = new Vertex(maxBound, minBound, maxBound, u1, v1, this.color);
+                qi.vertex[2] = new Vertex(maxBound, maxBound, maxBound, u1, v0, this.color);
+                qi.vertex[3] = new Vertex(minBound, maxBound, maxBound, u0, v0, this.color);
                 break;
             }
  
@@ -416,26 +515,29 @@ public class QuadFactory
         public double y;
         public double u;
         public double v;
+        public double depth;
         
-        public FaceVertex(double x, double y)
+        public FaceVertex(double x, double y, double depth)
         {
             this.x = x;
             this.y = y;
             this.u = x;
             this.v = y;
+            this.depth = depth;
         }
         
-        public FaceVertex(double x, double y, double u, double v)
+        public FaceVertex(double x, double y, double depth, double u, double v)
         {
             this.x = x;
             this.y = y;
             this.u = u;
             this.v = v;
+            this.depth = depth;
         }
         
         public FaceVertex clone()
         {
-            return new FaceVertex(x, y, u, v);
+            return new FaceVertex(x, y, depth, u, v);
         }
         
         public int getColor(int defaultColor)
@@ -447,22 +549,22 @@ public class QuadFactory
         {
             private int color = 0xFFFFFFFF;
             
-            public Colored(double x, double y, int color)
+            public Colored(double x, double y, double depth, int color)
             {
-                super(x, y);
+                super(x, y, depth);
                 this.color = color;
             }
             
-            public Colored(double x, double y, double u, double v, int color)
+            public Colored(double x, double y, double depth, double u, double v, int color)
             {
-                super(x, y, u, v);
+                super(x, y, depth, u, v);
                 this.color = color;
             }
             
             @Override
             public FaceVertex clone()
             {
-                return new FaceVertex.Colored(x, y, u, v, color);
+                return new FaceVertex.Colored(x, y, depth, u, v, color);
             }
             
             @Override

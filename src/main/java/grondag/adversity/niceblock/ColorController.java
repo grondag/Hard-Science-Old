@@ -23,7 +23,8 @@ public class ColorController extends ModelController
         this.bakedModelFactory = new ColorModelFactory(this);
     }
 
-    protected int getTextureOffsetFromShapeIndex(int shapeIndex) {
+    @Override
+    public int getAltTextureFromModelIndex(int shapeIndex) {
         if (useRotatedTexturesAsAlternates) {
             return shapeIndex / 4;
         } else {
