@@ -20,6 +20,7 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.Vec3d;
 
 public class FlowModelFactory extends ModelFactory
 {
@@ -46,6 +47,10 @@ public class FlowModelFactory extends ModelFactory
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
                 .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
         quadInputs.side = face;
+
+        
+        // normal calculation for later reference - assumes a quad, but works for triangle also
+        //Vec3d normal = (vertex[2].subtract(vertex[0]).crossProduct(vertex[3].subtract(vertex[1]))).normalize();
 
         switch(face)
         {
@@ -82,43 +87,6 @@ public class FlowModelFactory extends ModelFactory
                 builder.add(quadInputs.createNormalQuad());            }
             else
             {
-                // not co-planar, split so that seam is highest (convex face)
-//                float meanHeight = (hSE + hSW + hNE + hNW) / 4;
-//                
-//
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0, 0, 1.0-hSW),
-//                        new FaceVertex(1, 0, 1.0-hSE),
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        EnumFacing.NORTH);
-//                builder.add(quadInputs.createNormalQuad());
-//                
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        new FaceVertex(1, 0, 1.0-hSE),
-//                        new FaceVertex(1, 1, 1.0-hNE),
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        EnumFacing.NORTH);
-//                builder.add(quadInputs.createNormalQuad());
-//
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        new FaceVertex(1, 1, 1.0-hNE),
-//                        new FaceVertex(0, 1, 1.0-hNW),
-//                        EnumFacing.NORTH);
-//                builder.add(quadInputs.createNormalQuad());
-//                
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0, 0, 1.0-hSW),
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        new FaceVertex(0.5, 0.5, 1.0-meanHeight),
-//                        new FaceVertex(0, 1, 1.0-hNW),
-//                        EnumFacing.NORTH);
-//                builder.add(quadInputs.createNormalQuad());
-         
-                
                 if((hNE + hSW) > (hNW + hSE))
                 {
                     quadInputs.setupFaceQuad(

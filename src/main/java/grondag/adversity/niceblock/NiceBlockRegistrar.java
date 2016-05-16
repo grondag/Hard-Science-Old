@@ -91,7 +91,7 @@ public class NiceBlockRegistrar
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 2, true));
     public static final Block BLOCK_COLUMN_SQUARE_2 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2")
-        .setLightLevel(3F/15F).setLightOpacity(0);
+        .setLightLevel(3F/15F);//.setLightOpacity(0);
     
     public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_3 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 3, true));
@@ -101,7 +101,7 @@ public class NiceBlockRegistrar
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 4, true),
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 4, true));
     public static final Block BLOCK_COLUMN_SQUARE_4 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4")
-            .setLightLevel(3F/15F).setLightOpacity(0);
+            .setLightLevel(3F/15F);//.setLightOpacity(0);
 
     public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_5 = new ModelDispatcherBasic(BlockColors.INSTANCE, "colored_stone_0_0",
             new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 5, false));

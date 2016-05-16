@@ -66,6 +66,7 @@ public class QuadFactory
         public int color;
         public LightingMode lightingMode = LightingMode.SHADED;
         public boolean lockUV = false;
+        public boolean isItem = false;
         
         public static enum LightingMode
         {
@@ -91,6 +92,7 @@ public class QuadFactory
             retval.color = this.color;
             retval.lightingMode = this.lightingMode;
             retval.lockUV = this.lockUV;
+            retval.isItem = this.isItem;
             return retval;
         }
 
@@ -249,9 +251,7 @@ public class QuadFactory
         }
 
 
-        /**
-         * Use this for block models. Is faster and smaller than (Colored) UnpackedBakedQuads.
-         */
+
         public BakedQuad createNormalQuad()
         {
             for (int r = 0; r < this.rotation.index; r++)
@@ -261,7 +261,18 @@ public class QuadFactory
 
             int[] vertexData = new int[28];
             
+            VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
+            
             float[] faceNormal = this.calcNormal();
+            
+            if(this.isItem && this.lightingMode == LightingMode.FULLBRIGHT)
+            {
+                //TODO: this is really a hack - doesn't work well if item is at angle to Y axis
+                //not sure what the supported method is
+                faceNormal[0] = 0;
+                faceNormal[1] = 1;
+                faceNormal[2] = 0;
+            }
             
             for(int v = 0; v < 4; v++)
             {
@@ -274,16 +285,16 @@ public class QuadFactory
 //                ITEM.addElement(NORMAL_3B);
 //                ITEM.addElement(PADDING_1B);
                 
-                for(int e = 0; e < lightingMode.vertexFormat.getElementCount(); e++)
+                for(int e = 0; e < format.getElementCount(); e++)
                 {
-                    switch(lightingMode.vertexFormat.getElement(e).getUsage())
+                    switch(format.getElement(e).getUsage())
                     {
                         case POSITION:
-                            LightUtil.pack(vertex[v].toFloatArray(), vertexData, lightingMode.vertexFormat, v, e);
+                            LightUtil.pack(vertex[v].xyzToFloatArray(), vertexData, format, v, e);
                             break;
                             
                         case NORMAL: 
-                            LightUtil.pack(faceNormal, vertexData, lightingMode.vertexFormat, v, e);
+                            LightUtil.pack(vertex[v].hasNormal() ? vertex[v].normalToFloatArray() : faceNormal, vertexData, format, v, e);
                             break;
                         
                         case COLOR:
@@ -292,26 +303,26 @@ public class QuadFactory
                             colorRGBA[1] = ((float) (vertex[v].color >> 8 & 0xFF)) / 255f;
                             colorRGBA[2] = ((float) (vertex[v].color  & 0xFF)) / 255f;
                             colorRGBA[3] = ((float) (vertex[v].color >> 24 & 0xFF)) / 255f;
-
-//                            colorRGBA[0] = ((float) (0xFFFFFFFF >> 16 & 0xFF)) / 255f;
-//                            colorRGBA[1] = ((float) (0xFFFFFFFF >> 8 & 0xFF)) / 255f;
-//                            colorRGBA[2] = ((float) (0xFFFFFFFF  & 0xFF)) / 255f;
-//                            colorRGBA[3] = ((float) (0xFFFFFFFF >> 24 & 0xFF)) / 255f;
-                            LightUtil.pack(colorRGBA, vertexData, lightingMode.vertexFormat, v, e);
+                            LightUtil.pack(colorRGBA, vertexData, format, v, e);
                             break;
 
                         case UV: 
-                            if(lightingMode.vertexFormat.getElement(e).getIndex() == 1)
+                            if(format.getElement(e).getIndex() == 1)
                             {
-                                float[] fullBright = {1.0f, 1.0f};
-                                LightUtil.pack(fullBright, vertexData, lightingMode.vertexFormat, v, e);
+                                float[] fullBright = new float[2];
+                                
+                                //Don't really understand how brightness format works, but this does the job
+                                fullBright[0] = ((float)((15 >> 0x04) & 0xF) * 0x20) / 0xFFFF;
+                                fullBright[1] = ((float)((15 >> 0x14) & 0xF) * 0x20) / 0xFFFF;
+
+                                LightUtil.pack(fullBright, vertexData, format, v, e);
                             }
                             else
                             {
                                 float[] uvData = new float[2];
                                 uvData[0] = this.textureSprite.getInterpolatedU(vertex[v].u);
                                 uvData[1] = this.textureSprite.getInterpolatedV(vertex[v].v);
-                                LightUtil.pack(uvData, vertexData, lightingMode.vertexFormat, v, e);
+                                LightUtil.pack(uvData, vertexData, format, v, e);
                             }
                             break;
                             
@@ -327,7 +338,7 @@ public class QuadFactory
 //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
 
-            return new BakedQuad(vertexData, color, side, textureSprite, lightingMode == LightingMode.SHADED, lightingMode.vertexFormat);
+            return new BakedQuad(vertexData, color, side, textureSprite, lightingMode == LightingMode.SHADED, format);
 
         }
         
@@ -351,6 +362,7 @@ public class QuadFactory
         protected double u;
         protected double v;
         protected int color;
+        protected Vector3f normal;
 
         public Vertex(double x, double y, double z, double u, double v, int color)
         {
@@ -360,29 +372,67 @@ public class QuadFactory
             this.color = color;
         }
 
+        public Vertex(double x, double y, double z, double u, double v, int color, Vector3f normal)
+        {
+            this(x, y, z, u, v, color);
+            this.normal = normal;
+        }
+        
+        public boolean hasNormal()
+        {
+            return this.normal != null;
+        }
+        
         public Vertex clone()
         {
-            return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color);
+            return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal);
         }
         
         public Vertex transform(Matrix4f matrix, boolean rescaleToUnitCube)
         {
 
             Vector4f tmp = new Vector4f((float) xCoord, (float) yCoord, (float) zCoord, 1f);
+            
             matrix.transform(tmp);
             if (rescaleToUnitCube && Math.abs(tmp.w - 1f) > 1e-5)
             {
                 tmp.scale(1f / tmp.w);
             }
-            return new Vertex(tmp.x, tmp.y, tmp.z, u, v, color);
+            
+            if(this.hasNormal())
+            {
+                Vector4f tmpNormal = new Vector4f(this.normal.x, this.normal.y, this.normal.z, 1f);
+                matrix.transform(tmp);
+                Vector3f newNormal = new Vector3f(tmpNormal.x, tmpNormal.y, tmpNormal.z);
+                newNormal.normalize();
+                return new Vertex(tmp.x, tmp.y, tmp.z, u, v, color, newNormal);
+            }
+            else
+            {
+                return new Vertex(tmp.x, tmp.y, tmp.z, u, v, color);
+            }
+            
         }
         
-        public float[] toFloatArray()
+        public float[] xyzToFloatArray()
         {
             float[] retVal = new float[3];
             retVal[0] = (float)this.xCoord;
             retVal[1] = (float)this.yCoord;
             retVal[2] = (float)this.zCoord;
+            return retVal;
+        }
+        
+        public float[] normalToFloatArray()
+        {
+            float[] retVal = null;
+            if(this.hasNormal())
+            {
+                retVal = new float[3];
+                retVal[0] = this.normal.x;
+                retVal[1] = this.normal.y;
+                retVal[2] = this.normal.z;
+            }
             return retVal;
         }
     }

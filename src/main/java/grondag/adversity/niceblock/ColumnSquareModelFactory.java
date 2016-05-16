@@ -75,20 +75,31 @@ public class ColumnSquareModelFactory extends ModelFactory
     @Override
     public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
     {
+        return makeFaceQuads(modelState, colorProvider, face, false); 
+    }
+    
+    private List<BakedQuad> makeFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face, boolean isItem) 
+    {
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
-        
+
         int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
         int textureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
         CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
         EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];
 
-        int cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), modelState.getColorIndex(), textureIndex);
+        int cacheKey = 0;
+        List<BakedQuad> retVal = null;
         
-        List<BakedQuad> retVal = faceCache.get(cacheKey);
-
+        if(!isItem)
+        {
+            cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), modelState.getColorIndex(), textureIndex);
+            retVal = faceCache.get(cacheKey);
+        }
+        
         if(retVal == null)
         {
 	    	QuadInputs quadInputs = new QuadInputs();
+	    	quadInputs.isItem = isItem;
 	        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
 	        quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
 	        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
@@ -108,9 +119,12 @@ public class ColumnSquareModelFactory extends ModelFactory
 	            retVal = makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
 	        }
 	        
-	        synchronized(faceCache)
+	        if(!isItem)
 	        {
-	        	faceCache.put(cacheKey, retVal);
+	            synchronized(faceCache)
+    	        {
+    	        	faceCache.put(cacheKey, retVal);
+    	        }
 	        }
         }
         return retVal;
@@ -459,8 +473,8 @@ public class ColumnSquareModelFactory extends ModelFactory
                         {
                             // spline / center
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(offset + cutWidth - CAULK, 1.0 - offset - cutWidth - CAULK, 0),  
-                                    new FaceVertex(1.0 - offset - cutWidth + CAULK, 1.0 - offset - cutWidth - CAULK, 0),
+                                    new FaceVertex(Math.min(0.5, offset + cutWidth) - CAULK, 1.0 - offset - cutWidth - CAULK, 0),  
+                                    new FaceVertex(Math.max(0.5, 1.0 - offset - cutWidth) + CAULK, 1.0 - offset - cutWidth - CAULK, 0),
                                     new FaceVertex(1.0 - offset + CAULK, 1.0 - offset + CAULK, 0), 
                                     new FaceVertex(offset - CAULK, 1.0 - offset + CAULK, 0), 
                                     side);
@@ -501,7 +515,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.addAll(this.getFaceQuads(modelState, colorProvider, face));
+            general.addAll(this.makeFaceQuads(modelState, colorProvider, face, true));
         }        
         return general.build();
     }

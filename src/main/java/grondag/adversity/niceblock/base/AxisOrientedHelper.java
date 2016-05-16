@@ -55,11 +55,12 @@ public class AxisOrientedHelper extends ColorHelperPlus
     public boolean hasCustomBrightness()
     {
         // lamp blocks have two layers, and the inner (lamp) layer is solid
-        return this.dispatcher instanceof ModelDispatcherLayered && MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.SOLID;
+        return false;
+  //      return this.dispatcher instanceof ModelDispatcherLayered && MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.SOLID;
     }
     
-    @Override
-    public int getCustomBrightness(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return 15 << 20 | 15 << 4; 
-    }
+//    @Override
+//    public int getCustomBrightness(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+//        return 15 << 20 | 15 << 4; 
+//    }
 }
