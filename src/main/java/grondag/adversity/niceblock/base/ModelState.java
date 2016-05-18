@@ -11,18 +11,18 @@ public class ModelState
     private static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
    
     private int colorIndex = 0;
-    private int[] clientShapeIndex = new int[BlockRenderLayer.values().length];
-    private int serverShapeIndex = 0;
+    private long[] clientShapeIndex = new long[BlockRenderLayer.values().length];
+    private long serverShapeIndex = 0;
     
     public void writeToNBT(NBTTagCompound tag) 
     {
-        tag.setInteger(TAG_NAME, (serverShapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX));
+        tag.setLong(TAG_NAME, (serverShapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX));
     }
     
     public ModelState readFromNBT(NBTTagCompound tag) 
     {
-        int tagValue = tag.getInteger(TAG_NAME);
-        colorIndex = tagValue & MAX_COLOR_INDEX;
+        long tagValue = tag.getLong(TAG_NAME);
+        colorIndex = (int) (tagValue & MAX_COLOR_INDEX);
         serverShapeIndex = tagValue << COLOR_INDEX_BITLENGTH;
         return this;
     }
@@ -45,7 +45,7 @@ public class ModelState
         readFromNBT(tag);
     }
     
-    public ModelState(int serverShapeIndex, int colorIndex)
+    public ModelState(long serverShapeIndex, int colorIndex)
     {
         this.colorIndex = colorIndex;
         this.serverShapeIndex = serverShapeIndex;
@@ -62,24 +62,24 @@ public class ModelState
         return colorIndex;
     }
     
-    public ModelState setServerShapeIndex(int serverShapeIndex)
+    public ModelState setServerShapeIndex(long serverShapeIndex)
     {
          this.serverShapeIndex = serverShapeIndex;
          return this;
     }
     
-    public int getServerShapeIndex()
+    public long getServerShapeIndex()
     {
         return serverShapeIndex;
     }
     
-    public ModelState setClientShapeIndex(int shapeIndex, int layer)
+    public ModelState setClientShapeIndex(long shapeIndex, int layer)
     {
         clientShapeIndex[layer] = shapeIndex;
         return this;
     }
  
-    public int getClientShapeIndex(int layer)
+    public long getClientShapeIndex(int layer)
     {
         return clientShapeIndex[layer];
     }
