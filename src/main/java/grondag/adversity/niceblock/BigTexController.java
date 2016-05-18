@@ -40,11 +40,11 @@ public class BigTexController extends ModelController
         }
     }
 
-    @Override
-    public int getShapeCount()
-    {
-        return this.hasMetaVariants ? 4096 * 16 : 4096;
-    }
+//    @Override
+//    public int getShapeCount()
+//    {
+//        return this.hasMetaVariants ? 4096 * 16 : 4096;
+//    }
 
     @Override
     public String getTextureName(int offset)

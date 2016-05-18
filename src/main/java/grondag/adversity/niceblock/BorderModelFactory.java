@@ -72,7 +72,7 @@ public class BorderModelFactory extends ModelFactory
     {
     	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
     	
-        int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int clientShapeIndex = (int) modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
         int altTextureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
         CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
 

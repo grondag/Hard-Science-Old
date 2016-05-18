@@ -2,6 +2,11 @@ package grondag.adversity.niceblock;
 
 import java.util.List;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.SimpleItemBlockModel;
@@ -39,20 +44,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ModelDispatcherBasic extends ModelDispatcher
 {
-    //TODO More memory-efficient data structure (needs to be concurrent) for cache
-    /** 
-     * Cache for baked block models 
-     * Dimensions are color, shape.
-     * Conserves memory to put color first because most colors will never
-     * be instantiated, but many shapes within a color probably will.
-     */
-    private QuadContainer[][] bakedQuads;
+    private LoadingCache<Long, QuadContainer> modelCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(new CacheLoader<Long, QuadContainer>()
+    {
+        public QuadContainer load(Long key) throws Exception
+        {
+            return new QuadContainer();
+        }
+    });
+    
+    private ThreadLocal<IBlockState> lastState = new ThreadLocal<IBlockState>();
+    private ThreadLocal<QuadContainer> lastContainer = new ThreadLocal<QuadContainer>();
     
     private SimpleItemBlockModel[] itemModels;
 
     private final ModelController controller;
-
-    private final boolean isColorCountBiggerThanShapeCount;
 
     public ModelDispatcherBasic(IColorProvider colorProvider, String particleTextureName, ModelController controller)
     {
@@ -60,7 +65,6 @@ public class ModelDispatcherBasic extends ModelDispatcher
         this.controller = controller;
         this.itemModels = new SimpleItemBlockModel[colorProvider.getColorCount()];
         NiceBlockRegistrar.allDispatchers.add(this);
-        this.isColorCountBiggerThanShapeCount =  colorProvider.getColorCount() > controller.getShapeCount();
     }
     
     @Override
@@ -76,21 +80,10 @@ public class ModelDispatcherBasic extends ModelDispatcher
 	@Override
     public void handleBakeEvent(ModelBakeEvent event)
     {
-        // need to clear arrays to force rebaking of cached models
+        // need to clear cache to force rebaking of cached models
         if(FMLCommonHandler.instance().getSide() == Side.CLIENT) 
         {
-            if(isColorCountBiggerThanShapeCount)
-            {
-                bakedQuads = new QuadContainer[colorProvider.getColorCount()][];
-            }
-            else
-            {
-                bakedQuads = new QuadContainer[controller.getShapeCount()][];
-            }
-        }
-        else
-        {
-        	bakedQuads = null;
+            modelCache.invalidateAll();
         }
         controller.getBakedModelFactory().handleBakeEvent(event);
     }   
@@ -101,51 +94,22 @@ public class ModelDispatcherBasic extends ModelDispatcher
     {
 		if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
 		
-    	ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
-    	int firstIndex;
-    	int secondIndex;
-    	if(isColorCountBiggerThanShapeCount)
+		if(this.lastState.get() != state)
 		{
-    		firstIndex = modelState.getColorIndex();
-    		secondIndex = modelState.getClientShapeIndex(0);
+		    this.lastState.set(state);
+	        ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+		    this.lastContainer.set(modelCache.getUnchecked(controller.getCacheKeyFromModelState(modelState)));
 		}
-    	else
-    	{
-    		firstIndex = modelState.getClientShapeIndex(0);
-    		secondIndex = modelState.getColorIndex();
-    	}
-    	
-        if(bakedQuads[firstIndex] == null)
-        {
-            synchronized (bakedQuads)
-            {
-            	// first check was not synchronized, so confirm
-	            if(bakedQuads[firstIndex] == null)
-	            {
-	            	bakedQuads[firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? controller.getShapeCount() : this.colorProvider.getColorCount()];
-	            }
-            }
-        }
-        
-        if(bakedQuads[firstIndex][secondIndex] == null)
-        {
-            synchronized (bakedQuads)
-            {
-            	// first check was not synchronized, so confirm
-	            if(bakedQuads[firstIndex][secondIndex] == null)
-	            {
-	            	bakedQuads[firstIndex][secondIndex] = new QuadContainer();
-	            }
-            }
-        }
-        
-        List<BakedQuad> retVal = bakedQuads[firstIndex][secondIndex].getQuads(side);
+
+        List<BakedQuad> retVal = lastContainer.get().getQuads(side);
         if(retVal == null)
         {
+            ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
         	retVal = controller.getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
-        	synchronized (bakedQuads)
+        	QuadContainer container = lastContainer.get();
+        	synchronized (container)
             {
-            	bakedQuads[firstIndex][secondIndex].setQuads(side, retVal);
+        	    container.setQuads(side, retVal);
             }
         }
         return retVal;
@@ -157,7 +121,7 @@ public class ModelDispatcherBasic extends ModelDispatcher
     {
         if(isCachedStateDirty || !controller.useCachedClientState)
         {
-            int oldShapeIndex = modelState.getClientShapeIndex(0);
+            long oldShapeIndex = modelState.getClientShapeIndex(0);
             modelState.setClientShapeIndex(controller.getClientShapeIndex(block, state, world, pos), 0);
             return modelState.getClientShapeIndex(0) != oldShapeIndex;
         }

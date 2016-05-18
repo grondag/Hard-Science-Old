@@ -153,19 +153,19 @@ public class FlowController extends ModelController
         else return 0;
     }
     
-    @Override
-    public int getShapeCount()
-    {
-        return 0x10000; 
-    }
+//    @Override
+//    public int getShapeCount()
+//    {
+//        return 0x10000; 
+//    }
 
     @Override
-    public int getAltTextureFromModelIndex(int clientShapeIndex)
+    public int getAltTextureFromModelIndex(long clientShapeIndex)
     {
-        return clientShapeIndex >>> 16;
+        return (int) (clientShapeIndex >>> 16);
     }
     
-    public float getCornerHeightFromModelIndex(int clientShapeIndex, HorizontalCorner corner)
+    public float getCornerHeightFromModelIndex(long clientShapeIndex, HorizontalCorner corner)
     {
         float retVal = (float)((clientShapeIndex >>> (corner.ordinal() * 4)) & 0xF) / 15;
 //        Adversity.log.info("clientShapeIndex=" + clientShapeIndex + ", corner=" + corner.toString()

@@ -54,7 +54,7 @@ public class MasonryModelFactory extends ModelFactory
     {
     	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
     	
-        int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int clientShapeIndex = (int) modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
         int textureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
         SimpleJoinFaceState fjs = SimpleJoinFaceState.find(face, new SimpleJoin(myController.getShapeFromModelIndex(clientShapeIndex)));
         

@@ -72,10 +72,8 @@ public abstract class ModelController
      */
     public abstract int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
-    /**
-     * used by dispatcher for cache initialization
-     */
-    public abstract int getShapeCount();
+    public abstract long getCacheKeyFromModelState(ModelState modelState);
+    public abstract ModelState getModelStateFromCacheKey(long cacheKey);
 
     public ModelFactory getBakedModelFactory()
     {
@@ -108,7 +106,7 @@ public abstract class ModelController
      * Useful when alternate texture ID is baked into the client or shape index.
      * Simply returns zero if not overriden.
      */
-    public int getAltTextureFromModelIndex(int modelIndex)
+    public int getAltTextureFromModelIndex(long modelIndex)
     {
         return 0;
     }

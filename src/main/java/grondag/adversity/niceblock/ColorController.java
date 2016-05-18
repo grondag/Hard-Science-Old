@@ -24,17 +24,17 @@ public class ColorController extends ModelController
     }
 
     @Override
-    public int getAltTextureFromModelIndex(int shapeIndex) {
+    public int getAltTextureFromModelIndex(long l) {
         if (useRotatedTexturesAsAlternates) {
-            return shapeIndex / 4;
+            return (int) (l / 4);
         } else {
-            return shapeIndex;
+            return (int) l;
         }
     }
     
-    protected Rotation getTextureRotationFromShapeIndex(int shapeIndex){
+    protected Rotation getTextureRotationFromShapeIndex(long shapeIndex){
         if (useRotatedTexturesAsAlternates) {
-            return Rotation.values()[shapeIndex & 3];
+            return Rotation.values()[(int) (shapeIndex & 3)];
         } else {
             return Rotation.ROTATE_NONE;
         }
@@ -46,9 +46,9 @@ public class ColorController extends ModelController
         return alternator.getAlternate(pos);
     }
 
-    @Override
-    public int getShapeCount()
-    {
-        return this.getAlternateTextureCount() * (this.useRotatedTexturesAsAlternates? 4 : 1);
-    }
+//    @Override
+//    public int getShapeCount()
+//    {
+//        return this.getAlternateTextureCount() * (this.useRotatedTexturesAsAlternates? 4 : 1);
+//    }
 }

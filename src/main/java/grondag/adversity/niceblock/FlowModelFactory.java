@@ -39,7 +39,7 @@ public class FlowModelFactory extends ModelFactory
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        int clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        long clientShapeIndex = modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
         QuadInputs quadInputs = new QuadInputs();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
