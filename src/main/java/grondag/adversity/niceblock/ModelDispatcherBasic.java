@@ -2,7 +2,6 @@ package grondag.adversity.niceblock;
 
 import java.util.List;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -121,9 +120,9 @@ public class ModelDispatcherBasic extends ModelDispatcher
     {
         if(isCachedStateDirty || !controller.useCachedClientState)
         {
-            long oldShapeIndex = modelState.getClientShapeIndex(0);
-            modelState.setClientShapeIndex(controller.getClientShapeIndex(block, state, world, pos), 0);
-            return modelState.getClientShapeIndex(0) != oldShapeIndex;
+            long oldShapeIndex = modelState.getShapeIndex(BlockRenderLayer.SOLID);
+            modelState.setShapeIndex(controller.getClientShapeIndex(block, state, world, pos), BlockRenderLayer.SOLID);
+            return modelState.getShapeIndex(BlockRenderLayer.SOLID) != oldShapeIndex;
         }
         else
         {

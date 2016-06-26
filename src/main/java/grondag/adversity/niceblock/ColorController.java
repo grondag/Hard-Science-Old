@@ -41,7 +41,7 @@ public class ColorController extends ModelController
     }
     
     @Override
-    public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return alternator.getAlternate(pos);
     }

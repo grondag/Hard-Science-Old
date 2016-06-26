@@ -11,19 +11,29 @@ public class ModelState
     private static final int COLOR_INDEX_BITLENGTH = BigInteger.valueOf(MAX_COLOR_INDEX).bitLength();
    
     private int colorIndex = 0;
-    private long[] clientShapeIndex = new long[BlockRenderLayer.values().length];
-    private long serverShapeIndex = 0;
+    private long[] shapeIndex = new long[BlockRenderLayer.values().length];
+    private int persistenceIndex = -1;
     
     public void writeToNBT(NBTTagCompound tag) 
     {
-        tag.setLong(TAG_NAME, (serverShapeIndex << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX));
+        if(persistenceIndex == -1)
+        {
+            tag.setLong(TAG_NAME, (colorIndex & MAX_COLOR_INDEX));
+        }
+        else
+        {
+            tag.setLong(TAG_NAME, (shapeIndex[persistenceIndex] << COLOR_INDEX_BITLENGTH) | (colorIndex & MAX_COLOR_INDEX));
+        }
     }
     
     public ModelState readFromNBT(NBTTagCompound tag) 
     {
         long tagValue = tag.getLong(TAG_NAME);
         colorIndex = (int) (tagValue & MAX_COLOR_INDEX);
-        serverShapeIndex = tagValue << COLOR_INDEX_BITLENGTH;
+        if(persistenceIndex >= 0)
+        {
+            shapeIndex[persistenceIndex] = tagValue << COLOR_INDEX_BITLENGTH;
+        }
         return this;
     }
     
@@ -37,7 +47,7 @@ public class ModelState
     
     public ModelState()
     {
-        this(0, 0);
+        this(0);
     }
 
     public ModelState(NBTTagCompound tag)
@@ -45,10 +55,10 @@ public class ModelState
         readFromNBT(tag);
     }
     
-    public ModelState(long serverShapeIndex, int colorIndex)
+    public ModelState(int colorIndex)
     {
         this.colorIndex = colorIndex;
-        this.serverShapeIndex = serverShapeIndex;
+//        this.serverShapeIndex = serverShapeIndex;
     }
     
     public ModelState setColorIndex(int colorIndex)
@@ -62,25 +72,25 @@ public class ModelState
         return colorIndex;
     }
     
-    public ModelState setServerShapeIndex(long serverShapeIndex)
-    {
-         this.serverShapeIndex = serverShapeIndex;
-         return this;
-    }
+//    public ModelState setServerShapeIndex(long serverShapeIndex)
+//    {
+//         this.serverShapeIndex = serverShapeIndex;
+//         return this;
+//    }
+//    
+//    public long getServerShapeIndex()
+//    {
+//        return serverShapeIndex;
+//    }
     
-    public long getServerShapeIndex()
+    public ModelState setShapeIndex(long shapeIndex, BlockRenderLayer layer)
     {
-        return serverShapeIndex;
-    }
-    
-    public ModelState setClientShapeIndex(long shapeIndex, int layer)
-    {
-        clientShapeIndex[layer] = shapeIndex;
+        this.shapeIndex[layer.ordinal()] = shapeIndex;
         return this;
     }
  
-    public long getClientShapeIndex(int layer)
+    public long getShapeIndex(BlockRenderLayer layer)
     {
-        return clientShapeIndex[layer];
+        return shapeIndex[layer.ordinal()];
     }
 }

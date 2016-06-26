@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.library.model.QuadFactory.QuadInputs.LightingMode;
 import grondag.adversity.niceblock.base.AxisOrientedHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -72,9 +73,21 @@ public class NiceBlockRegistrar
             new HotBasaltController());
     public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
 
-    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(5), "cool_basalt_0_0",
-            new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, true));
-    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowBlock(new FlowBlockHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt");
+    public static final ModelDispatcherBasic MODEL_FLOWING_LAVA = new ModelDispatcherBasic(new NoColor(16), "volcanic_lava_flow_0_0",
+            new FlowController("volcanic_lava_flow", 1, BlockRenderLayer.SOLID, LightingMode.FULLBRIGHT));
+    public static final NiceBlock BLOCK_FLOWING_LAVA = (NiceBlock) new FlowingLavaBlock(new FlowBlockHelper(MODEL_FLOWING_LAVA, 16), BaseMaterial.FLEXSTONE, "flowing_lava")
+        .setLightLevel(3F/15F);
+        
+     public static final NiceBlock BLOCK_STATIC_LAVA = (NiceBlock) new StaticLavaBlock(new FlowBlockHelper(MODEL_FLOWING_LAVA, 16), BaseMaterial.FLEXSTONE, "static_lava")
+        .setLightLevel(3F/15F);
+     
+    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",
+            new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, LightingMode.SHADED));
+    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowBlock(new FlowBlockHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt");
+
+//    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",
+//            new HeightController("cool_basalt", 1, BlockRenderLayer.SOLID, true, false));
+//    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new HeightBlock(new SimpleHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt");
 
     
     public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColors.INSTANCE, "colored_stone_0_0",
@@ -229,7 +242,7 @@ public class NiceBlockRegistrar
                 for (int i = 0; i < block.blockModelHelper.getItemModelCount(); i++)
                 {
                     ModelResourceLocation itemModelResourceLocation = 
-                            new ModelResourceLocation(((NiceBlock)block).getRegistryName() + "." + i, "inventory");
+                        new ModelResourceLocation(((NiceBlock)block).getRegistryName() + "." + i, "inventory");
                     ModelLoader.setCustomModelResourceLocation(block.item, i, itemModelResourceLocation);
                 }
             }

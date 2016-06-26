@@ -82,7 +82,7 @@ public class ColumnSquareModelFactory extends ModelFactory
     {
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
-        int clientShapeIndex = (int) modelState.getClientShapeIndex(controller.getRenderLayer().ordinal());
+        int clientShapeIndex = (int) modelState.getShapeIndex(controller.getRenderLayer());
         int textureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
         CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
         EnumFacing.Axis axis = EnumFacing.Axis.values()[myController.getAxisFromModelIndex(clientShapeIndex)];

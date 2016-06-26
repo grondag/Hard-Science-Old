@@ -28,7 +28,7 @@ public class BigTexController extends ModelController
     *      2 bits uv texture flip indicators
     *      12 bit facade index
     */
-    public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         if(this.hasMetaVariants)
         {

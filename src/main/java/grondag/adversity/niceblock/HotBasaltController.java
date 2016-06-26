@@ -27,8 +27,8 @@ public class HotBasaltController extends ColorController
     }
 
     @Override
-    public int getAltTextureFromModelIndex(int shapeIndex) {
-        return (shapeIndex >> 2) & 15;
+    public int getAltTextureFromModelIndex(long shapeIndex) {
+        return (int) (shapeIndex >> 2) & 15;
     }
     
     public Rotation getTextureRotationFromShapeIndex(int shapeIndex){
@@ -42,14 +42,14 @@ public class HotBasaltController extends ColorController
      * 2 bits texture set       | derived from block metadata (hotness)
      */
     @Override
-    public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return ((state.getValue(NiceBlock.META) & 3) << 4) |  alternator.getAlternate(pos);
     }
     
-    @Override
-    public int getShapeCount()
-    {
-        return 64;
-    }
+//    @Override
+//    public int getShapeCount()
+//    {
+//        return 64;
+//    }
 }

@@ -60,6 +60,7 @@ public class BlockColors implements IColorProvider
         for(Hue hue: Hue.values())
         {
             COLORS[i++] = makeColorMap(hue, Tint.WHITE);
+            
             COLORS[i++] = makeColorMap(hue, Tint.GREY_BRIGHT);
             COLORS[i++] = makeColorMap(hue, Tint.GREY_LIGHT);
             COLORS[i++] = makeColorMap(hue, Tint.GREY_MID);

@@ -4,16 +4,12 @@ import java.util.List;
 
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.niceblock.ColorHelperPlus;
-import grondag.adversity.niceblock.ModelDispatcherLayered;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.MinecraftForgeClient;
 
 public class AxisOrientedHelper extends ColorHelperPlus
 {
@@ -43,11 +39,11 @@ public class AxisOrientedHelper extends ColorHelperPlus
     @Override
     public ModelState getModelStateForItemModel(int itemIndex)
     {
-        ModelState modelState = new ModelState(0, itemIndex);
-        modelState.setClientShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.SOLID.ordinal());
-        modelState.setClientShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT.ordinal());
-        modelState.setClientShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT_MIPPED.ordinal());
-        modelState.setClientShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.TRANSLUCENT.ordinal());
+        ModelState modelState = new ModelState(itemIndex);
+        modelState.setShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.SOLID);
+        modelState.setShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT);
+        modelState.setShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.CUTOUT_MIPPED);
+        modelState.setShapeIndex(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT, BlockRenderLayer.TRANSLUCENT);
         return modelState;
     }
     

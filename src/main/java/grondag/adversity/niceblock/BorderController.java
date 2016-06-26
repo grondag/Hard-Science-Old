@@ -29,7 +29,7 @@ public class BorderController extends ModelController
     }
     
     @Override
-    public int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
         TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
@@ -38,16 +38,16 @@ public class BorderController extends ModelController
         return (this.alternator.getAlternate(pos)  * CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) + CornerJoinBlockStateSelector.findIndex(mates);
     }
 
-    @Override
-    public int getShapeCount()
-    {
-        return CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT * getAlternateTextureCount();
-    }
+//    @Override
+//    public int getShapeCount()
+//    {
+//        return CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT * getAlternateTextureCount();
+//    }
 
     @Override
-    public int getAltTextureFromModelIndex(int clientShapeIndex)
+    public int getAltTextureFromModelIndex(long clientShapeIndex)
     {
-        return clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT;
+        return (int) (clientShapeIndex / CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
     }
     
     public int getShapeFromModelIndex(int clientShapeIndex)

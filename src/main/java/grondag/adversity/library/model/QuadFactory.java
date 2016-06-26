@@ -2,12 +2,10 @@ package grondag.adversity.library.model;
 
 import java.util.List;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 
 import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -18,7 +16,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Ints;
 
 public class QuadFactory
 {
@@ -263,12 +260,12 @@ public class QuadFactory
             
             VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
             
-            float[] faceNormal = this.calcNormal();
+            float[] faceNormal = this.getFaceNormalArray();
             
             if(this.isItem && this.lightingMode == LightingMode.FULLBRIGHT)
             {
                 //TODO: this is really a hack - doesn't work well if item is at angle to Y axis
-                //not sure what the supported method is
+                //There does not yet appear to be a supported method for full-bright items
                 faceNormal[0] = 0;
                 faceNormal[1] = 1;
                 faceNormal[2] = 0;
@@ -276,14 +273,6 @@ public class QuadFactory
             
             for(int v = 0; v < 4; v++)
             {
-//                BLOCK.addElement(POSITION_3F);
-//                BLOCK.addElement(COLOR_4UB);
-//                BLOCK.addElement(TEX_2F);
-
-                
-//                BLOCK.addElement(TEX_2S);                
-//                ITEM.addElement(NORMAL_3B);
-//                ITEM.addElement(PADDING_1B);
                 
                 for(int e = 0; e < format.getElementCount(); e++)
                 {
@@ -341,10 +330,15 @@ public class QuadFactory
             return new BakedQuad(vertexData, color, side, textureSprite, lightingMode == LightingMode.SHADED, format);
 
         }
-        
-        private float[] calcNormal()
+     
+        public Vec3d getFaceNormal()
         {
-            Vec3d normal = (vertex[2].subtract(vertex[0]).crossProduct(vertex[3].subtract(vertex[1]))).normalize();
+            return vertex[2].subtract(vertex[0]).crossProduct(vertex[3].subtract(vertex[1])).normalize();
+        }
+        
+        private float[] getFaceNormalArray()
+        {
+            Vec3d normal = getFaceNormal();
             
             float[] retval = new float[3];
             
@@ -362,7 +356,7 @@ public class QuadFactory
         protected double u;
         protected double v;
         protected int color;
-        protected Vector3f normal;
+        protected Vec3d normal;
 
         public Vertex(double x, double y, double z, double u, double v, int color)
         {
@@ -372,12 +366,17 @@ public class QuadFactory
             this.color = color;
         }
 
-        public Vertex(double x, double y, double z, double u, double v, int color, Vector3f normal)
+        public Vertex(double x, double y, double z, double u, double v, int color, Vec3d normal)
         {
             this(x, y, z, u, v, color);
             this.normal = normal;
         }
         
+        public void setNormal(Vec3d normalIn)
+        {
+            this.normal = normalIn;
+        }
+
         public boolean hasNormal()
         {
             return this.normal != null;
@@ -401,9 +400,9 @@ public class QuadFactory
             
             if(this.hasNormal())
             {
-                Vector4f tmpNormal = new Vector4f(this.normal.x, this.normal.y, this.normal.z, 1f);
+                Vector4f tmpNormal = new Vector4f((float)this.normal.xCoord, (float)this.normal.yCoord, (float)this.normal.zCoord, 1f);
                 matrix.transform(tmp);
-                Vector3f newNormal = new Vector3f(tmpNormal.x, tmpNormal.y, tmpNormal.z);
+                Vec3d newNormal = new Vec3d(tmpNormal.x, tmpNormal.y, tmpNormal.z);
                 newNormal.normalize();
                 return new Vertex(tmp.x, tmp.y, tmp.z, u, v, color, newNormal);
             }
@@ -429,9 +428,9 @@ public class QuadFactory
             if(this.hasNormal())
             {
                 retVal = new float[3];
-                retVal[0] = this.normal.x;
-                retVal[1] = this.normal.y;
-                retVal[2] = this.normal.z;
+                retVal[0] = (float) this.normal.xCoord;
+                retVal[1] = (float) this.normal.yCoord;
+                retVal[2] = (float) this.normal.zCoord;
             }
             return retVal;
         }
@@ -552,12 +551,12 @@ public class QuadFactory
 
 
 
-    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)
-    {
-
-        return new int[] { Float.floatToRawIntBits((float) x), Float.floatToRawIntBits((float) y), Float.floatToRawIntBits((float) z), color,
-                Float.floatToRawIntBits(sprite.getInterpolatedU(u)), Float.floatToRawIntBits(sprite.getInterpolatedV(v)), 0 };
-    }
+//    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)
+//    {
+//
+//        return new int[] { Float.floatToRawIntBits((float) x), Float.floatToRawIntBits((float) y), Float.floatToRawIntBits((float) z), color,
+//                Float.floatToRawIntBits(sprite.getInterpolatedU(u)), Float.floatToRawIntBits(sprite.getInterpolatedV(v)), 0 };
+//    }
 
     public static class FaceVertex
     {

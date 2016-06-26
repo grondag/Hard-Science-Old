@@ -70,10 +70,12 @@ public abstract class ModelController
     /**
      * used by block helper methods to get shape-related state
      */
-    public abstract int getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
+    public abstract long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
-    public abstract long getCacheKeyFromModelState(ModelState modelState);
-    public abstract ModelState getModelStateFromCacheKey(long cacheKey);
+    public long getCacheKeyFromModelState(ModelState modelState)
+    {
+        return modelState.getShapeIndex(this.renderLayer);
+    }
 
     public ModelFactory getBakedModelFactory()
     {

@@ -50,7 +50,7 @@ public class NeighborBlocks {
     {
         if(cornerStates[corner.ordinal()] == null)
         {
-            cornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.getDirectionVec()));
+            cornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.directionVector));
         }
         return cornerStates[corner.ordinal()];
     }
@@ -65,7 +65,7 @@ public class NeighborBlocks {
    {
        if(farCornerStates[corner.ordinal()] == null)
        {
-           farCornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.getDirectionVec()));
+           farCornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.directionVector));
        }
        return farCornerStates[corner.ordinal()];
    }
@@ -117,7 +117,7 @@ public class NeighborBlocks {
         public boolean result(BlockCorner corner)
         {
             if((completionFlags & corner.bitFlag) != corner.bitFlag) {
-                if(test.testBlock(world, NeighborBlocks.this.getBlockState(corner), pos.add(corner.getDirectionVec())))
+                if(test.testBlock(world, NeighborBlocks.this.getBlockState(corner), pos.add(corner.directionVector)))
                 {
                     resultFlags |= corner.bitFlag;
                 }
@@ -145,7 +145,7 @@ public class NeighborBlocks {
         public boolean result(FarCorner corner)
         {
             if((completionFlags & corner.bitFlag) != corner.bitFlag) {
-                if(test.testBlock(world, NeighborBlocks.this.getBlockState(corner), pos.add(corner.getDirectionVec())))
+                if(test.testBlock(world, NeighborBlocks.this.getBlockState(corner), pos.add(corner.directionVector)))
                 {
                     resultFlags |= corner.bitFlag;
                 }
@@ -186,6 +186,7 @@ public class NeighborBlocks {
         public final EnumFacing face2;
         public final EnumFacing.Axis axis;
         public final int bitFlag;
+        public final Vec3i directionVector;
         
         private BlockCorner(EnumFacing face1, EnumFacing face2)
         {
@@ -198,13 +199,11 @@ public class NeighborBlocks {
             
             CORNER_LOOKUP[face1.ordinal()][face2.ordinal()] = this;
             CORNER_LOOKUP[face2.ordinal()][face1.ordinal()] = this;
-        }
-        
-        public Vec3i getDirectionVec()
-        {
+            
             Vec3i v1 = face1.getDirectionVec();
             Vec3i v2 = face2.getDirectionVec();
-            return new Vec3i(v1.getX() + v2.getX(), v1.getY() + v2.getY(), v1.getZ() + v2.getZ());
+            this.directionVector = new Vec3i(v1.getX() + v2.getX(), v1.getY() + v2.getY(), v1.getZ() + v2.getZ());
+
         }
         
         public static BlockCorner find(EnumFacing face1, EnumFacing face2)
@@ -212,7 +211,6 @@ public class NeighborBlocks {
             return CORNER_LOOKUP[face1.ordinal()][face2.ordinal()];
         }
     }
-    private static HorizontalCorner[][] HORIZONTAL_CORNER_LOOKUP = new HorizontalCorner[6][6];
    
     public static enum HorizontalCorner
     {
@@ -231,24 +229,27 @@ public class NeighborBlocks {
             this.face1 = face1;
             this.face2 = face2;
             this.directionVector = new Vec3i(face1.getDirectionVec().getX() + face2.getDirectionVec().getX(), 0, face1.getDirectionVec().getZ() + face2.getDirectionVec().getZ());
-            HORIZONTAL_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()] = this;
-            HORIZONTAL_CORNER_LOOKUP[face2.ordinal()][face1.ordinal()] = this;
-
-        }
-        
-        public Vec3i getDirectionVec()
-        {
-            Vec3i v1 = face1.getDirectionVec();
-            Vec3i v2 = face2.getDirectionVec();
-            return new Vec3i(v1.getX() + v2.getX(), 0, v1.getZ() + v2.getZ());
-        }
-        
-        public static HorizontalCorner find(EnumFacing face1, EnumFacing face2)
-        {
-            return HORIZONTAL_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()];
         }
     }
     
+    public static enum HorizontalFace
+    {
+        NORTH(EnumFacing.NORTH),
+        EAST(EnumFacing.EAST),
+        SOUTH(EnumFacing.SOUTH),
+        WEST(EnumFacing.WEST);
+        
+        public final EnumFacing face;
+        
+        public final Vec3i directionVector;
+                
+        private HorizontalFace(EnumFacing face)
+        {
+            this.face = face;
+            this.directionVector = face.getDirectionVec();
+        }
+        
+    }
     private static FarCorner[][][] FAR_CORNER_LOOKUP = new FarCorner[6][6][6];
 
     public static enum FarCorner
@@ -267,6 +268,8 @@ public class NeighborBlocks {
         public final EnumFacing face2;
         public final EnumFacing face3;
         public final int bitFlag;
+        public final Vec3i directionVector;
+
         
         private FarCorner(EnumFacing face1, EnumFacing face2, EnumFacing face3)
         {
@@ -281,14 +284,12 @@ public class NeighborBlocks {
             FAR_CORNER_LOOKUP[face2.ordinal()][face3.ordinal()][face1.ordinal()] = this;
             FAR_CORNER_LOOKUP[face3.ordinal()][face2.ordinal()][face1.ordinal()] = this;
             FAR_CORNER_LOOKUP[face3.ordinal()][face1.ordinal()][face2.ordinal()] = this;
-        }
-        
-        public Vec3i getDirectionVec()
-        {
+
             Vec3i v1 = face1.getDirectionVec();
             Vec3i v2 = face2.getDirectionVec();
             Vec3i v3 = face3.getDirectionVec();
-            return new Vec3i(v1.getX() + v2.getX() + v3.getX(), v1.getY() + v2.getY() + v3.getY(), v1.getZ() + v2.getZ() + v3.getZ());
+            this.directionVector = new Vec3i(v1.getX() + v2.getX() + v3.getX(), v1.getY() + v2.getY() + v3.getY(), v1.getZ() + v2.getZ() + v3.getZ());
+
         }
         
         public static FarCorner find(EnumFacing face1, EnumFacing face2, EnumFacing face3)

@@ -15,6 +15,9 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.List;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -43,28 +46,25 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ModelDispatcherLayered extends ModelDispatcher
 {
 
-    /** 
-     * Cache for baked block models 
-     * Dimensions are render layer, shape, color.
-     * Conserves memory to put shape first because most shapes in large-count shape models will never
-     * be instantiated.
-     */
-    private QuadContainer[][][] bakedQuads = new QuadContainer[BlockRenderLayer.values().length][][];
+    @SuppressWarnings("unchecked")
+    private LoadingCache<Long, QuadContainer>[] modelCache = new LoadingCache[BlockRenderLayer.values().length];
     
+    private ThreadLocal<Integer> lastLayer = new ThreadLocal<Integer>();
+    private ThreadLocal<IBlockState> lastState = new ThreadLocal<IBlockState>();
+    private ThreadLocal<QuadContainer> lastContainer = new ThreadLocal<QuadContainer>();
+        
     private SimpleItemBlockModel[] itemModels;
 
     private final ModelController controllers[] = new ModelController[BlockRenderLayer.values().length];
     
     private final ModelController controllerPrimary;
     
-    private final boolean isColorCountBiggerThanShapeCount;
-
     public ModelDispatcherLayered(IColorProvider colorProvider, String particleTextureName, ModelController ... controllersIn)
     {
         super(colorProvider, particleTextureName);
+        
         this.controllerPrimary = controllersIn[0];
         this.itemModels = new SimpleItemBlockModel[colorProvider.getColorCount()];
-        boolean testColorCountBiggerThanShapeCount = true;
         for(ModelController cont : controllersIn)
         {
             if(this.controllers[cont.getRenderLayer().ordinal()] != null)
@@ -72,12 +72,16 @@ public class ModelDispatcherLayered extends ModelDispatcher
                 Adversity.log.warn("Duplicate render layer in controllers passed to ModelDispatherLayered.");
             }
             this.controllers[cont.getRenderLayer().ordinal()] = cont;
-            if(cont.getShapeCount() > colorProvider.getColorCount())
+            
+            LoadingCache<Long, QuadContainer> build = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(new CacheLoader<Long, QuadContainer>()
             {
-                testColorCountBiggerThanShapeCount = false;
-            }
+                public QuadContainer load(Long key) throws Exception
+                {
+                    return new QuadContainer();
+                }
+            });
+            modelCache[cont.getRenderLayer().ordinal()] = build;
         }
-        this.isColorCountBiggerThanShapeCount = testColorCountBiggerThanShapeCount;
         NiceBlockRegistrar.allDispatchers.add(this);
     }
     
@@ -107,14 +111,8 @@ public class ModelDispatcherLayered extends ModelDispatcher
             {
                 if(controllers[i] != null)
                 {
-                    if(isColorCountBiggerThanShapeCount)
-                    {
-                        bakedQuads[i] = new QuadContainer[colorProvider.getColorCount()][];
-                    }
-                    else
-                    {
-                        bakedQuads[i] = new QuadContainer[controllers[i].getShapeCount()][];
-                    }
+                    // need to clear cache to force rebaking of cached models
+                    modelCache[i].invalidateAll();
                     controllers[i].getBakedModelFactory().handleBakeEvent(event);
                 }
             }
@@ -125,57 +123,30 @@ public class ModelDispatcherLayered extends ModelDispatcher
     @SideOnly(Side.CLIENT)
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) 
     {
-		if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
-
+        
+        if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
+        
         int layer = MinecraftForgeClient.getRenderLayer().ordinal();
 
         if (controllers[layer] == null) return QuadFactory.EMPTY_QUAD_LIST;
         
-        ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
-    	int firstIndex;
-    	int secondIndex;
-    	if(isColorCountBiggerThanShapeCount)
-		{
-    		firstIndex = modelState.getColorIndex();
-    		secondIndex = modelState.getClientShapeIndex(layer);
-		}
-    	else
-    	{
-    		firstIndex = modelState.getClientShapeIndex(layer);
-    		secondIndex = modelState.getColorIndex();
-    	}
-    	
-        if(bakedQuads[layer][firstIndex] == null)
+        if(this.lastState.get() != state || this.lastLayer.get() != layer)
         {
-            synchronized (bakedQuads)
-            {
-            	// first check was not synchronized, so confirm
-	            if(bakedQuads[layer][firstIndex] == null)
-	            {
-	            	bakedQuads[layer][firstIndex] = new QuadContainer[isColorCountBiggerThanShapeCount ? controllers[layer].getShapeCount() : this.colorProvider.getColorCount()];
-	            }
-            }
+            this.lastState.set(state);
+            this.lastLayer.set(layer);
+            ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+            this.lastContainer.set(modelCache[layer].getUnchecked(controllers[layer].getCacheKeyFromModelState(modelState)));
         }
         
-        if(bakedQuads[layer][firstIndex][secondIndex] == null)
-        {
-            synchronized (bakedQuads)
-            {
-            	// first check was not synchronized, so confirm
-	            if(bakedQuads[layer][firstIndex][secondIndex] == null)
-	            {
-	            	bakedQuads[layer][firstIndex][secondIndex] = new QuadContainer();
-	            }
-            }
-        }
-        
-        List<BakedQuad> retVal = bakedQuads[layer][firstIndex][secondIndex].getQuads(side);
+        List<BakedQuad> retVal = lastContainer.get().getQuads(side);
         if(retVal == null)
         {
-        	retVal = controllers[layer].getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
-        	synchronized (bakedQuads)
+            ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+            retVal = controllers[layer].getBakedModelFactory().getFaceQuads(modelState, colorProvider, side);
+            QuadContainer container = lastContainer.get();
+            synchronized (container)
             {
-            	bakedQuads[layer][firstIndex][secondIndex].setQuads(side, retVal);
+                container.setQuads(side, retVal);
             }
         }
         return retVal;
@@ -191,9 +162,9 @@ public class ModelDispatcherLayered extends ModelDispatcher
             {
                 if(isCachedStateDirty || !cont.useCachedClientState)
                 {
-                    int oldShapeIndex = modelState.getClientShapeIndex(cont.getRenderLayer().ordinal());
-                    modelState.setClientShapeIndex(cont.getClientShapeIndex(block, state, world, pos), cont.getRenderLayer().ordinal());
-                    updated = updated || modelState.getClientShapeIndex(0) != oldShapeIndex;
+                    long oldShapeIndex = modelState.getShapeIndex(cont.getRenderLayer());
+                    modelState.setShapeIndex(cont.getClientShapeIndex(block, state, world, pos), cont.getRenderLayer());
+                    updated = updated || modelState.getShapeIndex(cont.getRenderLayer()) != oldShapeIndex;
                 }
              }
         }

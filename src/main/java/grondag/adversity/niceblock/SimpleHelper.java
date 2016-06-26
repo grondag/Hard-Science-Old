@@ -8,15 +8,17 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class FlowBlockHelper extends BlockModelHelper
+/**
+ * Simple block model helper for models that have only one color.
+ */
+public class SimpleHelper extends BlockModelHelper
 {
-
-    public final int levelCount;
+    public final int itemCount;
     
-    protected FlowBlockHelper(ModelDispatcher dispatcher, int levelCount)
+    protected SimpleHelper(ModelDispatcher dispatcher, int itemCount)
     {
         super(dispatcher);
-        this.levelCount = levelCount;
+        this.itemCount = itemCount;
     }
 
     @Override
@@ -30,14 +32,13 @@ public class FlowBlockHelper extends BlockModelHelper
     @Override
     public int getItemModelCount()
     {
-        return levelCount;
+        return itemCount;
     }
 
     @Override
     public ModelState getModelStateForItemModel(int itemIndex)
     {
-        int level = ((levelCount - itemIndex) * 16 / levelCount) - 1;
-        return new ModelState(0).setShapeIndex(level | level << 4 | level << 8 | level << 12, BlockRenderLayer.SOLID);
+        return new ModelState(0).setShapeIndex(itemIndex, BlockRenderLayer.SOLID);
     }
 
 }

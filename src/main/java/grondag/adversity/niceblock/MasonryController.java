@@ -29,7 +29,7 @@ public class MasonryController extends ModelController
     }
 
     @Override
-    public int getClientShapeIndex(final NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getClientShapeIndex(final NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
         TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
@@ -65,16 +65,16 @@ public class MasonryController extends ModelController
 
     }
 
-    @Override
-    public int getShapeCount()
-    {
-        return 64 * getAlternateTextureCount();
-    }
+//    @Override
+//    public int getShapeCount()
+//    {
+//        return 64 * getAlternateTextureCount();
+//    }
     
     @Override
-    public int getAltTextureFromModelIndex(int clientShapeIndex)
+    public int getAltTextureFromModelIndex(long clientShapeIndex)
     {
-        return clientShapeIndex / SimpleJoin.STATE_COUNT;
+        return (int) clientShapeIndex / SimpleJoin.STATE_COUNT;
     }
     
     public int getShapeFromModelIndex(int clientShapeIndex)

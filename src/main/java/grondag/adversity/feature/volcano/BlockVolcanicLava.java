@@ -19,7 +19,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.IFluidBlock;
 
 public class BlockVolcanicLava extends BlockFluidClassic {
     
@@ -31,6 +30,7 @@ public class BlockVolcanicLava extends BlockFluidClassic {
     };
     
     private IBlockTest testCanFlowInto = new IBlockTest() {
+        
         @Override
         public boolean testBlock(IBlockAccess world, IBlockState state, BlockPos pos) {
             
@@ -233,7 +233,7 @@ public class BlockVolcanicLava extends BlockFluidClassic {
         // flow 1 can only flow down
         if(!myFlowType.canFlow || myFlowType.outputFlowType == null)
         {
-           world.setBlockState(pos, NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState().withProperty(NiceBlock.META, 5-myFlowType.level));
+           world.setBlockState(pos, NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState().withProperty(NiceBlock.META, (int) (this.getFluidHeightForRender(world, pos) * 16) - 1));
            return;
         }
 
@@ -336,9 +336,9 @@ public class BlockVolcanicLava extends BlockFluidClassic {
         world.setBlockState(pos, this.getBlockState().getBaseState().withProperty(LEVEL, flowType.ordinal()), 3);
         
         if(world.getBlockState(pos.down()).getBlock() == NiceBlockRegistrar.BLOCK_COOL_BASALT
-                && world.getBlockState(pos.down()).getValue(NiceBlock.META) != 0)
+                && world.getBlockState(pos.down()).getValue(NiceBlock.META) != 15)
         {
-            world.setBlockState(pos.down(), NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState().withProperty(NiceBlock.META, 0));
+            world.setBlockState(pos.down(), NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState().withProperty(NiceBlock.META, 15));
         }
         return true;
     }

@@ -11,7 +11,6 @@ import grondag.adversity.Adversity;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -66,7 +65,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     private final TaskCounter taskCounter = new TaskCounter();
 
  //   private AtomicInteger nextNodeID = new AtomicInteger(NodeRoots.FIRST_NORMAL_NODE_ID);
-    private static final String TAG_NEXT_NODE_ID = "nxid";
+//    private static final String TAG_NEXT_NODE_ID = "nxid";
 	
     /** Last tick that is executing or has completed.
      * If = lastSimTick, means simulation is caught up or catching up with most recent activity.
