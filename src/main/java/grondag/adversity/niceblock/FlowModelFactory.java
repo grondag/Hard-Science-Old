@@ -32,6 +32,29 @@ public class FlowModelFactory extends ModelFactory
         this.myController = (FlowController)controller;
     }
 
+    private float getCornerHeight(FlowHeightState flowState, HorizontalFace face1, HorizontalFace face2)
+    {
+        int side1 = flowState.getSideHeight(face1);
+        int side2 = flowState.getSideHeight(face2);
+        int corner = flowState.getCornerHeight(HorizontalCorner.find(face1, face2));
+        
+//        if(corner <= 16 && (side1 > 16  || side2 > 16))
+//        {
+//            return 1;
+//        }
+//        else
+        {
+//            return Math.max(0, (float) (flowState.getCornerHeight(HorizontalCorner.find(face1, face2)) + flowState.getCenterHeight()
+//            + side1 + side2) / 64f);
+            
+            return (float) (corner + flowState.getCenterHeight()
+            + side1 + side2) / 64f;
+        }
+        
+        
+        
+    }
+    
     @Override
     public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face)
     {
@@ -50,28 +73,40 @@ public class FlowModelFactory extends ModelFactory
 
         FlowHeightState flowState = myController.getFlowHeightStateFromModelIndex(clientShapeIndex);
         
+        // egregious hackery
+        if(flowState.getSideHeight(HorizontalFace.NORTH) == 49)
+        {
+            return builder.build();
+        }
+        
         // get vertex heights
-        float hCenter = (float) flowState.getCenterHeight() / 15f;
+        float hCenter = (float) flowState.getCenterHeight() / 16f;
 
         
-        float hNorth = (float) (flowState.getSideHeight(HorizontalFace.NORTH) + flowState.getCenterHeight()) / 30f;
-        float hSouth = (float) (flowState.getSideHeight(HorizontalFace.SOUTH) + flowState.getCenterHeight()) / 30f;
-        float hEast = (float) (flowState.getSideHeight(HorizontalFace.EAST) + flowState.getCenterHeight()) / 30f;
-        float hWest = (float) (flowState.getSideHeight(HorizontalFace.WEST) + flowState.getCenterHeight()) / 30f;
+        float hNorth = (float) (flowState.getSideHeight(HorizontalFace.NORTH) + flowState.getCenterHeight()) / 32f;
+        float hSouth = (float) (flowState.getSideHeight(HorizontalFace.SOUTH) + flowState.getCenterHeight()) / 32f;
+        float hEast = (float) (flowState.getSideHeight(HorizontalFace.EAST) + flowState.getCenterHeight()) / 32f;
+        float hWest = (float) (flowState.getSideHeight(HorizontalFace.WEST) + flowState.getCenterHeight()) / 32f;
         
-        float hSW = (float) (flowState.getCornerHeight(HorizontalCorner.SOUTH_WEST) + flowState.getCenterHeight()
-         + flowState.getSideHeight(HorizontalFace.SOUTH) + flowState.getSideHeight(HorizontalFace.WEST)) / 60f;
-        
-        float hSE = (float) (flowState.getCornerHeight(HorizontalCorner.SOUTH_EAST) + flowState.getCenterHeight()
-        + flowState.getSideHeight(HorizontalFace.SOUTH) + flowState.getSideHeight(HorizontalFace.EAST)) / 60f;
+        float hSW = getCornerHeight(flowState, HorizontalFace.SOUTH, HorizontalFace.WEST);
+        float hSE = getCornerHeight(flowState, HorizontalFace.SOUTH, HorizontalFace.EAST);
+        float hNW = getCornerHeight(flowState, HorizontalFace.NORTH, HorizontalFace.WEST);
+        float hNE = getCornerHeight(flowState, HorizontalFace.NORTH, HorizontalFace.EAST);
+   
 
-        float hNE = (float) (flowState.getCornerHeight(HorizontalCorner.NORTH_EAST) + flowState.getCenterHeight()
-        + flowState.getSideHeight(HorizontalFace.NORTH) + flowState.getSideHeight(HorizontalFace.EAST)) / 60f;
-
-        float hNW = (float) (flowState.getCornerHeight(HorizontalCorner.NORTH_WEST) + flowState.getCenterHeight()
-        + flowState.getSideHeight(HorizontalFace.NORTH) + flowState.getSideHeight(HorizontalFace.WEST)) / 60f;
+//        if((flowState.getSideHeight(HorizontalFace.NORTH) > 16 || flowState.getSideHeight(HorizontalFace.EAST) > 16)
+//                && hNE < 1.0f) hNE = 1.0f;
+//
+//        if((flowState.getSideHeight(HorizontalFace.NORTH) > 16 || flowState.getSideHeight(HorizontalFace.WEST) > 16)
+//                && hNE < 1.0f) hNW = 1.0f;
+//
+//        if((flowState.getSideHeight(HorizontalFace.SOUTH) > 16 || flowState.getSideHeight(HorizontalFace.EAST) > 16)
+//                && hNE < 1.0f) hSE = 1.0f;
+//
+//        if((flowState.getSideHeight(HorizontalFace.SOUTH) > 16 || flowState.getSideHeight(HorizontalFace.WEST) > 16)
+//                && hNE < 1.0f) hSW = 1.0f;
         
-        // normal calculation for later reference - assumes a quad, but works for triangle also
+// normal calculation for later reference - assumes a quad, but works for triangle also
         //Vec3d normal = (vertex[2].subtract(vertex[0]).crossProduct(vertex[3].subtract(vertex[1]))).normalize();
 
         switch(face)
@@ -310,85 +345,85 @@ public class FlowModelFactory extends ModelFactory
              break;
              
         case EAST:
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0, 0, 0),
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(0.5, hEast, 0),
-                    new FaceVertex(0, hSE, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
-            
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(1, 0, 0),
-                    new FaceVertex(1, hNE, 0),
-                    new FaceVertex(0.5, hEast, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());        
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0, 0, 0),
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(0.5, hEast, 0),
+//                    new FaceVertex(0, hSE, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
+//            
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(1, 0, 0),
+//                    new FaceVertex(1, hNE, 0),
+//                    new FaceVertex(0.5, hEast, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());        
             
             break;
             
         case NORTH:
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0, 0, 0),
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(0.5, hNorth, 0),
-                    new FaceVertex(0, hNE, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
-            
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(1, 0, 0),
-                    new FaceVertex(1, hNW, 0),
-                    new FaceVertex(0.5, hNorth, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0, 0, 0),
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(0.5, hNorth, 0),
+//                    new FaceVertex(0, hNE, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
+//            
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(1, 0, 0),
+//                    new FaceVertex(1, hNW, 0),
+//                    new FaceVertex(0.5, hNorth, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
             
             break;
             
         case SOUTH:
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0, 0, 0),
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(0.5, hSouth, 0),
-                    new FaceVertex(0, hSW, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
-            
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(1, 0, 0),
-                    new FaceVertex(1, hSE, 0),
-                    new FaceVertex(0.5, hSouth, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0, 0, 0),
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(0.5, hSouth, 0),
+//                    new FaceVertex(0, hSW, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
+//            
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(1, 0, 0),
+//                    new FaceVertex(1, hSE, 0),
+//                    new FaceVertex(0.5, hSouth, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
             
             break;
             
         case WEST:
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0, 0, 0),
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(0.5, hWest, 0),
-                    new FaceVertex(0, hNW, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
-            
-            quadInputs.setupFaceQuad(
-                    new FaceVertex(0.5, 0, 0),
-                    new FaceVertex(1, 0, 0),
-                    new FaceVertex(1, hSW, 0),
-                    new FaceVertex(0.5, hWest, 0),
-                    EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0, 0, 0),
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(0.5, hWest, 0),
+//                    new FaceVertex(0, hNW, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
+//            
+//            quadInputs.setupFaceQuad(
+//                    new FaceVertex(0.5, 0, 0),
+//                    new FaceVertex(1, 0, 0),
+//                    new FaceVertex(1, hSW, 0),
+//                    new FaceVertex(0.5, hWest, 0),
+//                    EnumFacing.UP);
+//            builder.add(quadInputs.createNormalQuad());
             
             break;
             
         case DOWN:
         default:
-            quadInputs.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
-            builder.add(quadInputs.createNormalQuad());
+//            quadInputs.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
+//            builder.add(quadInputs.createNormalQuad());
             break;
         }
 

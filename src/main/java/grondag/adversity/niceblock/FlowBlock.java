@@ -10,30 +10,37 @@ import net.minecraft.world.IBlockAccess;
 
 public class FlowBlock extends NiceBlock implements IFlowBlock
 {
-    private final int levelCount;
+   // private final int levelCount;
+    
+    protected int tickRate = 20;
     
     public FlowBlock(FlowBlockHelper blockModelHelper, BaseMaterial material, String styleName)
     {
         super(blockModelHelper, material, styleName);
-        this.levelCount = blockModelHelper.levelCount;
+    //    this.levelCount = blockModelHelper.levelCount;
     }
 
     /**
-     * Force this to a minimum of 1 because we can only handle 15 values in model construction.
      * (The 0 value is reserved for non flow blocks.)
      * In practice, this makes one meta value (15) redundant.
      */
     @Override
     public int getRenderHeightFromState(IBlockState state)
     {
-        return Math.max(1, ((levelCount - state.getValue(META)) * 16 / levelCount) - 1);
+        return 16 - state.getValue(META);
     }
 
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        // TODO actually implement this
-        return true;
+        if(blockAccess.getBlockState(pos.up()).getBlock() instanceof IFlowBlock)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
 //    @Override
@@ -78,5 +85,18 @@ public class FlowBlock extends NiceBlock implements IFlowBlock
         return true;
     }
 
+    @Override
+    public int getPackedLightmapCoords(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        int lightThis     = world.getCombinedLight(pos, 0);
+        int lightUp       = world.getCombinedLight(pos.up(), 0);
+        int lightThisBase = lightThis & 255;
+        int lightUpBase   = lightUp & 255;
+        int lightThisExt  = lightThis >> 16 & 255;
+        int lightUpExt    = lightUp >> 16 & 255;
+        return (lightThisBase > lightUpBase ? lightThisBase : lightUpBase) |
+               ((lightThisExt > lightUpExt ? lightThisExt : lightUpExt) << 16);
+    }
+ 
     
 }

@@ -4,10 +4,15 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.BlockVolcanicLava;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
+import grondag.adversity.library.IBlockTest;
+import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
+import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.model.QuadFactory.QuadInputs;
 import grondag.adversity.library.model.QuadFactory.QuadInputs.LightingMode;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -17,6 +22,7 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -36,11 +42,23 @@ public class FlowController extends ModelController implements ICollisionHandler
         this.bakedModelFactory = new FlowModelFactory(this);
         this.lightingMode = lightingMode;
     }
-
+    
+    private static IBlockTest testIsFlowBlock = new IBlockTest() {
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
+            
+            if(isDebug) Adversity.log.info("testBlock for " + pos + " = " + ibs.getBlock().toString());
+            return ibs.getBlock() instanceof IFlowBlock;
+        }
+    };
+    
+    private static boolean isDebug = false;
+    
     @Override
     public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
 
+        isDebug = false; //pos.getX() == -317 && pos.getY() == 65 && pos.getZ() == 5;
         /**
          * Height depends on flow height of surrounding blocks, with the complication
          * that height of the block above or below a neighbor block counts.
@@ -53,60 +71,240 @@ public class FlowController extends ModelController implements ICollisionHandler
 
         if(block instanceof IFlowBlock)
         {
+            
+            NeighborBlocks neighbors = new NeighborBlocks(world, pos);
+            
 
-            Block b;
-            IBlockState bs;
-            int[][] neighborHeight = new int[3][3];
             
-            bs = world.getBlockState(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()));
-            b = bs.getBlock();
-            boolean isUnderFlow  = b instanceof IFlowBlock;
-                
-            for(int x = 0; x < 3; x++)
-            {
-                for(int z = 0; z < 3; z++)
-                {
-                    if(isUnderFlow)
-                    {
-                        neighborHeight[x][z] = 15;
-                    }
-                    else
-                    {
-                        neighborHeight[x][z] = 0;
-                        
-                        bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, pos.getY() + 1, pos.getZ() - 1 + z));
-                        b = bs.getBlock();
-                        if(b instanceof IFlowBlock)
-                        {
-                            neighborHeight[x][z] = 15;
-                        }
-                        else
-                        {
-                            bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, pos.getY(), pos.getZ() - 1 + z));
-                            b = bs.getBlock();
-                            if(b instanceof IFlowBlock)
-                            {
-                                neighborHeight[x][z] = ((IFlowBlock)b).getRenderHeightFromState(bs);
-                            }
-                        }
-                    }
-                }
-            }
+            NeighborTestResults isFlow =  neighbors.getNeighborTestResults(testIsFlowBlock);
+      
             
-            flowState.setCenterHeight(neighborHeight[1][1]);
+//            Block b;
+//            IBlockState bs;
+//            int[][] neighborHeight = new int[3][3];
+//                        
+//            if(isFlow.result(EnumFacing.UP))
+//            {
+//                flowState.setSideHeight(HorizontalFace.NORTH, 49);
+//                return flowState.getStateKey() | (this.alternator.getAlternate(pos) << 52);
+//            }
+//            
+//            bs = world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
+//            b = bs.getBlock();
+//            boolean isOverFlow  = b instanceof IFlowBlock;
+//            
+//            for(int x = 0; x < 3; x++)
+//            {
+//                for(int z = 0; z < 3; z++)
+//                {
+////                    if(isUnderFlow)
+////                    {
+////                        // if under another flow block, take the appearance of full cube
+////                        neighborHeight[x][z] = 16;
+////                    }
+////                    else
+//                    {
+//                        neighborHeight[x][z] = 0;
+//                        boolean upPresent = false;
+//                        
+//                        bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, pos.getY() + 1, pos.getZ() - 1 + z));
+//                        b = bs.getBlock();
+//                        if(b instanceof IFlowBlock)
+//                        {
+//                            neighborHeight[x][z] = 32 - bs.getValue(NiceBlock.META);
+//                            upPresent = true;
+//                        }
+//                        
+//                        bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, pos.getY(), pos.getZ() - 1 + z));
+//                        b = bs.getBlock();
+//                        
+//                        if(b instanceof IFlowBlock)
+//                        {
+//                            if(!upPresent)
+//                            {
+//                                neighborHeight[x][z] = 16 - bs.getValue(NiceBlock.META);
+//                        
+//                            }
+//                        }
+//                        else 
+//                        {
+//                            if(upPresent)
+//                            {
+//                                // if we had an up block but no middle, then up block doesn't count
+//                                neighborHeight[x][z] = 0;
+//                            }
+//                            
+//                            // bottom doesn't count unless center is over a block
+//                            if(isOverFlow)
+//                                {    
+//                                bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, pos.getY() - 1, pos.getZ() - 1 + z));
+//                                b = bs.getBlock();
+//                                if(b instanceof IFlowBlock)
+//                                {
+//                                    neighborHeight[x][z] = 0 - bs.getValue(NiceBlock.META);
+//                                }
+//                                else
+//                                {
+//                                    neighborHeight[x][z] = -16;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+            
+            flowState.setCenterHeight(16 - state.getValue(NiceBlock.META));
 
             for(HorizontalFace side : HorizontalFace.values())
             {
-                flowState.setSideHeight(side, neighborHeight[side.directionVector.getX() + 1][side.directionVector.getZ() + 1]);
+                
+              if(isFlow.resultUp(side))
+              {
+                  flowState.setSideHeight(side, 32 - neighbors.getBlockStateUp(side).getValue(NiceBlock.META));
+              }
+              else if(isFlow.result(side))
+              {
+                   flowState.setSideHeight(side, 16 - neighbors.getBlockState(side).getValue(NiceBlock.META));
+              }
+              else if(isFlow.resultDown(side))
+              {
+                   flowState.setSideHeight(side, 0 - neighbors.getBlockStateDown(side).getValue(NiceBlock.META));
+              }
+              else
+              {
+                  if((isFlow.result(EnumFacing.DOWN, side.left, side.face) && !isFlow.result(side.left, side.face))
+                      || (isFlow.result(EnumFacing.DOWN, side.right, side.face) && !isFlow.result(side.right, side.face))
+                          )
+                  {
+                      flowState.setSideHeight(side, -16);
+                  }
+                  else
+                  {
+                      flowState.setSideHeight(side, 0);
+                  }
+              }
+//                 if(isFlow.result(side))
+//                {
+//                    if(isFlow.resultUp(side))
+//                    {
+//                        flowState.setSideHeight(side, 32 - neighbors.getBlockStateUp(side).getValue(NiceBlock.META));
+//                    }
+//                    else
+//                    {
+//                        flowState.setSideHeight(side, 16 - neighbors.getBlockState(side).getValue(NiceBlock.META));
+//                    }
+//                }
+//                else
+//                {
+//                    if(isFlow.result(EnumFacing.DOWN))
+//                    {
+//                        if(isFlow.resultDown(side))
+//                        {
+//                            flowState.setSideHeight(side, 0 - neighbors.getBlockStateDown(side).getValue(NiceBlock.META));
+//                        }
+//                        else
+//                        {
+//                            flowState.setSideHeight(side, -16);
+//                        }
+//                    }
+//                    else
+//                    {
+//                        flowState.setSideHeight(side, 0);
+//                    }
+//                }
             }
             
             for(HorizontalCorner corner : HorizontalCorner.values())
             {
-                flowState.setCornerHeight(corner, neighborHeight[corner.directionVector.getX() + 1][corner.directionVector.getZ() + 1]);
+             //   boolean cornerFound = false;
+                
+                if(isFlow.resultUp(corner))
+                {
+//                    if((isFlow.resultUp(corner.face1) && isFlow.result(corner.face1))
+//                            || (isFlow.resultUp(corner.face2) && isFlow.result(corner.face2))
+//                            || (isFlow.result(corner)))
+//                    {
+                        flowState.setCornerHeight(corner, 32 - neighbors.getBlockStateUp(corner).getValue(NiceBlock.META));
+                      //  cornerFound = true;
+//                    }
+                }
+                else if(isFlow.result(corner))
+                {
+//                    if(isFlow.result(corner.face1) || isFlow.result(corner.face2))
+                    {
+                        flowState.setCornerHeight(corner, 16 - neighbors.getBlockState(corner).getValue(NiceBlock.META));
+                     //   cornerFound = true;
+                    }
+                }
+                else if(isFlow.resultDown(corner))
+                {
+//                    if((isFlow.resultDown(corner.face1) && isFlow.result(corner.face1))
+//                            || (isFlow.resultDown(corner.face2) && isFlow.result(corner.face2))
+//                            || isFlow.resultDown(corner))
+                    {
+                        flowState.setCornerHeight(corner, 0 - neighbors.getBlockStateDown(corner).getValue(NiceBlock.META));
+                      //  cornerFound = true;
+                    }
+                }
+                else // if (!cornerFound)
+                {
+//                    // corner down must be connected some way to count
+//                    if((isFlow.resultDown(corner.face1) && (isFlow.result(corner.face1) || isFlow.result(EnumFacing.DOWN)))
+//                            || (isFlow.resultDown(corner.face2)  && (isFlow.result(corner.face2) || isFlow.result(EnumFacing.DOWN))))
+//
+//                    {
+                    
+                  // for corner to be -16, must have an adjacent flow block that is not covered
+                  if((isFlow.resultDown(corner.face1) && !isFlow.result(corner.face1))
+                          || (isFlow.resultDown(corner.face2) && !isFlow.result(corner.face2))
+                  )
+                  {
+                      flowState.setCornerHeight(corner, -16);
+                  }
+                  else if((isFlow.result(corner.face1) && !isFlow.resultUp(corner.face1))
+                          || (isFlow.result(corner.face2) && !isFlow.resultUp(corner.face2))
+                  )
+                  {
+                      flowState.setCornerHeight(corner, 0);
+                  }
+
+                  else if((isFlow.resultUp(corner.face1))
+                          || (isFlow.resultUp(corner.face2))
+                  )
+                  {
+                      flowState.setCornerHeight(corner, 16);
+                  }
+                  else
+                  {
+                      flowState.setCornerHeight(corner, 0);
+                  }
+//                    }
+//                    else // if(isFlow.result(corner.face1) || isFlow.result(corner.face2))
+//                    {
+//                        flowState.setCornerHeight(corner, 0);
+//                    }
+//                    else if(neighbors.getBlockState(corner.face1).isFullCube() || neighbors.getBlockState(corner.face2).isFullCube())
+//                    {
+//                        flowState.setCornerHeight(corner, 16 - state.getValue(NiceBlock.META));
+//                    }
+//                    else
+//                    {
+//                        flowState.setCornerHeight(corner, 0);
+//                    }  
+                }
+                        
             }
+            if(isDebug) 
+            {
+                Adversity.log.info("debugging " + pos.toString());
+                Adversity.log.info(isFlow.toString());
+                Adversity.log.info(flowState.toString());
+            }
+    
         }
 
-        return flowState.getStateKey() | (this.alternator.getAlternate(pos) << 36);
+
+        return flowState.getStateKey() | (this.alternator.getAlternate(pos) << 52);
 
     }
 
@@ -114,12 +312,12 @@ public class FlowController extends ModelController implements ICollisionHandler
     @Override
     public int getAltTextureFromModelIndex(long clientShapeIndex)
     {
-        return (int) (clientShapeIndex >>> 36);
+        return (int) (clientShapeIndex >>> 52);
     }
 
     public FlowHeightState getFlowHeightStateFromModelIndex(long clientShapeIndex)
     {
-        return new FlowHeightState(clientShapeIndex & 0xFFFFFFFFFL);
+        return new FlowHeightState(clientShapeIndex & 0xFFFFFFFFFFFFFL);
     }
 
     @Override
@@ -142,7 +340,7 @@ public class FlowController extends ModelController implements ICollisionHandler
         return retVal;
     }
     
-    public class FlowHeightState
+    public static class FlowHeightState
     {
         private long stateKey;
 
@@ -151,7 +349,7 @@ public class FlowController extends ModelController implements ICollisionHandler
             return stateKey;
         }
 
-        private FlowHeightState(long stateKey)
+        FlowHeightState(long stateKey)
         {
             this.stateKey = stateKey;
         }
@@ -170,27 +368,42 @@ public class FlowController extends ModelController implements ICollisionHandler
         }
 
 
-        // Rendering height of corner and side neighbors ranges from 0 to 15
+        // Rendering height of corner and side neighbors ranges 
+        // from -16 (no blocks) to 48. 
 
         public void setSideHeight(HorizontalFace side, int height)
         {
-            stateKey |= ((long)(height) << (4 + side.ordinal() * 4));
+            stateKey |= ((long)(height + 16) << (4 + side.ordinal() * 6));
         }
 
         public int getSideHeight(HorizontalFace side)
         {
-            return (int) ((stateKey >> (4 + side.ordinal() * 4)) & 0xF);
+            return (int) ((stateKey >> (4 + side.ordinal() * 6)) & 0x3F) - 16;
         }
 
 
         public void setCornerHeight(HorizontalCorner corner, int height)
         {
-            stateKey |= ((long)(height) << (20 + corner.ordinal() * 4));
+            stateKey |= ((long)(height + 16) << (28 + corner.ordinal() * 6));
         }
 
         public int getCornerHeight(HorizontalCorner corner)
         {
-            return (int) ((stateKey >> (20 + corner.ordinal() * 4)) & 0xF);
+            return (int) ((stateKey >> (28 + corner.ordinal() * 6)) & 0x3F) - 16;
+        }
+        
+        public String toString()
+        {
+            String retval = "Center=" + this.getCenterHeight();
+            for(HorizontalFace side: HorizontalFace.values())
+            {
+                retval += " " + side.name() + "=" + this.getSideHeight(side);
+            }
+            for(HorizontalCorner corner: HorizontalCorner.values())
+            {
+                retval += " " + corner.name() + "=" + this.getCornerHeight(corner);
+            }
+            return retval;
         }
     }
 }

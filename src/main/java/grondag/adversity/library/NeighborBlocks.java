@@ -13,40 +13,68 @@ import net.minecraft.world.IBlockAccess;
  * and values are cached for reuse.
  */
 public class NeighborBlocks {
-	
+
     public final static int[] FACE_FLAGS = new int[]{1, 2, 4, 8, 16, 32};
 
-	private IBlockState blockStates[] = new IBlockState[EnumFacing.values().length];
+    private IBlockState blockStates[] = new IBlockState[EnumFacing.values().length];
     private IBlockState cornerStates[] = new IBlockState[BlockCorner.values().length];
     private IBlockState farCornerStates[] = new IBlockState[FarCorner.values().length];
-	
-	private final IBlockAccess world;
-	private final BlockPos pos;
 
-	/**
-	 * Gathers blockstates for adjacent positions as needed.
-	 */
-	public NeighborBlocks(IBlockAccess worldIn, BlockPos pos) {
-		this.world = worldIn;
-		this.pos = pos;
-	}
+    private final IBlockAccess world;
+    private final BlockPos pos;
 
-	public IBlockState getBlockState(EnumFacing face)
-	{
-	    if(blockStates[face.ordinal()] == null)
-	    {
-	        blockStates[face.ordinal()] = world.getBlockState(pos.add(face.getDirectionVec()));
-	    }
-	    return blockStates[face.ordinal()];
- 	}
-	
-	public IBlockState getBlockState(EnumFacing face1, EnumFacing face2)
-	{
-	    BlockCorner corner = BlockCorner.find(face1, face2);
-	    return getBlockState(corner);
-	}
+    /**
+     * Gathers blockstates for adjacent positions as needed.
+     */
+    public NeighborBlocks(IBlockAccess worldIn, BlockPos pos) {
+        this.world = worldIn;
+        this.pos = pos;
+    }
 
-   public IBlockState getBlockState(BlockCorner corner)
+    public IBlockState getBlockState(EnumFacing face)
+    {
+        if(blockStates[face.ordinal()] == null)
+        {
+            blockStates[face.ordinal()] = world.getBlockState(pos.add(face.getDirectionVec()));
+        }
+        return blockStates[face.ordinal()];
+    }
+
+    public IBlockState getBlockState(HorizontalFace face)
+    {
+        return getBlockState(face.face);
+    }
+
+    public IBlockState getBlockStateUp(HorizontalFace face)
+    {
+        return getBlockState(face.face, EnumFacing.UP);
+    }
+
+    public IBlockState getBlockStateDown(HorizontalFace face)
+    {
+        return getBlockState(face.face, EnumFacing.DOWN);
+    }
+    public IBlockState getBlockState(EnumFacing face1, EnumFacing face2)
+    {
+        BlockCorner corner = BlockCorner.find(face1, face2);
+        return getBlockState(corner);
+    }
+
+    public IBlockState getBlockState(HorizontalCorner corner)
+    {
+        return getBlockState(corner.face1.face, corner.face2.face);
+    }
+
+    public IBlockState getBlockStateUp(HorizontalCorner corner)
+    {
+        return getBlockState(corner.face1.face, corner.face2.face, EnumFacing.UP);
+    }
+
+    public IBlockState getBlockStateDown(HorizontalCorner corner)
+    {
+        return getBlockState(corner.face1.face, corner.face2.face, EnumFacing.DOWN);
+    }
+    public IBlockState getBlockState(BlockCorner corner)
     {
         if(cornerStates[corner.ordinal()] == null)
         {
@@ -54,66 +82,96 @@ public class NeighborBlocks {
         }
         return cornerStates[corner.ordinal()];
     }
-   
-   public IBlockState getBlockState(EnumFacing face1, EnumFacing face2, EnumFacing face3)
-   {
-       FarCorner corner = FarCorner.find(face1, face2, face3);
-       return getBlockState(corner);
-   }
 
-  public IBlockState getBlockState(FarCorner corner)
-   {
-       if(farCornerStates[corner.ordinal()] == null)
-       {
-           farCornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.directionVector));
-       }
-       return farCornerStates[corner.ordinal()];
-   }
-  
-	/**
-	 * Apply given test to neighboring block states.
-	 */
-	public NeighborTestResults getNeighborTestResults(IBlockTest test) {
-		return new NeighborTestResults(test);
-	}
+    public IBlockState getBlockState(EnumFacing face1, EnumFacing face2, EnumFacing face3)
+    {
+        FarCorner corner = FarCorner.find(face1, face2, face3);
+        return getBlockState(corner);
+    }
 
-	/**
-	 * Convenient data structure for returning test results.
-	 */
-	public class NeighborTestResults {
+    public IBlockState getBlockState(FarCorner corner)
+    {
+        if(farCornerStates[corner.ordinal()] == null)
+        {
+            farCornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.directionVector));
+        }
+        return farCornerStates[corner.ordinal()];
+    }
 
-		private int completionFlags = 0;
-		private int resultFlags = 0;
-		private final IBlockTest test;
+    /**
+     * Apply given test to neighboring block states.
+     */
+    public NeighborTestResults getNeighborTestResults(IBlockTest test) {
+        return new NeighborTestResults(test);
+    }
 
-		protected NeighborTestResults(IBlockTest test) {
-			this.test = test;
-		}
-		
-		public boolean result(EnumFacing face)
-		{
-		    int bitFlag = FACE_FLAGS[face.ordinal()];
-		    if((completionFlags & bitFlag) != bitFlag) {
-		        if(test.testBlock(world, NeighborBlocks.this.getBlockState(face), pos.add(face.getDirectionVec())))
-		        {
-		            resultFlags |= bitFlag;
-		        }
-		        completionFlags |= bitFlag;
-		    }
-		    return (resultFlags & bitFlag) == bitFlag;
-		}
-		
-		/** convenience method */
-		public int resultBit(EnumFacing face){
-			return  result(face) ? 1 : 0;
-		}
-		
+    /**
+     * Convenient data structure for returning test results.
+     */
+    public class NeighborTestResults {
+
+        private int completionFlags = 0;
+        private int resultFlags = 0;
+        private final IBlockTest test;
+
+        protected NeighborTestResults(IBlockTest test) {
+            this.test = test;
+        }
+
+        public boolean result(EnumFacing face)
+        {
+            int bitFlag = FACE_FLAGS[face.ordinal()];
+            if((completionFlags & bitFlag) != bitFlag) {
+                if(test.testBlock(world, NeighborBlocks.this.getBlockState(face), pos.add(face.getDirectionVec())))
+                {
+                    resultFlags |= bitFlag;
+                }
+                completionFlags |= bitFlag;
+            }
+            return (resultFlags & bitFlag) == bitFlag;
+        }
+
+        public boolean result(HorizontalFace face)
+        {
+            return result(face.face);
+        }
+
+        public boolean resultUp(HorizontalFace face)
+        {
+            return result(face.face, EnumFacing.UP);
+        }
+
+        public boolean resultDown(HorizontalFace face)
+        {
+            return result(face.face, EnumFacing.DOWN);
+        }
+
+        /** convenience method */
+        public int resultBit(EnumFacing face){
+            return  result(face) ? 1 : 0;
+        }
+
         public boolean result(EnumFacing face1, EnumFacing face2)
         {
             BlockCorner corner = BlockCorner.find(face1, face2);
             return result(corner);
         }
-        
+
+        public boolean result(HorizontalCorner corner)
+        {
+            return result(corner.face1.face, corner.face2.face);
+        }
+
+        public boolean resultUp(HorizontalCorner corner)
+        {
+            return result(corner.face1.face, corner.face2.face, EnumFacing.UP);
+        }
+
+        public boolean resultDown(HorizontalCorner corner)
+        {
+            return result(corner.face1.face, corner.face2.face, EnumFacing.DOWN);
+        }
+
         public boolean result(BlockCorner corner)
         {
             if((completionFlags & corner.bitFlag) != corner.bitFlag) {
@@ -125,23 +183,23 @@ public class NeighborBlocks {
             }
             return (resultFlags & corner.bitFlag) == corner.bitFlag;
         }
-        
+
         public int resultBit(EnumFacing face1, EnumFacing face2)
         {
             return  result(face1, face2) ? 1 : 0;
         }
-        
+
         public int resultBit(BlockCorner corner)
         {
             return  result(corner) ? 1 : 0;
         }
-        
+
         public boolean result(EnumFacing face1, EnumFacing face2, EnumFacing face3)
         {
             FarCorner corner = FarCorner.find(face1, face2, face3);
             return result(corner);
         }
-        
+
         public boolean result(FarCorner corner)
         {
             if((completionFlags & corner.bitFlag) != corner.bitFlag) {
@@ -153,18 +211,39 @@ public class NeighborBlocks {
             }
             return (resultFlags & corner.bitFlag) == corner.bitFlag;
         }
-        
+
         public int resultBit(EnumFacing face1, EnumFacing face2, EnumFacing face3)
         {
             return  result(face1, face2, face3) ? 1 : 0;
         }
-        
+
         public int resultBit(FarCorner corner)
         {
             return  result(corner) ? 1 : 0;
         }
-	}
-	
+        
+        public String toString()
+        {
+            String retval = "";
+            
+            for(EnumFacing face : EnumFacing.values())
+            {
+                retval += face.toString() + "=" + this.result(face) + " ";
+            }
+
+            for(BlockCorner corner : BlockCorner.values())
+            {
+                retval += corner.toString() + "=" + this.result(corner) + " ";
+            }
+            
+            for(FarCorner corner : FarCorner.values())
+            {
+                retval += corner.toString() + "=" + this.result(corner) + " ";
+            }
+            return retval;
+        }
+    }
+
     private static BlockCorner[][] CORNER_LOOKUP = new BlockCorner[6][6];
 
     public static enum BlockCorner
@@ -181,13 +260,13 @@ public class NeighborBlocks {
         DOWN_WEST(EnumFacing.DOWN, EnumFacing.WEST),
         DOWN_NORTH(EnumFacing.DOWN, EnumFacing.NORTH),
         DOWN_SOUTH(EnumFacing.DOWN, EnumFacing.SOUTH);
-        
+
         public final EnumFacing face1;
         public final EnumFacing face2;
         public final EnumFacing.Axis axis;
         public final int bitFlag;
         public final Vec3i directionVector;
-        
+
         private BlockCorner(EnumFacing face1, EnumFacing face2)
         {
             this.face1 = face1;
@@ -196,59 +275,72 @@ public class NeighborBlocks {
             boolean hasX = (face1.getAxis() == EnumFacing.Axis.X || face2.getAxis() == EnumFacing.Axis.X);
             boolean hasY = (face1.getAxis() == EnumFacing.Axis.Y || face2.getAxis() == EnumFacing.Axis.Y);
             this.axis = hasX && hasY ? EnumFacing.Axis.Z : hasX ? EnumFacing.Axis.Y : EnumFacing.Axis.X;
-            
+
             CORNER_LOOKUP[face1.ordinal()][face2.ordinal()] = this;
             CORNER_LOOKUP[face2.ordinal()][face1.ordinal()] = this;
-            
+
             Vec3i v1 = face1.getDirectionVec();
             Vec3i v2 = face2.getDirectionVec();
             this.directionVector = new Vec3i(v1.getX() + v2.getX(), v1.getY() + v2.getY(), v1.getZ() + v2.getZ());
 
         }
-        
+
         public static BlockCorner find(EnumFacing face1, EnumFacing face2)
         {
             return CORNER_LOOKUP[face1.ordinal()][face2.ordinal()];
         }
     }
-   
+
+    private static HorizontalCorner[][] HORIZONTAL_CORNER_LOOKUP = new HorizontalCorner[4][4];
+
     public static enum HorizontalCorner
     {
-        NORTH_EAST(EnumFacing.NORTH, EnumFacing.EAST),
-        NORTH_WEST(EnumFacing.NORTH, EnumFacing.WEST),
-        SOUTH_EAST(EnumFacing.SOUTH, EnumFacing.EAST),
-        SOUTH_WEST(EnumFacing.SOUTH, EnumFacing.WEST);
-        
-        public final EnumFacing face1;
-        public final EnumFacing face2;
-        
+        NORTH_EAST(HorizontalFace.NORTH, HorizontalFace.EAST),
+        NORTH_WEST(HorizontalFace.NORTH, HorizontalFace.WEST),
+        SOUTH_EAST(HorizontalFace.SOUTH, HorizontalFace.EAST),
+        SOUTH_WEST(HorizontalFace.SOUTH, HorizontalFace.WEST);
+
+        public final HorizontalFace face1;
+        public final HorizontalFace face2;
+
         public final Vec3i directionVector;
-                
-        private HorizontalCorner(EnumFacing face1, EnumFacing face2)
+
+        private HorizontalCorner(HorizontalFace face1, HorizontalFace face2)
         {
             this.face1 = face1;
             this.face2 = face2;
-            this.directionVector = new Vec3i(face1.getDirectionVec().getX() + face2.getDirectionVec().getX(), 0, face1.getDirectionVec().getZ() + face2.getDirectionVec().getZ());
+            this.directionVector = new Vec3i(face1.face.getDirectionVec().getX() + face2.face.getDirectionVec().getX(), 0, face1.face.getDirectionVec().getZ() + face2.face.getDirectionVec().getZ());
+            HORIZONTAL_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()] = this;
+            HORIZONTAL_CORNER_LOOKUP[face2.ordinal()][face1.ordinal()] = this;
+        }
+
+        public static HorizontalCorner find(HorizontalFace face1, HorizontalFace face2)
+        {
+            return HORIZONTAL_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()];
         }
     }
-    
+
     public static enum HorizontalFace
     {
-        NORTH(EnumFacing.NORTH),
-        EAST(EnumFacing.EAST),
-        SOUTH(EnumFacing.SOUTH),
-        WEST(EnumFacing.WEST);
-        
+        NORTH(EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.EAST),
+        EAST(EnumFacing.EAST, EnumFacing.NORTH, EnumFacing.SOUTH),
+        SOUTH(EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST),
+        WEST(EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.NORTH);
+
         public final EnumFacing face;
-        
+        public final EnumFacing left;
+        public final EnumFacing right;
+
         public final Vec3i directionVector;
-                
-        private HorizontalFace(EnumFacing face)
+
+        private HorizontalFace(EnumFacing face, EnumFacing left, EnumFacing right)
         {
             this.face = face;
+            this.left = left;
+            this.right = right;
             this.directionVector = face.getDirectionVec();
         }
-        
+
     }
     private static FarCorner[][][] FAR_CORNER_LOOKUP = new FarCorner[6][6][6];
 
@@ -263,21 +355,21 @@ public class NeighborBlocks {
         DOWN_SOUTH_EAST(EnumFacing.DOWN, EnumFacing.EAST, EnumFacing.SOUTH),
         DOWN_SOUTH_WEST(EnumFacing.DOWN, EnumFacing.WEST, EnumFacing.SOUTH);
 
-        
+
         public final EnumFacing face1;
         public final EnumFacing face2;
         public final EnumFacing face3;
         public final int bitFlag;
         public final Vec3i directionVector;
 
-        
+
         private FarCorner(EnumFacing face1, EnumFacing face2, EnumFacing face3)
         {
             this.face1 = face1;
             this.face2 = face2;
             this.face3 = face3;
             this.bitFlag = 1 << (FACE_FLAGS.length + BlockCorner.values().length + this.ordinal());
-            
+
             FAR_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()][face3.ordinal()] = this;
             FAR_CORNER_LOOKUP[face1.ordinal()][face3.ordinal()][face2.ordinal()] = this;
             FAR_CORNER_LOOKUP[face2.ordinal()][face1.ordinal()][face3.ordinal()] = this;
@@ -291,7 +383,7 @@ public class NeighborBlocks {
             this.directionVector = new Vec3i(v1.getX() + v2.getX() + v3.getX(), v1.getY() + v2.getY() + v3.getY(), v1.getZ() + v2.getZ() + v3.getZ());
 
         }
-        
+
         public static FarCorner find(EnumFacing face1, EnumFacing face2, EnumFacing face3)
         {
             return FAR_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()][face3.ordinal()];

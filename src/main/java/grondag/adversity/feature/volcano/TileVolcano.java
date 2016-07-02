@@ -1,15 +1,23 @@
 package grondag.adversity.feature.volcano;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeMap;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
@@ -59,26 +67,26 @@ public class TileVolcano extends TileEntity implements ITickable{
 	}
 
 	// true if relatively few nearby blocks at this level would stop lava
-	private boolean areOuterBlocksOpen(int y) {
-
-		int closedCount = 0;
-		final int THRESHOLD = 16;
-
-		for (int x = this.pos.getX() - 7; x <= this.pos.getX() + 7; ++x) {
-			for (int z = this.pos.getZ() - 7; z <= this.pos.getZ() + 7; ++z) {
-				if (!(this.worldObj.getBlockState(pos).getBlock() == Volcano.blockVolcanicLava 
-				        || Volcano.blockVolcanicLava.canDisplace(this.worldObj, pos))) {
-					++closedCount;
-					if (closedCount >= THRESHOLD) {
-						break;
-					}
-				}
-			}
-		}
-
-		return closedCount < THRESHOLD;
-
-	}
+//	private boolean areOuterBlocksOpen(int y) {
+//
+//		int closedCount = 0;
+//		final int THRESHOLD = 16;
+//
+//		for (int x = this.pos.getX() - 7; x <= this.pos.getX() + 7; ++x) {
+//			for (int z = this.pos.getZ() - 7; z <= this.pos.getZ() + 7; ++z) {
+//				if (!(this.worldObj.getBlockState(pos).getBlock() == Volcano.blockVolcanicLava 
+//				        || Volcano.blockVolcanicLava.canDisplace(this.worldObj, pos))) {
+//					++closedCount;
+//					if (closedCount >= THRESHOLD) {
+//						break;
+//					}
+//				}
+//			}
+//		}
+//
+//		return closedCount < THRESHOLD;
+//
+//	}
 
 	private boolean areInnerBlocksOpen(int y) {
 		return this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ()), true)
@@ -167,117 +175,289 @@ public class TileVolcano extends TileEntity implements ITickable{
 		}
 	}
 
-	@Override
-	public void update() {
-	    if(this.worldObj.isRemote) return;
-	    
-	    // dead volcanoes don't do anything
-	    if(stage == VolcanoStage.DEAD) return;
+
+    
+    private boolean canDisplace(BlockPos pos) {
+
+        IBlockState state = this.worldObj.getBlockState(pos);
         
-        if(weight < Integer.MAX_VALUE) weight++;
-	    
-        // everything after this point only happens 1x every 16 ticks.
-        if ((this.worldObj.getTotalWorldTime() & 15) != 15) return;
+        if (state.getBlock() == NiceBlockRegistrar.BLOCK_FLOWING_LAVA)
+        {
+            return false;
+        }
 
-        this.markDirty();
+        Material material = state.getMaterial();
+        if (material == Material.clay ) return false;
+        if (material == Material.dragonEgg ) return false;
+        if (material == Material.ground ) return false;
+        if (material == Material.iron ) return false;
+        if (material == Material.sand ) return false;
+        if (material == Material.portal ) return false;
+        if (material == Material.rock ) return false;
+        if (material == Material.anvil ) return false;
+        if (material == Material.grass ) return false;
 
-        if (node.isActive()) {
+        // Volcanic lava don't give no shits.
+        return true;        
 
-            this.markDirty();
-
-			if ((this.worldObj.getTotalWorldTime() & 255) == 255) {
-				Adversity.log.info("Volcanot State @" + this.pos.toString() + " = " + this.stage);
-			}
-
-			this.makeHaze();
-			
-			if (this.stage == VolcanoStage.NEW) 
-			{
-				this.level = this.getPos().getY();
-
-				++this.level;
-
-				this.levelsTilDormant = 80 - this.level;
-				this.stage = VolcanoStage.NEW_LEVEL;
-			}
-			else if (this.stage == VolcanoStage.DORMANT) 
-			{
-
-			    // Simulation shouldn't reactivate a volcano that is already at build limit
-			    // but deactivate if it somehow does.
-				if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
-				{
-				    this.weight = 0;
-				    this.stage = VolcanoStage.DEAD;
-					this.node.deActivate();
-					return;
-				}
-				
-				int window = VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT - this.level;
-				int interval = Math.min(1, window / 10);
-				
-                // always grow at least 10% of the available window
-                // plus 0 to 36% with a total average around 28%
-				this.levelsTilDormant = Math.min(window,
-				        interval
-				        + this.worldObj.rand.nextInt(interval)
-				        + this.worldObj.rand.nextInt(interval)
-				        + this.worldObj.rand.nextInt(interval)
-				        + this.worldObj.rand.nextInt(interval));
-
-				if (this.level >= 70) {
-					this.blowOut(4, 5);
-				}
-				this.stage = VolcanoStage.BUILDING_INNER;
-			} 
-			else if (this.stage == VolcanoStage.NEW_LEVEL) 
-			{
-				if (!this.areInnerBlocksOpen(this.level)) {
-				    this.worldObj.createExplosion(null, this.pos.getX(), this.level - 1, this.pos.getZ(), 5, true);
-				}
-				this.stage = VolcanoStage.BUILDING_INNER;
-			} 
-			else if (this.stage == VolcanoStage.BUILDING_INNER) 
-			{
-				if (this.buildLevel <= this.pos.getY() || this.buildLevel > this.level) {
-					this.buildLevel = this.pos.getY() + 1;
-				}
-				Useful.fill2dCircleInPlaneXZ(this.worldObj, this.pos.getX(), this.buildLevel, this.pos.getZ(), 3,
-						Volcano.blockVolcanicLava.getDefaultState());
-				if (this.buildLevel < this.level) {
-					++this.buildLevel;
-				} else {
-					this.buildLevel = 0;
-					this.stage = VolcanoStage.TESTING_OUTER;
-				}
-			}
-			else if (this.stage == VolcanoStage.TESTING_OUTER)
-			{
-				if (this.areOuterBlocksOpen(this.level))
-				{
-					this.stage = VolcanoStage.BUILDING_INNER;
-				}
-				else if (this.levelsTilDormant == 0)
-				{
-					this.stage = VolcanoStage.DORMANT;
-					if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
-	                {
-	                    this.weight = 0;
-	                    this.stage = VolcanoStage.DEAD;
-	                }
-					this.node.deActivate();
-				}
-				else 
-				{
-					++this.level;
-					--this.levelsTilDormant;
-					this.stage = VolcanoStage.NEW_LEVEL;
-				}
-			}
-		}
+    };
+    
+	
+	private TreeMap<Integer, HashSet<OpenPlacement>> spaces = new TreeMap<Integer, HashSet<OpenPlacement>>();
+    private TreeMap<Integer, LavaPlacement> placedLava = new TreeMap<Integer, LavaPlacement>();
+	//private Deque<BlockPos> placedLava = new ArrayDeque<BlockPos>();
+    private boolean firstTime = true;
+    private int backtrackLimit = 0;
+    private int counter = 0;
+	
+    public void update() {
+        if(this.worldObj.isRemote) return;
         
-        node.updateWorldState(this.weight, this.level);
-	}
+        if(firstTime)
+        {
+            placeIfPossible(new OpenPlacement(this.getPos().up(), this.getPos().up()));
+            firstTime = false;
+            backtrackLimit = this.pos.getY() + 3;
+        }
+        
+        if(!spaces.isEmpty())
+        {
+            HashSet<OpenPlacement> things = spaces.firstEntry().getValue();
+            if(!things.isEmpty())
+            {
+                OpenPlacement place = things.iterator().next();
+                
+//                Adversity.log.info("Attempting to place " + place.pos.toString(), ", spaceHash = " + getSpaceHash(place.pos));
+                if(place.pos.getY() < this.backtrackLimit)
+                {
+                    placeIfPossible(place);
+                    this.backtrackLimit = Math.min(backtrackLimit, place.pos.getY() + 3);
+                }
+                things.remove(place);
+                if(things.isEmpty())
+                {
+                    spaces.remove(this.getSpaceHash(place.pos));
+                }
+            }
+        }
+        
+        if (spaces.isEmpty() && !placedLava.isEmpty())// && placedLava.lastEntry().getValue().worldTick < this.worldObj.getWorldTime())
+        {
+            BlockPos target = placedLava.pollLastEntry().getValue().pos;
+            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.BLOCK_FLOWING_LAVA)
+            {
+                this.worldObj.setBlockState(target, NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState()
+                        .withProperty(NiceBlock.META, this.worldObj.getBlockState(target).getValue(NiceBlock.META)));
+            }
+        }
+    }
+    
+    private void placeIfPossible(OpenPlacement placement)
+    {
+        if(this.canDisplace(placement.pos))
+        {
+            double distanceSq = placement.pos.distanceSq(placement.origin);
+            if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
+            
+            
+            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar.BLOCK_FLOWING_LAVA.getDefaultState()
+                    .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
+            this.placedLava.put((int)distanceSq << 16 | this.counter++, 
+                    new LavaPlacement(placement.pos, this.worldObj.getWorldTime() + 60));
+            
+//            Adversity.log.info("placing " + placement.pos.toString());
+            
+            // don't spread sideways if can flow down or if already flowing down
+            if(addSpaceIfOpen(placement.pos.down(), placement.pos.down())
+                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar.BLOCK_FLOWING_LAVA)
+            {
+//                Adversity.log.info("skipping side placements for " + placement.pos.toString());
+                return;
+            }
+            
+            addSpaceIfOpen(placement.pos.east(), placement.origin);
+            addSpaceIfOpen(placement.pos.west(), placement.origin);
+            addSpaceIfOpen(placement.pos.north(), placement.origin);
+            addSpaceIfOpen(placement.pos.south(), placement.origin);
+        }
+    }
+    
+    private boolean addSpaceIfOpen(BlockPos posIn, BlockPos origin)
+    {
+        if(!canDisplace(posIn))
+        {
+//            Adversity.log.info("addSpaceIfOpen returning false for " + posIn.toString());
+            return false;
+        }
+        
+        int spaceHash = this.getSpaceHash(posIn);
+        
+        if(!spaces.containsKey(spaceHash))
+        {
+            spaces.put(spaceHash, new HashSet<OpenPlacement>());
+        }
+        spaces.get(spaceHash).add(new OpenPlacement(posIn, origin));
+
+//        Adversity.log.info("addSpaceIfOpen returning true for " + posIn.toString() + ", spaceHash = " + spaceHash );
+        
+        return true;
+
+    }
+    
+    /**
+     * Generates hash keys that facilitate sorting of spaces for new placement.
+     * Lower blocks come first.  Blocks within the same level are sorted by distance
+     * from center of volcano.
+     */
+    private int getSpaceHash(BlockPos posIn)
+    {
+        int dX = posIn.getX() - this.pos.getX();
+        int dZ = posIn.getZ() - this.pos.getZ();
+        return posIn.getY() << 20 | (dX * dX + dZ * dZ);
+    }
+    
+    private static class OpenPlacement
+    {
+        protected final BlockPos pos;
+        protected final BlockPos origin;
+        
+        protected OpenPlacement(BlockPos pos, BlockPos origin)
+        {
+            this.pos = pos;
+            this.origin = origin;
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return pos.hashCode();
+        }
+    }
+    
+    private static class LavaPlacement
+    {
+        protected final BlockPos pos;
+        protected final long worldTick;
+        
+        protected LavaPlacement(BlockPos pos, Long worldTick)
+        {
+            this.pos = pos;
+            this.worldTick = worldTick;
+        }
+    }
+	
+//	@Override
+//	public void updateOld() {
+//	    if(this.worldObj.isRemote) return;
+//	    
+//	    
+//	    // dead volcanoes don't do anything
+//	    if(stage == VolcanoStage.DEAD) return;
+//        
+//        if(weight < Integer.MAX_VALUE) weight++;
+//	    
+//        // everything after this point only happens 1x every 16 ticks.
+//        if ((this.worldObj.getTotalWorldTime() & 15) != 15) return;
+//
+//        this.markDirty();
+//
+// //       if (node.isActive()) {
+//
+//            this.markDirty();
+//
+//			if ((this.worldObj.getTotalWorldTime() & 255) == 255) {
+//				Adversity.log.info("Volcanot State @" + this.pos.toString() + " = " + this.stage);
+//			}
+//
+//			this.makeHaze();
+//			
+//			if (this.stage == VolcanoStage.NEW) 
+//			{
+//				this.level = this.getPos().getY();
+//
+//				++this.level;
+//
+//				this.levelsTilDormant = 80 - this.level;
+//				this.stage = VolcanoStage.NEW_LEVEL;
+//			}
+//			else if (this.stage == VolcanoStage.DORMANT) 
+//			{
+//
+//			    // Simulation shouldn't reactivate a volcano that is already at build limit
+//			    // but deactivate if it somehow does.
+//				if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
+//				{
+//				    this.weight = 0;
+//				    this.stage = VolcanoStage.DEAD;
+//					this.node.deActivate();
+//					return;
+//				}
+//				
+//				int window = VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT - this.level;
+//				int interval = Math.min(1, window / 10);
+//				
+//                // always grow at least 10% of the available window
+//                // plus 0 to 36% with a total average around 28%
+//				this.levelsTilDormant = Math.min(window,
+//				        interval
+//				        + this.worldObj.rand.nextInt(interval)
+//				        + this.worldObj.rand.nextInt(interval)
+//				        + this.worldObj.rand.nextInt(interval)
+//				        + this.worldObj.rand.nextInt(interval));
+//
+//				if (this.level >= 70) {
+//					this.blowOut(4, 5);
+//				}
+//				this.stage = VolcanoStage.BUILDING_INNER;
+//			} 
+//			else if (this.stage == VolcanoStage.NEW_LEVEL) 
+//			{
+//				if (!this.areInnerBlocksOpen(this.level)) {
+//				    this.worldObj.createExplosion(null, this.pos.getX(), this.level - 1, this.pos.getZ(), 5, true);
+//				}
+//				this.stage = VolcanoStage.BUILDING_INNER;
+//			} 
+//			else if (this.stage == VolcanoStage.BUILDING_INNER) 
+//			{
+//				if (this.buildLevel <= this.pos.getY() || this.buildLevel > this.level) {
+//					this.buildLevel = this.pos.getY() + 1;
+//				}
+//				Useful.fill2dCircleInPlaneXZ(this.worldObj, this.pos.getX(), this.buildLevel, this.pos.getZ(), 3,
+//						Volcano.blockVolcanicLava.getDefaultState());
+//				if (this.buildLevel < this.level) {
+//					++this.buildLevel;
+//				} else {
+//					this.buildLevel = 0;
+//					this.stage = VolcanoStage.TESTING_OUTER;
+//				}
+//			}
+//			else if (this.stage == VolcanoStage.TESTING_OUTER)
+//			{
+//				if (this.areOuterBlocksOpen(this.level))
+//				{
+//					this.stage = VolcanoStage.BUILDING_INNER;
+//				}
+//				else if (this.levelsTilDormant == 0)
+//				{
+//					this.stage = VolcanoStage.DORMANT;
+//					if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
+//	                {
+//	                    this.weight = 0;
+//	                    this.stage = VolcanoStage.DEAD;
+//	                }
+//					this.node.deActivate();
+//				}
+//				else 
+//				{
+//					++this.level;
+//					--this.levelsTilDormant;
+//					this.stage = VolcanoStage.NEW_LEVEL;
+//				}
+//			}
+////		}
+//        
+//        node.updateWorldState(this.weight, this.level);
+//	}
 	
     @Override
 	public void readFromNBT(NBTTagCompound tagCompound) {
