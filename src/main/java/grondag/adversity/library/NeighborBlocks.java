@@ -318,27 +318,49 @@ public class NeighborBlocks {
         {
             return HORIZONTAL_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()];
         }
+
     }
 
     public static enum HorizontalFace
     {
-        NORTH(EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.EAST),
-        EAST(EnumFacing.EAST, EnumFacing.NORTH, EnumFacing.SOUTH),
-        SOUTH(EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST),
-        WEST(EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.NORTH);
+        NORTH(EnumFacing.NORTH),
+        EAST(EnumFacing.EAST),
+        SOUTH(EnumFacing.SOUTH),
+        WEST(EnumFacing.WEST);
 
         public final EnumFacing face;
-        public final EnumFacing left;
-        public final EnumFacing right;
 
         public final Vec3i directionVector;
 
-        private HorizontalFace(EnumFacing face, EnumFacing left, EnumFacing right)
+        private HorizontalFace(EnumFacing face)
         {
             this.face = face;
-            this.left = left;
-            this.right = right;
+
             this.directionVector = face.getDirectionVec();
+        }
+        
+        public HorizontalFace getLeft()
+        {
+            if(this.ordinal() == 0)
+            {
+                return HorizontalFace.values()[3];
+            }
+            else
+            {
+                return HorizontalFace.values()[this.ordinal()-1];
+            }
+        }
+        
+        public HorizontalFace getRight()
+        {
+            if(this.ordinal() == 3)
+            {
+                return HorizontalFace.values()[0];
+            }
+            else
+            {
+                return HorizontalFace.values()[this.ordinal()+1];
+            }
         }
 
     }

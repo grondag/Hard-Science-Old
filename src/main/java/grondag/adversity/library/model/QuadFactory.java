@@ -584,6 +584,59 @@ public class QuadFactory
             this.depth = depth;
         }
         
+        public void rotateFacing(EnumFacing onFace, EnumFacing toFace, EnumFacing fromFace, boolean includeUV)
+        {
+            if(toFace == fromFace)
+            {
+                //   NOOP
+            }
+            else if(toFace == Useful.rightOf(onFace, fromFace))
+            {
+                double oldX = this.x;
+                double oldY = this.y;
+                this.x = oldY;
+                this.y = 1.0 - oldX;
+                
+                if(includeUV)
+                {
+                    double oldU = this.u;
+                    double oldV = this.v;
+                    this.u = oldV;
+                    this.v = 1.0 - oldU;
+                }
+            }
+            else if(toFace == Useful.bottomOf(onFace, fromFace))
+            {
+                double oldX = this.x;
+                double oldY = this.y;
+                this.x = 1.0 - oldX;
+                this.y = 1.0 - oldY;
+                
+                if(includeUV)
+                {
+                    double oldU = this.u;
+                    double oldV = this.v;
+                    this.u = 1.0 - oldU;
+                    this.v = 1.0 - oldV;
+                }
+            }
+            else // left of
+            {
+                double oldX = this.x;
+                double oldY = this.y;
+                this.x = 1.0 - oldY;
+                this.y = oldX;
+                
+                if(includeUV)
+                {
+                    double oldU = this.u;
+                    double oldV = this.v;
+                    this.u = 1.0 - oldV;
+                    this.v = oldU;
+                }
+            }
+        }
+        
         public FaceVertex clone()
         {
             return new FaceVertex(x, y, depth, u, v);
