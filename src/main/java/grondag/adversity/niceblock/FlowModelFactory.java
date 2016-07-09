@@ -8,9 +8,9 @@ import com.google.common.collect.ImmutableList;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.library.model.QuadFactory;
-import grondag.adversity.library.model.QuadFactory.FaceVertex;
-import grondag.adversity.library.model.QuadFactory.QuadInputs;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.QuadFactory.FaceVertex;
+import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs;
 import grondag.adversity.niceblock.FlowController.FlowHeightState;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
@@ -80,6 +80,16 @@ public class FlowModelFactory extends ModelFactory
         return (sideHeight + (float) flowState.getCenterHeight()) / 32F;
     }
     
+    //TODO: make configurable
+    /**
+     * Flowing terrain tends to appear washed out due to simplistic lighting model.
+     * Not hacking the lighter, but can scale horizontal component of vertex normals
+     * to make the shadows a little deeper.
+     */
+    private Vec3d shadowEnhance(Vec3d vec)
+    {
+        return new Vec3d(vec.xCoord * 4, vec.yCoord, vec.zCoord * 2);
+    }
     
     @Override
     public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face)
@@ -96,6 +106,8 @@ public class FlowModelFactory extends ModelFactory
                 .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
         quadInputs.side = face;
         quadInputs.lightingMode = myController.lightingMode;
+        QuadInputs.Tri triInputs = new QuadInputs.Tri();
+        triInputs.copyProperties(quadInputs);
 
         FlowHeightState flowState = myController.getFlowHeightStateFromModelIndex(clientShapeIndex);
                 
@@ -170,22 +182,20 @@ public class FlowModelFactory extends ModelFactory
             
             
             // build left and right quads on the block that edge this side
-            QuadInputs qiWork = quadInputs.clone();
+            QuadInputs.Tri qiWork = triInputs.clone();
             qiWork.setupFaceQuad(
                     fvMidSide[side.ordinal()],
                     fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
-                    fvCenter,
                     fvCenter,
                     EnumFacing.NORTH);           
             quadInputsCenterLeft[side.ordinal()] = qiWork;
             quadInputsSide.get(side.ordinal()).add(qiWork);
             quadInputsCorner.get(HorizontalCorner.find(side, side.getLeft()).ordinal()).add(qiWork);
 
-            qiWork = quadInputs.clone();
+            qiWork = triInputs.clone();
             qiWork.setupFaceQuad(
                     fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
                     fvMidSide[side.ordinal()],
-                    fvCenter,
                     fvCenter,
                     EnumFacing.NORTH);
             quadInputsCenterRight[side.ordinal()] = qiWork;
@@ -196,21 +206,18 @@ public class FlowModelFactory extends ModelFactory
 //            {
  
                 // side block tri that borders this block
-                qiWork = quadInputs.clone();
+                qiWork = triInputs.clone();
                 qiWork.setupFaceQuad(
                         fvFarSide[side.ordinal()],
                         fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
-                        fvMidSide[side.ordinal()],
                         fvMidSide[side.ordinal()],
                         EnumFacing.NORTH);           
                 quadInputsSide.get(side.ordinal()).add(qiWork);
                 quadInputsCorner.get(HorizontalCorner.find(side, side.getLeft()).ordinal()).add(qiWork);
 
-                qiWork = quadInputs.clone();
                 qiWork.setupFaceQuad(
                         fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
                         fvFarSide[side.ordinal()],
-                        fvMidSide[side.ordinal()],
                         fvMidSide[side.ordinal()],
                         EnumFacing.NORTH);           
                 quadInputsSide.get(side.ordinal()).add(qiWork);
@@ -218,20 +225,16 @@ public class FlowModelFactory extends ModelFactory
 
                 // side block tri that connects to corner but does not border side
 
-                qiWork = quadInputs.clone();
                 qiWork.setupFaceQuad(
                         fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
-                        fvFarSide[side.ordinal()],
                         fvFarSide[side.ordinal()],
                         fvFarCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
                         EnumFacing.NORTH);           
                 quadInputsCorner.get(HorizontalCorner.find(side, side.getLeft()).ordinal()).add(qiWork);
 
-                qiWork = quadInputs.clone();
                 qiWork.setupFaceQuad(
                         fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
                         fvFarCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
-                        fvFarSide[side.ordinal()],
                         fvFarSide[side.ordinal()],
                         EnumFacing.NORTH);           
                 quadInputsCorner.get(HorizontalCorner.find(side, side.getRight()).ordinal()).add(qiWork);
@@ -258,7 +261,7 @@ public class FlowModelFactory extends ModelFactory
             normCenter = normCenter.add(quadInputsCenterRight[1].getFaceNormal());
             normCenter = normCenter.add(quadInputsCenterRight[2].getFaceNormal());
             normCenter = normCenter.add(quadInputsCenterRight[3].getFaceNormal());
-            normCenter = normCenter.normalize();
+            normCenter = shadowEnhance(normCenter).normalize();
 
             Vec3d normSide[] = new Vec3d[4];
             for(HorizontalFace side : HorizontalFace.values())
@@ -275,7 +278,7 @@ public class FlowModelFactory extends ModelFactory
                         normTemp = normTemp.add(qi.getFaceNormal());
                     }
                 }
-                normSide[side.ordinal()] = normTemp.normalize();
+                normSide[side.ordinal()] = shadowEnhance(normTemp).normalize();
             }
             
             Vec3d normCorner[] = new Vec3d[4];
@@ -293,23 +296,21 @@ public class FlowModelFactory extends ModelFactory
                         normTemp = normTemp.add(qi.getFaceNormal());
                     }
                 }
-                normCorner[corner.ordinal()] = normTemp.normalize();
+                normCorner[corner.ordinal()] = shadowEnhance(normTemp).normalize();
             }
             
             for(HorizontalFace side: HorizontalFace.values())
             {
                 QuadInputs qi = quadInputsCenterLeft[side.ordinal()];
-                qi.vertex[0].setNormal(normSide[side.ordinal()]);
-                qi.vertex[1].setNormal(normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
-                qi.vertex[2].setNormal(normCenter);
-                qi.vertex[3].setNormal(normCenter);
+                qi.setNormal(0, normSide[side.ordinal()]);
+                qi.setNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
+                qi.setNormal(2, normCenter);
                 builder.add(qi.createNormalQuad());
 
                 qi = quadInputsCenterRight[side.ordinal()];
-                qi.vertex[0].setNormal(normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
-                qi.vertex[1].setNormal(normSide[side.ordinal()]);
-                qi.vertex[2].setNormal(normCenter);
-                qi.vertex[3].setNormal(normCenter);
+                qi.setNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
+                qi.setNormal(1, normSide[side.ordinal()]);
+                qi.setNormal(2, normCenter);
                 builder.add(qi.createNormalQuad());
             }
             
@@ -381,25 +382,37 @@ public class FlowModelFactory extends ModelFactory
              break;
              
         case EAST:
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0, 0, 0),
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(0.5, hEast, 0),
-//                    new FaceVertex(0, hSE, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
+        case WEST:
+        case SOUTH:
+        case NORTH:
+            
+//            HorizontalFace side = HorizontalFace.find(face);
 //            
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(1, 0, 0),
-//                    new FaceVertex(1, hNE, 0),
-//                    new FaceVertex(0.5, hEast, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());        
+//            if( midSideHeight[side.ordinal()] > 0 || midCornerHeight[side.getRight().ordinal()] > 0)
+//            {
+//                quadInputs.setupFaceQuad(
+//                        new FaceVertex(0, 0, 0),
+//                        new FaceVertex(0.5, 0, 0),
+//                        new FaceVertex(0.5, Math.max(0, midSideHeight[side.ordinal()]), 0),
+//                        new FaceVertex(0, Math.max(0, midCornerHeight[side.getRight().ordinal()]), 0),
+//                        EnumFacing.UP);
+//                builder.add(quadInputs.createNormalQuad());
+//            }
+//            
+//            if( midSideHeight[side.ordinal()] > 0 || midCornerHeight[side.getLeft().ordinal()] > 0)
+//            {
+//                quadInputs.setupFaceQuad(
+//                        new FaceVertex(0.5, 0, 0),
+//                        new FaceVertex(1, 0, 0),
+//                        new FaceVertex(1, Math.max(0, midCornerHeight[side.getLeft().ordinal()]), 0),
+//                        new FaceVertex(0.5, Math.max(0, midSideHeight[side.ordinal()]), 0),
+//                        EnumFacing.UP);
+//                builder.add(quadInputs.createNormalQuad());     
+//            }
             
             break;
             
-        case NORTH:
+ //       case NORTH:
 //            quadInputs.setupFaceQuad(
 //                    new FaceVertex(0, 0, 0),
 //                    new FaceVertex(0.5, 0, 0),
@@ -416,9 +429,9 @@ public class FlowModelFactory extends ModelFactory
 //                    EnumFacing.UP);
 //            builder.add(quadInputs.createNormalQuad());
             
-            break;
+ //           break;
             
-        case SOUTH:
+ //       case SOUTH:
 //            quadInputs.setupFaceQuad(
 //                    new FaceVertex(0, 0, 0),
 //                    new FaceVertex(0.5, 0, 0),
@@ -435,9 +448,9 @@ public class FlowModelFactory extends ModelFactory
 //                    EnumFacing.UP);
 //            builder.add(quadInputs.createNormalQuad());
             
-            break;
+  //          break;
             
-        case WEST:
+ //       case WEST:
 //            quadInputs.setupFaceQuad(
 //                    new FaceVertex(0, 0, 0),
 //                    new FaceVertex(0.5, 0, 0),
@@ -454,7 +467,7 @@ public class FlowModelFactory extends ModelFactory
 //                    EnumFacing.UP);
 //            builder.add(quadInputs.createNormalQuad());
             
-            break;
+ //           break;
             
         case DOWN:
         default:

@@ -65,7 +65,7 @@ public class HeightController extends ModelController implements ICollisionHandl
     @Override
     public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state)
     {
-        return state.getValue(NiceBlock.META);
+        return (long) state.getValue(NiceBlock.META);
     }
 
     @Override

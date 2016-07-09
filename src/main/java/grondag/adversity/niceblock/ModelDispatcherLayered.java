@@ -2,8 +2,8 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.model.QuadContainer;
-import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.SimpleItemBlockModel;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelDispatcher;

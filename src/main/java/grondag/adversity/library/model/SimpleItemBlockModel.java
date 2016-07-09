@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;

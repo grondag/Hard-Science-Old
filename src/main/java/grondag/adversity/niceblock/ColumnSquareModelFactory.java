@@ -5,10 +5,10 @@ import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.joinstate.FaceSide;
-import grondag.adversity.library.model.QuadFactory;
-import grondag.adversity.library.model.QuadFactory.FaceVertex;
-import grondag.adversity.library.model.QuadFactory.QuadInputs;
-import grondag.adversity.library.model.QuadFactory.SimpleQuadBounds;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.QuadFactory.FaceVertex;
+import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs;
+import grondag.adversity.library.model.quadfactory.QuadFactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.color.ColorMap;
@@ -343,21 +343,21 @@ public class ColumnSquareModelFactory extends ModelFactory
 
                     if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
                     {
+                        QuadInputs.Tri tri = new QuadInputs.Tri(qi);
+                        
                         // margin corner faces
-                        qi.setupFaceQuad(face, 
+                        tri.setupFaceQuad(face, 
                                 new FaceVertex(baseMarginWidth - CAULK, 1.0 - baseMarginWidth - CAULK, 0),
-                                new FaceVertex(baseMarginWidth + CAULK, 1.0 - baseMarginWidth - CAULK, 0),
                                 new FaceVertex(baseMarginWidth + CAULK, 1.0 + CAULK, 0),
                                 new FaceVertex(0.0 - CAULK, 1.0 + CAULK, 0), 
                                 side);
-                        builder.add(qi.createNormalQuad());
-                        qi.setupFaceQuad(face, 
+                        builder.add(tri.createNormalQuad());
+                        tri.setupFaceQuad(face, 
                                 new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 + CAULK, 0),  
-                                new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 -baseMarginWidth - CAULK, 0),
                                 new FaceVertex(1.0 - baseMarginWidth + CAULK, 1.0 -baseMarginWidth - CAULK, 0), 
                                 new FaceVertex(1.0 + CAULK, 1.0 + CAULK, 0), 
                                 side);
-                        builder.add(qi.createNormalQuad());                
+                        builder.add(tri.createNormalQuad());                
                     }
 
                     if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)

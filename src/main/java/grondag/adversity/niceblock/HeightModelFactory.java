@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.model.QuadFactory;
-import grondag.adversity.library.model.QuadFactory.QuadInputs;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;

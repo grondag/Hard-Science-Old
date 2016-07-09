@@ -1,8 +1,8 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.library.Rotation;
-import grondag.adversity.library.model.QuadFactory;
-import grondag.adversity.library.model.QuadFactory.CubeInputs;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.QuadFactory.CubeInputs;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelState;

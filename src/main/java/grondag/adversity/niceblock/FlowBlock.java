@@ -62,7 +62,7 @@ public class FlowBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isFullCube(IBlockState state)
     {
-        return state.getValue(META) == 0;
+        return false;//state.getValue(META) == 0;
     }
 
     @Override

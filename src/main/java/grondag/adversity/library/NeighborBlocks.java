@@ -321,6 +321,8 @@ public class NeighborBlocks {
 
     }
 
+    private static HorizontalFace HORIZONTAL_FACE_LOOKUP[] = new HorizontalFace[6];
+    
     public static enum HorizontalFace
     {
         NORTH(EnumFacing.NORTH),
@@ -335,8 +337,14 @@ public class NeighborBlocks {
         private HorizontalFace(EnumFacing face)
         {
             this.face = face;
+            HORIZONTAL_FACE_LOOKUP[face.ordinal()] = this;
 
             this.directionVector = face.getDirectionVec();
+        }
+        
+        public static HorizontalFace find(EnumFacing face)
+        {
+            return HORIZONTAL_FACE_LOOKUP[face.ordinal()];
         }
         
         public HorizontalFace getLeft()

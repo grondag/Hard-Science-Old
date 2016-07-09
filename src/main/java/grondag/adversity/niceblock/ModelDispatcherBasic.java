@@ -7,8 +7,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import grondag.adversity.library.model.QuadContainer;
-import grondag.adversity.library.model.QuadFactory;
 import grondag.adversity.library.model.SimpleItemBlockModel;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelDispatcher;
