@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs.LightingMode;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.AxisOrientedHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;

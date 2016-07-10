@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs;
+import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;
@@ -35,7 +35,7 @@ public class HeightModelFactory extends ModelFactory
 
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         long clientShapeIndex = modelState.getShapeIndex(controller.getRenderLayer());
-        QuadInputs quadInputs = new QuadInputs();
+        RawQuad quadInputs = new RawQuad();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
           quadInputs.lockUV = true;

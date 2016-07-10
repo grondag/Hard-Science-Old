@@ -5,10 +5,12 @@ import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.joinstate.FaceSide;
+import grondag.adversity.library.model.quadfactory.FaceVertex;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.library.model.quadfactory.QuadFactory.FaceVertex;
-import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs;
-import grondag.adversity.library.model.quadfactory.QuadFactory.SimpleQuadBounds;
+import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.model.quadfactory.RawTri;
+import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.color.ColorMap;
@@ -98,7 +100,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         
         if(retVal == null)
         {
-	    	QuadInputs quadInputs = new QuadInputs();
+	    	RawQuad quadInputs = new RawQuad();
 	    	quadInputs.isItem = isItem;
 	        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
 	        quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
@@ -106,8 +108,8 @@ public class ColumnSquareModelFactory extends ModelFactory
 	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
 	        quadInputs.lockUV = true;
 	        quadInputs.lightingMode = myController.modelType == ColumnSquareController.ModelType.LAMP_BASE 
-	                ? QuadInputs.LightingMode.FULLBRIGHT 
-                    : QuadInputs.LightingMode.SHADED;
+	                ? LightingMode.FULLBRIGHT 
+                    : LightingMode.SHADED;
 	        quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(textureIndex));
 	
 	        if(face.getAxis() == axis)
@@ -130,7 +132,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         return retVal;
     }
 
-    private List<BakedQuad> makeSideFace(EnumFacing face, QuadInputs qi, CornerJoinFaceState fjs, int cutColor, EnumFacing.Axis axis)
+    private List<BakedQuad> makeSideFace(EnumFacing face, RawQuad qi, CornerJoinFaceState fjs, int cutColor, EnumFacing.Axis axis)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         
@@ -297,7 +299,7 @@ public class ColumnSquareModelFactory extends ModelFactory
                 }
                 
                 // bottom can be a single poly
-                QuadInputs qiCut = qi.clone();
+                RawQuad qiCut = qi.clone();
                 qiCut.color = cutColor; 
                 qiCut.setupFaceQuad(face, Math.max(0.0, leftMarginWidth), bottomCapHeight, Math.min(1.0, 1.0 - rightMarginWidth), 1.0 - topCapHeight, cutDepth, topFace);
                 builder.add(qiCut.createNormalQuad());
@@ -306,7 +308,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         return builder.build();
     }
     
-    private List<BakedQuad> makeCapFace(EnumFacing face, QuadInputs qi, CornerJoinFaceState fjs, int cutColor, EnumFacing.Axis axis)
+    private List<BakedQuad> makeCapFace(EnumFacing face, RawQuad qi, CornerJoinFaceState fjs, int cutColor, EnumFacing.Axis axis)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 
@@ -316,7 +318,7 @@ public class ColumnSquareModelFactory extends ModelFactory
             if(myController.modelType != ColumnSquareController.ModelType.LAMP_OVERLAY)
             {
                 //cut bottom can be a single poly
-                QuadInputs qiCut = qi.clone();
+                RawQuad qiCut = qi.clone();
                 qiCut.color = cutColor; 
                 qiCut.setupFaceQuad(face, 
                         fjs.isJoined(FaceSide.LEFT) ? 0.0 : baseMarginWidth, 
@@ -343,7 +345,7 @@ public class ColumnSquareModelFactory extends ModelFactory
 
                     if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
                     {
-                        QuadInputs.Tri tri = new QuadInputs.Tri(qi);
+                        RawTri tri = new RawTri(qi);
                         
                         // margin corner faces
                         tri.setupFaceQuad(face, 
@@ -489,10 +491,10 @@ public class ColumnSquareModelFactory extends ModelFactory
         return builder.build();
     }
     
-    private void setupCutSideQuad(QuadInputs qi, int cutColor, SimpleQuadBounds qb)
+    private void setupCutSideQuad(RawQuad qi, int cutColor, SimpleQuadBounds qb)
     {
         int cutSideColor;
-        if(qi.lightingMode == QuadInputs.LightingMode.SHADED)
+        if(qi.lightingMode == LightingMode.SHADED)
         {
             cutSideColor = qi.color;
         }

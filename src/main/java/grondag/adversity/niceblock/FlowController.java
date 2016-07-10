@@ -13,8 +13,7 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs;
-import grondag.adversity.library.model.quadfactory.QuadFactory.QuadInputs.LightingMode;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -37,7 +36,7 @@ public class FlowController extends ModelController implements ICollisionHandler
 
     protected FlowController(String textureName, int alternateTextureCount, BlockRenderLayer renderLayer, LightingMode lightingMode)
     {
-        super(textureName, alternateTextureCount, renderLayer, lightingMode == QuadInputs.LightingMode.SHADED, false);
+        super(textureName, alternateTextureCount, renderLayer, lightingMode == LightingMode.SHADED, false);
         this.alternator = Alternator.getAlternator(alternateTextureCount);
         this.bakedModelFactory = new FlowModelFactory(this);
         this.lightingMode = lightingMode;
