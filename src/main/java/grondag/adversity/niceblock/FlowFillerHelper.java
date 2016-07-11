@@ -2,7 +2,6 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.niceblock.FlowController.FlowHeightState;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelState;
@@ -11,15 +10,12 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class FlowBlockHelper extends BlockModelHelper
+public class FlowFillerHelper extends BlockModelHelper
 {
 
-  //  public final int levelCount;
-    
-    protected FlowBlockHelper(ModelDispatcher dispatcher, int levelCount)
+    protected FlowFillerHelper(ModelDispatcher dispatcher, int levelCount)
     {
         super(dispatcher);
-    //    this.levelCount = levelCount;
     }
 
     @Override
@@ -33,14 +29,13 @@ public class FlowBlockHelper extends BlockModelHelper
     @Override
     public int getItemModelCount()
     {
-       // return levelCount;
-        return 16;
+        return 4;
     }
 
     @Override
     public ModelState getModelStateForItemModel(int itemIndex)
     {
-        int level = 16 - itemIndex;
+        int level = 16 / (itemIndex + 1);
         
         FlowHeightState flowState = new FlowHeightState(0);
         

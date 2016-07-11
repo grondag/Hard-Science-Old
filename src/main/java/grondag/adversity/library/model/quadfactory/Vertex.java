@@ -49,7 +49,11 @@ public class Vertex extends Vec3d
     public Vertex interpolate(Vertex otherVertex, double otherWeight)
     {
         Vec3d newPos = this.add(otherVertex.subtract(this).scale(otherWeight));
-        Vec3d newNorm = this.normal.add(otherVertex.normal.subtract(this.normal).scale(otherWeight));
+        Vec3d newNorm = null;
+        if(this.normal != null && otherVertex.normal != null)
+        {
+            newNorm = this.normal.add(otherVertex.normal.subtract(this.normal).scale(otherWeight));
+        }
         double newU = this.u + (otherVertex.u - this.u) * otherWeight;
         double newV = this.v + (otherVertex.v - this.v) * otherWeight;
 
@@ -62,14 +66,14 @@ public class Vertex extends Vec3d
     }
 
     /**
-     * Tests whether vertex is inside, on or outside the plane of 
-     * the given face for a standard block with bounds 0,0,0 to 1,1,1.
+     * Returns a signed distance to the plane of the given face.
+     * Positive numbers mean in front of face, negative numbers in back.
      */
-    public FaceTestResult faceTest(EnumFacing face)
-    {
-        double distance = distanceToFacePlane(face);
-        return (distance < -QuadFactory.EPSILON) ? FaceTestResult.BACK : (distance > QuadFactory.EPSILON) ? FaceTestResult.FRONT : FaceTestResult.COPLANAR;
-    }
+//    public double distanceToFacePlane(EnumFacing face)
+//    {
+//        int offset = face.getAxisDirection() == AxisDirection.POSITIVE ? 1 : 0;
+//        return new Vec3d(face.getDirectionVec()).dotProduct(this) - offset;
+//    }
 
     /**
      * Returns a signed distance to the plane of the given face.
@@ -77,10 +81,38 @@ public class Vertex extends Vec3d
      */
     public double distanceToFacePlane(EnumFacing face)
     {
-        int offset = face.getAxisDirection() == AxisDirection.POSITIVE ? 1 : 0;
-        return new Vec3d(face.getDirectionVec()).dotProduct(this) - offset;
-    }
+        // could use dot product, but exploiting special case for less math
+        switch(face)
+        {
+        case UP:
+            return this.yCoord - 1;
 
+        case DOWN:
+            return - this.yCoord;
+            
+        case EAST:
+            return this.xCoord - 1;
+
+        case WEST:
+            return -this.xCoord;
+
+        case NORTH:
+            return -this.zCoord;
+            
+        case SOUTH:
+            return this.zCoord - 1;
+
+        default:
+            // make compiler shut up about unhandled case
+            return 0;
+        }
+    }
+    
+    public boolean isOnFacePlane(EnumFacing face)
+    {
+        return Math.abs(this.distanceToFacePlane(face)) < QuadFactory.EPSILON;
+    }
+    
     public Vertex clone()
     {
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal);

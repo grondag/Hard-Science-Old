@@ -49,7 +49,7 @@ public class CubeInputs{
 
         double minBound = this.isOverlay ? -0.0002 : 0.0;
         double maxBound = this.isOverlay ? 1.0002 : 1.0;
-        qi.side = side;
+        qi.face = side;
 
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 

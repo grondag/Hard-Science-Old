@@ -8,38 +8,27 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class FlowBlock extends NiceBlock implements IFlowBlock
+public abstract class FlowBlock extends NiceBlock implements IFlowBlock
 {
-   // private final int levelCount;
     
     protected int tickRate = 20;
     
-    public FlowBlock(FlowBlockHelper blockModelHelper, BaseMaterial material, String styleName)
+    public FlowBlock(FlowHeightHelper blockModelHelper, BaseMaterial material, String styleName)
     {
         super(blockModelHelper, material, styleName);
-    //    this.levelCount = blockModelHelper.levelCount;
     }
 
-    /**
-     * (The 0 value is reserved for non flow blocks.)
-     * In practice, this makes one meta value (15) redundant.
-     */
-    @Override
-    public int getRenderHeightFromState(IBlockState state)
-    {
-        return 16 - state.getValue(META);
-    }
 
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        if(blockAccess.getBlockState(pos.up()).getBlock() instanceof IFlowBlock)
+        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof IFlowBlock)
         {
             return false;
         }
         else
         {
-            return true;
+            return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
         }
     }
 
@@ -58,25 +47,23 @@ public class FlowBlock extends NiceBlock implements IFlowBlock
 //    }
 //
     
-    // setting to false drops AO light value
+     // setting to false drops AO light value
     @Override
     public boolean isFullCube(IBlockState state)
     {
-        return false;//state.getValue(META) == 0;
+        return false;
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state)
     {
         return false;
-        //return state.getValue(META) == 0;
     }
 
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return false;
-        //return state.getValue(META) == 0;
     }
 
     @Override

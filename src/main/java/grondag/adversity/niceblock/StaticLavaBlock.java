@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 public class StaticLavaBlock extends FlowBlock
 {
 
-    public StaticLavaBlock(FlowBlockHelper blockModelHelper, BaseMaterial material, String styleName)
+    public StaticLavaBlock(FlowHeightHelper blockModelHelper, BaseMaterial material, String styleName)
     {
         super(blockModelHelper, material, styleName);
         this.setTickRandomly(true);

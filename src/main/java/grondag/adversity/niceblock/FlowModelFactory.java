@@ -1,22 +1,23 @@
 package grondag.adversity.niceblock;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.RawTri;
-import grondag.adversity.niceblock.FlowController.FlowHeightState;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;
-import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.IColorProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,14 @@ public class FlowModelFactory extends ModelFactory
 {
 
     private final FlowController myController;
+    
+    protected LoadingCache<Long, List<RawQuad>> modelCache = CacheBuilder.newBuilder().maximumSize(0xFF).build(new CacheLoader<Long, List<RawQuad>>()
+    {
+        public List<RawQuad> load(Long key) throws Exception
+        {
+            return makeRawQuads(key);
+        }
+    });
     
     public FlowModelFactory(ModelController controller)
     {
@@ -94,21 +103,39 @@ public class FlowModelFactory extends ModelFactory
     
     @Override
     public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face)
-    {
-        if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
-
+    {    
+       // if(face == EnumFacing.UP) return Collections.emptyList();
+        
+        int color = colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        long clientShapeIndex = modelState.getShapeIndex(controller.getRenderLayer());
+        
+
+        for(RawQuad quad : modelCache.getUnchecked(modelState.getShapeIndex(controller.getRenderLayer())))
+        {
+            if(quad.face == face)
+            {
+                // could have multiple threads attempting to colorize same quad
+                synchronized(quad)
+                {
+                    builder.add(quad.recolor(color).createNormalQuad());
+                }
+            }    
+        }
+        return builder.build();
+
+    }
+
+    protected List<RawQuad> makeRawQuads(long shapeIndex)
+    {
+       LinkedList<RawQuad> rawQuads = new LinkedList<RawQuad>();
+        
         RawQuad template = new RawQuad();
-        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
-        template.color = colorMap.getColorMap(EnumColorMap.BASE);
-          template.lockUV = true;
+        template.lockUV = true;
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
-                .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
-        template.side = face;
+                .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(shapeIndex)));
         template.lightingMode = myController.lightingMode;
   
-        FlowHeightState flowState = myController.getFlowHeightStateFromModelIndex(clientShapeIndex);
+        FlowHeightState flowState = myController.getFlowHeightStateFromModelIndex(shapeIndex);
                 
         // center vertex setup
         float centerHeight = (float) flowState.getCenterHeight() / 16f;
@@ -179,8 +206,9 @@ public class FlowModelFactory extends ModelFactory
             
             quadInputsSide.add(new ArrayList<RawQuad>(8));   
             
-            
+   
             // build left and right quads on the block that edge this side
+            template.face = EnumFacing.UP;
             RawTri qiWork = new RawTri(template);
             qiWork.setupFaceQuad(
                     fvMidSide[side.ordinal()],
@@ -236,254 +264,125 @@ public class FlowModelFactory extends ModelFactory
                     fvFarSide[side.ordinal()],
                     EnumFacing.NORTH);           
             quadInputsCorner.get(HorizontalCorner.find(side, side.getRight()).ordinal()).add(qiWork);
-
             
         }
 
+        double bottom = Math.min(Math.min(midCornerHeight[0], midCornerHeight[1]), Math.min(midCornerHeight[2], midCornerHeight[3]));
+        bottom = Math.floor(bottom - QuadFactory.EPSILON);
         
-        
-// normal calculation for later reference - assumes a quad, but works for triangle also
-        //Vec3d normal = (vertex[2].subtract(vertex[0]).crossProduct(vertex[3].subtract(vertex[1]))).normalize();
+        Vec3d normCenter = quadInputsCenterLeft[0].getFaceNormal();
+        normCenter = normCenter.add(quadInputsCenterLeft[1].getFaceNormal());
+        normCenter = normCenter.add(quadInputsCenterLeft[2].getFaceNormal());
+        normCenter = normCenter.add(quadInputsCenterLeft[3].getFaceNormal());
+        normCenter = normCenter.add(quadInputsCenterRight[0].getFaceNormal());
+        normCenter = normCenter.add(quadInputsCenterRight[1].getFaceNormal());
+        normCenter = normCenter.add(quadInputsCenterRight[2].getFaceNormal());
+        normCenter = normCenter.add(quadInputsCenterRight[3].getFaceNormal());
+        normCenter = shadowEnhance(normCenter).normalize();
 
-        switch(face)
+        Vec3d normSide[] = new Vec3d[4];
+        for(HorizontalFace side : HorizontalFace.values())
         {
-        case UP:
-            
-            Vec3d normCenter = quadInputsCenterLeft[0].getFaceNormal();
-            normCenter = normCenter.add(quadInputsCenterLeft[1].getFaceNormal());
-            normCenter = normCenter.add(quadInputsCenterLeft[2].getFaceNormal());
-            normCenter = normCenter.add(quadInputsCenterLeft[3].getFaceNormal());
-            normCenter = normCenter.add(quadInputsCenterRight[0].getFaceNormal());
-            normCenter = normCenter.add(quadInputsCenterRight[1].getFaceNormal());
-            normCenter = normCenter.add(quadInputsCenterRight[2].getFaceNormal());
-            normCenter = normCenter.add(quadInputsCenterRight[3].getFaceNormal());
-            normCenter = shadowEnhance(normCenter).normalize();
-
-            Vec3d normSide[] = new Vec3d[4];
-            for(HorizontalFace side : HorizontalFace.values())
+            Vec3d normTemp = null;
+            for(RawQuad qi : quadInputsSide.get(side.ordinal()))
             {
-                Vec3d normTemp = null;
-                for(RawQuad qi : quadInputsSide.get(side.ordinal()))
+                if(normTemp == null) 
                 {
-                    if(normTemp == null) 
-                    {
-                        normTemp = qi.getFaceNormal();
-                    }
-                    else
-                    {
-                        normTemp = normTemp.add(qi.getFaceNormal());
-                    }
+                    normTemp = qi.getFaceNormal();
                 }
-                normSide[side.ordinal()] = shadowEnhance(normTemp).normalize();
-            }
-            
-            Vec3d normCorner[] = new Vec3d[4];
-            for(HorizontalCorner corner : HorizontalCorner.values())
-            {
-                Vec3d normTemp = null;
-                for(RawQuad qi : quadInputsCorner.get(corner.ordinal()))
+                else
                 {
-                    if(normTemp == null) 
-                    {
-                        normTemp = qi.getFaceNormal();
-                    }
-                    else
-                    {
-                        normTemp = normTemp.add(qi.getFaceNormal());
-                    }
+                    normTemp = normTemp.add(qi.getFaceNormal());
                 }
-                normCorner[corner.ordinal()] = shadowEnhance(normTemp).normalize();
             }
-            
-            for(HorizontalFace side: HorizontalFace.values())
-            {
-                RawQuad qi = quadInputsCenterLeft[side.ordinal()];
-                qi.setNormal(0, normSide[side.ordinal()]);
-                qi.setNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
-                qi.setNormal(2, normCenter);
-                builder.add(qi.createNormalQuad());
-
-                qi = quadInputsCenterRight[side.ordinal()];
-                qi.setNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
-                qi.setNormal(1, normSide[side.ordinal()]);
-                qi.setNormal(2, normCenter);
-                builder.add(qi.createNormalQuad());
-            }
-            
-
-            
-//            //test if vertices are coplanar
-//            
-//            Vector3f vA = new Vector3f(0, hSW, 0);
-//            vA.sub(new Vector3f(1, hSE, 0));
-// 
-//            Vector3f vB = new Vector3f(1, hNE, 1);
-//            vB.sub(new Vector3f(0, hNW, 1));
-//
-//            Vector3f vAxB = new Vector3f();
-//            vAxB.cross(vA, vB);
-//            
-//            Vector3f vC = new Vector3f(1, hNE, 1);
-//            vC.sub(new Vector3f(0, hSE, 0));
-//
-//            if(vC.dot(vAxB) == 0)
-//            {
-//                // co-planar - single quad
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0, 0, 1.0-hSW),
-//                        new FaceVertex(1, 0, 1.0-hSE),
-//                        new FaceVertex(1, 1, 1.0-hNE),
-//                        new FaceVertex(0, 1, 1.0-hNW),
-//                        EnumFacing.NORTH);
-//                builder.add(quadInputs.createNormalQuad());            }
-//            else
-//            {
-//                if((hNE + hSW) > (hNW + hSE))
-//                {
-//                    quadInputs.setupFaceQuad(
-//                            new FaceVertex(0, 0, 1.0-hSW),
-//                            new FaceVertex(1, 0, 1.0-hSE),
-//                            new FaceVertex(0, 1, 1.0-hNW),
-//                            new FaceVertex(0, 1, 1.0-hNW),
-//                            EnumFacing.NORTH);
-//                    builder.add(quadInputs.createNormalQuad());
-//                    
-//                    quadInputs.setupFaceQuad(
-//                            new FaceVertex(1, 0, 1.0-hSE),
-//                            new FaceVertex(1, 0, 1.0-hSE),
-//                            new FaceVertex(1, 1, 1.0-hNE),
-//                            new FaceVertex(0, 1, 1.0-hNW),
-//                            EnumFacing.NORTH);
-//                    builder.add(quadInputs.createNormalQuad());
-//                }
-//                else
-//                {
-//                    quadInputs.setupFaceQuad(
-//                            new FaceVertex(0, 0, 1.0-hSW),
-//                            new FaceVertex(1, 0, 1.0-hSE),
-//                            new FaceVertex(1, 1, 1.0-hNE),
-//                            new FaceVertex(1, 1, 1.0-hNE),
-//                            EnumFacing.NORTH);
-//                    builder.add(quadInputs.createNormalQuad());
-//                    
-//                    quadInputs.setupFaceQuad(
-//                            new FaceVertex(0, 0, 1.0-hSW),
-//                            new FaceVertex(0.0, 0.0, 1.0-hSW),
-//                            new FaceVertex(1.0, 1.0, 1.0-hNE),
-//                            new FaceVertex(0, 1, 1.0-hNW),
-//                            EnumFacing.NORTH);
-//                    builder.add(quadInputs.createNormalQuad());
-//                }
-//            }
-             break;
-             
-        case EAST:
-        case WEST:
-        case SOUTH:
-        case NORTH:
-            
-//            HorizontalFace side = HorizontalFace.find(face);
-//            
-//            if( midSideHeight[side.ordinal()] > 0 || midCornerHeight[side.getRight().ordinal()] > 0)
-//            {
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0, 0, 0),
-//                        new FaceVertex(0.5, 0, 0),
-//                        new FaceVertex(0.5, Math.max(0, midSideHeight[side.ordinal()]), 0),
-//                        new FaceVertex(0, Math.max(0, midCornerHeight[side.getRight().ordinal()]), 0),
-//                        EnumFacing.UP);
-//                builder.add(quadInputs.createNormalQuad());
-//            }
-//            
-//            if( midSideHeight[side.ordinal()] > 0 || midCornerHeight[side.getLeft().ordinal()] > 0)
-//            {
-//                quadInputs.setupFaceQuad(
-//                        new FaceVertex(0.5, 0, 0),
-//                        new FaceVertex(1, 0, 0),
-//                        new FaceVertex(1, Math.max(0, midCornerHeight[side.getLeft().ordinal()]), 0),
-//                        new FaceVertex(0.5, Math.max(0, midSideHeight[side.ordinal()]), 0),
-//                        EnumFacing.UP);
-//                builder.add(quadInputs.createNormalQuad());     
-//            }
-            
-            break;
-            
- //       case NORTH:
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0, 0, 0),
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(0.5, hNorth, 0),
-//                    new FaceVertex(0, hNE, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
-//            
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(1, 0, 0),
-//                    new FaceVertex(1, hNW, 0),
-//                    new FaceVertex(0.5, hNorth, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
-            
- //           break;
-            
- //       case SOUTH:
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0, 0, 0),
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(0.5, hSouth, 0),
-//                    new FaceVertex(0, hSW, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
-//            
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(1, 0, 0),
-//                    new FaceVertex(1, hSE, 0),
-//                    new FaceVertex(0.5, hSouth, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
-            
-  //          break;
-            
- //       case WEST:
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0, 0, 0),
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(0.5, hWest, 0),
-//                    new FaceVertex(0, hNW, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
-//            
-//            quadInputs.setupFaceQuad(
-//                    new FaceVertex(0.5, 0, 0),
-//                    new FaceVertex(1, 0, 0),
-//                    new FaceVertex(1, hSW, 0),
-//                    new FaceVertex(0.5, hWest, 0),
-//                    EnumFacing.UP);
-//            builder.add(quadInputs.createNormalQuad());
-            
- //           break;
-            
-        case DOWN:
-        default:
-//            quadInputs.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
-//            builder.add(quadInputs.createNormalQuad());
-            break;
+            normSide[side.ordinal()] = shadowEnhance(normTemp).normalize();
         }
+        
+        Vec3d normCorner[] = new Vec3d[4];
+        for(HorizontalCorner corner : HorizontalCorner.values())
+        {
+            Vec3d normTemp = null;
+            for(RawQuad qi : quadInputsCorner.get(corner.ordinal()))
+            {
+                if(normTemp == null) 
+                {
+                    normTemp = qi.getFaceNormal();
+                }
+                else
+                {
+                    normTemp = normTemp.add(qi.getFaceNormal());
+                }
+            }
+            normCorner[corner.ordinal()] = shadowEnhance(normTemp).normalize();
+        }
+        
+        for(HorizontalFace side: HorizontalFace.values())
+        {
+            RawQuad qi = quadInputsCenterLeft[side.ordinal()];
+            qi.setNormal(0, normSide[side.ordinal()]);
+            qi.setNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
+            qi.setNormal(2, normCenter);
+            rawQuads.add(qi);
+
+            qi = quadInputsCenterRight[side.ordinal()];
+            qi.setNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
+            qi.setNormal(1, normSide[side.ordinal()]);
+            qi.setNormal(2, normCenter);
+            rawQuads.add(qi);
+        }
+       
+        //Add sides
+        for(HorizontalFace side : HorizontalFace.values())
+        {
+            template.face = side.face;
+            
+            RawQuad qLeft = new RawQuad(template);
+            qLeft.setupFaceQuad(
+                    new FaceVertex(0, bottom, 0),
+                    new FaceVertex(0.5, bottom, 0),
+                    new FaceVertex(0.5, midSideHeight[side.ordinal()], 0),
+                    new FaceVertex(0, midCornerHeight[HorizontalCorner.find(side, side.getRight()).ordinal()], 0),
+                    EnumFacing.UP);
+            rawQuads.add(qLeft);
+
+            RawQuad qRight = new RawQuad(template);
+            qRight.setupFaceQuad(
+                    new FaceVertex(0.5, bottom, 0),
+                    new FaceVertex(1, bottom, 0),
+                    new FaceVertex(1, midCornerHeight[HorizontalCorner.find(side, side.getLeft()).ordinal()], 0),
+                    new FaceVertex(0.5, midSideHeight[side.ordinal()], 0),
+                    EnumFacing.UP);
+            rawQuads.add(qRight);
+        }     
+        
+        // Bottom face(s)
+        template.face = EnumFacing.DOWN;
+        RawQuad qBottom = new RawQuad(template);
+        qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);
+     //   rawQuads.add(qBottom);
 
 
-        return builder.build();
+        LinkedList<RawQuad> swapQuads = new LinkedList<RawQuad>();
+        
+        rawQuads.forEach((quad) -> swapQuads.addAll(quad.clipToFace(EnumFacing.UP, template)));
+        rawQuads.clear();
+        swapQuads.forEach((quad) -> rawQuads.addAll(quad.clipToFace(EnumFacing.DOWN, template)));
+        
+        // don't count quads as face quads unless actually on the face
+        // will be useful for face culling
+        rawQuads.forEach((quad) -> quad.face = quad.isOnFace(quad.face) ? quad.face : null);
+        
+        return rawQuads;
 
     }
-
+    
     @Override
     public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
     {
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-  //          general.addAll(this.getFaceQuads(modelState, colorProvider, face));
+            general.addAll(this.getFaceQuads(modelState, colorProvider, face));
         }        
         return general.build();
     }

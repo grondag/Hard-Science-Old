@@ -1,20 +1,14 @@
 package grondag.adversity.library.model.quadfactory;
 
-import java.util.LinkedList;
 import java.util.List;
 
-import grondag.adversity.Adversity;
-
-import javax.print.attribute.standard.MediaSize.Other;
-
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.util.EnumFacing.Axis;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import com.google.common.collect.ImmutableList;
 
 public class QuadFactory
 {
-    static final double EPSILON = 0.0000005;
+    public static final double EPSILON = 0.0000005;
 
 
     public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();

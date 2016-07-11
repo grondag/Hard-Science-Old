@@ -1,6 +1,7 @@
 package grondag.adversity.library.model.quadfactory;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import grondag.adversity.library.Rotation;
@@ -17,7 +18,7 @@ public class RawQuad
     {
         // yes, this is ugly
         protected Vertex[] vertices = new Vertex[4];
-        public EnumFacing side;
+        public EnumFacing face;
         public TextureAtlasSprite textureSprite;
         public Rotation rotation = Rotation.ROTATE_NONE;
         public int color;
@@ -51,7 +52,7 @@ public class RawQuad
 
         protected void copyProperties(RawQuad fromObject)
         {
-            this.side = fromObject.side;
+            this.face = fromObject.face;
             this.textureSprite = fromObject.textureSprite;
             this.rotation = fromObject.rotation;
             this.color = fromObject.color;
@@ -66,33 +67,36 @@ public class RawQuad
          */
         public RawTri[] split()
         {
-            RawTri retVal[];
+            RawTri retVal[] = new RawTri[2];
+            
+            retVal[0] = new RawTri(this);
+            retVal[0].vertices[0] = this.vertices[0];
+            retVal[0].vertices[1] = this.vertices[1];
+            retVal[0].vertices[2] = this.vertices[2];
+            retVal[0].vertices[3] = this.vertices[2];
 
-            if(this instanceof RawTri)
-            {
-                retVal = new RawTri[1];
-                retVal[0] = (RawTri) this;
-            }
-            else
-            {
-                retVal = new RawTri[2];
-                retVal[0] = new RawTri(this);
-                retVal[0].vertices[0] = this.vertices[0];
-                retVal[0].vertices[1] = this.vertices[1];
-                retVal[0].vertices[2] = this.vertices[2];
-                retVal[0].vertices[3] = this.vertices[2];
-
-                retVal[1] = new RawTri(this);
-                retVal[1].vertices[0] = this.vertices[0];
-                retVal[1].vertices[1] = this.vertices[2];
-                retVal[1].vertices[2] = this.vertices[3];
-                retVal[1].vertices[3] = this.vertices[3];
-            }
-
+            retVal[1] = new RawTri(this);
+            retVal[1].vertices[0] = this.vertices[0];
+            retVal[1].vertices[1] = this.vertices[2];
+            retVal[1].vertices[2] = this.vertices[3];
+            retVal[1].vertices[3] = this.vertices[3];
+ 
             return retVal;
         }
 
-
+        /**
+         * Reverses winding order of this quad and returns itself
+         */
+        public RawQuad invert()
+        {
+            Vertex swap = vertices[0];
+            vertices[0] = vertices[3];
+            vertices[1] = vertices[2];
+            vertices[2] = vertices[1];
+            vertices[3] = swap;
+            return this;
+        }
+        
         /** 
          * Sets up a quad with standard semantics.  
          * Vertices should be given counter-clockwise from lower left.
@@ -106,7 +110,7 @@ public class RawQuad
         public void setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
         {
 
-            EnumFacing defaultTop = Useful.defaultTopOf(this.side);
+            EnumFacing defaultTop = Useful.defaultTopOf(this.face);
             FaceVertex rv0;
             FaceVertex rv1;
             FaceVertex rv2;
@@ -120,7 +124,7 @@ public class RawQuad
                 rv2 = vertexIn2.clone();
                 rv3 = vertexIn3.clone();
             }
-            else if(topFace == Useful.rightOf(this.side, defaultTop))
+            else if(topFace == Useful.rightOf(this.face, defaultTop))
             {
                 rv0 = new FaceVertex.Colored(vertexIn0.y, 1.0 - vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
                 rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -128,7 +132,7 @@ public class RawQuad
                 rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 1;
             }
-            else if(topFace == Useful.bottomOf(this.side, defaultTop))
+            else if(topFace == Useful.bottomOf(this.face, defaultTop))
             {
                 rv0 = new FaceVertex.Colored(1.0 - vertexIn0.x, 1.0 - vertexIn0.y, vertexIn0.depth, vertexIn0.getColor(this.color));
                 rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -163,7 +167,7 @@ public class RawQuad
             vertexIn3.y += QuadFactory.EPSILON;
             vertexIn2.y += QuadFactory.EPSILON;
 
-            switch(this.side)
+            switch(this.face)
             {
             case UP:
                 this.vertices[0] = new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color));
@@ -218,7 +222,7 @@ public class RawQuad
 
         public void setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
         {
-            this.side = side;
+            this.face = side;
             this.setupFaceQuad(tv0, tv1, tv2, tv3, topFace);
         }
 
@@ -243,7 +247,7 @@ public class RawQuad
 
         public void setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
         {
-            this.side = face;
+            this.face = face;
             this.setupFaceQuad(x0, y0, x1, y1, depth, topFace);
         }
 
@@ -255,6 +259,19 @@ public class RawQuad
             this.vertices[index].setNormal(normalIn);
         }
 
+        /**
+         * Changes all vertices and quad color to new color and returns itself
+         */
+        public RawQuad recolor(int color)
+        {
+            this.color = color;
+            vertices[0].color = color;
+            vertices[1].color = color;
+            vertices[2].color = color;
+            vertices[3].color = color;
+            return this;
+        }
+        
         /** Using this instead of referencing vertex array directly
          * ensures correctl handling for tris.
          */
@@ -268,202 +285,31 @@ public class RawQuad
             return this.vertices[index];
         }
         
-        public ClipResults clipToUp(EnumFacing face, RawQuad patchTemplate)
+        public List<RawQuad> clipToFace(EnumFacing face, RawQuad patchTemplate)
         {
-            ClipResults retVal = new ClipResults();
-
-            boolean hasAbove = false;
-            boolean hasBelow = false;
-
-            ArrayList<RawQuad> holes = new ArrayList<RawQuad>(3);
-
-            for(Vertex v : this.vertices)
+            LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
+            for(RawTri tri : this.split())
             {
-                hasAbove = hasAbove || v.yCoord > (1 + QuadFactory.EPSILON);
-                hasBelow = hasBelow || v.yCoord < (1 + QuadFactory.EPSILON);
+                retVal.addAll(tri.splitOnFace(face, patchTemplate));
             }
-
-            if(hasAbove)
-            {
-                if(hasBelow) // yes above, yes below
-                {
-                    // add portion below plane to output 
-                    // and add to hole generation if not orthogonal
-                    for(RawQuad tri : this.split())
-                    {
-                        retVal.clippedQuads.addAll(tri.splitOnFace(face, holes));
-                    }
-                }
-                else // yes above, no below
-                {
-                    //create a patch for whole poly if it isn't orthogonal
-                    if(!this.isOrthogonalTo(face))
-                    {
-                        holes.add(this);
-                    }
-                }
-            }
-            else
-            {
-                retVal.clippedQuads.add(this);
-            }
-
-            retVal.facePatches = makePatches(face, patchTemplate, holes);
-
-            // compute uv in addition to xyz
-            // interpolate normals
-            // interpolate color
-
             return retVal;
         }
 
-        private boolean isOrthogonalTo(EnumFacing face)
+
+        
+        protected boolean isOrthogonalTo(EnumFacing face)
         {
             return Math.abs(this.getFaceNormal().dotProduct(new Vec3d(face.getDirectionVec()))) <= QuadFactory.EPSILON;
         }
 
-        /**
-         * @param face
-         * @param holes
-         * @return
-         */
-        private List<RawQuad> splitOnFace(EnumFacing face, List<RawQuad> holes) 
+        public boolean isOnFace(EnumFacing face)
         {
-            ArrayList<RawQuad> retVal = new ArrayList<RawQuad>(4);
-
-            for(RawTri tri : this.split())
-            {
-
-                ArrayList<Vertex> vertexKeep = new ArrayList<Vertex>(4); 
-                ArrayList<Vertex> vertexHoles = new ArrayList<Vertex>(4); 
-
-                // precalc to avoid calling twice in loop below
-                FaceTestResult testResults[] = new FaceTestResult[3];
-                testResults[0] = this.vertices[0].faceTest(face);
-                testResults[1] = this.vertices[1].faceTest(face);
-                testResults[2] = this.vertices[2].faceTest(face);
-
-                for (int iThisVertex = 0; iThisVertex < 3; iThisVertex++) 
-                {
-                    int iNextVertex = (iThisVertex + 1) % 3;
-                    boolean isSplitNeeded = false;
-                    switch(testResults[iThisVertex])
-                    {
-                    case COPLANAR:
-                        vertexKeep.add(this.vertices[iThisVertex]);
-                        vertexHoles.add(this.vertices[iThisVertex]);
-                        break;
-
-                    case FRONT:
-                        vertexHoles.add(this.vertices[iThisVertex]);
-                        isSplitNeeded = testResults[iNextVertex] == FaceTestResult.BACK;
-                        break;
-
-                    case BACK:
-                        vertexKeep.add(this.vertices[iThisVertex]);
-                        isSplitNeeded = testResults[iNextVertex] == FaceTestResult.FRONT;
-                        break;
-                    }
-
-                    if(isSplitNeeded)
-                    {
-                        double a = Math.abs(this.vertices[iThisVertex].distanceToFacePlane(face));
-                        double b = Math.abs(this.vertices[iNextVertex].distanceToFacePlane(face));
-                        Vertex splitVertex = this.vertices[iThisVertex].interpolate(this.vertices[iNextVertex], a / (a + b)); 
-                        vertexKeep.add(splitVertex);
-                        vertexHoles.add(splitVertex);                    
-                    }
-                }
-
-                // create polys and add to collections
-                if(vertexKeep.size() == 3 || vertexKeep.size() == 4)
-                {
-                    RawQuad keeper = vertexKeep.size() == 3 ? new RawTri(this) : new RawQuad(this);
-                    for(int i = 0; i < vertexKeep.size(); i++)
-                    {
-                        keeper.setVertex(i, vertexKeep.get(i));
-                    }
-                    retVal.add(keeper);
-                }
-
-                if(vertexHoles.size() == 3 || vertexHoles.size() == 4)
-                {
-                    RawQuad hole = vertexHoles.size() == 3 ? new RawTri(this) : new RawQuad(this);
-                    for(int i = 0; i < vertexHoles.size(); i++)
-                    {
-                        hole.setVertex(i, vertexHoles.get(i));
-                    }
-                    if(!hole.isOrthogonalTo(face))
-                    {
-                        holes.add(hole);
-                    }
-                }
-            }           
-
-            return retVal;
-        }     
-
-
-        private List<RawQuad> makePatches(EnumFacing face, RawQuad patchTemplate, List<RawQuad> holes) 
-        {
-            ArrayList<RawQuad> retVal = new ArrayList<RawQuad>(holes.size());
-
-            for(RawQuad hole : holes)
-            {
-                RawQuad patch = hole instanceof RawTri ? new RawTri(patchTemplate) : new RawQuad(patchTemplate);
-
-                for(int i = 0; i < hole.vertexCount(); i++)
-                {
-                    double x = hole.getVertex(i).xCoord;
-                    double y = hole.getVertex(i).yCoord;
-                    double z = hole.getVertex(i).zCoord;
-                    double u = 0;
-                    double v = 0;
-                    switch(face)
-                    {
-                    case UP:
-                        y = 1;
-                        u = x * 16;
-                        v = z * 16;
-                        break;
-                    case DOWN:
-                        y = 0;
-                        u = (1 - x) * 16;
-                        v = z * 16;
-                        break;
-                    case EAST:
-                        x = 1;
-                        u = (1 - z) * 16;
-                        v = (1 - y) * 16;
-                        break;
-                    case WEST:
-                        x = 0;
-                        u = z * 16;
-                        v = (1 - y) * 16;
-                        break;
-                    case NORTH:
-                        z = 0;
-                        u = (1 - x) * 16;
-                        v = (1 - y) * 16;
-                        break;
-                    case SOUTH:
-                        z = 1;
-                        u = x * 16;
-                        v = (1 - y) * 16;
-                        break;
-                    default:
-                        // make compiler shut up about unhandled case
-                        break;
-                    }
-                    patch.setVertex(i, new Vertex(x, y, z, u, v, patch.color));
-                }
-                
-                retVal.add(patch);
-            }
-
-            return retVal;
+            return vertices[0].isOnFacePlane(face)
+                && vertices[1].isOnFacePlane(face)
+                && vertices[2].isOnFacePlane(face)
+                && vertices[3].isOnFacePlane(face);
         }
-
+        
         public BakedQuad createNormalQuad()
         {
             for (int r = 0; r < this.rotation.index; r++)
@@ -542,7 +388,7 @@ public class RawQuad
             //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
 
-            return new BakedQuad(vertexData, color, side, textureSprite, lightingMode == LightingMode.SHADED, format);
+            return new BakedQuad(vertexData, color, face, textureSprite, lightingMode == LightingMode.SHADED, format);
 
         }
 

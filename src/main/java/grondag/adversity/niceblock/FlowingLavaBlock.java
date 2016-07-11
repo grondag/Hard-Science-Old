@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 public class FlowingLavaBlock extends FlowBlock
 {
 
-    public FlowingLavaBlock(FlowBlockHelper blockModelHelper, BaseMaterial material, String styleName)
+    public FlowingLavaBlock(FlowHeightHelper blockModelHelper, BaseMaterial material, String styleName)
     {
         super(blockModelHelper, material, styleName);
     }
