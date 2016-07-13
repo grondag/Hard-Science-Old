@@ -1,6 +1,5 @@
 package grondag.adversity.library.model.quadfactory;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +10,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
@@ -98,16 +98,18 @@ public class RawQuad
         }
         
         /** 
-         * Sets up a quad with standard semantics.  
-         * Vertices should be given counter-clockwise from lower left.
-         * Ordering of vertices is maintained.
+         * Sets up a quad with human-friendly semantics.  
          * 
          * topFace establishes a reference for "up" in these semantics.
          * Depth represents how far recessed into the surface of the face the quad should be.
          * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
-         * means the UV coordinates *are* rotated so that a different part of the texture shows through.
+         * means the UV coordinates *are* rotated so they aren't affected by the order of vertices.
+         * 
+         * Vertices should be given counter-clockwise.
+         * Ordering of vertices is maintained for future references.
+         * (First vertex passed in will be vertex 0, for example.)
          */
-        public void setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
+        public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
         {
 
             EnumFacing defaultTop = Useful.defaultTopOf(this.face);
@@ -218,12 +220,14 @@ public class RawQuad
             {
                 QuadFactory.rotateQuadUV(this.vertices[0], this.vertices[1], this.vertices[2], this.vertices[3]);
             }
+            
+            return this;
         }
 
-        public void setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
+        public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
         {
             this.face = side;
-            this.setupFaceQuad(tv0, tv1, tv2, tv3, topFace);
+            return this.setupFaceQuad(tv0, tv1, tv2, tv3, topFace);
         }
 
         /** 
@@ -233,8 +237,10 @@ public class RawQuad
          * Depth represents how far recessed into the surface of the face the quad should be.
          * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
          * means the UV coordinates *are* rotated so that a different part of the texture shows through.
+         * 
+         * Returns self for convenience.
          */
-        public void setupFaceQuad(double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
+        public RawQuad setupFaceQuad(double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
         {
             this.setupFaceQuad(
                     new FaceVertex(x0, y0, depth),
@@ -242,13 +248,15 @@ public class RawQuad
                     new FaceVertex(x1, y1, depth),
                     new FaceVertex(x0, y1, depth), 
                     topFace);
+            
+            return this;
         }
 
 
-        public void setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
+        public RawQuad setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
         {
             this.face = face;
-            this.setupFaceQuad(x0, y0, x1, y1, depth, topFace);
+            return this.setupFaceQuad(x0, y0, x1, y1, depth, topFace);
         }
 
         /** Using this instead of method on vertex 
@@ -310,7 +318,59 @@ public class RawQuad
                 && vertices[3].isOnFacePlane(face);
         }
         
-        public BakedQuad createNormalQuad()
+        public boolean intersectsWithRay(Vec3d origin, Vec3d direction)
+        {
+            Vec3d normal = this.getFaceNormal();
+
+            double directionDotNormal = normal.dotProduct(direction);
+            if (Math.abs(directionDotNormal) < QuadFactory.EPSILON) 
+            { 
+                // parallel
+                return false;
+            }
+
+            double distanceToPlane = -normal.dotProduct((origin.subtract(vertices[0]))) / directionDotNormal;
+            Vec3d intersection = origin.add(direction.scale(distanceToPlane));
+
+            // now we just need to test if point is inside this polygon
+            return containsPoint(intersection);
+        }
+        
+        public boolean containsPoint(Vec3d point)
+        {
+            // point should be on the same side of every edge segment.
+            
+            
+            function side(x1, y1, x2, y2, x, y:Number):Number
+            {
+             return (y2 - y1)*(x - x1) + (-x2 + x1)*(y - y1);
+            }
+
+            function pointInTriangle(x1, y1, x2, y2, x3, y3, x, y:Number):Boolean
+            {
+             var checkSide1:Boolean = side(x1, y1, x2, y2, x, y) >= 0;
+             var checkSide2:Boolean = side(x2, y2, x3, y3, x, y) >= 0;
+             var checkSide3:Boolean = side(x3, y3, x1, y1, x, y) >= 0;
+             return checkSide1 && checkSide2 && checkSide3;
+            }
+
+            return false;
+        }
+        
+        public AxisAlignedBB getAABB()
+        {
+            double minX = Math.min(Math.min(vertices[0].xCoord, vertices[1].xCoord), Math.min(vertices[2].xCoord, vertices[3].xCoord));
+            double minY = Math.min(Math.min(vertices[0].yCoord, vertices[1].yCoord), Math.min(vertices[2].yCoord, vertices[3].yCoord));
+            double minZ = Math.min(Math.min(vertices[0].zCoord, vertices[1].zCoord), Math.min(vertices[2].zCoord, vertices[3].zCoord));
+         
+            double maxX = Math.max(Math.max(vertices[0].xCoord, vertices[1].xCoord), Math.max(vertices[2].xCoord, vertices[3].xCoord));
+            double maxY = Math.max(Math.max(vertices[0].yCoord, vertices[1].yCoord), Math.max(vertices[2].yCoord, vertices[3].yCoord));
+            double maxZ = Math.max(Math.max(vertices[0].zCoord, vertices[1].zCoord), Math.max(vertices[2].zCoord, vertices[3].zCoord));
+
+            return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+        }
+        
+        public BakedQuad createBakedQuad()
         {
             for (int r = 0; r < this.rotation.index; r++)
             {

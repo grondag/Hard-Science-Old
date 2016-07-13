@@ -36,7 +36,7 @@ public interface IFlowBlock
          */
         public static int getYOffsetFromState(IBlockState state)
         {
-            return FlowHeightState.getYOffsetFromNibble(state.getValue(NiceBlock.META));
+            return FlowHeightState.getYOffsetFromTriad(state.getValue(NiceBlock.META));
         }
         
         /**
@@ -44,7 +44,7 @@ public interface IFlowBlock
          */
         public static IBlockState stateWithYOffset(IBlockState state, int value)
         {
-            return state.withProperty(NiceBlock.META, FlowHeightState.getNibbleWithYOffset(value));
+            return state.withProperty(NiceBlock.META, FlowHeightState.getTriadWithYOffset(value));
         }
     }
 }

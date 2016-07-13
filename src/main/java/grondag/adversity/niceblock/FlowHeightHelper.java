@@ -44,7 +44,9 @@ public class FlowHeightHelper extends BlockModelHelper
         FlowHeightState flowState = new FlowHeightState(0);
         
         flowState.setCenterHeight(level);
+        flowState.setYOffset(0);
         
+        level--;
         flowState.setCornerHeight(HorizontalCorner.NORTH_EAST, level);
         flowState.setCornerHeight(HorizontalCorner.NORTH_WEST, level);
         flowState.setCornerHeight(HorizontalCorner.SOUTH_EAST, level);

@@ -29,15 +29,15 @@ public class RawTri extends RawQuad
         return 3;
     }
     
-    public void setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
+    public RawTri setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
     {
         this.face = side;
-        this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
+        return (RawTri) this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
     }
 
-    public void setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
+    public RawTri setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
     {
-        this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
+        return (RawTri) this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
     }
 
     /** Using this instead of method on vertex 

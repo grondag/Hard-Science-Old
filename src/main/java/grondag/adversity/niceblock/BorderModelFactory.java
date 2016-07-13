@@ -74,7 +74,7 @@ public class BorderModelFactory extends ModelFactory
     	
         int clientShapeIndex = (int) modelState.getShapeIndex(controller.getRenderLayer());
         int altTextureIndex = myController.getAltTextureFromModelIndex(clientShapeIndex);
-        CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeFromModelIndex(clientShapeIndex));
+        CornerJoinBlockState bjs = CornerJoinBlockStateSelector.getJoinState(myController.getShapeIndexFromModelIndex(clientShapeIndex));
 
         int cacheKey = makeCacheKey(face, bjs.getFaceJoinState(face), modelState.getColorIndex(), altTextureIndex);
         

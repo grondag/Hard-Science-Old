@@ -99,7 +99,7 @@ public class CubeInputs{
         }
 
 
-        builder.add(qi.createNormalQuad()).build();
+        builder.add(qi.createBakedQuad()).build();
 
         return builder.build();
     }

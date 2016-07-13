@@ -42,7 +42,7 @@ public class HotBasaltController extends ColorController
      * 2 bits texture set       | derived from block metadata (hotness)
      */
     @Override
-    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return ((state.getValue(NiceBlock.META) & 3) << 4) |  alternator.getAlternate(pos);
     }

@@ -70,7 +70,7 @@ public abstract class ModelController
     /**
      * used by block helper methods to get shape-related state
      */
-    public abstract long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
+    public abstract long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos);
 
     public long getCacheKeyFromModelState(ModelState modelState)
     {

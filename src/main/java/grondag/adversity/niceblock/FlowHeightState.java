@@ -2,22 +2,32 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.niceblock.base.NiceBlock;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.ClassInheritanceMultiMap;
 
 public class FlowHeightState
 {
 
     public final static long FULL_BLOCK_STATE_KEY;
-    
-    public final static long STATE_BIT_COUNT = 62;
-    
-    public final static long STATE_BIT_MASK = 0x3FFFFFFFFFFFFFFFL;
+
+    /** Four 13-bit blocks that store a corner and side value,
+     * plus 4 bits for center height and 3 bits for offset */
+    public final static long STATE_BIT_COUNT = 59;
+
+    public final static long STATE_BIT_MASK = 0x7FFFFFFFFFFFFFFL;
+
+    public final static int MIN_HEIGHT = -32;
+    public final static int NO_BLOCK = MIN_HEIGHT - 1;
+    public final static int MAX_HEIGHT = 48;
+
+    /**
+     * Number of possible values for non-center blocks.
+     * Includes negative values, positive values, zero and NO_BLOCK values.
+     */
+    private final static int VALUE_COUNT = -MIN_HEIGHT + MAX_HEIGHT + 1 + 1;
 
     static
     {
         FlowHeightState flowState = new FlowHeightState(0);
+        flowState.setYOffset(0);
         flowState.setCenterHeight(16);
         for (HorizontalFace face : HorizontalFace.values())
         {
@@ -29,39 +39,64 @@ public class FlowHeightState
         }
         FULL_BLOCK_STATE_KEY = flowState.getStateKey();
     }
-    
+
     /** 
-     * Returns values -2, -1, +1 and +2 from a nibble.
+     * Returns values -2 through +2 from a triad (3 bits).
      */
-    public static int getYOffsetFromNibble(int nibble)
+    public static int getYOffsetFromTriad(int triad)
     {
-        int clamped = nibble & 3;
-        return clamped < 2 ? clamped + 1 : 1 - clamped;
+        return Math.min(4, triad & 7) - 2;
     }
-    
+
     /**
-     * Stores values from -2 to -1 and +1 to +2 in a nibble.
+     * Stores values from -2  to +2 in a triad (3 bits).
      * Invalid values are handled same as +1.
      */
-    public static int getNibbleWithYOffset(int offset)
+    public static int getTriadWithYOffset(int offset)
     {
-        if(offset == -1 || offset == -2) 
-            return -offset + 1;
-        else if(offset == 2)
-            return  1;
-        else return 0;
+        return Math.min(4, (offset + 2) & 7);
     }
-    
-    private long stateKey;
 
+    private byte centerHeight;
+    private byte sideHeight[] = new byte[4];
+    private byte cornerHeight[] = new byte[4];
+    private byte yOffset = 0;
+
+    /** true if model vertex height calculations current */
+    private boolean vertexCalcsDone = false;
+    /** cache model vertex height calculations */
+    private float midCornerHeight[] = new float[HorizontalCorner.values().length];
+    /** cache model vertex height calculations */
+    private float farCornerHeight[] = new float[HorizontalCorner.values().length];
+    /** cache model vertex height calculations */
+    private float midSideHeight[] = new float[HorizontalFace.values().length];
+    /** cache model vertex height calculations */
+    private float farSideHeight[] = new float[HorizontalFace.values().length];
+
+    
     public long getStateKey()
     {
+        long stateKey = (centerHeight - 1) | getTriadWithYOffset(yOffset) << 4;
+
+        for(int i = 0; i < 4; i++)
+        {
+            long keyBlock = (cornerHeight[i] - NO_BLOCK) * VALUE_COUNT + (sideHeight[i] - NO_BLOCK); 
+            stateKey |= keyBlock << (i * 13 + 7);
+        }
         return stateKey;
     }
 
     FlowHeightState(long stateKey)
     {
-        this.stateKey = stateKey;
+        centerHeight = (byte)((stateKey & 0xF) + 1);
+        yOffset = (byte) getYOffsetFromTriad((int) ((stateKey >> 4) & 0x7));
+
+        for(int i = 0; i < 4; i++)
+        {
+            int keyBlock = (int) (stateKey >> (i * 13 + 7)) & 0x1FFF;
+            cornerHeight[i] = (byte) (keyBlock / VALUE_COUNT + NO_BLOCK);
+            sideHeight[i] = (byte) (keyBlock % VALUE_COUNT + NO_BLOCK);
+        }
     }
 
     // Rendering height of center block ranges from 1 to 16
@@ -69,42 +104,172 @@ public class FlowHeightState
 
     public void setCenterHeight(int height)
     {
-        stateKey |= (height - 1);
+        this.centerHeight = (byte)height;
+        vertexCalcsDone = false;
     }
 
     public int getCenterHeight()
     {
-        return (int) (stateKey & 0xF) + 1;
+        return this.centerHeight;
     }
 
+    public void setYOffset(int offset)
+    {
+        this.yOffset = (byte) Math.min(2, Math.max(-2, offset));
+    }
+ 
+    public int getYOffset()
+    {
+        return this.yOffset;
+    }
 
     // Rendering height of corner and side neighbors ranges 
     // from -32 to 48. 
 
     public void setSideHeight(HorizontalFace side, int height)
     {
-        stateKey |= ((long)(height - FlowController.NO_BLOCK) << (4 + side.ordinal() * 7));
+        this.sideHeight[side.ordinal()] = (byte)height;
+        vertexCalcsDone = false;
     }
 
     public int getSideHeight(HorizontalFace side)
     {
-        return (int) ((stateKey >> (4 + side.ordinal() * 7)) & 0x7F) + FlowController.NO_BLOCK;
+        return this.sideHeight[side.ordinal()];
     }
-
 
     public void setCornerHeight(HorizontalCorner corner, int height)
     {
-        stateKey |= ((long)(height - FlowController.NO_BLOCK) << (32 + corner.ordinal() * 7));
+        this.cornerHeight[corner.ordinal()] = (byte)height;
+        vertexCalcsDone = false;
     }
 
     public int getCornerHeight(HorizontalCorner corner)
     {
-        return (int) ((stateKey >> (32 + corner.ordinal() * 7)) & 0x7F) + FlowController.NO_BLOCK;
+        return this.cornerHeight[corner.ordinal()];
+    }
+
+    /**
+     * Returns max of all heights on the block, including center.
+     * Intended for determining collision box bounds.
+     */
+    public float getMaxVertexHeight()
+    {
+        refreshVertexCalculationsIfNeeded();
+        float max = getCenterVertexHeight();
+        for(int i = 0; i < 4; i++)
+        {
+            max = Math.max(max, this.midSideHeight[i]);
+            max = Math.max(max, this.midCornerHeight[i]);
+        }
+        return max - this.yOffset;
+    }
+
+    /**
+     * Returns minimum corner vertex height of block.
+     * Used for determining where the bottom of blocks starts.
+     */
+//    public float getMinCornerVertexHeight()
+//    {
+//        refreshVertexCalculationsIfNeeded();
+//        return Math.min(Math.min(midCornerHeight[0], midCornerHeight[1]), Math.min(midCornerHeight[2], midCornerHeight[3]));
+//    }
+    
+    public float getCenterVertexHeight()
+    {
+        return (float) getCenterHeight() / 16f;
+    }
+
+    public float getFarCornerVertexHeight(HorizontalCorner corner)
+    {
+        refreshVertexCalculationsIfNeeded();
+        return farCornerHeight[corner.ordinal()];
+    }
+    
+    public float getMidCornerVertexHeight(HorizontalCorner corner)
+    {
+        refreshVertexCalculationsIfNeeded();
+        return midCornerHeight[corner.ordinal()];
+    }
+    
+    public float getFarSideVertexHeight(HorizontalFace face)
+    {
+        refreshVertexCalculationsIfNeeded();
+        return farSideHeight[face.ordinal()];
+    }
+    
+    public float getMidSideVertexHeight(HorizontalFace face)
+    {
+        refreshVertexCalculationsIfNeeded();
+        return midSideHeight[face.ordinal()];
+    }
+
+    private void refreshVertexCalculationsIfNeeded()
+    {
+        if(vertexCalcsDone) return;
+        for(HorizontalFace side : HorizontalFace.values())
+        {
+            midSideHeight[side.ordinal()] = calcMidSideVertexHeight(side);
+            farSideHeight[side.ordinal()] = calcFarSideVertexHeight(side);
+            
+        }
+        for(HorizontalCorner corner: HorizontalCorner.values())
+        {
+            midCornerHeight[corner.ordinal()] = calcMidCornerVertexHeight(corner);
+            farCornerHeight[corner.ordinal()] = calcFarCornerVertexHeight(corner);
+        }
+        vertexCalcsDone = true;
+
+    }
+    
+    private float calcFarCornerVertexHeight(HorizontalCorner corner)
+    {
+        int heightCorner = getCornerHeight(corner);
+        
+        if(heightCorner == FlowHeightState.NO_BLOCK)
+        {
+            int max = Math.max(Math.max(getSideHeight(corner.face1), getSideHeight(corner.face2)), getCenterHeight());
+            heightCorner = (max - 1) / 16 * 16;
+        }
+       
+        return ((float) heightCorner) / 16f;
+    }
+    
+    /**
+     * Doesn't use getFarCornerHeight because would be redundant check of neighbor heights
+     */
+    private float calcMidCornerVertexHeight(HorizontalCorner corner)
+    {
+        int heightSide1 = getSideHeight(corner.face1);
+        int heightSide2 = getSideHeight(corner.face2);
+        int heightCorner = getCornerHeight(corner);
+        
+        int max = Math.max(Math.max(heightSide1, heightSide2), Math.max(heightCorner, getCenterHeight()));
+        max = (max - 1) / 16 * 16;
+                
+        if(heightSide1 == FlowHeightState.NO_BLOCK) heightSide1 = max;
+        if(heightSide2 == FlowHeightState.NO_BLOCK) heightSide2 = max;
+        if(heightCorner == FlowHeightState.NO_BLOCK) heightCorner = max;
+        
+        float numerator = getCenterHeight() + heightSide1 + heightSide2 + heightCorner;
+       
+        return numerator / 64f;
+        
+    }
+    
+    private float calcFarSideVertexHeight(HorizontalFace face)
+    {
+        return getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / 16f;
+    }
+
+    private float calcMidSideVertexHeight(HorizontalFace face)
+    {
+        float sideHeight = getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : (float)getSideHeight(face);
+        return (sideHeight + (float) getCenterHeight()) / 32F;
     }
 
     public String toString()
     {
-        String retval = "Center=" + this.getCenterHeight();
+        String retval = "CENTER=" + this.getCenterHeight();
         for(HorizontalFace side: HorizontalFace.values())
         {
             retval += " " + side.name() + "=" + this.getSideHeight(side);
@@ -113,6 +278,7 @@ public class FlowHeightState
         {
             retval += " " + corner.name() + "=" + this.getCornerHeight(corner);
         }
+        retval += " Y-OFFSET=" + yOffset;
         return retval;
     }
 }

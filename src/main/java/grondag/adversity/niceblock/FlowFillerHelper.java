@@ -12,7 +12,6 @@ import net.minecraft.world.IBlockAccess;
 
 public class FlowFillerHelper extends BlockModelHelper
 {
-
     protected FlowFillerHelper(ModelDispatcher dispatcher, int levelCount)
     {
         super(dispatcher);
@@ -29,7 +28,7 @@ public class FlowFillerHelper extends BlockModelHelper
     @Override
     public int getItemModelCount()
     {
-        return 4;
+        return 5;
     }
 
     @Override
@@ -40,6 +39,7 @@ public class FlowFillerHelper extends BlockModelHelper
         FlowHeightState flowState = new FlowHeightState(0);
         
         flowState.setCenterHeight(level);
+        flowState.setYOffset(0);
         
         flowState.setCornerHeight(HorizontalCorner.NORTH_EAST, level);
         flowState.setCornerHeight(HorizontalCorner.NORTH_WEST, level);

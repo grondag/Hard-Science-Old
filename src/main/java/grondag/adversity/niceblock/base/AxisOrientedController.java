@@ -39,7 +39,7 @@ public abstract class AxisOrientedController extends ModelController
     
     
     @Override
-    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int axis = Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(new BlockTests.TestForBlockMetaMatch(state));

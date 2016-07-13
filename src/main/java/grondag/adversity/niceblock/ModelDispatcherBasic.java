@@ -121,7 +121,7 @@ public class ModelDispatcherBasic extends ModelDispatcher
         if(isCachedStateDirty || !controller.useCachedClientState)
         {
             long oldShapeIndex = modelState.getShapeIndex(BlockRenderLayer.SOLID);
-            modelState.setShapeIndex(controller.getClientShapeIndex(block, state, world, pos), BlockRenderLayer.SOLID);
+            modelState.setShapeIndex(controller.getDynamicShapeIndex(block, state, world, pos), BlockRenderLayer.SOLID);
             return modelState.getShapeIndex(BlockRenderLayer.SOLID) != oldShapeIndex;
         }
         else

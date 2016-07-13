@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.google.common.cache.CacheBuilder;
@@ -9,6 +8,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
@@ -44,51 +44,7 @@ public class FlowModelFactory extends ModelFactory
         this.myController = (FlowController)controller;
     }
     
-    private float getFarCornerHeight(FlowHeightState flowState, HorizontalCorner corner)
-    {
-        int heightCorner = flowState.getCornerHeight(corner);
-        
-        if(heightCorner == FlowController.NO_BLOCK)
-        {
-            int max = Math.max(Math.max(flowState.getSideHeight(corner.face1), flowState.getSideHeight(corner.face2)), flowState.getCenterHeight());
-            heightCorner = (max - 1) / 16 * 16;
-        }
-       
-        return ((float) heightCorner) / 16f;
-    }
-    
-    /**
-     * Doesn't use getFarCornerHeight because would be redundant check of neighbor heights
-     */
-    private float getMidCornerHeight(FlowHeightState flowState, HorizontalCorner corner)
-    {
-        int heightSide1 = flowState.getSideHeight(corner.face1);
-        int heightSide2 = flowState.getSideHeight(corner.face2);
-        int heightCorner = flowState.getCornerHeight(corner);
-        
-        int max = Math.max(Math.max(heightSide1, heightSide2), Math.max(heightCorner, flowState.getCenterHeight()));
-        max = (max - 1) / 16 * 16;
-                
-        if(heightSide1 == FlowController.NO_BLOCK) heightSide1 = max;
-        if(heightSide2 == FlowController.NO_BLOCK) heightSide2 = max;
-        if(heightCorner == FlowController.NO_BLOCK) heightCorner = max;
-        
-        float numerator = flowState.getCenterHeight() + heightSide1 + heightSide2 + heightCorner;
-       
-        return numerator / 64f;
-        
-    }
-    
-    private float getFarSideHeight(FlowHeightState flowState, HorizontalFace face)
-    {
-        return flowState.getSideHeight(face) == FlowController.NO_BLOCK ? 0 : ((float)flowState.getSideHeight(face)) / 16f;
-    }
 
-    private float getMidSideHeight(FlowHeightState flowState, HorizontalFace face)
-    {
-        float sideHeight = flowState.getSideHeight(face) == FlowController.NO_BLOCK ? 0 : (float)flowState.getSideHeight(face);
-        return (sideHeight + (float) flowState.getCenterHeight()) / 32F;
-    }
     
     //TODO: make configurable
     /**
@@ -117,7 +73,7 @@ public class FlowModelFactory extends ModelFactory
                 // could have multiple threads attempting to colorize same quad
                 synchronized(quad)
                 {
-                    builder.add(quad.recolor(color).createNormalQuad());
+                    builder.add(quad.recolor(color).createBakedQuad());
                 }
             }    
         }
@@ -125,7 +81,7 @@ public class FlowModelFactory extends ModelFactory
 
     }
 
-    protected List<RawQuad> makeRawQuads(long shapeIndex)
+    public List<RawQuad> makeRawQuads(long shapeIndex)
     {
        LinkedList<RawQuad> rawQuads = new LinkedList<RawQuad>();
         
@@ -136,10 +92,11 @@ public class FlowModelFactory extends ModelFactory
         template.lightingMode = myController.lightingMode;
   
         FlowHeightState flowState = myController.getFlowHeightStateFromModelIndex(shapeIndex);
-                
+        
+        int yOffset = flowState.getYOffset();
+        
         // center vertex setup
-        float centerHeight = (float) flowState.getCenterHeight() / 16f;
-        FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0-centerHeight);
+        FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0 - flowState.getCenterVertexHeight() + yOffset);
         
         RawQuad quadInputsCenterLeft[] = new RawQuad[4];
         RawQuad quadInputsCenterRight[] = new RawQuad[4];
@@ -151,8 +108,6 @@ public class FlowModelFactory extends ModelFactory
         // set up corner heights and face vertices
         ///////////////////////////////////////////////
         
-        float midCornerHeight[] = new float[HorizontalCorner.values().length];
-        float farCornerHeight[] = new float[HorizontalCorner.values().length];
         
         // Coordinates assume quad will be set up with North=top orientation
         // Depth will be set separately.
@@ -171,17 +126,12 @@ public class FlowModelFactory extends ModelFactory
         
         for(HorizontalCorner corner : HorizontalCorner.values())
         {
-            midCornerHeight[corner.ordinal()] = getMidCornerHeight(flowState, corner);
-            farCornerHeight[corner.ordinal()] = getFarCornerHeight(flowState, corner);
             
-            fvMidCorner[corner.ordinal()].depth = 1.0-midCornerHeight[corner.ordinal()];
-            fvFarCorner[corner.ordinal()].depth = 1.0-farCornerHeight[corner.ordinal()];
+            fvMidCorner[corner.ordinal()].depth = 1.0 - flowState.getMidCornerVertexHeight(corner) + yOffset;
+            fvFarCorner[corner.ordinal()].depth = 1.0 - flowState.getFarCornerVertexHeight(corner) + yOffset;
             
             quadInputsCorner.add(new ArrayList<RawQuad>(8));            
         }
-        
-        float midSideHeight[] = new float[HorizontalFace.values().length];
-        float farSideHeight[] = new float[HorizontalFace.values().length];
         
         // Coordinates assume quad will be set up with North=top orientation
         // Depth will be set separately.
@@ -199,12 +149,10 @@ public class FlowModelFactory extends ModelFactory
         
         for(HorizontalFace side : HorizontalFace.values())
         {
-            midSideHeight[side.ordinal()] = getMidSideHeight(flowState, side);
-            farSideHeight[side.ordinal()] = getFarSideHeight(flowState, side);
-            fvMidSide[side.ordinal()].depth = 1.0-midSideHeight[side.ordinal()];
-            fvFarSide[side.ordinal()].depth = 1.0-farSideHeight[side.ordinal()];
+            fvMidSide[side.ordinal()].depth = 1.0 - flowState.getMidSideVertexHeight(side) + yOffset;
+            fvFarSide[side.ordinal()].depth = 1.0 - flowState.getFarSideVertexHeight(side) + yOffset;
             
-            quadInputsSide.add(new ArrayList<RawQuad>(8));   
+        quadInputsSide.add(new ArrayList<RawQuad>(8));   
             
    
             // build left and right quads on the block that edge this side
@@ -267,8 +215,12 @@ public class FlowModelFactory extends ModelFactory
             
         }
 
-        double bottom = Math.min(Math.min(midCornerHeight[0], midCornerHeight[1]), Math.min(midCornerHeight[2], midCornerHeight[3]));
+        /** Used for Y coord of bottom face and as lower Y coord of side faces*/
+        double bottom = -32; //flowState.getMinCornerVertexHeight();
         bottom = Math.floor(bottom - QuadFactory.EPSILON);
+        
+        // if we are offset under a block, make sure side faces cover us
+        bottom = Math.min(bottom, yOffset * 16);
         
         Vec3d normCenter = quadInputsCenterLeft[0].getFaceNormal();
         normCenter = normCenter.add(quadInputsCenterLeft[1].getFaceNormal());
@@ -338,19 +290,19 @@ public class FlowModelFactory extends ModelFactory
             
             RawQuad qLeft = new RawQuad(template);
             qLeft.setupFaceQuad(
-                    new FaceVertex(0, bottom, 0),
-                    new FaceVertex(0.5, bottom, 0),
-                    new FaceVertex(0.5, midSideHeight[side.ordinal()], 0),
-                    new FaceVertex(0, midCornerHeight[HorizontalCorner.find(side, side.getRight()).ordinal()], 0),
+                    new FaceVertex(0, bottom - yOffset, 0),
+                    new FaceVertex(0.5, bottom - yOffset, 0),
+                    new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
+                    new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())) - yOffset, 0),
                     EnumFacing.UP);
             rawQuads.add(qLeft);
 
             RawQuad qRight = new RawQuad(template);
             qRight.setupFaceQuad(
-                    new FaceVertex(0.5, bottom, 0),
-                    new FaceVertex(1, bottom, 0),
-                    new FaceVertex(1, midCornerHeight[HorizontalCorner.find(side, side.getLeft()).ordinal()], 0),
-                    new FaceVertex(0.5, midSideHeight[side.ordinal()], 0),
+                    new FaceVertex(0.5, bottom - yOffset, 0),
+                    new FaceVertex(1, bottom - yOffset, 0),
+                    new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())) - yOffset, 0),
+                    new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
                     EnumFacing.UP);
             rawQuads.add(qRight);
         }     
@@ -372,6 +324,17 @@ public class FlowModelFactory extends ModelFactory
         // will be useful for face culling
         rawQuads.forEach((quad) -> quad.face = quad.isOnFace(quad.face) ? quad.face : null);
         
+        // if we end up with an empty list, default to standard cube
+        if(rawQuads.isEmpty())
+        {            
+            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
+            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
+            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+        }
+        
         return rawQuads;
 
     }
@@ -384,6 +347,7 @@ public class FlowModelFactory extends ModelFactory
         {
             general.addAll(this.getFaceQuads(modelState, colorProvider, face));
         }        
+        general.addAll(this.getFaceQuads(modelState, colorProvider, null));
         return general.build();
     }
 

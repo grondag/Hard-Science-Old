@@ -58,7 +58,7 @@ public class HeightModelFactory extends ModelFactory
                     1.0,
                     1-height,
                     EnumFacing.NORTH);
-            builder.add(quadInputs.createNormalQuad());
+            builder.add(quadInputs.createBakedQuad());
             break;
              
         case EAST:
@@ -72,13 +72,13 @@ public class HeightModelFactory extends ModelFactory
                     height,
                     0.0,
                     EnumFacing.UP);
-            builder.add(quadInputs.createNormalQuad());
+            builder.add(quadInputs.createBakedQuad());
             break;
             
         case DOWN:
         default:
             quadInputs.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
-            builder.add(quadInputs.createNormalQuad());
+            builder.add(quadInputs.createBakedQuad());
             break;
         }
 

@@ -1,12 +1,16 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.property.IExtendedBlockState;
 
 public abstract class FlowBlock extends NiceBlock implements IFlowBlock
 {
@@ -24,7 +28,23 @@ public abstract class FlowBlock extends NiceBlock implements IFlowBlock
     {
         if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof IFlowBlock)
         {
-            return false;
+            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
+            {
+                return false;
+            }
+            else if(blockState instanceof IExtendedBlockState)
+            {
+                ModelState modelState = ((IExtendedBlockState)blockState).getValue(NiceBlock.MODEL_STATE);
+                long shapeIndex = modelState.getShapeIndex(MinecraftForgeClient.getRenderLayer());
+                FlowHeightState flowState = new FlowHeightState(shapeIndex);
+                
+                return flowState.getSideHeight(HorizontalFace.find(side)) < 0;
+
+            }
+            else
+            {
+                return true;
+            }
         }
         else
         {

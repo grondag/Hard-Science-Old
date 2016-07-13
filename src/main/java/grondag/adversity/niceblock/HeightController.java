@@ -30,7 +30,7 @@ public class HeightController extends ModelController implements ICollisionHandl
         this.bakedModelFactory = new HeightModelFactory(this);    }
 
     @Override
-    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
          return (this.alternator.getAlternate(pos) << 4) + state.getValue(NiceBlock.META);
     }

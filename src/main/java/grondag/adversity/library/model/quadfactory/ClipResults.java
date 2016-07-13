@@ -14,9 +14,9 @@ public class ClipResults
     {
         ArrayList<BakedQuad> retVal = new ArrayList<BakedQuad>(8);
         
-        clippedQuads.forEach((quad) -> retVal.add(quad.createNormalQuad()));
+        clippedQuads.forEach((quad) -> retVal.add(quad.createBakedQuad()));
 
-        if (includePatches) facePatches.forEach((quad) -> retVal.add(quad.createNormalQuad()));
+        if (includePatches) facePatches.forEach((quad) -> retVal.add(quad.createBakedQuad()));
         
         return retVal;
         

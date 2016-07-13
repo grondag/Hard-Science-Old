@@ -29,7 +29,7 @@ public class MasonryController extends ModelController
     }
 
     @Override
-    public long getClientShapeIndex(final NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getDynamicShapeIndex(final NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
         TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));

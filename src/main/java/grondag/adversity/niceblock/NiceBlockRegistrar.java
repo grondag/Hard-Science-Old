@@ -85,7 +85,7 @@ public class NiceBlockRegistrar
             new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, LightingMode.SHADED));
     public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowHeightBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt");
 
-    public static final NiceBlock BLOCK_COOL_BASALT_FILLER = (NiceBlock) new FlowFillerBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt_filler");
+    public static final NiceBlock BLOCK_COOL_BASALT_FILLER = (NiceBlock) new FlowFillerBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt_filler");
 
 //    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",
 //            new HeightController("cool_basalt", 1, BlockRenderLayer.SOLID, true, false));

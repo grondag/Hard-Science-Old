@@ -163,7 +163,7 @@ public class ModelDispatcherLayered extends ModelDispatcher
                 if(isCachedStateDirty || !cont.useCachedClientState)
                 {
                     long oldShapeIndex = modelState.getShapeIndex(cont.getRenderLayer());
-                    modelState.setShapeIndex(cont.getClientShapeIndex(block, state, world, pos), cont.getRenderLayer());
+                    modelState.setShapeIndex(cont.getDynamicShapeIndex(block, state, world, pos), cont.getRenderLayer());
                     updated = updated || modelState.getShapeIndex(cont.getRenderLayer()) != oldShapeIndex;
                 }
              }

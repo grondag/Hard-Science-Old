@@ -5,15 +5,12 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.BlockVolcanicLava;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
-import grondag.adversity.library.IBlockTest;
-import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -21,7 +18,6 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -42,24 +38,48 @@ public class FlowController extends ModelController implements ICollisionHandler
         this.lightingMode = lightingMode;
     }
 
-    public final static int NO_BLOCK = -33;
-
     @Override
-    public long getClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         FlowHeightState flowState = new FlowHeightState(0);
+        flowState.setYOffset(0);
         
-        
-        if(block instanceof IFlowBlock.IHeightBlock)
+        if(block instanceof IFlowBlock)
         {
-            // if under another flow height block, treat as full height
-            if(world.getBlockState(pos.up()).getBlock() instanceof IFlowBlock.IHeightBlock)
-            {
-                return FlowHeightState.FULL_BLOCK_STATE_KEY;
-            }
+            int yOrigin = pos.getY();
+            IBlockState originState = state;
 
+            // If under another flow height block, handle similar to filler block.
+            // Not a perfect fix if they are stacked, but shouldn't normally be.
+            if(block instanceof IFlowBlock.IHeightBlock)
+            {
+                // try to use block above as height origin
+                originState = world.getBlockState(pos.up());
+                if(originState.getBlock() instanceof IFlowBlock.IHeightBlock)
+                {
+                    yOrigin++;
+                    flowState.setYOffset(-1);
+                }
+                else
+                {
+                    // didn't work, go back to using this block
+                    originState = state;
+                }
+            }
+            else if(block instanceof IFlowBlock.IFillerBlock)
+            {
+                int offset = IFlowBlock.IFillerBlock.getYOffsetFromState(state);
+                yOrigin -= offset;
+                flowState.setYOffset(offset);
+                originState = world.getBlockState(pos.down(offset));
+                if(!(originState.getBlock() instanceof IFlowBlock.IHeightBlock))
+                {
+                    return FlowHeightState.FULL_BLOCK_STATE_KEY;
+                }
+            }
+            
             int[][] neighborHeight = new int[3][3];
-            neighborHeight[1][1] = IFlowBlock.IHeightBlock.getFlowHeightFromState(state);
+            neighborHeight[1][1] = IFlowBlock.IHeightBlock.getFlowHeightFromState(originState);
 
             Block b;
             IBlockState bs;
@@ -70,10 +90,10 @@ public class FlowController extends ModelController implements ICollisionHandler
                 {
                     if(!(x == 1 && z == 1)) 
                     {
-                        neighborHeight[x][z] = NO_BLOCK;
+                        neighborHeight[x][z] = FlowHeightState.NO_BLOCK;
                         for(int y = 2; y >= -2; y--)
                         {
-                            bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, pos.getY() + y, pos.getZ() - 1 + z));
+                            bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, yOrigin + y, pos.getZ() - 1 + z));
                             b = bs.getBlock();
                             if(b instanceof IFlowBlock.IHeightBlock)
                             {
@@ -102,7 +122,7 @@ public class FlowController extends ModelController implements ICollisionHandler
             }
         }
         
-        return flowState.getStateKey() | (this.alternator.getAlternate(pos) << FlowHeightState.STATE_BIT_COUNT);
+         return flowState.getStateKey() | (this.alternator.getAlternate(pos) << FlowHeightState.STATE_BIT_COUNT);
     }
 
     @Override
@@ -125,21 +145,67 @@ public class FlowController extends ModelController implements ICollisionHandler
     @Override
     public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state)
     {
-        if(state.getBlock() instanceof IFlowBlock.IHeightBlock)
+        Block block = state.getBlock();
+        if(block instanceof IFlowBlock)
         {
-            return IFlowBlock.IHeightBlock.getFlowHeightFromState(state);
+            return this.getDynamicShapeIndex((NiceBlock) block, state, worldIn, pos);
         }
         else
         {
-            return 16;
+            return 0;
         }
-
     }
 
     @Override
     public List<AxisAlignedBB> getModelBounds(long collisionKey)
     {
-        ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (collisionKey + 1)/16.0, 1)).build();
-        return retVal;
+        
+        List<RawQuad> quads = ((FlowModelFactory)this.bakedModelFactory).makeRawQuads(collisionKey);
+
+        // simple method
+        AxisAlignedBB simpleBox = null;
+        for(RawQuad quad : quads)
+        {
+            if(simpleBox == null)
+            {
+                simpleBox = quad.getAABB();
+            }
+            else
+            {
+                simpleBox = simpleBox.union(quad.getAABB());
+            }
+        }
+        
+        // voxel method
+        boolean voxels[][][] = new boolean[8][8][8];
+        ImmutableList.Builder<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>();
+
+        for(int x = 0; x < 8; x++)
+        {
+            for(int y = 0; y < 8; y++)
+            {
+                for(int z = 0; z < 8; z++)
+                {
+                    voxels[x][y][z] = false;
+                    for(RawQuad quad : quads)
+                    {
+                        if(quad.getAABB().intersectsWith(new AxisAlignedBB(x/8.0, y/8.0, z/8.0, (x+1.0)/8.0, (y+1.0)/8.0, (z+1.0)/8.0  )))
+                        {
+                            voxels[x][y][z] = true;
+                            retVal.add(new AxisAlignedBB(x/8.0, y/8.0, z/8.0, (x+1.0)/8.0, (y+1.0)/8.0, (z+1.0)/8.0));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        if(simpleBox == null) simpleBox = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
+        
+        //Adversity.log.info("box " + simpleBox.minX + " " + simpleBox.minY + " " + simpleBox.minZ + " " + simpleBox.maxX + " " + simpleBox.maxY + " " + simpleBox.maxZ );
+
+        //return new ImmutableList.Builder<AxisAlignedBB>().add(simpleBox).build();
+        return retVal.build();
     }
 }
