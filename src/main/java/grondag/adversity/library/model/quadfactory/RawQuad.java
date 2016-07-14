@@ -330,32 +330,53 @@ public class RawQuad
             }
 
             double distanceToPlane = -normal.dotProduct((origin.subtract(vertices[0]))) / directionDotNormal;
+            // facing away from plane
+            if(distanceToPlane < -QuadFactory.EPSILON) return false;
+            
             Vec3d intersection = origin.add(direction.scale(distanceToPlane));
 
             // now we just need to test if point is inside this polygon
             return containsPoint(intersection);
         }
         
+        /**
+         * Assumes the given point is on the plane of the polygon.
+         * 
+         * For each side, find a vector in the plane of the 
+         * polygon orthogonal to the line formed by the two vertices of the edge.
+         * Then take the dot product with vector formed by the first vertex and the point.
+         * If the point is inside the polygon, the sign should be the same for all
+         * edges, or the dot product should be very small, meaning the point is on the edge.
+         */
         public boolean containsPoint(Vec3d point)
         {
-            // point should be on the same side of every edge segment.
+ 
+            double lastSignum = 0;
+            Vec3d faceNormal = this.getFaceNormal();
+            int vertexCount = this instanceof RawTri ? 3 : 4;
             
-            
-            function side(x1, y1, x2, y2, x, y:Number):Number
+            for(int i = 0; i < vertexCount; i++)
             {
-             return (y2 - y1)*(x - x1) + (-x2 + x1)*(y - y1);
+                int nextVertex = i + 1;
+                if(nextVertex == vertexCount) nextVertex = 0;
+                
+                Vec3d line = vertices[nextVertex].subtract(vertices[i]);
+                Vec3d normalInPlane = faceNormal.crossProduct(line);
+                
+                double sign = normalInPlane.dotProduct(point.subtract(vertices[i]));
+                
+                if(lastSignum == 0)
+                {
+                    lastSignum = Math.signum(sign);
+                }
+                else if(Math.signum(sign) != lastSignum)
+                {
+                    return false;
+                }
             }
-
-            function pointInTriangle(x1, y1, x2, y2, x3, y3, x, y:Number):Boolean
-            {
-             var checkSide1:Boolean = side(x1, y1, x2, y2, x, y) >= 0;
-             var checkSide2:Boolean = side(x2, y2, x3, y3, x, y) >= 0;
-             var checkSide3:Boolean = side(x3, y3, x1, y1, x, y) >= 0;
-             return checkSide1 && checkSide2 && checkSide3;
-            }
-
-            return false;
+            return true;
         }
+        
         
         public AxisAlignedBB getAABB()
         {

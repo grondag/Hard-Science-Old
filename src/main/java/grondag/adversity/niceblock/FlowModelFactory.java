@@ -311,7 +311,7 @@ public class FlowModelFactory extends ModelFactory
         template.face = EnumFacing.DOWN;
         RawQuad qBottom = new RawQuad(template);
         qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);
-     //   rawQuads.add(qBottom);
+        //rawQuads.add(qBottom);
 
 
         LinkedList<RawQuad> swapQuads = new LinkedList<RawQuad>();
