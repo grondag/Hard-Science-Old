@@ -45,10 +45,16 @@ public class NiceBlockHighlighter {
     				double d1 = event.getPlayer().lastTickPosY + (event.getPlayer().posY - event.getPlayer().lastTickPosY) * event.getPartialTicks();
     				double d2 = event.getPlayer().lastTickPosZ + (event.getPlayer().posZ - event.getPlayer().lastTickPosZ) * event.getPartialTicks();
     
+    				// Draw collision boxes
     				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.getPlayer().worldObj, pos, bs)) {
     					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
     				}
     
+    				// Draw outline of block boundaries
+    				GlStateManager.color(0.0F, 0.0F, 0.0F, 0.2F);
+                    AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 1, 1).offset(pos.getX(), pos.getY(), pos.getZ());
+                    RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
+                    
     				GlStateManager.depthMask(true);
     				GlStateManager.enableTexture2D();
     				GlStateManager.disableBlend();

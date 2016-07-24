@@ -30,19 +30,37 @@ public class RawQuadTest
         // point with ray intersecting poly
         point = new Vec3d(0.5, 0.1, 0.5);
         direction = new Vec3d(0, 123, 0);
-        assertTrue(quad.intersectsWithRay(point, direction));
-        
+        assertTrue(quad.intersectsWithRay(point, direction));        
         
         // point with ray intersecting plane outside poly
         point = new Vec3d(-32, 0.2, 27);
         direction = new Vec3d(0, 123, 0);
         assertFalse(quad.containsPoint(point));
-        
-        
+             
         // point with ray facing away from poly
         point = new Vec3d(0.5, 0.1, 0.5);
         direction = new Vec3d(0, -124535, 0);
         assertFalse(quad.intersectsWithRay(point, direction));
+        
+        
+        //convexity tests
+        quad = new RawQuad().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0.5, EnumFacing.NORTH);
+        assertTrue(quad.isConvex());
+        
+        quad = new RawTri().setupFaceQuad(EnumFacing.UP,
+                new FaceVertex(0, 0, 0), 
+                new FaceVertex(1, 0, 0), 
+                new FaceVertex(1, 1, 0), 
+                EnumFacing.NORTH);
+        assertTrue(quad.isConvex());
+                
+        quad = new RawQuad().setupFaceQuad(EnumFacing.UP,
+                new FaceVertex(0, 0, 0), 
+                new FaceVertex(1, 0, 0), 
+                new FaceVertex(1, 1, 0), 
+                new FaceVertex(0.9, 0.1, 0), 
+                EnumFacing.NORTH);
+        assertFalse(quad.isConvex());
         
     }
 

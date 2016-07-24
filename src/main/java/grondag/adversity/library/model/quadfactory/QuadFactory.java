@@ -1,14 +1,17 @@
 package grondag.adversity.library.model.quadfactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import com.google.common.collect.ImmutableList;
 
 public class QuadFactory
 {
-    public static final double EPSILON = 0.0000005;
+    public static final double EPSILON = 0.0000001;
 
 
     public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();
@@ -56,7 +59,43 @@ public class QuadFactory
         v4.v = swapV;
     }
 
+    public static List<RawQuad> makeBox(AxisAlignedBB box, RawQuad template)
+    {
+        List<RawQuad> retVal = new ArrayList<RawQuad>(6);
+        
+        RawQuad quad = new RawQuad(template);
+        quad.setupFaceQuad(EnumFacing.UP, 1 - box.maxX, box.minZ, 1 - box.minX, box.maxZ, 1 - box.maxY, EnumFacing.SOUTH);
+        retVal.add(quad);
 
+        quad = new RawQuad(template);
+        quad.setupFaceQuad(EnumFacing.DOWN, box.minX, box.minZ, box.maxX, box.maxZ, box.minY, EnumFacing.SOUTH);
+        retVal.add(quad);
+
+        //-X
+        quad = new RawQuad(template);
+        quad.setupFaceQuad(EnumFacing.WEST, box.minZ, box.minY, box.maxZ, box.maxY, box.minX, EnumFacing.UP);
+        retVal.add(quad);
+        
+        //+X
+        quad = new RawQuad(template);
+        quad.setupFaceQuad(EnumFacing.EAST, 1 - box.maxZ, box.minY, 1 - box.minZ, box.maxY, 1 - box.maxX, EnumFacing.UP);
+        retVal.add(quad);
+        
+        //-Z
+        quad = new RawQuad(template);
+        quad.setupFaceQuad(EnumFacing.NORTH, 1 - box.maxX, box.minY, 1 - box.minX, box.maxY, box.minZ, EnumFacing.UP);
+        retVal.add(quad);
+        
+        //+Z
+        quad = new RawQuad(template);
+        quad.setupFaceQuad(EnumFacing.SOUTH, box.minX, box.minY, box.maxX, box.maxY, 1 - box.maxZ, EnumFacing.UP);
+        retVal.add(quad);
+        
+        
+
+        return retVal;
+    }
+    
 
     //    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)
     //    {

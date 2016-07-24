@@ -3,14 +3,18 @@ package grondag.adversity.niceblock;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
+import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
@@ -23,6 +27,7 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 
 public class FlowModelFactory extends ModelFactory
@@ -73,7 +78,9 @@ public class FlowModelFactory extends ModelFactory
                 // could have multiple threads attempting to colorize same quad
                 synchronized(quad)
                 {
-                    builder.add(quad.recolor(color).createBakedQuad());
+                    //TODO: put back to normal, make configurable
+                    builder.add(quad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000).createBakedQuad());
+                    //builder.add(quad.recolor(color).createBakedQuad());
                 }
             }    
         }
@@ -83,7 +90,7 @@ public class FlowModelFactory extends ModelFactory
 
     public List<RawQuad> makeRawQuads(long shapeIndex)
     {
-       LinkedList<RawQuad> rawQuads = new LinkedList<RawQuad>();
+       CSGShape rawQuads = new CSGShape();
         
         RawQuad template = new RawQuad();
         template.lockUV = true;
@@ -311,18 +318,20 @@ public class FlowModelFactory extends ModelFactory
         template.face = EnumFacing.DOWN;
         RawQuad qBottom = new RawQuad(template);
         qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);
-        //rawQuads.add(qBottom);
-
-
-        LinkedList<RawQuad> swapQuads = new LinkedList<RawQuad>();
+        rawQuads.add(qBottom);
         
-        rawQuads.forEach((quad) -> swapQuads.addAll(quad.clipToFace(EnumFacing.UP, template)));
-        rawQuads.clear();
-        swapQuads.forEach((quad) -> rawQuads.addAll(quad.clipToFace(EnumFacing.DOWN, template)));
-        
+
+        CSGShape cubeQuads = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, 0, 1, 1, 1), template));
+
+        rawQuads = rawQuads.intersect(cubeQuads);
+//        rawQuads.forEach((quad) -> swapQuads.addAll(quad.clipToFace(EnumFacing.UP, template)));
+//        rawQuads.clear();
+//        swapQuads.forEach((quad) -> rawQuads.addAll(quad.clipToFace(EnumFacing.DOWN, template)));
+//        
         // don't count quads as face quads unless actually on the face
         // will be useful for face culling
         rawQuads.forEach((quad) -> quad.face = quad.isOnFace(quad.face) ? quad.face : null);
+        
         
         // if we end up with an empty list, default to standard cube
         if(rawQuads.isEmpty())

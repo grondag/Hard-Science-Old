@@ -2,7 +2,9 @@ package grondag.adversity.library.model.quadfactory;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -26,6 +28,15 @@ public class RawQuad
         public boolean lockUV = false;
         public boolean isItem = false;
 
+        protected static AtomicLong nextQuadID = new AtomicLong(1);
+        protected static long IS_AN_ANCESTOR = -1;
+        protected static long NO_ID = 0;
+
+        protected boolean isInverted = false;
+        protected long quadID = NO_ID;
+        protected long ancestorQuadID = NO_ID;
+        protected long[] lineID = new long[4];
+        
         public RawQuad()
         {
             super();
@@ -40,16 +51,25 @@ public class RawQuad
         public RawQuad clone()
         {
             RawQuad retval = new RawQuad();
-            retval.vertices = this.vertices.clone();
             retval.copyProperties(this);
+            retval.copyVertices(this);
             return retval;
         }
         
+        protected void copyVertices(RawQuad template)
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                this.vertices[i] = template.vertices[i] == null ? null : template.vertices[i].clone();
+                this.lineID[i] = template.lineID[i];
+            }
+
+        }
         public int vertexCount()
         {
             return 4;
         }
-
+        
         protected void copyProperties(RawQuad fromObject)
         {
             this.face = fromObject.face;
@@ -59,27 +79,40 @@ public class RawQuad
             this.lightingMode = fromObject.lightingMode;
             this.lockUV = fromObject.lockUV;
             this.isItem = fromObject.isItem;
+            this.quadID = fromObject.quadID;
+            this.ancestorQuadID = fromObject.ancestorQuadID;
+            this.isInverted = fromObject.isInverted;
         }
 
         /** 
          * If this is a quad, returns two tris.
-         * If is already a tri, returns self.
+         * If is already a tri, returns copy of self.
          */
         public RawTri[] split()
         {
             RawTri retVal[] = new RawTri[2];
             
+            long splitLineID = CSGPlane.nextLineID.getAndIncrement();
+            
             retVal[0] = new RawTri(this);
-            retVal[0].vertices[0] = this.vertices[0];
-            retVal[0].vertices[1] = this.vertices[1];
-            retVal[0].vertices[2] = this.vertices[2];
-            retVal[0].vertices[3] = this.vertices[2];
+            retVal[0].setVertex(0, this.getVertex(0).clone());
+            retVal[0].setVertex(1, this.getVertex(1).clone());
+            retVal[0].setVertex(2, this.getVertex(2).clone());
+            retVal[0].setLineID(0, this.getLineID(0));
+            retVal[0].setLineID(1, this.getLineID(1));
+            retVal[0].setLineID(2, splitLineID);
+            retVal[0].ancestorQuadID = this.getAncestorQuadIDForDescendant();
+            retVal[0].quadID = nextQuadID.incrementAndGet();
 
             retVal[1] = new RawTri(this);
-            retVal[1].vertices[0] = this.vertices[0];
-            retVal[1].vertices[1] = this.vertices[2];
-            retVal[1].vertices[2] = this.vertices[3];
-            retVal[1].vertices[3] = this.vertices[3];
+            retVal[1].setVertex(0, this.getVertex(0).clone());
+            retVal[1].setVertex(1, this.getVertex(2).clone());
+            retVal[1].setVertex(2, this.getVertex(3).clone());
+            retVal[1].setLineID(0, splitLineID);
+            retVal[1].setLineID(1, this.getLineID(2));
+            retVal[1].setLineID(2, this.getLineID(3));
+            retVal[1].ancestorQuadID = this.getAncestorQuadIDForDescendant();
+            retVal[1].quadID = nextQuadID.incrementAndGet();
  
             return retVal;
         }
@@ -89,11 +122,27 @@ public class RawQuad
          */
         public RawQuad invert()
         {
-            Vertex swap = vertices[0];
-            vertices[0] = vertices[3];
-            vertices[1] = vertices[2];
-            vertices[2] = vertices[1];
-            vertices[3] = swap;
+            for(int i = 0; i < 4; i++)
+            {
+                if(vertices[i] != null && vertices[i].normal != null)
+                {
+                    vertices[i].normal = vertices[i].normal.scale(-1);
+                }
+            }
+            
+            Vertex swapVertex = getVertex(0);
+            setVertex(0, getVertex(2));
+            setVertex(2, swapVertex);
+            
+            long swapLine = lineID[0];
+            lineID[0] = lineID[1];
+            lineID[1] = swapLine;
+            swapLine = lineID[2];
+            lineID[2] = lineID[3];
+            lineID[3] = swapLine;
+            
+            this.isInverted = !this.isInverted;
+
             return this;
         }
         
@@ -111,7 +160,7 @@ public class RawQuad
          */
         public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
         {
-
+            
             EnumFacing defaultTop = Useful.defaultTopOf(this.face);
             FaceVertex rv0;
             FaceVertex rv1;
@@ -159,60 +208,61 @@ public class RawQuad
                 vertexIn3 = rv3;
             }
 
-            vertexIn0.x -= QuadFactory.EPSILON;
-            vertexIn3.x -= QuadFactory.EPSILON;
-            vertexIn0.y -= QuadFactory.EPSILON;
-            vertexIn1.y -= QuadFactory.EPSILON;
-
-            vertexIn2.x += QuadFactory.EPSILON;
-            vertexIn1.x += QuadFactory.EPSILON;
-            vertexIn3.y += QuadFactory.EPSILON;
-            vertexIn2.y += QuadFactory.EPSILON;
+            //TODO: move this to baked quad creation - causes problems with CSG if done before
+//            vertexIn0.x -= QuadFactory.EPSILON;
+//            vertexIn3.x -= QuadFactory.EPSILON;
+//            vertexIn0.y -= QuadFactory.EPSILON;
+//            vertexIn1.y -= QuadFactory.EPSILON;
+//
+//            vertexIn2.x += QuadFactory.EPSILON;
+//            vertexIn1.x += QuadFactory.EPSILON;
+//            vertexIn3.y += QuadFactory.EPSILON;
+//            vertexIn2.y += QuadFactory.EPSILON;
 
             switch(this.face)
             {
             case UP:
-                this.vertices[0] = new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color));
-                this.vertices[1] = new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color));
-                this.vertices[2] = new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color));
-                this.vertices[3] = new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color));
+                setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
+                setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color)));
+                setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color)));
+                setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color)));
                 break;
 
             case DOWN:     
-                this.vertices[0] = new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-vertexIn0.x) * 16.0, vertexIn0.y * 16.0, rv0.getColor(this.color));
-                this.vertices[1] = new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-vertexIn1.x) * 16.0, vertexIn1.y * 16.0, rv1.getColor(this.color));
-                this.vertices[2] = new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-vertexIn2.x) * 16.0, vertexIn2.y * 16.0, rv2.getColor(this.color));
-                this.vertices[3] = new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-vertexIn3.x) * 16.0, vertexIn3.y * 16.0, rv3.getColor(this.color));
+                setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-vertexIn0.x) * 16.0, vertexIn0.y * 16.0, rv0.getColor(this.color)));
+                setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-vertexIn1.x) * 16.0, vertexIn1.y * 16.0, rv1.getColor(this.color)));
+                setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-vertexIn2.x) * 16.0, vertexIn2.y * 16.0, rv2.getColor(this.color)));
+                setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-vertexIn3.x) * 16.0, vertexIn3.y * 16.0, rv3.getColor(this.color)));
                 break;
 
             case EAST:
 
 
-                this.vertices[0] = new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color));
-                this.vertices[1] = new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color));
-                this.vertices[2] = new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color));
-                this.vertices[3] = new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color));
+                setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
+                setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color)));
+                setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color)));
+                setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color)));
                 break;
 
             case WEST:
-                this.vertices[0] = new Vertex(rv0.depth, rv0.y, rv0.x, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color));
-                this.vertices[1] = new Vertex(rv1.depth, rv1.y, rv1.x, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color));
-                this.vertices[2] = new Vertex(rv2.depth, rv2.y, rv2.x, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color));
-                this.vertices[3] = new Vertex(rv3.depth, rv3.y, rv3.x, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color));
+                setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
+                setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color)));
+                setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color)));
+                setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color)));
                 break;
 
             case NORTH:
-                this.vertices[0] = new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color));
-                this.vertices[1] = new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color));
-                this.vertices[2] = new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color));
-                this.vertices[3] = new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color));
+                setVertex(0, new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
+                setVertex(1, new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
+                setVertex(2, new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
+                setVertex(3, new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
                 break;
 
             case SOUTH:
-                this.vertices[0] = new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color));
-                this.vertices[1] = new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color));
-                this.vertices[2] = new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color));
-                this.vertices[3] = new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color));
+                setVertex(0, new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
+                setVertex(1, new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
+                setVertex(2, new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
+                setVertex(3, new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
                 break;
             }
 
@@ -273,10 +323,10 @@ public class RawQuad
         public RawQuad recolor(int color)
         {
             this.color = color;
-            vertices[0].color = color;
-            vertices[1].color = color;
-            vertices[2].color = color;
-            vertices[3].color = color;
+            if(vertices[0] != null) vertices[0].color = color;
+            if(vertices[1] != null) vertices[1].color = color;
+            if(vertices[2] != null) vertices[2].color = color;
+            if(vertices[3] != null) vertices[3].color = color;
             return this;
         }
         
@@ -287,23 +337,115 @@ public class RawQuad
         {
             this.vertices[index] = vertexIn;
         }
-
+        
         public Vertex getVertex(int index)
         {
             return this.vertices[index];
         }
-        
-        public List<RawQuad> clipToFace(EnumFacing face, RawQuad patchTemplate)
+
+        public void setLineID(int index, long lineID)
         {
-            LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
-            for(RawTri tri : this.split())
-            {
-                retVal.addAll(tri.splitOnFace(face, patchTemplate));
-            }
-            return retVal;
+            this.lineID[index] = lineID;
         }
+        
+        public long getLineID(int index)
+        {
+            return this.lineID[index];
+        }
+        
+        public static int LINE_NOT_FOUND = -1;
+        /**
+         * Returns the index of the edge with the given line ID.
+         * Returns LINE_NOT_FOUND if, uh, you know, it wasn't found.
+         */
+        public int findLineIndex(long lineID)
+        {
+            for(int i = 0; i < this.vertexCount(); i++)
+            {
+                if(this.getLineID(i) == lineID)
+                {
+                    return i;
+                }
+            }
+            return LINE_NOT_FOUND;
+        }
+        
+        public long getAncestorQuadID()
+        {
+            return this.ancestorQuadID;
+        }
+        
+        public long getAncestorQuadIDForDescendant()
+        {
+            return this.ancestorQuadID == IS_AN_ANCESTOR ? this.quadID : this.ancestorQuadID;
+        }
+        
+        public RawQuad initCsg()
+        {
+            this.ancestorQuadID = IS_AN_ANCESTOR;
+            this.quadID = nextQuadID.getAndIncrement();
+            for(int i = 0; i < 4; i++)
+            {
+                if(vertices[i] != null)
+                {
+                    if(i == 3 && this instanceof RawTri)
+                    {
+                        vertices[3].setVertexID(vertices[2].getVertexID());
+                        this.setLineID(3, this.getLineID(2));
+                    }
+                    else
+                    {
+                        this.setLineID(i, CSGPlane.nextLineID.getAndIncrement());
+                    }
+                }
+            }
+            return this;
+        }
+        
+//        public List<RawQuad> clipToFace(EnumFacing face, RawQuad patchTemplate)
+//        {
+//            LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
+//            for(RawTri tri : this.split())
+//            {
+//                retVal.addAll(tri.splitOnFace(face, patchTemplate));
+//            }
+//            return retVal;
+//        }
 
+        /**
+         * Returns true if this polygon is convex.
+         * All Tris must be.  
+         * For quads, confirms that each turn around the quad 
+         * goes same way by comparing cross products of edges.
+         */
+        public boolean isConvex()
+        {
+            if(this instanceof RawTri) return true;
+            
+            Vec3d testVector = null;
+            
+            for(int thisVertex = 0; thisVertex < this.vertexCount(); thisVertex++)
+            {
+                int nextVertex = thisVertex + 1;
+                if(nextVertex == this.vertexCount()) nextVertex = 0;
 
+                int priorVertex = thisVertex - 1;
+                if(priorVertex == -1) priorVertex = this.vertexCount() - 1;
+
+                Vec3d lineA = vertices[thisVertex].subtract(vertices[priorVertex]);
+                Vec3d lineB = vertices[nextVertex].subtract(vertices[thisVertex]);
+                
+                if(testVector == null)
+                {
+                    testVector = lineA.crossProduct(lineB);
+                }
+                else if(testVector.dotProduct(lineA.crossProduct(lineB)) < 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         
         protected boolean isOrthogonalTo(EnumFacing face)
         {

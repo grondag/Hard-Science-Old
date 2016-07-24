@@ -1,20 +1,26 @@
 package grondag.adversity.library.model.quadfactory;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4f;
 
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.Vec3d;
 
 public class Vertex extends Vec3d
 {
+    protected static AtomicLong nextVertexID = new AtomicLong(1);
+    protected static long NO_ID = 0;
+
+    protected long vertexID = NO_ID;
+
     protected double u;
     protected double v;
     protected int color;
     protected Vec3d normal;
-
-
+    
+    
     public Vertex(double x, double y, double z, double u, double v, int color)
     {
         super(x, y, z);
@@ -35,6 +41,22 @@ public class Vertex extends Vec3d
         return this;
     }
 
+    protected Vertex setVertexID(long vertexID)
+    {
+        this.vertexID = vertexID;
+        return this;
+    }
+    
+    protected long getVertexID()
+    {
+        return this.vertexID;
+    }
+    
+    protected void initCsg()
+    {
+        this.vertexID = nextVertexID.getAndIncrement();
+    }
+    
     public boolean hasNormal()
     {
         return this.normal != null;
@@ -115,7 +137,7 @@ public class Vertex extends Vec3d
     
     public Vertex clone()
     {
-        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal);
+        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal).setVertexID(this.vertexID);
     }
 
     public Vertex transform(Matrix4f matrix, boolean rescaleToUnitCube)
@@ -164,5 +186,16 @@ public class Vertex extends Vec3d
             retVal[2] = (float) this.normal.zCoord;
         }
         return retVal;
+    }
+
+    /** 
+     * True if both vertices are at the same point. 
+     */
+    public boolean isCsgEqual(Vertex vertexIn)
+    {
+        return Math.abs(vertexIn.xCoord - this.xCoord) < QuadFactory.EPSILON
+            && Math.abs(vertexIn.yCoord - this.yCoord) < QuadFactory.EPSILON
+            && Math.abs(vertexIn.zCoord - this.zCoord) < QuadFactory.EPSILON;
+
     }
 }
