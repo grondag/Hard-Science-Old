@@ -186,9 +186,9 @@ public class CSGPlane
                         frontLineID.add(iType == COPLANAR && jType == BACK ? this.lineID : iLineID);
                     }
                     if (iType != FRONT) {
+                        backVertex.add(iType != BACK ? iVertex.clone() : iVertex);
                         // if we are splitting at an existing vertex need to use split line
                         // if the next vertex is not going into this list
-                        backVertex.add(iType != BACK ? iVertex.clone() : iVertex);
                         backLineID.add(iType == COPLANAR && jType == FRONT ? this.lineID : iLineID);
                     }
                     // Line for interpolated vertex depends on what the next vertex is for this side (front/back).
@@ -241,7 +241,7 @@ public class CSGPlane
 //                        
 //                        if((degenerateSplitCount & 0xFFL) == 0xFFL)
 //                        {
-//                            Adversity.log.info("Degenerate split rate is " + (double)degenerateSplitCount / splitQuadRunCount * 100 + "%");
+//                            Adversity.info("Degenerate split rate is " + (double)degenerateSplitCount / splitQuadRunCount * 100 + "%");
 //                            Adversity.log.info("Average degenerate edge length is " + totalVertexDistance / totalVertexCount);
 //                        }
 //                    }

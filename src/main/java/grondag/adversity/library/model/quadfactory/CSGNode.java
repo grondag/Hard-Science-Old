@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -311,12 +312,12 @@ public class CSGNode
         // confirm vertices on either end of vertex match
         if(!aQuad.getVertex(aStartIndex).isCsgEqual(bQuad.getVertex(bEndIndex)))
         {
-            Adversity.log.info("vertex mismatch");
+//            Adversity.log.info("vertex mismatch");
             return null;
         }
         if(!aQuad.getVertex(aEndIndex).isCsgEqual(bQuad.getVertex(bStartIndex)))
         {
-            Adversity.log.info("vertex mismatch");
+//            Adversity.log.info("vertex mismatch");
             return null;
         }
 
@@ -380,14 +381,14 @@ public class CSGNode
         // must be convex
         if(!joinedQuad.isConvex())
         {
-            Adversity.log.info("Quad not convex");
+//            Adversity.log.info("Quad not convex");
             return null;
         }
         
-        if(Math.abs(aQuad.getArea() + bQuad.getArea() - joinedQuad.getArea()) > QuadFactory.EPSILON)
-        {
-            Adversity.log.info("area mismatch");
-        }
+//        if(Math.abs(aQuad.getArea() + bQuad.getArea() - joinedQuad.getArea()) > QuadFactory.EPSILON)
+//        {
+//            Adversity.log.info("area mismatch");
+//        }
         
         return joinedQuad;
         
@@ -513,10 +514,10 @@ public class CSGNode
             
         }
         
-        if(quadMap.size() > 1 && quadList.getFirst().face == EnumFacing.DOWN)
-        {
-            Adversity.log.info("too many");
-        }
+//        if(quadMap.size() > 1 && quadList.getFirst().face == EnumFacing.DOWN)
+//        {
+//            Adversity.log.info("too many");
+//        }
         
         LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
         quadMap.valueCollection().forEach((q) -> retVal.addAll(q.toQuads()));
@@ -535,7 +536,11 @@ public class CSGNode
      */
     public final void build(List<RawQuad> quadsIn) {
         
-        if (quadsIn.isEmpty()) return;
+        
+        if (quadsIn.isEmpty()) 
+        {
+            return;
+        }
 
         if (this.plane == null) {
             this.plane = new CSGPlane(quadsIn.get(0));

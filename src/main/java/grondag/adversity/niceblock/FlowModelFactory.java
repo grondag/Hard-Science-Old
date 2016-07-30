@@ -274,46 +274,117 @@ public class FlowModelFactory extends ModelFactory
             normCorner[corner.ordinal()] = shadowEnhance(normTemp).normalize();
         }
         
+        boolean sideIsSimple[] = new boolean[4];
+        boolean topIsSimple = true;
+        
         for(HorizontalFace side: HorizontalFace.values())
         {
-            RawQuad qi = quadInputsCenterLeft[side.ordinal()];
-            qi.setVertexNormal(0, normSide[side.ordinal()]);
-            qi.setVertexNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
-            qi.setVertexNormal(2, normCenter);
-            rawQuads.add(qi);
-
-            qi = quadInputsCenterRight[side.ordinal()];
-            qi.setVertexNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
-            qi.setVertexNormal(1, normSide[side.ordinal()]);
-            qi.setVertexNormal(2, normCenter);
-            rawQuads.add(qi);
+            double avg = flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft()));
+            avg += flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight()));
+            avg /= 2;
+            sideIsSimple[side.ordinal()] = Math.abs(avg - flowState.getMidSideVertexHeight(side)) < 2.0 / 16.0;
+            topIsSimple = topIsSimple && sideIsSimple[side.ordinal()];
         }
-       
-        //Add sides
-        for(HorizontalFace side : HorizontalFace.values())
-        {
-            template.face = side.face;
-            
-            RawQuad qLeft = new RawQuad(template);
-            qLeft.setupFaceQuad(
-                    new FaceVertex(0, bottom - yOffset, 0),
-                    new FaceVertex(0.5, bottom - yOffset, 0),
-                    new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
-                    new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())) - yOffset, 0),
-                    EnumFacing.UP);
-            rawQuads.add(qLeft);
 
-            RawQuad qRight = new RawQuad(template);
-            qRight.setupFaceQuad(
-                    new FaceVertex(0.5, bottom - yOffset, 0),
-                    new FaceVertex(1, bottom - yOffset, 0),
-                    new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())) - yOffset, 0),
-                    new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
-                    EnumFacing.UP);
-            rawQuads.add(qRight);
+        double cross1 = (flowState.getMidCornerVertexHeight(HorizontalCorner.NORTH_EAST) + flowState.getMidCornerVertexHeight(HorizontalCorner.SOUTH_WEST)) / 2.0;
+        double cross2 = (flowState.getMidCornerVertexHeight(HorizontalCorner.NORTH_WEST) + flowState.getMidCornerVertexHeight(HorizontalCorner.SOUTH_EAST)) / 2.0;
+        topIsSimple = topIsSimple & (Math.abs(cross1 - cross2) < 2.0 / 16.0);
+        
+        
+        //single top face if it is relatively flat and all sides can be drawn without a mid vertex
+        if(topIsSimple)
+        {
+            template.face = EnumFacing.UP;
+            RawQuad qi = new RawQuad(template, 4);
+            qi.setupFaceQuad(
+                    fvMidCorner[HorizontalCorner.SOUTH_WEST.ordinal()],
+                    fvMidCorner[HorizontalCorner.SOUTH_EAST.ordinal()],
+                    fvMidCorner[HorizontalCorner.NORTH_EAST.ordinal()],
+                    fvMidCorner[HorizontalCorner.NORTH_WEST.ordinal()],
+                    EnumFacing.NORTH);   
+            qi.setVertexNormal(0, normCorner[HorizontalCorner.SOUTH_WEST.ordinal()]);
+            qi.setVertexNormal(1, normCorner[HorizontalCorner.SOUTH_EAST.ordinal()]);
+            qi.setVertexNormal(2, normCorner[HorizontalCorner.NORTH_EAST.ordinal()]);
+            qi.setVertexNormal(3, normCorner[HorizontalCorner.NORTH_WEST.ordinal()]);
+            qi.tag = "yawp!";
+            rawQuads.add(qi);    
+        }
+        
+        for(HorizontalFace side: HorizontalFace.values())
+        {
+           
+            // don't use middle vertex if it is close to being in line with corners
+            if(sideIsSimple[side.ordinal()])
+            {
+                // top
+                if(!topIsSimple)
+                {
+                    template.face = EnumFacing.UP;
+                    RawQuad qi = new RawQuad(template, 3);
+                    qi.setupFaceQuad(
+                            fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
+                            fvCenter,
+                            fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
+                            EnumFacing.NORTH);   
+                    qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
+                    qi.setVertexNormal(1, normCenter);
+                    qi.setVertexNormal(2, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
+                    rawQuads.add(qi);    
+                }
+                
+                // side
+                template.face = side.face;
+                RawQuad qSide = new RawQuad(template);
+                qSide.setupFaceQuad(
+                        new FaceVertex(0, bottom - yOffset, 0),
+                        new FaceVertex(1, bottom - yOffset, 0),
+                        new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())) - yOffset, 0),
+                        new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())) - yOffset, 0),
+                        EnumFacing.UP);
+                rawQuads.add(qSide);
+            
+            }
+            else
+            {
+                //tops
+                RawQuad qi = quadInputsCenterLeft[side.ordinal()];
+                qi.setVertexNormal(0, normSide[side.ordinal()]);
+    //            qi.setVertexNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
+                qi.setVertexNormal(1, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
+                qi.setVertexNormal(2, normCenter);
+                rawQuads.add(qi);
+    
+                qi = quadInputsCenterRight[side.ordinal()];
+    //            qi.setVertexNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
+                qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
+                qi.setVertexNormal(1, normSide[side.ordinal()]);
+                qi.setVertexNormal(2, normCenter);
+                rawQuads.add(qi);
+
+                //Sides
+                template.face = side.face;
+                
+                RawQuad qLeft = new RawQuad(template);
+                qLeft.setupFaceQuad(
+                        new FaceVertex(0, bottom - yOffset, 0),
+                        new FaceVertex(0.5, bottom - yOffset, 0),
+                        new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
+                        new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())) - yOffset, 0),
+                        EnumFacing.UP);
+                rawQuads.add(qLeft);
+    
+                RawQuad qRight = new RawQuad(template);
+                qRight.setupFaceQuad(
+                        new FaceVertex(0.5, bottom - yOffset, 0),
+                        new FaceVertex(1, bottom - yOffset, 0),
+                        new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())) - yOffset, 0),
+                        new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
+                        EnumFacing.UP);
+                rawQuads.add(qRight);
+            }
         }     
         
-        // Bottom face(s)
+        // Bottom face
         template.face = EnumFacing.DOWN;
         RawQuad qBottom = new RawQuad(template);
         qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);

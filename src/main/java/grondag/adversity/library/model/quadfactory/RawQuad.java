@@ -1,6 +1,7 @@
 package grondag.adversity.library.model.quadfactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,6 +31,7 @@ public class RawQuad
         public LightingMode lightingMode = LightingMode.SHADED;
         public boolean lockUV = false;
         public boolean isItem = false;
+        public String tag = "";
 
         protected static AtomicLong nextQuadID = new AtomicLong(1);
         protected static long IS_AN_ANCESTOR = -1;
@@ -97,6 +99,7 @@ public class RawQuad
             this.ancestorQuadID = fromObject.ancestorQuadID;
             this.isInverted = fromObject.isInverted;
             this.faceNormal = fromObject.getFaceNormal();
+            this.tag = fromObject.tag;
         }
 
         public List<RawQuad> toQuads()
@@ -138,38 +141,59 @@ public class RawQuad
          * If this is a quad, returns two tris.
          * If is already a tri, returns copy of self.
          */
-        public RawQuad[] toTris()
+        public List<RawQuad> toTris()
         {
-            RawQuad retVal[];
+            LinkedList<RawQuad>  retVal= new LinkedList<RawQuad>();
             
             if(this.getVertexCount() == 3)
             {
-                retVal = new RawQuad[1];
-                retVal[0] = this.clone();
-                return retVal;
+                retVal.add(this.clone());
+            }
+            else
+            {
+                long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
+                int head = vertexCount - 1;
+                int tail = 1;
+
+                RawQuad work = new RawQuad(this, 3);
+                work.setVertex(0, this.getVertex(head));
+                work.setLineID(0, this.getLineID(head));
+                work.setVertex(1, this.getVertex(0));
+                work.setLineID(1, this.getLineID(0));
+                work.setVertex(2, this.getVertex(tail));
+                work.setLineID(2, splitLineID);
+                work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+                retVal.add(work);
+                
+                while(head - tail > 1)
+                {
+                    work = new RawQuad(this, 3);
+                    work.setVertex(0, this.getVertex(head));
+                    work.setLineID(0, splitLineID);
+                    work.setVertex(1, this.getVertex(tail));
+                    work.setLineID(1, this.getLineID(tail));
+                    splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
+                    work.setVertex(2, this.getVertex(++tail));
+                    work.setLineID(2, head - tail == 1 ? this.getLineID(tail): splitLineID);
+                    work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+                    retVal.add(work);
+                    
+                    if(head - tail > 1)
+                    {
+                        work = new RawQuad(this, 3);
+                        work.setVertex(0, this.getVertex(head));
+                        work.setLineID(0, splitLineID);
+                        splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
+                        work.setVertex(1, this.getVertex(tail));
+                        work.setLineID(1, head - tail == 1 ? this.getLineID(tail): splitLineID);
+                        work.setVertex(2, this.getVertex(--head));
+                        work.setLineID(2, this.getLineID(head));
+                        work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+                        retVal.add(work);
+                    }
+                }
             }
             
-            retVal = new RawQuad[2];
-            long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
-            
-            retVal[0] = new RawQuad(this, 3);
-            retVal[0].setVertex(0, this.getVertex(0).clone());
-            retVal[0].setVertex(1, this.getVertex(1).clone());
-            retVal[0].setVertex(2, this.getVertex(2).clone());
-            retVal[0].setLineID(0, this.getLineID(0));
-            retVal[0].setLineID(1, this.getLineID(1));
-            retVal[0].setLineID(2, splitLineID);
-            retVal[0].ancestorQuadID = this.getAncestorQuadIDForDescendant();
-
-            retVal[1] = new RawQuad(this, 3);
-            retVal[1].setVertex(0, this.getVertex(0).clone());
-            retVal[1].setVertex(1, this.getVertex(2).clone());
-            retVal[1].setVertex(2, this.getVertex(3).clone());
-            retVal[1].setLineID(0, splitLineID);
-            retVal[1].setLineID(1, this.getLineID(2));
-            retVal[1].setLineID(2, this.getLineID(3));
-            retVal[1].ancestorQuadID = this.getAncestorQuadIDForDescendant();
- 
             return retVal;
         }
 
@@ -533,6 +557,24 @@ public class RawQuad
         protected boolean isOrthogonalTo(EnumFacing face)
         {
             return Math.abs(this.getFaceNormal().dotProduct(new Vec3d(face.getDirectionVec()))) <= QuadFactory.EPSILON;
+        }
+        
+        public boolean isOnSinglePlane()
+        {
+            if(this.getVertexCount() == 3) return true;
+            
+            Vec3d fn = this.getFaceNormal();
+            if(fn == null) return false;
+            
+            for(int i = 3; i < this.getVertexCount(); i++)
+            {
+                Vertex v = this.getVertex(i);
+                if(v == null) return false;
+
+                if(Math.abs(v.subtract(this.getVertex(0)).dotProduct(fn)) > QuadFactory.EPSILON) return false;
+            }
+            
+            return true;
         }
 
         public boolean isOnFace(EnumFacing face)

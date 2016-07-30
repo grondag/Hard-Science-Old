@@ -33,6 +33,7 @@ package grondag.adversity.library.model.quadfactory;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +44,6 @@ import grondag.adversity.library.Useful;
 
 public class CSGShape extends LinkedList<RawQuad>
 {
-
     /**
      * 
      */
@@ -76,8 +76,20 @@ public class CSGShape extends LinkedList<RawQuad>
     
     public CSGShape initCsg()
     {
-        this.forEach((q) -> q.initCsg());
-        return this;
+        CSGShape retVal = new CSGShape();
+        this.forEach((q) -> 
+        {
+            q.initCsg();
+            if(q.isOnSinglePlane())
+            {
+                retVal.add(q);
+            }
+            else
+            {
+                retVal.addAll(q.toTris());
+            }
+         });
+        return retVal;
     }
     
     /**
@@ -168,7 +180,7 @@ public class CSGShape extends LinkedList<RawQuad>
         a.build(b.allRawQuads());
         a.invert();
         CSGShape retVal = new CSGShape(a.recombinedRawQuads());
-        Adversity.log.info("raw count " + a.allRawQuads().size() + "   combined count " + retVal.size());
+//        Adversity.log.info("raw count " + a.allRawQuads().size() + "   combined count " + retVal.size());
 
         return retVal;
     }
