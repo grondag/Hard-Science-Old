@@ -1,5 +1,6 @@
 package grondag.adversity.library.model.quadfactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -18,8 +19,10 @@ import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public class RawQuad
     {
-        // yes, this is ugly
-        protected Vertex[] vertices = new Vertex[4];
+        private Vertex[] vertices;
+        private Vec3d faceNormal = null;
+        private final int vertexCount;
+        
         public EnumFacing face;
         public TextureAtlasSprite textureSprite;
         public Rotation rotation = Rotation.ROTATE_NONE;
@@ -33,41 +36,53 @@ public class RawQuad
         protected static long NO_ID = 0;
 
         protected boolean isInverted = false;
-        protected long quadID = NO_ID;
+        protected long quadID = nextQuadID.incrementAndGet();
         protected long ancestorQuadID = NO_ID;
-        protected long[] lineID = new long[4];
+        protected long[] lineID;
         
         public RawQuad()
         {
-            super();
+            this(4);
         }
 
         public RawQuad(RawQuad template)
         {
-            super();
-            this.copyProperties(template);
+            this(template, template.getVertexCount());
         }
 
+        public RawQuad(int vertexCount)
+        {
+            super();
+            this.vertexCount = Math.max(3, vertexCount);
+            this.vertices = new Vertex[vertexCount];
+            this.lineID = new long[vertexCount];
+        }
+        
+        public RawQuad(RawQuad template, int vertexCount)
+        {
+            this(vertexCount);
+            this.copyProperties(template);
+        }
+        
         public RawQuad clone()
         {
-            RawQuad retval = new RawQuad();
-            retval.copyProperties(this);
+            RawQuad retval = new RawQuad(this);
             retval.copyVertices(this);
             return retval;
         }
         
         protected void copyVertices(RawQuad template)
         {
-            for(int i = 0; i < 4; i++)
+            for(int i = 0; i < this.getVertexCount(); i++)
             {
-                this.vertices[i] = template.vertices[i] == null ? null : template.vertices[i].clone();
+                this.setVertex(i, template.getVertex(i) == null ? null : template.getVertex(i).clone());
                 this.lineID[i] = template.lineID[i];
             }
-
         }
-        public int vertexCount()
+        
+        public int getVertexCount()
         {
-            return 4;
+            return this.vertexCount;
         }
         
         protected void copyProperties(RawQuad fromObject)
@@ -79,22 +94,65 @@ public class RawQuad
             this.lightingMode = fromObject.lightingMode;
             this.lockUV = fromObject.lockUV;
             this.isItem = fromObject.isItem;
-            this.quadID = fromObject.quadID;
             this.ancestorQuadID = fromObject.ancestorQuadID;
             this.isInverted = fromObject.isInverted;
+            this.faceNormal = fromObject.getFaceNormal();
         }
 
+        public List<RawQuad> toQuads()
+        {
+            LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
+            
+            if(this.vertexCount <= 4)
+            {
+                retVal.add(this);
+            }
+            else
+            {
+                int head = vertexCount - 1;
+                int tail = 2;
+                RawQuad work = new RawQuad(this, 4);
+                work.setVertex(0, this.getVertex(head));
+                work.setVertex(1, this.getVertex(0));
+                work.setVertex(2, this.getVertex(1));
+                work.setVertex(3, this.getVertex(tail));
+                retVal.add(work);
+                
+                while(head - tail > 1)
+                {
+                    work = new RawQuad(this, head - tail == 2 ? 3 : 4);
+                    work.setVertex(0, this.getVertex(head));
+                    work.setVertex(1, this.getVertex(tail));
+                    work.setVertex(2, this.getVertex(++tail));
+                    if(head - tail > 1)
+                    {
+                        work.setVertex(3, this.getVertex(--head));
+                    }
+                    retVal.add(work);
+                }
+            }
+            return retVal;
+        }
+ 
         /** 
          * If this is a quad, returns two tris.
          * If is already a tri, returns copy of self.
          */
-        public RawTri[] split()
+        public RawQuad[] toTris()
         {
-            RawTri retVal[] = new RawTri[2];
+            RawQuad retVal[];
             
-            long splitLineID = CSGPlane.nextLineID.getAndIncrement();
+            if(this.getVertexCount() == 3)
+            {
+                retVal = new RawQuad[1];
+                retVal[0] = this.clone();
+                return retVal;
+            }
             
-            retVal[0] = new RawTri(this);
+            retVal = new RawQuad[2];
+            long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
+            
+            retVal[0] = new RawQuad(this, 3);
             retVal[0].setVertex(0, this.getVertex(0).clone());
             retVal[0].setVertex(1, this.getVertex(1).clone());
             retVal[0].setVertex(2, this.getVertex(2).clone());
@@ -102,9 +160,8 @@ public class RawQuad
             retVal[0].setLineID(1, this.getLineID(1));
             retVal[0].setLineID(2, splitLineID);
             retVal[0].ancestorQuadID = this.getAncestorQuadIDForDescendant();
-            retVal[0].quadID = nextQuadID.incrementAndGet();
 
-            retVal[1] = new RawTri(this);
+            retVal[1] = new RawQuad(this, 3);
             retVal[1].setVertex(0, this.getVertex(0).clone());
             retVal[1].setVertex(1, this.getVertex(2).clone());
             retVal[1].setVertex(2, this.getVertex(3).clone());
@@ -112,7 +169,6 @@ public class RawQuad
             retVal[1].setLineID(1, this.getLineID(2));
             retVal[1].setLineID(2, this.getLineID(3));
             retVal[1].ancestorQuadID = this.getAncestorQuadIDForDescendant();
-            retVal[1].quadID = nextQuadID.incrementAndGet();
  
             return retVal;
         }
@@ -122,30 +178,40 @@ public class RawQuad
          */
         public RawQuad invert()
         {
-            for(int i = 0; i < 4; i++)
+            
+            for(int i = 0; i < vertices.length; i++)
             {
-                if(vertices[i] != null && vertices[i].normal != null)
+                if(getVertex(i) != null && getVertex(i).normal != null)
                 {
-                    vertices[i].normal = vertices[i].normal.scale(-1);
+                    setVertexNormal(i, getVertex(i).normal.scale(-1));
                 }
+            }            
+            
+            //reverse order of vertices
+            for (int i = 0, mid = vertices.length / 2, j = vertices.length - 1; i < mid; i++, j--)
+            {
+                Vertex swapVertex = vertices[i];
+                vertices[i] = vertices[j];
+                vertices[j] = swapVertex;
+            }
+
+            // last edge is still always the last, and isn't sorted  (draw it to see)
+            for (int i = 0, mid = (vertices.length - 1) / 2, j = vertices.length - 2; i < mid; i++, j--)
+            {
+                long swapLineID = lineID[i];
+                lineID[i] = lineID[j];
+                lineID[j] = swapLineID;
             }
             
-            Vertex swapVertex = getVertex(0);
-            setVertex(0, getVertex(2));
-            setVertex(2, swapVertex);
-            
-            long swapLine = lineID[0];
-            lineID[0] = lineID[1];
-            lineID[1] = swapLine;
-            swapLine = lineID[2];
-            lineID[2] = lineID[3];
-            lineID[3] = swapLine;
-            
+            if(this.faceNormal != null) this.faceNormal = faceNormal.scale(-1);
+
             this.isInverted = !this.isInverted;
 
             return this;
         }
-        
+ 
+        //TODO: make the setupFaceQuad methods safer if accidentally call on poly with mismatched number of vertices
+
         /** 
          * Sets up a quad with human-friendly semantics.  
          * 
@@ -268,7 +334,7 @@ public class RawQuad
 
             for (int r = 0; r < uvRotationCount; r++)
             {
-                QuadFactory.rotateQuadUV(this.vertices[0], this.vertices[1], this.vertices[2], this.vertices[3]);
+                QuadFactory.rotateQuadUV(this.getVertex(0), this.getVertex(1), this.getVertex(2), this.getVertex(3));
             }
             
             return this;
@@ -309,12 +375,32 @@ public class RawQuad
             return this.setupFaceQuad(x0, y0, x1, y1, depth, topFace);
         }
 
+        /**
+         * Triangular version
+         */
+        public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
+        {
+            this.face = side;
+            return this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
+        }
+
+        /**
+         * Triangular version
+         */
+        public RawQuad setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
+        {
+            return this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
+        }
+        
         /** Using this instead of method on vertex 
          * ensures normals are set correctly for tris.
          */
-        public void setNormal(int index, Vec3d normalIn)
+        public void setVertexNormal(int index, Vec3d normalIn)
         {
-            this.vertices[index].setNormal(normalIn);
+            if(index < this.vertexCount)
+            {
+                this.getVertex(index).setNormal(normalIn);
+            }
         }
 
         /**
@@ -323,10 +409,10 @@ public class RawQuad
         public RawQuad recolor(int color)
         {
             this.color = color;
-            if(vertices[0] != null) vertices[0].color = color;
-            if(vertices[1] != null) vertices[1].color = color;
-            if(vertices[2] != null) vertices[2].color = color;
-            if(vertices[3] != null) vertices[3].color = color;
+            for(int i = 0; i < this.getVertexCount(); i++)
+            {
+                if(getVertex(i) != null) getVertex(i).color = color;
+            }
             return this;
         }
         
@@ -335,21 +421,30 @@ public class RawQuad
          */
         public void setVertex(int index, Vertex vertexIn)
         {
-            this.vertices[index] = vertexIn;
+            if(index < this.vertexCount)
+            {
+                this.vertices[index] = vertexIn;
+                this.faceNormal = null;
+            }
         }
         
         public Vertex getVertex(int index)
         {
+            if(this.getVertexCount() == 3 && index == 3) return this.vertices[2];
             return this.vertices[index];
         }
 
         public void setLineID(int index, long lineID)
         {
-            this.lineID[index] = lineID;
+            if(index < this.vertexCount)
+            {
+                this.lineID[index] = lineID;
+            }
         }
         
         public long getLineID(int index)
         {
+            if(this.getVertexCount() == 3 && index == 3) return this.lineID[2];
             return this.lineID[index];
         }
         
@@ -360,7 +455,7 @@ public class RawQuad
          */
         public int findLineIndex(long lineID)
         {
-            for(int i = 0; i < this.vertexCount(); i++)
+            for(int i = 0; i < this.getVertexCount(); i++)
             {
                 if(this.getLineID(i) == lineID)
                 {
@@ -383,21 +478,9 @@ public class RawQuad
         public RawQuad initCsg()
         {
             this.ancestorQuadID = IS_AN_ANCESTOR;
-            this.quadID = nextQuadID.getAndIncrement();
-            for(int i = 0; i < 4; i++)
+            for(int i = 0; i < this.getVertexCount(); i++)
             {
-                if(vertices[i] != null)
-                {
-                    if(i == 3 && this instanceof RawTri)
-                    {
-                        vertices[3].setVertexID(vertices[2].getVertexID());
-                        this.setLineID(3, this.getLineID(2));
-                    }
-                    else
-                    {
-                        this.setLineID(i, CSGPlane.nextLineID.getAndIncrement());
-                    }
-                }
+                this.lineID[i] = CSGPlane.nextOutsideLineID.getAndDecrement();
             }
             return this;
         }
@@ -420,20 +503,20 @@ public class RawQuad
          */
         public boolean isConvex()
         {
-            if(this instanceof RawTri) return true;
+            if(this.getVertexCount() == 3) return true;
             
             Vec3d testVector = null;
             
-            for(int thisVertex = 0; thisVertex < this.vertexCount(); thisVertex++)
+            for(int thisVertex = 0; thisVertex < this.getVertexCount(); thisVertex++)
             {
                 int nextVertex = thisVertex + 1;
-                if(nextVertex == this.vertexCount()) nextVertex = 0;
+                if(nextVertex == this.getVertexCount()) nextVertex = 0;
 
                 int priorVertex = thisVertex - 1;
-                if(priorVertex == -1) priorVertex = this.vertexCount() - 1;
+                if(priorVertex == -1) priorVertex = this.getVertexCount() - 1;
 
-                Vec3d lineA = vertices[thisVertex].subtract(vertices[priorVertex]);
-                Vec3d lineB = vertices[nextVertex].subtract(vertices[thisVertex]);
+                Vec3d lineA = getVertex(thisVertex).subtract(getVertex(priorVertex));
+                Vec3d lineB = getVertex(nextVertex).subtract(getVertex(thisVertex));
                 
                 if(testVector == null)
                 {
@@ -454,10 +537,12 @@ public class RawQuad
 
         public boolean isOnFace(EnumFacing face)
         {
-            return vertices[0].isOnFacePlane(face)
-                && vertices[1].isOnFacePlane(face)
-                && vertices[2].isOnFacePlane(face)
-                && vertices[3].isOnFacePlane(face);
+            boolean retVal = true;
+            for(int i = 0; i < this.vertexCount; i++)
+            {
+                retVal = retVal && getVertex(i).isOnFacePlane(face);
+            }
+            return retVal;
         }
         
         public boolean intersectsWithRay(Vec3d origin, Vec3d direction)
@@ -471,7 +556,7 @@ public class RawQuad
                 return false;
             }
 
-            double distanceToPlane = -normal.dotProduct((origin.subtract(vertices[0]))) / directionDotNormal;
+            double distanceToPlane = -normal.dotProduct((origin.subtract(getVertex(0)))) / directionDotNormal;
             // facing away from plane
             if(distanceToPlane < -QuadFactory.EPSILON) return false;
             
@@ -495,17 +580,16 @@ public class RawQuad
  
             double lastSignum = 0;
             Vec3d faceNormal = this.getFaceNormal();
-            int vertexCount = this instanceof RawTri ? 3 : 4;
             
-            for(int i = 0; i < vertexCount; i++)
+            for(int i = 0; i < this.getVertexCount(); i++)
             {
                 int nextVertex = i + 1;
-                if(nextVertex == vertexCount) nextVertex = 0;
+                if(nextVertex == this.getVertexCount()) nextVertex = 0;
                 
-                Vec3d line = vertices[nextVertex].subtract(vertices[i]);
+                Vec3d line = getVertex(nextVertex).subtract(getVertex(i));
                 Vec3d normalInPlane = faceNormal.crossProduct(line);
                 
-                double sign = normalInPlane.dotProduct(point.subtract(vertices[i]));
+                double sign = normalInPlane.dotProduct(point.subtract(getVertex(i)));
                 
                 if(lastSignum == 0)
                 {
@@ -522,13 +606,13 @@ public class RawQuad
         
         public AxisAlignedBB getAABB()
         {
-            double minX = Math.min(Math.min(vertices[0].xCoord, vertices[1].xCoord), Math.min(vertices[2].xCoord, vertices[3].xCoord));
-            double minY = Math.min(Math.min(vertices[0].yCoord, vertices[1].yCoord), Math.min(vertices[2].yCoord, vertices[3].yCoord));
-            double minZ = Math.min(Math.min(vertices[0].zCoord, vertices[1].zCoord), Math.min(vertices[2].zCoord, vertices[3].zCoord));
+            double minX = Math.min(Math.min(getVertex(0).xCoord, getVertex(1).xCoord), Math.min(getVertex(2).xCoord, getVertex(3).xCoord));
+            double minY = Math.min(Math.min(getVertex(0).yCoord, getVertex(1).yCoord), Math.min(getVertex(2).yCoord, getVertex(3).yCoord));
+            double minZ = Math.min(Math.min(getVertex(0).zCoord, getVertex(1).zCoord), Math.min(getVertex(2).zCoord, getVertex(3).zCoord));
          
-            double maxX = Math.max(Math.max(vertices[0].xCoord, vertices[1].xCoord), Math.max(vertices[2].xCoord, vertices[3].xCoord));
-            double maxY = Math.max(Math.max(vertices[0].yCoord, vertices[1].yCoord), Math.max(vertices[2].yCoord, vertices[3].yCoord));
-            double maxZ = Math.max(Math.max(vertices[0].zCoord, vertices[1].zCoord), Math.max(vertices[2].zCoord, vertices[3].zCoord));
+            double maxX = Math.max(Math.max(getVertex(0).xCoord, getVertex(1).xCoord), Math.max(getVertex(2).xCoord, getVertex(3).xCoord));
+            double maxY = Math.max(Math.max(getVertex(0).yCoord, getVertex(1).yCoord), Math.max(getVertex(2).yCoord, getVertex(3).yCoord));
+            double maxZ = Math.max(Math.max(getVertex(0).zCoord, getVertex(1).zCoord), Math.max(getVertex(2).zCoord, getVertex(3).zCoord));
 
             return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
         }
@@ -537,7 +621,7 @@ public class RawQuad
         {
             for (int r = 0; r < this.rotation.index; r++)
             {
-                QuadFactory.rotateQuadUV(this.vertices[0], this.vertices[1], this.vertices[2], this.vertices[3]);
+                QuadFactory.rotateQuadUV(this.getVertex(0), this.getVertex(1), this.getVertex(2), this.getVertex(3));
             }
 
             int[] vertexData = new int[28];
@@ -563,19 +647,19 @@ public class RawQuad
                     switch(format.getElement(e).getUsage())
                     {
                     case POSITION:
-                        LightUtil.pack(vertices[v].xyzToFloatArray(), vertexData, format, v, e);
+                        LightUtil.pack(getVertex(v).xyzToFloatArray(), vertexData, format, v, e);
                         break;
 
                     case NORMAL: 
-                        LightUtil.pack(vertices[v].hasNormal() ? vertices[v].normalToFloatArray() : faceNormal, vertexData, format, v, e);
+                        LightUtil.pack(getVertex(v).hasNormal() ? getVertex(v).normalToFloatArray() : faceNormal, vertexData, format, v, e);
                         break;
 
                     case COLOR:
                         float[] colorRGBA = new float[4];
-                        colorRGBA[0] = ((float) (vertices[v].color >> 16 & 0xFF)) / 255f;
-                        colorRGBA[1] = ((float) (vertices[v].color >> 8 & 0xFF)) / 255f;
-                        colorRGBA[2] = ((float) (vertices[v].color  & 0xFF)) / 255f;
-                        colorRGBA[3] = ((float) (vertices[v].color >> 24 & 0xFF)) / 255f;
+                        colorRGBA[0] = ((float) (getVertex(v).color >> 16 & 0xFF)) / 255f;
+                        colorRGBA[1] = ((float) (getVertex(v).color >> 8 & 0xFF)) / 255f;
+                        colorRGBA[2] = ((float) (getVertex(v).color  & 0xFF)) / 255f;
+                        colorRGBA[3] = ((float) (getVertex(v).color >> 24 & 0xFF)) / 255f;
                         LightUtil.pack(colorRGBA, vertexData, format, v, e);
                         break;
 
@@ -593,8 +677,8 @@ public class RawQuad
                         else
                         {
                             float[] uvData = new float[2];
-                            uvData[0] = this.textureSprite.getInterpolatedU(vertices[v].u);
-                            uvData[1] = this.textureSprite.getInterpolatedV(vertices[v].v);
+                            uvData[0] = this.textureSprite.getInterpolatedU(getVertex(v).u);
+                            uvData[1] = this.textureSprite.getInterpolatedV(getVertex(v).v);
                             LightUtil.pack(uvData, vertexData, format, v, e);
                         }
                         break;
@@ -617,7 +701,16 @@ public class RawQuad
 
         public Vec3d getFaceNormal()
         {
-            return vertices[2].subtract(vertices[0]).crossProduct(vertices[3].subtract(vertices[1])).normalize();
+            if(faceNormal == null && getVertex(0) != null && getVertex(1) != null && getVertex(2) != null && getVertex(3) != null)
+            {
+                faceNormal = getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).normalize();
+            }
+            return faceNormal;
+        }
+        
+        public void setFaceNormal(Vec3d faceNormal)
+        {
+            this.faceNormal = faceNormal;
         }
 
         private float[] getFaceNormalArray()
@@ -630,5 +723,28 @@ public class RawQuad
             retval[1] = (float)(normal.yCoord);
             retval[2] = (float)(normal.zCoord);
             return retval;
+        }
+        
+        public double getArea()
+        {
+            //TODO: generalize?
+            if(this.getVertexCount() == 3)
+            {
+                return Math.abs(getVertex(1).subtract(getVertex(0)).crossProduct(getVertex(2).subtract(getVertex(0))).lengthVector()) / 2.0;
+
+            }
+            else if(this.getVertexCount() == 4) //quad
+            {
+                return Math.abs(getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).lengthVector()) / 2.0;
+            }
+            else
+            {
+                double area = 0;
+                for(RawQuad q : this.toQuads())
+                {
+                    area += q.getArea();
+                }
+                return area;
+            }
         }
     }

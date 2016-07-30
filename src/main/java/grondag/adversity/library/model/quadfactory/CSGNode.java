@@ -1,6 +1,7 @@
 package grondag.adversity.library.model.quadfactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
 * Portions reproduced or adapted from JCSG.
@@ -50,6 +51,7 @@ import com.google.common.collect.ArrayListMultimap;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import grondag.adversity.Adversity;
+import net.minecraft.util.EnumFacing;
 
 
 public class CSGNode
@@ -81,17 +83,17 @@ public class CSGNode
      *
      * @param quadsIn polygons
      */
-    public CSGNode(List<RawQuad> quadsIn) {
+    public CSGNode(CSGShape shapeIn) {
         this.quads = new LinkedList<RawQuad>();
-        if (quadsIn != null) {
-            this.build(quadsIn, true);
+        if (shapeIn != null) {
+            this.build(shapeIn.clone().initCsg());
         }
     }
 
     /**
      * Constructor. Creates a node without polygons.
      */
-    public CSGNode() {
+    private CSGNode() {
         this(null);
     }
 
@@ -106,6 +108,21 @@ public class CSGNode
             node.quads.add(p.clone());
         });
         return node;
+    }
+    
+    /**
+     * For testing purposes.  Shouldn't happen.
+     */
+    protected long getFirstDuplicateQuadID()
+    {
+
+        HashSet<Long> ids = new HashSet<Long>();
+        for(RawQuad q : this.allRawQuads())
+        {
+            if(ids.contains(q.quadID)) return q.quadID;
+            ids.add(q.quadID);
+        }
+        return RawQuad.NO_ID;
     }
 
     /**
@@ -280,55 +297,62 @@ public class CSGNode
         int aStartIndex = aQuad.findLineIndex(lineID);
         // shouldn't happen, but won't work if does
         if(aStartIndex == RawQuad.LINE_NOT_FOUND) return null;
-        int aNextIndex = aStartIndex + 1 == aQuad.vertexCount() ? 0 : aStartIndex + 1;
-        int aPrevIndex = aStartIndex == 0 ? aQuad.vertexCount() - 1 : aStartIndex - 1;
+        int aEndIndex = aStartIndex + 1 == aQuad.getVertexCount() ? 0 : aStartIndex + 1;
+        int aNextIndex = aEndIndex + 1 == aQuad.getVertexCount() ? 0 : aEndIndex + 1;
+        int aPrevIndex = aStartIndex == 0 ? aQuad.getVertexCount() - 1 : aStartIndex - 1;
 
         int bStartIndex = bQuad.findLineIndex(lineID);
         // shouldn't happen, but won't work if does
         if(bStartIndex == RawQuad.LINE_NOT_FOUND) return null;
-        int bNextIndex = bStartIndex + 1 == bQuad.vertexCount() ? 0 : bStartIndex + 1;
-        int bPrevIndex = bStartIndex == 0 ? bQuad.vertexCount() - 1 : bStartIndex - 1;
+        int bEndIndex = bStartIndex + 1 == bQuad.getVertexCount() ? 0 : bStartIndex + 1;
+        int bNextIndex = bEndIndex + 1 == bQuad.getVertexCount() ? 0 : bEndIndex + 1;
+        int bPrevIndex = bStartIndex == 0 ? bQuad.getVertexCount() - 1 : bStartIndex - 1;
         
         // confirm vertices on either end of vertex match
-        if(!aQuad.getVertex(aStartIndex).isCsgEqual(bQuad.getVertex(bNextIndex))) return null;
-        if(!aQuad.getVertex(aNextIndex).isCsgEqual(bQuad.getVertex(bStartIndex))) return null;
+        if(!aQuad.getVertex(aStartIndex).isCsgEqual(bQuad.getVertex(bEndIndex)))
+        {
+            Adversity.log.info("vertex mismatch");
+            return null;
+        }
+        if(!aQuad.getVertex(aEndIndex).isCsgEqual(bQuad.getVertex(bStartIndex)))
+        {
+            Adversity.log.info("vertex mismatch");
+            return null;
+        }
 
         ArrayList<Vertex> joinedVertex = new ArrayList<Vertex>(8);
         ArrayList<Long> joinedLineID = new ArrayList<Long>(8);
         
-        for(int a = 0; a < aQuad.vertexCount(); a++)
+        for(int a = 0; a < aQuad.getVertexCount(); a++)
         {
             if(a == aStartIndex)
             {
                 //if vertex is on the same line as prev and next vertex, leave it out.
-                if(aQuad.getLineID(aPrevIndex) != bQuad.getLineID(bNextIndex))
+                if(!aQuad.getVertex(aStartIndex).isOnLine(aQuad.getVertex(aPrevIndex), bQuad.getVertex(bNextIndex)))
+//                if(aQuad.getLineID(aPrevIndex) != bQuad.getLineID(bEndIndex))
                 {
                     joinedVertex.add(aQuad.getVertex(aStartIndex));
-                    joinedLineID.add(bQuad.getLineID(bNextIndex));
+                    joinedLineID.add(bQuad.getLineID(bEndIndex));
                 }
-                
-                // won't add the two bQuad vertexes in common with A, so only going to add one or two
-                int b = bNextIndex + 1;
-                if(b == bQuad.vertexCount()) b = 0;
-                joinedVertex.add(bQuad.getVertex(b));
-                joinedLineID.add(bQuad.getLineID(b));
-                
-                // second vertex added if quad B has four
-                if(bQuad.vertexCount() == 4)
+
+                // add b vertexes except two bQuad vertexes in common with A
+                for(int bOffset = 1; bOffset < bQuad.getVertexCount() - 1; bOffset++)
                 {
-                    b = b + 1;
-                    if(b == bQuad.vertexCount()) b = 0;
+                    int b = bEndIndex + bOffset;
+                    if(b >= bQuad.getVertexCount()) b -= bQuad.getVertexCount();
                     joinedVertex.add(bQuad.getVertex(b));
                     joinedLineID.add(bQuad.getLineID(b));
+                    
                 }
             }
-            else if(a == aNextIndex)
+            else if(a == aEndIndex)
             {
                 //if vertex is on the same line as prev and next vertex, leave it out.
-                if(aQuad.getLineID(aNextIndex) != bQuad.getLineID(bPrevIndex))
+                if(!aQuad.getVertex(aEndIndex).isOnLine(aQuad.getVertex(aNextIndex), bQuad.getVertex(bPrevIndex)))
+//                if(aQuad.getLineID(aEndIndex) != bQuad.getLineID(bPrevIndex))
                 {
-                    joinedVertex.add(aQuad.getVertex(aNextIndex));
-                    joinedLineID.add(aQuad.getLineID(aNextIndex));
+                    joinedVertex.add(aQuad.getVertex(aEndIndex));
+                    joinedLineID.add(aQuad.getLineID(aEndIndex));
                 }
             }
             else
@@ -339,11 +363,14 @@ public class CSGNode
         }   
         
         // max size is quad
-        if(joinedVertex.size() > 4 || joinedVertex.size() < 3) return null;
+//        if(joinedVertex.size() > 4 || joinedVertex.size() < 3)
+//        {
+//            Adversity.log.info("Quad too many points");
+//            return null;
+//        }
         
         // actually build the new quad!
-        RawQuad joinedQuad = joinedVertex.size() == 3 ? new RawTri(aQuad) : new RawQuad(aQuad);
-        joinedQuad.quadID = RawQuad.nextQuadID.getAndIncrement();
+        RawQuad joinedQuad = new RawQuad(aQuad, joinedVertex.size());
         for(int i = 0; i < joinedVertex.size(); i++)
         {
             joinedQuad.setVertex(i, joinedVertex.get(i));
@@ -351,7 +378,16 @@ public class CSGNode
         }
 
         // must be convex
-        if(!joinedQuad.isConvex()) return null;
+        if(!joinedQuad.isConvex())
+        {
+            Adversity.log.info("Quad not convex");
+            return null;
+        }
+        
+        if(Math.abs(aQuad.getArea() + bQuad.getArea() - joinedQuad.getArea()) > QuadFactory.EPSILON)
+        {
+            Adversity.log.info("area mismatch");
+        }
         
         return joinedQuad;
         
@@ -364,16 +400,26 @@ public class CSGNode
         TLongObjectHashMap<RawQuad> quadMap = new TLongObjectHashMap<RawQuad>(quadList.size());
         TreeMap<Long, TreeMap<Long, Integer>> edgeMap = new TreeMap<Long, TreeMap<Long, Integer>>();
         
+//        double totalArea = 0;
+        
         for(RawQuad q : quadList) 
         {
             quadMap.put(q.quadID, q);
-            for(int i = 0; i < q.vertexCount(); i++)
+//            totalArea += q.getArea();
+            
+            // build edge map for inside edges that may be rejoined
+            for(int i = 0; i < q.getVertexCount(); i++)
             {
-                if(!edgeMap.containsKey(q.getLineID(i)))
+                long lineID = q.getLineID(i);
+                // negative line ids represent outside edges - no need to rejoin them
+                // zero ids are uninitialized edges and should be ignored
+                if(lineID <= 0) continue;
+                
+                if(!edgeMap.containsKey(lineID))
                 {
-                    edgeMap.put(q.getLineID(i), new TreeMap<Long, Integer>());
+                    edgeMap.put(lineID, new TreeMap<Long, Integer>());
                 }
-                edgeMap.get(q.getLineID(i)).put(q.quadID, i);
+                edgeMap.get(lineID).put(q.quadID, i);
             }
         }
         
@@ -386,10 +432,10 @@ public class CSGNode
             {
                 TreeMap<Long, Integer> edgeQuadMap = edgeMap.get(edgeKey);
                 
-                if(edgeQuadMap.isEmpty()) break;
+                if(edgeQuadMap.isEmpty()) continue;
                 
                 Long[] edgeQuadIDs = edgeQuadMap.keySet().toArray(new Long[1]);
-                if(edgeQuadIDs.length < 2) break;
+                if(edgeQuadIDs.length < 2) continue;
                 
                 for(int i = 0; i < edgeQuadIDs.length - 1; i++)
                 {
@@ -397,11 +443,11 @@ public class CSGNode
                     {
                         // Examining two quads that share an edge
                         // to determine if they can be combined.
-                        
+
                         RawQuad iQuad = quadMap.get(edgeQuadIDs[i]);
                         RawQuad jQuad = quadMap.get(edgeQuadIDs[j]);
                         
-                        if(iQuad == null || jQuad == null) break;
+                        if(iQuad == null || jQuad == null) continue;
                         
                         RawQuad joined = joinCsgQuads(iQuad, jQuad, edgeKey);
                         
@@ -413,31 +459,53 @@ public class CSGNode
                             quadMap.remove(iQuad.quadID);
                             quadMap.remove(jQuad.quadID);
                             
+                            // add quad to main map
+                            quadMap.put(joined.quadID, joined);
+
+                            //For debugging
+//                            {
+//                                double testArea = 0;
+//                                for(RawQuad quad : quadMap.valueCollection())
+//                                {
+//                                    testArea += quad.getArea();
+//                                }
+//                                if(Math.abs(testArea - totalArea) > QuadFactory.EPSILON)
+//                                {
+//                                    Adversity.log.info("area mismatch");
+//                                }
+//                            }
+                            
                             // remove quads from edge map
-                            for(int n = 0; n < iQuad.vertexCount(); n++)
-                            {
+                            for(int n = 0; n < iQuad.getVertexCount(); n++)
+                            {                
+                                // negative line ids represent outside edges - not part of map
+                                if(iQuad.getLineID(n) < 0) continue;
+
                                 TreeMap<Long, Integer> removeMap = edgeMap.get(iQuad.getLineID(n));
                                 removeMap.remove(iQuad.quadID);
                             }
                             
-                            for(int n = 0; n < jQuad.vertexCount(); n++)
+                            for(int n = 0; n < jQuad.getVertexCount(); n++)
                             {
+                                // negative line ids represent outside edges - not part of map
+                                if(jQuad.getLineID(n) < 0) continue;
+
                                 TreeMap<Long, Integer> removeMap = edgeMap.get(jQuad.getLineID(n));
                                 removeMap.remove(jQuad.quadID);
                             }                            
                             
-                            // add quad to main map
-                            quadMap.put(joined.quadID, joined);
-                            
                             // add quad to edge map
-                            for(int n = 0; n < joined.vertexCount(); n++)
+                            for(int n = 0; n < joined.getVertexCount(); n++)
                             {
+                                // negative line ids represent outside edges - not part of map
+                                if(joined.getLineID(n) < 0) continue;
+
                                 if(!edgeMap.containsKey(joined.getLineID(n)))
                                 {
                                     edgeMap.put(joined.getLineID(n), new TreeMap<Long, Integer>());
                                 }
                                 edgeMap.get(joined.getLineID(n)).put(joined.quadID, n);
-                            }                        
+                            }
                         }
                     }
                 }
@@ -445,8 +513,13 @@ public class CSGNode
             
         }
         
+        if(quadMap.size() > 1 && quadList.getFirst().face == EnumFacing.DOWN)
+        {
+            Adversity.log.info("too many");
+        }
+        
         LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
-        retVal.addAll(quadMap.valueCollection());
+        quadMap.valueCollection().forEach((q) -> retVal.addAll(q.toQuads()));
         return retVal;
             
         
@@ -460,7 +533,7 @@ public class CSGNode
      *
      * @param quadsIn polygons used to build the BSP
      */
-    public final void build(List<RawQuad> quadsIn, boolean initCSG) {
+    public final void build(List<RawQuad> quadsIn) {
         
         if (quadsIn.isEmpty()) return;
 
@@ -473,21 +546,20 @@ public class CSGNode
 
         // parallel version does not work here
         quadsIn.forEach((quad) -> {
-            this.plane.splitQuad(
-                    initCSG ? quad.clone().initCsg() : quad.clone(), this.quads, this.quads, frontP, backP);
+            this.plane.splitQuad(quad.clone(), this.quads, this.quads, frontP, backP);
         });
 
         if (!frontP.isEmpty()) {
             if (this.front == null) {
                 this.front = new CSGNode();
             }
-            this.front.build(frontP, false);
+            this.front.build(frontP);
         }
         if (!backP.isEmpty()) {
             if (this.back == null) {
                 this.back = new CSGNode();
             }
-            this.back.build(backP, false);
+            this.back.build(backP);
         }
     }
     

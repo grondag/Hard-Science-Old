@@ -18,7 +18,6 @@ import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.RawTri;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;
@@ -164,7 +163,7 @@ public class FlowModelFactory extends ModelFactory
    
             // build left and right quads on the block that edge this side
             template.face = EnumFacing.UP;
-            RawTri qiWork = new RawTri(template);
+            RawQuad qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvMidSide[side.ordinal()],
                     fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
@@ -174,7 +173,7 @@ public class FlowModelFactory extends ModelFactory
             quadInputsSide.get(side.ordinal()).add(qiWork);
             quadInputsCorner.get(HorizontalCorner.find(side, side.getLeft()).ordinal()).add(qiWork);
 
-            qiWork = new RawTri(template);
+            qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
                     fvMidSide[side.ordinal()],
@@ -185,7 +184,7 @@ public class FlowModelFactory extends ModelFactory
             quadInputsCorner.get(HorizontalCorner.find(side, side.getRight()).ordinal()).add(qiWork);
             
             // side block tri that borders this block
-            qiWork = new RawTri(template);
+            qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvFarSide[side.ordinal()],
                     fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
@@ -194,7 +193,7 @@ public class FlowModelFactory extends ModelFactory
             quadInputsSide.get(side.ordinal()).add(qiWork);
             quadInputsCorner.get(HorizontalCorner.find(side, side.getLeft()).ordinal()).add(qiWork);
 
-            qiWork = new RawTri(template);
+            qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
                     fvFarSide[side.ordinal()],
@@ -204,7 +203,7 @@ public class FlowModelFactory extends ModelFactory
             quadInputsCorner.get(HorizontalCorner.find(side, side.getRight()).ordinal()).add(qiWork);
 
             // side block tri that connects to corner but does not border side
-            qiWork = new RawTri(template);
+            qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
                     fvFarSide[side.ordinal()],
@@ -212,7 +211,7 @@ public class FlowModelFactory extends ModelFactory
                     EnumFacing.NORTH);           
             quadInputsCorner.get(HorizontalCorner.find(side, side.getLeft()).ordinal()).add(qiWork);
 
-            qiWork = new RawTri(template);
+            qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvMidCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
                     fvFarCorner[HorizontalCorner.find(side, side.getRight()).ordinal()],
@@ -278,15 +277,15 @@ public class FlowModelFactory extends ModelFactory
         for(HorizontalFace side: HorizontalFace.values())
         {
             RawQuad qi = quadInputsCenterLeft[side.ordinal()];
-            qi.setNormal(0, normSide[side.ordinal()]);
-            qi.setNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
-            qi.setNormal(2, normCenter);
+            qi.setVertexNormal(0, normSide[side.ordinal()]);
+            qi.setVertexNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
+            qi.setVertexNormal(2, normCenter);
             rawQuads.add(qi);
 
             qi = quadInputsCenterRight[side.ordinal()];
-            qi.setNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
-            qi.setNormal(1, normSide[side.ordinal()]);
-            qi.setNormal(2, normCenter);
+            qi.setVertexNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
+            qi.setVertexNormal(1, normSide[side.ordinal()]);
+            qi.setVertexNormal(2, normCenter);
             rawQuads.add(qi);
         }
        

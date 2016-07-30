@@ -42,8 +42,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class CSGPlane
 {
-    protected static AtomicLong nextLineID = new AtomicLong(1);
-
+    protected static AtomicLong nextInsideLineID = new AtomicLong(1);
+    protected static AtomicLong nextOutsideLineID = new AtomicLong(-1);
     
     /**
      * Normal vector.
@@ -54,7 +54,7 @@ public class CSGPlane
      */
     public double dist;
     
-    protected long lineID = nextLineID.getAndIncrement();
+    protected long lineID = nextInsideLineID.getAndIncrement();
 
     /**
      * Constructor. Creates a new plane defined by its normal vector and the
@@ -127,7 +127,7 @@ public class CSGPlane
         // four classes.
         int polygonType = 0;
         int types[] = new int[4];
-        for (int i = 0; i < quad.vertexCount(); i++) {
+        for (int i = 0; i < quad.getVertexCount(); i++) {
             double t = this.normal.dotProduct(quad.getVertex(i)) - this.dist;
             
             int type = (t < -QuadFactory.EPSILON) ? BACK : (t > QuadFactory.EPSILON) ? FRONT : COPLANAR;
@@ -137,9 +137,9 @@ public class CSGPlane
         
         // If we need to split a quad, break it into tris and redo on both parts.
         // Doing this because can't handle polys with more than four vertices.
-        if(polygonType == SPANNING && !(quad instanceof RawTri))
+        if(polygonType == SPANNING && quad.getVertexCount() > 3)
         {
-            for(RawQuad tri : quad.split())
+            for(RawQuad tri : quad.toTris())
             {
                 splitQuad(tri, coplanarFront, coplanarBack, front, back);
             }
@@ -181,11 +181,15 @@ public class CSGPlane
                     
                     if (iType != BACK) {
                         frontVertex.add(iVertex);
-                        frontLineID.add(iLineID);
+                        // if we are splitting at an existing vertex need to use split line
+                        // if the next vertex is not going into this list
+                        frontLineID.add(iType == COPLANAR && jType == BACK ? this.lineID : iLineID);
                     }
                     if (iType != FRONT) {
+                        // if we are splitting at an existing vertex need to use split line
+                        // if the next vertex is not going into this list
                         backVertex.add(iType != BACK ? iVertex.clone() : iVertex);
-                        backLineID.add(iLineID);
+                        backLineID.add(iType == COPLANAR && jType == FRONT ? this.lineID : iLineID);
                     }
                     // Line for interpolated vertex depends on what the next vertex is for this side (front/back).
                     // If the next vertex will be included in this side, we are starting the line connecting
@@ -205,8 +209,7 @@ public class CSGPlane
                     }
                 }
                 if (frontVertex.size() >= 3) {
-                    RawQuad frontQuad = frontVertex.size() == 3 ? new RawTri(quad) : new RawQuad(quad);
-                    frontQuad.quadID = RawQuad.nextQuadID.getAndIncrement();
+                    RawQuad frontQuad = new RawQuad(quad, frontVertex.size());
                     frontQuad.ancestorQuadID = quad.getAncestorQuadIDForDescendant();
                     
                     for(int i = 0; i < frontVertex.size(); i++)
@@ -214,34 +217,38 @@ public class CSGPlane
                         frontQuad.setVertex(i, frontVertex.get(i));
                         frontQuad.setLineID(i, frontLineID.get(i));
                     }
-                    //Avoid adding degenerate splits
-                    if(frontQuad.getFaceNormal().lengthVector() != 0)
-                    {
-                        front.add(frontQuad);
-                    }
-                    else
-                    {
-                        degenerateSplitCount++;
-                        totalVertexDistance += Math.abs(frontQuad.getVertex(1).distanceTo(frontQuad.getVertex(0)));
-                        totalVertexDistance += Math.abs(frontQuad.getVertex(2).distanceTo(frontQuad.getVertex(1)));
-                        totalVertexDistance += Math.abs(frontQuad.getVertex(0).distanceTo(frontQuad.getVertex(3)));
-                        if(frontVertex.size() == 4)
-                        {
-                            totalVertexDistance += Math.abs(frontQuad.getVertex(2).distanceTo(frontQuad.getVertex(3)));
-                        }
-                        totalVertexCount += frontVertex.size();
-                        
-                        if((degenerateSplitCount & 0xFFL) == 0xFFL)
-                        {
-                            Adversity.log.info("Degenerate split rate is " + (double)degenerateSplitCount / splitQuadRunCount * 100 + "%");
-                            Adversity.log.info("Average degenerate edge length is " + totalVertexDistance / totalVertexCount);
-                        }
-                    }
+                    
+                    // avoid generate zero face normals due to very small polys
+                    frontQuad.setFaceNormal(quad.getFaceNormal());
+                    front.add(frontQuad);
+                    
+//                    //Avoid adding degenerate splits
+//                    if(frontQuad.getFaceNormal().lengthVector() != 0)
+//                    {
+//                        front.add(frontQuad);
+//                    }
+//                    else
+//                    {
+//                        degenerateSplitCount++;
+//                        totalVertexDistance += Math.abs(frontQuad.getVertex(1).distanceTo(frontQuad.getVertex(0)));
+//                        totalVertexDistance += Math.abs(frontQuad.getVertex(2).distanceTo(frontQuad.getVertex(1)));
+//                        totalVertexDistance += Math.abs(frontQuad.getVertex(0).distanceTo(frontQuad.getVertex(3)));
+//                        if(frontVertex.size() == 4)
+//                        {
+//                            totalVertexDistance += Math.abs(frontQuad.getVertex(2).distanceTo(frontQuad.getVertex(3)));
+//                        }
+//                        totalVertexCount += frontVertex.size();
+//                        
+//                        if((degenerateSplitCount & 0xFFL) == 0xFFL)
+//                        {
+//                            Adversity.log.info("Degenerate split rate is " + (double)degenerateSplitCount / splitQuadRunCount * 100 + "%");
+//                            Adversity.log.info("Average degenerate edge length is " + totalVertexDistance / totalVertexCount);
+//                        }
+//                    }
                     
                 }
                 if (backVertex.size() >= 3) {
-                    RawQuad backQuad = backVertex.size() == 3 ? new RawTri(quad) : new RawQuad(quad);
-                    backQuad.quadID = RawQuad.nextQuadID.getAndIncrement();
+                    RawQuad backQuad = new RawQuad(quad, backVertex.size());
                     backQuad.ancestorQuadID = quad.getAncestorQuadIDForDescendant();
 
                     for(int i = 0; i < backVertex.size(); i++)
@@ -249,29 +256,34 @@ public class CSGPlane
                         backQuad.setVertex(i, backVertex.get(i));
                         backQuad.setLineID(i, backLineID.get(i));
                     }
-                    //Avoid adding degenerate splits
-                    if(backQuad.getFaceNormal().lengthVector() != 0)
-                    {
-                        back.add(backQuad);
-                    }
-                    else
-                    {
-                        degenerateSplitCount++;
-                        totalVertexDistance += Math.abs(backQuad.getVertex(1).distanceTo(backQuad.getVertex(0)));
-                        totalVertexDistance += Math.abs(backQuad.getVertex(2).distanceTo(backQuad.getVertex(1)));
-                        totalVertexDistance += Math.abs(backQuad.getVertex(0).distanceTo(backQuad.getVertex(3)));
-                        if(backVertex.size() == 4)
-                        {
-                            totalVertexDistance += Math.abs(backQuad.getVertex(2).distanceTo(backQuad.getVertex(3)));
-                        }
-                        totalVertexCount += backVertex.size();
-                        
-                        if((degenerateSplitCount & 0xFFL) == 0xFFL)
-                        {
-                            Adversity.log.info("Degenerate split rate is " + (double)degenerateSplitCount / splitQuadRunCount * 100 + "%");
-                            Adversity.log.info("Average degenerate edge length is " + totalVertexDistance / totalVertexCount);
-                        }
-                    }                    
+                    
+                    // avoid generate zero face normals due to very small polys
+                    backQuad.setFaceNormal(quad.getFaceNormal());
+                    back.add(backQuad);
+              
+//                    //Avoid adding degenerate splits
+//                    if(backQuad.getFaceNormal().lengthVector() != 0)
+//                    {
+//                        back.add(backQuad);
+//                    }
+//                    else
+//                    {
+//                        degenerateSplitCount++;
+//                        totalVertexDistance += Math.abs(backQuad.getVertex(1).distanceTo(backQuad.getVertex(0)));
+//                        totalVertexDistance += Math.abs(backQuad.getVertex(2).distanceTo(backQuad.getVertex(1)));
+//                        totalVertexDistance += Math.abs(backQuad.getVertex(0).distanceTo(backQuad.getVertex(3)));
+//                        if(backVertex.size() == 4)
+//                        {
+//                            totalVertexDistance += Math.abs(backQuad.getVertex(2).distanceTo(backQuad.getVertex(3)));
+//                        }
+//                        totalVertexCount += backVertex.size();
+//                        
+//                        if((degenerateSplitCount & 0xFFL) == 0xFFL)
+//                        {
+//                            Adversity.log.info("Degenerate split rate is " + (double)degenerateSplitCount / splitQuadRunCount * 100 + "%");
+//                            Adversity.log.info("Average degenerate edge length is " + totalVertexDistance / totalVertexCount);
+//                        }
+//                    }                    
                 }
                 break;
         }

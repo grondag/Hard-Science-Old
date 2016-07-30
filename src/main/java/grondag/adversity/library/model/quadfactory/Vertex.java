@@ -198,4 +198,15 @@ public class Vertex extends Vec3d
             && Math.abs(vertexIn.zCoord - this.zCoord) < QuadFactory.EPSILON;
 
     }
+
+    /**
+     * True if this point is on the line formed by the two given points.
+     */
+    public boolean isOnLine(Vec3d pointA, Vec3d pointB)
+    {
+        Vec3d diff1 = pointA.subtract(this).normalize();
+        Vec3d diff2 = pointB.subtract(this).normalize();
+        Double dotProdAV = Math.abs(diff1.dotProduct(diff2));
+        return(Math.abs(dotProdAV - 1) < QuadFactory.EPSILON);
+    }
 }

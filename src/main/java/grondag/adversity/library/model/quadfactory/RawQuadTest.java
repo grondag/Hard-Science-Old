@@ -43,17 +43,19 @@ public class RawQuadTest
         assertFalse(quad.intersectsWithRay(point, direction));
         
         
-        //convexity tests
+        //convexity & area tests
         quad = new RawQuad().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0.5, EnumFacing.NORTH);
         assertTrue(quad.isConvex());
+        assertTrue(Math.abs(quad.getArea() - 1.0) < QuadFactory.EPSILON);
         
-        quad = new RawTri().setupFaceQuad(EnumFacing.UP,
+        quad = new RawQuad(3).setupFaceQuad(EnumFacing.UP,
                 new FaceVertex(0, 0, 0), 
                 new FaceVertex(1, 0, 0), 
                 new FaceVertex(1, 1, 0), 
                 EnumFacing.NORTH);
         assertTrue(quad.isConvex());
-                
+        assertTrue(Math.abs(quad.getArea() - 0.5) < QuadFactory.EPSILON);
+        
         quad = new RawQuad().setupFaceQuad(EnumFacing.UP,
                 new FaceVertex(0, 0, 0), 
                 new FaceVertex(1, 0, 0), 

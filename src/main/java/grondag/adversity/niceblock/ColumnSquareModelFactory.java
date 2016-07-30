@@ -9,7 +9,6 @@ import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.RawTri;
 import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelState;
@@ -345,7 +344,7 @@ public class ColumnSquareModelFactory extends ModelFactory
 
                     if(myController.modelType != ColumnSquareController.ModelType.LAMP_BASE)
                     {
-                        RawTri tri = new RawTri(qi);
+                        RawQuad tri = new RawQuad(qi, 3);
                         
                         // margin corner faces
                         tri.setupFaceQuad(face, 

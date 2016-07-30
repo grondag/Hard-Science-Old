@@ -74,6 +74,12 @@ public class CSGShape extends LinkedList<RawQuad>
                 map((RawQuad p) -> p.clone()).collect(Collectors.toList()));
     }
     
+    public CSGShape initCsg()
+    {
+        this.forEach((q) -> q.initCsg());
+        return this;
+    }
+    
     /**
      * Randomly recolors all the quads as an aid to debugging.
      */
@@ -159,11 +165,12 @@ public class CSGShape extends LinkedList<RawQuad>
         b.invert();
         a.clipTo(b);
         b.clipTo(a);
-        a.build(b.allRawQuads(), false);
+        a.build(b.allRawQuads());
         a.invert();
-        Adversity.log.info("starting shape output");
-        a.allRawQuads().forEach((quad) -> Adversity.log.info(quad.ancestorQuadID + " " + quad.quadID));
-        return new CSGShape(a.recombinedRawQuads());
+        CSGShape retVal = new CSGShape(a.recombinedRawQuads());
+        Adversity.log.info("raw count " + a.allRawQuads().size() + "   combined count " + retVal.size());
+
+        return retVal;
     }
 
 }
