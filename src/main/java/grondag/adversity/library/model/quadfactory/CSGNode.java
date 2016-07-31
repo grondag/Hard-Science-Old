@@ -130,15 +130,17 @@ public class CSGNode
      * Converts solid space to empty space and vice verca.
      */
     public void invert() {
-        
+  
+        if (this.plane == null && quads.isEmpty()) return;
+
         quads.forEach((quad) -> {
             quad.invert();
         });
 
-        if (this.plane == null && !quads.isEmpty()) {
+        if (this.plane == null)
+        {
+            // quads can't be empty if we get to here
             this.plane = new CSGPlane(quads.get(0));
-        } else if (this.plane == null && quads.isEmpty()) {
-            throw new RuntimeException("Please fix me! I don't know what to do?");
         }
 
         this.plane.flip();

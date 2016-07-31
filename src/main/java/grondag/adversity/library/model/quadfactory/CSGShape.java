@@ -33,14 +33,14 @@ package grondag.adversity.library.model.quadfactory;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import grondag.adversity.Adversity;
+import eu.mihosoft.vrl.v3d.CSGBounds;
 import grondag.adversity.library.Useful;
+import net.minecraft.util.math.AxisAlignedBB;
 
 public class CSGShape extends LinkedList<RawQuad>
 {
@@ -108,6 +108,30 @@ public class CSGShape extends LinkedList<RawQuad>
         quadStream.forEach((RawQuad quad) -> quad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000));
     }
     
+    
+    public CSGBounds getBounds()
+    {
+        if (this.isEmpty()) {
+            return new CSGBounds(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        }
+
+        AxisAlignedBB retVal = null;
+
+        for (RawQuad p : this)
+        {
+            if(retVal == null)
+            {
+                retVal = p.getAABB();
+            }
+            else
+            {
+                retVal = retVal.union(p.getAABB());
+            }
+        }
+
+        return new CSGBounds(retVal.minX, retVal.minY, retVal.minZ, retVal.maxX, retVal.maxY, retVal.maxZ);
+    }
+    
     /**
      * Return a new CSG solid representing the union of this csg and the
      * specified csg.
@@ -144,6 +168,68 @@ public class CSGShape extends LinkedList<RawQuad>
 //                return _unionNoOpt(csg);
 //        }
 //    }
+    
+    /**
+     * Return a new CSG solid representing the difference of this csg and the
+     * specified csg.
+     *
+     * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+     *
+     * <blockquote><pre>
+     * A.difference(B)
+     *
+     * +-------+            +-------+
+     * |       |            |       |
+     * |   A   |            |       |
+     * |    +--+----+   =   |    +--+
+     * +----+--+    |       +----+
+     *      |   B   |
+     *      |       |
+     *      +-------+
+     * </pre></blockquote>
+     *
+     * @param other other csg
+     * @return difference of this csg and the specified csg
+     */
+    public CSGShape difference(CSGShape other) {
+        List<RawQuad> inner = new ArrayList<RawQuad>();
+        List<RawQuad> outer = new ArrayList<RawQuad>();
+
+        CSGBounds bounds = other.getBounds();
+
+        this.stream().forEach((p) -> {
+            if (bounds.intersectsWith(p.getAABB())) {
+                inner.add(p);
+            } else {
+                outer.add(p);
+            }
+        });
+
+        CSGShape innerCSG = new CSGShape(inner);
+
+        CSGShape result = new CSGShape();
+        result.addAll(outer);
+        result.addAll(innerCSG.differenceClip(other));
+
+        return result;
+    }
+    
+    private CSGShape differenceClip(CSGShape other) {
+
+        CSGNode a = new CSGNode(this.clone());
+        CSGNode b = new CSGNode(other.clone());
+
+        a.invert();
+        a.clipTo(b);
+        b.clipTo(a);
+        b.invert();
+        b.clipTo(a);
+        b.invert();
+        a.build(b.allRawQuads());
+        a.invert();
+
+        return new CSGShape(a.recombinedRawQuads());
+    }
     
     /**
      * Return a new CSG solid representing the intersection of this csg and the

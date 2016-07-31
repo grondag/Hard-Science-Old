@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4f;
 
+import grondag.adversity.Adversity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 
@@ -72,6 +73,7 @@ public class Vertex extends Vec3d
     {
         Vec3d newPos = this.add(otherVertex.subtract(this).scale(otherWeight));
         Vec3d newNorm = null;
+
         if(this.normal != null && otherVertex.normal != null)
         {
             newNorm = this.normal.add(otherVertex.normal.subtract(this.normal).scale(otherWeight));

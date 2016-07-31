@@ -149,6 +149,31 @@ public class RawQuad
             {
                 retVal.add(this.clone());
             }
+            else if(this.getVertexCount() == 4)
+            {
+                long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
+                
+                RawQuad work = new RawQuad(this, 3);
+               work.setVertex(0, this.getVertex(0).clone());
+               work.setVertex(1, this.getVertex(1).clone());
+               work.setVertex(2, this.getVertex(2).clone());
+               work.setLineID(0, this.getLineID(0));
+               work.setLineID(1, this.getLineID(1));
+               work.setLineID(2, splitLineID);
+               work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+               retVal.add(work);
+
+               work = new RawQuad(this, 3);
+               work.setVertex(0, this.getVertex(0).clone());
+               work.setVertex(1, this.getVertex(2).clone());
+               work.setVertex(2, this.getVertex(3).clone());
+               work.setLineID(0, splitLineID);
+               work.setLineID(1, this.getLineID(2));
+               work.setLineID(2, this.getLineID(3));
+               work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+               retVal.add(work);
+
+            }
             else
             {
                 long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
@@ -156,11 +181,11 @@ public class RawQuad
                 int tail = 1;
 
                 RawQuad work = new RawQuad(this, 3);
-                work.setVertex(0, this.getVertex(head));
+                work.setVertex(0, this.getVertex(head).clone());
                 work.setLineID(0, this.getLineID(head));
-                work.setVertex(1, this.getVertex(0));
+                work.setVertex(1, this.getVertex(0).clone());
                 work.setLineID(1, this.getLineID(0));
-                work.setVertex(2, this.getVertex(tail));
+                work.setVertex(2, this.getVertex(tail).clone());
                 work.setLineID(2, splitLineID);
                 work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
                 retVal.add(work);
@@ -168,12 +193,12 @@ public class RawQuad
                 while(head - tail > 1)
                 {
                     work = new RawQuad(this, 3);
-                    work.setVertex(0, this.getVertex(head));
+                    work.setVertex(0, this.getVertex(head).clone());
                     work.setLineID(0, splitLineID);
-                    work.setVertex(1, this.getVertex(tail));
+                    work.setVertex(1, this.getVertex(tail).clone());
                     work.setLineID(1, this.getLineID(tail));
                     splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
-                    work.setVertex(2, this.getVertex(++tail));
+                    work.setVertex(2, this.getVertex(++tail).clone());
                     work.setLineID(2, head - tail == 1 ? this.getLineID(tail): splitLineID);
                     work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
                     retVal.add(work);
@@ -181,12 +206,12 @@ public class RawQuad
                     if(head - tail > 1)
                     {
                         work = new RawQuad(this, 3);
-                        work.setVertex(0, this.getVertex(head));
+                        work.setVertex(0, this.getVertex(head).clone());
                         work.setLineID(0, splitLineID);
                         splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
-                        work.setVertex(1, this.getVertex(tail));
+                        work.setVertex(1, this.getVertex(tail).clone());
                         work.setLineID(1, head - tail == 1 ? this.getLineID(tail): splitLineID);
-                        work.setVertex(2, this.getVertex(--head));
+                        work.setVertex(2, this.getVertex(--head).clone());
                         work.setLineID(2, this.getLineID(head));
                         work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
                         retVal.add(work);
@@ -769,7 +794,6 @@ public class RawQuad
         
         public double getArea()
         {
-            //TODO: generalize?
             if(this.getVertexCount() == 3)
             {
                 return Math.abs(getVertex(1).subtract(getVertex(0)).crossProduct(getVertex(2).subtract(getVertex(0))).lengthVector()) / 2.0;
