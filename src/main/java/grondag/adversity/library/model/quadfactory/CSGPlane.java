@@ -199,7 +199,6 @@ public class CSGPlane
                     if ((iType | jType) == SPANNING) {
                         double t = (this.dist - this.normal.dotProduct(iVertex)) / this.normal.dotProduct(jVertex.subtract(iVertex));
                         Vertex v = iVertex.interpolate(jVertex, t);
-                        v.initCsg();
                         
                         frontVertex.add(v);
                         frontLineID.add(jType != FRONT ? this.lineID : iLineID);

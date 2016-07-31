@@ -1,6 +1,5 @@
 package grondag.adversity.library.model.quadfactory;
 
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4f;
@@ -11,53 +10,36 @@ import net.minecraft.util.math.Vec3d;
 
 public class Vertex extends Vec3d
 {
-    protected static AtomicLong nextVertexID = new AtomicLong(1);
-    protected static long NO_ID = 0;
-
-    protected long vertexID = NO_ID;
-
-    protected double u;
-    protected double v;
-    protected int color;
-    protected Vec3d normal;
+    protected final double u;
+    protected final double v;
+    public final int color;
+    protected final Vec3d normal;
     
     
     public Vertex(double x, double y, double z, double u, double v, int color)
+    {
+        this(x, y, z, u, v, color, null);
+    }
+
+    public Vertex(double x, double y, double z, double u, double v, int color, Vec3d normal)
     {
         super(x, y, z);
         this.u = u;
         this.v = v;
         this.color = color;
-    }
-
-    public Vertex(double x, double y, double z, double u, double v, int color, Vec3d normal)
-    {
-        this(x, y, z, u, v, color);
         this.normal = normal;
     }
 
-    protected Vertex setNormal(Vec3d normalIn)
+    protected Vertex withNormal(Vec3d normalIn)
     {
-        this.normal = normalIn;
-        return this;
+        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, normalIn);
     }
 
-    protected Vertex setVertexID(long vertexID)
+    protected Vertex withColor(int colorIn)
     {
-        this.vertexID = vertexID;
-        return this;
+        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, colorIn, this.normal);
     }
-    
-    protected long getVertexID()
-    {
-        return this.vertexID;
-    }
-    
-    protected void initCsg()
-    {
-        this.vertexID = nextVertexID.getAndIncrement();
-    }
-    
+
     public boolean hasNormal()
     {
         return this.normal != null;
@@ -139,7 +121,7 @@ public class Vertex extends Vec3d
     
     public Vertex clone()
     {
-        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal).setVertexID(this.vertexID);
+        return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, this.normal);
     }
 
     public Vertex transform(Matrix4f matrix, boolean rescaleToUnitCube)

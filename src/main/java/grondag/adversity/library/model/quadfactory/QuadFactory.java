@@ -42,23 +42,6 @@ public class QuadFactory
         return glOrder ? red  | green << 8 | blue << 16 | alpha << 24 : red << 16 | green << 8 | blue | alpha << 24;
     }
 
-    /**
-     * Rotates face texture 90deg clockwise
-     */
-    static void rotateQuadUV(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
-    {
-        double swapU = v1.u;
-        double swapV = v1.v;
-        v1.u = v2.u;
-        v1.v = v2.v;
-        v2.u = v3.u;
-        v2.v = v3.v;
-        v3.u = v4.u;
-        v3.v = v4.v;
-        v4.u = swapU;
-        v4.v = swapV;
-    }
-
     public static List<RawQuad> makeBox(AxisAlignedBB box, RawQuad template)
     {
         List<RawQuad> retVal = new ArrayList<RawQuad>(6);

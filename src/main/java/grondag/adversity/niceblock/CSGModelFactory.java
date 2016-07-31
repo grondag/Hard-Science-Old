@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
@@ -42,7 +43,6 @@ public class CSGModelFactory extends ModelFactory
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         template.color = colorMap.getColorMap(EnumColorMap.BASE);
         template.lockUV = true;
-        template.lightingMode = LightingMode.FLAT;
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
                 .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
   
@@ -59,7 +59,29 @@ public class CSGModelFactory extends ModelFactory
   //      quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0, 0.5, 0.5, 1.0, 0.7), template));
   //      result = result.difference(quadsB);
 
+        for(RawQuad rq : result)
+        {
+            for(int i = 0; i < rq.getVertexCount(); i++)
+            {
+                if(rq.getVertex(i).color != rq.color)
+                {
+                    Adversity.log.info("bloop");
+                }
+            }
+        }
+        
         result.recolor();
+        
+        for(RawQuad rq : result)
+        {
+            for(int i = 0; i < rq.getVertexCount(); i++)
+            {
+                if(rq.getVertex(i).color != rq.color)
+                {
+                    Adversity.log.info("bloop");
+                }
+            }
+        }
         result.forEach((quad) -> builder.add(quad.createBakedQuad()));
         
         return builder.build();

@@ -383,7 +383,7 @@ public class RawQuad
 
             for (int r = 0; r < uvRotationCount; r++)
             {
-                QuadFactory.rotateQuadUV(this.getVertex(0), this.getVertex(1), this.getVertex(2), this.getVertex(3));
+                rotateQuadUV();
             }
             
             return this;
@@ -448,7 +448,7 @@ public class RawQuad
         {
             if(index < this.vertexCount)
             {
-                this.getVertex(index).setNormal(normalIn);
+                this.getVertex(index).withNormal(normalIn);
             }
         }
 
@@ -460,13 +460,14 @@ public class RawQuad
             this.color = color;
             for(int i = 0; i < this.getVertexCount(); i++)
             {
-                if(getVertex(i) != null) getVertex(i).color = color;
+                if(getVertex(i) != null) setVertex(i, getVertex(i).withColor(color));
             }
             return this;
         }
         
-        /** Using this instead of referencing vertex array directly
-         * ensures correctl handling for tris.
+        /** Using this instead of referencing vertex array directly.
+         * DOES NOT RETAIN A REFERENCE TO THE INPUT VERTEX.
+         * Uses a clone instead.  Prevents unintentional changes later.
          */
         public void setVertex(int index, Vertex vertexIn)
         {
@@ -684,11 +685,40 @@ public class RawQuad
             return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
         }
         
+        /**
+         * Rotates face texture 90deg clockwise.
+         * TODO: this was originally intended for quads - not sure what it does for non-quads!
+         */
+        public void rotateQuadUV()
+        {
+
+            Vertex swapVertex = getVertex(0);
+            Vertex vTo = getVertex(0);
+            Vertex vFrom = getVertex(1);
+            Vertex vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            setVertex(0, vNew);
+            
+            vTo = getVertex(1);
+            vFrom = getVertex(2);
+            vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            setVertex(1, vNew);
+            
+            vTo = getVertex(2);
+            vFrom = getVertex(3);
+            vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            setVertex(2, vNew);
+
+            vTo = getVertex(3);
+            vFrom = swapVertex;
+            vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            setVertex(3, vNew);
+        }
+        
         public BakedQuad createBakedQuad()
         {
             for (int r = 0; r < this.rotation.index; r++)
             {
-                QuadFactory.rotateQuadUV(this.getVertex(0), this.getVertex(1), this.getVertex(2), this.getVertex(3));
+                rotateQuadUV();
             }
 
             int[] vertexData = new int[28];
