@@ -1,7 +1,6 @@
 package grondag.adversity.library.model.quadfactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -154,9 +153,9 @@ public class RawQuad
                 long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
                 
                 RawQuad work = new RawQuad(this, 3);
-               work.setVertex(0, this.getVertex(0).clone());
-               work.setVertex(1, this.getVertex(1).clone());
-               work.setVertex(2, this.getVertex(2).clone());
+               work.setVertex(0, this.getVertex(0));
+               work.setVertex(1, this.getVertex(1));
+               work.setVertex(2, this.getVertex(2));
                work.setLineID(0, this.getLineID(0));
                work.setLineID(1, this.getLineID(1));
                work.setLineID(2, splitLineID);
@@ -164,9 +163,9 @@ public class RawQuad
                retVal.add(work);
 
                work = new RawQuad(this, 3);
-               work.setVertex(0, this.getVertex(0).clone());
-               work.setVertex(1, this.getVertex(2).clone());
-               work.setVertex(2, this.getVertex(3).clone());
+               work.setVertex(0, this.getVertex(0));
+               work.setVertex(1, this.getVertex(2));
+               work.setVertex(2, this.getVertex(3));
                work.setLineID(0, splitLineID);
                work.setLineID(1, this.getLineID(2));
                work.setLineID(2, this.getLineID(3));
@@ -465,9 +464,8 @@ public class RawQuad
             return this;
         }
         
-        /** Using this instead of referencing vertex array directly.
-         * DOES NOT RETAIN A REFERENCE TO THE INPUT VERTEX.
-         * Uses a clone instead.  Prevents unintentional changes later.
+        /** 
+         * Using this instead of referencing vertex array directly.
          */
         public void setVertex(int index, Vertex vertexIn)
         {
@@ -842,5 +840,17 @@ public class RawQuad
                 }
                 return area;
             }
+        }
+        
+        @Override
+        public String toString()
+        {
+            String result = "id: " + this.quadID + " face: " + this.face;
+            for(int i = 0; i < getVertexCount(); i++)
+            {
+                result += " v" + i + ": " + this.getVertex(i).toString();
+                result += " l" + i + ": " + this.getLineID(i);
+            }
+            return result;
         }
     }

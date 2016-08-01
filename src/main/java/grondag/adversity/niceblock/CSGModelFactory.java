@@ -48,40 +48,25 @@ public class CSGModelFactory extends ModelFactory
   
         CSGShape quadsA = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.1, 0.1, 0.1, 0.9, 0.9, 0.9), template));
         template.color = colorMap.getColorMap(EnumColorMap.BORDER);
-//        CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0.4, 0.4, 1.0, 0.6, 0.6), template));
-         CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0.03, 0.5, 0.5, 0.95, 0.7), template));
-//         CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.2, 0, 0.4, 0.6, 1.0, 0.8), template));
+        CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0.03, 0.5, 0.5, 0.95, 0.7), template));
+
+//        CSGShape quadsA = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0.4, 0.4, 1.0, 0.6, 0.6), template));
+//        template.color = colorMap.getColorMap(EnumColorMap.BORDER);
+//        CSGShape quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.2, 0, 0.4, 0.6, 1.0, 0.8), template));
 
 //        CSGShape result = quadsA.intersect(quadsB);
         CSGShape result = quadsA.difference(quadsB);
 
         template.color = colorMap.getColorMap(EnumColorMap.HIGHLIGHT);
-  //      quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0, 0.5, 0.5, 1.0, 0.7), template));
-  //      result = result.difference(quadsB);
+        quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.2, 0.2, 0, 0.8, 0.8, 1), template));
+        result = result.difference(quadsB);
 
-        for(RawQuad rq : result)
-        {
-            for(int i = 0; i < rq.getVertexCount(); i++)
-            {
-                if(rq.getVertex(i).color != rq.color)
-                {
-                    Adversity.log.info("bloop");
-                }
-            }
-        }
+        template.color = colorMap.getColorMap(EnumColorMap.HIGHLIGHT);
+        quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, .4, 1, .4, .65), template));
+        result = result.difference(quadsB);
         
-        result.recolor();
+        //result.recolor();
         
-        for(RawQuad rq : result)
-        {
-            for(int i = 0; i < rq.getVertexCount(); i++)
-            {
-                if(rq.getVertex(i).color != rq.color)
-                {
-                    Adversity.log.info("bloop");
-                }
-            }
-        }
         result.forEach((quad) -> builder.add(quad.createBakedQuad()));
         
         return builder.build();

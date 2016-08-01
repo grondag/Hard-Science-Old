@@ -294,19 +294,22 @@ public class CSGNode
      */
     private RawQuad joinCsgQuads(RawQuad aQuad, RawQuad bQuad, long lineID)
     {
+
         // quads must be same orientation to be joined
         if(aQuad.isInverted != bQuad.isInverted) return null;
 
         int aStartIndex = aQuad.findLineIndex(lineID);
         // shouldn't happen, but won't work if does
-        if(aStartIndex == RawQuad.LINE_NOT_FOUND) return null;
+        if(aStartIndex == RawQuad.LINE_NOT_FOUND) 
+            return null;
         int aEndIndex = aStartIndex + 1 == aQuad.getVertexCount() ? 0 : aStartIndex + 1;
         int aNextIndex = aEndIndex + 1 == aQuad.getVertexCount() ? 0 : aEndIndex + 1;
         int aPrevIndex = aStartIndex == 0 ? aQuad.getVertexCount() - 1 : aStartIndex - 1;
 
         int bStartIndex = bQuad.findLineIndex(lineID);
         // shouldn't happen, but won't work if does
-        if(bStartIndex == RawQuad.LINE_NOT_FOUND) return null;
+        if(bStartIndex == RawQuad.LINE_NOT_FOUND) 
+            return null;
         int bEndIndex = bStartIndex + 1 == bQuad.getVertexCount() ? 0 : bStartIndex + 1;
         int bNextIndex = bEndIndex + 1 == bQuad.getVertexCount() ? 0 : bEndIndex + 1;
         int bPrevIndex = bStartIndex == 0 ? bQuad.getVertexCount() - 1 : bStartIndex - 1;
@@ -314,12 +317,20 @@ public class CSGNode
         // confirm vertices on either end of vertex match
         if(!aQuad.getVertex(aStartIndex).isCsgEqual(bQuad.getVertex(bEndIndex)))
         {
-//            Adversity.log.info("vertex mismatch");
+//            Adversity.log.info("vertex mismatch for LineID = " + lineID + " face = " + aQuad.face);
+//            Adversity.log.info("A Start: " + aQuad.getVertex(aStartIndex).toString() );
+//            Adversity.log.info("B End: " + bQuad.getVertex(bEndIndex).toString() );
+//            Adversity.log.info("B Start: " + bQuad.getVertex(bStartIndex).toString() );
+//            Adversity.log.info("A End: " + aQuad.getVertex(aEndIndex).toString() );
             return null;
         }
         if(!aQuad.getVertex(aEndIndex).isCsgEqual(bQuad.getVertex(bStartIndex)))
         {
-//            Adversity.log.info("vertex mismatch");
+//            Adversity.log.info("vertex mismatch for LineID = " + lineID);
+//            Adversity.log.info("A Start: " + aQuad.getVertex(aStartIndex).toString() );
+//            Adversity.log.info("A End: " + aQuad.getVertex(aEndIndex).toString() );
+//            Adversity.log.info("B Start: " + bQuad.getVertex(bStartIndex).toString() );
+//            Adversity.log.info("B End: " + bQuad.getVertex(bEndIndex).toString() );
             return null;
         }
 

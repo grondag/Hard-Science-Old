@@ -188,9 +188,6 @@ public class Vertex extends Vec3d
      */
     public boolean isOnLine(Vec3d pointA, Vec3d pointB)
     {
-        Vec3d diff1 = pointA.subtract(this).normalize();
-        Vec3d diff2 = pointB.subtract(this).normalize();
-        Double dotProdAV = Math.abs(diff1.dotProduct(diff2));
-        return(Math.abs(dotProdAV - 1) < QuadFactory.EPSILON);
+        return(Math.abs(pointA.distanceTo(pointB) - pointB.distanceTo(this) - pointA.distanceTo(this)) < QuadFactory.EPSILON);
     }
 }
