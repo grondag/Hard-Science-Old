@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 
 public class CSGModelFactory extends ModelFactory
 {
@@ -66,6 +67,35 @@ public class CSGModelFactory extends ModelFactory
         result = result.difference(quadsB);
         
         //result.recolor();
+        
+        for(RawQuad quad : result)
+        {
+            Vec3d faceNormal = quad.getFaceNormal();
+            if(!(faceNormal.xCoord ==0 || Math.abs(Math.abs(faceNormal.xCoord) - 1) < QuadFactory.EPSILON)
+                    || !(faceNormal.yCoord ==0 || Math.abs(Math.abs(faceNormal.yCoord) - 1) < QuadFactory.EPSILON)
+                    || !(faceNormal.zCoord ==0 || Math.abs(Math.abs(faceNormal.zCoord) - 1) < QuadFactory.EPSILON)
+                    || !(Math.abs(Math.abs(faceNormal.xCoord + faceNormal.yCoord + faceNormal.zCoord) - 1) < QuadFactory.EPSILON))
+            {
+                Adversity.log.info("hmmm");
+            }
+            
+            for(int i = 0; i < 4; i++)
+            {
+                Vec3d vNorm = quad.getVertex(i).getNormal();
+                if(vNorm != null && !vNorm.equals(quad.getFaceNormal()))
+                {
+                    Adversity.log.info("hmmm");
+                }
+                if(quad.getVertex(i).hasNormal())
+                {
+                    Adversity.log.info("hmmm");
+                }
+                if(quad.getVertex(i).color != quad.color)
+                {
+                    Adversity.log.info("hmmm");
+                }
+            }
+        }
         
         result.forEach((quad) -> builder.add(quad.createBakedQuad()));
         

@@ -45,6 +45,10 @@ public class Vertex extends Vec3d
         return this.normal != null;
     }
 
+    public Vec3d getNormal()
+    {
+        return this.normal;
+    }
     /**
      * Returns a new, linearly interpolated vertex based on this vertex
      * and the other vertex provided.  Neither vertex is changed.

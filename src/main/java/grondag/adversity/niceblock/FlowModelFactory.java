@@ -72,7 +72,7 @@ public class FlowModelFactory extends ModelFactory
 
         for(RawQuad quad : modelCache.getUnchecked(modelState.getShapeIndex(controller.getRenderLayer())))
         {
-            if(quad.face == face)
+            if(quad.getFace() == face)
             {
                 // could have multiple threads attempting to colorize same quad
                 synchronized(quad)
@@ -162,7 +162,7 @@ public class FlowModelFactory extends ModelFactory
             
    
             // build left and right quads on the block that edge this side
-            template.face = EnumFacing.UP;
+            template.setFace(EnumFacing.UP);
             RawQuad qiWork = new RawQuad(template, 3);
             qiWork.setupFaceQuad(
                     fvMidSide[side.ordinal()],
@@ -294,7 +294,7 @@ public class FlowModelFactory extends ModelFactory
         //single top face if it is relatively flat and all sides can be drawn without a mid vertex
         if(topIsSimple)
         {
-            template.face = EnumFacing.UP;
+            template.setFace(EnumFacing.UP);
             RawQuad qi = new RawQuad(template, 4);
             qi.setupFaceQuad(
                     fvMidCorner[HorizontalCorner.SOUTH_WEST.ordinal()],
@@ -319,7 +319,7 @@ public class FlowModelFactory extends ModelFactory
                 // top
                 if(!topIsSimple)
                 {
-                    template.face = EnumFacing.UP;
+                    template.setFace(EnumFacing.UP);
                     RawQuad qi = new RawQuad(template, 3);
                     qi.setupFaceQuad(
                             fvMidCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()],
@@ -333,7 +333,7 @@ public class FlowModelFactory extends ModelFactory
                 }
                 
                 // side
-                template.face = side.face;
+                template.setFace(side.face);
                 RawQuad qSide = new RawQuad(template);
                 qSide.setupFaceQuad(
                         new FaceVertex(0, bottom - yOffset, 0),
@@ -362,7 +362,7 @@ public class FlowModelFactory extends ModelFactory
                 rawQuads.add(qi);
 
                 //Sides
-                template.face = side.face;
+                template.setFace(side.face);
                 
                 RawQuad qLeft = new RawQuad(template);
                 qLeft.setupFaceQuad(
@@ -385,7 +385,7 @@ public class FlowModelFactory extends ModelFactory
         }     
         
         // Bottom face
-        template.face = EnumFacing.DOWN;
+        template.setFace(EnumFacing.DOWN);
         RawQuad qBottom = new RawQuad(template);
         qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);
         rawQuads.add(qBottom);
@@ -400,7 +400,7 @@ public class FlowModelFactory extends ModelFactory
 //        
         // don't count quads as face quads unless actually on the face
         // will be useful for face culling
-        rawQuads.forEach((quad) -> quad.face = quad.isOnFace(quad.face) ? quad.face : null);
+        rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getFace()) ? quad.getFace() : null));
         
         
         // if we end up with an empty list, default to standard cube

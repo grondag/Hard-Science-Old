@@ -23,7 +23,7 @@ public class RawQuad
         private Vec3d faceNormal = null;
         private final int vertexCount;
         
-        public EnumFacing face;
+        private EnumFacing face;
         public TextureAtlasSprite textureSprite;
         public Rotation rotation = Rotation.ROTATE_NONE;
         public int color;
@@ -88,7 +88,7 @@ public class RawQuad
         
         protected void copyProperties(RawQuad fromObject)
         {
-            this.face = fromObject.face;
+            this.setFace(fromObject.getFace());
             this.textureSprite = fromObject.textureSprite;
             this.rotation = fromObject.rotation;
             this.color = fromObject.color;
@@ -148,31 +148,31 @@ public class RawQuad
             {
                 retVal.add(this.clone());
             }
-            else if(this.getVertexCount() == 4)
-            {
-                long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
-                
-                RawQuad work = new RawQuad(this, 3);
-               work.setVertex(0, this.getVertex(0));
-               work.setVertex(1, this.getVertex(1));
-               work.setVertex(2, this.getVertex(2));
-               work.setLineID(0, this.getLineID(0));
-               work.setLineID(1, this.getLineID(1));
-               work.setLineID(2, splitLineID);
-               work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
-               retVal.add(work);
-
-               work = new RawQuad(this, 3);
-               work.setVertex(0, this.getVertex(0));
-               work.setVertex(1, this.getVertex(2));
-               work.setVertex(2, this.getVertex(3));
-               work.setLineID(0, splitLineID);
-               work.setLineID(1, this.getLineID(2));
-               work.setLineID(2, this.getLineID(3));
-               work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
-               retVal.add(work);
-
-            }
+//            else if(this.getVertexCount() == 4)
+//            {
+//                long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
+//                
+//                RawQuad work = new RawQuad(this, 3);
+//               work.setVertex(0, this.getVertex(0));
+//               work.setVertex(1, this.getVertex(1));
+//               work.setVertex(2, this.getVertex(2));
+//               work.setLineID(0, this.getLineID(0));
+//               work.setLineID(1, this.getLineID(1));
+//               work.setLineID(2, splitLineID);
+//               work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+//               retVal.add(work);
+//
+//               work = new RawQuad(this, 3);
+//               work.setVertex(0, this.getVertex(0));
+//               work.setVertex(1, this.getVertex(2));
+//               work.setVertex(2, this.getVertex(3));
+//               work.setLineID(0, splitLineID);
+//               work.setLineID(1, this.getLineID(2));
+//               work.setLineID(2, this.getLineID(3));
+//               work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
+//               retVal.add(work);
+//
+//            }
             else
             {
                 long splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
@@ -180,11 +180,11 @@ public class RawQuad
                 int tail = 1;
 
                 RawQuad work = new RawQuad(this, 3);
-                work.setVertex(0, this.getVertex(head).clone());
+                work.setVertex(0, this.getVertex(head));
                 work.setLineID(0, this.getLineID(head));
-                work.setVertex(1, this.getVertex(0).clone());
+                work.setVertex(1, this.getVertex(0));
                 work.setLineID(1, this.getLineID(0));
-                work.setVertex(2, this.getVertex(tail).clone());
+                work.setVertex(2, this.getVertex(tail));
                 work.setLineID(2, splitLineID);
                 work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
                 retVal.add(work);
@@ -192,12 +192,12 @@ public class RawQuad
                 while(head - tail > 1)
                 {
                     work = new RawQuad(this, 3);
-                    work.setVertex(0, this.getVertex(head).clone());
+                    work.setVertex(0, this.getVertex(head));
                     work.setLineID(0, splitLineID);
-                    work.setVertex(1, this.getVertex(tail).clone());
+                    work.setVertex(1, this.getVertex(tail));
                     work.setLineID(1, this.getLineID(tail));
                     splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
-                    work.setVertex(2, this.getVertex(++tail).clone());
+                    work.setVertex(2, this.getVertex(++tail));
                     work.setLineID(2, head - tail == 1 ? this.getLineID(tail): splitLineID);
                     work.ancestorQuadID = this.getAncestorQuadIDForDescendant();
                     retVal.add(work);
@@ -205,10 +205,10 @@ public class RawQuad
                     if(head - tail > 1)
                     {
                         work = new RawQuad(this, 3);
-                        work.setVertex(0, this.getVertex(head).clone());
+                        work.setVertex(0, this.getVertex(head));
                         work.setLineID(0, splitLineID);
                         splitLineID = CSGPlane.nextInsideLineID.getAndIncrement();
-                        work.setVertex(1, this.getVertex(tail).clone());
+                        work.setVertex(1, this.getVertex(tail));
                         work.setLineID(1, head - tail == 1 ? this.getLineID(tail): splitLineID);
                         work.setVertex(2, this.getVertex(--head).clone());
                         work.setLineID(2, this.getLineID(head));
@@ -275,7 +275,7 @@ public class RawQuad
         public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
         {
             
-            EnumFacing defaultTop = Useful.defaultTopOf(this.face);
+            EnumFacing defaultTop = Useful.defaultTopOf(this.getFace());
             FaceVertex rv0;
             FaceVertex rv1;
             FaceVertex rv2;
@@ -289,7 +289,7 @@ public class RawQuad
                 rv2 = vertexIn2.clone();
                 rv3 = vertexIn3.clone();
             }
-            else if(topFace == Useful.rightOf(this.face, defaultTop))
+            else if(topFace == Useful.rightOf(this.getFace(), defaultTop))
             {
                 rv0 = new FaceVertex.Colored(vertexIn0.y, 1.0 - vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
                 rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -297,7 +297,7 @@ public class RawQuad
                 rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
                 uvRotationCount = lockUV ? 0 : 1;
             }
-            else if(topFace == Useful.bottomOf(this.face, defaultTop))
+            else if(topFace == Useful.bottomOf(this.getFace(), defaultTop))
             {
                 rv0 = new FaceVertex.Colored(1.0 - vertexIn0.x, 1.0 - vertexIn0.y, vertexIn0.depth, vertexIn0.getColor(this.color));
                 rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -333,7 +333,7 @@ public class RawQuad
 //            vertexIn3.y += QuadFactory.EPSILON;
 //            vertexIn2.y += QuadFactory.EPSILON;
 
-            switch(this.face)
+            switch(this.getFace())
             {
             case UP:
                 setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
@@ -390,7 +390,7 @@ public class RawQuad
 
         public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
         {
-            this.face = side;
+            this.setFace(side);
             return this.setupFaceQuad(tv0, tv1, tv2, tv3, topFace);
         }
 
@@ -419,7 +419,7 @@ public class RawQuad
 
         public RawQuad setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
         {
-            this.face = face;
+            this.setFace(face);
             return this.setupFaceQuad(x0, y0, x1, y1, depth, topFace);
         }
 
@@ -428,7 +428,7 @@ public class RawQuad
          */
         public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
         {
-            this.face = side;
+            this.setFace(side);
             return this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
         }
 
@@ -790,7 +790,7 @@ public class RawQuad
             //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
 
-            return new BakedQuad(vertexData, color, face, textureSprite, lightingMode == LightingMode.SHADED, format);
+            return new BakedQuad(vertexData, color, getFace(), textureSprite, lightingMode == LightingMode.SHADED, format);
 
         }
 
@@ -845,12 +845,30 @@ public class RawQuad
         @Override
         public String toString()
         {
-            String result = "id: " + this.quadID + " face: " + this.face;
+            String result = "id: " + this.quadID + " face: " + this.getFace();
             for(int i = 0; i < getVertexCount(); i++)
             {
                 result += " v" + i + ": " + this.getVertex(i).toString();
                 result += " l" + i + ": " + this.getLineID(i);
             }
             return result;
+        }
+
+        /**
+         * Gets the face to be used for setupFace semantics.  
+         * Is a general facing but does NOT mean poly is actually on that face.
+         */
+        public EnumFacing getFace()
+        {
+            return face;
+        }
+
+        /**
+         * Sets the face to be used for setupFace semantics
+         */
+        public EnumFacing setFace(EnumFacing face)
+        {
+            this.face = face;
+            return face;
         }
     }

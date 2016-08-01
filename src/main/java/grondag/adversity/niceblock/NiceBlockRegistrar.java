@@ -90,7 +90,7 @@ public class NiceBlockRegistrar
     public static final ModelDispatcher MODEL_CSG_TEST = new ModelDispatcherBasic(
             BlockColors.INSTANCE, "colored_stone_0_0",
             new CSGController("colored_stone", 1, BlockRenderLayer.SOLID, true, false));
-    public static final NiceBlockPlus BLOCK_CSG_TEST = new NiceBlockPlus(new ColorHelperPlus(MODEL_CSG_TEST), BaseMaterial.FLEXSTONE, "CSG");
+    public static final CSGBlock BLOCK_CSG_TEST = new CSGBlock(new ColorHelperPlus(MODEL_CSG_TEST), BaseMaterial.FLEXSTONE, "CSG");
 
     
 //    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",

@@ -41,7 +41,7 @@ public class HeightModelFactory extends ModelFactory
           quadInputs.lockUV = true;
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
                 .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
-        quadInputs.face = face;
+        quadInputs.setFace(face);
 
         double height = (myController.getRenderHeight(clientShapeIndex) + 1) / 16.0;
         
