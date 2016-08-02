@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import eu.mihosoft.vrl.v3d.CSGBounds;
 import grondag.adversity.library.Useful;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -271,4 +270,75 @@ public class CSGShape extends LinkedList<RawQuad>
         return retVal;
     }
 
+    /**
+     * Return a new CSG solid representing the union of this csg and the
+     * specified csg.
+     *
+     * <b>Note:</b> Neither this csg nor the specified csg are weighted.
+     *
+     * <blockquote><pre>
+     *    A.union(B)
+     *
+     *    +-------+            +-------+
+     *    |       |            |       |
+     *    |   A   |            |       |
+     *    |    +--+----+   =   |       +----+
+     *    +----+--+    |       +----+       |
+     *         |   B   |            |       |
+     *         |       |            |       |
+     *         +-------+            +-------+
+     * </pre></blockquote>
+     *
+     *
+     * @param csg other csg
+     *
+     * @return union of this csg and the specified csg
+     */
+    public CSGShape union(CSGShape other) {
+    
+        
+        
+        List<RawQuad> inner = new ArrayList<RawQuad>();
+        List<RawQuad> outer = new ArrayList<RawQuad>();
+
+        CSGBounds bounds = other.getBounds();
+
+        this.stream().forEach((p) -> {
+            if (bounds.intersectsWith(p.getAABB())) {
+                inner.add(p);
+            } else {
+                outer.add(p);
+            }
+        });
+        
+        CSGShape result = new CSGShape();
+        
+        if (!inner.isEmpty()) {
+            CSGShape innerCSG = new CSGShape(inner);
+
+            result.addAll(outer);
+            result.addAll(innerCSG.unionClip(other));
+        } else {
+            result.addAll(this);
+            result.addAll(other);
+        }
+
+        return result;
+    }
+
+
+    private CSGShape unionClip(CSGShape other)
+    {
+        CSGNode a = new CSGNode(this.clone());
+        CSGNode b = new CSGNode(other.clone());
+        
+        a.clipTo(b);
+        b.clipTo(a);
+        b.invert();
+        b.clipTo(a);
+        b.invert();
+        a.build(b.allRawQuads());
+
+        return new CSGShape(a.recombinedRawQuads());
+    }
 }

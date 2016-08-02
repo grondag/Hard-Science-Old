@@ -1,4 +1,4 @@
-package eu.mihosoft.vrl.v3d;
+package grondag.adversity.library.model.quadfactory;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;

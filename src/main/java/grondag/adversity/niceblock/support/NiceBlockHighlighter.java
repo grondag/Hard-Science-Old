@@ -50,11 +50,15 @@ public class NiceBlockHighlighter {
     					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
     				}
     
-    				// Draw outline of block boundaries
-    				GlStateManager.color(0.0F, 0.0F, 0.0F, 0.2F);
-                    AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 1, 1).offset(pos.getX(), pos.getY(), pos.getZ());
-                    RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
-                    
+    				// TODO: want to enable this debug feature somehow?
+    				// Draw outline of block boundaries when sneaking
+//    				if(event.getPlayer().isSneaking())
+//    				{
+//        				GlStateManager.color(0.0F, 0.0F, 0.0F, 0.2F);
+//                        AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 1, 1).offset(pos.getX(), pos.getY(), pos.getZ());
+//                        RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2));
+//    				}
+    				
     				GlStateManager.depthMask(true);
     				GlStateManager.enableTexture2D();
     				GlStateManager.disableBlend();

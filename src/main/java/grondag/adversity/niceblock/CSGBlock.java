@@ -22,5 +22,10 @@ public class CSGBlock extends NiceBlockPlus
         return false;
     }
 
+    @Override
+    public boolean needsCustomHighlight()
+    {
+        return true;
+    }
 
 }

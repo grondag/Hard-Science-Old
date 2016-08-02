@@ -38,21 +38,8 @@ import java.util.HashSet;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.ArrayListMultimap;
-
 import gnu.trove.map.hash.TLongObjectHashMap;
-import grondag.adversity.Adversity;
-import net.minecraft.util.EnumFacing;
 
 
 public class CSGNode
