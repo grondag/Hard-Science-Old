@@ -16,6 +16,11 @@ public class Vertex extends Vec3d
     protected final Vec3d normal;
     
     
+    public Vertex(Vec3d point, double u, double v, int color, Vec3d normal)
+    {
+        this(point.xCoord, point.yCoord, point.zCoord, u, v, color, normal);
+    }
+    
     public Vertex(double x, double y, double z, double u, double v, int color)
     {
         this(x, y, z, u, v, color, null);
