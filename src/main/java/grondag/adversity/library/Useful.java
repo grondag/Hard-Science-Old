@@ -23,6 +23,11 @@ public class Useful {
     /** for misc. non-deterministic random number generation */
     public static final Random SALT_SHAKER = new Random();
 	
+    
+    public static double linearInterpolate(double value1, double value2, double location)
+    {
+        return( value1 * (1 - location) + value2 * location);
+    }
 	/** 
 	 * Sorts members of the BlockPos vector so that x is largest and z is smallest.
 	 * Useful when BlockPos represents a volume instead of a position.

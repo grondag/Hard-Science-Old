@@ -57,7 +57,8 @@ public class CSGModelFactory extends ModelFactory
         template.lockUV = true;
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
                 .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
-  
+        template.color = 0xFFFFFFFF;
+
         CSGShape  delta = null;
         CSGShape result = null;
         
@@ -67,11 +68,14 @@ public class CSGModelFactory extends ModelFactory
 //        result = result.union(delta);
         
         //union opposite overlapping coplanar faces created by diff
-        result = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.1, 0.1, 0.1, 0.9, 0.9, 0.9), template));
-        delta = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0.03, 0.5, 0.5, 0.95, 0.7), template));  
-        result = result.difference(delta);
-        delta = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0, 0, 0.4, .2, 1), template));
-        result = result.union(delta);
+//        result = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.1, 0.1, 0.1, 0.9, 0.9, 0.9), template));
+//        delta = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0.03, 0.5, 0.5, 0.95, 0.7), template));  
+//        result = result.difference(delta);
+//        delta = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0.3, 0, 0, 0.4, .2, 1), template));
+//        result = result.union(delta);
+        
+        // cylinder/cone test
+        result = new CSGShape(QuadFactory.makeCylinder(new Vec3d(.5, 0, .5), new Vec3d(.5, 1, .5), 0.5, 0, template));
         
 //        CSGShape quadsA = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0.4, 0.4, 1.0, 0.6, 0.6), template));
 //        template.color = colorMap.getColorMap(EnumColorMap.BORDER);
@@ -99,7 +103,7 @@ public class CSGModelFactory extends ModelFactory
 //        quadsB = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, .4, 1, .4, .65), template));
 //        result = result.difference(quadsB);
         
-        result.recolor();
+    //    result.recolor();
         
 //        for(RawQuad quad : result)
 //        {

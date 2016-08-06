@@ -44,6 +44,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.library.Useful;
+
 public class QuadFactory
 {
     public static final double EPSILON = 0.0000001;
@@ -114,7 +116,12 @@ public class QuadFactory
         return retVal;
     }
     
-    public static List<RawQuad> makeCylinder(Vec3d start, Vec3d end, double startRadius, double endRadius) {
+    //TODO: this is fine for smaller objects, but would likely generate excess polys for big shapes after CSG ops
+    // Also needs better/different texture handling for top and bottom when face diameter is > 1.
+    // So... create a separate version for creating axis-aligned cylinders and cones.  
+    // Also, create paramter for minimum slices to reduce poly count on small model parts when appropriate.
+    // Right now minimum is fixed at 12.
+    public static List<RawQuad> makeCylinder(Vec3d start, Vec3d end, double startRadius, double endRadius, RawQuad template) {
 
 
         double circumference = Math.PI * Math.max(startRadius, endRadius) * 2;
@@ -123,54 +130,76 @@ public class QuadFactory
         while(textureSlices * polysPerTextureSlice < 12) polysPerTextureSlice++;
         int polySlices = textureSlices * polysPerTextureSlice;
 
+        double length = start.distanceTo(end);
+        int raySlices = (int) Math.ceil(length);
         
-        final Vec3d ray = end.subtract(start);
-        final Vec3d axisZ = ray.normalize();
+        final Vec3d axisZ = end.subtract(start).normalize();
         boolean isY = (Math.abs(axisZ.yCoord) > 0.5);
         final Vec3d axisX = new Vec3d(isY ? 1 : 0, !isY ? 1 : 0, 0)
                 .crossProduct(axisZ).normalize();
         final Vec3d axisY = axisX.crossProduct(axisZ).normalize();
-//        Vertex startV = new Vertex(start, axisZ.negated());
-//        Vertex endV = new Vertex(end, axisZ.normalized());
-        List<Vertex> topVertices = new ArrayList<Vertex>(24);
-        List<Vertex> bottomVertices = new ArrayList<Vertex>(24);
+        RawQuad top = new RawQuad(template, polySlices);
+        RawQuad bottom = new RawQuad(template, polySlices);
+        
         List<RawQuad> results = new ArrayList<RawQuad>(48);
 
         for (int i = 0; i < polySlices; i++) {
             double t0 = i / (double) polySlices, t1 = (i + 1) / (double) polySlices;
-            polygons.add(new Polygon(Arrays.asList(
-                    startV,
-                    cylPoint(axisX, axisY, axisZ, ray, start, startRadius, 0, t0, -1),
-                    cylPoint(axisX, axisY, axisZ, ray, start, startRadius, 0, t1, -1)),
-                    properties
-            ));
-            polygons.add(new Polygon(Arrays.asList(
-                    cylPoint(axisX, axisY, axisZ, ray, start, startRadius, 0, t1, 0),
-                    cylPoint(axisX, axisY, axisZ, ray, start, startRadius, 0, t0, 0),
-                    cylPoint(axisX, axisY, axisZ, ray, start, endRadius, 1, t0, 0),
-                    cylPoint(axisX, axisY, axisZ, ray, start, endRadius, 1, t1, 0)),
-                    properties
-            ));
-            polygons.add(new Polygon(
-                    Arrays.asList(
-                            endV,
-                            cylPoint(axisX, axisY, axisZ, ray, start, endRadius, 1, t1, 1),
-                            cylPoint(axisX, axisY, axisZ, ray, start, endRadius, 1, t0, 1)),
-                    properties
-            ));
+
+            for(int j = 0; j < raySlices; j++ )
+            {
+                double rayLength = Math.min(1,  length - j);
+                Vec3d centerStart = start.add(axisZ.scale(j));
+                Vec3d centerEnd = start.add(axisZ.scale(j + rayLength));
+                
+                double quadStartRadius = Useful.linearInterpolate(startRadius, endRadius, (double) j / raySlices );
+                double quadEndRadius = Useful.linearInterpolate(startRadius, endRadius, Math.min(1, (double) (j + 1) / raySlices ));
+
+                double uStart = ((double) (i % polysPerTextureSlice) / polysPerTextureSlice);
+                double u0 = 16.0 * uStart;
+                double u1 = 16.0 * (uStart + 1.0 / polysPerTextureSlice);
+                double v0 = 0;
+                double v1 = 16.0 * rayLength;
+                
+                Vec3d n0 = cylNormal(axisX, axisY, t1);
+                Vec3d n1= cylNormal(axisX, axisY, t0);
+ 
+                
+                RawQuad newQuad = new RawQuad(template);
+                
+                newQuad.setVertex(0, new Vertex(centerStart.add(n0.scale(quadStartRadius)), u0, v0, template.color, n0));
+                newQuad.setVertex(1, new Vertex(centerStart.add(n1.scale(quadStartRadius)), u1, v0, template.color, n1));
+                newQuad.setVertex(2, new Vertex(centerEnd.add(n1.scale(quadEndRadius)), u1, v1, template.color, n1));
+                newQuad.setVertex(3, new Vertex(centerEnd.add(n0.scale(quadEndRadius)), u0, v1, template.color, n0));
+                results.add(newQuad);
+                
+                if(j == 0 || j == raySlices - 1)
+                {
+                    double angle = t0 * Math.PI * 2;
+                    double u = 8.0 + Math.cos(angle) * 8.0;
+                    double v = 8.0 + Math.sin(angle) * 8.0;
+
+                    if(j == 0)
+                    {    
+                        bottom.setVertex(i, new Vertex(centerStart.add(n0.scale(quadStartRadius)), u, v, template.color, null));                
+                    }
+                    if(j == raySlices - 1)
+                    {
+                        top.setVertex(polySlices - i - 1, new Vertex(centerEnd.add(n0.scale(quadEndRadius)), u, v, template.color, null));
+                    }
+                }
+            }
+        
         }
 
-        return polygons;
+        results.addAll(top.toQuads());
+        results.addAll(bottom.toQuads());
+        return results;
     }
 
-    private Vertex cylPoint(
-            Vector3d axisX, Vector3d axisY, Vector3d axisZ, Vector3d ray, Vector3d s,
-            double r, double stack, double slice, double normalBlend) {
-        double angle = slice * Math.PI * 2;
-        Vector3d out = axisX.times(Math.cos(angle)).plus(axisY.times(Math.sin(angle)));
-        Vector3d pos = s.plus(ray.times(stack)).plus(out.times(r));
-        Vector3d normal = out.times(1.0 - Math.abs(normalBlend)).plus(axisZ.times(normalBlend));
-        return new Vertex(pos, normal);
+    private static Vec3d cylNormal(Vec3d axisX, Vec3d axisY, double slice) {
+            double angle = slice * Math.PI * 2;
+            return axisX.scale(Math.cos(angle)).add(axisY.scale(Math.sin(angle)));
     }
     
     //    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)
