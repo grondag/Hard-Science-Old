@@ -181,7 +181,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         IBlockState state = this.worldObj.getBlockState(pos);
         
-        if (state.getBlock() == NiceBlockRegistrar.BLOCK_FLOWING_LAVA)
+        if (state.getBlock() == NiceBlockRegistrar.BLOCK_LAVA)
         {
             return false;
         }
@@ -244,7 +244,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         if (spaces.isEmpty() && !placedLava.isEmpty())// && placedLava.lastEntry().getValue().worldTick < this.worldObj.getWorldTime())
         {
             BlockPos target = placedLava.pollLastEntry().getValue().pos;
-            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.BLOCK_FLOWING_LAVA)
+            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.BLOCK_LAVA)
             {
                 this.worldObj.setBlockState(target, NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState()
                         .withProperty(NiceBlock.META, this.worldObj.getBlockState(target).getValue(NiceBlock.META)));
@@ -260,7 +260,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
             
             
-            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar.BLOCK_FLOWING_LAVA.getDefaultState()
+            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar.BLOCK_LAVA.getDefaultState()
                     .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
             this.placedLava.put((int)distanceSq << 16 | this.counter++, 
                     new LavaPlacement(placement.pos, this.worldObj.getWorldTime() + 60));
@@ -269,7 +269,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             
             // don't spread sideways if can flow down or if already flowing down
             if(addSpaceIfOpen(placement.pos.down(), placement.pos.down())
-                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar.BLOCK_FLOWING_LAVA)
+                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar.BLOCK_LAVA)
             {
 //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
                 return;

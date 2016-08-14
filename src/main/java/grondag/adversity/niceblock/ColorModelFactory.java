@@ -33,7 +33,7 @@ public class ColorModelFactory extends ModelFactory
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         ColorController controller = (ColorController)this.controller;
         
-        cubeInputs.color = colorMap.getColorMap(controller.getRenderLayer() == BlockRenderLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
+        cubeInputs.color = colorMap.getColor(controller.getRenderLayer() == BlockRenderLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
         cubeInputs.textureRotation = controller.getTextureRotationFromShapeIndex(modelState.getShapeIndex(controller.getRenderLayer()));
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getAltTextureFromModelIndex(modelState.getShapeIndex(controller.getRenderLayer()))));
@@ -53,7 +53,7 @@ public class ColorModelFactory extends ModelFactory
         ColorController controller = (ColorController)this.controller;
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
         
-        cubeInputs.color = colorMap.getColorMap(controller.getRenderLayer() == BlockRenderLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
+        cubeInputs.color = colorMap.getColor(controller.getRenderLayer() == BlockRenderLayer.SOLID ? EnumColorMap.BASE : EnumColorMap.HIGHLIGHT);
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 controller.getTextureName(controller.getAltTextureFromModelIndex(modelState.getShapeIndex(controller.getRenderLayer()))));
 

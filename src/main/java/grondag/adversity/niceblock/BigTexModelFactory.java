@@ -65,7 +65,7 @@ public class BigTexModelFactory extends ModelFactory
         
         if(retVal == null)
         {
-			retVal = makeBigTexFace(colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE), faceIndex, face);
+			retVal = makeBigTexFace(colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BASE), faceIndex, face);
             synchronized(faceCache)
             {
                 faceCache.put(cacheKey, retVal);
@@ -85,7 +85,7 @@ public class BigTexModelFactory extends ModelFactory
 		cubeInputs.v1 = 1;
 		cubeInputs.isItem = true;
 		cubeInputs.isOverlay = controller.getRenderLayer() != BlockRenderLayer.SOLID;
-		cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
+		cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BASE);
 		cubeInputs.textureSprite = 
 				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(0));
 

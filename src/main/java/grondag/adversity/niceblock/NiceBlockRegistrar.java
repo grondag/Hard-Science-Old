@@ -68,24 +68,22 @@ public class NiceBlockRegistrar
             new ColorController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
     public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new ColorHelperPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
 
-//    public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColor(4), "cool_basalt_0_0",
-//            new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
-//            new HotBasaltController());
-//    public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
-//
-//    public static final ModelDispatcherBasic MODEL_FLOWING_LAVA = new ModelDispatcherBasic(new NoColor(16), "volcanic_lava_flow_0_0",
-//            new FlowController("volcanic_lava_flow", 1, BlockRenderLayer.SOLID, LightingMode.FULLBRIGHT));
-//    public static final NiceBlock BLOCK_FLOWING_LAVA = (NiceBlock) new FlowingLavaBlock(new FlowHeightHelper(MODEL_FLOWING_LAVA, 16), BaseMaterial.FLEXSTONE, "flowing_lava")
-//        .setLightLevel(3F/15F);
-//        
-//     public static final NiceBlock BLOCK_STATIC_LAVA = (NiceBlock) new StaticLavaBlock(new FlowHeightHelper(MODEL_FLOWING_LAVA, 16), BaseMaterial.FLEXSTONE, "static_lava")
-//        .setLightLevel(3F/15F);
-//     
-//    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",
-//            new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, LightingMode.SHADED));
-//    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowHeightBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt");
-//
-//    public static final NiceBlock BLOCK_COOL_BASALT_FILLER = (NiceBlock) new FlowFillerBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt_filler");
+    public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColor(4), "cool_basalt_0_0",
+            new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
+            new HotBasaltController());
+    public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
+
+    public static final ModelDispatcherBasic MODEL_LAVA = new ModelDispatcherBasic(new NoColor(16), "volcanic_lava_flow_0_0",
+            new FlowController("volcanic_lava_flow", 1, BlockRenderLayer.SOLID, LightingMode.FULLBRIGHT));
+    public static final NiceBlock BLOCK_LAVA = (NiceBlock) new LavaBlock(new FlowHeightHelper(MODEL_LAVA, 16), BaseMaterial.FLEXSTONE, "flowing_lava")
+        .setLightLevel(3F/15F);
+
+     
+    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",
+            new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, LightingMode.SHADED));
+    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowHeightBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt");
+
+    public static final NiceBlock BLOCK_COOL_BASALT_FILLER = (NiceBlock) new FlowFillerBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt_filler");
 
     public static final ModelDispatcher MODEL_CSG_TEST = new ModelDispatcherBasic(
             BlockColors.INSTANCE, "colored_stone_0_0",

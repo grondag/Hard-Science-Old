@@ -83,7 +83,7 @@ public class BorderModelFactory extends ModelFactory
         if(retVal == null)
         {
             ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
-            retVal = makeBorderFace(colorMap.getColorMap(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
+            retVal = makeBorderFace(colorMap.getColor(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
             synchronized(faceCache)
             {
                 faceCache.put(cacheKey, retVal);
@@ -103,7 +103,7 @@ public class BorderModelFactory extends ModelFactory
         cubeInputs.v1 = 16;
         cubeInputs.isItem = true;
         cubeInputs.isOverlay = controller.getRenderLayer() != BlockRenderLayer.SOLID;
-        cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BORDER);
+        cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BORDER);
         // offset 4 is all borders
         cubeInputs.textureSprite = 
                 Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(4));

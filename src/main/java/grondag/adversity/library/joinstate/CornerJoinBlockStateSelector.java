@@ -84,7 +84,7 @@ public class CornerJoinBlockStateSelector
         int shift = 1;
         int localIndex = index - firstIndex;
         
-        CornerJoinBlockState retVal = new CornerJoinBlockState();
+        CornerJoinBlockState retVal = new CornerJoinBlockState(index);
         
         for(EnumFacing face : EnumFacing.values())
         {

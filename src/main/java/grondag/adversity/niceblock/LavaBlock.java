@@ -18,10 +18,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class FlowingLavaBlock extends FlowBlock
+public class LavaBlock extends FlowHeightBlock
 {
 
-    public FlowingLavaBlock(FlowHeightHelper blockModelHelper, BaseMaterial material, String styleName)
+    public LavaBlock(FlowHeightHelper blockModelHelper, BaseMaterial material, String styleName)
     {
         super(blockModelHelper, material, styleName);
     }
@@ -47,7 +47,7 @@ public class FlowingLavaBlock extends FlowBlock
     private IBlockTest testIsThisBlock = new IBlockTest() {
         @Override
         public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos) {
-            return ibs.getBlock() == FlowingLavaBlock.this;
+            return ibs.getBlock() == LavaBlock.this;
         }
     };
     
@@ -56,7 +56,7 @@ public class FlowingLavaBlock extends FlowBlock
         @Override
         public boolean testBlock(IBlockAccess world, IBlockState state, BlockPos pos) {
 
-            if (state.getBlock() == FlowingLavaBlock.this)
+            if (state.getBlock() == LavaBlock.this)
             {
                 return false;
             }

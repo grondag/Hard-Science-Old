@@ -84,7 +84,7 @@ public class MasonryModelFactory extends ModelFactory
        if(inputs == null) return QuadFactory.EMPTY_QUAD_LIST;
        
        CubeInputs cubeInputs = new CubeInputs();
-       cubeInputs.color = colorMap.getColorMap(EnumColorMap.BORDER);
+       cubeInputs.color = colorMap.getColor(EnumColorMap.BORDER);
        cubeInputs.textureRotation = inputs.rotation;
        cubeInputs.rotateBottom = true;
        cubeInputs.u0 = inputs.flipU ? 16 : 0;

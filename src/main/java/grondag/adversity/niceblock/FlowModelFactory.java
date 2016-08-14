@@ -66,7 +66,7 @@ public class FlowModelFactory extends ModelFactory
     {    
        // if(face == EnumFacing.UP) return Collections.emptyList();
         
-        int color = colorProvider.getColor(modelState.getColorIndex()).getColorMap(EnumColorMap.BASE);
+        int color = colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BASE);
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         
 
@@ -77,9 +77,9 @@ public class FlowModelFactory extends ModelFactory
                 // could have multiple threads attempting to colorize same quad
                 synchronized(quad)
                 {
-                    //TODO: put back to normal, make configurable
-                    builder.add(quad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000).createBakedQuad());
-                    //builder.add(quad.recolor(color).createBakedQuad());
+                    //random colors for debug
+//                    builder.add(quad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000).createBakedQuad());
+                    builder.add(quad.recolor(color).createBakedQuad());
                 }
             }    
         }

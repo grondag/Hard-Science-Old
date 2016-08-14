@@ -16,7 +16,7 @@ public class ColorMap
         return this;
     }
     
-    public int getColorMap(EnumColorMap whichColor)
+    public int getColor(EnumColorMap whichColor)
     {
         return colors[whichColor.ordinal()];
     }

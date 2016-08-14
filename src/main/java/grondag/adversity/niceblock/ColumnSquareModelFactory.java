@@ -102,9 +102,9 @@ public class ColumnSquareModelFactory extends ModelFactory
 	    	RawQuad quadInputs = new RawQuad();
 	    	quadInputs.isItem = isItem;
 	        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
-	        quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
+	        quadInputs.color = colorMap.getColor(EnumColorMap.BASE);
 	        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
-	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColorMap(EnumColorMap.LAMP);
+	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColor(EnumColorMap.LAMP);
 	        quadInputs.lockUV = true;
 	        quadInputs.lightingMode = myController.modelType == ColumnSquareController.ModelType.LAMP_BASE 
 	                ? LightingMode.FULLBRIGHT 

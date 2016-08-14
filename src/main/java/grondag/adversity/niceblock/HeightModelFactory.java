@@ -37,7 +37,7 @@ public class HeightModelFactory extends ModelFactory
         long clientShapeIndex = modelState.getShapeIndex(controller.getRenderLayer());
         RawQuad quadInputs = new RawQuad();
         ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
-        quadInputs.color = colorMap.getColorMap(EnumColorMap.BASE);
+        quadInputs.color = colorMap.getColor(EnumColorMap.BASE);
           quadInputs.lockUV = true;
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
                 .getAtlasSprite(controller.getTextureName(myController.getAltTextureFromModelIndex(clientShapeIndex)));
