@@ -83,153 +83,118 @@ public class ModelStateContainer
     
     public abstract static class ModelStateComponent<T>
     {
-//        protected final T value;
-//        
-//        public ModelStateComponent(T valueIn)
-//        {
-//            this.value = valueIn;
-//        }
-//        
-//
-//        public T getValue()
-//        {
-//            return this.value;
-//        }
+        protected final T value;
         protected final ModelStateComponentType componentType;
+
         
-        protected ModelStateComponent(ModelStateComponentType type)
+        public ModelStateComponent(ModelStateComponentType type, T valueIn)
         {
+            this.value = valueIn;
             this.componentType = type;
         }
         
+
+        public T getValue()
+        {
+            return this.value;
+        }
+                
         abstract protected Class<T> getType();
-        abstract public int getBitLength();
-        abstract public long toBits(T value);
-        abstract protected T getValueFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos);
-        abstract protected T getValueFromBits(long bits);
+        abstract public long toBits();
         public ModelStateComponentType getComponentType() { return this.componentType; }
+    }
+    
+    public abstract static class ModelStateComponentFactory<T>
+    {
+        abstract public ModelStateComponent<T> getStateFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos);
+        abstract public ModelStateComponent<T> getStateFromBits(long bits);
     }
     
     public enum ModelStateComponentType
     {
-        AXIS(ModelAxis.INSTANCE),
-        CORNER_JOIN(ModelCornerJoinState.INSTANCE);
+        AXIS(ModelAxis.KEY, new ModelAxisFactory(), 2),
+        CORNER_JOIN(ModelCornerJoinState.KEY, new ModelCornerJoinStateFactory(),
+                Integer.SIZE - Integer.numberOfLeadingZeros(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT));
         
         private final ModelStateComponent<?> instance;
-
-        private ModelStateComponentType(ModelStateComponent<?> instance)
+        private final ModelStateComponentFactory<?> factory;
+        protected final int bitLength;
+        protected final long bitMask;
+        
+        private ModelStateComponentType(ModelStateComponent<?> instance, ModelStateComponentFactory<?> factory, int bitLength)
         {
             this.instance = instance;
+            this.factory = factory;
+            this.bitLength = bitLength;
+            long mask = 0L;
+            for(int i = 0; i < bitLength; i++)
+            {
+                mask |= (1L << i);
+            }
+            this.bitMask = mask;
         }
         
-        public ModelStateComponent<?> getInstance()
-        {
-            return this.instance;
-        }
+        public ModelStateComponent<?> getInstance() { return this.instance; }
+        public ModelStateComponentFactory<?> getFactory() { return this.factory; }
+        public int getBitLength() { return bitLength; }
+        public long getBitMask() { return bitMask; }
     }
     
     public static class ModelAxis extends ModelStateComponent<EnumFacing.Axis>
     {
-        public static final ModelAxis INSTANCE = new ModelAxis(ModelStateComponentType.AXIS);
+        public static final ModelAxis KEY = new ModelAxis(null);
 
-        private ModelAxis(ModelStateComponentType type)
+        public ModelAxis(Axis valueIn)
         {
-            super(type);
-        }
-        
-        @Override
-        public ModelStateComponentType getComponentType()
-        {
-            return ModelStateComponentType.AXIS;
-        }
-        
-//        public ModelAxis(Axis valueIn)
-//        {
-//            super(valueIn);
-//        }
-
-        @Override
-        public int getBitLength()
-        {
-            return 2;
+            super(ModelStateComponentType.AXIS, valueIn);
         }
 
         @Override
-        public long toBits(EnumFacing.Axis value)
+        public long toBits()
         {
-            return value.ordinal();
-        }
-
-        @Override
-        protected Axis getValueFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        protected Axis getValueFromBits(long bits)
-        {
-            // TODO Auto-generated method stub
-            return null;
+            return this.value.ordinal();
         }
 
         @Override
         protected Class<Axis> getType()
         {
-            return EnumFacing.Axis.class;
+            return null;
         }
-
 
     }
     
+    public static class ModelAxisFactory extends ModelStateComponentFactory<EnumFacing.Axis>
+    {
 
+        @Override
+        public ModelAxis getStateFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public ModelAxis getStateFromBits(long bits)
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+    }
+    
     public static class ModelCornerJoinState extends ModelStateComponent<CornerJoinBlockState>
     {
-        public static final ModelCornerJoinState INSTANCE = new ModelCornerJoinState(ModelStateComponentType.CORNER_JOIN);
+        public static final ModelCornerJoinState KEY = new ModelCornerJoinState(null);
         
-        private static final int CORNER_JOIN_BIT_LENGTH = Integer.SIZE - Integer.numberOfLeadingZeros(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
-
-        private ModelCornerJoinState(ModelStateComponentType type)
+        public ModelCornerJoinState(CornerJoinBlockState valueIn)
         {
-            super(type);
+            super(ModelStateComponentType.CORNER_JOIN, valueIn);
         }
 
         @Override
-        public ModelStateComponentType getComponentType()
+        public long toBits()
         {
-            return ModelStateComponentType.CORNER_JOIN;
-        }
-        
-//        public ModelCornerJoinState(CornerJoinBlockState valueIn)
-//        {
-//            super(valueIn);
-//            // TODO Auto-generated constructor stub
-//        }
-
-        @Override
-        public int getBitLength()
-        {
-            return CORNER_JOIN_BIT_LENGTH;
-        }
-
-        @Override
-        public long toBits(CornerJoinBlockState value)
-        {
-            return value.getIndex();
-        }
-
-        @Override
-        protected CornerJoinBlockState getValueFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
-        {
-            NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(test);
-            return CornerJoinBlockStateSelector.getJoinState(CornerJoinBlockStateSelector.findIndex(tests));
-        }
-
-        @Override
-        protected CornerJoinBlockState getValueFromBits(long bits)
-        {
-            return CornerJoinBlockStateSelector.getJoinState((int) bits);
+            return this.value.getIndex();
         }
 
         @Override
@@ -240,9 +205,26 @@ public class ModelStateContainer
         
     }
     
+    public static class ModelCornerJoinStateFactory extends ModelStateComponentFactory<CornerJoinBlockState>
+    {
+        @Override
+        public ModelCornerJoinState getStateFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+        {
+            NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(test);
+            return new ModelCornerJoinState(CornerJoinBlockStateSelector.getJoinState(CornerJoinBlockStateSelector.findIndex(tests)));
+        }
+
+        @Override
+        public ModelCornerJoinState getStateFromBits(long bits)
+        {
+            return new ModelCornerJoinState(CornerJoinBlockStateSelector.getJoinState((int) bits));
+        }
+    }
+
     public static class ModelStateSet
     {
         private final int[] typeIndexes = new int[ModelStateComponentType.values().length];
+        private final int[] shiftBits = new int[ModelStateComponentType.values().length];
         private final int typeCount;
         public static final int NOT_PRESENT = -1;
         
@@ -256,9 +238,13 @@ public class ModelStateContainer
             }
             
             int counter = 0;
+            int shift = 0;
             for(ModelStateComponentType c : components)
             {
                 typeIndexes[c.ordinal()] = counter++;
+
+                shiftBits[c.ordinal()] = shift;
+                shift += c.getBitLength();
             }
         }
         
@@ -271,17 +257,42 @@ public class ModelStateContainer
         {
             return typeIndexes[type.ordinal()];
         }
+        
+        public int getBitShiftForType(ModelStateComponentType type)
+        {
+            return shiftBits[typeIndexes[type.ordinal()]];
+        }
+        
+        public long computeKey(ModelStateComponent<?>... components)
+        {
+            long key = 0L;
+            for(ModelStateComponent<?> c : components)
+            {
+                if(getIndexForType(c.getComponentType()) != NOT_PRESENT)
+                {
+                    key |= (c.toBits() << getBitShiftForType(c.getComponentType()));
+                }
+            }
+            return key;
+        }
     }
     
     public static class ModelStateSetValue
     {
         private final ModelStateSet stateSet;
         private final Object[] values;
+        private final long key;
         
-        public ModelStateSetValue(ModelStateSet stateSet)
+        public ModelStateSetValue(ModelStateSet stateSet, ModelStateComponent<?>... components)
         {
             this.stateSet = stateSet;
             values = new Object[stateSet.typeCount];
+            for(ModelStateComponent<?> c : components)
+            {
+                int index = stateSet.getIndexForType(c.getComponentType());
+                values[index] = c;
+            }
+            key = stateSet.computeKey(components);
         }
         
         public <V>V getValue(ModelStateComponent<V> type)
@@ -290,15 +301,10 @@ public class ModelStateContainer
             if(index == ModelStateSet.NOT_PRESENT) return null;
             return type.getType().cast(values[index]);
         }
-        
+
         public long getKey()
         {
-            return 0L;
-        }
-        
-        public long getSubKey(ModelStateSet SubSet)
-        {
-            return 0L;
+            return key;
         }
     }
     
@@ -306,6 +312,6 @@ public class ModelStateContainer
     {
         ModelStateSet set = new ModelStateSet(ModelStateComponentType.AXIS, ModelStateComponentType.CORNER_JOIN);
         ModelStateSetValue value = new ModelStateSetValue(set);
-        EnumFacing.Axis axis = value.getValue(ModelAxis.INSTANCE);
+        EnumFacing.Axis axis = value.getValue(ModelAxis.KEY);
     }
 }
