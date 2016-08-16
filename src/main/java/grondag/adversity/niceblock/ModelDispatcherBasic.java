@@ -12,10 +12,10 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import net.minecraft.block.state.IBlockState;

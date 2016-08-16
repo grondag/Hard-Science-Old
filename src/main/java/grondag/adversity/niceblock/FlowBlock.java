@@ -2,8 +2,8 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;

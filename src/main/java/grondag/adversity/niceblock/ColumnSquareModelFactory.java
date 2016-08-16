@@ -11,10 +11,10 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.IColorProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.modelstate.ModelState;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;

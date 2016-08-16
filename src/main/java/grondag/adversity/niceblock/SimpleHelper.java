@@ -2,7 +2,7 @@ package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelState;
+import grondag.adversity.niceblock.modelstate.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;

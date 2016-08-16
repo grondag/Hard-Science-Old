@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.base;
+package grondag.adversity.niceblock.modelstate;
 
 import java.math.BigInteger;
 import net.minecraft.nbt.NBTTagCompound;

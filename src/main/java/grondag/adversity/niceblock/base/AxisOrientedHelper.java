@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.niceblock.ColorHelperPlus;
+import grondag.adversity.niceblock.modelstate.ModelState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;

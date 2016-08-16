@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;

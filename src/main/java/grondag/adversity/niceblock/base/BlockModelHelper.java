@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.niceblock.modelstate.ModelState;
 //import mcp.mobius.waila.api.IWailaConfigHandler;
 //import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.state.IBlockState;

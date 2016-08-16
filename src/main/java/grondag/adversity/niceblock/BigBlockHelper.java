@@ -6,9 +6,9 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelState;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
+import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.niceblock.support.NicePlacement;
 

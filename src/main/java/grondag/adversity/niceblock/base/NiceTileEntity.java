@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.niceblock.modelstate.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;

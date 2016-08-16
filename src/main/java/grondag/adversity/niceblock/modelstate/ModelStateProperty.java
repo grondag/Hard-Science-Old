@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.base;
+package grondag.adversity.niceblock.modelstate;
 
 import net.minecraftforge.common.property.IUnlistedProperty;
 
