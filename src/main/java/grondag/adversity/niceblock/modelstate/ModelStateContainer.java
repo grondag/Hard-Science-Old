@@ -1,13 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
-import java.util.EnumMap;
-import java.util.EnumSet;
-
-import grondag.adversity.niceblock.modelstate.ModelAxisFactory.ModelAxis;
-import grondag.adversity.niceblock.modelstate.AbstractModelStateComponentFactory.ModelStateComponent;
-import grondag.adversity.niceblock.support.BlockTests;
-import grondag.adversity.niceblock.support.BlockTests.TestForBigBlockMatch;
-import net.minecraft.util.EnumFacing;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 
 /**
  * axis
@@ -53,7 +46,7 @@ public class ModelStateContainer
     public static void testDongle()
     {
         ModelStateSet set = new ModelStateSet(ModelStateComponentType.AXIS, ModelStateComponentType.CORNER_JOIN);
-        ModelStateSetValue value = new ModelStateSetValue(set);
-        EnumFacing.Axis axis = value.getValue(ModelAxisFactory.INSTANCE);
+        ModelStateSetValue value = set.getSetValue(ModelAxis.X);
+        ModelAxis axis = (ModelAxis) value.getValue(ModelStateComponentType.AXIS);
     }
 }

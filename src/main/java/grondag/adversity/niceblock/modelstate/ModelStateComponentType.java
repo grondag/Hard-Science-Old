@@ -1,24 +1,24 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-
 public enum ModelStateComponentType
 {
-    AXIS(ModelAxisFactory.INSTANCE, 2),
-    CORNER_JOIN(ModelCornerJoinStateFactory.INSTANCE,
-            Integer.SIZE - Integer.numberOfLeadingZeros(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT));
+    AXIS(ModelAxisAdapter.INSTANCE),
+    CORNER_JOIN(ModelCornerJoinStateAdapter.INSTANCE);
     
     //private final ModelStateComponentFactory<?>.ModelStateComponent instance;
-    private final AbstractModelStateComponentFactory<?> factory;
+    private final ModelStateComponentFactory<?> factory;
+    private final AbstractModelStateComponentAdapter<?> adapter;
     protected final int bitLength;
     protected final long bitMask;
     
-    private ModelStateComponentType(AbstractModelStateComponentFactory<?> factory, int bitLength)
+    private <T extends IModelStateComponent<?>> ModelStateComponentType(AbstractModelStateComponentAdapter<T> adapter)
     {
         //this.instance = instance;
-        this.factory = factory;
-        this.bitLength = bitLength;
+        
+        this.factory = new ModelStateComponentFactory<T>(adapter);
+        this.adapter = adapter;
         long mask = 0L;
+        bitLength = Long.SIZE - Long.numberOfLeadingZeros(adapter.getValueCount());
         for(int i = 0; i < bitLength; i++)
         {
             mask |= (1L << i);
@@ -27,7 +27,8 @@ public enum ModelStateComponentType
     }
     
    // public ModelStateComponentFactory<?>.ModelStateComponent getInstance() { return this.instance; }
-    public AbstractModelStateComponentFactory<?> getFactory() { return this.factory; }
+    public ModelStateComponentFactory<?> getFactory() { return this.factory; }
+    public AbstractModelStateComponentAdapter<?> getAdapter() { return this.adapter; }
     public int getBitLength() { return bitLength; }
     public long getBitMask() { return bitMask; }
 }

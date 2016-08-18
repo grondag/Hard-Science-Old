@@ -1,5 +1,11 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.library.IBlockTest;
+import grondag.adversity.niceblock.base.NiceBlock;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+
 public class ModelStateSet
 {
     private final int[] typeIndexes = new int[ModelStateComponentType.values().length];
@@ -37,21 +43,67 @@ public class ModelStateSet
         return typeIndexes[type.ordinal()];
     }
     
-    public int getBitShiftForType(ModelStateComponentType type)
-    {
-        return shiftBits[typeIndexes[type.ordinal()]];
-    }
-    
-    public long computeKey(AbstractModelStateComponentFactory<?>.ModelStateComponent... components)
+    public long computeKey(IModelStateComponent<?>... components)
     {
         long key = 0L;
-        for(AbstractModelStateComponentFactory<?>.ModelStateComponent c : components)
+        for(IModelStateComponent<?> c : components)
         {
-            if(getIndexForType(c.getComponentType()) != NOT_PRESENT)
+            int typeIndex = getIndexForType(c.getComponentType());
+            if(typeIndex != NOT_PRESENT)
             {
-                key |= (c.toBits() << getBitShiftForType(c.getComponentType()));
+                key |= (c.getBits() << shiftBits[typeIndex]);
             }
         }
         return key;
+    }
+    
+    public ModelStateSetValue getSetValue(IModelStateComponent<?>... components)
+    {
+        return new ModelStateSetValue(components);
+    }
+    
+    public ModelStateSetValue getSetValueFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        //TODO
+        return null;
+        //return new ModelStateSetValue(components);
+    }
+
+    public ModelStateSetValue getSetValueFromBits(long bits)
+    {
+        //TODO
+        return null;
+        //return new ModelStateSetValue(components);
+    }
+
+    public class ModelStateSetValue
+    {
+      //  private final ModelStateSet stateSet;
+        private final Object[] values;
+        private final long key;
+        
+        private ModelStateSetValue(IModelStateComponent<?>... components)
+        {
+   //         this.stateSet = stateSet;
+            values = new Object[typeCount];
+            for(IModelStateComponent<?> c : components)
+            {
+                int index = getIndexForType(c.getComponentType());
+                values[index] = c;
+            }
+            key = computeKey(components);
+        }
+        
+        public IModelStateComponent<?> getValue(ModelStateComponentType type)
+        {
+            int index = getIndexForType(type);
+            if(index == ModelStateSet.NOT_PRESENT) return null;
+            return type.getAdapter().getType().cast(values[index]);
+        }
+        
+        public long getKey()
+        {
+            return key;
+        }
     }
 }
