@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.modelstate;
 
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -12,17 +14,39 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public enum ModelStateSet
+public class ModelStateSet
 {
-    TEST(ModelStateGroup.INNER_SHAREDCOLOR_TEX4_ROTATE, ModelStateGroup.OUTER_CJ_SHAREDCOLOR_TEX2);
-    public static final int NOT_PRESENT = -1;
+    private static HashMap<BitSet, ModelStateSet> stateSets = new HashMap<BitSet, ModelStateSet>();
+
+    private static final int NOT_PRESENT = -1;
 
     private final int[] typeIndexes = new int[ModelStateComponents.MODEL_STATE_COMPONENTS.length];
     private final int[] shiftBits = new int[ModelStateComponents.MODEL_STATE_COMPONENTS.length];
     private final ModelStateComponent<?,?>[] includedTypes;
     private final int typeCount;
     private final ModelStateGroup[] groups;
-    private final int groupIndexes[] = new int[ModelStateGroup.values().length];
+    private final int[] groupIndexes;
+    
+    public static ModelStateSet find(ModelStateGroup... groups)
+    {
+        BitSet key = new BitSet();
+        for(ModelStateGroup g : groups)
+        {
+            key.set(g.getOrdinal());
+        }
+        
+        ModelStateSet result; 
+        synchronized(stateSets)
+        {
+            result = stateSets.get(key);
+            if(result == null)
+            {
+                result = new ModelStateSet(groups);
+                stateSets.put(key, result);
+            }
+        }
+        return result;
+    }
     
     private LoadingCache<Long, ModelStateSetValue> valueCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(new CacheLoader<Long, ModelStateSetValue>()
     {
@@ -42,16 +66,23 @@ public enum ModelStateSet
     {
         // groups and group lookups used by SetValue to compute keys for groups
         this.groups = groups;
-        for(int i = 0; i < ModelStateGroup.values().length; i++)
+
+        // NB: getGroupCount() *may* change if groups are added after this, but all groups
+        // that are part of this set must, by definition, have been created before this call
+        // and their ordinals will all be above the current max and should never be used
+        // as parameters to this set.
+        this.groupIndexes = new int[ModelStateGroup.getGroupCount()];
+
+        for(int i = 0; i < groupIndexes.length; i++)
         {
             groupIndexes[i] = NOT_PRESENT;
         }
         int groupCounter = 0;
         for(ModelStateGroup g : groups)
         {
-            if(groupIndexes[g.ordinal()] == NOT_PRESENT)
+            if(groupIndexes[g.getOrdinal()] == NOT_PRESENT)
             {
-                groupIndexes[g.ordinal()] = groupCounter++;
+                groupIndexes[g.getOrdinal()] = groupCounter++;
             }
         }
         
@@ -179,7 +210,7 @@ public enum ModelStateSet
          */
         public long getGroupKey(ModelStateGroup group)
         {
-            return groupKeys[groupIndexes[group.ordinal()]];
+            return groupKeys[groupIndexes[group.getOrdinal()]];
         }
     }
 }

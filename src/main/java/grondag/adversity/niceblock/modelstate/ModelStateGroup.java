@@ -1,19 +1,50 @@
 package grondag.adversity.niceblock.modelstate;
 
-public enum ModelStateGroup
+import java.util.BitSet;
+import java.util.HashMap;
+
+
+public class ModelStateGroup
 {
-    OUTER_CJ_SHAREDCOLOR_TEX2(ModelStateComponents.TEXTURE_INNER_2, ModelStateComponents.CORNER_JOIN, ModelStateComponents.ROTATION_OUTER_NO),
-    INNER_SHAREDCOLOR_TEX4_ROTATE(ModelStateComponents.TEXTURE_INNER_4, ModelStateComponents.ROTATION_OUTER_YES);
+    private static HashMap<BitSet, ModelStateGroup> groups = new HashMap<BitSet, ModelStateGroup>();
+    private static int nextOrdinal = 0;
     
-    private ModelStateComponent<?,?>[] components;
+    public static int getGroupCount() { return nextOrdinal; }
+    
+    public static ModelStateGroup find(ModelStateComponent<?,?>... components)
+    {
+        BitSet key = new BitSet();
+        for(ModelStateComponent<?,?> c : components)
+        {
+            key.set(c.getOrdinal());
+        }
+        
+        ModelStateGroup result; 
+        synchronized(groups)
+        {
+            result = groups.get(key);
+            if(result == null)
+            {
+                result = new ModelStateGroup(components);
+                groups.put(key, result);
+            }
+        }
+        return result;
+    }
+    
+    private final ModelStateComponent<?,?>[] components;
+    private final int ordinal;
     
     private ModelStateGroup(ModelStateComponent<?, ?>... components)
     {
         this.components = components;
+        this.ordinal = nextOrdinal++;
     }
     
     public ModelStateComponent<?,?>[] getComponents()
     {
         return components;
     }
+    
+    public int getOrdinal() { return this.ordinal; }
 }
