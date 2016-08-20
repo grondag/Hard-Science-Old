@@ -10,14 +10,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class ModelCornerJoinStateAdapter extends AbstractModelStateComponentAdapter<CornerJoinBlockState>
+public class ModelCornerJoinStateComponent extends ModelStateComponent<CornerJoinBlockState, CornerJoinBlockState>
 {
-    public static final ModelCornerJoinStateAdapter INSTANCE = new ModelCornerJoinStateAdapter();
-    
-    @Override
-    public Class<CornerJoinBlockState> getType()
+    public ModelCornerJoinStateComponent(int ordinal)
     {
-        return CornerJoinBlockState.class;
+        super(ordinal);
     }
 
     @Override
@@ -37,5 +34,17 @@ public class ModelCornerJoinStateAdapter extends AbstractModelStateComponentAdap
     public CornerJoinBlockState createValueFromBits(long bits)
     {
         return CornerJoinBlockStateSelector.getJoinState((int) bits);
+    }
+
+    @Override
+    public Class<CornerJoinBlockState> getStateType()
+    {
+        return CornerJoinBlockState.class;
+    }
+
+    @Override
+    public Class<CornerJoinBlockState> getValueType()
+    {
+        return CornerJoinBlockState.class;
     }
 }

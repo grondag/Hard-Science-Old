@@ -1,31 +1,42 @@
 package grondag.adversity.niceblock.modelstate;
 
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 
-public enum ModelAxis implements IModelStateComponent<ModelAxis>
+public class ModelAxis implements IModelStateValue<ModelAxis, EnumFacing.Axis>
 {
-    X(EnumFacing.Axis.X),
-    Y(EnumFacing.Axis.Y),
-    Z(EnumFacing.Axis.Z);
+    public static final ModelAxis X = new ModelAxis(EnumFacing.Axis.X);
+    public static final ModelAxis Y = new ModelAxis(EnumFacing.Axis.Y);
+    public static final ModelAxis Z = new ModelAxis(EnumFacing.Axis.Z);
+    private static final ModelAxis[] LOOKUP = {X, Y, Z};
     
-    private final EnumFacing.Axis axis;
-
-    private ModelAxis(EnumFacing.Axis axis)
+    public static ModelAxis fromEnum(EnumFacing.Axis axis)
     {
-        this.axis = axis;
+        return LOOKUP[axis.ordinal()];
     }
     
-    public EnumFacing.Axis getAxis() { return this.axis; }
+    private final Axis axis;
 
-    @Override
-    public ModelStateComponentType getComponentType()
+    ModelAxis(EnumFacing.Axis axis)
     {
-        return ModelStateComponentType.AXIS;
+        this.axis = axis;
     }
 
     @Override
     public long getBits()
     {
-        return this.ordinal();
+        return axis.ordinal();
+    }
+
+    @Override
+    public Axis getValue()
+    {
+        return this.axis;
+    }
+
+    @Override
+    public ModelStateComponent<ModelAxis, Axis> getComponentType()
+    {
+        return ModelStateComponents.AXIS;
     }
 }

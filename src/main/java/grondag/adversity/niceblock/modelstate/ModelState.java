@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.modelstate;
 
 import java.math.BigInteger;
+
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockRenderLayer;
 
@@ -13,6 +15,8 @@ public class ModelState
     private int colorIndex = 0;
     private long[] shapeIndex = new long[BlockRenderLayer.values().length];
     private int persistenceIndex = -1;
+    
+    public ModelStateSetValue stateValue;
     
     public void writeToNBT(NBTTagCompound tag) 
     {

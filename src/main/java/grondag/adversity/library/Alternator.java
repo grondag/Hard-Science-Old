@@ -18,9 +18,10 @@ import net.minecraft.util.math.BlockPos;
  * enough away to see 32 blocks repeat. The interface hides the implementation,
  * so we can change this later if it becomes a problem.
  */
-public class Alternator implements IAlternator {
+public class Alternator implements IAlternator  {
 
 	private final byte[][][] mix = new byte[32][32][32];
+	private final int alternateCount;
 
 	/** lightweight, special-case handler for 0 alternates */
 	private static final UnAlternator noAlternative = new UnAlternator();
@@ -50,6 +51,7 @@ public class Alternator implements IAlternator {
 	 * getAlternator instead.
 	 */
 	private Alternator(int alternateCount) {
+	    this.alternateCount = alternateCount;
 		final Random r = new Random(471958271);
 		for (int i = 0; i < 32; i++) {
 			for (int j = 0; j < 32; j++) {
@@ -79,6 +81,12 @@ public class Alternator implements IAlternator {
 		return mix[pos.getX() & 31][pos.getY() & 31][pos.getZ() & 31];
 	}
 
+	@Override
+	public int getAlternateCount()
+	{
+	    return this.alternateCount;
+	}
+
 	/**
 	 * Handles special case of no alternates
 	 */
@@ -87,5 +95,12 @@ public class Alternator implements IAlternator {
 		public int getAlternate(BlockPos pos) {
 			return 0;
 		}
+
+        @Override
+        public int getAlternateCount()
+        {
+            return 1;
+        }
 	}
+
 }

@@ -10,4 +10,5 @@ public interface IAlternator {
 	 * is determined when you retrieve the object with getAlternator().
 	 */
 	int getAlternate(BlockPos pos);
+	int getAlternateCount();
 }
