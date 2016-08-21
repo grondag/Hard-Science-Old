@@ -1,22 +1,22 @@
 package grondag.adversity.niceblock.color;
 
-public class FixedColors implements IColorProvider
+public class FixedColorMapProvider implements IColorMapProvider
 {
     private final ColorMap[] COLORS;
 
-    public FixedColors(ColorMap... colors)
+    public FixedColorMapProvider(ColorMap... colors)
     {
         COLORS = colors;
     }
     
     @Override
-    public int getColorCount()
+    public int getColorMapCount()
     {
         return COLORS.length;
     }
 
     @Override
-    public ColorMap getColor(int colorIndex)
+    public ColorMap getColorMap(int colorIndex)
     {
         return COLORS[Math.max(0, Math.min(COLORS.length-1, colorIndex))];
     }

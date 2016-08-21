@@ -12,7 +12,7 @@ import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelState;
 
@@ -74,12 +74,12 @@ public class ColumnSquareModelFactory extends ModelFactory
     }
 
     @Override
-    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
+    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorMapProvider colorProvider, EnumFacing face) 
     {
         return makeFaceQuads(modelState, colorProvider, face, false); 
     }
     
-    private List<BakedQuad> makeFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face, boolean isItem) 
+    private List<BakedQuad> makeFaceQuads(ModelState modelState, IColorMapProvider colorProvider, EnumFacing face, boolean isItem) 
     {
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
@@ -101,7 +101,7 @@ public class ColumnSquareModelFactory extends ModelFactory
         {
 	    	RawQuad quadInputs = new RawQuad();
 	    	quadInputs.isItem = isItem;
-	        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
+	        ColorMap colorMap = colorProvider.getColorMap(modelState.getColorIndex());
 	        quadInputs.color = colorMap.getColor(EnumColorMap.BASE);
 	        int cutColor = myController.modelType == ColumnSquareController.ModelType.NORMAL 
 	                ? QuadFactory.shadeColor(quadInputs.color, 0.85F, false) : colorMap.getColor(EnumColorMap.LAMP);
@@ -511,7 +511,7 @@ public class ColumnSquareModelFactory extends ModelFactory
     }    
     
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
+    public List<BakedQuad> getItemQuads(ModelState modelState, IColorMapProvider colorProvider)
     {
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)

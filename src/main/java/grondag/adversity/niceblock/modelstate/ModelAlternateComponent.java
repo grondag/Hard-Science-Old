@@ -14,7 +14,7 @@ public class ModelAlternateComponent extends ModelStateComponent<ModelInteger, I
 
     public ModelAlternateComponent(int ordinal, int alternateCount)
     {
-        super(ordinal);
+        super(ordinal, alternateCount > 1);
         alternator = Alternator.getAlternator(alternateCount);
     }
 

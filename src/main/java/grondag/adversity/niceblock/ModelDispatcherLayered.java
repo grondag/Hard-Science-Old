@@ -9,7 +9,7 @@ import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -59,12 +59,12 @@ public class ModelDispatcherLayered extends ModelDispatcher
     
     private final ModelController controllerPrimary;
     
-    public ModelDispatcherLayered(IColorProvider colorProvider, String particleTextureName, ModelController ... controllersIn)
+    public ModelDispatcherLayered(IColorMapProvider colorProvider, String particleTextureName, ModelController ... controllersIn)
     {
         super(colorProvider, particleTextureName);
         
         this.controllerPrimary = controllersIn[0];
-        this.itemModels = new SimpleItemBlockModel[colorProvider.getColorCount()];
+        this.itemModels = new SimpleItemBlockModel[colorProvider.getColorMapCount()];
         for(ModelController cont : controllersIn)
         {
             if(this.controllers[cont.getRenderLayer().ordinal()] != null)

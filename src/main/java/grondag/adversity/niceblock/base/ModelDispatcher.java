@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.model.ItemModelDelegate;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -28,11 +28,11 @@ public abstract class ModelDispatcher implements IBakedModel //, IBlockColor
 {
 
     protected final String resourceName = UUID.randomUUID().toString();
-    protected final IColorProvider colorProvider;
+    protected final IColorMapProvider colorProvider;
     protected final String particleTextureName;
     protected TextureAtlasSprite particleTexture;
     
-    public ModelDispatcher(IColorProvider colorProvider, String particleTextureName)
+    public ModelDispatcher(IColorMapProvider colorProvider, String particleTextureName)
     {
         this.colorProvider = colorProvider;
         this.particleTextureName = "adversity:blocks/" + particleTextureName;
@@ -60,7 +60,7 @@ public abstract class ModelDispatcher implements IBakedModel //, IBlockColor
         return Adversity.MODID + ":" + resourceName;
     }
 
-    public IColorProvider getColorProvider()
+    public IColorMapProvider getColorProvider()
     {
         return colorProvider;
     }

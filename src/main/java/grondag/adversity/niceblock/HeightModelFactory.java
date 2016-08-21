@@ -9,7 +9,7 @@ import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelState;
 import net.minecraft.client.Minecraft;
@@ -29,14 +29,14 @@ public class HeightModelFactory extends ModelFactory
 
 
     @Override
-    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face)
+    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorMapProvider colorProvider, EnumFacing face)
     {
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         long clientShapeIndex = modelState.getShapeIndex(controller.getRenderLayer());
         RawQuad quadInputs = new RawQuad();
-        ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
+        ColorMap colorMap = colorProvider.getColorMap(modelState.getColorIndex());
         quadInputs.color = colorMap.getColor(EnumColorMap.BASE);
           quadInputs.lockUV = true;
         quadInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
@@ -87,7 +87,7 @@ public class HeightModelFactory extends ModelFactory
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
+    public List<BakedQuad> getItemQuads(ModelState modelState, IColorMapProvider colorProvider)
     {
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)

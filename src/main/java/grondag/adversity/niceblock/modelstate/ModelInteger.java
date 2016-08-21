@@ -1,30 +1,23 @@
 package grondag.adversity.niceblock.modelstate;
 
-public class ModelInteger implements IModelStateValue<ModelInteger, Integer>
+public class ModelInteger extends ModelStateValue<ModelInteger, Integer>
 {
-    private final int value;
-    private final ModelStateComponent<ModelInteger, Integer> type;
+    private final ModelStateComponent<ModelInteger, Integer> component;
     
     public ModelInteger(ModelStateComponent<ModelInteger, Integer> type, int value)
     {
-        this.type = type;
-        this.value = value;
+        super(value);
+        this.component = type;
     }
     @Override
-    public ModelStateComponent<ModelInteger, Integer> getComponentType()
+    public ModelStateComponent<ModelInteger, Integer> getComponent()
     {
-        return type;
-    }
-
-    @Override
-    public Integer getValue()
-    {
-        return value;
+        return component;
     }
 
     @Override
     public long getBits()
     {
-        return value;
+        return this.value;
     }
 }

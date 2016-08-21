@@ -9,7 +9,7 @@ import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelState;
 
@@ -69,7 +69,7 @@ public class BorderModelFactory extends ModelFactory
     }
     
     @Override
-    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
+    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorMapProvider colorProvider, EnumFacing face) 
     {
     	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
     	
@@ -83,7 +83,7 @@ public class BorderModelFactory extends ModelFactory
 
         if(retVal == null)
         {
-            ColorMap colorMap = colorProvider.getColor(modelState.getColorIndex());
+            ColorMap colorMap = colorProvider.getColorMap(modelState.getColorIndex());
             retVal = makeBorderFace(colorMap.getColor(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
             synchronized(faceCache)
             {
@@ -95,7 +95,7 @@ public class BorderModelFactory extends ModelFactory
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
+    public List<BakedQuad> getItemQuads(ModelState modelState, IColorMapProvider colorProvider)
     {
         CubeInputs cubeInputs = new CubeInputs();
         cubeInputs.u0 = 0;
@@ -104,7 +104,7 @@ public class BorderModelFactory extends ModelFactory
         cubeInputs.v1 = 16;
         cubeInputs.isItem = true;
         cubeInputs.isOverlay = controller.getRenderLayer() != BlockRenderLayer.SOLID;
-        cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BORDER);
+        cubeInputs.color = colorProvider.getColorMap(modelState.getColorIndex()).getColor(EnumColorMap.BORDER);
         // offset 4 is all borders
         cubeInputs.textureSprite = 
                 Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(4));

@@ -9,7 +9,7 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelState;
 
@@ -50,7 +50,7 @@ public class MasonryModelFactory extends ModelFactory
     }
     
 	@Override
-    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
+    public List<BakedQuad> getFaceQuads(ModelState modelState, IColorMapProvider colorProvider, EnumFacing face) 
     {
     	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
     	
@@ -64,7 +64,7 @@ public class MasonryModelFactory extends ModelFactory
         
         if(retVal == null)
         {
-        	retVal = makeFace(face, fjs, colorProvider.getColor(modelState.getColorIndex()), textureIndex, false);
+        	retVal = makeFace(face, fjs, colorProvider.getColorMap(modelState.getColorIndex()), textureIndex, false);
         	
 	        synchronized(faceCache)
 	        {
@@ -100,13 +100,13 @@ public class MasonryModelFactory extends ModelFactory
 	}
 	
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
+    public List<BakedQuad> getItemQuads(ModelState modelState, IColorMapProvider colorProvider)
     {
         ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
         
         for(EnumFacing face : EnumFacing.values())
         {
-        	itemBuilder.addAll(makeFace(face, SimpleJoinFaceState.ALL, colorProvider.getColor(modelState.getColorIndex()), 0, true));
+        	itemBuilder.addAll(makeFace(face, SimpleJoinFaceState.ALL, colorProvider.getColorMap(modelState.getColorIndex()), 0, true));
         }
         return itemBuilder.build(); 
     }

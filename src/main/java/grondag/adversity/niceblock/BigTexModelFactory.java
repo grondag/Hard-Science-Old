@@ -5,7 +5,7 @@ import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelController;
-import grondag.adversity.niceblock.color.IColorProvider;
+import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelState;
 
@@ -53,7 +53,7 @@ public class BigTexModelFactory extends ModelFactory
     }
 	
 	@Override
-	public List<BakedQuad> getFaceQuads(ModelState modelState, IColorProvider colorProvider, EnumFacing face) 
+	public List<BakedQuad> getFaceQuads(ModelState modelState, IColorMapProvider colorProvider, EnumFacing face) 
 	{
 		if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
@@ -65,7 +65,7 @@ public class BigTexModelFactory extends ModelFactory
         
         if(retVal == null)
         {
-			retVal = makeBigTexFace(colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BASE), faceIndex, face);
+			retVal = makeBigTexFace(colorProvider.getColorMap(modelState.getColorIndex()).getColor(EnumColorMap.BASE), faceIndex, face);
             synchronized(faceCache)
             {
                 faceCache.put(cacheKey, retVal);
@@ -76,7 +76,7 @@ public class BigTexModelFactory extends ModelFactory
 	}
 
 	@Override
-	public List<BakedQuad> getItemQuads(ModelState modelState, IColorProvider colorProvider)
+	public List<BakedQuad> getItemQuads(ModelState modelState, IColorMapProvider colorProvider)
 	{
 		CubeInputs cubeInputs = new CubeInputs();
 		cubeInputs.u0 = 0;
@@ -85,7 +85,7 @@ public class BigTexModelFactory extends ModelFactory
 		cubeInputs.v1 = 1;
 		cubeInputs.isItem = true;
 		cubeInputs.isOverlay = controller.getRenderLayer() != BlockRenderLayer.SOLID;
-		cubeInputs.color = colorProvider.getColor(modelState.getColorIndex()).getColor(EnumColorMap.BASE);
+		cubeInputs.color = colorProvider.getColorMap(modelState.getColorIndex()).getColor(EnumColorMap.BASE);
 		cubeInputs.textureSprite = 
 				Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(controller.getTextureName(0));
 

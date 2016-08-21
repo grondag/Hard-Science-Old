@@ -1,11 +1,8 @@
 package grondag.adversity.library.joinstate;
 
-import grondag.adversity.niceblock.modelstate.IModelStateValue;
-import grondag.adversity.niceblock.modelstate.ModelStateComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import net.minecraft.util.EnumFacing;
 
-public class CornerJoinBlockState implements IModelStateValue<CornerJoinBlockState, CornerJoinBlockState>
+public class CornerJoinBlockState
 {
     private final int index;
     
@@ -30,22 +27,4 @@ public class CornerJoinBlockState implements IModelStateValue<CornerJoinBlockSta
     {
         return CornerJoinFaceState.values()[faceJoinIndex[face.ordinal()]];
     }
-
-    @Override
-    public ModelStateComponent<CornerJoinBlockState, CornerJoinBlockState> getComponentType()
-    {
-        return ModelStateComponents.CORNER_JOIN;
-    }
-
-    @Override
-    public long getBits()
-    {
-        return index;
-    }
-
-    @Override
-    public CornerJoinBlockState getValue()
-    {
-        return this;
-    }    
 }

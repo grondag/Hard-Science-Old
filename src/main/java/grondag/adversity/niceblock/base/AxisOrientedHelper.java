@@ -28,7 +28,7 @@ public class AxisOrientedHelper extends ColorHelperPlus
     @Override
     public int getItemModelCount()
     {
-        return dispatcher.getColorProvider().getColorCount();
+        return dispatcher.getColorProvider().getColorMapCount();
     }
 
     @Override

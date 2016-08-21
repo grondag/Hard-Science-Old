@@ -10,11 +10,12 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class ModelCornerJoinStateComponent extends ModelStateComponent<CornerJoinBlockState, CornerJoinBlockState>
+public class ModelCornerJoinComponent extends ModelStateComponent<ModelCornerJoinComponent.ModelCornerJoin, CornerJoinBlockState>
 {
-    public ModelCornerJoinStateComponent(int ordinal)
+    
+    public ModelCornerJoinComponent(int ordinal, boolean useWorldState)
     {
-        super(ordinal);
+        super(ordinal, useWorldState);
     }
 
     @Override
@@ -31,20 +32,40 @@ public class ModelCornerJoinStateComponent extends ModelStateComponent<CornerJoi
     }
 
     @Override
-    public CornerJoinBlockState createValueFromBits(long bits)
+    public ModelCornerJoin createValueFromBits(long bits)
     {
-        return CornerJoinBlockStateSelector.getJoinState((int) bits);
+        return new ModelCornerJoin(CornerJoinBlockStateSelector.getJoinState((int) bits));
     }
 
     @Override
-    public Class<CornerJoinBlockState> getStateType()
+    public Class<ModelCornerJoinComponent.ModelCornerJoin> getStateType()
     {
-        return CornerJoinBlockState.class;
+        return ModelCornerJoinComponent.ModelCornerJoin.class;
     }
 
     @Override
     public Class<CornerJoinBlockState> getValueType()
     {
         return CornerJoinBlockState.class;
+    }
+    
+    public class ModelCornerJoin extends ModelStateValue<ModelCornerJoin, CornerJoinBlockState>
+    {
+        private ModelCornerJoin(CornerJoinBlockState value)
+        {
+            super(value);
+        }
+        
+        @Override
+        public ModelStateComponent<ModelCornerJoin, CornerJoinBlockState> getComponent()
+        {
+            return ModelCornerJoinComponent.this;
+        }
+
+        @Override
+        public long getBits()
+        {
+            return value.getIndex();
+        }
     }
 }

@@ -26,6 +26,7 @@ public class ModelStateSet
     private final int typeCount;
     private final ModelStateGroup[] groups;
     private final int[] groupIndexes;
+    private final boolean usesWorldState;
     
     public static ModelStateSet find(ModelStateGroup... groups)
     {
@@ -53,7 +54,7 @@ public class ModelStateSet
         @Override
         public ModelStateSetValue load(Long key)
         {
-            ArrayList<IModelStateValue<?,?>> parts = new ArrayList<>(typeCount);
+            ArrayList<ModelStateValue<?,?>> parts = new ArrayList<>(typeCount);
             for(ModelStateComponent<?,?> c : includedTypes)
             {
                 parts.add(c.createValueFromBits((key >> shiftBits[c.getOrdinal()]) & c.getBitMask())); 
@@ -95,6 +96,7 @@ public class ModelStateSet
         //for each group, update lookup array for all included components to show position within this set
         int componentCounter = 0;
         int shift = 0;
+        boolean canRefresh = false;
         for(ModelStateGroup g : groups)
         {
             for(ModelStateComponent<?,?> c : g.getComponents())
@@ -104,9 +106,11 @@ public class ModelStateSet
                     typeIndexes[c.getOrdinal()] = componentCounter++;
                     shiftBits[c.getOrdinal()] = shift;
                     shift += c.getBitLength();
+                    canRefresh = canRefresh || c.canRefreshFromWorld();
                 }
             }
         }
+        this.usesWorldState = canRefresh;
         
         //initialize smaller array to include only types that are part of one or more groups
         typeCount = componentCounter;
@@ -125,12 +129,12 @@ public class ModelStateSet
         return typeIndexes[type.getOrdinal()];
     }
     
-    public long computeKey(IModelStateValue<?,?>... components)
+    public long computeKey(ModelStateValue<?,?>... components)
     {
         long key = 0L;
-        for(IModelStateValue<?,?> c : components)
+        for(ModelStateValue<?,?> c : components)
         {
-            int typeIndex = getIndexForType(c.getComponentType());
+            int typeIndex = getIndexForType(c.getComponent());
             if(typeIndex != NOT_PRESENT)
             {
                 key |= (c.getBits() << shiftBits[typeIndex]);
@@ -139,17 +143,45 @@ public class ModelStateSet
         return key;
     }
     
-    public ModelStateSetValue getSetValue(IModelStateValue<?,?>... components)
+    public long computeMask(ModelStateValue<?,?>... components)
+    {
+        long mask = 0L;
+        for(ModelStateValue<?,?> c : components)
+        {
+            int typeIndex = getIndexForType(c.getComponent());
+            if(typeIndex != NOT_PRESENT)
+            {
+                mask |= (c.getComponent().getBitMask() << shiftBits[typeIndex]);
+            }
+        }
+        return mask;
+    }
+    
+    public ModelStateSetValue getValue(ModelStateValue<?,?>... components)
     {
         return valueCache.getUnchecked(computeKey(components));
     }
     
-    public ModelStateSetValue getSetValueFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public ModelStateSetValue getValueWithUpdates(ModelStateSetValue valueIn, ModelStateValue<?,?>... components)
     {
+        long mask = computeMask(components);
+        long key = (valueIn.key & mask) | computeKey(components);
+        return valueCache.getUnchecked(key);
+    }
+    
+    public boolean canRefreshFromWorld() { return this.usesWorldState; }
+    
+    public ModelStateSetValue getRefreshedValueFromWorld(long startingBits, NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        if(!this.usesWorldState) return valueCache.getUnchecked(startingBits);
+        
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
         {
-            bits |= (c.getBitsFromWorld(block, test, state, world, pos) << shiftBits[c.getOrdinal()]);
+            if(c.canRefreshFromWorld())
+                bits |= (c.getBitsFromWorld(block, test, state, world, pos) << shiftBits[c.getOrdinal()]);
+            else
+                bits |= (startingBits & (c.getBitMask() << shiftBits[c.getOrdinal()]));
         }
         return valueCache.getUnchecked(bits);
     }
@@ -161,16 +193,16 @@ public class ModelStateSet
     
     public class ModelStateSetValue
     {
-        private final IModelStateValue<?,?>[] values;
+        private final ModelStateValue<?,?>[] values;
         private final long key;
         private final long[]groupKeys;
         
-        private ModelStateSetValue(IModelStateValue<?,?>... valuesIn)
+        private ModelStateSetValue(ModelStateValue<?,?>... valuesIn)
         {
-            values = new IModelStateValue<?,?>[typeCount];
-            for(IModelStateValue<?,?> v : valuesIn)
+            values = new ModelStateValue<?,?>[typeCount];
+            for(ModelStateValue<?,?> v : valuesIn)
             {
-                int index = getIndexForType(v.getComponentType());
+                int index = getIndexForType(v.getComponent());
                 values[index] = v;
             }
             key = computeKey(valuesIn);
@@ -179,7 +211,7 @@ public class ModelStateSet
             groupKeys = new long[groups.length];
             for(int i = 0; i < groups.length; i++)
             {
-                IModelStateValue<?,?>[] subValues = new IModelStateValue<?,?>[groups[i].getComponents().length];
+                ModelStateValue<?,?>[] subValues = new ModelStateValue<?,?>[groups[i].getComponents().length];
                 int valueCounter = 0;
                 for(ModelStateComponent<?,?> c : groups[i].getComponents())
                 {
@@ -189,7 +221,7 @@ public class ModelStateSet
             }
         }
         
-        public <T extends IModelStateValue<T, V>, V> V getValue(ModelStateComponent<T, V> type)
+        public <T extends ModelStateValue<T, V>, V> V getValue(ModelStateComponent<T, V> type)
         {
             int index = getIndexForType(type);
             if(index == ModelStateSet.NOT_PRESENT) return null;

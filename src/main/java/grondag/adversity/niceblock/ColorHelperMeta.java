@@ -33,14 +33,14 @@ public class ColorHelperMeta extends BlockModelHelper
     @Override
     public int getItemModelCount()
     {
-        return dispatcher.getColorProvider().getColorCount();
+        return dispatcher.getColorProvider().getColorMapCount();
     }
 
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);
-        String colorName = dispatcher.getColorProvider().getColor(stack.getMetadata()).colorMapName;
+        String colorName = dispatcher.getColorProvider().getColorMap(stack.getMetadata()).colorMapName;
         if(colorName !="")
         {
             tooltip.add(colorName);

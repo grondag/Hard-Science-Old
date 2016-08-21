@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.color;
 
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 
-public class NoColor implements IColorProvider
+public class NoColorMapProvider implements IColorMapProvider
 {
     
     private static final ColorMap WHITE;
@@ -18,19 +18,19 @@ public class NoColor implements IColorProvider
     
     private final int virtualColorCount;
 
-    public NoColor(int virtualColorCount)
+    public NoColorMapProvider(int virtualColorCount)
     {
         this.virtualColorCount = virtualColorCount;
     }
 
     @Override
-    public int getColorCount()
+    public int getColorMapCount()
     {
         return virtualColorCount;
     }
 
     @Override
-    public ColorMap getColor(int colorIndex)
+    public ColorMap getColorMap(int colorIndex)
     {
         return WHITE;
     }

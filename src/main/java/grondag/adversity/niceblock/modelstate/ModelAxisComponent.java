@@ -8,11 +8,21 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class ModelAxisComponent extends ModelStateComponent<ModelAxis, EnumFacing.Axis>
+public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.ModelAxis, EnumFacing.Axis>
 {
-    public ModelAxisComponent(int ordinal)
+    private final ModelAxis[] LOOKUP = new ModelAxis[EnumFacing.Axis.values().length];
+    
+    public ModelAxisComponent(int ordinal, boolean useWorldState)
     {
-        super(ordinal);
+        super(ordinal, useWorldState);
+        LOOKUP[EnumFacing.Axis.X.ordinal()] = new ModelAxis(EnumFacing.Axis.X);
+        LOOKUP[EnumFacing.Axis.Y.ordinal()] = new ModelAxis(EnumFacing.Axis.Y);
+        LOOKUP[EnumFacing.Axis.Z.ordinal()] = new ModelAxis(EnumFacing.Axis.Z);
+    }
+    
+    public ModelAxis fromEnum(EnumFacing.Axis axis)
+    {
+        return LOOKUP[axis.ordinal()];
     }
     
     @Override
@@ -44,11 +54,24 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxis, EnumFacin
     {
         return EnumFacing.Axis.class;
     }
+    
+    public class ModelAxis extends ModelStateValue<ModelAxis, EnumFacing.Axis>
+    {
+        ModelAxis(EnumFacing.Axis axis)
+        {
+            super(axis);
+        }
 
-//    @Override
-//    public long getBits(Axis value)
-//    {
-//        return value.ordinal();
-//    }
+        @Override
+        public long getBits()
+        {
+            return this.value.ordinal();
+        }
 
+        @Override
+        public ModelStateComponent<ModelAxis, Axis> getComponent()
+        {
+            return ModelAxisComponent.this;
+        }
+    }
 }

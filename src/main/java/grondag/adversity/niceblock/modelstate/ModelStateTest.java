@@ -9,11 +9,11 @@ public class ModelStateTest
 
     public static void testDongle()
     {
-        ModelStateGroup g1 = ModelStateGroup.find(ModelStateComponents.AXIS, ModelStateComponents.CORNER_JOIN);
+        ModelStateGroup g1 = ModelStateGroup.find(ModelStateComponents.AXIS_DYNAMIC, ModelStateComponents.CORNER_JOIN_DYNAMIC);
         ModelStateGroup g2 = ModelStateGroup.find(ModelStateComponents.ROTATION_INNER_YES, ModelStateComponents.TEXTURE_INNER_4);
         ModelStateSet set = ModelStateSet.find(g1, g2);
-        ModelStateSetValue value = set.getSetValue(ModelAxis.X);
-        EnumFacing.Axis axis = value.getValue(ModelStateComponents.AXIS);
+        ModelStateSetValue value = set.getValue(ModelStateComponents.AXIS_DYNAMIC.fromEnum(EnumFacing.Axis.X));
+        EnumFacing.Axis axis = value.getValue(ModelStateComponents.AXIS_DYNAMIC);
         long subKey = value.getGroupKey(g1);
     }
 }

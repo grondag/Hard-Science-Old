@@ -6,13 +6,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public abstract class ModelStateComponent<T extends IModelStateValue<T, V>, V> 
+public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V> 
 {
     private final int bitLength;
     private final long bitMask;
     private final int ordinal;
+    private final boolean useWorldState;
     
-    public ModelStateComponent(int ordinal)
+    public ModelStateComponent(int ordinal, boolean useWorldState)
     {
         long mask = 0L;
         bitLength = Long.SIZE - Long.numberOfLeadingZeros(getValueCount());
@@ -22,13 +23,25 @@ public abstract class ModelStateComponent<T extends IModelStateValue<T, V>, V>
         }
         this.bitMask = mask;
         this.ordinal = ordinal;
+        this.useWorldState = useWorldState;
     }
+    
+    public ModelStateComponent(int ordinal)
+    {
+        this(ordinal, false);
+    }
+
     abstract public long getValueCount();
-    abstract public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos);
     abstract public T createValueFromBits(long bits);
 //    abstract public long getBits(V value);
     abstract public Class<T> getStateType();
     abstract public Class<V> getValueType();
+    
+    /** override if can derive state from meta or neighbor blocks */
+    public boolean canRefreshFromWorld() { return useWorldState; }
+
+    /** override if can derive state from meta or neighbor blocks */
+    public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
 
     public int getOrdinal() { return ordinal; }
     public int getBitLength() { return bitLength; }
