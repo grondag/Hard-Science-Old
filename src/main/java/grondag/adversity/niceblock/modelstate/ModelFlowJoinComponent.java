@@ -1,48 +1,55 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.modelstate;
 
-import java.util.List;
-
-import grondag.adversity.library.Alternator;
-import grondag.adversity.library.IAlternator;
+import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.niceblock.FlowHeightState;
 import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 
-public class FlowController extends ModelController implements ICollisionHandler
-{
-
-    protected final IAlternator alternator;
-
-    public final LightingMode lightingMode;
-
-    protected FlowController(String textureName, int alternateTextureCount, BlockRenderLayer renderLayer, LightingMode lightingMode)
+public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinComponent.ModelFlowJoin, FlowHeightState>
+{    
+    public ModelFlowJoinComponent(int ordinal, boolean useWorldState)
     {
-        super(textureName, alternateTextureCount, renderLayer, lightingMode == LightingMode.SHADED, false);
-        this.alternator = Alternator.getAlternator(alternateTextureCount);
-        this.bakedModelFactory = new FlowModelFactory(this);
-        this.lightingMode = lightingMode;
+        super(ordinal, useWorldState);
     }
 
     @Override
-    public long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getValueCount()
+    {
+        return FlowHeightState.STATE_BIT_MASK;
+    }
+
+    @Override
+    public ModelFlowJoin createValueFromBits(long bits)
+    {
+        return new ModelFlowJoin(new FlowHeightState(bits));
+    }
+
+    @Override
+    public Class<ModelFlowJoin> getStateType()
+    {
+        return ModelFlowJoinComponent.ModelFlowJoin.class;
+    }
+
+    @Override
+    public Class<FlowHeightState> getValueType()
+    {
+        return FlowHeightState.class;
+    }
+    
+    @Override
+    public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int centerHeight;
         int sideHeight[] = new int[4];
         int cornerHeight[] = new int[4];
         int yOffset = 0;
-        long key;
-        
+
         if(block instanceof IFlowBlock)
         {
             int yOrigin = pos.getY();
@@ -116,50 +123,32 @@ public class FlowController extends ModelController implements ICollisionHandler
                 cornerHeight[corner.ordinal()] = neighborHeight[corner.directionVector.getX() + 1][corner.directionVector.getZ() + 1];
             }
             
-            key = FlowHeightState.computeStateKey(centerHeight, sideHeight, cornerHeight, yOffset);
+            return FlowHeightState.computeStateKey(centerHeight, sideHeight, cornerHeight, yOffset);
         }
         else
         {
-            key = FlowHeightState.FULL_BLOCK_STATE_KEY;
+            return FlowHeightState.FULL_BLOCK_STATE_KEY;
         }
         
-         return key | (this.alternator.getAlternate(pos) << FlowHeightState.STATE_BIT_COUNT);
     }
 
-    @Override
-    public int getAltTextureFromModelIndex(long clientShapeIndex)
+    public class ModelFlowJoin extends ModelStateValue<ModelFlowJoinComponent.ModelFlowJoin, FlowHeightState>
     {
-        return (int) (clientShapeIndex >>> FlowHeightState.STATE_BIT_COUNT);
-    }
-
-    public FlowHeightState getFlowHeightStateFromModelIndex(long clientShapeIndex)
-    {
-        return new FlowHeightState(clientShapeIndex & FlowHeightState.STATE_BIT_MASK);
-    }
-
-    @Override
-    public ICollisionHandler getCollisionHandler()
-    {
-        return this;
-    }
-
-    @Override
-    public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state)
-    {
-        Block block = state.getBlock();
-        if(block instanceof IFlowBlock)
+        ModelFlowJoin(FlowHeightState valueIn)
         {
-            return this.getDynamicShapeIndex((NiceBlock) block, state, worldIn, pos);
+            super(valueIn);
         }
-        else
-        {
-            return 0;
-        }
-    }
 
-    @Override
-    public List<AxisAlignedBB> getModelBounds(long collisionKey)
-    {
-        return CollisionBoxGenerator.makeCollisionBox(((FlowModelFactory)this.bakedModelFactory).makeRawQuads(collisionKey));
+        @Override
+        public ModelStateComponent<ModelFlowJoinComponent.ModelFlowJoin, FlowHeightState> getComponent()
+        {
+            return ModelFlowJoinComponent.this;
+        }
+
+        @Override
+        public long getBits()
+        {
+            return this.value.getStateKey();
+        }
     }
 }

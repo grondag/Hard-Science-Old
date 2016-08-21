@@ -6,7 +6,7 @@ import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 public class FlowHeightState
 {
 
-    public final static long FULL_BLOCK_STATE_KEY;
+    public final static long FULL_BLOCK_STATE_KEY = FlowHeightState.computeStateKey(16, new int[] {16, 16, 16,16}, new int[] {16, 16, 16, 16}, 0 );
 
     /** Four 13-bit blocks that store a corner and side value,
      * plus 4 bits for center height and 3 bits for offset */
@@ -23,22 +23,6 @@ public class FlowHeightState
      * Includes negative values, positive values, zero and NO_BLOCK values.
      */
     private final static int VALUE_COUNT = -MIN_HEIGHT + MAX_HEIGHT + 1 + 1;
-
-    static
-    {
-        FlowHeightState flowState = new FlowHeightState(0);
-        flowState.setYOffset(0);
-        flowState.setCenterHeight(16);
-        for (HorizontalFace face : HorizontalFace.values())
-        {
-            flowState.setSideHeight(face, 16);
-        }
-        for (HorizontalCorner corner : HorizontalCorner.values())
-        {
-            flowState.setCornerHeight(corner, 16);
-        }
-        FULL_BLOCK_STATE_KEY = flowState.getStateKey();
-    }
 
     /** 
      * Returns values -2 through +2 from a triad (3 bits).
@@ -57,10 +41,11 @@ public class FlowHeightState
         return Math.min(4, (offset + 2) & 7);
     }
 
-    private byte centerHeight;
-    private byte sideHeight[] = new byte[4];
-    private byte cornerHeight[] = new byte[4];
-    private byte yOffset = 0;
+    private final byte centerHeight;
+    private final byte sideHeight[] = new byte[4];
+    private final byte cornerHeight[] = new byte[4];
+    private final byte yOffset;
+    private final long stateKey;
 
     /** true if model vertex height calculations current */
     private boolean vertexCalcsDone = false;
@@ -72,22 +57,35 @@ public class FlowHeightState
     private float midSideHeight[] = new float[HorizontalFace.values().length];
     /** cache model vertex height calculations */
     private float farSideHeight[] = new float[HorizontalFace.values().length];
-
     
     public long getStateKey()
     {
-        long stateKey = (centerHeight - 1) | getTriadWithYOffset(yOffset) << 4;
+        return stateKey;
+    }
+
+    public static long computeStateKey(int centerHeightIn, int[] sideHeightIn, int[] cornerHeightIn, int yOffsetIn)
+    {
+        long stateKey = (centerHeightIn - 1) | getTriadWithYOffset(yOffsetIn) << 4;
 
         for(int i = 0; i < 4; i++)
         {
-            long keyBlock = (cornerHeight[i] - NO_BLOCK) * VALUE_COUNT + (sideHeight[i] - NO_BLOCK); 
+            long keyBlock = (cornerHeightIn[i] - NO_BLOCK) * VALUE_COUNT + (sideHeightIn[i] - NO_BLOCK); 
             stateKey |= keyBlock << (i * 13 + 7);
         }
         return stateKey;
     }
+    
+//    public FlowHeightState(byte centerHeightIn, int[] sideHeightIn, int[] cornerHeightIn, int yOffsetIn)
+//    {
+//        centerHeight = centerHeightIn;
+//        yOffset = (byte) Math.min(2, Math.max(-2, yOffsetIn));
+//        this.sideHeight = sideHeightIn;
+//        this.cornerHeight = cornerHeightIn;
+//    }
 
-    FlowHeightState(long stateKey)
+    public FlowHeightState(long stateKey)
     {
+        this.stateKey = stateKey;
         centerHeight = (byte)((stateKey & 0xF) + 1);
         yOffset = (byte) getYOffsetFromTriad((int) ((stateKey >> 4) & 0x7));
 
@@ -98,25 +96,24 @@ public class FlowHeightState
             sideHeight[i] = (byte) (keyBlock % VALUE_COUNT + NO_BLOCK);
         }
     }
-
     // Rendering height of center block ranges from 1 to 16
     // and is stored in state key as values 0-15.
 
-    public void setCenterHeight(int height)
-    {
-        this.centerHeight = (byte)height;
-        vertexCalcsDone = false;
-    }
+//    public void setCenterHeight(int height)
+//    {
+//        this.centerHeight = (byte)height;
+//        vertexCalcsDone = false;
+//    }
 
     public int getCenterHeight()
     {
         return this.centerHeight;
     }
 
-    public void setYOffset(int offset)
-    {
-        this.yOffset = (byte) Math.min(2, Math.max(-2, offset));
-    }
+//    public void setYOffset(int offset)
+//    {
+//        this.yOffset = (byte) Math.min(2, Math.max(-2, offset));
+//    }
  
     public int getYOffset()
     {
@@ -126,22 +123,22 @@ public class FlowHeightState
     // Rendering height of corner and side neighbors ranges 
     // from -32 to 48. 
 
-    public void setSideHeight(HorizontalFace side, int height)
-    {
-        this.sideHeight[side.ordinal()] = (byte)height;
-        vertexCalcsDone = false;
-    }
+//    public void setSideHeight(HorizontalFace side, int height)
+//    {
+//        this.sideHeight[side.ordinal()] = (byte)height;
+//        vertexCalcsDone = false;
+//    }
 
     public int getSideHeight(HorizontalFace side)
     {
         return this.sideHeight[side.ordinal()];
     }
 
-    public void setCornerHeight(HorizontalCorner corner, int height)
-    {
-        this.cornerHeight[corner.ordinal()] = (byte)height;
-        vertexCalcsDone = false;
-    }
+//    public void setCornerHeight(HorizontalCorner corner, int height)
+//    {
+//        this.cornerHeight[corner.ordinal()] = (byte)height;
+//        vertexCalcsDone = false;
+//    }
 
     public int getCornerHeight(HorizontalCorner corner)
     {

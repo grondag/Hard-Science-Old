@@ -6,15 +6,17 @@ import java.util.ArrayList;
  * axis
  * alternate texture index - could be different for diff layers
  * corner join state
- * simple join state
- * flow join state
- * height state
  * big texture model index
  * simple alternate index (hot basalt, for example)
  * base color
  * glow color
  * border color
  * highlight color
+ * simple join state
+
+ * flow join state
+ * height state
+
  * primitive offset
 
  * underlying primitive (probably determined by the block)
@@ -49,7 +51,10 @@ public class ModelStateComponents
     private static ArrayList<ModelStateComponent<?,?>> list = new ArrayList<ModelStateComponent<?,?>>(20);
 
     public static final ModelAxisComponent AXIS_DYNAMIC = register(new ModelAxisComponent(counter++, true));
+    public static final ModelAxisComponent AXIS_STATIC = register(new ModelAxisComponent(counter++, false));
+    
     public static final ModelCornerJoinComponent CORNER_JOIN_DYNAMIC = register(new ModelCornerJoinComponent(counter++, true));
+    public static final ModelCornerJoinComponent CORNER_JOIN_STATIC = register(new ModelCornerJoinComponent(counter++, false));
 
     public static final ModelAlternateComponent ROTATION_INNER_YES = register(new ModelAlternateComponent(counter++, 4));
     public static final ModelAlternateComponent ROTATION_INNER_NO = register(new ModelAlternateComponent(counter++, 1));
@@ -59,6 +64,8 @@ public class ModelStateComponents
     public static final ModelAlternateComponent TEXTURE_INNER_1 = register(new ModelAlternateComponent(counter++, 1));
     public static final ModelAlternateComponent TEXTURE_INNER_2 = register(new ModelAlternateComponent(counter++, 2));
     public static final ModelAlternateComponent TEXTURE_INNER_4 = register(new ModelAlternateComponent(counter++, 4));
+    
+    public static final ModelBigTexComponent BIG_TEX = register(new ModelBigTexComponent(counter++));
 
     public static final ModelStateComponent<?,?>[] MODEL_STATE_COMPONENTS;
 

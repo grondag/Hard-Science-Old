@@ -33,7 +33,6 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
 
     abstract public long getValueCount();
     abstract public T createValueFromBits(long bits);
-//    abstract public long getBits(V value);
     abstract public Class<T> getStateType();
     abstract public Class<V> getValueType();
     
@@ -43,6 +42,22 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     /** override if can derive state from meta or neighbor blocks */
     public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
 
+    // another option vs. statically defining in each subclass
+//    @SuppressWarnings("unchecked")
+//    public Class<T> getStateType()
+//    {
+//            ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
+//            return (Class<T>) superclass.getActualTypeArguments()[0];
+//    }
+//    
+//    @SuppressWarnings("unchecked")
+//    
+//    public Class<V> getValueType()
+//    {
+//            ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
+//            return (Class<V>) superclass.getActualTypeArguments()[1];
+//    }
+    
     public int getOrdinal() { return ordinal; }
     public int getBitLength() { return bitLength; }
     public long getBitMask() { return bitMask; }
