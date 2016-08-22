@@ -10,6 +10,7 @@ import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelTextureComponent;
+import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -31,43 +32,73 @@ TODO: remove super inheritance and references
 public abstract class ModelFactory2
 {
     protected final ModelStateGroup stateGroup;
+    protected final ModelInputs modelInputs;
     protected final ModelColorMapComponent colorComponent;
     protected final ModelTextureComponent textureComponent;
-    protected final ModelInputs modelInputs;
     protected final ModelRotationComponent rotationComponent;
-
     
     public ModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
     {
-        ModelStateGroup.find(colorComponent, textureComponent, rotationComponent)
+        this.stateGroup = ModelStateGroup.find(components);
+        this.modelInputs = modelInputs;
+
+        ModelColorMapComponent colorComponent = null;
+        ModelTextureComponent textureComponent = null;
+        ModelRotationComponent rotationComponent = null;
         
-        this.stateGroup = stateGroup;
+        for(ModelStateComponent<?,?> c : components)
+        {
+            if(c instanceof ModelColorMapComponent)
+                colorComponent = (ModelColorMapComponent) c;
+            else if(c instanceof ModelTextureComponent)
+                textureComponent = (ModelTextureComponent) c;
+            else if(c instanceof ModelRotationComponent)
+                rotationComponent = (ModelRotationComponent) c;
+        }
+        
         this.colorComponent = colorComponent;
         this.textureComponent = textureComponent;
         this.rotationComponent = rotationComponent;
-        this.modelInputs = modelInputs;
     }
     
+    public boolean canRenderInLayer(BlockRenderLayer renderLayer) 
+    { 
+        return this.modelInputs.renderLayer == renderLayer;
+    }
+
     public ModelStateGroup getStateGroup() { return stateGroup; }
     
-    public abstract List<BakedQuad> getFaceQuads(ModelState modelState, EnumFacing face);
-    public abstract List<BakedQuad> getItemQuads(ModelState modelState);
+    public abstract List<BakedQuad> getFaceQuads(ModelState modelState, BlockRenderLayer renderLayer, EnumFacing face);
+    public abstract List<BakedQuad> getItemQuads(ModelState modelState, BlockRenderLayer renderLayer);
     
+    /**
+     * Override if special collision handling is needed due to non-cubic shape.
+     */
+    public ICollisionHandler getCollisionHandler()
+    {
+        return null;
+    }
+    
+    /** override if need to do some setup that must wait until bake event */
     public void handleBakeEvent(ModelBakeEvent event)
     {
         // NOOP: default implementation assumes lazy baking
     }
     
     /**
-     * identifies all textures needed for texture stitch
+     * Identifies all textures needed for texture stitch.
+     * Assumes a single texture per model.
+     * Override if have something more complicated.
      */
     public String[] getAllTextureNames()
     {
-        final String retVal[] = new String[getAlternateTextureCount() * textureCount];
+        if(this.modelInputs.textureName == null) return new String[0];
+        
+        final String retVal[] = new String[(int) this.textureComponent.getValueCount()];
 
-        for (int i = 0; i < getAlternateTextureCount() * textureCount; i++)
+        for (int i = 0; i < retVal.length; i++)
         {
-            retVal[i] = getTextureName(i);
+            retVal[i] = buildTextureName(this.modelInputs.textureName, i);
         }
         return retVal;
     }

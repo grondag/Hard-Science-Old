@@ -49,15 +49,17 @@ public class ColorModelFactory2 extends ModelFactory2
     }
     
 	@Override
-	public List<BakedQuad> getFaceQuads(ModelState modelState, EnumFacing face) 
+	public List<BakedQuad> getFaceQuads(ModelState modelState, BlockRenderLayer renderLayer, EnumFacing face)
     {
-        if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
+        if (face == null || renderLayer != modelInputs.renderLayer) return QuadFactory.EMPTY_QUAD_LIST;
         return getCubeInputs(modelState).makeFace(face);
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState)
+    public List<BakedQuad> getItemQuads(ModelState modelState, BlockRenderLayer renderLayer)
     {
+        if (renderLayer != modelInputs.renderLayer) return QuadFactory.EMPTY_QUAD_LIST;
+
         CubeInputs cubeInputs = getCubeInputs(modelState);
         cubeInputs.isItem = true;
         cubeInputs.isOverlay = modelInputs.renderLayer != BlockRenderLayer.SOLID;
@@ -72,4 +74,8 @@ public class ColorModelFactory2 extends ModelFactory2
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
         return itemBuilder.build();        
     }
+
+ 
+
+   
 }
