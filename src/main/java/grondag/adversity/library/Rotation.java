@@ -5,23 +5,17 @@ package grondag.adversity.library;
  * alternate textures.
  */
 public enum Rotation {
-	ROTATE_NONE(0, 0),
-	ROTATE_90(1, 90),
-	ROTATE_180(2, 180),
-	ROTATE_270(3, 270);
-
-	/**
-	 * May be useful for dynamic manipulations.
-	 */
-	public final int index;
+	ROTATE_NONE(0),
+	ROTATE_90(90),
+	ROTATE_180(180),
+	ROTATE_270(270);
 
 	/**
 	 * Useful for locating model file names that use degrees as a suffix.
 	 */
 	public final int degrees;
 
-	Rotation(int index, int degrees) {
-		this.index = index;
+	Rotation(int degrees) {
 		this.degrees = degrees;
 	}
 	

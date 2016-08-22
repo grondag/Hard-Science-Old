@@ -2,6 +2,8 @@ package grondag.adversity.niceblock.modelstate;
 
 import java.util.ArrayList;
 
+import grondag.adversity.niceblock.color.BlockColorMapProvider;
+
 /**
  * axis
  * alternate texture index - could be different for diff layers
@@ -56,19 +58,18 @@ public class ModelStateComponents
     public static final ModelCornerJoinComponent CORNER_JOIN_DYNAMIC = register(new ModelCornerJoinComponent(counter++, true));
     public static final ModelCornerJoinComponent CORNER_JOIN_STATIC = register(new ModelCornerJoinComponent(counter++, false));
 
-    public static final ModelAlternateComponent ROTATION_INNER_YES = register(new ModelAlternateComponent(counter++, 4));
-    public static final ModelAlternateComponent ROTATION_INNER_NO = register(new ModelAlternateComponent(counter++, 1));
-    public static final ModelAlternateComponent ROTATION_OUTER_YES = register(new ModelAlternateComponent(counter++, 4));
-    public static final ModelAlternateComponent ROTATION_OUTER_NO = register(new ModelAlternateComponent(counter++, 1));
+    public static final ModelRotationComponent ROTATION = register(new ModelRotationComponent(counter++));
+    public static final ModelRotationComponent ROTATION_NONE = register(new ModelRotationComponent(counter++, true));
     
-    public static final ModelAlternateComponent TEXTURE_INNER_1 = register(new ModelAlternateComponent(counter++, 1));
-    public static final ModelAlternateComponent TEXTURE_INNER_2 = register(new ModelAlternateComponent(counter++, 2));
-    public static final ModelAlternateComponent TEXTURE_INNER_4 = register(new ModelAlternateComponent(counter++, 4));
+    public static final ModelTextureComponent TEXTURE_1 = register(new ModelTextureComponent(counter++, 1));
+    public static final ModelTextureComponent TEXTURE_2 = register(new ModelTextureComponent(counter++, 2));
+    public static final ModelTextureComponent TEXTURE_4 = register(new ModelTextureComponent(counter++, 4));
     
     public static final ModelBigTexComponent BIG_TEX = register(new ModelBigTexComponent(counter++));
 
-    public static final ModelStateComponent<?,?>[] MODEL_STATE_COMPONENTS;
-
+    public static final ModelColorMapComponent BLOCK_COLORS = register(new ModelColorMapComponent(counter++, BlockColorMapProvider.INSTANCE, false));
+    
+    private static final ModelStateComponent<?,?>[] MODEL_STATE_COMPONENTS;
     
     static
     {
@@ -76,6 +77,16 @@ public class ModelStateComponents
         
         // prevent unintentional use
         list = null;
+    }
+    
+    public static int getCount()
+    {
+        return MODEL_STATE_COMPONENTS.length;
+    }
+    
+    public static ModelStateComponent<?,?> get(int index)
+    {
+        return MODEL_STATE_COMPONENTS[index];
     }
     
     private static <T extends ModelStateComponent<?,?>> T register(T c)

@@ -8,11 +8,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class ModelAlternateComponent extends ModelStateComponent<ModelInteger, Integer>
+public class ModelTextureComponent extends ModelStateComponent<ModelTextureComponent.ModelTextureIndex, Integer>
 {
     private final IAlternator alternator;
 
-    public ModelAlternateComponent(int ordinal, int alternateCount)
+    public ModelTextureComponent(int ordinal, int alternateCount)
     {
         super(ordinal, alternateCount > 1);
         alternator = Alternator.getAlternator(alternateCount);
@@ -31,20 +31,40 @@ public class ModelAlternateComponent extends ModelStateComponent<ModelInteger, I
     }
 
     @Override
-    public ModelInteger createValueFromBits(long bits)
+    public ModelTextureComponent.ModelTextureIndex createValueFromBits(long bits)
     {
-        return new ModelInteger(this, (int) bits);
+        return new ModelTextureComponent.ModelTextureIndex((int) bits);
     }
 
     @Override
-    public Class<ModelInteger> getStateType()
+    public Class<ModelTextureComponent.ModelTextureIndex> getStateType()
     {
-        return ModelInteger.class;
+        return ModelTextureComponent.ModelTextureIndex.class;
     }
 
     @Override
     public Class<Integer> getValueType()
     {
         return Integer.class;
+    }
+    
+    public class ModelTextureIndex extends ModelStateValue<ModelTextureComponent.ModelTextureIndex, Integer>
+    {
+        private ModelTextureIndex(Integer value)
+        {
+            super(value);
+        }
+
+        @Override
+        public long getBits()
+        {
+            return this.value;
+        }
+
+        @Override
+        public ModelStateComponent<ModelTextureComponent.ModelTextureIndex, Integer> getComponent()
+        {
+            return ModelTextureComponent.this;
+        }
     }
 }

@@ -9,7 +9,7 @@ import net.minecraft.world.IBlockAccess;
 /**
 * Selects one of 4096 models in a repeating 16x16x16 volume
 */
-public class ModelBigTexComponent extends ModelStateComponent<ModelInteger, Integer>
+public class ModelBigTexComponent extends ModelStateComponent<ModelBigTexComponent.ModelBigTex, Integer>
 {
     public ModelBigTexComponent(int ordinal)
     {
@@ -23,15 +23,15 @@ public class ModelBigTexComponent extends ModelStateComponent<ModelInteger, Inte
     }
 
     @Override
-    public ModelInteger createValueFromBits(long bits)
+    public ModelBigTexComponent.ModelBigTex createValueFromBits(long bits)
     {
-        return new ModelInteger(this, (int) bits);
+        return new ModelBigTexComponent.ModelBigTex((int) bits);
     }
 
     @Override
-    public Class<ModelInteger> getStateType()
+    public Class<ModelBigTexComponent.ModelBigTex> getStateType()
     {
-        return ModelInteger.class;
+        return ModelBigTexComponent.ModelBigTex.class;
     }
 
     @Override
@@ -46,4 +46,23 @@ public class ModelBigTexComponent extends ModelStateComponent<ModelInteger, Inte
         return ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);
     }
 
+    public class ModelBigTex extends ModelStateValue<ModelBigTexComponent.ModelBigTex, Integer>
+    {
+        private ModelBigTex(Integer value)
+        {
+            super(value);
+        }
+
+        @Override
+        public long getBits()
+        {
+            return this.value;
+        }
+
+        @Override
+        public ModelStateComponent<ModelBigTex, Integer> getComponent()
+        {
+            return ModelBigTexComponent.this;
+        }
+    }
 }

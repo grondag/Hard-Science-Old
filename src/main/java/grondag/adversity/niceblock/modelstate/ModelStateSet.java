@@ -20,8 +20,8 @@ public class ModelStateSet
 
     private static final int NOT_PRESENT = -1;
 
-    private final int[] typeIndexes = new int[ModelStateComponents.MODEL_STATE_COMPONENTS.length];
-    private final int[] shiftBits = new int[ModelStateComponents.MODEL_STATE_COMPONENTS.length];
+    private final int[] typeIndexes = new int[ModelStateComponents.getCount()];
+    private final int[] shiftBits = new int[ModelStateComponents.getCount()];
     private final ModelStateComponent<?,?>[] includedTypes;
     private final int typeCount;
     private final ModelStateGroup[] groups;
@@ -88,7 +88,7 @@ public class ModelStateSet
         }
         
         //initialize lookup array for all component types to default that none are present
-        for(int i = 0; i < ModelStateComponents.MODEL_STATE_COMPONENTS.length; i++)
+        for(int i = 0; i < ModelStateComponents.getCount(); i++)
         {
             typeIndexes[i] = NOT_PRESENT;
         }
@@ -115,11 +115,11 @@ public class ModelStateSet
         //initialize smaller array to include only types that are part of one or more groups
         typeCount = componentCounter;
         this.includedTypes = new ModelStateComponent<?,?>[typeCount];
-        for(int i = 0; i < ModelStateComponents.MODEL_STATE_COMPONENTS.length; i++)
+        for(int i = 0; i < ModelStateComponents.getCount(); i++)
         {
             if(typeIndexes[i] != NOT_PRESENT)
             {
-                includedTypes[typeIndexes[i]] = ModelStateComponents.MODEL_STATE_COMPONENTS[i];
+                includedTypes[typeIndexes[i]] = ModelStateComponents.get(i);
             }
         }
     }

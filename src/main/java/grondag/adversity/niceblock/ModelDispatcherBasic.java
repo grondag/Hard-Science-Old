@@ -118,6 +118,7 @@ public class ModelDispatcherBasic extends ModelDispatcher
      @Override
     public boolean refreshClientShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState, boolean isCachedStateDirty)
     {
+         
         if(isCachedStateDirty || !controller.useCachedClientState)
         {
             long oldShapeIndex = modelState.getShapeIndex(BlockRenderLayer.SOLID);
