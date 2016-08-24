@@ -714,7 +714,7 @@ public class RawQuad
         
         public BakedQuad createBakedQuad()
         {
-            for (int r = 0; r < this.rotation.index; r++)
+            for (int r = 0; r < this.rotation.ordinal(); r++)
             {
                 rotateQuadUV();
             }

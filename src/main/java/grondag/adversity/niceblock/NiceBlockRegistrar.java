@@ -3,6 +3,7 @@ package grondag.adversity.niceblock;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.AxisOrientedHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
+import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceTileEntity;
@@ -52,6 +53,7 @@ public class NiceBlockRegistrar
      * Model dispatchers add themselves here for handling during model bake and texture stitch
      */
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
+    public static LinkedList<ModelDispatcher2> allDispatchers2 = new LinkedList<ModelDispatcher2>();
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
     public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColorMapProvider(
@@ -292,6 +294,14 @@ public class NiceBlockRegistrar
             
             event.getModelRegistry().putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
         }
+ 
+        for (ModelDispatcher2 dispatcher : allDispatchers2)
+        {
+            dispatcher.handleBakeEvent(event);
+            //dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
+            
+            event.getModelRegistry().putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
+        }
         
         for (NiceBlock block : allBlocks)
         {
@@ -310,6 +320,11 @@ public class NiceBlockRegistrar
     public void stitcherEventPre(TextureStitchEvent.Pre event)
     {
         for (ModelDispatcher dispatcher : allDispatchers)
+        {
+            dispatcher.handleTexturePreStitch(event);
+        }
+        
+        for (ModelDispatcher2 dispatcher : allDispatchers2)
         {
             dispatcher.handleTexturePreStitch(event);
         }
