@@ -171,9 +171,9 @@ public class ModelStateSet
     
     public boolean canRefreshFromWorld() { return this.usesWorldState; }
     
-    public ModelStateSetValue getRefreshedValueFromWorld(ModelStateSetValue startingValue, NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getRefreshedKeyFromWorld(long startingKey, NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        if(!this.usesWorldState) return startingValue;
+        if(!this.usesWorldState) return startingKey;
         
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
@@ -181,11 +181,9 @@ public class ModelStateSet
             if(c.canRefreshFromWorld())
                 bits |= (c.getBitsFromWorld(block, test, state, world, pos) << shiftBits[c.getOrdinal()]);
             else
-                bits |= (startingValue.getKey() & (c.getBitMask() << shiftBits[c.getOrdinal()]));
+                bits |= (startingKey & (c.getBitMask() << shiftBits[c.getOrdinal()]));
         }
-        if(bits == startingValue.getKey()) return startingValue;
-        
-        return valueCache.getUnchecked(bits);
+        return bits;
     }
 
     public ModelStateSetValue getSetValueFromBits(long bits)

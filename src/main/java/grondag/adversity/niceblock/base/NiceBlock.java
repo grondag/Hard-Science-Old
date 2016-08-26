@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
 import grondag.adversity.niceblock.modelstate.ModelStateProperty;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
@@ -65,6 +66,7 @@ public class NiceBlock extends Block // implements IWailaProvider
      * all allowed values into a hashmap... Plus this hides the implementation from the block.
      */
     public static final ModelStateProperty MODEL_STATE = new ModelStateProperty();
+    public static final ModelKeyProperty MODEL_KEY = new ModelKeyProperty();
 
     /**
      * Controls material-dependent properties
@@ -132,7 +134,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_STATE });
+        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_STATE, MODEL_KEY });
     }
 
     // BASIC METADATA MECHANICS

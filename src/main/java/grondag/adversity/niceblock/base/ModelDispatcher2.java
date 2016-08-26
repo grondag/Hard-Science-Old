@@ -60,15 +60,14 @@ public class ModelDispatcher2 implements IBakedModel
     private final ICollisionHandler collisionHandler;
     
     private TextureAtlasSprite particleTexture;
+
+    private final SimpleCacheLoader<SparseLayerMap> blockLoader = new BlockCacheLoader();
+    private final SimpleLoadingCache<SparseLayerMap> modelCache = new SimpleLoadingCache<SparseLayerMap>(blockLoader, 1024);
+    private final SimpleCacheLoader<SimpleItemBlockModel> itemLoader = new ItemCacheLoader();
+    private final SimpleLoadingCache<SimpleItemBlockModel> itemCache = new SimpleLoadingCache<SimpleItemBlockModel>(itemLoader, 256);
     
-    //TODO: consider fastutil?
-    
-    private final BlockCacheLoader blockLoader = new BlockCacheLoader();
-    private final LoadingCache<ModelState, SparseLayerMap> modelCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(blockLoader);
-    private final Cache<Long, SimpleItemBlockModel> itemCache = CacheBuilder.newBuilder().maximumSize(0xFFF).build();
-    
-    private ThreadLocal<Long> lastStateKey = new ThreadLocal<Long>();
-    private ThreadLocal<SparseLayerMap> lastLayerMap = new ThreadLocal<SparseLayerMap>();
+//    private ThreadLocal<Long> lastStateKey = new ThreadLocal<Long>();
+//    private ThreadLocal<SparseLayerMap> lastLayerMap = new ThreadLocal<SparseLayerMap>();
     
     public ModelDispatcher2(String particleTextureName, ModelFactory2... models)
     {
@@ -116,17 +115,14 @@ public class ModelDispatcher2 implements IBakedModel
         NiceBlockRegistrar.allDispatchers2.add(this);
     }
         
-    /** Update state from world in passed modelState if needed.  
-     * Returns true if the state changed.
+    /** 
+     * Updated model state key from world.  
      */
-    public boolean refreshModelStateFromWorld(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos, ModelState modelState, boolean isCachedStateDirty)
+    public long getRefreshedKeyFromWorld(long oldKey, NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         //TODO: make this side-aware, states only need to be refreshed on server if matter for collision detection
-        
-        long oldKey = modelState.stateValue.getKey();
         //TODO: handle block test somehow
-        modelState.stateValue = stateSet.getRefreshedValueFromWorld(modelState.stateValue, block, null, state, world, pos);
-        return modelState.stateValue.getKey() != oldKey;
+        return stateSet.getRefreshedKeyFromWorld(oldKey, block, null, state, world, pos);
     }
 
     /**
@@ -149,8 +145,8 @@ public class ModelDispatcher2 implements IBakedModel
     public void handleBakeEvent(ModelBakeEvent event)
     {
         //clear caches to force rebaking of cached models
-        modelCache.invalidateAll();
-        itemCache.invalidateAll();
+        modelCache.clear();
+        itemCache.clear();
         
         for(ModelFactory2 model : models)
         {
@@ -194,15 +190,15 @@ public class ModelDispatcher2 implements IBakedModel
     {
         if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
 
-        ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+        long key = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_KEY);
         
-        if(this.lastStateKey.get() != modelState.stateValue.getKey())
-        {
-            this.lastStateKey.set(modelState.stateValue.getKey());
-            this.lastLayerMap.set(modelCache.getUnchecked(modelState));
-        }
+//        if(this.lastStateKey.get() != key)
+//        {
+//            this.lastStateKey.set(key);
+//            this.lastLayerMap.set(modelCache.get(key));
+//        }
         
-        return lastLayerMap.get().get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
+        return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
     }
     
     private class BlockCacheLoader extends CacheLoader<ModelState, SparseLayerMap>

@@ -2,8 +2,6 @@ package grondag.adversity.niceblock.base;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.niceblock.modelstate.ModelState;
-
 public class SimpleLoadingCache<V>
 {
     private class CacheState
@@ -19,9 +17,9 @@ public class SimpleLoadingCache<V>
     
     private volatile CacheState state;
     
-    public AtomicInteger calls = new AtomicInteger(0);
-    public AtomicInteger hits = new AtomicInteger(0);
-    public AtomicInteger searchCount = new AtomicInteger(0);
+//    public AtomicInteger calls = new AtomicInteger(0);
+//    public AtomicInteger hits = new AtomicInteger(0);
+//    public AtomicInteger searchCount = new AtomicInteger(0);
     
     private Object writeLock = new Object();
     
@@ -52,12 +50,14 @@ public class SimpleLoadingCache<V>
         }
     }
     
-    public V get(ModelState modelState)
+    public V get(long key)
     {
-        calls.incrementAndGet();
-        long key = modelState.stateValue.getKey();
+//        calls.incrementAndGet();
         
         CacheState localState = state;
+        
+        // Zero value normally indicates an unused spot in key array
+        // so requires special handling to prevent search weirdness.
         if(key == 0)
         {
             if(localState.values[localState.zeroLocation] == null)
@@ -67,14 +67,14 @@ public class SimpleLoadingCache<V>
                     localState = state;
                     if(localState.values[localState.zeroLocation] == null)
                     {
-                        localState.values[localState.zeroLocation] = loader.load(modelState);
+                        localState.values[localState.zeroLocation] = loader.load(key);
                     }
                 }
             }
-            else
-            {
-                hits.incrementAndGet();
-            }
+//            else
+//            {
+//                hits.incrementAndGet();
+//            }
             return localState.values[localState.zeroLocation];
         }
         
@@ -84,68 +84,82 @@ public class SimpleLoadingCache<V>
      
         if(currentKey == key) 
         {
-            hits.incrementAndGet();
+//            hits.incrementAndGet();
             return localState.values[position];
         }
         
-        if(currentKey == 0) return load(key, keyHash, modelState);
+        if(currentKey == 0) return load(key, keyHash);
 
         while (true) 
         {
-            searchCount.incrementAndGet();
+//            searchCount.incrementAndGet();
             position = (position + 1) & localState.positionMask;
             currentKey = localState.keys[position];
             
-            if(currentKey == 0) return load(key, keyHash, modelState);
+            if(currentKey == 0) return load(key, keyHash);
             
             if(currentKey == key)
             {
-                hits.incrementAndGet();
+//                hits.incrementAndGet();
                 return localState.values[position];
             }
         }
     }
     
-    private V load(long key, long keyHash, ModelState modelState)
+    private V load(long key, long keyHash)
     {
-        synchronized(writeLock)
+        CacheState localState = state;
+        
+        // no need to handle zero key here - is handled as special case in get();
+        int position = (int) (keyHash & localState.positionMask);
+        long currentKey = localState.keys[position];       
+
+        // small chance another thread added our value before we got our lock
+        if(currentKey == key) return localState.values[position];
+
+        if(currentKey == 0)
         {
-            CacheState localState = state;
-            
-            // no need to handle zero key here - is handled as special case in get();
-            int position = (int) (keyHash & localState.positionMask);
-            long currentKey = localState.keys[position];       
-
-            // small chance another thread added our value before we got our lock
-            if(currentKey == key) return localState.values[position];
-
-            if(currentKey == 0)
+            V result = loader.load(key);
+            synchronized(writeLock)
             {
-                localState.keys[position] = key;
-                V result = loader.load(modelState);
-                localState.values[position] = result;
-                if(++size >= maxFill) expand(); 
-                return result;
-            }
-
-            while (true) 
-            {
-                position = (position + 1) & localState.positionMask;
-                currentKey = localState.keys[position];
-                
-                if(currentKey == 0)
+                //Abort save if another thread took our spot or expanded array.
+                //Will simply reload if necessary next time.
+                if(state.keys[position] == 0 && state.positionMask == localState.positionMask)
                 {
                     localState.keys[position] = key;
-                    V result = loader.load(modelState);
                     localState.values[position] = result;
                     if(++size >= maxFill) expand(); 
-                    return result;
                 }
-                
-                // small chance another thread added our value before we got our lock
-                if(currentKey == key) return localState.values[position];
             }
+            return result;
         }
+
+        while (true) 
+        {
+            position = (position + 1) & localState.positionMask;
+            currentKey = localState.keys[position];
+            
+            if(currentKey == 0)
+            {
+                V result = loader.load(key);
+                synchronized(writeLock)
+                {
+                    //Abort save if another thread took our spot or expanded array.
+                    //Will simply reload if necessary next time.
+                    if(state.keys[position] == 0 && state.positionMask == localState.positionMask)
+                    {
+                        localState.keys[position] = key;
+                        localState.values[position] = result;
+                        if(++size >= maxFill) expand(); 
+                    }
+                }
+                return result;
+            }
+            
+            // small chance another thread added our value before we got our lock
+            if(currentKey == key) return localState.values[position];
+        }
+        
     }
     
     @SuppressWarnings("unchecked")

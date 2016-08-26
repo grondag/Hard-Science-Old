@@ -1,7 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import java.util.ArrayList;
-
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 
 /**
