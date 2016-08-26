@@ -15,13 +15,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
 {    
     public ModelFlowJoinComponent(int ordinal, boolean useWorldState)
     {
-        super(ordinal, useWorldState);
-    }
-
-    @Override
-    public long getValueCount()
-    {
-        return FlowHeightState.STATE_BIT_MASK;
+        super(ordinal, useWorldState, FlowHeightState.STATE_BIT_MASK);
     }
 
     @Override

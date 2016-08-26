@@ -15,13 +15,7 @@ public class ModelCornerJoinComponent extends ModelStateComponent<ModelCornerJoi
     
     public ModelCornerJoinComponent(int ordinal, boolean useWorldState)
     {
-        super(ordinal, useWorldState);
-    }
-
-    @Override
-    public long getValueCount()
-    {
-        return CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT;
+        super(ordinal, useWorldState, CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
     }
 
     @Override

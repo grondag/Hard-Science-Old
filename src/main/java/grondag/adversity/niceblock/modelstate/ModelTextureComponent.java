@@ -14,14 +14,8 @@ public class ModelTextureComponent extends ModelStateComponent<ModelTextureCompo
 
     public ModelTextureComponent(int ordinal, int alternateCount)
     {
-        super(ordinal, alternateCount > 1);
+        super(ordinal, alternateCount > 1, alternateCount);
         alternator = Alternator.getAlternator(alternateCount);
-    }
-
-    @Override
-    public long getValueCount()
-    {
-        return alternator.getAlternateCount();
     }
 
     @Override

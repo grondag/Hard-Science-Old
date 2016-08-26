@@ -1,11 +1,13 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
+
 import grondag.adversity.library.model.ItemModelDelegate2;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
@@ -42,6 +44,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -52,18 +55,20 @@ public class ModelDispatcher2 implements IBakedModel
     private final ModelFactory2[] models;
     private final ModelStateSet stateSet;
     private final boolean renderLayerFlags[] = new boolean[BlockRenderLayer.values().length];
+    private final boolean shadedFlag;
     private final SparseLayerMapBuilder layerMapBuilder;
     private final ICollisionHandler collisionHandler;
     
     private TextureAtlasSprite particleTexture;
     
     //TODO: consider fastutil?
-    private final Cache<Long, SparseLayerMap> modelCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build();
+    
+    private final BlockCacheLoader blockLoader = new BlockCacheLoader();
+    private final LoadingCache<ModelState, SparseLayerMap> modelCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(blockLoader);
     private final Cache<Long, SimpleItemBlockModel> itemCache = CacheBuilder.newBuilder().maximumSize(0xFFF).build();
     
-    private ThreadLocal<Integer> lastLayer = new ThreadLocal<Integer>();
-    private ThreadLocal<IBlockState> lastState = new ThreadLocal<IBlockState>();
-    private ThreadLocal<QuadContainer> lastContainer = new ThreadLocal<QuadContainer>();
+    private ThreadLocal<Long> lastStateKey = new ThreadLocal<Long>();
+    private ThreadLocal<SparseLayerMap> lastLayerMap = new ThreadLocal<SparseLayerMap>();
     
     public ModelDispatcher2(String particleTextureName, ModelFactory2... models)
     {
@@ -76,6 +81,7 @@ public class ModelDispatcher2 implements IBakedModel
 
         ArrayList<ICollisionHandler> collisionHandlers = new ArrayList<>();
 
+        boolean isShaded = false;
         for(int i = 0; i < models.length; i++)
         {
             groups[i] = models[i].getStateGroup();
@@ -92,8 +98,10 @@ public class ModelDispatcher2 implements IBakedModel
                     layerList.add(layer);
                 }
             }
+            isShaded = isShaded || models[i].modelInputs.isShaded;
         }
-        
+        this.shadedFlag = isShaded;
+       
         if(collisionHandlers.isEmpty())
         {
             this.collisionHandler = null;
@@ -184,7 +192,28 @@ public class ModelDispatcher2 implements IBakedModel
     @Override
     public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)
     {
+        if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
 
+        ModelState modelState = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_STATE);
+        
+        if(this.lastStateKey.get() != modelState.stateValue.getKey())
+        {
+            this.lastStateKey.set(modelState.stateValue.getKey());
+            this.lastLayerMap.set(modelCache.getUnchecked(modelState));
+        }
+        
+        return lastLayerMap.get().get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
+    }
+    
+    private class BlockCacheLoader extends CacheLoader<ModelState, SparseLayerMap>
+    {
+
+        @Override
+        public SparseLayerMap load(ModelState key) throws Exception
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }       
     }
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
@@ -195,9 +224,7 @@ public class ModelDispatcher2 implements IBakedModel
     @Override
     public boolean isAmbientOcclusion()
     {
-        BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-        if (layer == null || controllers[layer.ordinal()] == null) return true;
-        return controllers[layer.ordinal()].isShaded;
+        return this.shadedFlag;
     }
     
     @Override

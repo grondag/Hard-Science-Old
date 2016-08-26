@@ -15,23 +15,17 @@ public class ModelRotationComponent extends ModelStateComponent<ModelRotationCom
 
     public ModelRotationComponent(int ordinal)
     {
-        super(ordinal, true);
+        super(ordinal, true, 4);
         alternator = Alternator.getAlternator(4);
     }
 
     /** use this when want to force no rotation */
     public ModelRotationComponent(int ordinal, boolean noRotate)
     {
-        super(ordinal, true);
+        super(ordinal, true, 1);
         alternator = Alternator.getAlternator(1);
     }
     
-    @Override
-    public long getValueCount()
-    {
-        return alternator.getAlternateCount();
-    }
-
     @Override
     public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {

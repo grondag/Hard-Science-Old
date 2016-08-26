@@ -59,7 +59,7 @@ public class ModelStateSet
             {
                 parts.add(c.createValueFromBits((key >> shiftBits[c.getOrdinal()]) & c.getBitMask())); 
             }
-            return new ModelStateSetValue(parts.toArray(null)); 
+            return new ModelStateSetValue(key, parts); 
         }
     });
     
@@ -199,15 +199,15 @@ public class ModelStateSet
         private final long key;
         private final long[]groupKeys;
         
-        private ModelStateSetValue(ModelStateValue<?,?>... valuesIn)
+        private ModelStateSetValue(Long key, ArrayList<ModelStateValue<?,?>> valuesIn)
         {
+            this.key = key;
             values = new ModelStateValue<?,?>[typeCount];
             for(ModelStateValue<?,?> v : valuesIn)
             {
                 int index = getIndexForType(v.getComponent());
                 values[index] = v;
             }
-            key = computeKey(valuesIn);
             
             //pre-compute group keys
             groupKeys = new long[groups.length];

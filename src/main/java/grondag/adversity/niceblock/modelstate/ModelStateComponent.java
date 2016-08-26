@@ -11,12 +11,16 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     private final int bitLength;
     private final long bitMask;
     private final int ordinal;
+    private final long valueCount;
     private final boolean useWorldState;
     
-    public ModelStateComponent(int ordinal, boolean useWorldState)
+    public ModelStateComponent(int ordinal, boolean useWorldState, long valueCount)
     {
+        this.valueCount = valueCount;
+        bitLength = Long.SIZE - Long.numberOfLeadingZeros(valueCount);
+
+        // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
         long mask = 0L;
-        bitLength = Long.SIZE - Long.numberOfLeadingZeros(getValueCount());
         for(int i = 0; i < bitLength; i++)
         {
             mask |= (1L << i);
@@ -26,15 +30,16 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
         this.useWorldState = useWorldState;
     }
     
-    public ModelStateComponent(int ordinal)
+    public ModelStateComponent(int ordinal, long valueCount)
     {
-        this(ordinal, false);
+        this(ordinal, false, valueCount);
     }
 
-    abstract public long getValueCount();
     abstract public T createValueFromBits(long bits);
     abstract public Class<T> getStateType();
     abstract public Class<V> getValueType();
+    
+    public final long getValueCount() { return this.valueCount; }
     
     /** override if can derive state from meta or neighbor blocks */
     public boolean canRefreshFromWorld() { return useWorldState; }

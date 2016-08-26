@@ -14,14 +14,8 @@ public class ModelColorMapComponent extends ModelStateComponent<ModelColorMapCom
     
     public ModelColorMapComponent(int ordinal, IColorMapProvider colorProvider, boolean useMeta)
     {
-        super(ordinal, useMeta);
+        super(ordinal, useMeta, colorProvider.getColorMapCount());
         this.colorProvider = colorProvider;
-    }
-
-    @Override
-    public long getValueCount()
-    {
-        return colorProvider.getColorMapCount();
     }
 
     @Override

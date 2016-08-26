@@ -4,15 +4,9 @@ import grondag.adversity.library.joinstate.SimpleJoin;
 
 public class ModelSimpleJoinComponent extends ModelStateComponent<ModelSimpleJoinComponent.ModelSimpleJoin, SimpleJoin>
 {
-    public ModelSimpleJoinComponent(int ordinal)
+    public ModelSimpleJoinComponent(int ordinal, boolean useWorldState)
     {
-        super(ordinal);
-    }
-
-    @Override
-    public long getValueCount()
-    {
-        return SimpleJoin.STATE_COUNT;
+        super(ordinal, useWorldState, SimpleJoin.STATE_COUNT);
     }
 
     @Override

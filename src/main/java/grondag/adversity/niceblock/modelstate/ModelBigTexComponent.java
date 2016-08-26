@@ -13,13 +13,7 @@ public class ModelBigTexComponent extends ModelStateComponent<ModelBigTexCompone
 {
     public ModelBigTexComponent(int ordinal)
     {
-        super(ordinal, true);
-    }
-
-    @Override
-    public long getValueCount()
-    {
-        return 0xFFF;
+        super(ordinal, true, 0xFFF);
     }
 
     @Override

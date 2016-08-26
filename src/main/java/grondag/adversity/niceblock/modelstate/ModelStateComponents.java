@@ -50,7 +50,9 @@ public class ModelStateComponents
 {
     // used by registration
     private static int counter = 0;
-    private static ArrayList<ModelStateComponent<?,?>> list = new ArrayList<ModelStateComponent<?,?>>(20);
+    private static final ModelStateComponent<?,?>[] MODEL_STATE_COMPONENTS = new ModelStateComponent<?,?>[45];
+
+//    private static ArrayList<ModelStateComponent<?,?>> list = new ArrayList<ModelStateComponent<?,?>>(20);
 
     public static final ModelAxisComponent AXIS_DYNAMIC = register(new ModelAxisComponent(counter++, true));
     public static final ModelAxisComponent AXIS_STATIC = register(new ModelAxisComponent(counter++, false));
@@ -69,19 +71,10 @@ public class ModelStateComponents
 
     public static final ModelColorMapComponent BLOCK_COLORS = register(new ModelColorMapComponent(counter++, BlockColorMapProvider.INSTANCE, false));
     
-    private static final ModelStateComponent<?,?>[] MODEL_STATE_COMPONENTS;
-    
-    static
-    {
-        MODEL_STATE_COMPONENTS = list.toArray(null);
-        
-        // prevent unintentional use
-        list = null;
-    }
     
     public static int getCount()
     {
-        return MODEL_STATE_COMPONENTS.length;
+        return counter;
     }
     
     public static ModelStateComponent<?,?> get(int index)
@@ -91,7 +84,7 @@ public class ModelStateComponents
     
     private static <T extends ModelStateComponent<?,?>> T register(T c)
     {
-        list.add(c);
+        MODEL_STATE_COMPONENTS[c.getOrdinal()] = c;
         return c;
     }
 }

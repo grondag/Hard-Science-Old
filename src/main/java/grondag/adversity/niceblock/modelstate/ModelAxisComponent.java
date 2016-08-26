@@ -14,7 +14,7 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.M
     
     public ModelAxisComponent(int ordinal, boolean useWorldState)
     {
-        super(ordinal, useWorldState);
+        super(ordinal, useWorldState, EnumFacing.Axis.values().length);
         LOOKUP[EnumFacing.Axis.X.ordinal()] = new ModelAxis(EnumFacing.Axis.X);
         LOOKUP[EnumFacing.Axis.Y.ordinal()] = new ModelAxis(EnumFacing.Axis.Y);
         LOOKUP[EnumFacing.Axis.Z.ordinal()] = new ModelAxis(EnumFacing.Axis.Z);
@@ -30,12 +30,6 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.M
     {
         return Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
     } 
-
-    @Override
-    public long getValueCount()
-    {
-        return EnumFacing.Axis.values().length;
-    }
 
     @Override
     public ModelAxis createValueFromBits(long bits)
