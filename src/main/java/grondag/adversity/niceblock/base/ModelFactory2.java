@@ -101,6 +101,12 @@ public abstract class ModelFactory2
         return retVal;
     }
     
+    /** used by dispatched as default particle texture */
+    public String getDefaultParticleTexture() 
+    { 
+    	return buildTextureName(modelInputs.textureName, 0);
+    }
+    
     public static String buildTextureName(String baseName, int offset)
     {
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);

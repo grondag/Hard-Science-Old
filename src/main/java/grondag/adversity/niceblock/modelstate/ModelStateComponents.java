@@ -1,6 +1,10 @@
 package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
+import grondag.adversity.niceblock.color.ColorMap;
+import grondag.adversity.niceblock.color.FixedColorMapProvider;
+import grondag.adversity.niceblock.color.HueSet.Tint;
+import grondag.adversity.niceblock.color.NiceHues.Hue;
 
 /**
  * axis
@@ -67,8 +71,9 @@ public class ModelStateComponents
     
     public static final ModelBigTexComponent BIG_TEX = register(new ModelBigTexComponent(counter++));
 
-    public static final ModelColorMapComponent BLOCK_COLORS = register(new ModelColorMapComponent(counter++, BlockColorMapProvider.INSTANCE, false));
-    
+    public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, BlockColorMapProvider.INSTANCE, false));
+    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, 
+    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE)), true));
     
     public static int getCount()
     {

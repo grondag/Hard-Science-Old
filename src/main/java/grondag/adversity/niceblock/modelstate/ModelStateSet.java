@@ -9,7 +9,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -157,6 +157,15 @@ public class ModelStateSet
         return mask;
     }
     
+    public ModelColorMapComponent getFirstColorMapComponent()
+    {
+    	for(ModelStateComponent<?,?> c : includedTypes)
+    	{
+    		if(c instanceof ModelColorMapComponent) return (ModelColorMapComponent) c;
+    	}
+    	return null;
+    }
+    
     public ModelStateSetValue getValue(ModelStateValue<?,?>... components)
     {
         return valueCache.getUnchecked(computeKey(components));
@@ -171,7 +180,7 @@ public class ModelStateSet
     
     public boolean canRefreshFromWorld() { return this.usesWorldState; }
     
-    public long getRefreshedKeyFromWorld(long startingKey, NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getRefreshedKeyFromWorld(long startingKey, NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         if(!this.usesWorldState) return startingKey;
         

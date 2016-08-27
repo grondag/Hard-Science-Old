@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -45,7 +45,7 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     public boolean canRefreshFromWorld() { return useWorldState; }
 
     /** override if can derive state from meta or neighbor blocks */
-    public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
+    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
 
     // another option vs. statically defining in each subclass
 //    @SuppressWarnings("unchecked")

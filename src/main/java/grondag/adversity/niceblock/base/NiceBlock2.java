@@ -1,9 +1,8 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.NiceBlockRegistrar2;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
-import grondag.adversity.niceblock.modelstate.ModelStateProperty;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -25,10 +24,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -53,7 +54,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
  * If block getLightValue > 0 and lightOpacity > 0
  * then block stays lit when nearby light sources are removed.
  */
-public class NiceBlock extends Block // implements IWailaProvider
+public class NiceBlock2 extends Block // implements IWailaProvider
 {
 
     /**
@@ -65,7 +66,6 @@ public class NiceBlock extends Block // implements IWailaProvider
      * Contains state passed from getExtendedState to handleBlockState. Using a custom unlisted property because we need large int values and the vanilla implementation enumerates
      * all allowed values into a hashmap... Plus this hides the implementation from the block.
      */
-    public static final ModelStateProperty MODEL_STATE = new ModelStateProperty();
     public static final ModelKeyProperty MODEL_KEY = new ModelKeyProperty();
 
     /**
@@ -79,9 +79,13 @@ public class NiceBlock extends Block // implements IWailaProvider
     private final String styleName;
 
     /**
+     * Use in UI
+     */
+    private final String displayName;
+    /**
      * Item for this block. Will have same meta variants as this block. Instantiated and retained here for convenience and to enable consistent handling.
      */
-    public final NiceItemBlock item;
+    public final NiceItemBlock2 item;
 
     /**
      * CAN BE NULL! If non-null, blocks requires special collision handling, typically because it is not a standard cube shape. Retrieved from model cook book at instantiation and
@@ -106,37 +110,48 @@ public class NiceBlock extends Block // implements IWailaProvider
      */
     private final TLongObjectHashMap<AxisAlignedBB> combinedBounds;
 
-    public final BlockModelHelper blockModelHelper;
+    public final ModelDispatcher2 dispatcher;
+    
+    private boolean isGlowing;
 
-    public NiceBlock(BlockModelHelper blockModelHelper, BaseMaterial material, String styleName)
+    public NiceBlock2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName)
+    {
+        this(dispatcher, material, styleName, false);
+    }
+    
+    public NiceBlock2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName, boolean isGlowing)
     {
         super(material.material);
         this.material = material;
+        this.isGlowing = isGlowing;
         this.styleName = styleName;
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
         setStepSound(material.stepSound);
         setHardness(material.hardness);
         setResistance(material.resistance);
-        this.blockModelHelper = blockModelHelper;
-        blockModelHelper.setBlock(this);
+        this.dispatcher = dispatcher;
         this.setRegistryName(material.materialName + "." + styleName);
         this.setUnlocalizedName(this.getRegistryName().toString());
+        
+        String makeName = I18n.translateToLocal(getStyleName());
+        if(makeName == null || makeName == "") makeName = getStyleName();
+        displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
 
-        collisionHandler = blockModelHelper.dispatcher.getCollisionHandler();
+        collisionHandler = dispatcher.getCollisionHandler();
         modelBounds = collisionHandler == null ? null : new TLongObjectHashMap<List<AxisAlignedBB>>();
         combinedBounds = collisionHandler == null ? null :  new TLongObjectHashMap<AxisAlignedBB>();
 
-        item = new NiceItemBlock(this);
+        item = new NiceItemBlockColor(this);
 
         // let registrar know to register us when appropriate
-        NiceBlockRegistrar.allBlocks.add(this);
+        NiceBlockRegistrar2.allBlocks.add(this);
     }
 
     @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_STATE, MODEL_KEY });
+        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_KEY });
     }
 
     // BASIC METADATA MECHANICS
@@ -145,7 +160,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
-        list.addAll(blockModelHelper.getSubItems());
+        list.addAll(item.getSubItems());
     }
 
     @Override
@@ -167,6 +182,11 @@ public class NiceBlock extends Block // implements IWailaProvider
         return super.getLocalizedName();
     }
 
+    public String getDisplayName()
+    {
+    	return displayName;
+    }
+    
     // INTERACTION HANDLING
 
     @Override
@@ -185,24 +205,20 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public BlockRenderLayer getBlockLayer()
     {
-        return blockModelHelper.dispatcher.canRenderInLayer(BlockRenderLayer.TRANSLUCENT)
+        return dispatcher.canRenderInLayer(BlockRenderLayer.TRANSLUCENT)
         		? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
     }
 
     @Override
     public boolean canRenderInLayer(BlockRenderLayer layer)
     {
-        return blockModelHelper.dispatcher.canRenderInLayer(layer);
+        return dispatcher.canRenderInLayer(layer);
     }
 
     @Override
     public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        if(blockModelHelper.hasCustomBrightness()){
-            return blockModelHelper.getCustomBrightness(state, source, pos); 
-        } else {
-            return super.getPackedLightmapCoords(state, source, pos);
-        }
+        return this.isGlowing ? 15 << 20 | 15 << 4 : super.getPackedLightmapCoords(state, source, pos);
     }
   
 //  private long elapsedTime;
@@ -214,7 +230,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return blockModelHelper.getExtendedState(state, world, pos);
+        return ((IExtendedBlockState)state).withProperty(MODEL_KEY, dispatcher.getRefreshedKeyFromWorld(0, this, state, world, pos));
     }
 
     /**

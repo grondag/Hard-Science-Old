@@ -3,28 +3,21 @@ package grondag.adversity.niceblock.base;
 import grondag.adversity.Adversity;
 
 import grondag.adversity.library.model.ItemModelDelegate2;
-import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.QuadContainer2;
 import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.modelstate.ModelState;
+import grondag.adversity.niceblock.NiceBlockRegistrar2;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.state.IBlockState;
@@ -36,7 +29,6 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -47,8 +39,6 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.common.property.IExtendedBlockState;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 
 public class ModelDispatcher2 implements IBakedModel
 {
@@ -104,10 +94,15 @@ public class ModelDispatcher2 implements IBakedModel
 			return new SimpleItemBlockModel(builder.build(), isAmbientOcclusion());
 		}       
     }
+  
+    public ModelDispatcher2(ModelFactory2... models)
+    {
+    	this(models[0].getDefaultParticleTexture(), models);
+    }
     
     public ModelDispatcher2(String particleTextureName, ModelFactory2... models)
     {
-        this.particleTextureName = "adversity:blocks/" + particleTextureName;
+        this.particleTextureName = particleTextureName;
         this.models = models;
         
         ArrayList<BlockRenderLayer> layerList = new ArrayList<BlockRenderLayer>();
@@ -148,13 +143,13 @@ public class ModelDispatcher2 implements IBakedModel
         
         layerMapBuilder = new SparseLayerMapBuilder(layerList);
    
-        NiceBlockRegistrar.allDispatchers2.add(this);
+        NiceBlockRegistrar2.allDispatchers.add(this);
     }
         
     /** 
      * Updated model state key from world.  
      */
-    public long getRefreshedKeyFromWorld(long oldKey, NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getRefreshedKeyFromWorld(long oldKey, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         //TODO: make this side-aware, states only need to be refreshed on server if matter for collision detection
         //TODO: handle block test somehow
@@ -211,6 +206,11 @@ public class ModelDispatcher2 implements IBakedModel
         return Adversity.MODID + ":" + resourceName;
     }
 
+    public ModelStateSet getStateSet() 
+    {
+    	return this.stateSet;
+    }
+    
     @Override
     public TextureAtlasSprite getParticleTexture()
     {
@@ -226,7 +226,7 @@ public class ModelDispatcher2 implements IBakedModel
     {
         if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
 
-        long key = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_KEY);
+        long key = ((IExtendedBlockState)state).getValue(NiceBlock2.MODEL_KEY);
         
         return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
     }

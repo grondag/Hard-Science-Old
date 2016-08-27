@@ -56,20 +56,20 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher2> allDispatchers2 = new LinkedList<ModelDispatcher2>();
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
-    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColorMapProvider(
-            ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
-            new ColorController("raw_flexstone", 4, BlockRenderLayer.SOLID, true, true));
-    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
-    
-    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColorMapProvider(
-            ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
-            new ColorController("raw_durastone", 4, BlockRenderLayer.SOLID, true, true));
-    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
-
-    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcherBasic(
-            BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new ColorController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
-    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new ColorHelperPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
+//    public static final ModelDispatcher MODEL_FLEXSTONE_RAW = new ModelDispatcherBasic(new FixedColorMapProvider(
+//            ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE)), "raw_flexstone_0_0",
+//            new ColorController("raw_flexstone", 4, BlockRenderLayer.SOLID, true, true));
+//    public static final NiceBlock BLOCK_FLEXSTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_FLEXSTONE_RAW), BaseMaterial.FLEXSTONE, "raw");
+//    
+//    public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColorMapProvider(
+//            ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
+//            new ColorController("raw_durastone", 4, BlockRenderLayer.SOLID, true, true));
+//    public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
+//
+//    public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcherBasic(
+//            BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new ColorController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
+//    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new ColorHelperPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
 
     public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColorMapProvider(4), "cool_basalt_0_0",
             new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
