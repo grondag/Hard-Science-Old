@@ -67,7 +67,7 @@ public abstract class ModelFactory2
     public ModelStateGroup getStateGroup() { return stateGroup; }
     
     public abstract QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
-    public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
+    public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state);
     
     /**
      * Override if special collision handling is needed due to non-cubic shape.
@@ -105,6 +105,8 @@ public abstract class ModelFactory2
     {
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
     }
+    
+    public boolean isShaded() { return modelInputs.isShaded; }
     
     public static class ModelInputs
     {

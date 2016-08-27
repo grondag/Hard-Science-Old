@@ -92,13 +92,18 @@ public class ModelDispatcher2 implements IBakedModel
     private class ItemCacheLoader implements SimpleCacheLoader<SimpleItemBlockModel>
     {
 		@Override
-		public SimpleItemBlockModel load(long key) {
-			// TODO Auto-generated method stub
-			return null;
+		public SimpleItemBlockModel load(long key) 
+		{
+			ModelStateSetValue state = stateSet.getSetValueFromBits(key);
+	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+			
+			for(ModelFactory2 model : models)
+			{
+				builder.addAll(model.getItemQuads(state));
+			}
+			return new SimpleItemBlockModel(builder.build(), isAmbientOcclusion());
 		}       
     }
-//    private ThreadLocal<Long> lastStateKey = new ThreadLocal<Long>();
-//    private ThreadLocal<SparseLayerMap> lastLayerMap = new ThreadLocal<SparseLayerMap>();
     
     public ModelDispatcher2(String particleTextureName, ModelFactory2... models)
     {
@@ -223,18 +228,13 @@ public class ModelDispatcher2 implements IBakedModel
 
         long key = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_KEY);
         
-//        if(this.lastStateKey.get() != key)
-//        {
-//            this.lastStateKey.set(key);
-//            this.lastLayerMap.set(modelCache.get(key));
-//        }
-        
         return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
     }
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        
+        long key = stack.getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+        return itemCache.get(key);
     }
 
     @Override

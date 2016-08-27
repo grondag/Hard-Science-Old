@@ -58,10 +58,8 @@ public class ColorModelFactory2 extends ModelFactory2
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
     {
-        if (renderLayer != modelInputs.renderLayer) return QuadFactory.EMPTY_QUAD_LIST;
-
         CubeInputs cubeInputs = getCubeInputs(state);
         cubeInputs.isItem = true;
         cubeInputs.isOverlay = modelInputs.renderLayer != BlockRenderLayer.SOLID;

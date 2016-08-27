@@ -21,6 +21,8 @@ import net.minecraft.world.World;
  */
 public class NiceItemBlock extends ItemBlock implements IItemColor{
 
+	public static String ITEM_MODEL_KEY_TAG = "AMS";
+	
 	public NiceItemBlock(Block block) {
 		super(block);
 		setHasSubtypes(true);
