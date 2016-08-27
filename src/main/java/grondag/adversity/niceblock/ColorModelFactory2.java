@@ -1,19 +1,14 @@
 package grondag.adversity.niceblock;
 
+
+import grondag.adversity.library.model.QuadContainer2;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelFactory2;
 import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.modelstate.ModelTextureComponent;
-import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
-import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
-import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateGroup;
-
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -31,14 +26,14 @@ public class ColorModelFactory2 extends ModelFactory2
         super(modelInputs, components);
     }
 
-    private CubeInputs getCubeInputs(ModelState modelState)
+    private CubeInputs getCubeInputs(ModelStateSetValue state)
     {
         CubeInputs result = new CubeInputs();
-        ColorMap colorMap = modelState.stateValue.getValue(colorComponent);
+        ColorMap colorMap = state.getValue(colorComponent);
         result.color = colorMap.getColor(EnumColorMap.BASE);
-        result.textureRotation = modelState.stateValue.getValue(rotationComponent);
+        result.textureRotation = state.getValue(rotationComponent);
         result.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                buildTextureName(modelInputs.textureName, modelState.stateValue.getValue(textureComponent)));
+                buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
         result.isShaded = modelInputs.isShaded;
         result.u0 = 0;
         result.v0 = 0;
@@ -49,18 +44,25 @@ public class ColorModelFactory2 extends ModelFactory2
     }
     
 	@Override
-	public List<BakedQuad> getFaceQuads(ModelState modelState, BlockRenderLayer renderLayer, EnumFacing face)
+	public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if (face == null || renderLayer != modelInputs.renderLayer) return QuadFactory.EMPTY_QUAD_LIST;
-        return getCubeInputs(modelState).makeFace(face);
+		if(renderLayer == modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
+		CubeInputs cube = getCubeInputs(state);
+		QuadContainer2.QuadContainerBuilder builder = new QuadContainer2.QuadContainerBuilder();
+		builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
+		for(EnumFacing face : EnumFacing.values())
+		{
+			builder.setQuads(face, cube.makeFace(face));
+		}
+        return builder.build();
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelState modelState, BlockRenderLayer renderLayer)
+    public List<BakedQuad> getItemQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
         if (renderLayer != modelInputs.renderLayer) return QuadFactory.EMPTY_QUAD_LIST;
 
-        CubeInputs cubeInputs = getCubeInputs(modelState);
+        CubeInputs cubeInputs = getCubeInputs(state);
         cubeInputs.isItem = true;
         cubeInputs.isOverlay = modelInputs.renderLayer != BlockRenderLayer.SOLID;
 

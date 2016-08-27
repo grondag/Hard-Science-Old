@@ -4,6 +4,7 @@ import grondag.adversity.Adversity;
 
 import grondag.adversity.library.model.ItemModelDelegate2;
 import grondag.adversity.library.model.QuadContainer;
+import grondag.adversity.library.model.QuadContainer2;
 import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
@@ -12,6 +13,7 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
 import java.util.ArrayList;
@@ -61,11 +63,40 @@ public class ModelDispatcher2 implements IBakedModel
     
     private TextureAtlasSprite particleTexture;
 
-    private final SimpleCacheLoader<SparseLayerMap> blockLoader = new BlockCacheLoader();
-    private final SimpleLoadingCache<SparseLayerMap> modelCache = new SimpleLoadingCache<SparseLayerMap>(blockLoader, 1024);
-    private final SimpleCacheLoader<SimpleItemBlockModel> itemLoader = new ItemCacheLoader();
-    private final SimpleLoadingCache<SimpleItemBlockModel> itemCache = new SimpleLoadingCache<SimpleItemBlockModel>(itemLoader, 256);
+
+    private final SimpleLoadingCache<SparseLayerMap> modelCache = new SimpleLoadingCache<SparseLayerMap>(new BlockCacheLoader(), 1024);
+    private final SimpleLoadingCache<SimpleItemBlockModel> itemCache = new SimpleLoadingCache<SimpleItemBlockModel>( new ItemCacheLoader(), 256);
     
+    
+    private class BlockCacheLoader implements SimpleCacheLoader<SparseLayerMap>
+    {
+		@Override
+		public SparseLayerMap load(long key) {
+			
+			ModelStateSetValue state = stateSet.getSetValueFromBits(key);
+			
+			SparseLayerMap result = layerMapBuilder.makeNewMap();
+			for(BlockRenderLayer layer : BlockRenderLayer.values())
+			{
+				ArrayList<QuadContainer2> containers = new ArrayList<QuadContainer2>();
+				for(ModelFactory2 model : models)
+				{
+					containers.add(model.getFaceQuads(state, layer));
+				}
+				result.set(layer, QuadContainer2.merge(containers));
+			}
+			return result;
+		}       
+    }
+    
+    private class ItemCacheLoader implements SimpleCacheLoader<SimpleItemBlockModel>
+    {
+		@Override
+		public SimpleItemBlockModel load(long key) {
+			// TODO Auto-generated method stub
+			return null;
+		}       
+    }
 //    private ThreadLocal<Long> lastStateKey = new ThreadLocal<Long>();
 //    private ThreadLocal<SparseLayerMap> lastLayerMap = new ThreadLocal<SparseLayerMap>();
     
@@ -199,17 +230,6 @@ public class ModelDispatcher2 implements IBakedModel
 //        }
         
         return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
-    }
-    
-    private class BlockCacheLoader extends CacheLoader<ModelState, SparseLayerMap>
-    {
-
-        @Override
-        public SparseLayerMap load(ModelState key) throws Exception
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }       
     }
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)

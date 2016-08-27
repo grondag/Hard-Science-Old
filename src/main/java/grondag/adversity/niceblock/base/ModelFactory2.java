@@ -2,18 +2,16 @@ package grondag.adversity.niceblock.base;
 
 import java.util.List;
 
-import grondag.adversity.niceblock.base.ModelFactory2.ModelInputs;
-import grondag.adversity.niceblock.color.IColorMapProvider;
+import grondag.adversity.library.model.QuadContainer2;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
-import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.modelstate.ModelTextureComponent;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.event.ModelBakeEvent;
 
 /**
@@ -68,8 +66,8 @@ public abstract class ModelFactory2
 
     public ModelStateGroup getStateGroup() { return stateGroup; }
     
-    public abstract List<BakedQuad> getFaceQuads(ModelState modelState, BlockRenderLayer renderLayer, EnumFacing face);
-    public abstract List<BakedQuad> getItemQuads(ModelState modelState, BlockRenderLayer renderLayer);
+    public abstract QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
+    public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
     
     /**
      * Override if special collision handling is needed due to non-cubic shape.

@@ -30,23 +30,19 @@ public class SparseLayerMapBuilder
     
     public class SparseLayerMap
     {
-        private final QuadContainer[] values;
+        private final QuadContainer2[] values = new QuadContainer2[size];
         
         private SparseLayerMap()
         {
-            this.values = new QuadContainer[size];
-            for(int i = 0; i < size; i++)
-            {
-                values[i] = new QuadContainer();
-            }
+        	//NOOP - just making it private
         }
         
-        public QuadContainer get(BlockRenderLayer layer)
+        public QuadContainer2 get(BlockRenderLayer layer)
         {
             return values[layerIndices[layer.ordinal()]];
         }
         
-        public void set(BlockRenderLayer layer, QuadContainer value)
+        public void set(BlockRenderLayer layer, QuadContainer2 value)
         {
             values[layerIndices[layer.ordinal()]] = value;
         }
