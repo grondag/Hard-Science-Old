@@ -3,6 +3,7 @@ package grondag.adversity;
 
 import grondag.adversity.feature.volcano.Volcano;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.NiceBlockRegistrar2;
 import grondag.adversity.simulator.Simulator;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,6 +23,8 @@ public class CommonProxy {
 		
 		Volcano.preInit(event);
 		NiceBlockRegistrar.preInit(event);
+        NiceBlockRegistrar2.preInit(event);
+		
 		// TODO: reenable Waila when it is ported
         if (Loader.isModLoaded("Waila")){
        //     WailaDataProvider.register();
@@ -35,6 +38,7 @@ public class CommonProxy {
       //  Simulator.instance.init(event);
 		Volcano.init(event);
 		NiceBlockRegistrar.init(event);
+        NiceBlockRegistrar2.init(event);
 	}
 
 	public void postInit(FMLPostInitializationEvent event) {

@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.base;
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar2;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
+import grondag.adversity.niceblock.modelstate.ModelState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -18,6 +19,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -142,7 +144,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         modelBounds = collisionHandler == null ? null : new TLongObjectHashMap<List<AxisAlignedBB>>();
         combinedBounds = collisionHandler == null ? null :  new TLongObjectHashMap<AxisAlignedBB>();
 
-        item = new NiceItemBlockColor(this);
+        item = new NiceItemBlock2(this);
 
         // let registrar know to register us when appropriate
         NiceBlockRegistrar2.allBlocks.add(this);
@@ -160,9 +162,20 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
-        list.addAll(item.getSubItems());
+        list.addAll(getSubItems());
     }
 
+    public List<ItemStack> getSubItems()
+    {
+        int itemCount = (int) dispatcher.getStateSet().getFirstColorMapComponent().getValueCount();
+        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+        for(int i = 0; i < itemCount; i++)
+        {
+            itemBuilder.add(new ItemStack(this, 1, i));
+        }
+        return itemBuilder.build();
+    }
+    
     @Override
     public IBlockState getStateFromMeta(int meta)
     {
@@ -195,6 +208,15 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         return state.getValue(META);
     }
 
+    @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
+    {
+        ItemStack stack = new ItemStack(item, 1, 0);
+        long key = ((IExtendedBlockState)this.getExtendedState(state, world, pos)).getValue(MODEL_KEY);
+        stack.getTagCompound().setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
+        return stack;
+    }
+    
     // RENDERING-RELATED THINGS AND STUFF
     // Note that some of the methods here are called server-side.
     // (Ray tracing and collisions, mainly.)

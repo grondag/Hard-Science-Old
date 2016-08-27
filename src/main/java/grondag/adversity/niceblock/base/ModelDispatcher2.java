@@ -233,7 +233,7 @@ public class ModelDispatcher2 implements IBakedModel
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        long key = stack.getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+        long key = stack.getTagCompound().getLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG);
         return itemCache.get(key);
     }
 

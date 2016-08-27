@@ -2,7 +2,6 @@ package grondag.adversity.niceblock.base;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.entity.Entity;
@@ -18,7 +17,7 @@ import net.minecraft.world.World;
 /**
  * Provides sub-items and handles item logic for NiceBlocks.
  */
-public abstract class NiceItemBlock2 extends ItemBlock implements IItemColor
+public class NiceItemBlock2 extends ItemBlock implements IItemColor
 {
 
 	public static String ITEM_MODEL_KEY_TAG = "AMS";
@@ -38,22 +37,7 @@ public abstract class NiceItemBlock2 extends ItemBlock implements IItemColor
     {
         return damage;
     }
-
- 
-    public abstract int getItemModelCount();
-
-    public abstract List<ItemStack> getSubItems();
-    
-    public abstract long getModelKeyForSubItem(int itemIndex);
-    
-    public abstract int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player);
-    
-    public abstract void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, NiceTileEntity niceTE);
-    
-    public abstract long getModelKeyFromStack(ItemStack stack);
-
-    public abstract void updateItemStackForPickBlock(ItemStack stack, IBlockState blockState, NiceTileEntity niceTE);
-    
+         
 //    public List<String> getWailaBody(ItemStack itemStack, List<String> current tip, IWailaDataAccessor accessor, IWailaConfigHandler config)
 //    {
 //        List<String> retVal = new ArrayList<String>();
@@ -79,9 +63,7 @@ public abstract class NiceItemBlock2 extends ItemBlock implements IItemColor
         
         else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))
         {
-            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
-            
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, newMeta, playerIn);
+            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, stack.getMetadata(), playerIn);
 
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
             {
@@ -107,17 +89,16 @@ public abstract class NiceItemBlock2 extends ItemBlock implements IItemColor
      */
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
-    {
-        NiceBlock block = (NiceBlock)(this.block);
- 
+    { 
         if (!world.setBlockState(pos, newState, 3)) return false;
 
         if(newState.getBlock() instanceof NiceBlockPlus)
         {
-            NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
+            NiceTileEntity2 niceTE = (NiceTileEntity2)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                block.blockModelHelper.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+                niceTE.setModelKey(stack.getTagCompound().getLong(ITEM_MODEL_KEY_TAG));
+                niceTE.markDirty();
                 if(world.isRemote)
                 {
                     world.markBlockRangeForRenderUpdate(pos, pos);
