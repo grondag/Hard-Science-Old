@@ -5,7 +5,7 @@ import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -19,7 +19,7 @@ public class ModelCornerJoinComponent extends ModelStateComponent<ModelCornerJoi
     }
 
     @Override
-    public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(test);
         return CornerJoinBlockStateSelector.findIndex(tests);

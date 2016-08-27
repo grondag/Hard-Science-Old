@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
@@ -26,7 +27,7 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.M
     }
     
     @Override
-    public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
     } 

@@ -31,7 +31,7 @@ public class NiceItemBlockColor extends NiceItemBlock2
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
         for(int i = 0; i < getItemModelCount(); i++)
         {
-            itemBuilder.add(new ItemStack(block.item, 1, i));
+            itemBuilder.add(new ItemStack(this, 1, i));
         }
         return itemBuilder.build();
     }

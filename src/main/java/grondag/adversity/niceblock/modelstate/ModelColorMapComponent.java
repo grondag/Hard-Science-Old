@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.library.IBlockTest;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.IColorMapProvider;
 import net.minecraft.block.state.IBlockState;
@@ -19,9 +19,9 @@ public class ModelColorMapComponent extends ModelStateComponent<ModelColorMapCom
     }
 
     @Override
-    public long getBitsFromWorld(NiceBlock block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return (long) state.getValue(NiceBlock.META);
+        return (long) state.getValue(NiceBlock2.META);
     }
 
     @Override
