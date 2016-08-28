@@ -71,27 +71,27 @@ public class NiceBlockRegistrar
 //            new ColorController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
 //    public static final NiceBlockPlus BLOCK_FLEXSTONE_COLORED = new NiceBlockPlus(new ColorHelperPlus(MODEL_COLORED_STONE), BaseMaterial.FLEXSTONE, "smooth");
 
-    public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColorMapProvider(4), "cool_basalt_0_0",
-            new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
-            new HotBasaltController());
-    public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
-
-    public static final ModelDispatcherBasic MODEL_LAVA = new ModelDispatcherBasic(new NoColorMapProvider(16), "volcanic_lava_flow_0_0",
-            new FlowController("volcanic_lava_flow", 1, BlockRenderLayer.SOLID, LightingMode.FULLBRIGHT));
-    public static final NiceBlock BLOCK_LAVA = (NiceBlock) new LavaBlock(new FlowHeightHelper(MODEL_LAVA, 16), BaseMaterial.FLEXSTONE, "flowing_lava")
-        .setLightLevel(3F/15F);
-
-     
-    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColorMapProvider(16), "cool_basalt_0_0",
-            new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, LightingMode.SHADED));
-    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowHeightBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt");
-
-    public static final NiceBlock BLOCK_COOL_BASALT_FILLER = (NiceBlock) new FlowFillerBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt_filler");
-
-    public static final ModelDispatcher MODEL_CSG_TEST = new ModelDispatcherBasic(
-            BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new CSGController("colored_stone", 1, BlockRenderLayer.SOLID, true, false));
-    public static final CSGBlock BLOCK_CSG_TEST = new CSGBlock(new ColorHelperPlus(MODEL_CSG_TEST), BaseMaterial.FLEXSTONE, "CSG");
+//    public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColorMapProvider(4), "cool_basalt_0_0",
+//            new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
+//            new HotBasaltController());
+//    public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
+//
+//    public static final ModelDispatcherBasic MODEL_LAVA = new ModelDispatcherBasic(new NoColorMapProvider(16), "volcanic_lava_flow_0_0",
+//            new FlowController("volcanic_lava_flow", 1, BlockRenderLayer.SOLID, LightingMode.FULLBRIGHT));
+//    public static final NiceBlock BLOCK_LAVA = (NiceBlock) new LavaBlock(new FlowHeightHelper(MODEL_LAVA, 16), BaseMaterial.FLEXSTONE, "flowing_lava")
+//        .setLightLevel(3F/15F);
+//
+//     
+//    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColorMapProvider(16), "cool_basalt_0_0",
+//            new FlowController("cool_basalt", 1, BlockRenderLayer.SOLID, LightingMode.SHADED));
+//    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new FlowHeightBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 16), BaseMaterial.FLEXSTONE, "cool_basalt");
+//
+//    public static final NiceBlock BLOCK_COOL_BASALT_FILLER = (NiceBlock) new FlowFillerBlock(new FlowHeightHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt_filler");
+//
+//    public static final ModelDispatcher MODEL_CSG_TEST = new ModelDispatcherBasic(
+//            BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new CSGController("colored_stone", 1, BlockRenderLayer.SOLID, true, false));
+//    public static final CSGBlock BLOCK_CSG_TEST = new CSGBlock(new ColorHelperPlus(MODEL_CSG_TEST), BaseMaterial.FLEXSTONE, "CSG");
 
     
 //    public static final ModelDispatcherBasic MODEL_COOL_BASALT = new ModelDispatcherBasic(new NoColor(16), "cool_basalt_0_0",
@@ -99,35 +99,35 @@ public class NiceBlockRegistrar
 //    public static final NiceBlock BLOCK_COOL_BASALT = (NiceBlock) new HeightBlock(new SimpleHelper(MODEL_COOL_BASALT, 5), BaseMaterial.FLEXSTONE, "cool_basalt");
 
     
-    public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
-            new BorderController("bordertest", 1, BlockRenderLayer.TRANSLUCENT, true));
-    public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
-
-    public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
-            new MasonryController("masonrytest", 1, BlockRenderLayer.CUTOUT_MIPPED, true));
-    public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
-
-    public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),
-            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 2, true));
-    public static final Block BLOCK_COLUMN_SQUARE_2 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2")
-        .setLightLevel(3F/15F);//.setLightOpacity(0);
-    
-    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_3 = new ModelDispatcherBasic(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 3, true));
-    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_3 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_3), BaseMaterial.FLEXSTONE, "column_square_3");
-
-    public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_4 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 4, true),
-            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 4, true));
-    public static final Block BLOCK_COLUMN_SQUARE_4 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4")
-            .setLightLevel(3F/15F);//.setLightOpacity(0);
-
-    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_5 = new ModelDispatcherBasic(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 5, false));
-    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_5 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_5), BaseMaterial.FLEXSTONE, "column_square_5");
+//    public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
+//            new BorderController("bordertest", 1, BlockRenderLayer.TRANSLUCENT, true));
+//    public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
+//
+//    public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
+//            new MasonryController("masonrytest", 1, BlockRenderLayer.CUTOUT_MIPPED, true));
+//    public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
+//
+//    public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),
+//            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 2, true));
+//    public static final Block BLOCK_COLUMN_SQUARE_2 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2")
+//        .setLightLevel(3F/15F);//.setLightOpacity(0);
+//    
+//    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_3 = new ModelDispatcherBasic(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 3, true));
+//    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_3 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_3), BaseMaterial.FLEXSTONE, "column_square_3");
+//
+//    public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_4 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 4, true),
+//            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 4, true));
+//    public static final Block BLOCK_COLUMN_SQUARE_4 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4")
+//            .setLightLevel(3F/15F);//.setLightOpacity(0);
+//
+//    public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_5 = new ModelDispatcherBasic(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
+//            new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 5, false));
+//    public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_5 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_5), BaseMaterial.FLEXSTONE, "column_square_5");
     
     // declare the block instances
     // public static final NiceBlock raw1 = new NiceBlock(NiceStyle.RAW, new PlacementSimple(),

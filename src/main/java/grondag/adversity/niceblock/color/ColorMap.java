@@ -10,11 +10,13 @@ import grondag.adversity.niceblock.color.NiceHues.Hue;
 public class ColorMap
 {
     public final String colorMapName;
+    public final int ordinal;
     private final int[] colors = new int[EnumColorMap.values().length];
 
-    public ColorMap(String vectorName)
+    public ColorMap(String vectorName, int ordinal)
     {
         this.colorMapName = vectorName;
+        this.ordinal = ordinal;
     }
 
     public ColorMap setColor(EnumColorMap whichColor, int colorValue)
@@ -28,11 +30,11 @@ public class ColorMap
         return colors[whichColor.ordinal()];
     }
     
-    public static ColorMap makeColorMap(Hue hue, Tint tint)
+    public static ColorMap makeColorMap(Hue hue, Tint tint, int ordinal)
     {
         String mapName =  tint.tintName + " " + hue.hueName();
                 
-        ColorMap newColorMap = new ColorMap(mapName);
+        ColorMap newColorMap = new ColorMap(mapName, ordinal);
     
         Color baseColor = Color.fromHCL(hue.hueDegrees(), tint.chroma, tint.luminance);
     

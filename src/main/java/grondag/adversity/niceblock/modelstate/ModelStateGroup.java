@@ -47,4 +47,14 @@ public class ModelStateGroup
     }
     
     public int getOrdinal() { return this.ordinal; }
+    
+    public boolean contains(ModelStateComponent<?,?> search)
+    {
+        for(ModelStateComponent<?,?> c : components)
+        {
+            if(search == c) return true;
+        }
+        return false;
+    }
+
 }

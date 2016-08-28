@@ -9,7 +9,7 @@ public class NoColorMapProvider implements IColorMapProvider
     
     static 
     {
-        WHITE = new ColorMap("");
+        WHITE = new ColorMap("", 0);
         for(EnumColorMap whichColor : EnumColorMap.values())
         {
             WHITE.setColor(whichColor, 0xFFFFFFFF);

@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.base;
 import java.util.List;
 
 import grondag.adversity.library.model.QuadContainer2;
+import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
@@ -34,6 +35,7 @@ public abstract class ModelFactory2
     protected final ModelColorMapComponent colorComponent;
     protected final ModelTextureComponent textureComponent;
     protected final ModelRotationComponent rotationComponent;
+    protected final ModelBigTexComponent bigTexComponent;
     
     public ModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
     {
@@ -43,6 +45,7 @@ public abstract class ModelFactory2
         ModelColorMapComponent colorComponent = null;
         ModelTextureComponent textureComponent = null;
         ModelRotationComponent rotationComponent = null;
+        ModelBigTexComponent bigTexComponent = null;
         
         for(ModelStateComponent<?,?> c : components)
         {
@@ -52,11 +55,14 @@ public abstract class ModelFactory2
                 textureComponent = (ModelTextureComponent) c;
             else if(c instanceof ModelRotationComponent)
                 rotationComponent = (ModelRotationComponent) c;
+            else if(c instanceof ModelBigTexComponent)
+                bigTexComponent = (ModelBigTexComponent) c;
         }
         
         this.colorComponent = colorComponent;
         this.textureComponent = textureComponent;
         this.rotationComponent = rotationComponent;
+        this.bigTexComponent = bigTexComponent;
     }
     
     public boolean canRenderInLayer(BlockRenderLayer renderLayer) 
@@ -83,6 +89,11 @@ public abstract class ModelFactory2
         // NOOP: default implementation assumes lazy baking
     }
     
+    protected int getTextureCount()
+    {
+        return (int) this.textureComponent.getValueCount();
+    }
+    
     /**
      * Identifies all textures needed for texture stitch.
      * Assumes a single texture per model.
@@ -92,7 +103,7 @@ public abstract class ModelFactory2
     {
         if(this.modelInputs.textureName == null) return new String[0];
         
-        final String retVal[] = new String[(int) this.textureComponent.getValueCount()];
+        final String retVal[] = new String[getTextureCount()];
 
         for (int i = 0; i < retVal.length; i++)
         {
@@ -107,7 +118,7 @@ public abstract class ModelFactory2
     	return buildTextureName(modelInputs.textureName, 0);
     }
     
-    public static String buildTextureName(String baseName, int offset)
+    public String buildTextureName(String baseName, int offset)
     {
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
     }

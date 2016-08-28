@@ -68,13 +68,15 @@ public class ModelStateComponents
     public static final ModelTextureComponent TEXTURE_2 = register(new ModelTextureComponent(counter++, 2));
     public static final ModelTextureComponent TEXTURE_4 = register(new ModelTextureComponent(counter++, 4));
     
-    public static final ModelBigTexComponent BIG_TEX = register(new ModelBigTexComponent(counter++));
+    public static final ModelBigTexComponent BIG_TEX_META_VARIED = register(new ModelBigTexComponent(counter++, true));
 
     public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
     public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
-    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE))));
+    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE, 0))));
     public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
-            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE))));
+            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE, 0))));
+    
+//    public static final ModelSpeciesComponent SPECIES = register(new ModelSpeciesComponent(counter++));
 
     public static int getCount()
     {
