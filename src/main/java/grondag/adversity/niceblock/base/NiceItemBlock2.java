@@ -1,9 +1,7 @@
 package grondag.adversity.niceblock.base;
 
-import java.util.List;
-
+import grondag.adversity.niceblock.NiceBlockRegistrar2;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -17,7 +15,7 @@ import net.minecraft.world.World;
 /**
  * Provides sub-items and handles item logic for NiceBlocks.
  */
-public class NiceItemBlock2 extends ItemBlock implements IItemColor
+public class NiceItemBlock2 extends ItemBlock
 {
 
 	public static String ITEM_MODEL_KEY_TAG = "AMS";
@@ -25,6 +23,8 @@ public class NiceItemBlock2 extends ItemBlock implements IItemColor
 	public NiceItemBlock2(NiceBlock2 block) {
 		super(block);
 		setHasSubtypes(true);
+       // let registrar know to register us when appropriate
+        NiceBlockRegistrar2.allItems.add(this);
 	}
 
 	public void registerSelf()
@@ -61,9 +61,10 @@ public class NiceItemBlock2 extends ItemBlock implements IItemColor
             return EnumActionResult.FAIL;
         }
         
-        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))
+        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))            
         {
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, stack.getMetadata(), playerIn);
+            int meta = ((NiceBlock2) this.block).getMetaForPlacedBlockFromStack(stack);
+            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn);
 
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
             {
@@ -92,7 +93,7 @@ public class NiceItemBlock2 extends ItemBlock implements IItemColor
     { 
         if (!world.setBlockState(pos, newState, 3)) return false;
 
-        if(newState.getBlock() instanceof NiceBlockPlus)
+        if(newState.getBlock() instanceof NiceBlockPlus2)
         {
             NiceTileEntity2 niceTE = (NiceTileEntity2)world.getTileEntity(pos);
             if (niceTE != null) 
@@ -109,9 +110,4 @@ public class NiceItemBlock2 extends ItemBlock implements IItemColor
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
     }
-
-	@Override
-	public int getColorFromItemstack(ItemStack stack, int tintIndex) {
-		return 0xFFFFFFFF;
-	}	
 }

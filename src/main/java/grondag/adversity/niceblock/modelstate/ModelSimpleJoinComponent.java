@@ -1,12 +1,22 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.library.IBlockTest;
+import grondag.adversity.library.NeighborBlocks;
+import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.joinstate.SimpleJoin;
+import grondag.adversity.niceblock.base.NiceBlock2;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public class ModelSimpleJoinComponent extends ModelStateComponent<ModelSimpleJoinComponent.ModelSimpleJoin, SimpleJoin>
 {
-    public ModelSimpleJoinComponent(int ordinal, boolean useWorldState)
+    private final IBlockTest blockTest;
+    
+    public ModelSimpleJoinComponent(int ordinal, IBlockTest blockTest)
     {
-        super(ordinal, useWorldState, SimpleJoin.STATE_COUNT);
+        super(ordinal, WorldRefreshType.SOMETIMES, SimpleJoin.STATE_COUNT);
+        this.blockTest = blockTest;
     }
 
     @Override
@@ -25,6 +35,13 @@ public class ModelSimpleJoinComponent extends ModelStateComponent<ModelSimpleJoi
     public Class<SimpleJoin> getValueType()
     {
         return SimpleJoin.class;
+    }
+    
+    @Override
+    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(blockTest);
+        return SimpleJoin.getIndex(tests);
     }
     
     public class ModelSimpleJoin extends ModelStateValue<ModelSimpleJoinComponent.ModelSimpleJoin, SimpleJoin>

@@ -2,8 +2,9 @@ package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar2;
+import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
-import grondag.adversity.niceblock.modelstate.ModelState;
+import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -22,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -84,11 +86,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
      * Use in UI
      */
     private final String displayName;
-    /**
-     * Item for this block. Will have same meta variants as this block. Instantiated and retained here for convenience and to enable consistent handling.
-     */
-    public final NiceItemBlock2 item;
-
+ 
     /**
      * CAN BE NULL! If non-null, blocks requires special collision handling, typically because it is not a standard cube shape. Retrieved from model cook book at instantiation and
      * reference saved for simpler coding.
@@ -144,8 +142,6 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         modelBounds = collisionHandler == null ? null : new TLongObjectHashMap<List<AxisAlignedBB>>();
         combinedBounds = collisionHandler == null ? null :  new TLongObjectHashMap<AxisAlignedBB>();
 
-        item = new NiceItemBlock2(this);
-
         // let registrar know to register us when appropriate
         NiceBlockRegistrar2.allBlocks.add(this);
     }
@@ -167,11 +163,17 @@ public class NiceBlock2 extends Block // implements IWailaProvider
 
     public List<ItemStack> getSubItems()
     {
-        int itemCount = (int) dispatcher.getStateSet().getFirstColorMapComponent().getValueCount();
+        ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
+        int itemCount = (int) colorMap.getValueCount();
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
         for(int i = 0; i < itemCount; i++)
         {
-            itemBuilder.add(new ItemStack(this, 1, i));
+            ItemStack stack = new ItemStack(this, 1, i);
+            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i));
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
+            stack.setTagCompound(tag);
+            itemBuilder.add(stack);
         }
         return itemBuilder.build();
     }
@@ -186,6 +188,11 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     public int getMetaFromState(IBlockState state)
     {
         return state.getValue(META);
+    }
+    
+    public int getMetaForPlacedBlockFromStack(ItemStack stack)
+    {
+        return stack.getMetadata();
     }
 
     // LOCALIZATION
@@ -211,9 +218,11 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
-        ItemStack stack = new ItemStack(item, 1, 0);
+        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, 0);
         long key = ((IExtendedBlockState)this.getExtendedState(state, world, pos)).getValue(MODEL_KEY);
-        stack.getTagCompound().setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
+        stack.setTagCompound(tag);
         return stack;
     }
     
@@ -252,9 +261,14 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return ((IExtendedBlockState)state).withProperty(MODEL_KEY, dispatcher.getRefreshedKeyFromWorld(0, this, state, world, pos));
+        return ((IExtendedBlockState)state).withProperty(MODEL_KEY, getModelStateKey(state, world, pos));
     }
 
+    public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, WorldRefreshType.ALWAYS, this, state, world, pos);
+    }
+    
     /**
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. Override for blocks that need it.
      */

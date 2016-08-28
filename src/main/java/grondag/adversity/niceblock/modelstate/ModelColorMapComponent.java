@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.IColorMapProvider;
@@ -12,14 +11,14 @@ public class ModelColorMapComponent extends ModelStateComponent<ModelColorMapCom
 {
     private final IColorMapProvider colorProvider;
     
-    public ModelColorMapComponent(int ordinal, IColorMapProvider colorProvider, boolean useMeta)
+    public ModelColorMapComponent(int ordinal, WorldRefreshType refreshType, IColorMapProvider colorProvider)
     {
-        super(ordinal, useMeta, colorProvider.getColorMapCount());
+        super(ordinal, refreshType, colorProvider.getColorMapCount());
         this.colorProvider = colorProvider;
     }
 
     @Override
-    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return (long) state.getValue(NiceBlock2.META);
     }

@@ -8,8 +8,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import grondag.adversity.library.IBlockTest;
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -27,12 +28,17 @@ public class ModelStateSet
     private final ModelStateGroup[] groups;
     private final int[] groupIndexes;
     private final boolean usesWorldState;
+    private final ModelColorMapComponent firstColorMapComponent;
     
     public static ModelStateSet find(ModelStateGroup... groups)
     {
         BitSet key = new BitSet();
         for(ModelStateGroup g : groups)
         {
+            if(g == null)
+            {
+                Adversity.log.debug("wut?");
+            }
             key.set(g.getOrdinal());
         }
         
@@ -48,6 +54,7 @@ public class ModelStateSet
         }
         return result;
     }
+    
     
     private LoadingCache<Long, ModelStateSetValue> valueCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(new CacheLoader<Long, ModelStateSetValue>()
     {
@@ -96,6 +103,7 @@ public class ModelStateSet
         //for each group, update lookup array for all included components to show position within this set
         int componentCounter = 0;
         int shift = 0;
+        ModelColorMapComponent colorMap = null;
         boolean canRefresh = false;
         for(ModelStateGroup g : groups)
         {
@@ -106,10 +114,17 @@ public class ModelStateSet
                     typeIndexes[c.getOrdinal()] = componentCounter++;
                     shiftBits[c.getOrdinal()] = shift;
                     shift += c.getBitLength();
-                    canRefresh = canRefresh || c.canRefreshFromWorld();
+                    canRefresh = canRefresh || c.canRefreshFromWorld(WorldRefreshType.SOMETIMES);
+                    
+                    if(colorMap == null && c instanceof ModelColorMapComponent)
+                    {
+                        colorMap = (ModelColorMapComponent) c;
+                    }
+
                 }
             }
         }
+        this.firstColorMapComponent = colorMap;
         this.usesWorldState = canRefresh;
         
         //initialize smaller array to include only types that are part of one or more groups
@@ -157,14 +172,9 @@ public class ModelStateSet
         return mask;
     }
     
-    public ModelColorMapComponent getFirstColorMapComponent()
-    {
-    	for(ModelStateComponent<?,?> c : includedTypes)
-    	{
-    		if(c instanceof ModelColorMapComponent) return (ModelColorMapComponent) c;
-    	}
-    	return null;
-    }
+    /** used for fast color matching */
+    public ModelColorMapComponent getFirstColorMapComponent() { return this.firstColorMapComponent; }
+
     
     public ModelStateSetValue getValue(ModelStateValue<?,?>... components)
     {
@@ -180,21 +190,28 @@ public class ModelStateSet
     
     public boolean canRefreshFromWorld() { return this.usesWorldState; }
     
-    public long getRefreshedKeyFromWorld(long startingKey, NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getRefreshedKeyFromWorld(long startingKey, WorldRefreshType refreshType, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         if(!this.usesWorldState) return startingKey;
         
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
         {
-            if(c.canRefreshFromWorld())
-                bits |= (c.getBitsFromWorld(block, test, state, world, pos) << shiftBits[c.getOrdinal()]);
+            if(c.canRefreshFromWorld(refreshType))
+                bits |= (c.getBitsFromWorld(block, state, world, pos) << shiftBits[c.getOrdinal()]);
             else
                 bits |= (startingKey & (c.getBitMask() << shiftBits[c.getOrdinal()]));
         }
         return bits;
     }
 
+    /** provides fast match testing without instantiating two value objectes */
+    public boolean doComponentValuesMatch(ModelStateComponent<?,?> c, long key1, long key2)
+    {
+        long mask = c.getBitMask() << shiftBits[c.getOrdinal()];
+        return (key1 & mask) == (key2 & mask);
+    }
+    
     public ModelStateSetValue getSetValueFromBits(long bits)
     {
         return valueCache.getUnchecked(bits);

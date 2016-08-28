@@ -8,7 +8,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.joinstate.SimpleJoin;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BlockTests.TestForBigBlockMatch;
+import grondag.adversity.niceblock.support.BlockTests.BigBlockMatch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
@@ -32,7 +32,7 @@ public class MasonryController extends ModelController
     public long getDynamicShapeIndex(final NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
-        TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
+        BigBlockMatch test = new BigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
         NeighborBlocks neighbors = new NeighborBlocks(world, pos);
         NeighborTestResults mates = neighbors.getNeighborTestResults(test);
         

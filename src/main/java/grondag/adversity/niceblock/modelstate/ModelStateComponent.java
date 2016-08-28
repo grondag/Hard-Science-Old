@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -12,12 +11,19 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     private final long bitMask;
     private final int ordinal;
     private final long valueCount;
-    private final boolean useWorldState;
+    private final WorldRefreshType refreshType;
     
-    public ModelStateComponent(int ordinal, boolean useWorldState, long valueCount)
+    public static enum WorldRefreshType
+    {
+        NEVER,
+        SOMETIMES,
+        ALWAYS
+    }
+    
+    public ModelStateComponent(int ordinal, WorldRefreshType refreshType, long valueCount)
     {
         this.valueCount = valueCount;
-        bitLength = Long.SIZE - Long.numberOfLeadingZeros(valueCount);
+        bitLength = Long.SIZE - Long.numberOfLeadingZeros(valueCount - 1);
 
         // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
         long mask = 0L;
@@ -27,12 +33,12 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
         }
         this.bitMask = mask;
         this.ordinal = ordinal;
-        this.useWorldState = useWorldState;
+        this.refreshType = refreshType;
     }
     
     public ModelStateComponent(int ordinal, long valueCount)
     {
-        this(ordinal, false, valueCount);
+        this(ordinal, WorldRefreshType.NEVER, valueCount);
     }
 
     abstract public T createValueFromBits(long bits);
@@ -42,10 +48,10 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     public final long getValueCount() { return this.valueCount; }
     
     /** override if can derive state from meta or neighbor blocks */
-    public boolean canRefreshFromWorld() { return useWorldState; }
+    public boolean canRefreshFromWorld(WorldRefreshType refreshType) { return this.refreshType.ordinal() >= refreshType.ordinal(); }
 
     /** override if can derive state from meta or neighbor blocks */
-    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
+    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
 
     // another option vs. statically defining in each subclass
 //    @SuppressWarnings("unchecked")

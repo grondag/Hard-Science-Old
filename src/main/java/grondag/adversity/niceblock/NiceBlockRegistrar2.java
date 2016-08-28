@@ -3,18 +3,21 @@ package grondag.adversity.niceblock;
 import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.ModelFactory2;
 import grondag.adversity.niceblock.base.NiceBlock2;
-import grondag.adversity.niceblock.base.NiceTileEntity;
+import grondag.adversity.niceblock.base.NiceBlockPlus2;
+import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.NiceTileEntity2;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
-import grondag.adversity.niceblock.support.NiceBlockStateMapper;
+import grondag.adversity.niceblock.support.NiceBlockStateMapper2;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -42,6 +45,11 @@ public class NiceBlockRegistrar2
     public static LinkedList<NiceBlock2> allBlocks = new LinkedList<NiceBlock2>();
 
     /**
+     * NiceItemBlocks add themselves here so that we can easily iterate them during registration
+     */
+    public static LinkedList<NiceItemBlock2> allItems = new LinkedList<NiceItemBlock2>();
+
+    /**
      * Model dispatchers add themselves here for handling during model bake and texture stitch
      */
     public static LinkedList<ModelDispatcher2> allDispatchers = new LinkedList<ModelDispatcher2>();
@@ -51,13 +59,23 @@ public class NiceBlockRegistrar2
     private final static ColorModelFactory2 RAW_FLEXSTONE_MODEL = new ColorModelFactory2(RAW_FLEXSTONE_INPUTS, ModelStateComponents.COLORS_RAW_FLEXSTONE,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher2 RAW_FLEXSTONE_DISPATCH = new ModelDispatcher2(RAW_FLEXSTONE_MODEL);
-    public static final NiceBlock2 BLOCK_FLEXSTONE_RAW = new NiceBlock2(RAW_FLEXSTONE_DISPATCH, BaseMaterial.FLEXSTONE, "raw");
+    public static final NiceBlock2 RAW_FLEXSTONE_BLOCK = new NiceBlock2(RAW_FLEXSTONE_DISPATCH, BaseMaterial.FLEXSTONE, "raw");
+    public static final NiceItemBlock2 RAW_FLEXSTONE_ITEM = new NiceItemBlock2(RAW_FLEXSTONE_BLOCK);
+    
+    private final static ModelFactory2.ModelInputs RAW_DURASTONE_INPUTS = new ModelFactory2.ModelInputs("raw_durastone", true, BlockRenderLayer.SOLID);
+    private final static ColorModelFactory2 RAW_DURASTONE_MODEL = new ColorModelFactory2(RAW_DURASTONE_INPUTS, ModelStateComponents.COLORS_RAW_DURASTONE,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private static final ModelDispatcher2 RAW_DURASTONE_DISPATCH = new ModelDispatcher2(RAW_DURASTONE_MODEL);
+    public static final NiceBlock2 RAW_DURASTONE_BLOCK = new NiceBlock2(RAW_DURASTONE_DISPATCH, BaseMaterial.DURASTONE, "raw");
+    public static final NiceItemBlock2 RAW_DURASTONE_ITEM = new NiceItemBlock2(RAW_DURASTONE_BLOCK);
 
-    // public static final ModelDispatcher MODEL_DURASTONE_RAW = new ModelDispatcherBasic(new FixedColorMapProvider(
-    // ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE)), "raw_durastone_0_0",
-    // new ColorController("raw_durastone", 4, BlockRenderLayer.SOLID, true, true));
-    // public static final NiceBlock BLOCK_DURASTONE_RAW = new NiceBlock(new ColorHelperMeta(MODEL_DURASTONE_RAW), BaseMaterial.DURASTONE, "raw");
-    //
+    private final static ModelFactory2.ModelInputs COLORED_STONE_INPUTS = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.SOLID);
+    private final static ColorModelFactory2 COLORED_STONE_MODEL = new ColorModelFactory2(COLORED_STONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private static final ModelDispatcher2 COLORED_STONE_DISPATCH = new ModelDispatcher2(COLORED_STONE_MODEL);
+    public static final NiceBlockPlus2 COLORED_STONE_BLOCK = new NiceBlockPlus2(COLORED_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "colored");
+    public static final NiceItemBlock2 COLORED_STONE_ITEM = new NiceItemBlock2(COLORED_STONE_BLOCK);
+   
     // public static final ModelDispatcher MODEL_COLORED_STONE = new ModelDispatcherBasic(
     // BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
     // new ColorController("colored_stone", 4, BlockRenderLayer.SOLID, true, true));
@@ -127,32 +145,39 @@ public class NiceBlockRegistrar2
         for (NiceBlock2 block : allBlocks)
         {
             GameRegistry.register(block);
-            block.item.registerSelf();
+        }
+        
+        // REGISTER ALL ITEMS
+        for (NiceItemBlock2 item : allItems)
+        {
+            item.registerSelf();
+        }
+        
 
-            if (event.getSide() == Side.CLIENT)
+        if (event.getSide() == Side.CLIENT)
+        {
+            for (NiceBlock2 block : allBlocks)
             {
-                ModelLoader.setCustomStateMapper(block, NiceBlockStateMapper.instance);
+                ModelLoader.setCustomStateMapper(block, NiceBlockStateMapper2.instance);
 
                 for (ItemStack stack : block.getSubItems())
                 {
                     ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation(((NiceBlock2) block).getRegistryName() + "." + stack.getMetadata(), "inventory");
-                    ModelLoader.setCustomModelResourceLocation(block.item, stack.getMetadata(), itemModelResourceLocation);
+                    ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), stack.getMetadata(), itemModelResourceLocation);
                 }
             }
         }
 
-        GameRegistry.registerTileEntity(NiceTileEntity.class, "nicetileentity");
+        GameRegistry.registerTileEntity(NiceTileEntity2.class, "nicetileentity2");
 
         if (event.getSide() == Side.CLIENT)
         {
-
             // Register event handlers for nice blocks (they are in this class)
             MinecraftForge.EVENT_BUS.register(instance);
 
             // Register custom block highlighter for blocks with irregular hitboxes.
             MinecraftForge.EVENT_BUS.register(NiceBlockHighlighter.instance);
         }
-
     }
 
     public static void init(FMLInitializationEvent event)
@@ -161,10 +186,19 @@ public class NiceBlockRegistrar2
         {
             // won't work in pre-init because BlockColors/ItemColors aren't instantiated yet
             // Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block.blockModelHelper.dispatcher, block);
-            Minecraft.getMinecraft().getItemColors().registerItemColorHandler(block.item, block);
+            Minecraft.getMinecraft().getItemColors().registerItemColorHandler(DummyColorHandler.INSTANCE, block);
         }
     }
 
+    private static class DummyColorHandler implements IItemColor
+    {
+        private static final DummyColorHandler INSTANCE = new DummyColorHandler();
+        
+        @Override
+        public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+            return 0xFFFFFFFF;
+        }
+    }
     /**
      * Centralized event handler for NiceModel baking.
      */

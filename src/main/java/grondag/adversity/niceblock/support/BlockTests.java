@@ -4,18 +4,63 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import grondag.adversity.library.IBlockTest;
+import grondag.adversity.library.IBlockTestFactory;
+import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceBlockPlus2;
+import grondag.adversity.niceblock.base.NiceTileEntity2;
+import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 
 public class BlockTests
 {
-    public static class TestForBigBlockMatch implements IBlockTest
+    public static class BigBlockMatchFactory implements IBlockTestFactory
+    {
+        @Override
+        public IBlockTest makeTest(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            return new BigBlockMatch2(world, ibs, pos);
+        }
+    }
+    
+    public static class BigBlockMatch2 implements IBlockTest
+    {
+        private final ModelDispatcher2 matchDispather;
+        private final long matchKey;
+        private final ModelColorMapComponent colorComponent;
+        private final int matchSpecies;
+        
+        /** pass in the info for the block you want to match */
+        private BigBlockMatch2(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            this.matchDispather = ((NiceBlockPlus2)ibs.getBlock()).dispatcher;
+            this.matchKey = ((NiceTileEntity2) world.getTileEntity(pos)).getModelKey();
+            this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
+            this.matchSpecies = ibs.getValue(NiceBlock2.META);
+        }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            
+            // can only match with other NiceBlocks
+            if(!(ibs.getBlock() instanceof NiceBlockPlus2)) return false;
+ 
+            return matchDispather == ((NiceBlockPlus2)ibs.getBlock()).dispatcher
+                   && matchSpecies == ibs.getValue(NiceBlock.META)
+                   && matchDispather.getStateSet().doComponentValuesMatch(colorComponent, matchKey,
+                           ((NiceTileEntity2) world.getTileEntity(pos)).getModelKey());
+        }
+        
+    }
+    public static class BigBlockMatch implements IBlockTest
     {
         private final NiceBlock matchBlock;
         private final int matchColorIndex;
         private final int matchSpecies;
         
         /** pass in the info for the block you want to match */
-        public TestForBigBlockMatch(NiceBlock matchBlock, int matchColorIndex, int matchSpecies){
+        public BigBlockMatch(NiceBlock matchBlock, int matchColorIndex, int matchSpecies){
             this.matchBlock = matchBlock;
             this.matchColorIndex = matchColorIndex;
             this.matchSpecies = matchSpecies;
@@ -46,6 +91,7 @@ public class BlockTests
         
     }
 
+    
     /** 
      * True if same block and color but not necessarily the same species.
      * Main use is to find candidate mates for big blocks being placed.

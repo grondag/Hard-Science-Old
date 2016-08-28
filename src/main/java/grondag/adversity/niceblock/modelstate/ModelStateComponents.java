@@ -5,6 +5,7 @@ import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.FixedColorMapProvider;
 import grondag.adversity.niceblock.color.HueSet.Tint;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
+import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
 /**
  * axis
@@ -56,11 +57,9 @@ public class ModelStateComponents
 
 //    private static ArrayList<ModelStateComponent<?,?>> list = new ArrayList<ModelStateComponent<?,?>>(20);
 
-    public static final ModelAxisComponent AXIS_DYNAMIC = register(new ModelAxisComponent(counter++, true));
-    public static final ModelAxisComponent AXIS_STATIC = register(new ModelAxisComponent(counter++, false));
+    public static final ModelAxisComponent AXIS = register(new ModelAxisComponent(counter++));
     
-    public static final ModelCornerJoinComponent CORNER_JOIN_DYNAMIC = register(new ModelCornerJoinComponent(counter++, true));
-    public static final ModelCornerJoinComponent CORNER_JOIN_STATIC = register(new ModelCornerJoinComponent(counter++, false));
+    public static final ModelCornerJoinComponent CORNER_JOIN = register(new ModelCornerJoinComponent(counter++, null));
 
     public static final ModelRotationComponent ROTATION = register(new ModelRotationComponent(counter++));
     public static final ModelRotationComponent ROTATION_NONE = register(new ModelRotationComponent(counter++, true));
@@ -71,10 +70,12 @@ public class ModelStateComponents
     
     public static final ModelBigTexComponent BIG_TEX = register(new ModelBigTexComponent(counter++));
 
-    public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, BlockColorMapProvider.INSTANCE, false));
-    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, 
-    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE)), true));
-    
+    public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
+    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.SOMETIMES,
+    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE))));
+    public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.SOMETIMES,
+            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE))));
+
     public static int getCount()
     {
         return counter;

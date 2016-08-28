@@ -1,8 +1,8 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Alternator;
 import grondag.adversity.library.IAlternator;
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
@@ -15,19 +15,19 @@ public class ModelRotationComponent extends ModelStateComponent<ModelRotationCom
 
     public ModelRotationComponent(int ordinal)
     {
-        super(ordinal, true, 4);
+        super(ordinal, WorldRefreshType.ALWAYS, 4);
         alternator = Alternator.getAlternator(4);
     }
 
     /** use this when want to force no rotation */
     public ModelRotationComponent(int ordinal, boolean noRotate)
     {
-        super(ordinal, true, 1);
+        super(ordinal, WorldRefreshType.ALWAYS, 1);
         alternator = Alternator.getAlternator(1);
     }
     
     @Override
-    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return alternator.getAlternate(pos);
     }

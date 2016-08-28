@@ -77,7 +77,7 @@ public abstract class NicePlacement {
 		         {
 		             species = neighbors.getBlockState(face).getValue(NiceBlock.META);
 		             speciesInUseFlags |= (1 << species);
-		             if (shape.isValidShape(worldIn, pos, new BlockTests.TestForBigBlockMatch(helper.block, colorIndex, species))) {
+		             if (shape.isValidShape(worldIn, pos, new BlockTests.BigBlockMatch(helper.block, colorIndex, species))) {
 		                 return species;
 		             }
 		         }

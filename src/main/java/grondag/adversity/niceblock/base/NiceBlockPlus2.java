@@ -1,0 +1,26 @@
+package grondag.adversity.niceblock.base;
+
+import grondag.adversity.niceblock.support.BaseMaterial;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+
+public class NiceBlockPlus2 extends NiceBlock2 implements ITileEntityProvider {
+
+	public NiceBlockPlus2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName)
+	{
+		super(dispatcher, material, styleName);
+	}
+		
+	@Override
+	public TileEntity createNewTileEntity(World worldIn, int meta) {
+		return new NiceTileEntity2();		
+	}
+	
+	@Override
+    public int getMetaForPlacedBlockFromStack(ItemStack stack)
+    {
+        return 0;
+    }
+}

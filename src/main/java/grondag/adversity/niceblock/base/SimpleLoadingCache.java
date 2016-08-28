@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.base;
 
-import java.util.concurrent.atomic.AtomicInteger;
+//import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleLoadingCache<V>
 {

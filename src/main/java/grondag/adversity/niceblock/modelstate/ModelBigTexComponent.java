@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -13,7 +12,7 @@ public class ModelBigTexComponent extends ModelStateComponent<ModelBigTexCompone
 {
     public ModelBigTexComponent(int ordinal)
     {
-        super(ordinal, true, 0xFFF);
+        super(ordinal, WorldRefreshType.ALWAYS, 0xFFF);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class ModelBigTexComponent extends ModelStateComponent<ModelBigTexCompone
     }
 
     @Override
-    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);
     }

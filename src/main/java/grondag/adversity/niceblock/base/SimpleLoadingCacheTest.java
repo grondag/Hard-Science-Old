@@ -49,24 +49,25 @@ public class SimpleLoadingCacheTest
             }
         }
     }
+//    
+//    private class OtherRunner implements Runnable
+//    {
+//        @Override
+//        public void run()
+//        {
+//            for(int i = 0; i < 1000000000; i++)
+//            {
+//                long input = random.nextInt(bound);
+//                Long result = otherCache.getUnchecked(input);
+//                assert(result.longValue() == input);
+//            }
+//        }
+//    }
     
-    private class OtherRunner implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            for(int i = 0; i < 1000000000; i++)
-            {
-                long input = random.nextInt(bound);
-                Long result = otherCache.getUnchecked(input);
-                assert(result.longValue() == input);
-            }
-        }
-    }
     SimpleLoadingCache<Long> cache = new SimpleLoadingCache<Long>(new Loader(), 4096);
-    ModelStateSet set = ModelStateSet.find(ModelStateGroup.find(ModelStateComponents.CORNER_JOIN_STATIC));
+    ModelStateSet set = ModelStateSet.find(ModelStateGroup.find(ModelStateComponents.CORNER_JOIN));
     Random random = new Random();
-    int bound = (int) ModelStateComponents.CORNER_JOIN_STATIC.getValueCount();
+    int bound = (int) ModelStateComponents.CORNER_JOIN.getValueCount();
     LoadingCache<Long, Long> otherCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(new Loader());
     
     @Test

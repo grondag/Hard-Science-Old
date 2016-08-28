@@ -12,6 +12,11 @@ public class SimpleJoin
     
     public SimpleJoin(NeighborBlocks.NeighborTestResults testResults)
     {
+        this.joins = getIndex(testResults);
+    }
+    
+    public static byte getIndex(NeighborBlocks.NeighborTestResults testResults)
+    {
         byte j = 0;
         for(EnumFacing face : EnumFacing.values())
         {
@@ -20,7 +25,7 @@ public class SimpleJoin
                 j |= NeighborBlocks.FACE_FLAGS[face.ordinal()];
             }
         }
-        this.joins = j;
+        return j;
     }
     
     public SimpleJoin(boolean up, boolean down, boolean east, boolean west, boolean north, boolean south)

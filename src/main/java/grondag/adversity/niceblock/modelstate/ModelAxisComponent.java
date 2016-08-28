@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
@@ -13,9 +12,9 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.M
 {
     private final ModelAxis[] LOOKUP = new ModelAxis[EnumFacing.Axis.values().length];
     
-    public ModelAxisComponent(int ordinal, boolean useWorldState)
+    public ModelAxisComponent(int ordinal)
     {
-        super(ordinal, useWorldState, EnumFacing.Axis.values().length);
+        super(ordinal, WorldRefreshType.SOMETIMES, EnumFacing.Axis.values().length);
         LOOKUP[EnumFacing.Axis.X.ordinal()] = new ModelAxis(EnumFacing.Axis.X);
         LOOKUP[EnumFacing.Axis.Y.ordinal()] = new ModelAxis(EnumFacing.Axis.Y);
         LOOKUP[EnumFacing.Axis.Z.ordinal()] = new ModelAxis(EnumFacing.Axis.Z);
@@ -27,7 +26,7 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.M
     }
     
     @Override
-    public long getBitsFromWorld(NiceBlock2 block, IBlockTest test, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return Math.max(0, Math.min(2, state.getValue(NiceBlock.META)));
     } 

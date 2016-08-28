@@ -9,6 +9,7 @@ import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.NiceBlockRegistrar2;
+import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -107,6 +108,10 @@ public class ModelDispatcher2 implements IBakedModel
         
         ArrayList<BlockRenderLayer> layerList = new ArrayList<BlockRenderLayer>();
         ModelStateGroup groups[] = new ModelStateGroup[models.length];
+        for(int i = 0 ; i < models.length; i++)
+        {
+            groups[i] = models[i].getStateGroup();
+        }
         this.stateSet = ModelStateSet.find(groups);
 
         ArrayList<ICollisionHandler> collisionHandlers = new ArrayList<>();
@@ -146,16 +151,6 @@ public class ModelDispatcher2 implements IBakedModel
         NiceBlockRegistrar2.allDispatchers.add(this);
     }
         
-    /** 
-     * Updated model state key from world.  
-     */
-    public long getRefreshedKeyFromWorld(long oldKey, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        //TODO: make this side-aware, states only need to be refreshed on server if matter for collision detection
-        //TODO: handle block test somehow
-        return stateSet.getRefreshedKeyFromWorld(oldKey, block, null, state, world, pos);
-    }
-
     /**
      * Register all textures that will be needed for associated models. 
      * Happens before model bake.
