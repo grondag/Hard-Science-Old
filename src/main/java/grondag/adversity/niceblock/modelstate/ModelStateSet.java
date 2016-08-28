@@ -114,7 +114,7 @@ public class ModelStateSet
                     typeIndexes[c.getOrdinal()] = componentCounter++;
                     shiftBits[c.getOrdinal()] = shift;
                     shift += c.getBitLength();
-                    canRefresh = canRefresh || c.canRefreshFromWorld(WorldRefreshType.SOMETIMES);
+                    canRefresh = canRefresh || c.getRefreshType() != WorldRefreshType.NEVER;
                     
                     if(colorMap == null && c instanceof ModelColorMapComponent)
                     {
@@ -190,14 +190,16 @@ public class ModelStateSet
     
     public boolean canRefreshFromWorld() { return this.usesWorldState; }
     
-    public long getRefreshedKeyFromWorld(long startingKey, WorldRefreshType refreshType, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getRefreshedKeyFromWorld(long startingKey, boolean refreshCache, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         if(!this.usesWorldState) return startingKey;
+        
+        int refreshCutoffOrdinal = refreshCache ? WorldRefreshType.CACHED.ordinal() : WorldRefreshType.ALWAYS.ordinal(); 
         
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
         {
-            if(c.canRefreshFromWorld(refreshType))
+            if(c.getRefreshType().ordinal() <= refreshCutoffOrdinal)
                 bits |= (c.getBitsFromWorld(block, state, world, pos) << shiftBits[c.getOrdinal()]);
             else
                 bits |= (startingKey & (c.getBitMask() << shiftBits[c.getOrdinal()]));

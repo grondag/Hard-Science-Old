@@ -4,7 +4,6 @@ import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar2;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
-import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -256,7 +255,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
 //  private int timerCount = 0;
 
 	/**
-     * Determines which model should be displayed via MODEL_STATE. Handling is delegated to the block model helper.
+     * Determines which model should be displayed via MODEL_KEY. 
      */
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -266,7 +265,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
 
     public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, WorldRefreshType.ALWAYS, this, state, world, pos);
+        return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, true, this, state, world, pos);
     }
     
     /**

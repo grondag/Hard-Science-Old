@@ -14,7 +14,7 @@ public class ModelAxisComponent extends ModelStateComponent<ModelAxisComponent.M
     
     public ModelAxisComponent(int ordinal)
     {
-        super(ordinal, WorldRefreshType.SOMETIMES, EnumFacing.Axis.values().length);
+        super(ordinal, WorldRefreshType.CACHED, EnumFacing.Axis.values().length);
         LOOKUP[EnumFacing.Axis.X.ordinal()] = new ModelAxis(EnumFacing.Axis.X);
         LOOKUP[EnumFacing.Axis.Y.ordinal()] = new ModelAxis(EnumFacing.Axis.Y);
         LOOKUP[EnumFacing.Axis.Z.ordinal()] = new ModelAxis(EnumFacing.Axis.Z);

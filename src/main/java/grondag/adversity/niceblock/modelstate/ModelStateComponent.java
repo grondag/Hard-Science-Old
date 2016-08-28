@@ -15,9 +15,9 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     
     public static enum WorldRefreshType
     {
-        NEVER,
-        SOMETIMES,
-        ALWAYS
+        NEVER,  // state is not stored in world
+        CACHED, // state can be derived from world, but cache in TE for performance if possible
+        ALWAYS  // state is always derived from world
     }
     
     public ModelStateComponent(int ordinal, WorldRefreshType refreshType, long valueCount)
@@ -48,7 +48,7 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     public final long getValueCount() { return this.valueCount; }
     
     /** override if can derive state from meta or neighbor blocks */
-    public boolean canRefreshFromWorld(WorldRefreshType refreshType) { return this.refreshType.ordinal() >= refreshType.ordinal(); }
+    public WorldRefreshType getRefreshType() { return this.refreshType; }
 
     /** override if can derive state from meta or neighbor blocks */
     public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }

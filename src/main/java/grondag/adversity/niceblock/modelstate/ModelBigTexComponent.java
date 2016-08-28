@@ -12,7 +12,7 @@ public class ModelBigTexComponent extends ModelStateComponent<ModelBigTexCompone
 {
     public ModelBigTexComponent(int ordinal)
     {
-        super(ordinal, WorldRefreshType.ALWAYS, 0xFFF);
+        super(ordinal, WorldRefreshType.CACHED, 0xFFF);
     }
 
     @Override

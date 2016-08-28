@@ -71,9 +71,9 @@ public class ModelStateComponents
     public static final ModelBigTexComponent BIG_TEX = register(new ModelBigTexComponent(counter++));
 
     public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
-    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.SOMETIMES,
+    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
     		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE))));
-    public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.SOMETIMES,
+    public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE))));
 
     public static int getCount()

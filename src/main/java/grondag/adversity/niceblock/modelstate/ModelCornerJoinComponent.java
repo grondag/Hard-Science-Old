@@ -17,7 +17,7 @@ public class ModelCornerJoinComponent extends ModelStateComponent<ModelCornerJoi
     
     public ModelCornerJoinComponent(int ordinal, IBlockTestFactory blockTestFactory)
     {
-        super(ordinal, WorldRefreshType.SOMETIMES, CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
+        super(ordinal, WorldRefreshType.CACHED, CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
         this.blockTestFactory = blockTestFactory;
     }
 

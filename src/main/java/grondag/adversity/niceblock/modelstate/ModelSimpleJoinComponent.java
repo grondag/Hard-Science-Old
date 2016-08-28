@@ -15,7 +15,7 @@ public class ModelSimpleJoinComponent extends ModelStateComponent<ModelSimpleJoi
     
     public ModelSimpleJoinComponent(int ordinal, IBlockTest blockTest)
     {
-        super(ordinal, WorldRefreshType.SOMETIMES, SimpleJoin.STATE_COUNT);
+        super(ordinal, WorldRefreshType.CACHED, SimpleJoin.STATE_COUNT);
         this.blockTest = blockTest;
     }
 

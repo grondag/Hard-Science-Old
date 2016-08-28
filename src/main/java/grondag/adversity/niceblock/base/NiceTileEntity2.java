@@ -7,26 +7,21 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class NiceTileEntity2 extends TileEntity{
 	
-    public static final String PLACEMENT_SHAPE_TAG = "BBPlace";
     public static final String DAMAGE_TAG = "BBPlace";
     private static final String MODEL_KEY_TAG = "AMK";
 
     private long modelKey;
     
-    /** used by big blocks */
-    private int placementShape;
-    
     /** used by hyperstone */
 	private byte damage = 0;
 	
-	public IExtendedBlockState exBlockState;
-	public boolean isClientShapeIndexDirty = true;
+//	public IExtendedBlockState exBlockState;
+	public boolean isModelKeyCacheDirty = true;
 	public boolean isLoaded = false;
 	public boolean isDeleted = false;
 
@@ -38,6 +33,7 @@ public class NiceTileEntity2 extends TileEntity{
 		{
 			isDeleted = true;
 //			Adversity.log.info("shouldRefresh " + pos.toString());
+            //TODO: could this be better handled elsewhere, performance-wise?
 			updateClientRenderState();
 		}
 		return super.shouldRefresh(world, pos, oldState, newSate);
@@ -49,6 +45,7 @@ public class NiceTileEntity2 extends TileEntity{
 		super.onLoad();
 		if(this.worldObj.isRemote)
 		{
+		    //TODO: could this be better handled elsewhere, performance-wise?
 			updateClientRenderState();
 		}
 	}
@@ -56,8 +53,7 @@ public class NiceTileEntity2 extends TileEntity{
 	@SideOnly(Side.CLIENT)
 	private void updateClientRenderState()
 	{
-		this.isClientShapeIndexDirty = true;
-		worldObj.markBlockRangeForRenderUpdate(pos.up().north().east(), pos.down().south().west());
+		this.isModelKeyCacheDirty = true;
 		
 		invalidateClientCache(pos.up());
 		invalidateClientCache(pos.down());
@@ -90,6 +86,9 @@ public class NiceTileEntity2 extends TileEntity{
         invalidateClientCache(pos.down().south().east());
         invalidateClientCache(pos.down().north().west());
         invalidateClientCache(pos.down().south().west());
+
+        worldObj.markBlockRangeForRenderUpdate(pos.up().north().east(), pos.down().south().west());
+
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -97,10 +96,10 @@ public class NiceTileEntity2 extends TileEntity{
 	{
 //		Adversity.log.info("updatify attempt @ " + updatePos.toString());
 		TileEntity target = worldObj.getTileEntity(updatePos);
-		if(target != null && target instanceof NiceTileEntity2 && !((NiceTileEntity2)target).isClientShapeIndexDirty)
+		if(target != null && target instanceof NiceTileEntity2)
 		{
 //			Adversity.log.info("updatify success @ " + updatePos.toString());
-			((NiceTileEntity2)target).isClientShapeIndexDirty = true;
+			((NiceTileEntity2)target).isModelKeyCacheDirty = true;
 		}
 	}
 
@@ -121,6 +120,7 @@ public class NiceTileEntity2 extends TileEntity{
         doReadFromNBT(pkt.getNbtCompound());
         if(oldModelKey != modelKey && this.worldObj.isRemote)
         {
+            this.isModelKeyCacheDirty = true;
             worldObj.markBlockRangeForRenderUpdate(pos, pos);
         }
     }
@@ -136,7 +136,6 @@ public class NiceTileEntity2 extends TileEntity{
     private void doReadFromNBT(NBTTagCompound compound)
     {
         modelKey = compound.getLong(MODEL_KEY_TAG);
-        placementShape = compound.getInteger(PLACEMENT_SHAPE_TAG);
         damage = compound.getByte(DAMAGE_TAG);
     }
     
@@ -151,14 +150,19 @@ public class NiceTileEntity2 extends TileEntity{
     {
         if(modelKey != 0L) compound.setLong(MODEL_KEY_TAG, modelKey);
         if(damage != 0) compound.setByte(DAMAGE_TAG, damage);
-        if(placementShape != 0) compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
     }
 	
     public long getModelKey() { return modelKey; }
-    public void setModelKey(long modelKey) { this.modelKey = modelKey; }
+    public void setModelKey(long modelKey) 
+    { 
+        this.markDirty();
+        this.modelKey = modelKey; 
+    }
+    
 	public byte getDamage() { return damage; }
-	public void setDamage( byte damage) { this.damage = damage; }
-	public int getPlacementShape() { return placementShape; }
-	public void setPlacementShape( int placementShape) { this.placementShape = placementShape; }
-	
+	public void setDamage( byte damage) 
+	{ 
+	    this.markDirty();
+	    this.damage = damage; 
+    }
 }
