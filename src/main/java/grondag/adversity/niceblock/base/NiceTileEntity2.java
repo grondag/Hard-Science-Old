@@ -155,14 +155,20 @@ public class NiceTileEntity2 extends TileEntity{
     public long getModelKey() { return modelKey; }
     public void setModelKey(long modelKey) 
     { 
-        this.markDirty();
-        this.modelKey = modelKey; 
+        if(this.modelKey != modelKey)
+        {
+            this.markDirty();
+            this.modelKey = modelKey; 
+        }
     }
     
 	public byte getDamage() { return damage; }
 	public void setDamage( byte damage) 
 	{ 
-	    this.markDirty();
-	    this.damage = damage; 
+	    if(this.damage != damage)
+	    {
+    	    this.markDirty();
+    	    this.damage = damage; 
+	    }
     }
 }

@@ -199,7 +199,7 @@ public class ModelStateSet
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
         {
-            if(c.getRefreshType().ordinal() <= refreshCutoffOrdinal)
+            if(c.getRefreshType().ordinal() >= refreshCutoffOrdinal)
                 bits |= (c.getBitsFromWorld(block, state, world, pos) << shiftBits[c.getOrdinal()]);
             else
                 bits |= (startingKey & (c.getBitMask() << shiftBits[c.getOrdinal()]));

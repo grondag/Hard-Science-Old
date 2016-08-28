@@ -99,7 +99,6 @@ public class NiceItemBlock2 extends ItemBlock
             if (niceTE != null) 
             {
                 niceTE.setModelKey(stack.getTagCompound().getLong(ITEM_MODEL_KEY_TAG));
-                niceTE.markDirty();
                 if(world.isRemote)
                 {
                     world.markBlockRangeForRenderUpdate(pos, pos);
