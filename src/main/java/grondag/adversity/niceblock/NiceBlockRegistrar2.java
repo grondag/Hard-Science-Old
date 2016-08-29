@@ -83,6 +83,13 @@ public class NiceBlockRegistrar2
     public static final NiceBlockPlus2 BIGTEX_BLOCK = new NiceBlockPlus2(BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigtex");
     public static final NiceItemBlock2 BIGTEX_ITEM = new NiceItemBlock2(BIGTEX_BLOCK);
 
+    private final static ModelFactory2.ModelInputs BORDER_INPUTS = new ModelFactory2.ModelInputs("bordertest", true, BlockRenderLayer.TRANSLUCENT);
+    private final static BorderModelFactory2 BORDER_MODEL = new BorderModelFactory2(BORDER_INPUTS, ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1);
+    private static final ModelDispatcher2 BORDER_DISPATCH = new ModelDispatcher2(BORDER_MODEL);
+    public static final NiceBlockPlus2 BORDER_BLOCK = new NiceBlockPlus2(BORDER_DISPATCH, BaseMaterial.FLEXSTONE, "border");
+    public static final NiceItemBlock2 BORDER_ITEM = new NiceItemBlock2(BORDER_BLOCK);
+
     
     // public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
     // new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),

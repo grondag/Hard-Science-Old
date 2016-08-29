@@ -14,7 +14,48 @@ import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 
 public class BlockTests
 {
-    public static class BigBlockMatchFactory implements IBlockTestFactory
+    
+    public static class TestForBigBlockMatch implements IBlockTest
+    {
+        private final NiceBlock matchBlock;
+        private final int matchColorIndex;
+        private final int matchSpecies;
+        
+        /** pass in the info for the block you want to match */
+        public TestForBigBlockMatch(NiceBlock matchBlock, int matchColorIndex, int matchSpecies){
+            this.matchBlock = matchBlock;
+            this.matchColorIndex = matchColorIndex;
+            this.matchSpecies = matchSpecies;
+        }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            if(matchBlock == null)
+            {
+                // not initialized with a NiceBlock instance
+                return false;
+            }
+            
+            if(!(ibs.getBlock() instanceof NiceBlock))
+            {
+                // can only match with other NiceBlocks
+                return false;
+            }
+            
+            NiceBlock candidate = (NiceBlock)ibs.getBlock();
+            
+
+            return matchBlock.blockModelHelper.dispatcher == candidate.blockModelHelper.dispatcher
+                   && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos, false).getColorIndex()
+                   && matchSpecies == ibs.getValue(NiceBlock.META);
+        }
+        
+    }
+    
+    public static final IBlockTestFactory BIG_BLOCK_MATCH = new BigBlockMatchFactory();
+    
+    private static class BigBlockMatchFactory implements IBlockTestFactory
     {
         @Override
         public IBlockTest makeTest(IBlockAccess world, IBlockState ibs, BlockPos pos)
@@ -23,7 +64,7 @@ public class BlockTests
         }
     }
     
-    public static class BigBlockMatch2 implements IBlockTest
+    private static class BigBlockMatch2 implements IBlockTest
     {
         private final ModelDispatcher2 matchDispather;
         private final long matchKey;
@@ -33,8 +74,9 @@ public class BlockTests
         /** pass in the info for the block you want to match */
         private BigBlockMatch2(IBlockAccess world, IBlockState ibs, BlockPos pos)
         {
-            this.matchDispather = ((NiceBlockPlus2)ibs.getBlock()).dispatcher;
-            this.matchKey = ((NiceTileEntity2) world.getTileEntity(pos)).getModelKey();
+            NiceBlock2 block = ((NiceBlockPlus2)ibs.getBlock());
+            this.matchDispather = block.dispatcher;
+            this.matchKey = block.getModelStateKey(ibs, world, pos);
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = ibs.getValue(NiceBlock2.META);
         }

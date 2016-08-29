@@ -46,7 +46,7 @@ public class ColorModelFactory2 extends ModelFactory2
 	@Override
 	public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-		if(renderLayer == modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
+		if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
 		CubeInputs cube = getCubeInputs(state);
 		QuadContainer2.QuadContainerBuilder builder = new QuadContainer2.QuadContainerBuilder();
 		builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);

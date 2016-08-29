@@ -6,6 +6,7 @@ import grondag.adversity.niceblock.color.FixedColorMapProvider;
 import grondag.adversity.niceblock.color.HueSet.Tint;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
+import grondag.adversity.niceblock.support.BlockTests;
 
 /**
  * axis
@@ -59,7 +60,7 @@ public class ModelStateComponents
 
     public static final ModelAxisComponent AXIS = register(new ModelAxisComponent(counter++));
     
-    public static final ModelCornerJoinComponent CORNER_JOIN = register(new ModelCornerJoinComponent(counter++, null));
+    public static final ModelCornerJoinComponent CORNER_JOIN = register(new ModelCornerJoinComponent(counter++, BlockTests.BIG_BLOCK_MATCH));
 
     public static final ModelRotationComponent ROTATION = register(new ModelRotationComponent(counter++));
     public static final ModelRotationComponent ROTATION_NONE = register(new ModelRotationComponent(counter++, true));

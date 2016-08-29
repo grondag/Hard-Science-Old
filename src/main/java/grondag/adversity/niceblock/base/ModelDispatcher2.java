@@ -64,7 +64,7 @@ public class ModelDispatcher2 implements IBakedModel
 			ModelStateSetValue state = stateSet.getSetValueFromBits(key);
 			
 			SparseLayerMap result = layerMapBuilder.makeNewMap();
-			for(BlockRenderLayer layer : BlockRenderLayer.values())
+			for(BlockRenderLayer layer : layerMapBuilder.layerList)
 			{
 				ArrayList<QuadContainer2> containers = new ArrayList<QuadContainer2>();
 				for(ModelFactory2 model : models)
