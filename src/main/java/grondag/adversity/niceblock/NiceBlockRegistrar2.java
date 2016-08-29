@@ -94,12 +94,6 @@ public class NiceBlockRegistrar2
     public static final NiceBlockPlus2 BORDER_BIGTEX_BLOCK = new NiceBlockPlus2(BORDER_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "border");
     public static final NiceItemBlock2 BORDER_BIG_TEXITEM = new NiceItemBlock2(BORDER_BIGTEX_BLOCK);
 
-    
-    // public static final ModelDispatcherLayered MODEL_BORDER_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-    // new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
-    // new BorderController("bordertest", 1, BlockRenderLayer.TRANSLUCENT, true));
-    // public static final NiceBlockPlus BLOCK_BORDERED = new NiceBlockPlus(new BigBlockHelper(MODEL_BORDER_TEST, (3 << 16) | (3 << 8) | 3), BaseMaterial.FLEXSTONE, "bordered");
-    //
     // public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
     // new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
     // new MasonryController("masonrytest", 1, BlockRenderLayer.CUTOUT_MIPPED, true));

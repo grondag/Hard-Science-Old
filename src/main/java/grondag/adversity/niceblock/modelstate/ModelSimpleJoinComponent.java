@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.library.IBlockTest;
+import grondag.adversity.library.IBlockTestFactory;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.joinstate.SimpleJoin;
@@ -11,12 +11,12 @@ import net.minecraft.world.IBlockAccess;
 
 public class ModelSimpleJoinComponent extends ModelStateComponent<ModelSimpleJoinComponent.ModelSimpleJoin, SimpleJoin>
 {
-    private final IBlockTest blockTest;
+    private final IBlockTestFactory blockTestFactory;
     
-    public ModelSimpleJoinComponent(int ordinal, IBlockTest blockTest)
+    public ModelSimpleJoinComponent(int ordinal, IBlockTestFactory blockTestFactory)
     {
         super(ordinal, WorldRefreshType.CACHED, SimpleJoin.STATE_COUNT);
-        this.blockTest = blockTest;
+        this.blockTestFactory = blockTestFactory;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ModelSimpleJoinComponent extends ModelStateComponent<ModelSimpleJoi
     @Override
     public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(blockTest);
+        NeighborTestResults tests = new NeighborBlocks(world, pos).getNeighborTestResults(blockTestFactory.makeTest(world, state, pos));
         return SimpleJoin.getIndex(tests);
     }
     
