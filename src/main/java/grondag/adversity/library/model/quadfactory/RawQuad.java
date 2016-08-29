@@ -689,27 +689,30 @@ public class RawQuad
          */
         public void rotateQuadUV()
         {
-
-            Vertex swapVertex = getVertex(0);
-            Vertex vTo = getVertex(0);
-            Vertex vFrom = getVertex(1);
-            Vertex vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            
+            double swapU = getVertex(0).u;
+            double swapV = getVertex(0).v;
+            
+            Vertex vOld = getVertex(0);
+            Vertex vNext = getVertex(1);
+            Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
             setVertex(0, vNew);
             
-            vTo = getVertex(1);
-            vFrom = getVertex(2);
-            vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            vOld = getVertex(1);
+            vNext = getVertex(2);
+            vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
             setVertex(1, vNew);
-            
-            vTo = getVertex(2);
-            vFrom = getVertex(3);
-            vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+ 
+            vOld = getVertex(2);
+            vNext = getVertex(3);
+            vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
             setVertex(2, vNew);
-
-            vTo = getVertex(3);
-            vFrom = swapVertex;
-            vNew = new Vertex(vTo.xCoord, vTo.yCoord, vTo.zCoord, vFrom.v, vFrom.u, vTo.color, vTo.normal);
+            
+            vOld = getVertex(3);
+            vNext = null;
+            vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
             setVertex(3, vNew);
+
         }
         
         public BakedQuad createBakedQuad()
