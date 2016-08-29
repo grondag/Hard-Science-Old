@@ -7,7 +7,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BlockTests.TestForBigBlockMatch;
+import grondag.adversity.niceblock.support.BlockTests;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
@@ -32,7 +32,7 @@ public class BorderController extends ModelController
     public long getDynamicShapeIndex(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int colorIndex = block.blockModelHelper.getModelStateForBlock(state, world, pos, false).getColorIndex();
-        TestForBigBlockMatch test = new TestForBigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
+        BlockTests.BigBlockMatch test = new BlockTests.BigBlockMatch(block, colorIndex, state.getValue(NiceBlock.META));
         NeighborTestResults mates = new NeighborBlocks(world, pos).getNeighborTestResults(test);
 
         return (this.alternator.getAlternate(pos)  * CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT) + CornerJoinBlockStateSelector.findIndex(mates);

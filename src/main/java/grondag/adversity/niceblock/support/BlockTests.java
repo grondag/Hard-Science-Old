@@ -15,44 +15,6 @@ import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 public class BlockTests
 {
     
-    public static class TestForBigBlockMatch implements IBlockTest
-    {
-        private final NiceBlock matchBlock;
-        private final int matchColorIndex;
-        private final int matchSpecies;
-        
-        /** pass in the info for the block you want to match */
-        public TestForBigBlockMatch(NiceBlock matchBlock, int matchColorIndex, int matchSpecies){
-            this.matchBlock = matchBlock;
-            this.matchColorIndex = matchColorIndex;
-            this.matchSpecies = matchSpecies;
-        }
-        
-        @Override
-        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
-        {
-            if(matchBlock == null)
-            {
-                // not initialized with a NiceBlock instance
-                return false;
-            }
-            
-            if(!(ibs.getBlock() instanceof NiceBlock))
-            {
-                // can only match with other NiceBlocks
-                return false;
-            }
-            
-            NiceBlock candidate = (NiceBlock)ibs.getBlock();
-            
-
-            return matchBlock.blockModelHelper.dispatcher == candidate.blockModelHelper.dispatcher
-                   && matchColorIndex == candidate.blockModelHelper.getModelStateForBlock(ibs, world, pos, false).getColorIndex()
-                   && matchSpecies == ibs.getValue(NiceBlock.META);
-        }
-        
-    }
-    
     public static final IBlockTestFactory BIG_BLOCK_MATCH = new BigBlockMatchFactory();
     
     private static class BigBlockMatchFactory implements IBlockTestFactory
