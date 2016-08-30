@@ -4,8 +4,10 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshTy
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -23,7 +25,7 @@ public class NiceBlockPlus2 extends NiceBlock2 implements ITileEntityProvider {
 	}
 	
 	@Override
-    public int getMetaForPlacedBlockFromStack(ItemStack stack)
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
         return 0;
     }
@@ -39,5 +41,10 @@ public class NiceBlockPlus2 extends NiceBlock2 implements ITileEntityProvider {
         long newKey = dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, needsRefresh, this, state, world, pos);
         if(newKey != oldKey) myTE.setModelKey(newKey);
         return newKey;
+    }
+    
+    public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, NiceTileEntity2 niceTE)
+    {
+        // default is NOOP
     }
 }

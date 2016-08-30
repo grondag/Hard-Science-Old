@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
@@ -18,7 +19,7 @@ import net.minecraft.world.World;
 public class NiceItemBlock2 extends ItemBlock
 {
 
-	public static String ITEM_MODEL_KEY_TAG = "AMS";
+	private static String ITEM_MODEL_KEY_TAG = "AMS";
 	
 	public NiceItemBlock2(NiceBlock2 block) {
 		super(block);
@@ -45,7 +46,33 @@ public class NiceItemBlock2 extends ItemBlock
 //        return retVal;
 //    }
 
+    public static long getModelStateKey(ItemStack stack)
+    {
+        if(stack.getItem() instanceof NiceItemBlock2)
+        {
+            return stack.getTagCompound().getLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG);
+        }
+        else
+        {
+            return 0L;
+        }
+    }
     
+    public static void setModelStateKey(ItemStack stack, long key)
+    {
+        if(stack.getItem() instanceof NiceItemBlock2)
+        {
+            
+            NBTTagCompound tag = stack.getTagCompound();
+            if(tag == null)
+            {
+                tag = new NBTTagCompound();
+                stack.setTagCompound(tag);
+
+            }
+            tag.setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
+        }
+    }
     
     @Override
     public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
@@ -63,7 +90,7 @@ public class NiceItemBlock2 extends ItemBlock
         
         else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))            
         {
-            int meta = ((NiceBlock2) this.block).getMetaForPlacedBlockFromStack(stack);
+            int meta = ((NiceBlock2) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
             IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn);
 
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
@@ -98,7 +125,11 @@ public class NiceItemBlock2 extends ItemBlock
             NiceTileEntity2 niceTE = (NiceTileEntity2)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                niceTE.setModelKey(stack.getTagCompound().getLong(ITEM_MODEL_KEY_TAG));
+                niceTE.setModelKey(getModelStateKey(stack));
+
+                //handle any block-specific transfer from stack to TE
+                ((NiceBlockPlus2)newState.getBlock()).updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+                
                 if(world.isRemote)
                 {
                     world.markBlockRangeForRenderUpdate(pos, pos);

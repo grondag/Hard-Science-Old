@@ -11,11 +11,15 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class NiceTileEntity2 extends TileEntity{
-	
-    public static final String DAMAGE_TAG = "BBPlace";
+
+    public static final String PLACEMENT_SHAPE_TAG = "APS";
+    public static final String DAMAGE_TAG = "ADT";
     private static final String MODEL_KEY_TAG = "AMK";
 
     private long modelKey;
+    
+    /** used by big blocks */
+    private int placementShape;
     
     /** used by hyperstone */
 	private byte damage = 0;
@@ -136,6 +140,7 @@ public class NiceTileEntity2 extends TileEntity{
     private void doReadFromNBT(NBTTagCompound compound)
     {
         modelKey = compound.getLong(MODEL_KEY_TAG);
+        placementShape = compound.getInteger(PLACEMENT_SHAPE_TAG);
         damage = compound.getByte(DAMAGE_TAG);
     }
     
@@ -150,6 +155,7 @@ public class NiceTileEntity2 extends TileEntity{
     {
         if(modelKey != 0L) compound.setLong(MODEL_KEY_TAG, modelKey);
         if(damage != 0) compound.setByte(DAMAGE_TAG, damage);
+        if(placementShape != 0) compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
     }
 	
     public long getModelKey() { return modelKey; }
@@ -157,8 +163,8 @@ public class NiceTileEntity2 extends TileEntity{
     { 
         if(this.modelKey != modelKey)
         {
-            this.markDirty();
             this.modelKey = modelKey; 
+            this.markDirty();
         }
     }
     
@@ -167,8 +173,18 @@ public class NiceTileEntity2 extends TileEntity{
 	{ 
 	    if(this.damage != damage)
 	    {
-    	    this.markDirty();
     	    this.damage = damage; 
+    	    this.markDirty();
 	    }
+    }
+	
+	public int getPlacementShape() { return placementShape; }
+    public void setPlacementShape( int placementShape)
+    { 
+        if(this.placementShape != placementShape)
+        {
+            this.placementShape = placementShape;
+            this.markDirty();
+        }
     }
 }

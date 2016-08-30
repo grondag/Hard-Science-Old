@@ -82,7 +82,7 @@ public class MasonryModelFactory2 extends ModelFactory2
     	
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
         
-        SimpleJoinFaceState fjs = SimpleJoinFaceState.find(face, state.getValue(ModelStateComponents.SIMPLE_JOIN));
+        SimpleJoinFaceState fjs = SimpleJoinFaceState.find(face, state.getValue(ModelStateComponents.MASONRY_JOIN));
         int altTextureIndex = state.getValue(this.textureComponent);
         int cacheKey = makeCacheKey(face, fjs, state.getValue(this.colorComponent).ordinal, altTextureIndex);
         List<BakedQuad> retVal = faceCache.get(cacheKey);

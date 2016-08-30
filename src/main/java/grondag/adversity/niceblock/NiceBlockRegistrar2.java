@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.niceblock.base.BigBlock2;
 import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.ModelFactory2;
 import grondag.adversity.niceblock.base.NiceBlock2;
@@ -10,6 +11,7 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper2;
+import grondag.adversity.niceblock.support.NicePlacement;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -91,8 +93,16 @@ public class NiceBlockRegistrar2
 //    public static final NiceItemBlock2 BORDER_ITEM = new NiceItemBlock2(BORDER_BLOCK);
 
     private static final ModelDispatcher2 BORDER_BIGTEX_DISPATCH = new ModelDispatcher2(BIGTEX_MODEL, BORDER_MODEL);
-    public static final NiceBlockPlus2 BORDER_BIGTEX_BLOCK = new NiceBlockPlus2(BORDER_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "border");
-    public static final NiceItemBlock2 BORDER_BIG_TEXITEM = new NiceItemBlock2(BORDER_BIGTEX_BLOCK);
+    public static final BigBlock2 BORDER_BIGTEX_BLOCK = new BigBlock2(BORDER_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "border", NicePlacement.PLACEMENT_3x3x3);
+    public static final NiceItemBlock2 BORDER_BIGTEX_ITEM = new NiceItemBlock2(BORDER_BIGTEX_BLOCK);
+
+    private final static ModelFactory2.ModelInputs MASONRY_INPUTS = new ModelFactory2.ModelInputs("masonrytest", true, BlockRenderLayer.CUTOUT_MIPPED);
+    private final static MasonryModelFactory2 MASONRY_MODEL = new MasonryModelFactory2(MASONRY_INPUTS, ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.MASONRY_JOIN, ModelStateComponents.TEXTURE_1);
+
+    private static final ModelDispatcher2 MASONRY_BIGTEX_DISPATCH = new ModelDispatcher2(BIGTEX_MODEL, MASONRY_MODEL);
+    public static final BigBlock2 MASONRY_BIGTEX_BLOCK = new BigBlock2(MASONRY_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigbrick", NicePlacement.PLACEMENT_2x1x1);
+    public static final NiceItemBlock2 MASONRY_BIGTEX_ITEM = new NiceItemBlock2(MASONRY_BIGTEX_BLOCK);
 
     // public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
     // new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),

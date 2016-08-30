@@ -29,6 +29,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -169,9 +170,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         {
             ItemStack stack = new ItemStack(this, 1, i);
             long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i));
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
-            stack.setTagCompound(tag);
+            NiceItemBlock2.setModelStateKey(stack, key);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();
@@ -189,7 +188,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         return state.getValue(META);
     }
     
-    public int getMetaForPlacedBlockFromStack(ItemStack stack)
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
         return stack.getMetadata();
     }
@@ -219,9 +218,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     {
         ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, 0);
         long key = ((IExtendedBlockState)this.getExtendedState(state, world, pos)).getValue(MODEL_KEY);
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setLong(NiceItemBlock2.ITEM_MODEL_KEY_TAG, key);
-        stack.setTagCompound(tag);
+        NiceItemBlock2.setModelStateKey(stack, key);
         return stack;
     }
     
@@ -267,7 +264,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     {
         return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, true, this, state, world, pos);
     }
-    
+
     /**
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. Override for blocks that need it.
      */

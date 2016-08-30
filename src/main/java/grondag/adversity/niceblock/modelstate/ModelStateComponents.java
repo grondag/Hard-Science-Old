@@ -77,7 +77,7 @@ public class ModelStateComponents
     public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE, 0))));
     
-    public static final ModelSimpleJoinComponent SIMPLE_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.BIG_BLOCK_MATCH));
+    public static final ModelSimpleJoinComponent MASONRY_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.MASONRY_MATCH));
 
     //    public static final ModelSpeciesComponent SPECIES = register(new ModelSpeciesComponent(counter++));
 

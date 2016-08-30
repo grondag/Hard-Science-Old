@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.support;
 
+import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
@@ -7,6 +8,8 @@ import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceItemBlock2;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -19,14 +22,20 @@ import net.minecraft.world.World;
  */
 public abstract class NicePlacement {
     
-
+    public static final int PLACEMENT_2x1x1 = (2 << 16) | (1 << 8) | 1;
+    public static final int PLACEMENT_2x2x2 = (2 << 16) | (2 << 8) | 2;
+    public static final int PLACEMENT_3x3x3 = (3 << 16) | (3 << 8) | 3;
+    public static final int PLACEMENT_4x4x4 = (4 << 16) | (4 << 8) | 4;
+    
 //	/** call from Block class after setting up **/
 //	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 //			float hitZ, int meta, EntityLivingBase placer);
 
 	public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, BlockModelHelper helper);
 	
-//	/** convenience factory method */
+    public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock2 block);
+
+    //	/** convenience factory method */
 //	public static NicePlacement makeMasonryPlacer() {
 //		return new PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
 //				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
@@ -62,6 +71,11 @@ public abstract class NicePlacement {
 	        this.shape = shape;
 	    }
 	    
+	    /**
+	     * Use this instead of enum order so that masonry blocks join horizontally before vertically
+	     */
+	    private static final EnumFacing[] PLACEMENT_ORDER = {EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.SOUTH, 
+                   EnumFacing.DOWN, EnumFacing.UP};
 		@Override
 		public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, BlockModelHelper helper)
 		{
@@ -70,8 +84,8 @@ public abstract class NicePlacement {
             int species;
             NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
 			NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.TestForBlockColorMatch(helper.block, colorIndex));
-			
-			for(EnumFacing face : EnumFacing.VALUES)		    
+	
+			for(EnumFacing face : PLACEMENT_ORDER)		    
 			{
 		         if (results.result(face)) 
 		         {
@@ -105,6 +119,52 @@ public abstract class NicePlacement {
 			}
 			return 0;
 		}
+
+        @Override
+        public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock2 block)
+        {
+            long matchKey = NiceItemBlock2.getModelStateKey(stack);
+            IBlockTest colorMatch = new BlockTests.TestForBlockColorMatch2(block, matchKey);
+            int speciesInUseFlags = 0;
+            int species;
+            NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
+            NeighborTestResults results = neighbors.getNeighborTestResults(colorMatch);
+            
+            for(EnumFacing face : PLACEMENT_ORDER)            
+            {
+                 if (results.result(face)) 
+                 {
+                     species = neighbors.getBlockState(face).getValue(NiceBlock.META);
+                     speciesInUseFlags |= (1 << species);
+                     if (shape.isValidShape(worldIn, pos, new BlockTests.BigBlockMatch2(block, matchKey, species))) 
+                     {
+                         return species;
+                     }
+                 }
+            }
+
+            for(BlockCorner corner : BlockCorner.values())
+            {
+                if(results.result(corner))
+                {
+                    speciesInUseFlags |= (1 << neighbors.getBlockState(corner).getValue(NiceBlock.META));
+                }
+            }
+
+            
+            // if no available mates, randomly choose a species 
+            //that will not connect to what is surrounding
+            int salt = Useful.SALT_SHAKER.nextInt(16);
+            for(int i = 0; i < 16; i++)
+            {
+                species = (i + salt) % 16;
+                if((speciesInUseFlags & (1 << species)) == 0)
+                {
+                    return species;
+                }
+            }
+            return 0;
+        }
 	}
 
 	/**
