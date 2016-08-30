@@ -24,7 +24,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 
-public class MasonryModelFactory2 extends ModelFactory2
+public class MasonryModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
 {
     //TODO: use SimpleLoadingCache
     private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);

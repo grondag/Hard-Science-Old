@@ -24,7 +24,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BorderModelFactory2 extends ModelFactory2
+public class BorderModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
 {
     //TODO: replace with SimpleLoadingCache
     private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
@@ -80,6 +80,7 @@ public class BorderModelFactory2 extends ModelFactory2
         return textures;
     }
 
+    //TODO: optimize
     private int makeCacheKey(EnumFacing face, CornerJoinFaceState fjs, int colorIndex, int textureIndex)
     {
     	int key = face.ordinal();

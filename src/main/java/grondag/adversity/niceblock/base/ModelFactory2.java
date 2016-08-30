@@ -28,16 +28,16 @@ handleBake()
 
 TODO: remove super inheritance and references
  */
-public abstract class ModelFactory2
+public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
 {
     protected final ModelStateGroup stateGroup;
-    protected final ModelInputs modelInputs;
+    protected final V modelInputs;
     protected final ModelColorMapComponent colorComponent;
     protected final ModelTextureComponent textureComponent;
     protected final ModelRotationComponent rotationComponent;
     protected final ModelBigTexComponent bigTexComponent;
     
-    public ModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+    public ModelFactory2(V modelInputs, ModelStateComponent<?,?>... components)
     {
         this.stateGroup = ModelStateGroup.find(components);
         this.modelInputs = modelInputs;

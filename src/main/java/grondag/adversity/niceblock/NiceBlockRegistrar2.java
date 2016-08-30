@@ -104,10 +104,6 @@ public class NiceBlockRegistrar2
     public static final BigBlock2 MASONRY_BIGTEX_BLOCK = new BigBlock2(MASONRY_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigbrick", NicePlacement.PLACEMENT_2x1x1);
     public static final NiceItemBlock2 MASONRY_BIGTEX_ITEM = new NiceItemBlock2(MASONRY_BIGTEX_BLOCK);
 
-    // public static final ModelDispatcherLayered MODEL_BIGBRICK_TEST = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-    // new BigTexController("bigtex_rock_test", BlockRenderLayer.SOLID, true, true),
-    // new MasonryController("masonrytest", 1, BlockRenderLayer.CUTOUT_MIPPED, true));
-    // public static final NiceBlockPlus BLOCK_BIGBRICK = new NiceBlockPlus(new BigBlockHelper(MODEL_BIGBRICK_TEST, (2 << 16) | (1 << 8) | 1), BaseMaterial.FLEXSTONE, "bigbrick");
     //
     // public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
     // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),

@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 
-public class ColorModelFactory2 extends ModelFactory2
+public class ColorModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
 {
     
     public ColorModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components) 
