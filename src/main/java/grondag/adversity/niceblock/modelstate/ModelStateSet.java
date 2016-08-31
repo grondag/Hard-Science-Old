@@ -8,9 +8,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -25,8 +25,8 @@ public class ModelStateSet
     private final int[] shiftBits = new int[ModelStateComponents.getCount()];
     private final ModelStateComponent<?,?>[] includedTypes;
     private final int typeCount;
-    private final ModelStateGroup[] groups;
-    private final int[] groupIndexes;
+//    private final ModelStateGroup[] groups;
+//    private final int[] groupIndexes;
     private final boolean usesWorldState;
     private final ModelColorMapComponent firstColorMapComponent;
     
@@ -35,10 +35,6 @@ public class ModelStateSet
         BitSet key = new BitSet();
         for(ModelStateGroup g : groups)
         {
-            if(g == null)
-            {
-                Adversity.log.debug("wut?");
-            }
             key.set(g.getOrdinal());
         }
         
@@ -73,26 +69,26 @@ public class ModelStateSet
     private ModelStateSet(ModelStateGroup... groups)
     {
         // groups and group lookups used by SetValue to compute keys for groups
-        this.groups = groups;
+//        this.groups = groups;
 
         // NB: getGroupCount() *may* change if groups are added after this, but all groups
         // that are part of this set must, by definition, have been created before this call
         // and their ordinals will all be above the current max and should never be used
         // as parameters to this set.
-        this.groupIndexes = new int[ModelStateGroup.getGroupCount()];
+//        this.groupIndexes = new int[ModelStateGroup.getGroupCount()];
 
-        for(int i = 0; i < groupIndexes.length; i++)
-        {
-            groupIndexes[i] = NOT_PRESENT;
-        }
-        int groupCounter = 0;
-        for(ModelStateGroup g : groups)
-        {
-            if(groupIndexes[g.getOrdinal()] == NOT_PRESENT)
-            {
-                groupIndexes[g.getOrdinal()] = groupCounter++;
-            }
-        }
+//        for(int i = 0; i < groupIndexes.length; i++)
+//        {
+//            groupIndexes[i] = NOT_PRESENT;
+//        }
+//        int groupCounter = 0;
+//        for(ModelStateGroup g : groups)
+//        {
+//            if(groupIndexes[g.getOrdinal()] == NOT_PRESENT)
+//            {
+//                groupIndexes[g.getOrdinal()] = groupCounter++;
+//            }
+//        }
         
         //initialize lookup array for all component types to default that none are present
         for(int i = 0; i < ModelStateComponents.getCount(); i++)
@@ -139,20 +135,20 @@ public class ModelStateSet
         }
     }
     
-    private int getIndexForType(ModelStateComponent<?,?> type)
-    {
-        return typeIndexes[type.getOrdinal()];
-    }
+//    private int getIndexForType(ModelStateComponent<?,?> type)
+//    {
+//        return typeIndexes[type.getOrdinal()];
+//    }
     
     public long computeKey(ModelStateValue<?,?>... components)
     {
         long key = 0L;
         for(ModelStateValue<?,?> c : components)
         {
-            int typeIndex = getIndexForType(c.getComponent());
-            if(typeIndex != NOT_PRESENT)
+            int i = c.getComponent().getOrdinal();
+            if(typeIndexes[i] != NOT_PRESENT)
             {
-                key |= (c.getBits() << shiftBits[typeIndex]);
+                key |= (c.getBits() << shiftBits[i]);
             }
         }
         return key;
@@ -163,10 +159,10 @@ public class ModelStateSet
         long mask = 0L;
         for(ModelStateValue<?,?> c : components)
         {
-            int typeIndex = getIndexForType(c.getComponent());
-            if(typeIndex != NOT_PRESENT)
+            int i = c.getComponent().getOrdinal();
+            if(typeIndexes[i] != NOT_PRESENT)
             {
-                mask |= (c.getComponent().getBitMask() << shiftBits[typeIndex]);
+                mask |= (c.getComponent().getBitMask() << shiftBits[i]);
             }
         }
         return mask;
@@ -223,7 +219,7 @@ public class ModelStateSet
     {
         private final ModelStateValue<?,?>[] values;
         private final long key;
-        private final long[]groupKeys;
+//        private final long[]groupKeys;
         
         private ModelStateSetValue(Long key, ArrayList<ModelStateValue<?,?>> valuesIn)
         {
@@ -231,27 +227,27 @@ public class ModelStateSet
             values = new ModelStateValue<?,?>[typeCount];
             for(ModelStateValue<?,?> v : valuesIn)
             {
-                int index = getIndexForType(v.getComponent());
+                int index = typeIndexes[v.getComponent().getOrdinal()];
                 values[index] = v;
             }
             
-            //pre-compute group keys
-            groupKeys = new long[groups.length];
-            for(int i = 0; i < groups.length; i++)
-            {
-                ModelStateValue<?,?>[] subValues = new ModelStateValue<?,?>[groups[i].getComponents().length];
-                int valueCounter = 0;
-                for(ModelStateComponent<?,?> c : groups[i].getComponents())
-                {
-                    subValues[valueCounter++] = values[getIndexForType(c)];
-                }
-                groupKeys[i] = computeKey(subValues);
-            }
+//            //pre-compute group keys
+//            groupKeys = new long[groups.length];
+//            for(int i = 0; i < groups.length; i++)
+//            {
+//                ModelStateValue<?,?>[] subValues = new ModelStateValue<?,?>[groups[i].getComponents().length];
+//                int valueCounter = 0;
+//                for(ModelStateComponent<?,?> c : groups[i].getComponents())
+//                {
+//                    subValues[valueCounter++] = values[getIndexForType(c)];
+//                }
+//                groupKeys[i] = computeKey(subValues);
+//            }
         }
         
         public <T extends ModelStateValue<T, V>, V> V getValue(ModelStateComponent<T, V> type)
         {
-            int index = getIndexForType(type);
+            int index = typeIndexes[type.getOrdinal()];
             if(index == ModelStateSet.NOT_PRESENT) return null;
             return type.getValueType().cast(values[index].getValue());
         }
@@ -264,13 +260,13 @@ public class ModelStateSet
             return key;
         }
         
-        /** 
-         * Unique ID for a subset of components (group).
-         * Used to lookup baked models that rely on a subset of entire state.
-         */
-        public long getGroupKey(ModelStateGroup group)
-        {
-            return groupKeys[groupIndexes[group.getOrdinal()]];
-        }
+//        /** 
+//         * Unique ID for a subset of components (group).
+//         * Used to lookup baked models that rely on a subset of entire state.
+//         */
+//        public long getGroupKey(ModelStateGroup group)
+//        {
+//            return groupKeys[groupIndexes[group.getOrdinal()]];
+//        }
     }
 }

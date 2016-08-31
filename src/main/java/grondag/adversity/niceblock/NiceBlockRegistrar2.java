@@ -104,6 +104,27 @@ public class NiceBlockRegistrar2
     public static final BigBlock2 MASONRY_BIGTEX_BLOCK = new BigBlock2(MASONRY_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigbrick", NicePlacement.PLACEMENT_2x1x1);
     public static final NiceItemBlock2 MASONRY_BIGTEX_ITEM = new NiceItemBlock2(MASONRY_BIGTEX_BLOCK);
 
+    private static final ModelFactory2.ModelInputs COLUMN_INPUTS_BASE 
+        = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.SOLID);
+    
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
+         = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_2_OUTER 
+    = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
+
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_2_INNER 
+        = new ColumnSquareModelFactory2(COLUMN_INPUTS_2_INNER, ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_2_OUTER 
+    = new ColumnSquareModelFactory2(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
+        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    
+    private static final ModelDispatcher2 COLUMN_2_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_2_INNER, COLUMN_MODEL_2_OUTER);
+    public static final ColumnSquareBlock2 COLUMN_2_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2")
+            .setLightLevel(3F/15F);
+    public static final NiceItemBlock2 COLUMN_2_ITEM = new NiceItemBlock2(COLUMN_2_BLOCK);
+
+    
     //
     // public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
     // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),
