@@ -107,44 +107,76 @@ public class NiceBlockRegistrar2
     private static final ModelFactory2.ModelInputs COLUMN_INPUTS_BASE 
         = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.SOLID);
     
+    // not sure why, but get bad lighting artifacts if overlay not on a separate layer
+    private static final ModelFactory2.ModelInputs COLUMN_INPUTS_OVERLAY 
+    = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.CUTOUT_MIPPED);
+    
+    
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
          = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_2_OUTER 
-    = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
+    = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
 
     private final static ColumnSquareModelFactory2 COLUMN_MODEL_2_INNER 
         = new ColumnSquareModelFactory2(COLUMN_INPUTS_2_INNER, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
     private final static ColumnSquareModelFactory2 COLUMN_MODEL_2_OUTER 
-    = new ColumnSquareModelFactory2(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
+        = new ColumnSquareModelFactory2(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
         ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
     
     private static final ModelDispatcher2 COLUMN_2_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_2_INNER, COLUMN_MODEL_2_OUTER);
     public static final ColumnSquareBlock2 COLUMN_2_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2")
-            .setLightLevel(3F/15F);
+        .setLightLevel(3F/15F);
     public static final NiceItemBlock2 COLUMN_2_ITEM = new NiceItemBlock2(COLUMN_2_BLOCK);
 
     
-    //
-    // public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_2 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-    // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 2, true),
-    // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 2, true));
-    // public static final Block BLOCK_COLUMN_SQUARE_2 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_2), BaseMaterial.FLEXSTONE, "column_square_2")
-    // .setLightLevel(3F/15F);//.setLightOpacity(0);
-    //
-    // public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_3 = new ModelDispatcherBasic(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-    // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 3, true));
-    // public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_3 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_3), BaseMaterial.FLEXSTONE, "column_square_3");
-    //
-    // public static final ModelDispatcherLayered MODEL_COLUMN_SQUARE_4 = new ModelDispatcherLayered(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-    // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_BASE, true, 4, true),
-    // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.LAMP_OVERLAY, true, 4, true));
-    // public static final Block BLOCK_COLUMN_SQUARE_4 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_4), BaseMaterial.FLEXSTONE, "column_square_4")
-    // .setLightLevel(3F/15F);//.setLightOpacity(0);
-    //
-    // public static final ModelDispatcherBasic MODEL_COLUMN_SQUARE_5 = new ModelDispatcherBasic(BlockColorMapProvider.INSTANCE, "colored_stone_0_0",
-    // new ColumnSquareController("colored_stone", 1, ColumnSquareController.ModelType.NORMAL, true, 5, false));
-    // public static final NiceBlockPlus BLOCK_COLUMN_SQUARE_5 = new ColumnSquareBlock(new AxisOrientedHelper(MODEL_COLUMN_SQUARE_5), BaseMaterial.FLEXSTONE, "column_square_5");
+    
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_3 
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 3, true, ColumnSquareModelFactory2.ModelType.NORMAL);
+  
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_3
+        = new ColumnSquareModelFactory2(COLUMN_INPUTS_3, ModelStateComponents.COLORS_BLOCK,
+        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    
+    private static final ModelDispatcher2 COLUMN_3_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_3);
+    public static final ColumnSquareBlock2 COLUMN_3_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_3_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_3");
+    public static final NiceItemBlock2 COLUMN_3_ITEM = new NiceItemBlock2(COLUMN_3_BLOCK);
+
+    
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_4_INNER 
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 4, false, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_4_OUTER 
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 4, false, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
+    
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_4_INNER 
+       = new ColumnSquareModelFactory2(COLUMN_INPUTS_4_INNER, ModelStateComponents.COLORS_BLOCK,
+           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_4_OUTER 
+       = new ColumnSquareModelFactory2(COLUMN_INPUTS_4_OUTER, ModelStateComponents.COLORS_BLOCK,
+       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    
+    private static final ModelDispatcher2 COLUMN_4_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_4_INNER, COLUMN_MODEL_4_OUTER);
+    public static final ColumnSquareBlock2 COLUMN_4_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_4_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_4")
+       .setLightLevel(3F/15F);
+    public static final NiceItemBlock2 COLUMN_4_ITEM = new NiceItemBlock2(COLUMN_4_BLOCK);
+
+    
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_5_INNER 
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 5, false, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
+    private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_5_OUTER 
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 5, false, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
+    
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_5_INNER 
+       = new ColumnSquareModelFactory2(COLUMN_INPUTS_5_INNER, ModelStateComponents.COLORS_BLOCK,
+           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    private final static ColumnSquareModelFactory2 COLUMN_MODEL_5_OUTER 
+       = new ColumnSquareModelFactory2(COLUMN_INPUTS_5_OUTER, ModelStateComponents.COLORS_BLOCK,
+       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+    
+    private static final ModelDispatcher2 COLUMN_5_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_5_INNER, COLUMN_MODEL_5_OUTER);
+    public static final ColumnSquareBlock2 COLUMN_5_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_5_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_5")
+       .setLightLevel(3F/15F);
+    public static final NiceItemBlock2 COLUMN_5_ITEM = new NiceItemBlock2(COLUMN_5_BLOCK);
 
     // public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColorMapProvider(4), "cool_basalt_0_0",
     // new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
