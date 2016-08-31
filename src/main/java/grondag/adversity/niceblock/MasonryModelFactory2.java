@@ -36,33 +36,27 @@ public class MasonryModelFactory2 extends ModelFactory2<ModelFactory2.ModelInput
         super(modelInputs, components);
     }
 
-	   @Override
-	    protected int getTextureCount()
-	    {
-	        return (int) this.textureComponent.getValueCount() * TEXTURE_COUNT;
-	    }
-
 	    
-	    /**
-	     * Textures are generated in blocks of 8, but only some are used in each block.
-	     * Skip the unused ones so that we don't waste texture memory.
-	     * 
-	     * TODO: put this into parent?
-	     */
-	    @Override
-	    public String[] getAllTextureNames()
-	    {
-	        String[] textures = new String[getTextureCount()];
-	        
-	        for(int i = 0; i < this.textureComponent.getValueCount(); i++)
-	        {
-	            for(int j = 0; j < TEXTURE_COUNT; j++)
-	            {
-	                textures[i * TEXTURE_COUNT + j] = this.buildTextureName(modelInputs.textureName, i * TEXTURE_BLOCK_SIZE + j);
-	            }
-	        }
-	        return textures;
-	    }
+    /**
+     * Textures are generated in blocks of 8, but only some are used in each block.
+     * Skip the unused ones so that we don't waste texture memory.
+     * 
+     * TODO: put this into parent?
+     */
+    @Override
+    public String[] getAllTextureNames()
+    {
+        String[] textures = new String[(int) this.textureComponent.getValueCount() * TEXTURE_COUNT];
+        
+        for(int i = 0; i < this.textureComponent.getValueCount(); i++)
+        {
+            for(int j = 0; j < TEXTURE_COUNT; j++)
+            {
+                textures[i * TEXTURE_COUNT + j] = this.buildTextureName(modelInputs.textureName, i * TEXTURE_BLOCK_SIZE + j);
+            }
+        }
+        return textures;
+    }
 
     private int makeCacheKey(EnumFacing face, SimpleJoinFaceState fjs, int colorIndex, int textureIndex)
     {

@@ -200,10 +200,4 @@ public class BigTexModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs
     {
         return "adversity:blocks/" + baseName;
     }
-
-    @Override
-    protected int getTextureCount()
-    {
-        return 1;
-    }
 }

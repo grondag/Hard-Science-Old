@@ -4,6 +4,7 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 
 public class NoColorMapProvider implements IColorMapProvider
 {
+    public static final NoColorMapProvider INSTANCE = new NoColorMapProvider(1);
     
     private static final ColorMap WHITE;
     

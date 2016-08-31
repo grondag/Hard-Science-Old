@@ -6,6 +6,7 @@ import grondag.adversity.library.model.QuadContainer2;
 import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
+import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -36,6 +37,7 @@ public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
     protected final ModelTextureComponent textureComponent;
     protected final ModelRotationComponent rotationComponent;
     protected final ModelBigTexComponent bigTexComponent;
+    protected final ModelSpeciesComponent speciesComponent;
     
     public ModelFactory2(V modelInputs, ModelStateComponent<?,?>... components)
     {
@@ -46,6 +48,7 @@ public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
         ModelTextureComponent textureComponent = null;
         ModelRotationComponent rotationComponent = null;
         ModelBigTexComponent bigTexComponent = null;
+        ModelSpeciesComponent speciesComponent = null;
         
         for(ModelStateComponent<?,?> c : components)
         {
@@ -57,12 +60,15 @@ public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
                 rotationComponent = (ModelRotationComponent) c;
             else if(c instanceof ModelBigTexComponent)
                 bigTexComponent = (ModelBigTexComponent) c;
+            else if(c instanceof ModelSpeciesComponent)
+                speciesComponent = (ModelSpeciesComponent) c;
         }
         
         this.colorComponent = colorComponent;
         this.textureComponent = textureComponent;
         this.rotationComponent = rotationComponent;
         this.bigTexComponent = bigTexComponent;
+        this.speciesComponent = speciesComponent;
     }
     
     public boolean canRenderInLayer(BlockRenderLayer renderLayer) 
@@ -89,11 +95,6 @@ public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
         // NOOP: default implementation assumes lazy baking
     }
     
-    protected int getTextureCount()
-    {
-        return (int) this.textureComponent.getValueCount();
-    }
-    
     /**
      * Identifies all textures needed for texture stitch.
      * Assumes a single texture per model.
@@ -103,7 +104,7 @@ public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
     {
         if(this.modelInputs.textureName == null) return new String[0];
         
-        final String retVal[] = new String[getTextureCount()];
+        final String retVal[] = new String[(int) this.textureComponent.getValueCount()];
 
         for (int i = 0; i < retVal.length; i++)
         {
@@ -118,7 +119,7 @@ public abstract class ModelFactory2<V extends ModelFactory2.ModelInputs>
     	return buildTextureName(modelInputs.textureName, 0);
     }
     
-    public String buildTextureName(String baseName, int offset)
+    protected String buildTextureName(String baseName, int offset)
     {
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
     }

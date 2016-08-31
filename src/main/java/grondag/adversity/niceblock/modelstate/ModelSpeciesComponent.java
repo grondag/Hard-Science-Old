@@ -9,9 +9,9 @@ import net.minecraft.world.IBlockAccess;
 public class ModelSpeciesComponent extends ModelStateComponent<ModelSpeciesComponent.ModelSpecies, Integer>
 {
     
-    public ModelSpeciesComponent(int ordinal)
+    public ModelSpeciesComponent(int ordinal, int valueCount)
     {
-        super(ordinal, WorldRefreshType.CACHED, 16);
+        super(ordinal, WorldRefreshType.CACHED, valueCount);
     }
     
     @Override

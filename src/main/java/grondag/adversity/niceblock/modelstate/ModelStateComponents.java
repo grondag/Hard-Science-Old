@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.modelstate;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.FixedColorMapProvider;
+import grondag.adversity.niceblock.color.NoColorMapProvider;
 import grondag.adversity.niceblock.color.HueSet.Tint;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
@@ -72,14 +73,17 @@ public class ModelStateComponents
     public static final ModelBigTexComponent BIG_TEX_META_VARIED = register(new ModelBigTexComponent(counter++, true));
 
     public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
-    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
+    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
     		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE, 0))));
-    public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.CACHED,
+    public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE, 0))));
     
     public static final ModelSimpleJoinComponent MASONRY_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.MASONRY_MATCH));
 
-    //    public static final ModelSpeciesComponent SPECIES = register(new ModelSpeciesComponent(counter++));
+    public static final ModelSpeciesComponent SPECIES_4 = register(new ModelSpeciesComponent(counter++, 4));
+
+    public static final ModelColorMapComponent COLORS_WHITE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
+            NoColorMapProvider.INSTANCE));
 
     public static int getCount()
     {

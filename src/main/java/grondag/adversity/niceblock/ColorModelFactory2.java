@@ -26,7 +26,7 @@ public class ColorModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
         super(modelInputs, components);
     }
 
-    private CubeInputs getCubeInputs(ModelStateSetValue state)
+    protected CubeInputs getCubeInputs(ModelStateSetValue state)
     {
         CubeInputs result = new CubeInputs();
         ColorMap colorMap = state.getValue(colorComponent);

@@ -80,7 +80,7 @@ public class NiceBlockRegistrar2
    
     private final static ModelFactory2.ModelInputs BIGTEX_INPUTS = new ModelFactory2.ModelInputs("bigtex_rock_test", true, BlockRenderLayer.SOLID);
     private final static BigTexModelFactory2 BIGTEX_MODEL = new BigTexModelFactory2(BIGTEX_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.BIG_TEX_META_VARIED);
+            ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1);
     private static final ModelDispatcher2 BIGTEX_DISPATCH = new ModelDispatcher2(BIGTEX_MODEL);
     public static final NiceBlockPlus2 BIGTEX_BLOCK = new NiceBlockPlus2(BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigtex");
     public static final NiceItemBlock2 BIGTEX_ITEM = new NiceItemBlock2(BIGTEX_BLOCK);
@@ -178,11 +178,31 @@ public class NiceBlockRegistrar2
        .setLightLevel(3F/15F);
     public static final NiceItemBlock2 COLUMN_5_ITEM = new NiceItemBlock2(COLUMN_5_BLOCK);
 
-    // public static final ModelDispatcherLayered MODEL_HOT_BASALT = new ModelDispatcherLayered(new NoColorMapProvider(4), "cool_basalt_0_0",
-    // new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
-    // new HotBasaltController());
-    // public static final NiceBlock BLOCK_HOT_BASALT = (NiceBlock) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
-    //
+    private final static ModelFactory2.ModelInputs COOL_SQUARE_BASALT_INPUTS = new ModelFactory2.ModelInputs("cool_basalt", true, BlockRenderLayer.SOLID);
+    private final static ColorModelFactory2 COOL_SQUARE_BASALT_MODEL 
+        = new ColorModelFactory2(COOL_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private static final ModelDispatcher2 COOL_SQUARE_BASALT_DISPATCH = new ModelDispatcher2(COOL_SQUARE_BASALT_MODEL);
+    public static final NiceBlock2 COOL_SQUARE_BASALT_BLOCK = new NiceBlock2(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "cool_basalt");
+    public static final NiceItemBlock2 COOL_SQUARE_BASALT_ITEM = new NiceItemBlock2(COOL_SQUARE_BASALT_BLOCK);
+
+    
+    private final static ModelFactory2.ModelInputs HOT_SQUARE_BASALT_INPUTS = new ModelFactory2.ModelInputs("hot_basalt", false, BlockRenderLayer.TRANSLUCENT);
+    private final static SpeciesModelFactory HOT_SQUARE_BASALT_MODEL 
+        = new SpeciesModelFactory(HOT_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_4);
+    private static final ModelDispatcher2 HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher2(COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
+    public static final NiceBlock2 HOT_SQUARE_BASALT_BLOCK = new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt");
+    public static final NiceItemBlock2 HOT_SQUARE_BASALT_ITEM = new NiceItemBlock2(HOT_SQUARE_BASALT_BLOCK);
+
+    
+//     public static final ModelDispatcherLayered HOT_SQUARE_BASALT_MODEL = new ModelDispatcherLayered(new NoColorMapProvider(4), "cool_basalt_0_0",
+//     new ColorController("cool_basalt", 4, BlockRenderLayer.SOLID, true, true),
+//     new HotBasaltController());
+//     public static final NiceBlock2 HOT_SQUARE_BASALT_BLOCK = (NiceBlock2) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
+//
+//     public static final NiceBlock2 COOL_SQUARE_BASALT_BLOCK = (NiceBlock2) new HotBasaltBlock(new HotBasaltHelper(MODEL_HOT_BASALT), BaseMaterial.FLEXSTONE, "hot_basalt");
+
     // public static final ModelDispatcherBasic MODEL_LAVA = new ModelDispatcherBasic(new NoColorMapProvider(16), "volcanic_lava_flow_0_0",
     // new FlowController("volcanic_lava_flow", 1, BlockRenderLayer.SOLID, LightingMode.FULLBRIGHT));
     // public static final NiceBlock BLOCK_LAVA = (NiceBlock) new LavaBlock(new FlowHeightHelper(MODEL_LAVA, 16), BaseMaterial.FLEXSTONE, "flowing_lava")

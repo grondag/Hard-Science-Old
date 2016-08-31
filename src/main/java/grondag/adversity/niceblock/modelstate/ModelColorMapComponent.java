@@ -11,16 +11,19 @@ public class ModelColorMapComponent extends ModelStateComponent<ModelColorMapCom
 {
     private final IColorMapProvider colorProvider;
     
+    private final boolean hasSingleColor;
+    
     public ModelColorMapComponent(int ordinal, WorldRefreshType refreshType, IColorMapProvider colorProvider)
     {
         super(ordinal, refreshType, colorProvider.getColorMapCount());
         this.colorProvider = colorProvider;
+        this.hasSingleColor = colorProvider.getColorMapCount() == 1;
     }
 
     @Override
     public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return (long) state.getValue(NiceBlock2.META);
+        return hasSingleColor ? 0L : (long) state.getValue(NiceBlock2.META);
     }
 
     @Override

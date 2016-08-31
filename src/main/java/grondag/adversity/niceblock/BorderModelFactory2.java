@@ -54,13 +54,7 @@ public class BorderModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs
         super(modelInputs, components);
     }
     
-    @Override
-    protected int getTextureCount()
-    {
-        return (int) this.textureComponent.getValueCount() * TEXTURE_COUNT;
-    }
 
-    
     /**
      * Textures are generated in blocks of 16, but only 13 are used in each block.
      * Skip the unused ones so that we don't waste texture memory.
@@ -68,7 +62,7 @@ public class BorderModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs
     @Override
     public String[] getAllTextureNames()
     {
-        String[] textures = new String[getTextureCount()];
+        String[] textures = new String[(int) this.textureComponent.getValueCount() * TEXTURE_COUNT];
         
         for(int i = 0; i < this.textureComponent.getValueCount(); i++)
         {

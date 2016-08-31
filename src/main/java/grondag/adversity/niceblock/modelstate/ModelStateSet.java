@@ -29,6 +29,7 @@ public class ModelStateSet
 //    private final int[] groupIndexes;
     private final boolean usesWorldState;
     private final ModelColorMapComponent firstColorMapComponent;
+    private final ModelSpeciesComponent firstSpeciesComponent;
     
     public static ModelStateSet find(ModelStateGroup... groups)
     {
@@ -100,6 +101,7 @@ public class ModelStateSet
         int componentCounter = 0;
         int shift = 0;
         ModelColorMapComponent colorMap = null;
+        ModelSpeciesComponent species = null;
         boolean canRefresh = false;
         for(ModelStateGroup g : groups)
         {
@@ -116,11 +118,15 @@ public class ModelStateSet
                     {
                         colorMap = (ModelColorMapComponent) c;
                     }
-
+                    if(species == null && c instanceof ModelSpeciesComponent)
+                    {
+                        species = (ModelSpeciesComponent) c;
+                    }
                 }
             }
         }
         this.firstColorMapComponent = colorMap;
+        this.firstSpeciesComponent = species;
         this.usesWorldState = canRefresh;
         
         //initialize smaller array to include only types that are part of one or more groups
@@ -170,6 +176,7 @@ public class ModelStateSet
     
     /** used for fast color matching */
     public ModelColorMapComponent getFirstColorMapComponent() { return this.firstColorMapComponent; }
+    public ModelSpeciesComponent getFirstSpeciesComponent() { return this.firstSpeciesComponent; }
 
     
     public ModelStateSetValue getValue(ModelStateValue<?,?>... components)
