@@ -26,11 +26,11 @@ public class HotBasaltBlock extends NiceBlock2 {
 	}
 
 	// helps to prevent some weird lighting artifacts
-    @Override
-    public boolean isTranslucent(IBlockState state)
-    {
-    	return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT;
-    }
+//    @Override
+//    public boolean isTranslucent(IBlockState state)
+//    {
+//    	return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT;
+//    }
 
 //    @Override
 //    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand)
@@ -78,23 +78,23 @@ public class HotBasaltBlock extends NiceBlock2 {
     }
     
 
-    @Override
-    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT ? 15 << 20 | 15 << 4 : super.getPackedLightmapCoords(state, source, pos);
-    }
+//    @Override
+//    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
+//    {
+//        return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT ? 15 << 20 | 15 << 4 : super.getPackedLightmapCoords(state, source, pos);
+//    }
 
     // necessary to offset the AO lighting effects of a fully lit translucent layer
     // values >= 15 are changed to 1 by rendering code
-    @Override
-    public int getLightOpacity(IBlockState state) {
-        return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT ? 0 : 255;
-    }
-
-    @Override
-    public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return getLightOpacity(state);
-    }
+//    @Override
+//    public int getLightOpacity(IBlockState state) {
+//        return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT ? 0 : 255;
+//    }
+//
+//    @Override
+//    public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+//        return getLightOpacity(state);
+//    }
     
 //    @Override
 //    public String getItemStackDisplayName(ItemStack stack)

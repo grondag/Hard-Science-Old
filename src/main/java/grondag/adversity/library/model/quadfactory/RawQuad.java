@@ -724,14 +724,16 @@ public class RawQuad
 
             int[] vertexData = new int[28];
 
+            // see LightingMode for more info on how this enables full brightness for block models.
             VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
 
             float[] faceNormal = this.getFaceNormalArray();
 
+            // The item renderer doesn't recognize pre-baked lightmaps, so we have to get creative.
+            // TODO: this is really a hack - doesn't work well if item is at angle to Y axis
+            // There does not yet appear to be a supported method for full-bright items.
             if(this.isItem && this.lightingMode == LightingMode.FULLBRIGHT)
             {
-                //TODO: this is really a hack - doesn't work well if item is at angle to Y axis
-                //There does not yet appear to be a supported method for full-bright items
                 faceNormal[0] = 0;
                 faceNormal[1] = 1;
                 faceNormal[2] = 0;
@@ -764,16 +766,21 @@ public class RawQuad
                     case UV: 
                         if(format.getElement(e).getIndex() == 1)
                         {
+                            // This block happens when we are using a BLOCK vertex format
+                            // that accepts pre-baked lightmaps.  Assuming here that the 
+                            // intention is for full brightness. (Don't have a way to pass something dimmer.)
                             float[] fullBright = new float[2];
 
-                            //Don't really understand how brightness format works, but this does the job
-                            fullBright[0] = ((float)((15 >> 0x04) & 0xF) * 0x20) / 0xFFFF;
-                            fullBright[1] = ((float)((15 >> 0x14) & 0xF) * 0x20) / 0xFFFF;
+                            //Don't really understand how brightness format works, but this does the job.
+                            //It mimics the lightmap that would be returned from a block in full brightness.
+                            fullBright[0] = (float)(15 * 0x20) / 0xFFFF;
+                            fullBright[1] = (float)(15 * 0x20) / 0xFFFF;
 
                             LightUtil.pack(fullBright, vertexData, format, v, e);
                         }
                         else
                         {
+                            // This block handles the normal case: texture UV coordinates
                             float[] uvData = new float[2];
                             uvData[0] = this.textureSprite.getInterpolatedU(getVertex(v).u);
                             uvData[1] = this.textureSprite.getInterpolatedV(getVertex(v).v);
@@ -792,8 +799,7 @@ public class RawQuad
             //                    vertexToInts(this.v3.xCoord, this.v3.yCoord, this.v3.zCoord, this.v3.u, this.v3.v, v3.color, this.textureSprite),
             //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
-
-            return new BakedQuad(vertexData, color, getFace(), textureSprite, lightingMode == LightingMode.SHADED, format);
+              return new BakedQuad(vertexData, color, getFace(), textureSprite, lightingMode == LightingMode.SHADED, format);
 
         }
 

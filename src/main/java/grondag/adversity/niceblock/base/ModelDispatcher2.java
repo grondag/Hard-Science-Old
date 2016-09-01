@@ -45,7 +45,7 @@ public class ModelDispatcher2 implements IBakedModel
     private final ModelFactory2[] models;
     private final ModelStateSet stateSet;
     private final boolean renderLayerFlags[] = new boolean[BlockRenderLayer.values().length];
-    private final boolean shadedFlag;
+    private final boolean shadedFlags[] = new boolean[BlockRenderLayer.values().length];
     private final SparseLayerMapBuilder layerMapBuilder;
     private final ICollisionHandler collisionHandler;
     
@@ -89,7 +89,7 @@ public class ModelDispatcher2 implements IBakedModel
 			{
 				builder.addAll(model.getItemQuads(state));
 			}
-			return new SimpleItemBlockModel(builder.build(), isAmbientOcclusion());
+			return new SimpleItemBlockModel(builder.build(), shadedFlags[0]);
 		}       
     }
   
@@ -113,7 +113,6 @@ public class ModelDispatcher2 implements IBakedModel
 
         ArrayList<ICollisionHandler> collisionHandlers = new ArrayList<>();
 
-        boolean isShaded = false;
         for(int i = 0; i < models.length; i++)
         {
             groups[i] = models[i].getStateGroup();
@@ -128,11 +127,10 @@ public class ModelDispatcher2 implements IBakedModel
                 {
                     renderLayerFlags[layer.ordinal()] = true;
                     layerList.add(layer);
+                    shadedFlags[layer.ordinal()] = shadedFlags[layer.ordinal()] || models[i].modelInputs.isShaded;
                 }
             }
-            isShaded = isShaded || models[i].modelInputs.isShaded;
         }
-        this.shadedFlag = isShaded;
        
         if(collisionHandlers.isEmpty())
         {
@@ -232,7 +230,7 @@ public class ModelDispatcher2 implements IBakedModel
     @Override
     public boolean isAmbientOcclusion()
     {
-        return this.shadedFlag;
+        return shadedFlags[MinecraftForgeClient.getRenderLayer().ordinal()];
     }
     
     @Override

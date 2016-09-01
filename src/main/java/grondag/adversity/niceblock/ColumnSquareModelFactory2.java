@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
@@ -97,6 +98,8 @@ public class ColumnSquareModelFactory2 extends ModelFactory2<ColumnSquareModelFa
     	key += textureIndex * offset;
     	offset *= this.textureComponent.getValueCount();
     	key += colorIndex * offset;
+//    	offset *= ModelType.values().length;
+//    	key += this.modelInputs.modelType.ordinal();
     	return key;
     }
 

@@ -106,14 +106,17 @@ public class NiceBlockRegistrar2
 
     private static final ModelFactory2.ModelInputs COLUMN_INPUTS_BASE 
         = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.SOLID);
-    
-    // not sure why, but get bad lighting artifacts if overlay not on a separate layer
+
+    private static final ModelFactory2.ModelInputs COLUMN_INPUTS_LAMP 
+    = new ModelFactory2.ModelInputs("colored_stone", false, BlockRenderLayer.SOLID);
+
+    // need overlay on a separate layer to keep it out of AO lighting
     private static final ModelFactory2.ModelInputs COLUMN_INPUTS_OVERLAY 
     = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.CUTOUT_MIPPED);
     
     
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
-         = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
+         = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_2_OUTER 
     = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 2, true, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
 
@@ -124,9 +127,8 @@ public class NiceBlockRegistrar2
         = new ColumnSquareModelFactory2(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
         ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
     
-    private static final ModelDispatcher2 COLUMN_2_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_2_INNER, COLUMN_MODEL_2_OUTER);
-    public static final ColumnSquareBlock2 COLUMN_2_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2")
-        .setLightLevel(3F/15F);
+    private static final ModelDispatcher2 COLUMN_2_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_2_INNER , COLUMN_MODEL_2_OUTER);
+    public static final ColumnSquareBlock2 COLUMN_2_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2");
     public static final NiceItemBlock2 COLUMN_2_ITEM = new NiceItemBlock2(COLUMN_2_BLOCK);
 
     
@@ -144,7 +146,7 @@ public class NiceBlockRegistrar2
 
     
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_4_INNER 
-        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 4, false, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 4, false, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_4_OUTER 
         = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 4, false, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
     
@@ -156,13 +158,12 @@ public class NiceBlockRegistrar2
        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
     
     private static final ModelDispatcher2 COLUMN_4_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_4_INNER, COLUMN_MODEL_4_OUTER);
-    public static final ColumnSquareBlock2 COLUMN_4_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_4_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_4")
-       .setLightLevel(3F/15F);
+    public static final ColumnSquareBlock2 COLUMN_4_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_4_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_4");
     public static final NiceItemBlock2 COLUMN_4_ITEM = new NiceItemBlock2(COLUMN_4_BLOCK);
 
     
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_5_INNER 
-        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_BASE, 5, false, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
+        = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 5, false, ColumnSquareModelFactory2.ModelType.LAMP_BASE);
     private static final ColumnSquareModelFactory2.ColumnSquareInputs COLUMN_INPUTS_5_OUTER 
         = new ColumnSquareModelFactory2.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 5, false, ColumnSquareModelFactory2.ModelType.LAMP_OVERLAY);
     
@@ -174,8 +175,7 @@ public class NiceBlockRegistrar2
        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
     
     private static final ModelDispatcher2 COLUMN_5_DISPATCH = new ModelDispatcher2(COLUMN_MODEL_5_INNER, COLUMN_MODEL_5_OUTER);
-    public static final ColumnSquareBlock2 COLUMN_5_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_5_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_5")
-       .setLightLevel(3F/15F);
+    public static final ColumnSquareBlock2 COLUMN_5_BLOCK = (ColumnSquareBlock2) new ColumnSquareBlock2(COLUMN_5_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_5");
     public static final NiceItemBlock2 COLUMN_5_ITEM = new NiceItemBlock2(COLUMN_5_BLOCK);
 
     private final static ModelFactory2.ModelInputs COOL_SQUARE_BASALT_INPUTS = new ModelFactory2.ModelInputs("cool_basalt", true, BlockRenderLayer.SOLID);
@@ -191,8 +191,9 @@ public class NiceBlockRegistrar2
     private final static SpeciesModelFactory HOT_SQUARE_BASALT_MODEL 
         = new SpeciesModelFactory(HOT_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_4);
-    private static final ModelDispatcher2 HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher2(COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
-    public static final NiceBlock2 HOT_SQUARE_BASALT_BLOCK = new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt");
+    private static final ModelDispatcher2 HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher2( COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
+    public static final NiceBlock2 HOT_SQUARE_BASALT_BLOCK = (NiceBlock2) new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt");
+//        .setLightLevel(1F/15F);
     public static final NiceItemBlock2 HOT_SQUARE_BASALT_ITEM = new NiceItemBlock2(HOT_SQUARE_BASALT_BLOCK);
 
     

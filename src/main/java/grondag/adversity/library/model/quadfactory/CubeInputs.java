@@ -44,6 +44,8 @@ public class CubeInputs{
 
         RawQuad qi = new RawQuad();
         qi.color = this.color;
+        //TODO: support flat lighting mode?
+        qi.lightingMode = this.isShaded ? LightingMode.SHADED : LightingMode.FULLBRIGHT;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
         qi.textureSprite = this.textureSprite;
 

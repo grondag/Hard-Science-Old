@@ -399,8 +399,6 @@ public class NiceBlock2 extends Block // implements IWailaProvider
 		return styleName;
 	}
 
-
-
 //    @Override
 //    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
 //    {
