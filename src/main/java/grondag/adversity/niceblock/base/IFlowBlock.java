@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.base;
 
-import grondag.adversity.niceblock.FlowHeightState;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 
 public interface IFlowBlock 

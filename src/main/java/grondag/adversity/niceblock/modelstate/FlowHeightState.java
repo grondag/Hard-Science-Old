@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;

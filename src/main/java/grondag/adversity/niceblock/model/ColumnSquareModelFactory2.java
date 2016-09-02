@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.model;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;

@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.block;
 
 import net.minecraft.util.math.BlockPos;
 

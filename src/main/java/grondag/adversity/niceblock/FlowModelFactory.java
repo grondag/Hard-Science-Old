@@ -17,6 +17,7 @@ import grondag.adversity.niceblock.base.ModelController;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.IColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;

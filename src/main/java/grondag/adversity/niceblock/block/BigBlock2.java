@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.base;
+package grondag.adversity.niceblock.block;
 
 import java.util.List;
 
@@ -8,6 +8,12 @@ import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.niceblock.base.ModelDispatcher2;
+import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceBlockPlus2;
+import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.NiceTileEntity2;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.BlockTests;

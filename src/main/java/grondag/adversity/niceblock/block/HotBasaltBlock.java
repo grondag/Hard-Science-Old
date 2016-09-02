@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.block;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;

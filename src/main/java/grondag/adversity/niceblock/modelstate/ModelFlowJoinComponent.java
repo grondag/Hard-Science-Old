@@ -2,7 +2,6 @@ package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.niceblock.FlowHeightState;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.Block;

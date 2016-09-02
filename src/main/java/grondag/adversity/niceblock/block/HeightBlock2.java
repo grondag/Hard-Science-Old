@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.block;
 
 import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.NiceBlock2;

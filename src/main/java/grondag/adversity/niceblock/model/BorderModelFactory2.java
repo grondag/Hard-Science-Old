@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.model;
 
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;

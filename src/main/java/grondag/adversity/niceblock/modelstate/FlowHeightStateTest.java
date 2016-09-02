@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.modelstate;
 
 import static org.junit.Assert.*;
 
