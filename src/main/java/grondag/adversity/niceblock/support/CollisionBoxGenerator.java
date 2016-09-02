@@ -1,12 +1,11 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.support;
 
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.niceblock.VoxelBitField;
 import grondag.adversity.niceblock.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;

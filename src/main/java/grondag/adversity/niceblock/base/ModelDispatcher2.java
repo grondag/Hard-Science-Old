@@ -1,7 +1,8 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
-
+import grondag.adversity.library.SimpleCacheLoader;
+import grondag.adversity.library.SimpleLoadingCache;
 import grondag.adversity.library.model.ItemModelDelegate2;
 import grondag.adversity.library.model.QuadContainer2;
 import grondag.adversity.library.model.SimpleItemBlockModel;

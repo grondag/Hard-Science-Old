@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock;
 
 import grondag.adversity.niceblock.base.ModelDispatcher2;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import grondag.adversity.niceblock.base.NiceBlockPlus2;
 import grondag.adversity.niceblock.base.NiceItemBlock2;

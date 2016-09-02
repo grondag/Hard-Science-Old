@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.base;
+package grondag.adversity.library;
 
 public interface SimpleCacheLoader<V>
 {

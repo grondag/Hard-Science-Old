@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.support.CollisionBoxGenerator;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
