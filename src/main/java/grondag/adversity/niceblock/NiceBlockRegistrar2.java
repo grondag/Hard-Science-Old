@@ -200,7 +200,7 @@ public class NiceBlockRegistrar2
     public static final NiceBlockPlus2 HEIGHT_STONE_BLOCK = new HeightBlock2(HEIGHT_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "variable_height");
     public static final NiceItemBlock2 HEIGHT_STONE_ITEM = new NiceItemBlock2(HEIGHT_STONE_BLOCK);
 
-    // height block
+
     // flow height block - dynamic
     // filler for above
     // flow height block - static

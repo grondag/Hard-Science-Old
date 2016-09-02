@@ -87,6 +87,9 @@ public class ModelStateComponents
 
     public static final ModelSpeciesComponent SPECIES_16 = register(new ModelSpeciesComponent(counter++, 16));
 
+    public static final ModelFlowJoinComponent FLOW_JOIN_DYNAMIC = register(new ModelFlowJoinComponent(counter++, WorldRefreshType.CACHED));
+    public static final ModelFlowJoinComponent FLOW_JOIN_STATIC = register(new ModelFlowJoinComponent(counter++, WorldRefreshType.NEVER));
+
     public static int getCount()
     {
         return counter;
