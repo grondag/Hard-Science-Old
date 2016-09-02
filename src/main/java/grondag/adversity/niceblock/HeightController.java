@@ -74,5 +74,11 @@ public class HeightController extends ModelController implements ICollisionHandl
         ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (collisionKey + 1)/16.0, 1)).build();
         return retVal;
     }
+
+    @Override
+    public int getKeyBitLength()
+    {
+        return 4;
+    }
   
 }

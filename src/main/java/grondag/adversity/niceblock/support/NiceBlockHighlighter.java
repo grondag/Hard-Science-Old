@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlock2;
 
 /**
  * Common event handler for NiceBlocks for things that don't belong in a block instance.
@@ -31,8 +31,8 @@ public class NiceBlockHighlighter {
         if(pos != null && event.getPlayer() != null)
         {
     		IBlockState bs = event.getPlayer().worldObj.getBlockState(pos);
-    		if (bs != null && bs.getBlock() instanceof NiceBlock) {
-    			NiceBlock nb = (NiceBlock) bs.getBlock();
+    		if (bs != null && bs.getBlock() instanceof NiceBlock2) {
+    			NiceBlock2 nb = (NiceBlock2) bs.getBlock();
     			if (nb.needsCustomHighlight()) {
     
     				GlStateManager.enableBlend();

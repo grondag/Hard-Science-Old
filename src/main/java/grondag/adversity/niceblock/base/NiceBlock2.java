@@ -192,6 +192,11 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     {
         return stack.getMetadata();
     }
+    
+    public boolean isItemUsageAdditive(World worldIn, BlockPos pos, ItemStack stack)
+    {
+        return false;
+    }
 
     // LOCALIZATION
     @Override

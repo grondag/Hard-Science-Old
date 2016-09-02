@@ -16,5 +16,8 @@ public interface ICollisionHandler {
     public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state);
 
     public List<AxisAlignedBB> getModelBounds(long collisionKey);
+    
+    /** for composite keys */
+    public int getKeyBitLength();
 
 }

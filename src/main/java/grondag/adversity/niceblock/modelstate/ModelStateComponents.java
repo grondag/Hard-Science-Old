@@ -85,6 +85,8 @@ public class ModelStateComponents
     public static final ModelColorMapComponent COLORS_WHITE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
             NoColorMapProvider.INSTANCE));
 
+    public static final ModelSpeciesComponent SPECIES_16 = register(new ModelSpeciesComponent(counter++, 16));
+
     public static int getCount()
     {
         return counter;
