@@ -10,6 +10,7 @@ import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.NiceBlock2;
 import grondag.adversity.niceblock.base.NiceBlockPlus2;
 import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.NiceTileEntity2;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -29,11 +30,11 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
         this.isFiller = isFiller;
     }
 
-    @Override 
-    public boolean isDynamic()
-    {
-        return true;
-    }
+//    @Override 
+//    public boolean isDynamic()
+//    {
+//        return false;
+//    }
     
     @Override
     public boolean isFiller()
@@ -94,7 +95,14 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
 //    }
 
     
-     // setting to false drops AO light value
+    @Override
+    public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        NiceTileEntity2 myTE = (NiceTileEntity2) world.getTileEntity(pos);
+       return myTE == null ? 0 : myTE.getModelKey();
+    }
+
+    // setting to false drops AO light value
     @Override
     public boolean isFullCube(IBlockState state)
     {

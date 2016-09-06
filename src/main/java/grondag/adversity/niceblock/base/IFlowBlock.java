@@ -6,7 +6,7 @@ import net.minecraft.block.state.IBlockState;
 
 public interface IFlowBlock 
 {
-    public boolean isDynamic();
+//    public boolean isDynamic();
     
     /** height block if false, filler if true */
     public boolean isFiller();

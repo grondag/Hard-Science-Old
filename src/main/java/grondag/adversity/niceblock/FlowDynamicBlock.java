@@ -28,11 +28,11 @@ public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
         this.isFiller = isFiller;
     }
 
-    @Override 
-    public boolean isDynamic()
-    {
-        return true;
-    }
+//    @Override 
+//    public boolean isDynamic()
+//    {
+//        return true;
+//    }
     
     @Override
     public boolean isFiller()
