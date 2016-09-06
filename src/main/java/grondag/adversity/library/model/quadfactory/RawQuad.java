@@ -447,7 +447,7 @@ public class RawQuad
         {
             if(index < this.vertexCount)
             {
-                this.getVertex(index).withNormal(normalIn);
+                this.setVertex(index, this.getVertex(index).withNormal(normalIn));
             }
         }
 
@@ -727,7 +727,12 @@ public class RawQuad
             // see LightingMode for more info on how this enables full brightness for block models.
             VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
 
-            float[] faceNormal = this.getFaceNormalArray();
+            //TODO: REMOVE
+            if(this.tag == "top")
+            {
+                Adversity.log.info("found top");
+            }
+            float[] faceNormal = this.getFaceNormalArray();          
 
             // The item renderer doesn't recognize pre-baked lightmaps, so we have to get creative.
             // TODO: this is really a hack - doesn't work well if item is at angle to Y axis

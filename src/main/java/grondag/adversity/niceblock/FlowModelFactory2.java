@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
@@ -12,18 +13,28 @@ import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelFactory2;
+import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.niceblock.support.CollisionBoxGenerator;
+import grondag.adversity.niceblock.support.ICollisionHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
-public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
+public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> implements ICollisionHandler
 {
 
     public FlowModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components) 
@@ -47,52 +58,58 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
     public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
         if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
-        QuadContainer2.QuadContainerBuilder builder = new QuadContainer2.QuadContainerBuilder();
-        builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
+     
+        @SuppressWarnings("unchecked")
+        ImmutableList.Builder<BakedQuad>[] faces = new ImmutableList.Builder[6];
         for(EnumFacing face : EnumFacing.values())
         {
-            builder.setQuads(face, makeFaceQuads(state, face));
+            faces[face.ordinal()] = new ImmutableList.Builder<BakedQuad>();
         }
-        return builder.build();
+        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
+        
+        for(RawQuad quad : this.makeRawQuads(state))
+        {
+            if(quad.getFace() == null)
+            {
+                general.add(quad.createBakedQuad());
+            }
+            else
+            {
+                faces[quad.getFace().ordinal()].add(quad.createBakedQuad());
+            }
+        }  
+  
+        QuadContainer2.QuadContainerBuilder containerBuilder = new QuadContainer2.QuadContainerBuilder();
+        containerBuilder.setQuads(null, general.build());
+        for(EnumFacing face : EnumFacing.values())
+        {
+            containerBuilder.setQuads(face, faces[face.ordinal()].build());
+        }
+        return containerBuilder.build();
     }
 
     @Override
     public List<BakedQuad> getItemQuads(ModelStateSetValue state)
     {
-        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            general.addAll(this.makeFaceQuads(state, face));
-        }        
-        return general.build();
-    }
-    
-    private List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face)
-    {    
-       // if(face == EnumFacing.UP) return Collections.emptyList();
-        
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        
-
         for(RawQuad quad : this.makeRawQuads(state))
         {
-            if(quad.getFace() == face)
-            {
-
-                //random colors for debug
-//                    builder.add(quad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000).createBakedQuad());
-                builder.add(quad.createBakedQuad());
-            }    
-        }
+      
+            builder.add(quad.createBakedQuad());
+            
+        }   
         return builder.build();
-
     }
+    
 
     public List<RawQuad> makeRawQuads(ModelStateSetValue state)
     {
        CSGShape rawQuads = new CSGShape();
         RawQuad template = new RawQuad();
+        template.color = state.getValue(this.colorComponent).getColor(EnumColorMap.BASE);
         template.lockUV = true;
+        //TODO: WHY U NO WORK?!
+//        template.rotation = state.getValue(this.rotationComponent);
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
         template.lightingMode = modelInputs.isShaded? LightingMode.SHADED : LightingMode.FULLBRIGHT;
@@ -306,7 +323,13 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
             qi.setVertexNormal(1, normCorner[HorizontalCorner.SOUTH_EAST.ordinal()]);
             qi.setVertexNormal(2, normCorner[HorizontalCorner.NORTH_EAST.ordinal()]);
             qi.setVertexNormal(3, normCorner[HorizontalCorner.NORTH_WEST.ordinal()]);
-            qi.tag = "yawp!";
+
+            //TODO: remove
+            if(qi.isItem == false)
+            {
+                qi.tag = "top";
+            }
+            
             rawQuads.add(qi);    
         }
         
@@ -329,6 +352,13 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
                     qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                     qi.setVertexNormal(1, normCenter);
                     qi.setVertexNormal(2, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
+                    
+                    //TODO: remove
+                    if(qi.isItem == false)
+                    {
+                        qi.tag = "top";
+                    }
+                    
                     rawQuads.add(qi);    
                 }
                 
@@ -352,6 +382,13 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
     //            qi.setVertexNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
                 qi.setVertexNormal(1, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                 qi.setVertexNormal(2, normCenter);
+                
+                //TODO: remove
+                if(qi.isItem == false)
+                {
+                    qi.tag = "top";
+                }
+                
                 rawQuads.add(qi);
     
                 qi = quadInputsCenterRight[side.ordinal()];
@@ -359,6 +396,13 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
                 qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
                 qi.setVertexNormal(1, normSide[side.ordinal()]);
                 qi.setVertexNormal(2, normCenter);
+                
+                //TODO: remove
+                if(qi.isItem == false)
+                {
+                    qi.tag = "top";
+                }
+                
                 rawQuads.add(qi);
 
                 //Sides
@@ -418,5 +462,46 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
 
     }
 
+    @Override
+    public ICollisionHandler getCollisionHandler()
+    {
+        return this;
+    }
 
+    @Override
+    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
+    {
+        Block block = state.getBlock();
+        if(block instanceof IFlowBlock && block instanceof NiceBlock2)
+        {
+            return ((NiceBlock2) block).getModelStateKey(state, worldIn, pos);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    @Override
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
+    {
+        Block block = state.getBlock();
+        if(block instanceof IFlowBlock && block instanceof NiceBlock2)
+        {
+            
+            return CollisionBoxGenerator.makeCollisionBox(
+                    makeRawQuads(((NiceBlock2) block).dispatcher.getStateSet().getSetValueFromBits(getCollisionKey(state, worldIn, pos))));
+        }
+        else
+        {
+            return Collections.emptyList();
+        }
+    }
+
+
+    @Override
+    public int getKeyBitLength()
+    {
+        return ModelStateComponents.FLOW_JOIN.getBitLength();
+    }
 }

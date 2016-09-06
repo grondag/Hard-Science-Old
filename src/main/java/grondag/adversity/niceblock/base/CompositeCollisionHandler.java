@@ -1,18 +1,15 @@
 package grondag.adversity.niceblock.base;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import akka.util.Collections;
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class CompositeCollisionHandler implements ICollisionHandler
 {
@@ -44,27 +41,27 @@ public class CompositeCollisionHandler implements ICollisionHandler
     }
     
     @Override
-    public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state)
+    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
     {
         long key = 0;
         for(int i = 0; i < handlers.length; i++)
         {
-            key |= (handlers[i].getCollisionKey(worldIn, pos, state) << shiftBits[i]);
+            key |= (handlers[i].getCollisionKey(state, worldIn, pos) << shiftBits[i]);
         }
         return key;
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(long collisionKey)
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
     {
-        if(handlers.length == 1) return handlers[0].getModelBounds(collisionKey);
+        if(handlers.length == 1) return handlers[0].getModelBounds(state, worldIn, pos);
 
         if(handlers.length == 0) return java.util.Collections.emptyList();
         
         ImmutableList.Builder<AxisAlignedBB> builder = new ImmutableList.Builder<>();
         for(int i = 0; i < handlers.length; i++)
         {
-            builder.addAll(handlers[i].getModelBounds((collisionKey >> shiftBits[i]) & bitMasks[i]));
+            builder.addAll(handlers[i].getModelBounds(state, worldIn, pos));
         }
         return builder.build();
     }

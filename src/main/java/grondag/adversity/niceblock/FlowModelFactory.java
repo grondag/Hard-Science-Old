@@ -302,7 +302,13 @@ public class FlowModelFactory extends ModelFactory
             qi.setVertexNormal(1, normCorner[HorizontalCorner.SOUTH_EAST.ordinal()]);
             qi.setVertexNormal(2, normCorner[HorizontalCorner.NORTH_EAST.ordinal()]);
             qi.setVertexNormal(3, normCorner[HorizontalCorner.NORTH_WEST.ordinal()]);
-            qi.tag = "yawp!";
+            
+            //TODO: remove
+            if(qi.isItem == false)
+            {
+                qi.tag = "top";
+            }
+            
             rawQuads.add(qi);    
         }
         
@@ -325,6 +331,13 @@ public class FlowModelFactory extends ModelFactory
                     qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                     qi.setVertexNormal(1, normCenter);
                     qi.setVertexNormal(2, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
+                    
+                    //TODO: remove
+                    if(qi.isItem == false)
+                    {
+                        qi.tag = "top";
+                    }
+                    
                     rawQuads.add(qi);    
                 }
                 
@@ -348,6 +361,13 @@ public class FlowModelFactory extends ModelFactory
     //            qi.setVertexNormal(1, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getLeft()).ordinal()]);
                 qi.setVertexNormal(1, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                 qi.setVertexNormal(2, normCenter);
+                
+                //TODO: remove
+                if(qi.isItem == false)
+                {
+                    qi.tag = "top";
+                }
+                
                 rawQuads.add(qi);
     
                 qi = quadInputsCenterRight[side.ordinal()];
@@ -355,6 +375,10 @@ public class FlowModelFactory extends ModelFactory
                 qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
                 qi.setVertexNormal(1, normSide[side.ordinal()]);
                 qi.setVertexNormal(2, normCenter);
+                
+                //TODO: remove
+                qi.tag = "top";
+                
                 rawQuads.add(qi);
 
                 //Sides

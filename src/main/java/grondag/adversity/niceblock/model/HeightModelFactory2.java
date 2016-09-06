@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.model.QuadContainer2;
-import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
@@ -120,15 +119,15 @@ public class HeightModelFactory2 extends ColorModelFactory2 implements ICollisio
     }
 
     @Override
-    public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state)
+    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
     {
         return (long) state.getValue(NiceBlock.META);
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(long collisionKey)
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
     {
-        ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (collisionKey + 1)/16.0, 1)).build();
+        ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (state.getValue(NiceBlock.META) + 1)/16.0, 1)).build();
         return retVal;
     }
 

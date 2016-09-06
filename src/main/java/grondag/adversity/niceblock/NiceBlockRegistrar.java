@@ -1,30 +1,18 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.base.AxisOrientedHelper;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceTileEntity;
-import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.FixedColorMapProvider;
 import grondag.adversity.niceblock.color.NiceHues;
-import grondag.adversity.niceblock.color.NoColorMapProvider;
-import grondag.adversity.niceblock.color.HueSet.Tint;
-import grondag.adversity.niceblock.color.NiceHues.Hue;
-import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 
 import java.io.IOException;
 import java.util.LinkedList;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;

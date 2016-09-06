@@ -210,7 +210,13 @@ public class NiceBlockRegistrar2
     public static final NiceBlockPlus2 HEIGHT_STONE_BLOCK = new HeightBlock2(HEIGHT_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "variable_height");
     public static final NiceItemBlock2 HEIGHT_STONE_ITEM = new NiceItemBlock2(HEIGHT_STONE_BLOCK);
 
-
+    private final static ModelFactory2.ModelInputs COOL_FLOWING_BASALT_INPUTS = new ModelFactory2.ModelInputs("cool_basalt", true, BlockRenderLayer.SOLID);
+    private final static FlowModelFactory2 COOL_FLOWING_BASALT_MODEL = new FlowModelFactory2(COOL_FLOWING_BASALT_INPUTS, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
+    private static final ModelDispatcher2 COOL_FLOWING_BASALT_DISPATCH = new ModelDispatcher2(COOL_FLOWING_BASALT_MODEL);
+    public static final FlowDynamicBlock COOL_FLOWING_BASALT_HEIGHT_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "flowing_dynamic_height", false);
+    public static final NiceItemBlock2 COOL_FLOWING_BASALT_HEIGHT_ITEM = new NiceItemBlock2(COOL_FLOWING_BASALT_HEIGHT_BLOCK);
+    
     // flow height block - dynamic
     // filler for above
     // flow height block - static

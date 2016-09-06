@@ -22,7 +22,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -221,10 +220,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
-        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, 0);
-        long key = ((IExtendedBlockState)this.getExtendedState(state, world, pos)).getValue(MODEL_KEY);
-        NiceItemBlock2.setModelStateKey(stack, key);
-        return stack;
+        return this.getSubItems().get(state.getValue(NiceBlock2.META));
     }
     
     // RENDERING-RELATED THINGS AND STUFF
@@ -282,16 +278,18 @@ public class NiceBlock2 extends Block // implements IWailaProvider
      * Gets bounding box list for given state.
      * Should never be called unless collisionHandler is non-null.
      */
-    private List<AxisAlignedBB> getCachedModelBounds(long collisionKey)
+    private List<AxisAlignedBB> getCachedModelBounds(IBlockState state, World worldIn, BlockPos pos)
     {
         if(collisionHandler == null) return java.util.Collections.emptyList();
         
-        List<AxisAlignedBB> retVal = modelBounds.get(collisionKey);
+        long key = collisionHandler.getCollisionKey(state, worldIn, pos);
+        
+        List<AxisAlignedBB> retVal = modelBounds.get(key);
         
         if(retVal == null)
         {
-            retVal = collisionHandler.getModelBounds(collisionKey);
-            modelBounds.put(collisionKey, retVal);
+            retVal = collisionHandler.getModelBounds(state, worldIn, pos);
+            modelBounds.put(key, retVal);
         }
 
         return retVal;
@@ -309,7 +307,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         {
             AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
             
-            List<AxisAlignedBB> bounds = getCachedModelBounds(collisionHandler.getCollisionKey(worldIn, pos, state));
+            List<AxisAlignedBB> bounds = getCachedModelBounds(state, worldIn, pos);
  
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
@@ -329,12 +327,12 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         }
         else
         {
-            long collisionKey = collisionHandler.getCollisionKey(worldIn, pos, state);
+            long collisionKey = collisionHandler.getCollisionKey(state, worldIn, pos);
             AxisAlignedBB retVal = this.combinedBounds.get(collisionKey);
             
             if(retVal == null)
             {
-                for (AxisAlignedBB aabb : this.getCachedModelBounds(collisionHandler.getCollisionKey(worldIn, pos, state))) 
+                for (AxisAlignedBB aabb : this.getCachedModelBounds(state, worldIn, pos)) 
                 {
                   retVal = retVal == null ? aabb : retVal.union(aabb);
                 }
@@ -393,7 +391,7 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
     
-            for (AxisAlignedBB aabb : this.getCachedModelBounds(collisionHandler.getCollisionKey(worldIn, pos, state))) {
+            for (AxisAlignedBB aabb : this.getCachedModelBounds(state, worldIn, pos)) {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }
             return builder.build();

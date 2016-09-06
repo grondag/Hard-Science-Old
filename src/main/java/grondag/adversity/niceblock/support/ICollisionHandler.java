@@ -13,9 +13,9 @@ import net.minecraft.world.World;
  */
 public interface ICollisionHandler {
     
-    public long getCollisionKey(World worldIn, BlockPos pos, IBlockState state);
+    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos);
 
-    public List<AxisAlignedBB> getModelBounds(long collisionKey);
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos);
     
     /** for composite keys */
     public int getKeyBitLength();

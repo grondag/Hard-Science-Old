@@ -1,50 +1,66 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 
 public interface IFlowBlock 
 {
-    public static boolean isDynamic()
+    public boolean isDynamic();
+    
+    /** height block if false, filler if true */
+    public boolean isFiller();
+    
+    /**
+     * Convenience method to check for filler block. 
+     */
+    public static boolean isBlockFlowFiller(Block block)
     {
-        return true;
+        return block instanceof IFlowBlock && ((IFlowBlock)block).isFiller();
     }
     
-    public interface IHeightBlock
+    /**
+     * Convenience method to check for height block. 
+     */
+    public static boolean isBlockFlowHeight(Block block)
     {
-        /**
-         * Returns a value from 1 to 16 to indicate the center height of this block
-         */
-        public static int getFlowHeightFromState(IBlockState state)
-        {
-            return 16 - state.getValue(NiceBlock.META);
-        }
-        
-        /** 
-         * Stores a value from 1 to 16 to indicate the center height of this block 
-         */
-        public static IBlockState stateWithFlowHeight(IBlockState state, int value)
-        {
-            return state.withProperty(NiceBlock.META, Math.min(15, Math.max(0,value - 16)));
-        }
+        return block instanceof IFlowBlock && !((IFlowBlock)block).isFiller();
     }
     
-    public interface IFillerBlock
+    /**
+     * Use for height blocks.
+     * Returns a value from 1 to 16 to indicate the center height of this block
+     */
+    public static int getFlowHeightFromState(IBlockState state)
     {
-        /**
-         * Returns values from -2 to -1 and +1 to +2.
-         */
-        public static int getYOffsetFromState(IBlockState state)
-        {
-            return FlowHeightState.getYOffsetFromTriad(state.getValue(NiceBlock.META));
-        }
-        
-        /**
-         * Stores values from -2 to -1 and +1 to +2.
-         */
-        public static IBlockState stateWithYOffset(IBlockState state, int value)
-        {
-            return state.withProperty(NiceBlock.META, FlowHeightState.getTriadWithYOffset(value));
-        }
+        return 16 - state.getValue(NiceBlock2.META);
     }
+    
+    /** 
+     * Use for height blocks.
+     * Stores a value from 1 to 16 to indicate the center height of this block 
+     */
+    public static IBlockState stateWithFlowHeight(IBlockState state, int value)
+    {
+        return state.withProperty(NiceBlock2.META, Math.min(15, Math.max(0,value - 16)));
+    }
+
+    /**
+     * Use for filler blocks.
+     * Returns values from -2 to -1 and +1 to +2.
+     */
+    public static int getYOffsetFromState(IBlockState state)
+    {
+        return FlowHeightState.getYOffsetFromTriad(state.getValue(NiceBlock2.META));
+    }
+    
+    /**
+     * Use for filler blocks.
+     * Stores values from -2 to -1 and +1 to +2.
+     */
+    public static IBlockState stateWithYOffset(IBlockState state, int value)
+    {
+        return state.withProperty(NiceBlock2.META, FlowHeightState.getTriadWithYOffset(value));
+    }
+    
 }

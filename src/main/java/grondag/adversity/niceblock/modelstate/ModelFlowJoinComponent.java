@@ -49,11 +49,11 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
 
             // If under another flow height block, handle similar to filler block.
             // Not a perfect fix if they are stacked, but shouldn't normally be.
-            if(block instanceof IFlowBlock.IHeightBlock)
+            if(IFlowBlock.isBlockFlowHeight(block))
             {
                 // try to use block above as height origin
                 originState = world.getBlockState(pos.up());
-                if(originState.getBlock() instanceof IFlowBlock.IHeightBlock)
+                if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
                 {
                     yOrigin++;
                     yOffset = -1;
@@ -64,20 +64,20 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                     originState = state;
                 }
             }
-            else if(block instanceof IFlowBlock.IFillerBlock)
+            else if(IFlowBlock.isBlockFlowFiller(block))
             {
-                int offset = IFlowBlock.IFillerBlock.getYOffsetFromState(state);
+                int offset = IFlowBlock.getYOffsetFromState(state);
                 yOrigin -= offset;
                 yOffset = offset;
                 originState = world.getBlockState(pos.down(offset));
-                if(!(originState.getBlock() instanceof IFlowBlock.IHeightBlock))
+                if(!IFlowBlock.isBlockFlowHeight(originState.getBlock()))
                 {
                     return FlowHeightState.FULL_BLOCK_STATE_KEY;
                 }
             }
             
             int[][] neighborHeight = new int[3][3];
-            neighborHeight[1][1] = IFlowBlock.IHeightBlock.getFlowHeightFromState(originState);
+            neighborHeight[1][1] = IFlowBlock.getFlowHeightFromState(originState);
 
             Block b;
             IBlockState bs;
@@ -93,9 +93,9 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                         {
                             bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, yOrigin + y, pos.getZ() - 1 + z));
                             b = bs.getBlock();
-                            if(b instanceof IFlowBlock.IHeightBlock)
+                            if(IFlowBlock.isBlockFlowHeight(b))
                             {
-                                neighborHeight[x][z] = y * 16 + IFlowBlock.IHeightBlock.getFlowHeightFromState(bs);
+                                neighborHeight[x][z] = y * 16 + IFlowBlock.getFlowHeightFromState(bs);
                                 break;
                             }
                         }
