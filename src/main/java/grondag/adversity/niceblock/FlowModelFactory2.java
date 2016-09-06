@@ -37,6 +37,9 @@ import net.minecraft.world.World;
 public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> implements ICollisionHandler
 {
 
+    //TODO: add caching to reduce memory consumption for multi-layer dispatchers and multi-species dispatchers
+    // Also, make it configurable via parameter, because not all blocks need it.
+    
     public FlowModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components) 
     {
         super(modelInputs, components);
@@ -323,12 +326,6 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
             qi.setVertexNormal(1, normCorner[HorizontalCorner.SOUTH_EAST.ordinal()]);
             qi.setVertexNormal(2, normCorner[HorizontalCorner.NORTH_EAST.ordinal()]);
             qi.setVertexNormal(3, normCorner[HorizontalCorner.NORTH_WEST.ordinal()]);
-
-            //TODO: remove
-            if(qi.isItem == false)
-            {
-                qi.tag = "top";
-            }
             
             rawQuads.add(qi);    
         }
@@ -352,12 +349,6 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
                     qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                     qi.setVertexNormal(1, normCenter);
                     qi.setVertexNormal(2, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
-                    
-                    //TODO: remove
-                    if(qi.isItem == false)
-                    {
-                        qi.tag = "top";
-                    }
                     
                     rawQuads.add(qi);    
                 }
@@ -383,25 +374,13 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
                 qi.setVertexNormal(1, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                 qi.setVertexNormal(2, normCenter);
                 
-                //TODO: remove
-                if(qi.isItem == false)
-                {
-                    qi.tag = "top";
-                }
-                
                 rawQuads.add(qi);
     
                 qi = quadInputsCenterRight[side.ordinal()];
     //            qi.setVertexNormal(0, normCorner[HorizontalCorner.find(HorizontalFace.values()[side.ordinal()], HorizontalFace.values()[side.ordinal()].getRight()).ordinal()]);
                 qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
                 qi.setVertexNormal(1, normSide[side.ordinal()]);
-                qi.setVertexNormal(2, normCenter);
-                
-                //TODO: remove
-                if(qi.isItem == false)
-                {
-                    qi.tag = "top";
-                }
+                qi.setVertexNormal(2, normCenter);     
                 
                 rawQuads.add(qi);
 
