@@ -8,6 +8,7 @@ import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher2;
 import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceBlockPlus2;
 import grondag.adversity.niceblock.base.NiceItemBlock2;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -19,7 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class FlowStaticBlock extends NiceBlock2 implements IFlowBlock
+public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
 {    
     private final boolean isFiller;
     
@@ -71,21 +72,20 @@ public class FlowStaticBlock extends NiceBlock2 implements IFlowBlock
     @Override
     public List<ItemStack> getSubItems()
     {
-        int itemCount = this.isFiller ? 5 : 16;
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-        for(int i = 0; i < itemCount; i++)
-        {
-            ItemStack stack = new ItemStack(this, 1, i);
-            int level = this.isFiller ? 15 : 16 - i;
-            int [] quadrants = new int[] {level, level, level, level};
-            long flowKey = FlowHeightState.computeStateKey(level, quadrants, quadrants, 0);
-            long key = dispatcher.getStateSet()
-                    .computeKey(ModelStateComponents.FLOW_JOIN.createValueFromBits(flowKey));
-            NiceItemBlock2.setModelStateKey(stack, key);
-            itemBuilder.add(stack);
-        }
+
+        ItemStack stack = new ItemStack(this, 1, 0);
+        int [] quadrants = new int[] {15, 15, 15, 15};
+        long flowKey = FlowHeightState.computeStateKey(15, quadrants, quadrants, 0);
+        long key = dispatcher.getStateSet()
+                .computeKey(ModelStateComponents.FLOW_JOIN.createValueFromBits(flowKey));
+        NiceItemBlock2.setModelStateKey(stack, key);
+        itemBuilder.add(stack);
+        
         return itemBuilder.build();
     }
+    
+    
     
 //    @Override
 //    public boolean isFullBlock(IBlockState state)

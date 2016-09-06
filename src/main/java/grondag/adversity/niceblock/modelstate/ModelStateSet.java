@@ -28,6 +28,7 @@ public class ModelStateSet
 //    private final ModelStateGroup[] groups;
 //    private final int[] groupIndexes;
     private final boolean usesWorldState;
+    private final boolean noAlwaysRefresh;
     private final ModelColorMapComponent firstColorMapComponent;
     private final ModelSpeciesComponent firstSpeciesComponent;
     
@@ -103,6 +104,8 @@ public class ModelStateSet
         ModelColorMapComponent colorMap = null;
         ModelSpeciesComponent species = null;
         boolean canRefresh = false;
+        boolean noAlwaysRefresh = true;
+
         for(ModelStateGroup g : groups)
         {
             for(ModelStateComponent<?,?> c : g.getComponents())
@@ -113,6 +116,7 @@ public class ModelStateSet
                     shiftBits[c.getOrdinal()] = shift;
                     shift += c.getBitLength();
                     canRefresh = canRefresh || c.getRefreshType() != WorldRefreshType.NEVER;
+                    noAlwaysRefresh = noAlwaysRefresh && c.getRefreshType() != WorldRefreshType.ALWAYS;
                     
                     if(colorMap == null && c instanceof ModelColorMapComponent)
                     {
@@ -128,6 +132,7 @@ public class ModelStateSet
         this.firstColorMapComponent = colorMap;
         this.firstSpeciesComponent = species;
         this.usesWorldState = canRefresh;
+        this.noAlwaysRefresh = noAlwaysRefresh;
         
         //initialize smaller array to include only types that are part of one or more groups
         typeCount = componentCounter;
@@ -195,7 +200,7 @@ public class ModelStateSet
     
     public long getRefreshedKeyFromWorld(long startingKey, boolean refreshCache, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        if(!this.usesWorldState) return startingKey;
+        if(!this.usesWorldState || (!refreshCache && noAlwaysRefresh)) return startingKey;
         
         int refreshCutoffOrdinal = refreshCache ? WorldRefreshType.CACHED.ordinal() : WorldRefreshType.ALWAYS.ordinal(); 
         
