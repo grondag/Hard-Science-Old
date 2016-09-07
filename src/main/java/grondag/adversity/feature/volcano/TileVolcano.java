@@ -16,8 +16,8 @@ import java.util.TreeMap;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.NiceBlockRegistrar2;
+import grondag.adversity.niceblock.base.NiceBlock2;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
@@ -157,7 +157,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 		final int x = this.pos.getX() + dx * distanceFromCenter;
 		final int z = this.pos.getZ() + dz * distanceFromCenter;
 		//new FlyingBlocksExplosion(this.worldObj, x, this.level - 1, z, blastRadius).doExplosion();
-		Useful.fill2dCircleInPlaneXZ(this.worldObj, x, this.level - 2, z, blastRadius, NiceBlockRegistrar.BLOCK_HOT_BASALT.getDefaultState());
+		Useful.fill2dCircleInPlaneXZ(this.worldObj, x, this.level - 2, z, blastRadius, NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
 	}
 
 	private void makeHaze() {
@@ -181,7 +181,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         IBlockState state = this.worldObj.getBlockState(pos);
         
-        if (state.getBlock() == NiceBlockRegistrar.BLOCK_LAVA)
+        if (state.getBlock() == NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
             return false;
         }
@@ -244,10 +244,14 @@ public class TileVolcano extends TileEntity implements ITickable{
         if (spaces.isEmpty() && !placedLava.isEmpty())// && placedLava.lastEntry().getValue().worldTick < this.worldObj.getWorldTime())
         {
             BlockPos target = placedLava.pollLastEntry().getValue().pos;
-            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.BLOCK_LAVA)
+            IBlockState state = this.worldObj.getBlockState(target);
+            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             {
-                this.worldObj.setBlockState(target, NiceBlockRegistrar.BLOCK_COOL_BASALT.getDefaultState()
-                        .withProperty(NiceBlock.META, this.worldObj.getBlockState(target).getValue(NiceBlock.META)));
+                int meta = state.getValue(NiceBlock2.META);
+                long modelStateKey = NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getModelStateKey(state, this.worldObj, target);
+                state = NiceBlockRegistrar2.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock2.META, meta);
+                this.worldObj.setBlockState(target, state);
+                NiceBlockRegistrar2.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
             }
         }
     }
@@ -260,8 +264,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
             
             
-            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar.BLOCK_LAVA.getDefaultState()
-                    .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
+            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+                    .withProperty(NiceBlock2.META, 2 * (int)Math.sqrt(distanceSq)));
             this.placedLava.put((int)distanceSq << 16 | this.counter++, 
                     new LavaPlacement(placement.pos, this.worldObj.getWorldTime() + 60));
             
@@ -269,7 +273,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             
             // don't spread sideways if can flow down or if already flowing down
             if(addSpaceIfOpen(placement.pos.down(), placement.pos.down())
-                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar.BLOCK_LAVA)
+                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             {
 //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
                 return;

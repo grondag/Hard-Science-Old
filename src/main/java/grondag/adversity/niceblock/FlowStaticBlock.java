@@ -45,6 +45,8 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
+        //TODO: make this code shared with dynamic version of block
+
         if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowStaticBlock)
         {
             if(side == EnumFacing.UP || side == EnumFacing.DOWN)
@@ -93,6 +95,7 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
 //    {
 //        return super.isFullBlock(state);
 //    }
+    
 
     
     @Override
@@ -101,17 +104,25 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
         NiceTileEntity2 myTE = (NiceTileEntity2) world.getTileEntity(pos);
        return myTE == null ? 0 : myTE.getModelKey();
     }
+    
+    public void setModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos, long modelKey)
+    {
+       NiceTileEntity2 myTE = (NiceTileEntity2) world.getTileEntity(pos);
+       if(myTE != null) myTE.setModelKey(modelKey);
+    }
 
     // setting to false drops AO light value
     @Override
     public boolean isFullCube(IBlockState state)
     {
+        //TODO: make this dependent on model state
         return false;
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state)
     {
+        //TODO: make this dependent on model state
         return false;
     }
 

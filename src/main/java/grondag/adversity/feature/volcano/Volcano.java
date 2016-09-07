@@ -96,9 +96,9 @@ public class Volcano {
 
 		
 		// TILE ENTITIES
-//		Volcano.blockVolcano = new BlockVolcano();
+		Volcano.blockVolcano = new BlockVolcano();
 //		GameRegistry.registerBlock(Volcano.blockVolcano, "BlockVolcano");
-//		GameRegistry.registerTileEntity(TileVolcano.class, "TileVolcano");
+		GameRegistry.registerTileEntity(TileVolcano.class, "TileVolcano");
 	}
 
 	public static void init(FMLInitializationEvent event) {

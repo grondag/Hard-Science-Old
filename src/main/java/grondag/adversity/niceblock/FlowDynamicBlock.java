@@ -98,18 +98,24 @@ public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
     @Override
     public boolean isFullCube(IBlockState state)
     {
+        //TODO: make this dependent on model state
+
         return false;
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state)
     {
+        //TODO: make this dependent on model state
+
         return false;
     }
 
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
+        //TODO: make this dependent on model state
+
         return false;
     }
 
