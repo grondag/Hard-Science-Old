@@ -43,24 +43,24 @@ public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowDynamicBlock)
+        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof IFlowBlock)
         {
-            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
-            {
+//            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
+//            {
                 return false;
-            }
-            else if(blockState instanceof IExtendedBlockState)
-            {
-                return this.dispatcher.getStateSet()
-                        .getSetValueFromBits(((IExtendedBlockState)blockState)
-                        .getValue(NiceBlock2.MODEL_KEY))
-                        .getValue(ModelStateComponents.FLOW_JOIN)
-                        .getSideHeight(HorizontalFace.find(side)) < 0;
-            }
-            else
-            {
-                return true;
-            }
+//            }
+//            else if(blockState instanceof IExtendedBlockState)
+//            {
+//                return this.dispatcher.getStateSet()
+//                        .getSetValueFromBits(((IExtendedBlockState)blockState)
+//                        .getValue(NiceBlock2.MODEL_KEY))
+//                        .getValue(ModelStateComponents.FLOW_JOIN)
+//                        .getSideHeight(HorizontalFace.find(side)) < 0;
+//            }
+//            else
+//            {
+//                return true;
+//            }
         }
         else
         {

@@ -43,7 +43,7 @@ public class ModelDispatcher2 implements IBakedModel
 {
     private final String resourceName = UUID.randomUUID().toString();
     private final String particleTextureName;
-    private final ModelFactory2[] models;
+    private final ModelFactory2<?>[] models;
     private final ModelStateSet stateSet;
     private final boolean renderLayerFlags[] = new boolean[BlockRenderLayer.values().length];
     private final boolean shadedFlags[] = new boolean[BlockRenderLayer.values().length];
@@ -68,7 +68,7 @@ public class ModelDispatcher2 implements IBakedModel
 			for(BlockRenderLayer layer : layerMapBuilder.layerList)
 			{
 				ArrayList<QuadContainer2> containers = new ArrayList<QuadContainer2>();
-				for(ModelFactory2 model : models)
+				for(ModelFactory2<?> model : models)
 				{
 					containers.add(model.getFaceQuads(state, layer));
 				}
@@ -86,7 +86,7 @@ public class ModelDispatcher2 implements IBakedModel
 			ModelStateSetValue state = stateSet.getSetValueFromBits(key);
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 			
-			for(ModelFactory2 model : models)
+			for(ModelFactory2<?> model : models)
 			{
 				builder.addAll(model.getItemQuads(state));
 			}
@@ -94,12 +94,12 @@ public class ModelDispatcher2 implements IBakedModel
 		}       
     }
   
-    public ModelDispatcher2(ModelFactory2... models)
+    public ModelDispatcher2(ModelFactory2<?>... models)
     {
     	this(models[0].getDefaultParticleTexture(), models);
     }
     
-    public ModelDispatcher2(String particleTextureName, ModelFactory2... models)
+    public ModelDispatcher2(String particleTextureName, ModelFactory2<?>... models)
     {
         this.particleTextureName = particleTextureName;
         this.models = models;
@@ -155,7 +155,7 @@ public class ModelDispatcher2 implements IBakedModel
     {
         event.getMap().registerSprite(new ResourceLocation(particleTextureName));
         
-        for(ModelFactory2 model : models)
+        for(ModelFactory2<?> model : models)
         {
             for (String tex : model.getAllTextureNames())
             {
@@ -170,7 +170,7 @@ public class ModelDispatcher2 implements IBakedModel
         modelCache.clear();
         itemCache.clear();
         
-        for(ModelFactory2 model : models)
+        for(ModelFactory2<?> model : models)
         {
             model.handleBakeEvent(event);
         }
@@ -220,6 +220,12 @@ public class ModelDispatcher2 implements IBakedModel
         long key = ((IExtendedBlockState)state).getValue(NiceBlock2.MODEL_KEY);
         
         return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
+    }
+    
+    public int getOcclusionKey(long modelStateKey, EnumFacing face)
+    {
+        if(this.renderLayerFlags[BlockRenderLayer.SOLID.ordinal()] == false) return 0;
+        return modelCache.get(modelStateKey).get(BlockRenderLayer.SOLID).getOcclusionHash(face);
     }
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)

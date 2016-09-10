@@ -78,7 +78,7 @@ public class SimpleLoadingCache<V>
             return localState.values[localState.zeroLocation];
         }
         
-        long keyHash = mix(key);
+        long keyHash = Useful.longHash(key);
         int position = (int) (keyHash & localState.positionMask);
         long currentKey = localState.keys[position];       
      
@@ -185,7 +185,7 @@ public class SimpleLoadingCache<V>
             {
                 if(oldKeys[i] != 0)
                 {
-                    position = (int) (mix(oldKeys[i]) & positionMask);
+                    position = (int) (Useful.longHash(oldKeys[i]) & positionMask);
                     if(newKeys[position] != 0)
                     {
                         while (!((newKeys[position = (position + 1) & positionMask]) == (0)));
@@ -205,15 +205,5 @@ public class SimpleLoadingCache<V>
             state = newState;
         }
     }
-    
-    /** see http://brpreiss.com/books/opus4/html/page214.html */
-    private static long mix(long l) 
-    {
-        // constant is golden ratio
-        long h = l * 0x9E3779B97F4A7C15L;
-        h ^= h >>> 32;
-        return h ^ (h >>> 16);
-    }
-    
 
 }

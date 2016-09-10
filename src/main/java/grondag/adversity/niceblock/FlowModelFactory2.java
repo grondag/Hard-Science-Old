@@ -416,11 +416,10 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
         CSGShape cubeQuads = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, 0, 1, 1, 1), template));
 
         rawQuads = rawQuads.intersect(cubeQuads);
-
+ 
         // don't count quads as face quads unless actually on the face
         // will be useful for face culling
-        rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getFace()) ? quad.getFace() : null));
-        
+        rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getFace()) ? quad.getFace() : null));        
         
         // if we end up with an empty list, default to standard cube
         if(rawQuads.isEmpty())

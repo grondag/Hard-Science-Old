@@ -1,12 +1,18 @@
 package grondag.adversity.library.model;
 
 import java.util.List;
+import java.util.TreeSet;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.pipeline.IVertexConsumer;
+import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public class QuadContainer2
 {
@@ -25,6 +31,7 @@ public class QuadContainer2
 	}
 	
 	private final List<BakedQuad>[] quads;
+	private int[] occlusionHash;
  
 	private QuadContainer2(List<BakedQuad>[] quads)
     {
@@ -60,6 +67,33 @@ public class QuadContainer2
 		}
     }
     
+    public int getOcclusionHash(EnumFacing face)
+    {
+        if(this.occlusionHash == null)
+        {
+            this.occlusionHash = new int[EnumFacing.values().length];
+            for(EnumFacing f : EnumFacing.values())
+            {
+                this.occlusionHash[f.ordinal()] = computeOcclusionHash(f);
+            }
+        }
+        
+        if(face == null) return 0;
+        
+        return this.occlusionHash[face.ordinal()];
+    }
+    
+    private int computeOcclusionHash(EnumFacing face)
+    {
+        List<BakedQuad> quads = getQuads(face);
+        QuadListKeyBuilder keyBuilder = new QuadListKeyBuilder(face);
+        for(BakedQuad q : quads)
+        {
+            LightUtil.putBakedQuad(keyBuilder, q);
+        }
+        return keyBuilder.getQuadListKey();
+    }
+    
     public static class QuadContainerBuilder
     {
         @SuppressWarnings("unchecked")
@@ -83,4 +117,73 @@ public class QuadContainer2
         }
     }
 
+    private static class QuadListKeyBuilder implements IVertexConsumer
+    {
+        private final int axis0;
+        private final int axis1;
+
+        private TreeSet<Long> vertexKeys = new TreeSet<Long>();
+        
+        private QuadListKeyBuilder(EnumFacing face)
+        {
+            switch(face.getAxis())
+            {
+            case X:
+                axis0 = 1;
+                axis1 = 2;
+                break;
+            case Y:
+                axis0 = 0;
+                axis1 = 2;
+                break;
+            case Z:
+            default:
+                axis0 = 0;
+                axis1 = 1;
+                break;
+            }
+        }
+        
+        /** call after piping vertices into this instance */
+        private int getQuadListKey()
+        {
+            int key = 0;
+            for(Long vk : vertexKeys)
+            {
+               key += (Useful.longHash(vk) & 0xFFFFFFFF); 
+            }
+            return (key << 8) | (vertexKeys.size() & 0xFF);     
+        }
+        
+        @Override
+        public VertexFormat getVertexFormat()
+        {
+            return DefaultVertexFormats.POSITION;
+        }
+    
+        @Override
+        public void setQuadTint(int tint)
+        {
+            //NOOP - not used
+        }
+    
+        @Override
+        public void setQuadOrientation(EnumFacing orientation)
+        {
+            //NOOP - not used
+        }
+    
+        @Override
+        public void setApplyDiffuseLighting(boolean diffuse)
+        {
+            //NOOP - not used
+        }
+    
+        @Override
+        public void put(int element, float... data)
+        {
+            //don't need to check which element - position is the only one included
+            vertexKeys.add((long) (Math.round(data[axis0] * 0xFFFFFFF) | (Math.round(data[axis1] * 0xFFFFFFF) << 32)));
+        }
+    }
 }

@@ -28,6 +28,20 @@ public class Useful {
     {
         return( value1 * (1 - location) + value2 * location);
     }
+    
+    /**
+     * Computes long hash from long value. 
+     * Use as many bits as needed/practical for specific application.
+     * see http://brpreiss.com/books/opus4/html/page214.html 
+     */
+    public static long longHash(long l) 
+    {
+        // constant is golden ratio
+        long h = l * 0x9E3779B97F4A7C15L;
+        h ^= h >>> 32;
+        return h ^ (h >>> 16);
+    }
+    
 	/** 
 	 * Sorts members of the BlockPos vector so that x is largest and z is smallest.
 	 * Useful when BlockPos represents a volume instead of a position.

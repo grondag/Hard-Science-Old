@@ -266,6 +266,11 @@ public class NiceBlock2 extends Block // implements IWailaProvider
         return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, true, this, state, world, pos);
     }
 
+    public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
+    {
+        return dispatcher.getOcclusionKey(this.getModelStateKey(state, world, pos), side);
+    }
+    
     /**
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. Override for blocks that need it.
      */

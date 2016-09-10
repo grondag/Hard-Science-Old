@@ -45,8 +45,19 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        //TODO: make this work, and confirm/test dynamic version also
-        return side != EnumFacing.DOWN;
+        
+        IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
+        if(neighborState.getBlock() instanceof IFlowBlock)
+        {
+            int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
+            int otherOcclusionKey = ((NiceBlock2)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
+            return myOcclusionKey != otherOcclusionKey;
+        }
+        else
+        {
+            return !neighborState.doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
+        }
+        
 //        
 //        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowStaticBlock)
 //        {
