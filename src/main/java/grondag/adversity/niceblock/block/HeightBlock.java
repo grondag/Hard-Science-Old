@@ -1,9 +1,9 @@
 package grondag.adversity.niceblock.block;
 
-import grondag.adversity.niceblock.base.ModelDispatcher2;
-import grondag.adversity.niceblock.base.NiceBlock2;
-import grondag.adversity.niceblock.base.NiceBlockPlus2;
-import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.ModelDispatcher;
+import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlockPlus;
+import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -15,10 +15,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class HeightBlock2 extends NiceBlockPlus2
+public class HeightBlock extends NiceBlockPlus
 {
     
-    public HeightBlock2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName)
+    public HeightBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
     {
         super(dispatcher, material, styleName);
     }
@@ -34,19 +34,19 @@ public class HeightBlock2 extends NiceBlockPlus2
     @Override
     public boolean isFullCube(IBlockState state)
     {
-        return state.getValue(NiceBlock2.META) == 15;
+        return state.getValue(NiceBlock.META) == 15;
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state)
     {
-        return state.getValue(NiceBlock2.META) == 15;
+        return state.getValue(NiceBlock.META) == 15;
     }
 
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return state.getValue(NiceBlock2.META) == 15;
+        return state.getValue(NiceBlock.META) == 15;
     }
     
     @Override
@@ -55,7 +55,7 @@ public class HeightBlock2 extends NiceBlockPlus2
         IBlockState state = worldIn.getBlockState(pos);
         return state.getBlock() == this && state.getValue(META) < 15  
                 && dispatcher.getStateSet().doComponentValuesMatch(dispatcher.getStateSet().getFirstColorMapComponent(),
-                this.getModelStateKey(state, worldIn, pos), NiceItemBlock2.getModelStateKey(stack));
+                this.getModelStateKey(state, worldIn, pos), NiceItemBlock.getModelStateKey(stack));
     }
 
     @Override
@@ -64,11 +64,11 @@ public class HeightBlock2 extends NiceBlockPlus2
         // add meta values if adding to existing block instance
         IBlockState state = worldIn.getBlockState(posPlaced);
         ModelStateSet set = dispatcher.getStateSet();
-        ModelStateSetValue stateSetValue = set.getSetValueFromBits(NiceItemBlock2.getModelStateKey(stack));
+        ModelStateSetValue stateSetValue = set.getSetValueFromBits(NiceItemBlock.getModelStateKey(stack));
         
         if(state.getBlock() == this 
                 && set.doComponentValuesMatch(set.getFirstColorMapComponent(),
-                        this.getModelStateKey(state, worldIn, posPlaced), NiceItemBlock2.getModelStateKey(stack)))
+                        this.getModelStateKey(state, worldIn, posPlaced), NiceItemBlock.getModelStateKey(stack)))
         {
             return (Math.min(15, state.getValue(META) + 1 + stateSetValue.getValue(set.getFirstSpeciesComponent())));
         }

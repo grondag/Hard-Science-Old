@@ -8,7 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
 import net.minecraft.block.state.IBlockState;
@@ -198,7 +198,7 @@ public class ModelStateSet
     
     public boolean canRefreshFromWorld() { return this.usesWorldState; }
     
-    public long getRefreshedKeyFromWorld(long startingKey, boolean refreshCache, NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getRefreshedKeyFromWorld(long startingKey, boolean refreshCache, NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         if(!this.usesWorldState || (!refreshCache && noAlwaysRefresh)) return startingKey;
         

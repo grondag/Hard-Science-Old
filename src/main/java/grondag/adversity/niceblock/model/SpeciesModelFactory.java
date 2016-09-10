@@ -1,17 +1,17 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.library.model.quadfactory.CubeInputs;
-import grondag.adversity.niceblock.base.ModelFactory2;
+import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import net.minecraft.client.Minecraft;
 
-public class SpeciesModelFactory extends ColorModelFactory2
+public class SpeciesModelFactory extends ColorModelFactory
 {
 
-    public SpeciesModelFactory(ModelFactory2.ModelInputs modelInputs, ModelStateComponent<?, ?>... components)
+    public SpeciesModelFactory(ModelFactory.ModelInputs modelInputs, ModelStateComponent<?, ?>... components)
     {
         super(modelInputs, components);
     }

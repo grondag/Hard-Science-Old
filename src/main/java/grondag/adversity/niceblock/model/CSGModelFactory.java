@@ -5,14 +5,14 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.model.QuadContainer2;
+import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.CSGBlock2;
-import grondag.adversity.niceblock.base.ModelFactory2;
-import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.block.CSGBlock;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
@@ -29,10 +29,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class CSGModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> implements ICollisionHandler
+public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
 {
     
-    public CSGModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+    public CSGModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
     {
         super(modelInputs, components);
     }
@@ -48,7 +48,7 @@ public class CSGModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> i
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
         template.lightingMode = modelInputs.isShaded ? LightingMode.SHADED : LightingMode.FULLBRIGHT;
     
-        CSGShape  delta = null;
+       // CSGShape  delta = null;
         CSGShape result = null;
         
         //union opposite overlapping coplanar faces
@@ -127,11 +127,11 @@ public class CSGModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> i
     }
     
     @Override
-    public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
+        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
         
-        return QuadContainer2.fromRawQuads(this.makeRawQuads(state));
+        return QuadContainer.fromRawQuads(this.makeRawQuads(state));
     }
 
     @Override
@@ -163,10 +163,10 @@ public class CSGModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> i
     public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
     {
         Block block = state.getBlock();
-        if(block instanceof CSGBlock2 )
+        if(block instanceof CSGBlock )
         {            
             return CollisionBoxGenerator.makeCollisionBox(
-                    makeRawQuads(((NiceBlock2) block).dispatcher.getStateSet().getSetValueFromBits(getCollisionKey(state, worldIn, pos))));
+                    makeRawQuads(((NiceBlock) block).dispatcher.getStateSet().getSetValueFromBits(getCollisionKey(state, worldIn, pos))));
         }
         else
         {

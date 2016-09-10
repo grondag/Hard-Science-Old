@@ -34,14 +34,12 @@ package grondag.adversity.library.model.quadfactory;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.Useful;

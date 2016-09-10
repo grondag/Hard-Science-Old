@@ -3,24 +3,18 @@ package grondag.adversity.niceblock.block;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.niceblock.base.ModelDispatcher2;
-import grondag.adversity.niceblock.base.NiceBlock2;
-import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.ModelDispatcher;
+import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.support.BaseMaterial;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.MinecraftForgeClient;
 
-public class HotBasaltBlock extends NiceBlock2 {
+public class HotBasaltBlock extends NiceBlock {
 	
-    public HotBasaltBlock(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName) {
+    public HotBasaltBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName) {
 		super(dispatcher, material, styleName);
 //		this.setTickRandomly(true);
 	}
@@ -71,7 +65,7 @@ public class HotBasaltBlock extends NiceBlock2 {
         {
             ItemStack stack = new ItemStack(this, 1, i);
             long key = dispatcher.getStateSet().computeKey(species.createValueFromBits(i));
-            NiceItemBlock2.setModelStateKey(stack, key);
+            NiceItemBlock.setModelStateKey(stack, key);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();

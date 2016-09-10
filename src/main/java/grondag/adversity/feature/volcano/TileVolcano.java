@@ -1,6 +1,5 @@
 package grondag.adversity.feature.volcano;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -8,18 +7,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.TreeMap;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar2;
-import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.simulator.VolcanoManager;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 
 
@@ -59,12 +54,12 @@ public class TileVolcano extends TileEntity implements ITickable{
 //		}
 //	}
 
-	private boolean isBlockOpen(BlockPos pos, boolean allowSourceLava) {
-	    final IBlockState state = this.worldObj.getBlockState(pos);
-		final Block block = state.getBlock();
-		return block.isAir(state, this.worldObj, pos) 
-		        ||  (block instanceof BlockVolcanicLava && (allowSourceLava || !((BlockVolcanicLava)block).isSourceBlock(this.worldObj, pos)));
-	}
+//	private boolean isBlockOpen(BlockPos pos, boolean allowSourceLava) {
+//	    final IBlockState state = this.worldObj.getBlockState(pos);
+//		final Block block = state.getBlock();
+//		return block.isAir(state, this.worldObj, pos) 
+//		        ||  (block instanceof BlockVolcanicLava && (allowSourceLava || !((BlockVolcanicLava)block).isSourceBlock(this.worldObj, pos)));
+//	}
 
 	// true if relatively few nearby blocks at this level would stop lava
 //	private boolean areOuterBlocksOpen(int y) {
@@ -88,33 +83,33 @@ public class TileVolcano extends TileEntity implements ITickable{
 //
 //	}
 
-	private boolean areInnerBlocksOpen(int y) {
-		return this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ()), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 2, y, this.pos.getZ() - 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 2, y, this.pos.getZ()), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 2, y, this.pos.getZ() + 1), true) &&
-
-				this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() - 2), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() - 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ()), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() + 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() + 2), true) &&
-
-				this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() - 2), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() - 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() + 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() + 2), true) &&
-
-				this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() - 2), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() - 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ()), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() + 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() + 2), true) &&
-
-				this.isBlockOpen(new BlockPos(this.pos.getX() + 2, y, this.pos.getZ() - 1), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 2, y, this.pos.getZ()), true)
-				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 2, y, this.pos.getZ() + 1), true);
-	}
+//	private boolean areInnerBlocksOpen(int y) {
+//		return this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ()), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 2, y, this.pos.getZ() - 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 2, y, this.pos.getZ()), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 2, y, this.pos.getZ() + 1), true) &&
+//
+//				this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() - 2), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() - 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ()), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() + 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() - 1, y, this.pos.getZ() + 2), true) &&
+//
+//				this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() - 2), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() - 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() + 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX(), y, this.pos.getZ() + 2), true) &&
+//
+//				this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() - 2), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() - 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ()), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() + 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 1, y, this.pos.getZ() + 2), true) &&
+//
+//				this.isBlockOpen(new BlockPos(this.pos.getX() + 2, y, this.pos.getZ() - 1), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 2, y, this.pos.getZ()), true)
+//				&& this.isBlockOpen(new BlockPos(this.pos.getX() + 2, y, this.pos.getZ() + 1), true);
+//	}
 
 	private void blowOut(int distanceFromCenter, int blastRadius) {
 		int dx = 0;
@@ -157,7 +152,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 		final int x = this.pos.getX() + dx * distanceFromCenter;
 		final int z = this.pos.getZ() + dz * distanceFromCenter;
 		//new FlyingBlocksExplosion(this.worldObj, x, this.level - 1, z, blastRadius).doExplosion();
-		Useful.fill2dCircleInPlaneXZ(this.worldObj, x, this.level - 2, z, blastRadius, NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
+		Useful.fill2dCircleInPlaneXZ(this.worldObj, x, this.level - 2, z, blastRadius, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
 	}
 
 	private void makeHaze() {
@@ -181,7 +176,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         IBlockState state = this.worldObj.getBlockState(pos);
         
-        if (state.getBlock() == NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if (state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
             return false;
         }
@@ -245,13 +240,13 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             BlockPos target = placedLava.pollLastEntry().getValue().pos;
             IBlockState state = this.worldObj.getBlockState(target);
-            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             {
-                int meta = state.getValue(NiceBlock2.META);
-                long modelStateKey = NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getModelStateKey(state, this.worldObj, target);
-                state = NiceBlockRegistrar2.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock2.META, meta);
+                int meta = state.getValue(NiceBlock.META);
+                long modelStateKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getModelStateKey(state, this.worldObj, target);
+                state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
                 this.worldObj.setBlockState(target, state);
-                NiceBlockRegistrar2.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
+                NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
             }
         }
     }
@@ -264,8 +259,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
             
             
-            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock2.META, 2 * (int)Math.sqrt(distanceSq)));
+            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+                    .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
             this.placedLava.put((int)distanceSq << 16 | this.counter++, 
                     new LavaPlacement(placement.pos, this.worldObj.getWorldTime() + 60));
             
@@ -273,7 +268,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             
             // don't spread sideways if can flow down or if already flowing down
             if(addSpaceIfOpen(placement.pos.down(), placement.pos.down())
-                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar2.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             {
 //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
                 return;

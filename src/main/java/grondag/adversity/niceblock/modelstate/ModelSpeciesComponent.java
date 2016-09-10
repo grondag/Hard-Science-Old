@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceBlock2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -15,7 +14,7 @@ public class ModelSpeciesComponent extends ModelStateComponent<ModelSpeciesCompo
     }
     
     @Override
-    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return (long) state.getValue(NiceBlock.META);
     } 

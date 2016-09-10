@@ -5,8 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.VoxelBitField;
-import grondag.adversity.niceblock.VoxelBitField.VoxelBox;
+import grondag.adversity.niceblock.support.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;

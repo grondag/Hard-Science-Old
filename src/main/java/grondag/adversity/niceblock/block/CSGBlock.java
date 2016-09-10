@@ -1,9 +1,7 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.block;
 
-import grondag.adversity.niceblock.base.BlockModelHelper;
-import grondag.adversity.niceblock.base.ModelDispatcher2;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
-import grondag.adversity.niceblock.base.NiceBlockPlus2;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -11,10 +9,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 
-public class CSGBlock2 extends NiceBlockPlus2
+public class CSGBlock extends NiceBlockPlus
 {
 
-    public CSGBlock2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName)
+    public CSGBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
     {
         super(dispatcher, material, styleName);
     }

@@ -2,8 +2,8 @@ package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
-import grondag.adversity.niceblock.modelstate.ModelStateProperty;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -19,16 +19,20 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -65,7 +69,6 @@ public class NiceBlock extends Block // implements IWailaProvider
      * Contains state passed from getExtendedState to handleBlockState. Using a custom unlisted property because we need large int values and the vanilla implementation enumerates
      * all allowed values into a hashmap... Plus this hides the implementation from the block.
      */
-    public static final ModelStateProperty MODEL_STATE = new ModelStateProperty();
     public static final ModelKeyProperty MODEL_KEY = new ModelKeyProperty();
 
     /**
@@ -79,10 +82,10 @@ public class NiceBlock extends Block // implements IWailaProvider
     private final String styleName;
 
     /**
-     * Item for this block. Will have same meta variants as this block. Instantiated and retained here for convenience and to enable consistent handling.
+     * Use in UI
      */
-    public final NiceItemBlock item;
-
+    private final String displayName;
+ 
     /**
      * CAN BE NULL! If non-null, blocks requires special collision handling, typically because it is not a standard cube shape. Retrieved from model cook book at instantiation and
      * reference saved for simpler coding.
@@ -106,28 +109,37 @@ public class NiceBlock extends Block // implements IWailaProvider
      */
     private final TLongObjectHashMap<AxisAlignedBB> combinedBounds;
 
-    public final BlockModelHelper blockModelHelper;
+    public final ModelDispatcher dispatcher;
+    
+    private boolean isGlowing;
 
-    public NiceBlock(BlockModelHelper blockModelHelper, BaseMaterial material, String styleName)
+    public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
+    {
+        this(dispatcher, material, styleName, false);
+    }
+    
+    public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isGlowing)
     {
         super(material.material);
         this.material = material;
+        this.isGlowing = isGlowing;
         this.styleName = styleName;
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
         setStepSound(material.stepSound);
         setHardness(material.hardness);
         setResistance(material.resistance);
-        this.blockModelHelper = blockModelHelper;
-        blockModelHelper.setBlock(this);
+        this.dispatcher = dispatcher;
         this.setRegistryName(material.materialName + "." + styleName);
         this.setUnlocalizedName(this.getRegistryName().toString());
+        
+        String makeName = I18n.translateToLocal(getStyleName());
+        if(makeName == null || makeName == "") makeName = getStyleName();
+        displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
 
-        collisionHandler = blockModelHelper.dispatcher.getCollisionHandler();
+        collisionHandler = dispatcher.getCollisionHandler();
         modelBounds = collisionHandler == null ? null : new TLongObjectHashMap<List<AxisAlignedBB>>();
         combinedBounds = collisionHandler == null ? null :  new TLongObjectHashMap<AxisAlignedBB>();
-
-        item = new NiceItemBlock(this);
 
         // let registrar know to register us when appropriate
         NiceBlockRegistrar.allBlocks.add(this);
@@ -136,7 +148,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_STATE, MODEL_KEY });
+        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_KEY });
     }
 
     // BASIC METADATA MECHANICS
@@ -145,9 +157,24 @@ public class NiceBlock extends Block // implements IWailaProvider
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
-        list.addAll(blockModelHelper.getSubItems());
+        list.addAll(getSubItems());
     }
 
+    public List<ItemStack> getSubItems()
+    {
+        ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
+        int itemCount = (int) colorMap.getValueCount();
+        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+        for(int i = 0; i < itemCount; i++)
+        {
+            ItemStack stack = new ItemStack(this, 1, i);
+            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i));
+            NiceItemBlock.setModelStateKey(stack, key);
+            itemBuilder.add(stack);
+        }
+        return itemBuilder.build();
+    }
+    
     @Override
     public IBlockState getStateFromMeta(int meta)
     {
@@ -159,6 +186,16 @@ public class NiceBlock extends Block // implements IWailaProvider
     {
         return state.getValue(META);
     }
+    
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
+    {
+        return stack.getMetadata();
+    }
+    
+    public boolean isItemUsageAdditive(World worldIn, BlockPos pos, ItemStack stack)
+    {
+        return false;
+    }
 
     // LOCALIZATION
     @Override
@@ -167,6 +204,11 @@ public class NiceBlock extends Block // implements IWailaProvider
         return super.getLocalizedName();
     }
 
+    public String getDisplayName()
+    {
+    	return displayName;
+    }
+    
     // INTERACTION HANDLING
 
     @Override
@@ -175,6 +217,12 @@ public class NiceBlock extends Block // implements IWailaProvider
         return state.getValue(META);
     }
 
+    @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
+    {
+        return this.getSubItems().get(state.getValue(NiceBlock.META));
+    }
+    
     // RENDERING-RELATED THINGS AND STUFF
     // Note that some of the methods here are called server-side.
     // (Ray tracing and collisions, mainly.)
@@ -185,38 +233,44 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public BlockRenderLayer getBlockLayer()
     {
-        return blockModelHelper.dispatcher.canRenderInLayer(BlockRenderLayer.TRANSLUCENT)
+        return dispatcher.canRenderInLayer(BlockRenderLayer.TRANSLUCENT)
         		? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
     }
 
     @Override
     public boolean canRenderInLayer(BlockRenderLayer layer)
     {
-        return blockModelHelper.dispatcher.canRenderInLayer(layer);
+        return dispatcher.canRenderInLayer(layer);
     }
 
     @Override
     public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        if(blockModelHelper.hasCustomBrightness()){
-            return blockModelHelper.getCustomBrightness(state, source, pos); 
-        } else {
-            return super.getPackedLightmapCoords(state, source, pos);
-        }
+        return this.isGlowing ? 15 << 20 | 15 << 4 : super.getPackedLightmapCoords(state, source, pos);
     }
   
 //  private long elapsedTime;
 //  private int timerCount = 0;
 
 	/**
-     * Determines which model should be displayed via MODEL_STATE. Handling is delegated to the block model helper.
+     * Determines which model should be displayed via MODEL_KEY. 
      */
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return blockModelHelper.getExtendedState(state, world, pos);
+        return ((IExtendedBlockState)state).withProperty(MODEL_KEY, getModelStateKey(state, world, pos));
     }
 
+    public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, true, this, state, world, pos);
+    }
+
+    public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
+    {
+        return dispatcher.getOcclusionKey(this.getModelStateKey(state, world, pos), side);
+    }
+    
     /**
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. Override for blocks that need it.
      */
@@ -229,16 +283,18 @@ public class NiceBlock extends Block // implements IWailaProvider
      * Gets bounding box list for given state.
      * Should never be called unless collisionHandler is non-null.
      */
-    private List<AxisAlignedBB> getCachedModelBounds(long collisionKey)
+    private List<AxisAlignedBB> getCachedModelBounds(IBlockState state, World worldIn, BlockPos pos)
     {
         if(collisionHandler == null) return java.util.Collections.emptyList();
         
-        List<AxisAlignedBB> retVal = modelBounds.get(collisionKey);
+        long key = collisionHandler.getCollisionKey(state, worldIn, pos);
+        
+        List<AxisAlignedBB> retVal = modelBounds.get(key);
         
         if(retVal == null)
         {
-            retVal = collisionHandler.getModelBounds(collisionKey);
-            modelBounds.put(collisionKey, retVal);
+            retVal = collisionHandler.getModelBounds(state, worldIn, pos);
+            modelBounds.put(key, retVal);
         }
 
         return retVal;
@@ -256,7 +312,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         {
             AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
             
-            List<AxisAlignedBB> bounds = getCachedModelBounds(collisionHandler.getCollisionKey(worldIn, pos, state));
+            List<AxisAlignedBB> bounds = getCachedModelBounds(state, worldIn, pos);
  
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
@@ -276,12 +332,12 @@ public class NiceBlock extends Block // implements IWailaProvider
         }
         else
         {
-            long collisionKey = collisionHandler.getCollisionKey(worldIn, pos, state);
+            long collisionKey = collisionHandler.getCollisionKey(state, worldIn, pos);
             AxisAlignedBB retVal = this.combinedBounds.get(collisionKey);
             
             if(retVal == null)
             {
-                for (AxisAlignedBB aabb : this.getCachedModelBounds(collisionHandler.getCollisionKey(worldIn, pos, state))) 
+                for (AxisAlignedBB aabb : this.getCachedModelBounds(state, worldIn, pos)) 
                 {
                   retVal = retVal == null ? aabb : retVal.union(aabb);
                 }
@@ -340,7 +396,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
     
-            for (AxisAlignedBB aabb : this.getCachedModelBounds(collisionHandler.getCollisionKey(worldIn, pos, state))) {
+            for (AxisAlignedBB aabb : this.getCachedModelBounds(state, worldIn, pos)) {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }
             return builder.build();
@@ -350,8 +406,6 @@ public class NiceBlock extends Block // implements IWailaProvider
 	public String getStyleName() {
 		return styleName;
 	}
-
-
 
 //    @Override
 //    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)

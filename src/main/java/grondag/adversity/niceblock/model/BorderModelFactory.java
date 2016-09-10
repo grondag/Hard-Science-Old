@@ -4,10 +4,10 @@ import grondag.adversity.library.Rotation;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.model.FaceQuadInputs;
-import grondag.adversity.library.model.QuadContainer2;
+import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.niceblock.base.ModelFactory2;
+import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -24,7 +24,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BorderModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs>
+public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
     //TODO: replace with SimpleLoadingCache
     private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
@@ -49,7 +49,7 @@ public class BorderModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs
     private final static int TEXTURE_COUNT = 13;
     private final static int TEXTURE_BLOCK_SIZE = 16;
  
-    public BorderModelFactory2(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+    public BorderModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
     {
         super(modelInputs, components);
     }
@@ -110,10 +110,10 @@ public class BorderModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs
 
 
     @Override
-    public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
-        QuadContainer2.QuadContainerBuilder builder = new QuadContainer2.QuadContainerBuilder();
+        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {

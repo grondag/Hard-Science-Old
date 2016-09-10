@@ -1,18 +1,13 @@
 package grondag.adversity.feature.volcano;
 
-import java.util.List;
 import java.util.Random;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.base.NiceItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockVolcano extends Block implements ITileEntityProvider {

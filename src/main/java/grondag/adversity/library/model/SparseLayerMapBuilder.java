@@ -37,26 +37,26 @@ public class SparseLayerMapBuilder
     
     public abstract class SparseLayerMap
     {
-        public abstract QuadContainer2 get(BlockRenderLayer layer);
+        public abstract QuadContainer get(BlockRenderLayer layer);
         
-        public abstract void set(BlockRenderLayer layer, QuadContainer2 value);
+        public abstract void set(BlockRenderLayer layer, QuadContainer value);
     }
     
     private class SparseLayerArrayMap extends SparseLayerMap
     {
-        private final QuadContainer2[] values = new QuadContainer2[size];
+        private final QuadContainer[] values = new QuadContainer[size];
         
         private SparseLayerArrayMap()
         {
             //NOOP - just making it private
         }
         
-        public QuadContainer2 get(BlockRenderLayer layer)
+        public QuadContainer get(BlockRenderLayer layer)
         {
             return values[layerIndices[layer.ordinal()]];
         }
         
-        public void set(BlockRenderLayer layer, QuadContainer2 value)
+        public void set(BlockRenderLayer layer, QuadContainer value)
         {
             values[layerIndices[layer.ordinal()]] = value;
         }
@@ -65,19 +65,19 @@ public class SparseLayerMapBuilder
      
     private class SparseLayerSingletonMap extends SparseLayerMap
     {
-        private QuadContainer2 value;
+        private QuadContainer value;
         
         private SparseLayerSingletonMap()
         {
             //NOOP - just making it private
         }
         
-        public QuadContainer2 get(BlockRenderLayer layer)
+        public QuadContainer get(BlockRenderLayer layer)
         {
             return value;
         }
         
-        public void set(BlockRenderLayer layer, QuadContainer2 value)
+        public void set(BlockRenderLayer layer, QuadContainer value)
         {
             this.value = value;
         }

@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.niceblock.base.ModelDispatcher2;
-import grondag.adversity.niceblock.base.NiceBlockPlus2;
-import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.ModelDispatcher;
+import grondag.adversity.niceblock.base.NiceBlockPlus;
+import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -19,10 +19,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class ColumnSquareBlock2 extends NiceBlockPlus2
+public class ColumnSquareBlock extends NiceBlockPlus
 {
 
-    public ColumnSquareBlock2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName)
+    public ColumnSquareBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
     {
         super(dispatcher, material, styleName);
     }
@@ -53,7 +53,7 @@ public class ColumnSquareBlock2 extends NiceBlockPlus2
             ItemStack stack = new ItemStack(this, 1, i);
             long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i),
                     ModelStateComponents.AXIS.fromEnum(EnumFacing.Axis.Y));
-            NiceItemBlock2.setModelStateKey(stack, key);
+            NiceItemBlock.setModelStateKey(stack, key);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();

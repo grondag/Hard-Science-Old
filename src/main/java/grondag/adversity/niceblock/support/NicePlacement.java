@@ -6,10 +6,8 @@ import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.base.BlockModelHelper;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceBlock2;
-import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.NiceItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -31,9 +29,7 @@ public abstract class NicePlacement {
 //	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 //			float hitZ, int meta, EntityLivingBase placer);
 
-	public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, BlockModelHelper helper);
-	
-    public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock2 block);
+    public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock block);
 
     //	/** convenience factory method */
 //	public static NicePlacement makeMasonryPlacer() {
@@ -76,54 +72,12 @@ public abstract class NicePlacement {
 	     */
 	    private static final EnumFacing[] PLACEMENT_ORDER = {EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.SOUTH, 
                    EnumFacing.DOWN, EnumFacing.UP};
-		@Override
-		public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, BlockModelHelper helper)
-		{
-		    int colorIndex = helper.getColorIndexFromItemStack(stack);
-            int speciesInUseFlags = 0;
-            int species;
-            NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos);
-			NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.TestForBlockColorMatch(helper.block, colorIndex));
 	
-			for(EnumFacing face : PLACEMENT_ORDER)		    
-			{
-		         if (results.result(face)) 
-		         {
-		             species = neighbors.getBlockState(face).getValue(NiceBlock.META);
-		             speciesInUseFlags |= (1 << species);
-		             if (shape.isValidShape(worldIn, pos, new BlockTests.BigBlockMatch(helper.block, colorIndex, species))) {
-		                 return species;
-		             }
-		         }
-			}
-
-            for(BlockCorner corner : BlockCorner.values())
-            {
-                if(results.result(corner))
-                {
-                    speciesInUseFlags |= (1 << neighbors.getBlockState(corner).getValue(NiceBlock.META));
-                }
-            }
-
-            
-            // if no available mates, randomly choose a species 
-			//that will not connect to what is surrounding
-			int salt = Useful.SALT_SHAKER.nextInt(16);
-			for(int i = 0; i < 16; i++)
-			{
-			    species = (i + salt) % 16;
-			    if((speciesInUseFlags & (1 << species)) == 0)
-			    {
-			        return species;
-			    }
-			}
-			return 0;
-		}
 
         @Override
-        public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock2 block)
+        public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock block)
         {
-            long matchKey = NiceItemBlock2.getModelStateKey(stack);
+            long matchKey = NiceItemBlock.getModelStateKey(stack);
             IBlockTest colorMatch = new BlockTests.TestForBlockColorMatch2(block, matchKey);
             int speciesInUseFlags = 0;
             int species;

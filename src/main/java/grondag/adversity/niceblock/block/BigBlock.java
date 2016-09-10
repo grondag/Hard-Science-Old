@@ -8,12 +8,11 @@ import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.base.ModelDispatcher2;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceBlock2;
-import grondag.adversity.niceblock.base.NiceBlockPlus2;
-import grondag.adversity.niceblock.base.NiceItemBlock2;
-import grondag.adversity.niceblock.base.NiceTileEntity2;
+import grondag.adversity.niceblock.base.NiceBlockPlus;
+import grondag.adversity.niceblock.base.NiceItemBlock;
+import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.BlockTests;
@@ -27,13 +26,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class BigBlock2 extends NiceBlockPlus2
+public class BigBlock extends NiceBlockPlus
 {
     //tried using a byte array here but kept reading as a string tag for reason I couldn't fathom
     private int defaultPlacementShape;
 
 
-    public BigBlock2(ModelDispatcher2 dispatcher, BaseMaterial material, String styleName, int placementShape)
+    public BigBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, int placementShape)
     {
         super(dispatcher, material, styleName);
         defaultPlacementShape = placementShape;
@@ -59,16 +58,16 @@ public class BigBlock2 extends NiceBlockPlus2
             if(placedOn.getBlock() == this 
                     && this.dispatcher.getStateSet().doComponentValuesMatch(colorComponent, 
                             this.getModelStateKey(placedOn, worldIn, posOn),
-                            NiceItemBlock2.getModelStateKey(stack)))                 
+                            NiceItemBlock.getModelStateKey(stack)))                 
             {
                 // Force match the metadata of the block on which we are placed
-                return placedOn.getValue(NiceBlock2.META);
+                return placedOn.getValue(NiceBlock.META);
             }
             else
             {
                 // Force non-match of metadata for any neighboring blocks
                 int speciesInUseFlags = 0;
-                IBlockTest colorMatch = new BlockTests.TestForBlockColorMatch2(this, NiceItemBlock2.getModelStateKey(stack));
+                IBlockTest colorMatch = new BlockTests.TestForBlockColorMatch2(this, NiceItemBlock.getModelStateKey(stack));
                 NeighborBlocks neighbors = new NeighborBlocks(worldIn, posPlaced);
                 NeighborTestResults results = neighbors.getNeighborTestResults(colorMatch);
                 
@@ -106,9 +105,9 @@ public class BigBlock2 extends NiceBlockPlus2
         
         NBTTagCompound tag = stack.getTagCompound();
         
-        if(tag != null && tag.hasKey(NiceTileEntity2.PLACEMENT_SHAPE_TAG))
+        if(tag != null && tag.hasKey(NiceTileEntity.PLACEMENT_SHAPE_TAG))
         {
-            int shape = tag.getInteger(NiceTileEntity2.PLACEMENT_SHAPE_TAG);
+            int shape = tag.getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG);
             
             //tried using a byte array here but kept reading as a string tag for reason I couldn't fathom
             NicePlacement placer = new NicePlacement.PlacementBigBlock(
@@ -122,14 +121,14 @@ public class BigBlock2 extends NiceBlockPlus2
 
     @Override
     public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState,
-            NiceTileEntity2 niceTE)
+            NiceTileEntity niceTE)
     {
         super.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
 
         NBTTagCompound tag = stack.getTagCompound();
-        if(tag != null && tag.hasKey(NiceTileEntity2.PLACEMENT_SHAPE_TAG))
+        if(tag != null && tag.hasKey(NiceTileEntity.PLACEMENT_SHAPE_TAG))
         {
-            niceTE.setPlacementShape(tag.getInteger(NiceTileEntity2.PLACEMENT_SHAPE_TAG));
+            niceTE.setPlacementShape(tag.getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG));
         }
     }
 
@@ -137,7 +136,7 @@ public class BigBlock2 extends NiceBlockPlus2
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
-        NiceTileEntity2 myTE = (NiceTileEntity2) world.getTileEntity(pos);
+        NiceTileEntity myTE = (NiceTileEntity) world.getTileEntity(pos);
         int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : defaultPlacementShape;
         updateStackPlacementShape(stack, placementShape);
         return stack;
@@ -162,14 +161,14 @@ public class BigBlock2 extends NiceBlockPlus2
             tag = new NBTTagCompound();
             stack.setTagCompound(tag);
         }
-        tag.setInteger(NiceTileEntity2.PLACEMENT_SHAPE_TAG, placementShape);
+        tag.setInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG, placementShape);
     }
 
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);
-        int placementShape = stack.getTagCompound().getInteger(NiceTileEntity2.PLACEMENT_SHAPE_TAG);
+        int placementShape = stack.getTagCompound().getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG);
         if(placementShape != 0)
         {
             tooltip.add(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));

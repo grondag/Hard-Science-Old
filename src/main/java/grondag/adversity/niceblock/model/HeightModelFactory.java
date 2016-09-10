@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.model.QuadContainer2;
+import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.ModelFactory2;
+import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
@@ -24,9 +24,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class HeightModelFactory2 extends ColorModelFactory2 implements ICollisionHandler
+public class HeightModelFactory extends ColorModelFactory implements ICollisionHandler
 {
-    public HeightModelFactory2(ModelFactory2.ModelInputs modelInputs, ModelStateComponent<?, ?>... components)
+    public HeightModelFactory(ModelFactory.ModelInputs modelInputs, ModelStateComponent<?, ?>... components)
     {
         super(modelInputs, components);
     }
@@ -89,10 +89,10 @@ public class HeightModelFactory2 extends ColorModelFactory2 implements ICollisio
 
   
     @Override
-    public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
-         QuadContainer2.QuadContainerBuilder builder = new QuadContainer2.QuadContainerBuilder();
+        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+         QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {

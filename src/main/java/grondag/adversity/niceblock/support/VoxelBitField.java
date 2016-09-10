@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.support;
 
 import java.util.ArrayList;
 import java.util.BitSet;

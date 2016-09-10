@@ -4,7 +4,6 @@ package grondag.adversity.library.model.quadfactory;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4f;
 
-import grondag.adversity.Adversity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 
@@ -14,7 +13,6 @@ public class Vertex extends Vec3d
     protected final double v;
     public final int color;
     protected final Vec3d normal;
-    
     
     public Vertex(Vec3d point, double u, double v, int color, Vec3d normal)
     {

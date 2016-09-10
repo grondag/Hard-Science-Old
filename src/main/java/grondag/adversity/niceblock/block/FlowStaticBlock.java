@@ -1,14 +1,15 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.niceblock.block;
 
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.ModelDispatcher2;
-import grondag.adversity.niceblock.base.NiceBlock2;
-import grondag.adversity.niceblock.base.NiceItemBlock2;
+import grondag.adversity.niceblock.base.ModelDispatcher;
+import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.base.NiceBlockPlus;
+import grondag.adversity.niceblock.base.NiceItemBlock;
+import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -17,13 +18,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
+public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
 {    
     private final boolean isFiller;
     
-    public FlowDynamicBlock (ModelDispatcher2 dispatcher, BaseMaterial material, String styleName, boolean isFiller) {
+    public FlowStaticBlock (ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller) {
         super(dispatcher, material, styleName);
         this.isFiller = isFiller;
     }
@@ -31,7 +31,7 @@ public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
 //    @Override 
 //    public boolean isDynamic()
 //    {
-//        return true;
+//        return false;
 //    }
     
     @Override
@@ -43,51 +43,89 @@ public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
+        
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
         if(neighborState.getBlock() instanceof IFlowBlock)
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
-            int otherOcclusionKey = ((NiceBlock2)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
+            int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
             return myOcclusionKey != otherOcclusionKey;
         }
         else
         {
             return !neighborState.doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
         }
+        
+//        
+//        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowStaticBlock)
+//        {
+//            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
+//            {
+//                return false;
+//            }
+//            else if(blockState instanceof IExtendedBlockState)
+//            {
+//                return this.dispatcher.getStateSet()
+//                        .getSetValueFromBits(((IExtendedBlockState)blockState)
+//                        .getValue(NiceBlock2.MODEL_KEY))
+//                        .getValue(ModelStateComponents.FLOW_JOIN)
+//                        .getSideHeight(HorizontalFace.find(side)) < 0;
+//            }
+//            else
+//            {
+//                return true;
+//            }
+//        }
+//        else
+//        {
+//            return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
+//        }
     }
 
     @Override
     public List<ItemStack> getSubItems()
     {
-        int itemCount = this.isFiller ? 5 : 16;
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-        for(int i = 0; i < itemCount; i++)
-        {
-            ItemStack stack = new ItemStack(this, 1, i);
-            int level = this.isFiller ? 15 : 16 - i;
-            int [] quadrants = new int[] {level, level, level, level};
-            long flowKey = FlowHeightState.computeStateKey(level, quadrants, quadrants, 0);
-            long key = dispatcher.getStateSet()
-                    .computeKey(ModelStateComponents.FLOW_JOIN.createValueFromBits(flowKey));
-            NiceItemBlock2.setModelStateKey(stack, key);
-            itemBuilder.add(stack);
-        }
+
+        ItemStack stack = new ItemStack(this, 1, 0);
+        int [] quadrants = new int[] {15, 15, 15, 15};
+        long flowKey = FlowHeightState.computeStateKey(15, quadrants, quadrants, 0);
+        long key = dispatcher.getStateSet()
+                .computeKey(ModelStateComponents.FLOW_JOIN.createValueFromBits(flowKey));
+        NiceItemBlock.setModelStateKey(stack, key);
+        itemBuilder.add(stack);
+        
         return itemBuilder.build();
     }
+    
+    
     
 //    @Override
 //    public boolean isFullBlock(IBlockState state)
 //    {
 //        return super.isFullBlock(state);
 //    }
+    
 
     
-     // setting to false drops AO light value
+    @Override
+    public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        NiceTileEntity myTE = (NiceTileEntity) world.getTileEntity(pos);
+       return myTE == null ? 0 : myTE.getModelKey();
+    }
+    
+    public void setModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos, long modelKey)
+    {
+       NiceTileEntity myTE = (NiceTileEntity) world.getTileEntity(pos);
+       if(myTE != null) myTE.setModelKey(modelKey);
+    }
+
+    // setting to false drops AO light value
     @Override
     public boolean isFullCube(IBlockState state)
     {
         //TODO: make this dependent on model state
-
         return false;
     }
 
@@ -95,15 +133,12 @@ public class FlowDynamicBlock extends NiceBlock2 implements IFlowBlock
     public boolean isOpaqueCube(IBlockState state)
     {
         //TODO: make this dependent on model state
-
         return false;
     }
 
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        //TODO: make this dependent on model state
-
         return false;
     }
 

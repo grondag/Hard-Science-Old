@@ -1,14 +1,13 @@
 package grondag.adversity.niceblock.base;
 
-import java.util.List;
-
-import net.minecraft.block.Block;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
@@ -16,16 +15,17 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 /**
- * Exists to provide sub-items for NiceBlocks.
- * Doesn't do much else.
+ * Provides sub-items and handles item logic for NiceBlocks.
  */
-public class NiceItemBlock extends ItemBlock implements IItemColor{
-
-	public static String ITEM_MODEL_KEY_TAG = "AMS";
+public class NiceItemBlock extends ItemBlock
+{
+	private static String ITEM_MODEL_KEY_TAG = "AMS";
 	
-	public NiceItemBlock(Block block) {
+	public NiceItemBlock(NiceBlock block) {
 		super(block);
 		setHasSubtypes(true);
+       // let registrar know to register us when appropriate
+        NiceBlockRegistrar.allItems.add(this);
 	}
 
 	public void registerSelf()
@@ -38,23 +38,48 @@ public class NiceItemBlock extends ItemBlock implements IItemColor{
     {
         return damage;
     }
+         
+//    public List<String> getWailaBody(ItemStack itemStack, List<String> current tip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+//    {
+//        List<String> retVal = new ArrayList<String>();
+//        this.addInformation(itemStack, null, retVal, false);
+//        return retVal;
+//    }
 
-    @Override
-    public String getItemStackDisplayName(ItemStack stack)
+    public static long getModelStateKey(ItemStack stack)
     {
-        return ((NiceBlock)this.block).blockModelHelper.getItemStackDisplayName(stack);
+        if(stack.getItem() instanceof NiceItemBlock)
+        {
+            return stack.getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+        }
+        else
+        {
+            return 0L;
+        }
     }
-
-    @Override
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    
+    public static void setModelStateKey(ItemStack stack, long key)
     {
-        ((NiceBlock)this.block).blockModelHelper.addInformation(stack, playerIn, tooltip, advanced);
-    }
+        if(stack.getItem() instanceof NiceItemBlock)
+        {
+            
+            NBTTagCompound tag = stack.getTagCompound();
+            if(tag == null)
+            {
+                tag = new NBTTagCompound();
+                stack.setTagCompound(tag);
 
+            }
+            tag.setLong(NiceItemBlock.ITEM_MODEL_KEY_TAG, key);
+        }
+    }
+    
     @Override
     public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        BlockPos placedPos = block.isReplaceable(worldIn, pos) ? pos : pos.offset(facing);
+        boolean isAdditive = false;
+        BlockPos placedPos = block.isReplaceable(worldIn, pos) || (isAdditive = ((NiceBlock)block).isItemUsageAdditive(worldIn, pos, stack))
+                ? pos : pos.offset(facing);
         
         if (stack.stackSize == 0)
         {
@@ -65,11 +90,26 @@ public class NiceItemBlock extends ItemBlock implements IItemColor{
             return EnumActionResult.FAIL;
         }
         
-        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))
+        else if (isAdditive)
         {
-            int newMeta = ((NiceBlock)this.block).blockModelHelper.getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
-            
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, newMeta, playerIn);
+            IBlockState state = worldIn.getBlockState(pos);
+            AxisAlignedBB axisalignedbb = state.getSelectedBoundingBox(worldIn, placedPos);
+            if(!worldIn.checkNoEntityCollision(axisalignedbb.offset(pos), playerIn)) return EnumActionResult.FAIL;
+            int meta = ((NiceBlock) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
+            IBlockState placedState = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn);
+            if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, placedState))
+            {
+                worldIn.playSound((double)((float)placedPos.getX() + 0.5F), (double)((float)placedPos.getY() + 0.5F), (double)((float)placedPos.getZ() + 0.5F), this.block.getStepSound().getPlaceSound(), null, (this.block.getStepSound().getVolume() + 1.0F) / 2.0F, this.block.getStepSound().getPitch() * 0.8F, true);
+                --stack.stackSize;
+            }
+
+            return EnumActionResult.SUCCESS;
+        }
+        
+        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))            
+        {
+            int meta = ((NiceBlock) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
+            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn);
 
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
             {
@@ -95,9 +135,7 @@ public class NiceItemBlock extends ItemBlock implements IItemColor{
      */
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
-    {
-        NiceBlock block = (NiceBlock)(this.block);
- 
+    { 
         if (!world.setBlockState(pos, newState, 3)) return false;
 
         if(newState.getBlock() instanceof NiceBlockPlus)
@@ -105,7 +143,11 @@ public class NiceItemBlock extends ItemBlock implements IItemColor{
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                block.blockModelHelper.updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+                niceTE.setModelKey(getModelStateKey(stack));
+
+                //handle any block-specific transfer from stack to TE
+                ((NiceBlockPlus)newState.getBlock()).updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+                
                 if(world.isRemote)
                 {
                     world.markBlockRangeForRenderUpdate(pos, pos);
@@ -116,9 +158,4 @@ public class NiceItemBlock extends ItemBlock implements IItemColor{
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
     }
-
-	@Override
-	public int getColorFromItemstack(ItemStack stack, int tintIndex) {
-		return 0xFFFFFFFF;
-	}	
 }

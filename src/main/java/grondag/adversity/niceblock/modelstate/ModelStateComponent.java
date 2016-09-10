@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -51,7 +51,7 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     public WorldRefreshType getRefreshType() { return this.refreshType; }
 
     /** override if can derive state from meta or neighbor blocks */
-    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
+    public long getBitsFromWorld(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos) { return 0; }
 
     // another option vs. statically defining in each subclass
 //    @SuppressWarnings("unchecked")

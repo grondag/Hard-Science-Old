@@ -1,18 +1,17 @@
 package grondag.adversity.niceblock.model;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.joinstate.FaceSide;
-import grondag.adversity.library.model.QuadContainer2;
+import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
-import grondag.adversity.niceblock.base.ModelFactory2;
-import grondag.adversity.niceblock.base.ModelFactory2.ModelInputs;
+import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelFactory.ModelInputs;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -29,7 +28,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
-public class ColumnSquareModelFactory2 extends ModelFactory2<ColumnSquareModelFactory2.ColumnSquareInputs>
+public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFactory.ColumnSquareInputs>
 {
      private final double cutWidth;
     private final double baseMarginWidth;
@@ -67,7 +66,7 @@ public class ColumnSquareModelFactory2 extends ModelFactory2<ColumnSquareModelFa
         LAMP_OVERLAY;
     }
     
-    public ColumnSquareModelFactory2(ColumnSquareInputs modelInputs, ModelStateComponent<?,?>... components)
+    public ColumnSquareModelFactory(ColumnSquareInputs modelInputs, ModelStateComponent<?,?>... components)
     {
         super(modelInputs, components);
         if(modelInputs.areCutsOnEdge)
@@ -104,10 +103,10 @@ public class ColumnSquareModelFactory2 extends ModelFactory2<ColumnSquareModelFa
     }
 
     @Override
-    public QuadContainer2 getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
-        QuadContainer2.QuadContainerBuilder builder = new QuadContainer2.QuadContainerBuilder();
+        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {

@@ -3,7 +3,7 @@ package grondag.adversity.niceblock.modelstate;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.NiceBlock2;
+import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -35,7 +35,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
     }
     
     @Override
-    public long getBitsFromWorld(NiceBlock2 block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public long getBitsFromWorld(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int centerHeight;
         int sideHeight[] = new int[4];
