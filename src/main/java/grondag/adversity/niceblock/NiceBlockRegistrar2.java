@@ -12,6 +12,7 @@ import grondag.adversity.niceblock.block.HeightBlock2;
 import grondag.adversity.niceblock.block.HotBasaltBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory2;
 import grondag.adversity.niceblock.model.BorderModelFactory2;
+import grondag.adversity.niceblock.model.CSGModelFactory2;
 import grondag.adversity.niceblock.model.ColorModelFactory2;
 import grondag.adversity.niceblock.model.ColumnSquareModelFactory2;
 import grondag.adversity.niceblock.model.HeightModelFactory2;
@@ -268,8 +269,14 @@ public class NiceBlockRegistrar2
     public static final NiceItemBlock2 HOT_FLOWING_LAVA_FILLER_ITEM = new NiceItemBlock2(HOT_FLOWING_LAVA_FILLER_BLOCK);
 
     
+    private final static ModelFactory2.ModelInputs CSG_TEST_INPUTS = new ModelFactory2.ModelInputs("colored_stone", true, BlockRenderLayer.SOLID);
+    private final static CSGModelFactory2 CSG_TEST_MODEL = new CSGModelFactory2(CSG_TEST_INPUTS, ModelStateComponents.COLORS_WHITE,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private static final ModelDispatcher2 CSG_TEST_DISPATCH = new ModelDispatcher2(CSG_TEST_MODEL);
+    public static final CSGBlock2 CSG_TEST_BLOCK = new CSGBlock2(CSG_TEST_DISPATCH, BaseMaterial.FLEXSTONE, "csg_test");
+    public static final NiceItemBlock2 CSG_TEST_ITEM = new NiceItemBlock2(CSG_TEST_BLOCK);
 
-    // face culling for flow blocks
+    
     // csg block
 
     

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.RawQuad;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -37,6 +38,38 @@ public class QuadContainer2
     {
         this.quads = quads;
     }
+	
+	/** bakes quads and sorts into appropriate face */
+	public static QuadContainer2 fromRawQuads(List<RawQuad> rawQuads)
+	{
+	    @SuppressWarnings("unchecked")
+        ImmutableList.Builder<BakedQuad>[] faces = new ImmutableList.Builder[6];
+        for(EnumFacing face : EnumFacing.values())
+        {
+            faces[face.ordinal()] = new ImmutableList.Builder<BakedQuad>();
+        }
+        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
+        
+        for(RawQuad quad : rawQuads)
+        {
+            if(quad.getActualFace() == null)
+            {
+                general.add(quad.createBakedQuad());
+            }
+            else
+            {
+                faces[quad.getActualFace().ordinal()].add(quad.createBakedQuad());
+            }
+        }  
+  
+        QuadContainer2.QuadContainerBuilder containerBuilder = new QuadContainer2.QuadContainerBuilder();
+        containerBuilder.setQuads(null, general.build());
+        for(EnumFacing face : EnumFacing.values())
+        {
+            containerBuilder.setQuads(face, faces[face.ordinal()].build());
+        }
+        return containerBuilder.build();
+	}
 
 	public static QuadContainer2 merge(List<QuadContainer2> inputs)
 	{

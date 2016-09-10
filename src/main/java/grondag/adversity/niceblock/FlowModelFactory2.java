@@ -62,33 +62,7 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
     {
         if(renderLayer != modelInputs.renderLayer) return QuadContainer2.EMPTY_CONTAINER;
      
-        @SuppressWarnings("unchecked")
-        ImmutableList.Builder<BakedQuad>[] faces = new ImmutableList.Builder[6];
-        for(EnumFacing face : EnumFacing.values())
-        {
-            faces[face.ordinal()] = new ImmutableList.Builder<BakedQuad>();
-        }
-        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
-        
-        for(RawQuad quad : this.makeRawQuads(state))
-        {
-            if(quad.getFace() == null)
-            {
-                general.add(quad.createBakedQuad());
-            }
-            else
-            {
-                faces[quad.getFace().ordinal()].add(quad.createBakedQuad());
-            }
-        }  
-  
-        QuadContainer2.QuadContainerBuilder containerBuilder = new QuadContainer2.QuadContainerBuilder();
-        containerBuilder.setQuads(null, general.build());
-        for(EnumFacing face : EnumFacing.values())
-        {
-            containerBuilder.setQuads(face, faces[face.ordinal()].build());
-        }
-        return containerBuilder.build();
+        return QuadContainer2.fromRawQuads(this.makeRawQuads(state));
     }
 
     @Override

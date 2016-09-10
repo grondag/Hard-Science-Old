@@ -602,6 +602,7 @@ public class RawQuad
 
         public boolean isOnFace(EnumFacing face)
         {
+            if(face == null) return false;
             boolean retVal = true;
             for(int i = 0; i < this.vertexCount; i++)
             {
@@ -798,7 +799,7 @@ public class RawQuad
             //                    vertexToInts(this.v3.xCoord, this.v3.yCoord, this.v3.zCoord, this.v3.u, this.v3.v, v3.color, this.textureSprite),
             //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
-              return new BakedQuad(vertexData, color, getFace(), textureSprite, lightingMode == LightingMode.SHADED, format);
+              return new BakedQuad(vertexData, color, this.face, textureSprite, lightingMode == LightingMode.SHADED, format);
 
         }
 
@@ -870,7 +871,23 @@ public class RawQuad
         {
             return face;
         }
-
+        
+        /** 
+         * Face to use for occlusion testing.
+         * Null if not fully on one of the faces.
+         */
+        public EnumFacing getActualFace()
+        {
+            // semantic face will be right most of the time
+            if(this.isOnFace(this.face)) return face;
+            
+            for(EnumFacing f : EnumFacing.values())
+            {
+                if(f != face && this.isOnFace(f)) return f;
+            }
+            return null;
+        }
+        
         /**
          * Sets the face to be used for setupFace semantics
          */
