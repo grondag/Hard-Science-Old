@@ -36,7 +36,6 @@ import java.util.HashSet;
 * <info@michaelhoffer.de>.
 */
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -72,7 +71,7 @@ public class CSGNode
      * @param quadsIn polygons
      */
     public CSGNode(CSGShape shapeIn) {
-        this.quads = new LinkedList<RawQuad>();
+        this.quads = new ArrayList<RawQuad>();
         if (shapeIn != null) {
             this.build(shapeIn.clone().initCsg());
         }
@@ -91,7 +90,7 @@ public class CSGNode
         node.plane = this.plane == null ? null : this.plane.clone();
         node.front = this.front == null ? null : this.front.clone();
         node.back = this.back == null ? null : this.back.clone();
-        node.quads = new LinkedList<RawQuad>();
+        node.quads = new ArrayList<RawQuad>();
         quads.forEach((RawQuad p) -> {
             node.quads.add(p.clone());
         });
@@ -156,11 +155,11 @@ public class CSGNode
     private List<RawQuad> clipQuads(List<RawQuad> quads) {
 
         if (this.plane == null) {
-            return new LinkedList<RawQuad>(quads);
+            return new ArrayList<RawQuad>(quads);
         }
 
-        List<RawQuad> frontP = new LinkedList<RawQuad>();
-        List<RawQuad> backP = new LinkedList<RawQuad>();
+        List<RawQuad> frontP = new ArrayList<RawQuad>();
+        List<RawQuad> backP = new ArrayList<RawQuad>();
 
         for (RawQuad quad : quads) {
             this.plane.splitQuad(quad, frontP, backP, frontP, backP);
@@ -171,7 +170,7 @@ public class CSGNode
         if (this.back != null) {
             backP = this.back.clipQuads(backP);
         } else {
-            backP = new LinkedList<RawQuad>();
+            backP = new ArrayList<RawQuad>();
         }
 
         frontP.addAll(backP);
@@ -204,7 +203,7 @@ public class CSGNode
      * @return a list of all polygons in this BSP tree
      */
     public List<RawQuad> allRawQuads() {
-        List<RawQuad> localRawQuads = new LinkedList<>(this.quads);
+        List<RawQuad> localRawQuads = new ArrayList<>(this.quads);
         if (this.front != null) {
             localRawQuads.addAll(this.front.allRawQuads());
 //            polygons = Utils.concat(polygons, this.front.allRawQuads());
@@ -228,18 +227,18 @@ public class CSGNode
      */
     public List<RawQuad> recombinedRawQuads()
     {
-        TLongObjectHashMap<LinkedList<RawQuad>> ancestorBuckets = new TLongObjectHashMap<LinkedList<RawQuad>>();
+        TLongObjectHashMap<ArrayList<RawQuad>> ancestorBuckets = new TLongObjectHashMap<ArrayList<RawQuad>>();
         
         this.allRawQuads().forEach((quad) -> 
         {
             if(!ancestorBuckets.contains(quad.ancestorQuadID))
             {
-                ancestorBuckets.put(quad.ancestorQuadID, new LinkedList<RawQuad>());
+                ancestorBuckets.put(quad.ancestorQuadID, new ArrayList<RawQuad>());
             }
             ancestorBuckets.get(quad.ancestorQuadID).add(quad);
         });
         
-        LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
+        ArrayList<RawQuad> retVal = new ArrayList<RawQuad>();
         ancestorBuckets.valueCollection().forEach((quadList) ->
         {
             retVal.addAll(recombine(quadList));
@@ -394,9 +393,9 @@ public class CSGNode
         
     }
     
-    private List<RawQuad> recombine(LinkedList<RawQuad> quadList)
+    private List<RawQuad> recombine(ArrayList<RawQuad> quadList)
     {
-        if(quadList.getFirst().ancestorQuadID == RawQuad.IS_AN_ANCESTOR) return quadList;
+        if(quadList.get(0).ancestorQuadID == RawQuad.IS_AN_ANCESTOR) return quadList;
         
         TLongObjectHashMap<RawQuad> quadMap = new TLongObjectHashMap<RawQuad>(quadList.size());
         TreeMap<Long, TreeMap<Long, Integer>> edgeMap = new TreeMap<Long, TreeMap<Long, Integer>>();
@@ -519,7 +518,7 @@ public class CSGNode
 //            Adversity.log.info("too many");
 //        }
         
-        LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
+        ArrayList<RawQuad> retVal = new ArrayList<RawQuad>();
         quadMap.valueCollection().forEach((q) -> retVal.addAll(q.toQuads()));
         return retVal;
             
@@ -546,8 +545,8 @@ public class CSGNode
             this.plane = new CSGPlane(quadsIn.get(0));
         }
 
-        List<RawQuad> frontP = new LinkedList<RawQuad>();
-        List<RawQuad> backP = new LinkedList<RawQuad>();
+        List<RawQuad> frontP = new ArrayList<RawQuad>();
+        List<RawQuad> backP = new ArrayList<RawQuad>();
 
         // parallel version does not work here
         quadsIn.forEach((quad) -> {

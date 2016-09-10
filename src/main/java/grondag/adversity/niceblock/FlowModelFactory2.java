@@ -348,8 +348,7 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
                             EnumFacing.NORTH);   
                     qi.setVertexNormal(0, normCorner[HorizontalCorner.find(side, side.getLeft()).ordinal()]);
                     qi.setVertexNormal(1, normCenter);
-                    qi.setVertexNormal(2, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);
-                    
+                    qi.setVertexNormal(2, normCorner[HorizontalCorner.find(side, side.getRight()).ordinal()]);                    
                     rawQuads.add(qi);    
                 }
                 
@@ -417,10 +416,7 @@ public class FlowModelFactory2 extends ModelFactory2<ModelFactory2.ModelInputs> 
         CSGShape cubeQuads = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0, 0, 1, 1, 1), template));
 
         rawQuads = rawQuads.intersect(cubeQuads);
-//        rawQuads.forEach((quad) -> swapQuads.addAll(quad.clipToFace(EnumFacing.UP, template)));
-//        rawQuads.clear();
-//        swapQuads.forEach((quad) -> rawQuads.addAll(quad.clipToFace(EnumFacing.DOWN, template)));
-//        
+
         // don't count quads as face quads unless actually on the face
         // will be useful for face culling
         rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getFace()) ? quad.getFace() : null));

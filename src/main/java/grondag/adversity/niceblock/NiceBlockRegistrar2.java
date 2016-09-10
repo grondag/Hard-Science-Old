@@ -269,8 +269,6 @@ public class NiceBlockRegistrar2
 
     
 
-    // flow height block - static
-    // filler for above
     // face culling for flow blocks
     // csg block
 

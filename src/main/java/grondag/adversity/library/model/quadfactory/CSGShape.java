@@ -265,6 +265,7 @@ public class CSGShape extends LinkedList<RawQuad>
         a.build(b.allRawQuads());
         a.invert();
         CSGShape retVal = new CSGShape(a.recombinedRawQuads());
+        
 //        Adversity.log.info("raw count " + a.allRawQuads().size() + "   combined count " + retVal.size());
 
         return retVal;

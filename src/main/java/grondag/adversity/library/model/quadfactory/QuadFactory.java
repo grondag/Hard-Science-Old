@@ -85,6 +85,10 @@ public class QuadFactory
         
         RawQuad quad = new RawQuad(template);
         quad.setupFaceQuad(EnumFacing.UP, 1 - box.maxX, box.minZ, 1 - box.minX, box.maxZ, 1 - box.maxY, EnumFacing.SOUTH);
+        
+        //TODO: remove
+        quad.tag = "UP";
+        
         retVal.add(quad);
 
         quad = new RawQuad(template);

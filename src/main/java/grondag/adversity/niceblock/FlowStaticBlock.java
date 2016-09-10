@@ -45,31 +45,32 @@ public class FlowStaticBlock extends NiceBlockPlus2 implements IFlowBlock
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        //TODO: make this code shared with dynamic version of block
-
-        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowStaticBlock)
-        {
-            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
-            {
-                return false;
-            }
-            else if(blockState instanceof IExtendedBlockState)
-            {
-                return this.dispatcher.getStateSet()
-                        .getSetValueFromBits(((IExtendedBlockState)blockState)
-                        .getValue(NiceBlock2.MODEL_KEY))
-                        .getValue(ModelStateComponents.FLOW_JOIN)
-                        .getSideHeight(HorizontalFace.find(side)) < 0;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else
-        {
-            return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
-        }
+        //TODO: make this work, and confirm/test dynamic version also
+        return side != EnumFacing.DOWN;
+//        
+//        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowStaticBlock)
+//        {
+//            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
+//            {
+//                return false;
+//            }
+//            else if(blockState instanceof IExtendedBlockState)
+//            {
+//                return this.dispatcher.getStateSet()
+//                        .getSetValueFromBits(((IExtendedBlockState)blockState)
+//                        .getValue(NiceBlock2.MODEL_KEY))
+//                        .getValue(ModelStateComponents.FLOW_JOIN)
+//                        .getSideHeight(HorizontalFace.find(side)) < 0;
+//            }
+//            else
+//            {
+//                return true;
+//            }
+//        }
+//        else
+//        {
+//            return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
+//        }
     }
 
     @Override

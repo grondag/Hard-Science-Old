@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -86,7 +85,7 @@ public class RawQuad
             return this.vertexCount;
         }
         
-        protected void copyProperties(RawQuad fromObject)
+        private void copyProperties(RawQuad fromObject)
         {
             this.setFace(fromObject.getFace());
             this.textureSprite = fromObject.textureSprite;
@@ -97,7 +96,7 @@ public class RawQuad
             this.isItem = fromObject.isItem;
             this.ancestorQuadID = fromObject.ancestorQuadID;
             this.isInverted = fromObject.isInverted;
-            this.faceNormal = fromObject.getFaceNormal();
+            this.faceNormal = fromObject.faceNormal;
             this.tag = fromObject.tag;
         }
 
@@ -727,11 +726,6 @@ public class RawQuad
             // see LightingMode for more info on how this enables full brightness for block models.
             VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
 
-            //TODO: REMOVE
-            if(this.tag == "top")
-            {
-                Adversity.log.info("found top");
-            }
             float[] faceNormal = this.getFaceNormalArray();          
 
             // The item renderer doesn't recognize pre-baked lightmaps, so we have to get creative.
