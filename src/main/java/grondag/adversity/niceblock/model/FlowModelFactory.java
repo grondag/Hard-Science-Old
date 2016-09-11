@@ -90,6 +90,8 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
         template.lightingMode = modelInputs.isShaded? LightingMode.SHADED : LightingMode.FULLBRIGHT;
   
+        boolean isAnimated = template.textureSprite.hasAnimationMetadata();
+        
         FlowHeightState flowState = state.getValue(this.flowJoinComponent);
                 
         // center vertex setup
