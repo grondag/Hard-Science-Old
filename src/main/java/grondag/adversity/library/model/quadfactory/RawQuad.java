@@ -685,35 +685,16 @@ public class RawQuad
         
         /**
          * Rotates face texture 90deg clockwise.
-         * TODO: this was originally intended for quads - not sure what it does for non-quads!
          */
         public void rotateQuadUV()
         {
-            
-            double swapU = getVertex(0).u;
-            double swapV = getVertex(0).v;
-            
-            Vertex vOld = getVertex(0);
-            Vertex vNext = getVertex(1);
-            Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
-            setVertex(0, vNew);
-            
-            vOld = getVertex(1);
-            vNext = getVertex(2);
-            vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
-            setVertex(1, vNew);
- 
-            vOld = getVertex(2);
-            vNext = getVertex(3);
-            vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
-            setVertex(2, vNew);
-            
-            vOld = getVertex(3);
-            vNext = null;
-            vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
-            setVertex(3, vNew);
-
-        }
+            for(int i = 0; i < this.getVertexCount(); i++)
+            {
+                Vertex vOld = getVertex(i);
+                Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vOld.v, 16 - vOld.u, vOld.color, vOld.normal);
+                setVertex(i, vNew);
+            }
+          }
         
         public BakedQuad createBakedQuad()
         {

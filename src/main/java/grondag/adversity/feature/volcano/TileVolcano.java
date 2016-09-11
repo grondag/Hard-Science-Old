@@ -11,8 +11,10 @@ import java.util.HashSet;
 import java.util.TreeMap;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.RelativeBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
@@ -198,7 +200,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     };
     
 	
-	private TreeMap<Integer, HashSet<OpenPlacement>> spaces = new TreeMap<Integer, HashSet<OpenPlacement>>();
+	private TreeMap<Integer, HashSet<OpenSpace>> spaces = new TreeMap<Integer, HashSet<OpenSpace>>();
     private TreeMap<Integer, LavaPlacement> placedLava = new TreeMap<Integer, LavaPlacement>();
 	//private Deque<BlockPos> placedLava = new ArrayDeque<BlockPos>();
     private boolean firstTime = true;
@@ -210,28 +212,28 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(firstTime)
         {
-            placeIfPossible(new OpenPlacement(this.getPos().up(), this.getPos().up()));
+            placeIfPossible(new OpenSpace(this.getPos().up(), this.getPos().up()));
             firstTime = false;
             backtrackLimit = this.pos.getY() + 3;
         }
         
         if(!spaces.isEmpty())
         {
-            HashSet<OpenPlacement> things = spaces.firstEntry().getValue();
+            HashSet<OpenSpace> things = spaces.firstEntry().getValue();
             if(!things.isEmpty())
             {
-                OpenPlacement place = things.iterator().next();
+                OpenSpace place = things.iterator().next();
                 
 //                Adversity.log.info("Attempting to place " + place.pos.toString(), ", spaceHash = " + getSpaceHash(place.pos));
-                if(place.pos.getY() < this.backtrackLimit)
+                if(place.pos().getY() < this.backtrackLimit)
                 {
                     placeIfPossible(place);
-                    this.backtrackLimit = Math.min(backtrackLimit, place.pos.getY() + 3);
+                    this.backtrackLimit = Math.min(backtrackLimit, place.pos().getY() + 3);
                 }
                 things.remove(place);
                 if(things.isEmpty())
                 {
-                    spaces.remove(this.getSpaceHash(place.pos));
+                    spaces.remove(place.getDistanceHash());
                 }
             }
         }
@@ -248,36 +250,72 @@ public class TileVolcano extends TileEntity implements ITickable{
                 this.worldObj.setBlockState(target, state);
                 NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
             }
+            if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+            {
+                int meta = state.getValue(NiceBlock.META);
+                long modelStateKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getModelStateKey(state, this.worldObj, target);
+                state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
+                this.worldObj.setBlockState(target, state);
+                NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
+            }
         }
     }
     
-    private void placeIfPossible(OpenPlacement placement)
+    private void placeIfPossible(OpenSpace placement)
     {
-        if(this.canDisplace(placement.pos))
+        BlockPos pPos = placement.pos();
+        BlockPos pOrigin = placement.origin();
+        
+        if(this.canDisplace(pPos))
         {
-            double distanceSq = placement.pos.distanceSq(placement.origin);
+            double distanceSq = pPos.distanceSq(pOrigin);
             if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
             
             
-            this.worldObj.setBlockState(placement.pos, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+            this.worldObj.setBlockState(pPos, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
             this.placedLava.put((int)distanceSq << 16 | this.counter++, 
-                    new LavaPlacement(placement.pos, this.worldObj.getWorldTime() + 60));
+                    new LavaPlacement(pPos, this.worldObj.getWorldTime() + 60));
+            
+            fillIfNeeded(pPos.up(), pOrigin);
+            
+            fillIfNeeded(pPos.east(), pOrigin);
+            fillIfNeeded(pPos.west(), pOrigin);
+            fillIfNeeded(pPos.north(), pOrigin);
+            fillIfNeeded(pPos.south(), pOrigin);
+            
+            fillIfNeeded(pPos.east().north(), pOrigin);
+            fillIfNeeded(pPos.west().north(), pOrigin);
+            fillIfNeeded(pPos.east().south(), pOrigin);
+            fillIfNeeded(pPos.west().south(), pOrigin);
             
 //            Adversity.log.info("placing " + placement.pos.toString());
             
             // don't spread sideways if can flow down or if already flowing down
-            if(addSpaceIfOpen(placement.pos.down(), placement.pos.down())
-                    || this.worldObj.getBlockState(placement.pos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+            if(addSpaceIfOpen(pPos.down(), pPos.down())
+                    || this.worldObj.getBlockState(pPos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             {
 //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
                 return;
             }
             
-            addSpaceIfOpen(placement.pos.east(), placement.origin);
-            addSpaceIfOpen(placement.pos.west(), placement.origin);
-            addSpaceIfOpen(placement.pos.north(), placement.origin);
-            addSpaceIfOpen(placement.pos.south(), placement.origin);
+            addSpaceIfOpen(pPos.east(), pOrigin);
+            addSpaceIfOpen(pPos.west(), pOrigin);
+            addSpaceIfOpen(pPos.north(), pOrigin);
+            addSpaceIfOpen(pPos.south(), pOrigin);
+        }
+    }
+    
+    private void fillIfNeeded(BlockPos spaceAbove, BlockPos origin)
+    {
+        if(this.canDisplace(spaceAbove) && IFlowBlock.needsTopFiller(this.worldObj.getBlockState(spaceAbove.down()), this.worldObj, spaceAbove.down()))
+        {
+         
+            
+            this.worldObj.setBlockState(spaceAbove, NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getDefaultState()
+                    .withProperty(NiceBlock.META, 3));
+            this.placedLava.put((int)spaceAbove.distanceSq(origin) << 16 | this.counter++, 
+                    new LavaPlacement(spaceAbove, this.worldObj.getWorldTime() + 60));
         }
     }
     
@@ -289,13 +327,14 @@ public class TileVolcano extends TileEntity implements ITickable{
             return false;
         }
         
-        int spaceHash = this.getSpaceHash(posIn);
+        OpenSpace space = new OpenSpace(posIn, origin);
+        int distanceHash = space.getDistanceHash();
         
-        if(!spaces.containsKey(spaceHash))
+        if(!spaces.containsKey(distanceHash))
         {
-            spaces.put(spaceHash, new HashSet<OpenPlacement>());
+            spaces.put(distanceHash, new HashSet<OpenSpace>());
         }
-        spaces.get(spaceHash).add(new OpenPlacement(posIn, origin));
+        spaces.get(distanceHash).add(space);
 
 //        Adversity.log.info("addSpaceIfOpen returning true for " + posIn.toString() + ", spaceHash = " + spaceHash );
         
@@ -303,45 +342,64 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     }
     
-    /**
-     * Generates hash keys that facilitate sorting of spaces for new placement.
-     * Lower blocks come first.  Blocks within the same level are sorted by distance
-     * from center of volcano.
-     */
-    private int getSpaceHash(BlockPos posIn)
+    private class OpenSpace
     {
-        int dX = posIn.getX() - this.pos.getX();
-        int dZ = posIn.getZ() - this.pos.getZ();
-        return posIn.getY() << 20 | (dX * dX + dZ * dZ);
-    }
-    
-    private static class OpenPlacement
-    {
-        protected final BlockPos pos;
-        protected final BlockPos origin;
+        private final long key;
         
-        protected OpenPlacement(BlockPos pos, BlockPos origin)
+        protected OpenSpace(BlockPos pos, BlockPos origin)
         {
-            this.pos = pos;
-            this.origin = origin;
+            key = ((long)RelativeBlockPos.getKey(pos, TileVolcano.this.pos) << 32) | RelativeBlockPos.getKey(origin, TileVolcano.this.pos);
+        }
+        
+        protected OpenSpace(long key)
+        {
+            this.key = key;
+        }
+        
+        public long getKey()
+        {
+            return key;
+        }
+        
+        public BlockPos pos()
+        {
+            return RelativeBlockPos.getPos((int)(key >> 32), TileVolcano.this.pos);
+        }
+        
+        public BlockPos origin()
+        {
+            return RelativeBlockPos.getPos((int)(key & 0xFFFFFFFF), TileVolcano.this.pos);
+        }
+        
+        /**
+         * Generates hash keys that facilitate sorting of spaces for new placement.
+         * Lower blocks come first.  Blocks within the same level are sorted by distance
+         * from center of volcano.
+         */
+        public int getDistanceHash()
+        {
+            BlockPos myPos = this.pos();
+            int dx = myPos.getX() - TileVolcano.this.pos.getX();
+            int dz = myPos.getZ() - TileVolcano.this.pos.getZ();
+            return myPos.getY() << 20 | (dx * dx + dz * dz);
         }
         
         @Override
         public int hashCode()
         {
-            return pos.hashCode();
+            return (int) (Useful.longHash(key) & 0xFFFFFFFF);
         }
     }
     
     private static class LavaPlacement
     {
         protected final BlockPos pos;
-        protected final long worldTick;
+//        protected final long worldTick;
         
         protected LavaPlacement(BlockPos pos, Long worldTick)
         {
             this.pos = pos;
-            this.worldTick = worldTick;
+//            this.worldTick = worldTick;
         }
     }
 	

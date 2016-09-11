@@ -4,6 +4,7 @@ import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
 
@@ -266,6 +267,11 @@ public class NiceBlock extends Block // implements IWailaProvider
         return dispatcher.getStateSet().getRefreshedKeyFromWorld(0, true, this, state, world, pos);
     }
 
+    public ModelStateSetValue getModelState(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return dispatcher.getStateSet().getSetValueFromBits(getModelStateKey(state, world, pos));
+    }
+    
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
         return dispatcher.getOcclusionKey(this.getModelStateKey(state, world, pos), side);

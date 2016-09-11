@@ -85,18 +85,15 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         RawQuad template = new RawQuad();
         template.color = state.getValue(this.colorComponent).getColor(EnumColorMap.BASE);
         template.lockUV = true;
-        //TODO: WHY U NO WORK?!
-//        template.rotation = state.getValue(this.rotationComponent);
+        template.rotation = state.getValue(this.rotationComponent);
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
         template.lightingMode = modelInputs.isShaded? LightingMode.SHADED : LightingMode.FULLBRIGHT;
   
         FlowHeightState flowState = state.getValue(this.flowJoinComponent);
-        
-        int yOffset = flowState.getYOffset();
-        
+                
         // center vertex setup
-        FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0 - flowState.getCenterVertexHeight() + yOffset);
+        FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0 - flowState.getCenterVertexHeight());
         
         RawQuad quadInputsCenterLeft[] = new RawQuad[4];
         RawQuad quadInputsCenterRight[] = new RawQuad[4];
@@ -127,8 +124,8 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         for(HorizontalCorner corner : HorizontalCorner.values())
         {
             
-            fvMidCorner[corner.ordinal()].depth = 1.0 - flowState.getMidCornerVertexHeight(corner) + yOffset;
-            fvFarCorner[corner.ordinal()].depth = 1.0 - flowState.getFarCornerVertexHeight(corner) + yOffset;
+            fvMidCorner[corner.ordinal()].depth = 1.0 - flowState.getMidCornerVertexHeight(corner);
+            fvFarCorner[corner.ordinal()].depth = 1.0 - flowState.getFarCornerVertexHeight(corner);
             
             quadInputsCorner.add(new ArrayList<RawQuad>(8));            
         }
@@ -149,8 +146,8 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         
         for(HorizontalFace side : HorizontalFace.values())
         {
-            fvMidSide[side.ordinal()].depth = 1.0 - flowState.getMidSideVertexHeight(side) + yOffset;
-            fvFarSide[side.ordinal()].depth = 1.0 - flowState.getFarSideVertexHeight(side) + yOffset;
+            fvMidSide[side.ordinal()].depth = 1.0 - flowState.getMidSideVertexHeight(side);
+            fvFarSide[side.ordinal()].depth = 1.0 - flowState.getFarSideVertexHeight(side);
             
         quadInputsSide.add(new ArrayList<RawQuad>(8));   
             
@@ -220,7 +217,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         bottom = Math.floor(bottom - QuadFactory.EPSILON);
         
         // if we are offset under a block, make sure side faces cover us
-        bottom = Math.min(bottom, yOffset * 16);
+        bottom = Math.min(bottom, flowState.getYOffset() * 16);
         
         Vec3d normCenter = quadInputsCenterLeft[0].getFaceNormal();
         normCenter = normCenter.add(quadInputsCenterLeft[1].getFaceNormal());
@@ -330,10 +327,10 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
                 template.setFace(side.face);
                 RawQuad qSide = new RawQuad(template);
                 qSide.setupFaceQuad(
-                        new FaceVertex(0, bottom - yOffset, 0),
-                        new FaceVertex(1, bottom - yOffset, 0),
-                        new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())) - yOffset, 0),
-                        new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())) - yOffset, 0),
+                        new FaceVertex(0, bottom - flowState.getYOffset(), 0),
+                        new FaceVertex(1, bottom - flowState.getYOffset(), 0),
+                        new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())), 0),
+                        new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())), 0),
                         EnumFacing.UP);
                 rawQuads.add(qSide);
             
@@ -362,19 +359,19 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
                 
                 RawQuad qLeft = new RawQuad(template);
                 qLeft.setupFaceQuad(
-                        new FaceVertex(0, bottom - yOffset, 0),
-                        new FaceVertex(0.5, bottom - yOffset, 0),
-                        new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
-                        new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())) - yOffset, 0),
+                        new FaceVertex(0, bottom - flowState.getYOffset(), 0),
+                        new FaceVertex(0.5, bottom - flowState.getYOffset(), 0),
+                        new FaceVertex(0.5, flowState.getMidSideVertexHeight(side), 0),
+                        new FaceVertex(0, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight())), 0),
                         EnumFacing.UP);
                 rawQuads.add(qLeft);
     
                 RawQuad qRight = new RawQuad(template);
                 qRight.setupFaceQuad(
-                        new FaceVertex(0.5, bottom - yOffset, 0),
-                        new FaceVertex(1, bottom - yOffset, 0),
-                        new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())) - yOffset, 0),
-                        new FaceVertex(0.5, flowState.getMidSideVertexHeight(side) - yOffset, 0),
+                        new FaceVertex(0.5, bottom - flowState.getYOffset(), 0),
+                        new FaceVertex(1, bottom - flowState.getYOffset(), 0),
+                        new FaceVertex(1, flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft())), 0),
+                        new FaceVertex(0.5, flowState.getMidSideVertexHeight(side), 0),
                         EnumFacing.UP);
                 rawQuads.add(qRight);
             }

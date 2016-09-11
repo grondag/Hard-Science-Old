@@ -1,12 +1,14 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public interface IFlowBlock 
 {
-//    public boolean isDynamic();
     
     /** height block if false, filler if true */
     public boolean isFiller();
@@ -45,6 +47,19 @@ public interface IFlowBlock
         return state.withProperty(NiceBlock.META, Math.min(15, Math.max(0,value - 16)));
     }
 
+    /**
+     * Use for height blocks.
+     * True if the top face is not a full square.
+     */
+    public static boolean needsTopFiller(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    {
+        Block block = blockState.getBlock();
+        if(!(block instanceof IFlowBlock && !((IFlowBlock)block).isFiller())) return false;
+        FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
+                .getValue(ModelStateComponents.FLOW_JOIN);
+        return flowState.isTopFillerNeeded();
+    }
+    
     /**
      * Use for filler blocks.
      * Returns values from -2 to -1 and +1 to +2.

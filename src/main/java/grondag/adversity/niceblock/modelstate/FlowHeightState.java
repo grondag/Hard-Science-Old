@@ -146,10 +146,9 @@ public class FlowHeightState
     }
 
     /**
-     * Returns max of all heights on the block, including center.
-     * Intended for determining collision box bounds.
+     * True if filler blocks are needed on top to cover a cut surface.
      */
-    public float getMaxVertexHeight()
+    public boolean isTopFillerNeeded()
     {
         refreshVertexCalculationsIfNeeded();
         float max = getCenterVertexHeight();
@@ -158,7 +157,7 @@ public class FlowHeightState
             max = Math.max(max, this.midSideHeight[i]);
             max = Math.max(max, this.midCornerHeight[i]);
         }
-        return max - this.yOffset;
+        return max > 1;
     }
 
     /**
@@ -173,7 +172,7 @@ public class FlowHeightState
     
     public float getCenterVertexHeight()
     {
-        return (float) getCenterHeight() / 16f;
+        return (float) getCenterHeight() / 16f - this.yOffset;
     }
 
     public float getFarCornerVertexHeight(HorizontalCorner corner)
@@ -228,7 +227,7 @@ public class FlowHeightState
             heightCorner = (max - 1) / 16 * 16;
         }
        
-        return ((float) heightCorner) / 16f;
+        return ((float) heightCorner) / 16f - this.yOffset;
     }
     
     /**
@@ -249,19 +248,19 @@ public class FlowHeightState
         
         float numerator = getCenterHeight() + heightSide1 + heightSide2 + heightCorner;
        
-        return numerator / 64f;
+        return numerator / 64f - this.yOffset;
         
     }
     
     private float calcFarSideVertexHeight(HorizontalFace face)
     {
-        return getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / 16f;
+        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / 16f) - this.yOffset;
     }
 
     private float calcMidSideVertexHeight(HorizontalFace face)
     {
         float sideHeight = getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : (float)getSideHeight(face);
-        return (sideHeight + (float) getCenterHeight()) / 32F;
+        return (sideHeight + (float) getCenterHeight()) / 32F - this.yOffset;
     }
 
     public String toString()
