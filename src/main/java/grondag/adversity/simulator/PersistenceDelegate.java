@@ -39,7 +39,11 @@ public class PersistenceDelegate extends WorldSavedData
     }
     
     @Override
-    public void writeToNBT(NBTTagCompound nbt) { if(node != null) node.writeToNBT(nbt); }
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
+    { 
+        if(node != null) node.writeToNBT(nbt);
+        return nbt;
+    }
 
     @Override
     public boolean isDirty() { return node == null ? false : node.isSaveDirty(); }

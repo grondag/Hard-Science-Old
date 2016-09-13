@@ -9,6 +9,7 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
@@ -217,6 +218,12 @@ public class QuadContainer
         {
             //don't need to check which element - position is the only one included
             vertexKeys.add((long) (Math.round(data[axis0] * 0xFFFFFFF) | (Math.round(data[axis1] * 0xFFFFFFF) << 32)));
+        }
+
+        @Override
+        public void setTexture(TextureAtlasSprite texture)
+        {
+            //NOOP - not used
         }
     }
 }

@@ -12,7 +12,7 @@ import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.SimulationNodeRunnable;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
@@ -80,7 +80,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                     // 7 chunk radius
                     if(x*x + z*z <= 49)
                     {
-                        ForgeChunkManager.forceChunk(chunkTicket, new ChunkCoordIntPair(centerX + x, centerZ + z));
+                        ForgeChunkManager.forceChunk(chunkTicket, new ChunkPos(centerX + x, centerZ + z));
                         chunksUsedThisTicket++;
                     }
                 }

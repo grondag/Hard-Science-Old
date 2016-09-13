@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.BiomeManager.BiomeType;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class Volcano {
 
 	// BIOMES
-	public static BiomeGenBase		volcano;
+	public static BiomeType		volcano;
 
 
 	//public static BlockHotBasalt	blockHotBasalt;
@@ -98,8 +98,8 @@ public class Volcano {
 
 		// in vanilla worlds, plants shouldn't stop volcanic lava from spreading
 		// TODO: probably need to add some more blocks here
-		Blocks.fire.setFireInfo(Blocks.cactus, 5, 5);
-		Blocks.fire.setFireInfo(Blocks.deadbush, 30, 100);
+		Blocks.FIRE.setFireInfo(Blocks.CACTUS, 5, 5);
+		Blocks.FIRE.setFireInfo(Blocks.DEADBUSH, 30, 100);
 	}
 
 }

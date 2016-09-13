@@ -42,7 +42,7 @@ public class Adversity {
 		public Item getTabIconItem() 
 		{
 			//TODO need a real Icon
-			return Items.baked_potato;
+			return Items.BAKED_POTATO;
 		}
 	};
 

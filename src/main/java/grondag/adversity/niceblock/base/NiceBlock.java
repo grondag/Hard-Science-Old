@@ -127,7 +127,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         this.styleName = styleName;
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
-        setStepSound(material.stepSound);
+        setSoundType(material.stepSound);
         setHardness(material.hardness);
         setResistance(material.resistance);
         this.dispatcher = dispatcher;

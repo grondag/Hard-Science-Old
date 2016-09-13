@@ -9,10 +9,10 @@ import net.minecraft.block.material.Material;
  * Determines Minecraft material and other physical properties.
  */
 public enum BaseMaterial {
-	FLEXSTONE("flexstone", Material.rock, SoundType.STONE),
-	DURASTONE("durastone", Material.rock, SoundType.STONE),
-	HYPERSTONE("hyperstone", Material.iron, SoundType.WOOD),
-	SUPERWOOD("superwood", Material.wood, SoundType.METAL);
+	FLEXSTONE("flexstone", Material.ROCK, SoundType.STONE),
+	DURASTONE("durastone", Material.ROCK, SoundType.STONE),
+	HYPERSTONE("hyperstone", Material.IRON, SoundType.WOOD),
+	SUPERWOOD("superwood", Material.WOOD, SoundType.METAL);
 
 	public final String materialName;
 	public final Material material;

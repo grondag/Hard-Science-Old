@@ -38,7 +38,11 @@ public class BlockTests
         {
             NiceBlock block = ((NiceBlockPlus)ibs.getBlock());
             this.matchDispather = block.dispatcher;
-            this.matchKey = block.getModelStateKey(ibs, world, pos);
+            
+            //this.matchKey = block.getModelStateKey(ibs, world, pos);
+            //prevent recursion - we don't need the full model state (which depends on this logic)
+            // we just need the color, which is persisted in the TE key
+            this.matchKey = ((NiceTileEntity) world.getTileEntity(pos)).getModelKey();
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = ibs.getValue(NiceBlock.META);
         }
@@ -88,7 +92,12 @@ public class BlockTests
             this.origin = pos;
             NiceBlock block = ((NiceBlockPlus)ibs.getBlock());
             this.matchDispather = block.dispatcher;
-            this.matchKey = block.getModelStateKey(ibs, world, pos);
+            
+            //this.matchKey = block.getModelStateKey(ibs, world, pos);
+            //prevent recursion - we don't need the full model state (which depends on this logic)
+            // we just need the color, which is persisted in the TE key
+            this.matchKey = ((NiceTileEntity) world.getTileEntity(pos)).getModelKey();
+
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = ibs.getValue(NiceBlock.META);
         }

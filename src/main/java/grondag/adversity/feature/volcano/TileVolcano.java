@@ -184,15 +184,15 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
 
         Material material = state.getMaterial();
-        if (material == Material.clay ) return false;
-        if (material == Material.dragonEgg ) return false;
-        if (material == Material.ground ) return false;
-        if (material == Material.iron ) return false;
-        if (material == Material.sand ) return false;
-        if (material == Material.portal ) return false;
-        if (material == Material.rock ) return false;
-        if (material == Material.anvil ) return false;
-        if (material == Material.grass ) return false;
+        if (material == Material.CLAY) return false;
+        if (material == Material.DRAGON_EGG ) return false;
+        if (material == Material.GROUND ) return false;
+        if (material == Material.IRON ) return false;
+        if (material == Material.SAND ) return false;
+        if (material == Material.PORTAL ) return false;
+        if (material == Material.ROCK ) return false;
+        if (material == Material.ANVIL ) return false;
+        if (material == Material.GRASS ) return false;
 
         // Volcanic lava don't give no shits.
         return true;        
@@ -546,14 +546,14 @@ public class TileVolcano extends TileEntity implements ITickable{
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound tagCompound) {
-		super.writeToNBT(tagCompound);
+	public NBTTagCompound writeToNBT(NBTTagCompound tagCompound) {
 		tagCompound.setInteger("stage", this.stage.ordinal());
 		tagCompound.setInteger("level", this.level);
 	    tagCompound.setInteger("weight", this.weight);
 		tagCompound.setInteger("buildLevel", this.buildLevel);
 		tagCompound.setInteger("levelsTilDormant", this.levelsTilDormant);
 		tagCompound.setInteger("nodeId", this.node.getID());
+		return super.writeToNBT(tagCompound);
 
 		//this.hazeMaker.writeToNBT(tagCompound);
 

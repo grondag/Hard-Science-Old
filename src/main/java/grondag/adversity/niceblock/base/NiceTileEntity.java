@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.Adversity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -17,75 +18,80 @@ public class NiceTileEntity extends TileEntity{
     private static final String MODEL_KEY_TAG = "AMK";
 
     private long modelKey;
-    
+
     /** used by big blocks */
     private int placementShape;
-    
+
     /** used by hyperstone */
-	private byte damage = 0;
-	
-//	public IExtendedBlockState exBlockState;
-	public boolean isModelKeyCacheDirty = true;
-	public boolean isLoaded = false;
-	public boolean isDeleted = false;
+    private byte damage = 0;
+
+    //	public IExtendedBlockState exBlockState;
+    public boolean isModelKeyCacheDirty = true;
+    public boolean isLoaded = false;
+    public boolean isDeleted = false;
 
 
-	@Override
-	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
-	{
-		if(this.worldObj.isRemote)
-		{
-			isDeleted = true;
-//			Adversity.log.info("shouldRefresh " + pos.toString());
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
+    {
+        Adversity.log.info("shouldRefresh thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+
+        if(this.worldObj.isRemote)
+        {
+            isDeleted = true;
+            //			Adversity.log.info("shouldRefresh " + pos.toString());
             //TODO: could this be better handled elsewhere, performance-wise?
-			updateClientRenderState();
-		}
-		return super.shouldRefresh(world, pos, oldState, newSate);
-	}
+            updateClientRenderState();
+        }
+        return super.shouldRefresh(world, pos, oldState, newSate);
+    }
 
-	@Override
-	public void onLoad() 
-	{
-		super.onLoad();
-		if(this.worldObj.isRemote)
-		{
-		    //TODO: could this be better handled elsewhere, performance-wise?
-			updateClientRenderState();
-		}
-	}
-	
-	@SideOnly(Side.CLIENT)
-	private void updateClientRenderState()
-	{
-		this.isModelKeyCacheDirty = true;
-		
-		invalidateClientCache(pos.up());
-		invalidateClientCache(pos.down());
-		invalidateClientCache(pos.east());
-		invalidateClientCache(pos.west());
-		invalidateClientCache(pos.north());
-		invalidateClientCache(pos.south());
+    @Override
+    public void onLoad() 
+    {
+        Adversity.log.info("onLoad thread=" + Thread.currentThread().getName());
+        super.onLoad();
+//        if(this.worldObj.isRemote)
+//        {
+//            //TODO: could this be better handled elsewhere, performance-wise?
+//            updateClientRenderState();
+//        }
+    }
 
-		invalidateClientCache(pos.up().east());
-		invalidateClientCache(pos.up().west());
-		invalidateClientCache(pos.up().north());
-		invalidateClientCache(pos.up().south());
+    @SideOnly(Side.CLIENT)
+    private void updateClientRenderState()
+    {
+        Adversity.log.info("updateClientRenderState thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
 
-		invalidateClientCache(pos.down().east());
-		invalidateClientCache(pos.down().west());
-		invalidateClientCache(pos.down().north());
-		invalidateClientCache(pos.down().south());
+        this.isModelKeyCacheDirty = true;
 
-		invalidateClientCache(pos.north().east());
-		invalidateClientCache(pos.north().west());
-		invalidateClientCache(pos.south().east());
-		invalidateClientCache(pos.south().west());
-		
-		invalidateClientCache(pos.up().north().east());
+        invalidateClientCache(pos.up());
+        invalidateClientCache(pos.down());
+        invalidateClientCache(pos.east());
+        invalidateClientCache(pos.west());
+        invalidateClientCache(pos.north());
+        invalidateClientCache(pos.south());
+
+        invalidateClientCache(pos.up().east());
+        invalidateClientCache(pos.up().west());
+        invalidateClientCache(pos.up().north());
+        invalidateClientCache(pos.up().south());
+
+        invalidateClientCache(pos.down().east());
+        invalidateClientCache(pos.down().west());
+        invalidateClientCache(pos.down().north());
+        invalidateClientCache(pos.down().south());
+
+        invalidateClientCache(pos.north().east());
+        invalidateClientCache(pos.north().west());
+        invalidateClientCache(pos.south().east());
+        invalidateClientCache(pos.south().west());
+
+        invalidateClientCache(pos.up().north().east());
         invalidateClientCache(pos.up().south().east());
         invalidateClientCache(pos.up().north().west());
         invalidateClientCache(pos.up().south().west());
-        
+
         invalidateClientCache(pos.down().north().east());
         invalidateClientCache(pos.down().south().east());
         invalidateClientCache(pos.down().north().west());
@@ -93,45 +99,84 @@ public class NiceTileEntity extends TileEntity{
 
         worldObj.markBlockRangeForRenderUpdate(pos.up().north().east(), pos.down().south().west());
 
-	}
-	
-	@SideOnly(Side.CLIENT)
-	private void invalidateClientCache(BlockPos updatePos)
-	{
-//		Adversity.log.info("updatify attempt @ " + updatePos.toString());
-		TileEntity target = worldObj.getTileEntity(updatePos);
-		if(target != null && target instanceof NiceTileEntity)
-		{
-//			Adversity.log.info("updatify success @ " + updatePos.toString());
-			((NiceTileEntity)target).isModelKeyCacheDirty = true;
-		}
-	}
+    }
 
-   @Override
-    public SPacketUpdateTileEntity getDescriptionPacket() {
+    @SideOnly(Side.CLIENT)
+    private void invalidateClientCache(BlockPos updatePos)
+    {
+//        Adversity.log.info("invalidateClientCache thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        TileEntity target = worldObj.getTileEntity(updatePos);
+        if(target != null && target instanceof NiceTileEntity)
+        {
+            //			Adversity.log.info("updatify success @ " + updatePos.toString());
+            ((NiceTileEntity)target).isModelKeyCacheDirty = true;
+        }
+    }
+
+
+    /**
+     * Generate tag sent to client when block/chunk first loads.
+     * MUST include x, y, z tags so client knows which TE belong to.
+     */
+    @Override
+    public NBTTagCompound getUpdateTag()
+    {
+        Adversity.log.info("getUpdateTag thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+
+        return this.doWriteToNBT(super.getUpdateTag());
+    }
+
+    /**
+     * Process tag sent to client when block/chunk first loads.
+     */
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag)
+    {
+        // The description packet often arrives after render state is first cached on client
+        // so we need to refresh render state once we have the server-side info.
+        Adversity.log.info("handleUpdateTag thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+
+        super.handleUpdateTag(tag);
+        long oldModelKey = modelKey;
+        doReadFromNBT(tag);
+        if(oldModelKey != modelKey && this.worldObj.isRemote)
+        {
+            this.updateClientRenderState();
+        }
+    }
+
+    /**
+     * Generate packet sent to client for TE synch after block/chunk is loaded.
+     */
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket()
+    {
+        Adversity.log.info("getUpdatePacket thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         doWriteToNBT(nbtTagCompound);
         int metadata = getBlockMetadata();
         return new SPacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
     }
 
+    /**
+     * Process packet sent to client for TE synch after block/chunk is loaded.
+     */
     @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-
-        // The description packet often arrives after render state is first cached on client
-        // so we need to refresh render state once we have the server-side info.
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
+    {
+        Adversity.log.info("OnDataPacket thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         long oldModelKey = modelKey;
         doReadFromNBT(pkt.getNbtCompound());
         if(oldModelKey != modelKey && this.worldObj.isRemote)
         {
-            this.isModelKeyCacheDirty = true;
-            worldObj.markBlockRangeForRenderUpdate(pos, pos);
+            this.updateClientRenderState();
         }
     }
-	    
+
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
+        Adversity.log.info("readFromNBT thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         super.readFromNBT(compound);
         doReadFromNBT(compound);
         isLoaded = true;
@@ -143,44 +188,53 @@ public class NiceTileEntity extends TileEntity{
         placementShape = compound.getInteger(PLACEMENT_SHAPE_TAG);
         damage = compound.getByte(DAMAGE_TAG);
     }
-    
+
     @Override
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(compound);
+        Adversity.log.info("writeToNBT thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         doWriteToNBT(compound);
+        return super.writeToNBT(compound);
     }
-    
-    private void doWriteToNBT(NBTTagCompound compound)
+
+    private NBTTagCompound doWriteToNBT(NBTTagCompound compound)
     {
         if(modelKey != 0L) compound.setLong(MODEL_KEY_TAG, modelKey);
         if(damage != 0) compound.setByte(DAMAGE_TAG, damage);
         if(placementShape != 0) compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
+        return compound;
     }
-	
+
     public long getModelKey() { return modelKey; }
     public void setModelKey(long modelKey) 
     { 
+        Adversity.log.info("setModelKey thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("oldModelKey=" + this.modelKey + " newModelKey=" + modelKey );
         if(this.modelKey != modelKey)
         {
             this.modelKey = modelKey; 
+            if(!this.worldObj.isRemote)
+            {
+                this.markDirty();
+            }
+        }
+    }
+
+    public byte getDamage() { return damage; }
+    public void setDamage( byte damage) 
+    { 
+        if(this.damage != damage)
+        {
+            this.damage = damage; 
             this.markDirty();
         }
     }
-    
-	public byte getDamage() { return damage; }
-	public void setDamage( byte damage) 
-	{ 
-	    if(this.damage != damage)
-	    {
-    	    this.damage = damage; 
-    	    this.markDirty();
-	    }
-    }
-	
-	public int getPlacementShape() { return placementShape; }
+
+    public int getPlacementShape() { return placementShape; }
     public void setPlacementShape( int placementShape)
     { 
+        Adversity.log.info("setPlacementShape thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+
         if(this.placementShape != placementShape)
         {
             this.placementShape = placementShape;

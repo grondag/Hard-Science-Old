@@ -14,11 +14,11 @@ public class BlockVolcano extends Block implements ITileEntityProvider {
 
 
 	public BlockVolcano() {
-		super(Material.rock);
+		super(Material.ROCK);
 		this.setCreativeTab(Adversity.tabAdversity);
 		this.setHardness(2000.0F);
 		this.setResistance(2000.0F);
-		this.setStepSound(SoundType.STONE);
+		this.setSoundType(SoundType.STONE);
 		this.setHarvestLevel("pickaxe", 5);
         this.setRegistryName("blockVolcano");
         this.setUnlocalizedName(this.getRegistryName().toString());

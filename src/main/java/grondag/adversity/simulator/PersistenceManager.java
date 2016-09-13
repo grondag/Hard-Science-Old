@@ -22,7 +22,7 @@ public class PersistenceManager
     public static boolean loadNode(World world, SimulationNode node)
     {
         MapStorage storage = world.getMapStorage();
-        PersistenceDelegate instance = (PersistenceDelegate) storage.loadData(PersistenceDelegate.class, Adversity.MODID + node.getID());
+        PersistenceDelegate instance = (PersistenceDelegate) storage.getOrLoadData(PersistenceDelegate.class, Adversity.MODID + node.getID());
         if(instance == null) return false;
         instance.setNode(node);
         instance.readCachedNBT();
@@ -36,7 +36,7 @@ public class PersistenceManager
     public static void unRegisterNode(World world, SimulationNode node)
     {
         MapStorage storage = world.getMapStorage();
-        PersistenceDelegate instance = (PersistenceDelegate) storage.loadData(PersistenceDelegate.class, Adversity.MODID + node.getID());
+        PersistenceDelegate instance = (PersistenceDelegate) storage.getOrLoadData(PersistenceDelegate.class, Adversity.MODID + node.getID());
         if(instance != null) instance.setNode(null);
     }
 }

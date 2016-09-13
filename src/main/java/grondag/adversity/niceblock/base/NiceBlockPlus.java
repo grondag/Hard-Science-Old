@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
@@ -50,7 +51,11 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
         boolean needsRefresh = myTE.isModelKeyCacheDirty;
         myTE.isModelKeyCacheDirty = false;
         long newKey = dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, needsRefresh, this, state, world, pos);
-        if(newKey != oldKey) myTE.setModelKey(newKey);
+        if(newKey != oldKey) 
+        {
+            Adversity.log.info("calling setModelKey from NiceBlockPlus.getModelStateKey");
+            myTE.setModelKey(newKey);
+        }
         return newKey;
     }
     
