@@ -179,6 +179,8 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public IBlockState getStateFromMeta(int meta)
     {
+        Adversity.log.info("getStateFromMeta meta=" + meta);
+
         return getDefaultState().withProperty(META, meta);
     }
 
@@ -259,6 +261,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
+        Adversity.log.info("getExtendedState meta=" + state.getValue(NiceBlock.META));
         return ((IExtendedBlockState)state).withProperty(MODEL_KEY, getModelStateKey(state, world, pos));
     }
 

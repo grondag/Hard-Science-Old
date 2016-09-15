@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.support;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import grondag.adversity.Adversity;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.IBlockTestFactory;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -62,6 +63,11 @@ public class BlockTests
             // can only match with other NiceBlocks
             if(!(ibs.getBlock() instanceof NiceBlockPlus)) return false;
  
+            Adversity.log.info("testBlock species=" + Boolean.toString(matchSpecies == ibs.getValue(NiceBlock.META))
+                    + " color=" + Boolean.toString(matchDispather.getStateSet().doComponentValuesMatch(colorComponent, matchKey,
+                            ((NiceTileEntity) world.getTileEntity(pos)).getModelKey()))
+                    + " pos=" + pos.toString());
+
             return matchDispather == ((NiceBlockPlus)ibs.getBlock()).dispatcher
                    && matchSpecies == ibs.getValue(NiceBlock.META)
                    && matchDispather.getStateSet().doComponentValuesMatch(colorComponent, matchKey,

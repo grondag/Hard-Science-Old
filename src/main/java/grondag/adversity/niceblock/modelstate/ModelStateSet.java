@@ -8,6 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
@@ -200,18 +201,30 @@ public class ModelStateSet
     
     public long getRefreshedKeyFromWorld(long startingKey, boolean refreshCache, NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
+//        Adversity.log.info("getRefreshedKeyFromWorld ENTRY thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+ 
         if(!this.usesWorldState || (!refreshCache && noAlwaysRefresh)) return startingKey;
         
+        Adversity.log.info("getRefreshedKeyFromWorld CONTINUE1 thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        
         int refreshCutoffOrdinal = refreshCache ? WorldRefreshType.CACHED.ordinal() : WorldRefreshType.ALWAYS.ordinal(); 
+        
+        Adversity.log.info("getRefreshedKeyFromWorld CONTINUE2 thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
         {
             if(c.getRefreshType().ordinal() >= refreshCutoffOrdinal)
+            {
+                Adversity.log.info("getRefreshedKeyFromWorld REFRESH component=" + c.getClass().getName() + " thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
                 bits |= (c.getBitsFromWorld(block, state, world, pos) << shiftBits[c.getOrdinal()]);
+            }
             else
                 bits |= (startingKey & (c.getBitMask() << shiftBits[c.getOrdinal()]));
         }
+        
+        Adversity.log.info("getRefreshedKeyFromWorld END before/after=" + startingKey + "/" + bits + " thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        
         return bits;
     }
 
