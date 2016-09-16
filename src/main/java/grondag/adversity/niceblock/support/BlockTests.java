@@ -46,6 +46,10 @@ public class BlockTests
             this.matchKey = ((NiceTileEntity) world.getTileEntity(pos)).getModelKey();
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = ibs.getValue(NiceBlock.META);
+            
+            Adversity.log.info("new BBGTest species=" + matchSpecies
+            + " pos=" + pos.toString());
+
         }
         
         public BigBlockMatch2(NiceBlock block, long modelStateKey, int species)
@@ -54,6 +58,7 @@ public class BlockTests
             this.matchKey = modelStateKey;
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = species;
+            Adversity.log.info("new BBGTest (ItemStack) species=" + matchSpecies);
         }
         
         @Override

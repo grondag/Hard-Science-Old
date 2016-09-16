@@ -261,7 +261,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        Adversity.log.info("getExtendedState meta=" + state.getValue(NiceBlock.META));
+        Adversity.log.info("getExtendedState meta=" + state.getValue(NiceBlock.META) + " pos=" + pos.toString());
         return ((IExtendedBlockState)state).withProperty(MODEL_KEY, getModelStateKey(state, world, pos));
     }
 

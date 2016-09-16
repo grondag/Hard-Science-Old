@@ -37,7 +37,11 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
         ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, 0);
-        long key = ((IExtendedBlockState)this.getExtendedState(state, world, pos)).getValue(MODEL_KEY);
+        //Do not trust the state passed in, because WAILA passes in a default state.
+        //Doing so causes us to pass in bad meta value which determines a bad model key 
+        //which is then cached, leading to strange render problems for blocks just placed up updated.
+        IBlockState goodState = world.getBlockState(pos);
+        long key = getModelStateKey(goodState, world, pos);
         NiceItemBlock.setModelStateKey(stack, key);
         return stack;
     }
