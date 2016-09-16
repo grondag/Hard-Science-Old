@@ -144,7 +144,7 @@ public class NiceItemBlock extends ItemBlock
             NiceTileEntity niceTE = (NiceTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-                Adversity.log.info("calling setModelKey from NiceItemBlock.placeBlockAt");
+//                Adversity.log.info("calling setModelKey from NiceItemBlock.placeBlockAt");
 
                 niceTE.setModelKey(getModelStateKey(stack));
 

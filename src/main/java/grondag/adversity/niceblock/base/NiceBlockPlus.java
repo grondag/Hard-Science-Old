@@ -57,7 +57,7 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
         long newKey = dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, needsRefresh, this, state, world, pos);
         if(newKey != oldKey) 
         {
-            Adversity.log.info("calling setModelKey from NiceBlockPlus.getModelStateKey");
+//            Adversity.log.info("calling setModelKey from NiceBlockPlus.getModelStateKey");
             myTE.setModelKey(newKey);
         }
         return newKey;
