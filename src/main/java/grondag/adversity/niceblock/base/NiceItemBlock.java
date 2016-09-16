@@ -153,7 +153,7 @@ public class NiceItemBlock extends ItemBlock
                 
                 if(world.isRemote)
                 {
-                    world.markBlockRangeForRenderUpdate(pos, pos);
+                    niceTE.updateClientRenderState();
                 }
             }
         }

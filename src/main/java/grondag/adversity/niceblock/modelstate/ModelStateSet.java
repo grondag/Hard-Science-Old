@@ -30,6 +30,7 @@ public class ModelStateSet
 //    private final int[] groupIndexes;
     private final boolean usesWorldState;
     private final boolean noAlwaysRefresh;
+    private final long persistenceMask;
     private final ModelColorMapComponent firstColorMapComponent;
     private final ModelSpeciesComponent firstSpeciesComponent;
     
@@ -102,6 +103,7 @@ public class ModelStateSet
         //for each group, update lookup array for all included components to show position within this set
         int componentCounter = 0;
         int shift = 0;
+        long persistenceMask = 0;
         ModelColorMapComponent colorMap = null;
         ModelSpeciesComponent species = null;
         boolean canRefresh = false;
@@ -119,6 +121,11 @@ public class ModelStateSet
                     canRefresh = canRefresh || c.getRefreshType() != WorldRefreshType.NEVER;
                     noAlwaysRefresh = noAlwaysRefresh && c.getRefreshType() != WorldRefreshType.ALWAYS;
                     
+                    if(c.getRefreshType() == WorldRefreshType.NEVER)
+                    {
+                        persistenceMask |= c.getBitMask() << shiftBits[c.getOrdinal()];
+                    }
+                    
                     if(colorMap == null && c instanceof ModelColorMapComponent)
                     {
                         colorMap = (ModelColorMapComponent) c;
@@ -134,6 +141,7 @@ public class ModelStateSet
         this.firstSpeciesComponent = species;
         this.usesWorldState = canRefresh;
         this.noAlwaysRefresh = noAlwaysRefresh;
+        this.persistenceMask = persistenceMask;
         
         //initialize smaller array to include only types that are part of one or more groups
         typeCount = componentCounter;
@@ -184,6 +192,7 @@ public class ModelStateSet
     public ModelColorMapComponent getFirstColorMapComponent() { return this.firstColorMapComponent; }
     public ModelSpeciesComponent getFirstSpeciesComponent() { return this.firstSpeciesComponent; }
 
+    public long getPersistenceMask() { return this.persistenceMask; }
     
     public ModelStateSetValue getValue(ModelStateValue<?,?>... components)
     {

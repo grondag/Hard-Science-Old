@@ -28,28 +28,27 @@ public class NiceTileEntity extends TileEntity{
     //	public IExtendedBlockState exBlockState;
     public boolean isModelKeyCacheDirty = true;
     public boolean isLoaded = false;
-    public boolean isDeleted = false;
 
 
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
     {
-        Adversity.log.info("shouldRefresh thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
-
-        if(this.worldObj.isRemote)
+        Adversity.log.info("shouldRefresh pos=" + pos.toString());
+        if(oldState.getBlock() == newSate.getBlock())
         {
-            isDeleted = true;
-            //			Adversity.log.info("shouldRefresh " + pos.toString());
-            //TODO: could this be better handled elsewhere, performance-wise?
-            updateClientRenderState();
+            return false;
         }
-        return super.shouldRefresh(world, pos, oldState, newSate);
+        else
+        {
+            if(world.isRemote) updateClientRenderState();
+            return true;
+        }
     }
 
     @Override
     public void onLoad() 
     {
-        Adversity.log.info("onLoad thread=" + Thread.currentThread().getName());
+        Adversity.log.info("onLoad");
         super.onLoad();
 //        if(this.worldObj.isRemote)
 //        {
@@ -58,10 +57,21 @@ public class NiceTileEntity extends TileEntity{
 //        }
     }
 
+//    /**
+//     * This is called during chunk loading and normally does nothing.
+//     * Using it here to set the world reference earlier than normal so
+//     * that we can find our block and dispatcher during ReadNBT without NPE.
+//     * World reference not normally set until worldObj.addTileEntity is called.
+//     */
+//    @Override
+//    protected void func_190201_b(World p_190201_1_)
+//    {
+//    }
+    
     @SideOnly(Side.CLIENT)
-    private void updateClientRenderState()
+    public void updateClientRenderState()
     {
-        Adversity.log.info("updateClientRenderState thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("updateClientRenderState pos=" + pos.toString());
 
         this.isModelKeyCacheDirty = true;
 
@@ -121,7 +131,7 @@ public class NiceTileEntity extends TileEntity{
     @Override
     public NBTTagCompound getUpdateTag()
     {
-        Adversity.log.info("getUpdateTag thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("getUpdateTag pos=" + pos.toString());
 
         return this.doWriteToNBT(super.getUpdateTag());
     }
@@ -134,7 +144,7 @@ public class NiceTileEntity extends TileEntity{
     {
         // The description packet often arrives after render state is first cached on client
         // so we need to refresh render state once we have the server-side info.
-        Adversity.log.info("handleUpdateTag thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("handleUpdateTag pos=" + pos.toString());
 
         super.handleUpdateTag(tag);
         long oldModelKey = modelKey;
@@ -151,7 +161,7 @@ public class NiceTileEntity extends TileEntity{
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        Adversity.log.info("getUpdatePacket thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("getUpdatePacket pos=" + pos.toString());
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         doWriteToNBT(nbtTagCompound);
         int metadata = getBlockMetadata();
@@ -164,7 +174,7 @@ public class NiceTileEntity extends TileEntity{
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
     {
-        Adversity.log.info("OnDataPacket thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("OnDataPacket pos=" + pos.toString());
         long oldModelKey = modelKey;
         doReadFromNBT(pkt.getNbtCompound());
         if(oldModelKey != modelKey && this.worldObj.isRemote)
@@ -176,15 +186,33 @@ public class NiceTileEntity extends TileEntity{
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
-        Adversity.log.info("readFromNBT thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("readFromNBT START pos=" + pos.toString());
         super.readFromNBT(compound);
+        Adversity.log.info("readFromNBT POST-SUPER pos=" + pos.toString());
         doReadFromNBT(compound);
         isLoaded = true;
     }
 
     private void doReadFromNBT(NBTTagCompound compound)
     {
-        modelKey = compound.getLong(MODEL_KEY_TAG);
+        if(this.worldObj == null)
+        {
+            //Block will be unknown if no world reference yet.
+            //In that case, no reason to update only the persistent bits.
+            modelKey = (compound.getLong(MODEL_KEY_TAG));
+        }
+        else
+        {
+            long mask = ((NiceBlockPlus)this.getBlockType()).dispatcher.getStateSet().getPersistenceMask();
+            Adversity.log.info("doReadFromNBT mask=" + mask
+                + " oldModelKey=" + modelKey
+                + " NBTModelKey=" +  compound.getLong(MODEL_KEY_TAG)
+                + " newModelKey=" + ((compound.getLong(MODEL_KEY_TAG) & mask) | (modelKey & ~mask))
+                + " pos=" + pos.toString());
+
+            modelKey = (compound.getLong(MODEL_KEY_TAG) & mask)
+                    | (modelKey & ~mask);
+        }
         placementShape = compound.getInteger(PLACEMENT_SHAPE_TAG);
         damage = compound.getByte(DAMAGE_TAG);
     }
@@ -192,7 +220,7 @@ public class NiceTileEntity extends TileEntity{
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        Adversity.log.info("writeToNBT thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("writeToNBT pos=" + pos.toString());
         doWriteToNBT(compound);
         return super.writeToNBT(compound);
     }
@@ -208,7 +236,7 @@ public class NiceTileEntity extends TileEntity{
     public long getModelKey() { return modelKey; }
     public void setModelKey(long modelKey) 
     { 
-        Adversity.log.info("setModelKey thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("setModelKey pos=" + pos.toString());
         Adversity.log.info("oldModelKey=" + this.modelKey + " newModelKey=" + modelKey );
         if(this.modelKey != modelKey)
         {
@@ -233,7 +261,7 @@ public class NiceTileEntity extends TileEntity{
     public int getPlacementShape() { return placementShape; }
     public void setPlacementShape( int placementShape)
     { 
-        Adversity.log.info("setPlacementShape thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+        Adversity.log.info("setPlacementShape pos=" + pos.toString());
 
         if(this.placementShape != placementShape)
         {

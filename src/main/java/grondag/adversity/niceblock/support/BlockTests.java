@@ -46,10 +46,6 @@ public class BlockTests
             this.matchKey = ((NiceTileEntity) world.getTileEntity(pos)).getModelKey();
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = ibs.getValue(NiceBlock.META);
-            
-            Adversity.log.info("new BBGTest species=" + matchSpecies
-            + " pos=" + pos.toString());
-
         }
         
         public BigBlockMatch2(NiceBlock block, long modelStateKey, int species)
@@ -58,7 +54,6 @@ public class BlockTests
             this.matchKey = modelStateKey;
             this.colorComponent = matchDispather.getStateSet().getFirstColorMapComponent();
             this.matchSpecies = species;
-            Adversity.log.info("new BBGTest (ItemStack) species=" + matchSpecies);
         }
         
         @Override
@@ -67,12 +62,6 @@ public class BlockTests
             
             // can only match with other NiceBlocks
             if(!(ibs.getBlock() instanceof NiceBlockPlus)) return false;
- 
-            Adversity.log.info("testBlock species=" + Boolean.toString(matchSpecies == ibs.getValue(NiceBlock.META))
-                    + " color=" + Boolean.toString(matchDispather.getStateSet().doComponentValuesMatch(colorComponent, matchKey,
-                            ((NiceTileEntity) world.getTileEntity(pos)).getModelKey()))
-                    + " pos=" + pos.toString());
-
             return matchDispather == ((NiceBlockPlus)ibs.getBlock()).dispatcher
                    && matchSpecies == ibs.getValue(NiceBlock.META)
                    && matchDispather.getStateSet().doComponentValuesMatch(colorComponent, matchKey,
