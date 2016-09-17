@@ -10,6 +10,7 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
+import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -106,7 +107,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
 //        return super.isFullBlock(state);
 //    }
     
-
+    
     
     @Override
     public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -114,7 +115,13 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         NiceTileEntity myTE = (NiceTileEntity) world.getTileEntity(pos);
        return myTE == null ? 0 : myTE.getModelKey();
     }
-    
+
+    @Override
+    public ModelRefreshMode getModelRefreshMode()
+    {
+        return ModelRefreshMode.ALWAYS;
+    }
+
     public void setModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos, long modelKey)
     {
        NiceTileEntity myTE = (NiceTileEntity) world.getTileEntity(pos);

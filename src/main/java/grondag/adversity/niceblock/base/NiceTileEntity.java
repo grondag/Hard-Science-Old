@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.base;
 
-import grondag.adversity.Adversity;
+//import grondag.adversity.Adversity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -29,6 +29,27 @@ public class NiceTileEntity extends TileEntity{
     public boolean isModelKeyCacheDirty = true;
     public boolean isLoaded = false;
 
+    public static enum ModelRefreshMode
+    {
+        /** 
+         * Normal setting for cached model state keys.
+         * Only changes to persistent bits will trigger an update packet/render refresh.
+         */
+        CACHE, 
+        
+//        /**
+//         * Currently unused/unimplemented. 
+//         * Changes to model key will never trigger an update packet/render refresh 
+//         */
+//        NEVER,
+        
+        /**
+         * For static flow blocks or other blocks that are a static version
+         * of a block with dynamic model state components.
+         * All changes to model key will trigger an update packet/render refresh 
+         */
+        ALWAYS
+    }
 
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
@@ -195,11 +216,14 @@ public class NiceTileEntity extends TileEntity{
 
     private void doReadFromNBT(NBTTagCompound compound)
     {
-        if(this.worldObj == null)
+        if(this.worldObj == null || ((NiceBlockPlus)this.getBlockType()).getModelRefreshMode() == ModelRefreshMode.ALWAYS)
         {
             //Block will be unknown if no world reference yet.
             //In that case, no reason to update only the persistent bits.
+            //Also always update if refresh mode indicates necessary.
             modelKey = (compound.getLong(MODEL_KEY_TAG));
+//            Adversity.log.info("doReadFromNBT static modelKey=" + modelKey);
+
         }
         else
         {

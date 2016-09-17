@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.HashSet;
 import java.util.TreeMap;
 
-import grondag.adversity.Adversity;
+//import grondag.adversity.Adversity;
 import grondag.adversity.library.RelativeBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -254,9 +254,9 @@ public class TileVolcano extends TileEntity implements ITickable{
                 state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
                 this.worldObj.setBlockState(target, state);
                 NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
-                Adversity.log.info("place basalt meta=" + meta 
-                        + " priorKey=" + modelStateKey
-                        + " newKey=" + NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, worldObj, target));
+//                Adversity.log.info("place basalt meta=" + meta 
+//                        + " priorKey=" + modelStateKey
+//                        + " newKey=" + NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, worldObj, target));
             }
             if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
             {
@@ -532,23 +532,23 @@ public class TileVolcano extends TileEntity implements ITickable{
 		this.weight= tagCompound.getInteger("weight");
 		this.buildLevel = tagCompound.getInteger("buildLevel");
 		this.levelsTilDormant = tagCompound.getInteger("levelsTilDormant");
-		int nodeId = tagCompound.getInteger("nodeId");
+//		int nodeId = tagCompound.getInteger("nodeId");
 		
-		if(nodeId != 0)
-		{
-		    this.node = Simulator.instance.getVolcanoManager().findNode(nodeId);
-		    if(this.node == null)
-		    {
-		        Adversity.log.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
-		        + ". Created new simulation node.  Simulation state was lost.");
-		    }
-		}
-		
-		if(nodeId == 0 || this.node == null)
-		{
-		    this.node = Simulator.instance.getVolcanoManager().createNode();
-		    this.markDirty();
-		}
+//		if(nodeId != 0)
+//		{
+//		    this.node = Simulator.instance.getVolcanoManager().findNode(nodeId);
+//		    if(this.node == null)
+//		    {
+//		        Adversity.log.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
+//		        + ". Created new simulation node.  Simulation state was lost.");
+//		    }
+//		}
+//		
+//		if(nodeId == 0 || this.node == null)
+//		{
+//		    this.node = Simulator.instance.getVolcanoManager().createNode();
+//		    this.markDirty();
+//		}
 
 		//this.hazeMaker.readFromNBT(tagCompound);
 	}
