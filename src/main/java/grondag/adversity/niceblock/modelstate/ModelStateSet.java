@@ -214,25 +214,25 @@ public class ModelStateSet
  
         if(!this.usesWorldState || (!refreshCache && noAlwaysRefresh)) return startingKey;
         
-        Adversity.log.info("getRefreshedKeyFromWorld CONTINUE1 thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+//        Adversity.log.info("getRefreshedKeyFromWorld CONTINUE1 thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         
         int refreshCutoffOrdinal = refreshCache ? WorldRefreshType.CACHED.ordinal() : WorldRefreshType.ALWAYS.ordinal(); 
         
-        Adversity.log.info("getRefreshedKeyFromWorld CONTINUE2 thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+//        Adversity.log.info("getRefreshedKeyFromWorld CONTINUE2 thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         
         long bits = 0L;
         for(ModelStateComponent<?,?> c : includedTypes)
         {
             if(c.getRefreshType().ordinal() >= refreshCutoffOrdinal)
             {
-                Adversity.log.info("getRefreshedKeyFromWorld REFRESH component=" + c.getClass().getName() + " thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+//                Adversity.log.info("getRefreshedKeyFromWorld REFRESH component=" + c.getClass().getName() + " thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
                 bits |= (c.getBitsFromWorld(block, state, world, pos) << shiftBits[c.getOrdinal()]);
             }
             else
                 bits |= (startingKey & (c.getBitMask() << shiftBits[c.getOrdinal()]));
         }
         
-        Adversity.log.info("getRefreshedKeyFromWorld END before/after=" + startingKey + "/" + bits + " thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
+//        Adversity.log.info("getRefreshedKeyFromWorld END before/after=" + startingKey + "/" + bits + " thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         
         return bits;
     }

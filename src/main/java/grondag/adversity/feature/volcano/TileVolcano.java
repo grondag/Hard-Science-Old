@@ -212,6 +212,11 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(firstTime)
         {
+            if(this.node == null)
+            {
+                this.node = Simulator.instance.getVolcanoManager().createNode();
+            }
+            
             placeIfPossible(new OpenSpace(this.getPos().up(), this.getPos().up()));
             firstTime = false;
             backtrackLimit = this.pos.getY() + 3;
@@ -249,6 +254,9 @@ public class TileVolcano extends TileEntity implements ITickable{
                 state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
                 this.worldObj.setBlockState(target, state);
                 NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
+                Adversity.log.info("place basalt meta=" + meta 
+                        + " priorKey=" + modelStateKey
+                        + " newKey=" + NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, worldObj, target));
             }
             if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
             {
@@ -552,7 +560,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 	    tagCompound.setInteger("weight", this.weight);
 		tagCompound.setInteger("buildLevel", this.buildLevel);
 		tagCompound.setInteger("levelsTilDormant", this.levelsTilDormant);
-		tagCompound.setInteger("nodeId", this.node.getID());
+		if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
 		return super.writeToNBT(tagCompound);
 
 		//this.hazeMaker.writeToNBT(tagCompound);
