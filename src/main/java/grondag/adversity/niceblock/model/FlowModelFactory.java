@@ -36,13 +36,14 @@ import net.minecraft.world.World;
 
 public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
 {
-
+    private final boolean enableCollision;
     //TODO: add caching to reduce memory consumption for multi-layer dispatchers and multi-species dispatchers
     // Also, make it configurable via parameter, because not all blocks need it.
     
-    public FlowModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components) 
+    public FlowModelFactory(ModelInputs modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
     {
         super(modelInputs, components);
+        this.enableCollision = enableCollision;
     }
     
     
@@ -412,7 +413,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
     @Override
     public ICollisionHandler getCollisionHandler()
     {
-        return this;
+        return enableCollision ? this : null;
     }
 
     @Override

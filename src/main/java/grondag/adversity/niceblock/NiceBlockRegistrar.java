@@ -216,23 +216,23 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock HEIGHT_STONE_ITEM = new NiceItemBlock(HEIGHT_STONE_BLOCK);
 
     private final static ModelFactory.ModelInputs COOL_FLOWING_BASALT_INPUTS = new ModelFactory.ModelInputs("cool_basalt", true, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory COOL_FLOWING_BASALT_MODEL = new FlowModelFactory(COOL_FLOWING_BASALT_INPUTS, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory COOL_FLOWING_BASALT_MODEL = new FlowModelFactory(COOL_FLOWING_BASALT_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
     
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_0_INPUTS = new ModelFactory.ModelInputs("hot_basalt_0", false, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_0_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_0_INPUTS, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_0_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_0_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_1_INPUTS = new ModelFactory.ModelInputs("hot_basalt_1", false, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_1_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_1_INPUTS, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_1_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_1_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_2_INPUTS = new ModelFactory.ModelInputs("hot_basalt_2", false, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_2_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_2_INPUTS, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_2_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_2_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_3_INPUTS = new ModelFactory.ModelInputs("hot_basalt_3", false, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_3_INPUTS, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_3_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_0_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL, HOT_FLOWING_BASALT_0_MODEL);    
@@ -260,9 +260,9 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock HOT_FLOWING_BASALT_3_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_FILLER_BLOCK);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("volcanic_lava_flow", false, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
-    private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL, HOT_FLOWING_LAVA_MODEL);    
+    private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
     public static final FlowDynamicBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
             (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.FLEXSTONE, "hot_flowing_lava_height", false)
             .setLightLevel(4F/15F);
