@@ -1,5 +1,7 @@
 package grondag.adversity.niceblock.base;
 
+import java.util.List;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
@@ -51,7 +53,16 @@ public class NiceItemBlock extends ItemBlock
     {
         if(stack.getItem() instanceof NiceItemBlock)
         {
-            return stack.getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+            //WAILA or other mods might create a stack with no NBT, which will not work in dispatcher.
+            if(stack.getTagCompound() == null)
+            {
+                List<ItemStack> subItems =  ((NiceBlock)((NiceItemBlock)stack.getItem()).block).getSubItems();
+                return subItems.get(Math.min(stack.getMetadata(), subItems.size()-1)).getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+            }
+            else
+            {
+                return stack.getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+            }
         }
         else
         {
