@@ -1,17 +1,34 @@
 flexstone=Flexstone
 durastone=Durastone 
 hyperstone=Hyperstone
-bordered=Bordered
+basalt=Basalt
+volcanicLava=Volcanic Lava
+
+border=Bordered
 raw=Raw
 smooth=Smooth
+colored=Tinted
+bigtex=Continuous
+bigbrick=Masonry
+stacked=Stacked
+
 square_column=Square Column
 round_column=Round Column
+
 hot=Hot
-very_hot=Very Hot
-warm=Warm
-cooling=Cooling
-basalt=Basalt
-big_tex=Flowing Stone
+cool=Cool
+flow=Flowing
+fill=Filler
+very_hot_flow=Very Hot Flowing
+hot_flow=Hot Flowing
+warm_flow=Warm Flowing
+cooling_flow=Cooling Flowing
+
+very_hot_fill=Very Hot Filler
+hot_fill=Hot Filler
+warm_fill=Warm Filler
+cooling_fill=Cooling Filler
+
 species0=Species A
 species1=Species B
 species2=Species C
@@ -29,22 +46,4 @@ species13=Species N
 species14=Species O
 species15=Species P
 
-tile.adversity:raw_1.0.name=Raw Basalt
-tile.adversity:smooth_1.0.name=Smooth Basalt
-tile.adversity:large_brick_1.0.name=Large Basalt Bricks
-tile.adversity:small_brick_1.0.name=Small Basalt Bricks
-tile.adversity:big_block_a_1.0.name=Big Basalt Block (A)
-tile.adversity:big_block_b_1.0.name=Big Basalt Block (B)
-tile.adversity:big_block_c_1.0.name=Big Basalt Block (C)
-tile.adversity:big_block_d_1.0.name=Big Basalt Block (D)
-tile.adversity:big_block_e_1.0.name=Big Basalt Block (E)
-tile.adversity:big_weathered_1.0.name=Weathered Basalt
-tile.adversity:big_ornate_1.0.name=Ornate Basalt
-tile.adversity:masonry_a_1.0.name=Basalt Masonry (A)
-tile.adversity:masonry_b_1.0.name=Basalt Masonry (B)
-tile.adversity:masonry_c_1.0.name=Basalt Masonry (C)
-tile.adversity:masonry_d_1.0.name=Basalt Masonry (D)
-tile.adversity:masonry_e_1.0.name=Basalt Masonry (E)
-tile.adversity:column_x_1.0.name=Square Basalt Column (East/West)
-tile.adversity:column_y_1.0.name=Square Basalt Column (Up/Down)
-tile.adversity:column_z_1.0.name=Square Basalt Column (North/South)
+

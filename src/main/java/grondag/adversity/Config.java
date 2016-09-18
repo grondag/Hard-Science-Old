@@ -131,7 +131,21 @@ public class Config {
 		hyperstone.harvestLevel = config.getInt("hyperstoneHarvestLevel", "Substances", 3, 1, 3, "");
 		hyperstone.resistance = config.getInt("hyperstoneResistance", "Substances", 200, 1, 50, "");
 		substances.put("hyperstone", hyperstone);
+		
+		Substance basalt = new Substance();
+        basalt.hardness = config.getInt("basaltHardness", "Substances", 2, 1, 50, "");
+        basalt.harvestTool = config.getString("basaltHarvestTool", "Substances", "pickaxe", "Tool used to break block", allowedTools);
+        basalt.harvestLevel = config.getInt("basaltHarvestLevel", "Substances", 1, 1, 3, "");
+        basalt.resistance = config.getInt("basaltResistance", "Substances", 10, 1, 50, "");
+        substances.put("basalt", basalt);
 
+        Substance volcanicLava = new Substance();
+        volcanicLava.hardness = config.getInt("volcanicLavaHardness", "Substances", 4, 1, 50, "");
+        volcanicLava.harvestTool = config.getString("volcanicLavaHarvestTool", "Substances", "shovel", "Tool used to break block", allowedTools);
+        volcanicLava.harvestLevel = config.getInt("volcanicLavaHarvestLevel", "Substances", 3, 1, 3, "");
+        volcanicLava.resistance = config.getInt("volcanicLavaResistance", "Substances", 50, 1, 50, "");
+        substances.put("volcanicLava", volcanicLava);
+        
         Substance superwood = new Substance();
         hyperstone.hardness = config.getInt("superwoodHardness", "Substances", 2, 1, 50, "");
         hyperstone.harvestTool = config.getString("superwoodHarvestTool", "Substances", "axe", "Tool used to break block", allowedTools);

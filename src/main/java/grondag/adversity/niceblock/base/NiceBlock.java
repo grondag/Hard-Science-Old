@@ -202,10 +202,10 @@ public class NiceBlock extends Block // implements IWailaProvider
     @Override
     public String getLocalizedName()
     {
-        return super.getLocalizedName();
+        return displayName;
     }
 
-    public String getDisplayName()
+    public String getItemStackDisplayName(ItemStack stack)
     {
     	return displayName;
     }

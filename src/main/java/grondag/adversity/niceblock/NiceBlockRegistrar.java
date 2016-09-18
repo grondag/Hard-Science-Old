@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.feature.volcano.HotBasaltBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -12,7 +13,6 @@ import grondag.adversity.niceblock.block.ColumnSquareBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.block.HeightBlock;
-import grondag.adversity.niceblock.block.HotBasaltBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
@@ -195,7 +195,7 @@ public class NiceBlockRegistrar
         = new ColorModelFactory(COOL_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher COOL_SQUARE_BASALT_DISPATCH = new ModelDispatcher(COOL_SQUARE_BASALT_MODEL);
-    public static final NiceBlock COOL_SQUARE_BASALT_BLOCK = new NiceBlock(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "cool_basalt");
+    public static final NiceBlock COOL_SQUARE_BASALT_BLOCK = new NiceBlock(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "cool");
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
 
     
@@ -204,7 +204,7 @@ public class NiceBlockRegistrar
         = new SpeciesModelFactory(HOT_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_4);
     private static final ModelDispatcher HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher( COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
-    public static final NiceBlock HOT_SQUARE_BASALT_BLOCK = (NiceBlock) new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt");
+    public static final NiceBlock HOT_SQUARE_BASALT_BLOCK = (NiceBlock) new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "hot");
     public static final NiceItemBlock HOT_SQUARE_BASALT_ITEM = new NiceItemBlock(HOT_SQUARE_BASALT_BLOCK);
 
     
@@ -212,7 +212,7 @@ public class NiceBlockRegistrar
     private final static HeightModelFactory HEIGHT_STONE_MODEL = new HeightModelFactory(HEIGHT_STONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_16);
     private static final ModelDispatcher HEIGHT_STONE_DISPATCH = new ModelDispatcher(HEIGHT_STONE_MODEL);
-    public static final NiceBlockPlus HEIGHT_STONE_BLOCK = new HeightBlock(HEIGHT_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "variable_height");
+    public static final NiceBlockPlus HEIGHT_STONE_BLOCK = new HeightBlock(HEIGHT_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "stacked");
     public static final NiceItemBlock HEIGHT_STONE_ITEM = new NiceItemBlock(HEIGHT_STONE_BLOCK);
 
     private final static ModelFactory.ModelInputs COOL_FLOWING_BASALT_INPUTS = new ModelFactory.ModelInputs("cool_basalt", true, BlockRenderLayer.SOLID);
@@ -236,39 +236,46 @@ public class NiceBlockRegistrar
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_0_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL, HOT_FLOWING_BASALT_0_MODEL);    
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_0_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_0_height", false);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_0_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_flow", false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_0_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_HEIGHT_BLOCK);
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_0_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_0_fill", true);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_0_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_fill", true);
     public static final NiceItemBlock HOT_FLOWING_BASALT_0_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_FILLER_BLOCK);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_1_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL, HOT_FLOWING_BASALT_1_MODEL);    
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_1_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_1_height", false);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_1_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_flow", false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_1_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_HEIGHT_BLOCK);
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_1_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_1_fill", true);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_1_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_fill", true);
     public static final NiceItemBlock HOT_FLOWING_BASALT_1_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_FILLER_BLOCK);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_2_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL, HOT_FLOWING_BASALT_2_MODEL);    
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_2_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_2_height", false);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_2_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_flow", false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_2_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_HEIGHT_BLOCK);
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_2_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_2_fill", true);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_2_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_fill", true);
     public static final NiceItemBlock HOT_FLOWING_BASALT_2_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_FILLER_BLOCK);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_3_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL, HOT_FLOWING_BASALT_3_MODEL);    
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_3_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_3_height", false);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_3_HEIGHT_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_flow", false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_3_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_HEIGHT_BLOCK);
-    public static final FlowStaticBlock HOT_FLOWING_BASALT_3_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.FLEXSTONE, "hot_basalt_3_fill", true);
+    public static final FlowStaticBlock HOT_FLOWING_BASALT_3_FILLER_BLOCK = new FlowStaticBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_fill", true);
     public static final NiceItemBlock HOT_FLOWING_BASALT_3_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_FILLER_BLOCK);
 
+    private static final ModelDispatcher COOL_FLOWING_BASALT_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL);    
+    public static final FlowStaticBlock COOL_FLOWING_BASALT_HEIGHT_BLOCK = new FlowStaticBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "flow", false);
+    public static final NiceItemBlock COOL_FLOWING_BASALT_HEIGHT_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_HEIGHT_BLOCK);
+    public static final FlowStaticBlock COOL_FLOWING_BASALT_FILLER_BLOCK = new FlowStaticBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "fill", true);
+    public static final NiceItemBlock COOL_FLOWING_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_FILLER_BLOCK);
+
+    
     private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("volcanic_lava_flow", false, BlockRenderLayer.SOLID);
     private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
     private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
     public static final FlowDynamicBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
-            (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.FLEXSTONE, "hot_flowing_lava_height", false)
+            (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "flow", false)
             .setLightLevel(4F/15F);
     public static final NiceItemBlock HOT_FLOWING_LAVA_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_HEIGHT_BLOCK);
     public static final FlowDynamicBlock HOT_FLOWING_LAVA_FILLER_BLOCK = 
-            (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.FLEXSTONE, "hot_flowing_lava_fill", true)
+            (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "fill", true)
             .setLightLevel(4F/15F);
     public static final NiceItemBlock HOT_FLOWING_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_FILLER_BLOCK);
 

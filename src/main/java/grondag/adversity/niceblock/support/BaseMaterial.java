@@ -12,8 +12,9 @@ public enum BaseMaterial {
 	FLEXSTONE("flexstone", Material.ROCK, SoundType.STONE),
 	DURASTONE("durastone", Material.ROCK, SoundType.STONE),
 	HYPERSTONE("hyperstone", Material.IRON, SoundType.WOOD),
-	SUPERWOOD("superwood", Material.WOOD, SoundType.METAL);
-
+	SUPERWOOD("superwood", Material.WOOD, SoundType.METAL),
+	BASALT("basalt", Material.ROCK, SoundType.STONE),
+    VOLCANIC_LAVA("volcanicLava", Material.LAVA, SoundType.STONE);
 	public final String materialName;
 	public final Material material;
 	public final SoundType stepSound;

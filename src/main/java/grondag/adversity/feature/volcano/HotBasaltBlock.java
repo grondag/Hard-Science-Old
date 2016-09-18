@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.block;
+package grondag.adversity.feature.volcano;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;
@@ -12,7 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class HotBasaltBlock extends NiceBlock {
+public class HotBasaltBlock extends NiceBlock
+{
 	
     public HotBasaltBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName) {
 		super(dispatcher, material, styleName);
@@ -26,28 +27,8 @@ public class HotBasaltBlock extends NiceBlock {
 //    	return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.TRANSLUCENT;
 //    }
 
-//    @Override
-//    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand)
-//    {
-//        if (!world.isRemote) {
-//
-//            // TODO: restore function
-//            //OddUtils.igniteSurroundingBlocks(world, pos);
-//
-//            final int meta = state.getValue(NiceBlock.META);
-//
-//            // necessary to prevent too many block updates on large volcanoes
-//            if (meta == 0 || world.getBlockState(pos.east()).getBlock() != Blocks.air 
-//                    && world.getBlockState(pos.west()) != Blocks.air
-//                    && world.getBlockState(pos.north()) != Blocks.air 
-//                    && world.getBlockState(pos.south()) != Blocks.air
-//                    && world.getBlockState(pos.up()) != Blocks.air) {
-//                world.setBlockState(pos, NiceBlockRegistrar2.COOL_SQUARE_BASALT_BLOCK.getDefaultState(), 2);
-//            } else {
-//                world.setBlockState(pos, state.withProperty(NiceBlock.META, meta-1), 2);
-//            }
-//        }
-//    }
+    
+    
 
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
@@ -70,7 +51,6 @@ public class HotBasaltBlock extends NiceBlock {
         }
         return itemBuilder.build();
     }
-    
 
 //    @Override
 //    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)

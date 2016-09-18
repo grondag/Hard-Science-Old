@@ -172,4 +172,13 @@ public class NiceItemBlock extends ItemBlock
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;
     }
+
+    @Override
+    public String getItemStackDisplayName(ItemStack stack)
+    {
+        // TODO Auto-generated method stub
+        return ((NiceBlock)this.block).getItemStackDisplayName(stack);
+    }
+    
+    
 }

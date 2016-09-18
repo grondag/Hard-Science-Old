@@ -32,11 +32,17 @@ public class TileVolcano extends TileEntity implements ITickable{
 	private int                     weight = 2400000;
 	
 	private VolcanoNode             node;
-
+    
+    private TreeMap<Integer, HashSet<OpenSpace>> spaces = new TreeMap<Integer, HashSet<OpenSpace>>();
+    private TreeMap<Integer, LavaPlacement> placedLava = new TreeMap<Integer, LavaPlacement>();
+    
 	//private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
 
 	// these are all derived or ephemeral - not saved to NBT
 	private int						hazeTimer		= 60;
+	private boolean firstTime = true;
+	private int backtrackLimit = 0;
+	private int counter = 0;
 	
 	private static enum VolcanoStage
 	{
@@ -198,14 +204,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         return true;        
 
     };
-    
-	
-	private TreeMap<Integer, HashSet<OpenSpace>> spaces = new TreeMap<Integer, HashSet<OpenSpace>>();
-    private TreeMap<Integer, LavaPlacement> placedLava = new TreeMap<Integer, LavaPlacement>();
-	//private Deque<BlockPos> placedLava = new ArrayDeque<BlockPos>();
-    private boolean firstTime = true;
-    private int backtrackLimit = 0;
-    private int counter = 0;
+
 	
     public void update() {
         if(this.worldObj.isRemote) return;
