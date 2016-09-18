@@ -1,6 +1,10 @@
 package grondag.adversity.niceblock.base;
 
+import java.util.List;
+
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
+import grondag.adversity.niceblock.color.ColorMap;
+import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
@@ -70,5 +74,24 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
     public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, NiceTileEntity niceTE)
     {
         // default is NOOP
+    }
+    
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    {
+        super.addInformation(stack, playerIn, tooltip, advanced);
+        ModelColorMapComponent colorComponent = this.dispatcher.getStateSet().getFirstColorMapComponent();
+        if(colorComponent != null && colorComponent.getValueCount() > 1)
+        {
+            long modelKey = NiceItemBlock.getModelStateKey(stack);
+            if(modelKey != 0L)
+            {
+                ColorMap colorMap = dispatcher.getStateSet().getSetValueFromBits(modelKey).getValue(colorComponent);
+                if(colorMap != null)
+                {
+                    tooltip.add("Color: " + colorMap.colorMapName);
+                }
+            }
+        }
     }
 }
