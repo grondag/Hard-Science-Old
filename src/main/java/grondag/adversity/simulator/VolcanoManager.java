@@ -145,6 +145,18 @@ public class VolcanoManager extends SimulationNodeRunnable
 
     public VolcanoNode findNode(int nodeID)
     {
+        if(nodes == null)
+        {
+            Adversity.log.warn("Volcano simulation manager not properly initialized."
+                    + " Volcano simulation state will be invalid.");
+            return null;
+        }
+        if(nodeID < 0 || nodeID >= nodes.length)
+        {
+            Adversity.log.warn("Invalid volcano node id: " + nodeID
+                    + ". Volcano simulation state will be invalid.");
+            return null;
+        }
         return nodes[nodeID];
     }
     
