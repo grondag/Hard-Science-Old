@@ -244,7 +244,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         else if(spaceManager.getCount() != 0)
         {
         	OpenSpace place = spaceManager.pollFirstEntry();
-        	Adversity.log.info("found open spot @ " + place.getPos().toString() + " with origin " + place.getOrigin().toString());
+//        	Adversity.log.info("found open spot @ " + place.getPos().toString() + " with origin " + place.getOrigin().toString());
         	if(place.getPos().getY() < this.backtrackLimit)
             {
                 placeIfPossible(place.getPos(), place.getOrigin());
@@ -252,7 +252,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
         	else
         	{
-                Adversity.log.info("skipping spot due to backtrackLimit " + this.backtrackLimit);
+//                Adversity.log.info("skipping spot due to backtrackLimit " + this.backtrackLimit);
         	}
             this.markDirty();
         }
@@ -287,7 +287,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     
     private void placeIfPossible(BlockPos pPos, BlockPos pOrigin)
     {
-        Adversity.log.info("attempting to place @ " + pPos.toString() + " with origin " + pOrigin.toString());
+//        Adversity.log.info("attempting to place @ " + pPos.toString() + " with origin " + pOrigin.toString());
         
         if(this.canDisplace(pPos))
         {
@@ -297,7 +297,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             
             this.worldObj.setBlockState(pPos, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
-            this.blockManager.add((int)distanceSq << 16 | this.placementCounter++, 
+            this.blockManager.add((int)pPos.distanceSq(this.pos) << 16 | this.placementCounter++, 
                     pPos, this.ticksActive + 60);
             
 //            Adversity.log.info("placing " + placement.pos.toString());
@@ -314,42 +314,42 @@ public class TileVolcano extends TileEntity implements ITickable{
                 addSpaceIfOpen(pPos.south(), pOrigin);
             }
             
-            fillIfNeeded(pPos.up(), pOrigin);
+            fillIfNeeded(pPos.up());
             
-            fillIfNeeded(pPos.east(), pOrigin);
-            fillIfNeeded(pPos.west(), pOrigin);
-            fillIfNeeded(pPos.north(), pOrigin);
-            fillIfNeeded(pPos.south(), pOrigin);
+            fillIfNeeded(pPos.east());
+            fillIfNeeded(pPos.west());
+            fillIfNeeded(pPos.north());
+            fillIfNeeded(pPos.south());
             
-            fillIfNeeded(pPos.east().north(), pOrigin);
-            fillIfNeeded(pPos.west().north(), pOrigin);
-            fillIfNeeded(pPos.east().south(), pOrigin);
-            fillIfNeeded(pPos.west().south(), pOrigin);
+            fillIfNeeded(pPos.east().north());
+            fillIfNeeded(pPos.west().north());
+            fillIfNeeded(pPos.east().south());
+            fillIfNeeded(pPos.west().south());
         }
         else
         {
-            Adversity.log.info("skipping placement: not displaceable");
+//            Adversity.log.info("skipping placement: not displaceable");
         }
     }
     
-    private void fillIfNeeded(BlockPos spaceAbove, BlockPos origin)
+    private void fillIfNeeded(BlockPos spaceAbove)
     {
         if(this.canDisplace(spaceAbove) && IFlowBlock.needsTopFiller(this.worldObj.getBlockState(spaceAbove.down()), this.worldObj, spaceAbove.down()))
         {
             this.worldObj.setBlockState(spaceAbove, NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, 3));
-            this.blockManager.add((int)spaceAbove.distanceSq(origin) << 16 | this.placementCounter++, 
+            this.blockManager.add((int)spaceAbove.distanceSq(this.pos) << 16 | this.placementCounter++, 
                     spaceAbove, this.ticksActive + 60);
         }
     }
     
     private boolean addSpaceIfOpen(BlockPos posIn, BlockPos origin)
     {
-        Adversity.log.info("attempting to add open space @ " + posIn.toString() + " with origin " + origin.toString());
+//        Adversity.log.info("attempting to add open space @ " + posIn.toString() + " with origin " + origin.toString());
         
         if(!canDisplace(posIn))
         {
-            Adversity.log.info("space not added: not displacable");
+//            Adversity.log.info("space not added: not displacable");
             return false;
         }
         
