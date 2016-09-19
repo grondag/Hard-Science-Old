@@ -1,7 +1,7 @@
 package grondag.adversity.feature.volcano;
 
-import java.util.Map.Entry;
-import java.util.TreeMap;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.TreeMultiset;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.RelativeBlockPos;
@@ -10,14 +10,13 @@ import net.minecraft.util.math.BlockPos;
 public class BlockManager 
 {
     private final BlockPos pos;
-    private TreeMap<Integer, BlockPlacement> placedBlocks;
-    private int blockCount = 0;
-
+    private TreeMultiset<BlockPlacement> placedBlocks;
 
     public BlockManager(BlockPos pos)
     {
         this.pos = pos;
-        placedBlocks = new TreeMap<Integer, BlockPlacement>();
+        placedBlocks =  TreeMultiset.create();
+          
     }
 
     public BlockManager(BlockPos pos, int[] values)
@@ -26,7 +25,7 @@ public class BlockManager
         this(pos);
         
         //to be valid, must have a multiple of three
-        if(values.length % 3 != 0)
+        if(values.length % 2 != 0)
         {
             Adversity.log.warn("Invalid placement data loading volcano at " + pos.toString()
                     + ". Previously placed blocks may not be updated properly.");
@@ -36,56 +35,49 @@ public class BlockManager
         int i = 0;
         while(i < values.length)
         {
-            this.placedBlocks.put(values[i++], new BlockPlacement(values[i++], values[i++]));
-            this.blockCount++;
+            this.placedBlocks.add(new BlockPlacement(values[i++], values[i++]));
         }
     }
     
     public int getCount() 
     {
-        return this.blockCount;
+        return placedBlocks.size();
     }
 
     public int[] getArray()
     {
-        int[] result = new int[this.blockCount * 3];
+        int[] result = new int[placedBlocks.size() * 2];
         int i = 0;
         
-        for(Entry<Integer, BlockPlacement> entry: this.placedBlocks.entrySet())
+        for(BlockPlacement entry: this.placedBlocks)
         {
-            result[i++] = entry.getKey();
-            result[i++] = entry.getValue().pos;
-            result[i++] = entry.getValue().tick;          
+            result[i++] = entry.pos;
+            result[i++] = entry.tick;          
         }       
         return result;
     }
 
-    public void add(int sortKey, BlockPos pos, int tick)
+    public void add(BlockPos pos, int tick)
     {
-        this.placedBlocks.put(sortKey, new BlockPlacement(pos, tick));
-        this.blockCount++;
+        this.placedBlocks.add(new BlockPlacement(pos, tick));
     }
     
-    public BlockPlacement pollLastEntryIfReady(int minTick)
+    public BlockPlacement pollFirstReadyEntry(int minTick)
     {
-        BlockPlacement result = null;
-        if(! placedBlocks.isEmpty())
+        if(placedBlocks.isEmpty()) return null;
+                
+            
+        if(placedBlocks.firstEntry().getElement().getTick() > minTick)
         {
-            result = placedBlocks.lastEntry().getValue();
-            if(result.getTick() >= minTick)
-            {
-                placedBlocks.pollLastEntry();
-                blockCount--;
-            }
-            else
-            {
-                result = null;
-            }
+            Adversity.log.info("too early " + placedBlocks.firstEntry().getElement().getTick() + " > " + minTick);
+            return null;
         }
-        return result;
+        
+        return placedBlocks.pollFirstEntry().getElement();
+        
     }
 
-    public class BlockPlacement
+    public class BlockPlacement implements Comparable<BlockPlacement>
     {
         private final int pos;
         private final int tick;
@@ -109,6 +101,15 @@ public class BlockManager
         public int getTick()
         {
             return tick;
+        }
+
+        @Override
+        public int compareTo(BlockPlacement other)
+        {
+            return ComparisonChain.start()
+                    .compare(this.tick, other.tick)
+                    .compare(this.pos, other.pos)
+                    .result();
         }
     }
 }
