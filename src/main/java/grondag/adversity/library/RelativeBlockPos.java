@@ -19,18 +19,17 @@ public class RelativeBlockPos
 {
     public static int getKey(BlockPos pos, BlockPos origin)
     {
-        BlockPos offset = pos.subtract(origin);
-        int x  = (offset.getX() + 2047) & 0xFFF;
-        int z = (offset.getZ() + 2047) & 0xFFF;
-        int y = offset.getY() & 0xFF;
+        int x  = (pos.getX() + 2047 - origin.getX()) & 0xFFF;
+        int z = (pos.getZ() + 2047 - origin.getZ()) & 0xFFF;
+        int y = pos.getY() & 0xFF;
         return x | y << 12 | z << 20;
     }
     
     public static BlockPos getPos(int key, BlockPos origin)
     {
-        int x  = (key & 0xFFF) - 2047;
-        int z = ((key >> 20) & 0xFFF) - 2047;
+        int x  = (key & 0xFFF) - 2047 + origin.getX();
+        int z = ((key >> 20) & 0xFFF) - 2047 + origin.getZ();
         int y = (key >> 12) & 0xFF;
-        return origin.add(x, y, z);
+        return new BlockPos(x, y, z);
     }
 }

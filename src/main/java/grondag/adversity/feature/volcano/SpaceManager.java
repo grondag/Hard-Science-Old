@@ -70,6 +70,7 @@ public class SpaceManager
 
 	public void add(BlockPos posIn, BlockPos origin)
 	{
+	    Adversity.log.info("adding space @ " + posIn.toString() + " with origin " + origin.toString());
         OpenSpace space = new OpenSpace(posIn, origin);
         int distanceHash = space.getDistanceHash();
         

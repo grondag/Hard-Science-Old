@@ -212,7 +212,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 	
     public void update() 
     {
-        if(this.worldObj.isRemote) return;
+        if(this.worldObj.isRemote || this.stage == VolcanoStage.DORMANT) return;
                 
         if(this.stage == VolcanoStage.NEW && Simulator.instance.getVolcanoManager() != null)
         {
@@ -232,6 +232,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             if(spaceManager.getCount() == 0)
             {
                 this.stage = VolcanoStage.DORMANT;
+                //TODO: remove
+                Adversity.log.info("Volcano DORMANT");
             }
             else
             {
@@ -242,11 +244,16 @@ public class TileVolcano extends TileEntity implements ITickable{
         else if(spaceManager.getCount() != 0)
         {
         	OpenSpace place = spaceManager.pollFirstEntry();
+        	Adversity.log.info("found open spot @ " + place.getPos().toString() + " with origin " + place.getOrigin().toString());
         	if(place.getPos().getY() < this.backtrackLimit)
             {
                 placeIfPossible(place.getPos(), place.getOrigin());
                 this.backtrackLimit = Math.min(backtrackLimit, place.getPos().getY() + 3);
             }
+        	else
+        	{
+                Adversity.log.info("skipping spot due to backtrackLimit " + this.backtrackLimit);
+        	}
             this.markDirty();
         }
         // this should always be true if we get to this point - really just for clarity
@@ -280,6 +287,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     
     private void placeIfPossible(BlockPos pPos, BlockPos pOrigin)
     {
+        Adversity.log.info("attempting to place @ " + pPos.toString() + " with origin " + pOrigin.toString());
         
         if(this.canDisplace(pPos))
         {
@@ -292,6 +300,20 @@ public class TileVolcano extends TileEntity implements ITickable{
             this.blockManager.add((int)distanceSq << 16 | this.placementCounter++, 
                     pPos, this.ticksActive + 60);
             
+//            Adversity.log.info("placing " + placement.pos.toString());
+            
+            // don't spread sideways if can flow down or if already flowing down
+            if(!(addSpaceIfOpen(pPos.down(), pPos.down())
+                    || this.worldObj.getBlockState(pPos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK))
+            {
+//                Adversity.log.info("skipping side placements for " + placement.pos.toString());
+                
+                addSpaceIfOpen(pPos.east(), pOrigin);
+                addSpaceIfOpen(pPos.west(), pOrigin);
+                addSpaceIfOpen(pPos.north(), pOrigin);
+                addSpaceIfOpen(pPos.south(), pOrigin);
+            }
+            
             fillIfNeeded(pPos.up(), pOrigin);
             
             fillIfNeeded(pPos.east(), pOrigin);
@@ -303,21 +325,10 @@ public class TileVolcano extends TileEntity implements ITickable{
             fillIfNeeded(pPos.west().north(), pOrigin);
             fillIfNeeded(pPos.east().south(), pOrigin);
             fillIfNeeded(pPos.west().south(), pOrigin);
-            
-//            Adversity.log.info("placing " + placement.pos.toString());
-            
-            // don't spread sideways if can flow down or if already flowing down
-            if(addSpaceIfOpen(pPos.down(), pPos.down())
-                    || this.worldObj.getBlockState(pPos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-            {
-//                Adversity.log.info("skipping side placements for " + placement.pos.toString());
-                return;
-            }
-            
-            addSpaceIfOpen(pPos.east(), pOrigin);
-            addSpaceIfOpen(pPos.west(), pOrigin);
-            addSpaceIfOpen(pPos.north(), pOrigin);
-            addSpaceIfOpen(pPos.south(), pOrigin);
+        }
+        else
+        {
+            Adversity.log.info("skipping placement: not displaceable");
         }
     }
     
@@ -334,7 +345,13 @@ public class TileVolcano extends TileEntity implements ITickable{
     
     private boolean addSpaceIfOpen(BlockPos posIn, BlockPos origin)
     {
-        if(!canDisplace(posIn)) return false;
+        Adversity.log.info("attempting to add open space @ " + posIn.toString() + " with origin " + origin.toString());
+        
+        if(!canDisplace(posIn))
+        {
+            Adversity.log.info("space not added: not displacable");
+            return false;
+        }
         
         spaceManager.add(posIn, origin);
         return true;
