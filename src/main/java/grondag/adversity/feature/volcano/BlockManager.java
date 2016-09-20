@@ -1,21 +1,24 @@
 package grondag.adversity.feature.volcano;
 
+import java.util.TreeSet;
+
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.TreeMultiset;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.library.RelativeBlockPos;
 import net.minecraft.util.math.BlockPos;
 
 public class BlockManager 
 {
     private final BlockPos pos;
-    private TreeMultiset<BlockPlacement> placedBlocks;
+    private TreeSet<BlockPlacement> placedBlocks;
 
     public BlockManager(BlockPos pos)
     {
         this.pos = pos;
-        placedBlocks =  TreeMultiset.create();
+        placedBlocks =  new TreeSet<BlockPlacement>();
           
     }
 
@@ -24,7 +27,7 @@ public class BlockManager
         
         this(pos);
         
-        //to be valid, must have a multiple of three
+        //to be valid, must have a multiple of two
         if(values.length % 2 != 0)
         {
             Adversity.log.warn("Invalid placement data loading volcano at " + pos.toString()
@@ -52,45 +55,50 @@ public class BlockManager
         for(BlockPlacement entry: this.placedBlocks)
         {
             result[i++] = entry.pos;
-            result[i++] = entry.tick;          
+            result[i++] = entry.index;  
         }       
         return result;
     }
 
-    public void add(BlockPos pos, int tick)
+    public void add(BlockPos pos, int index)
     {
-        this.placedBlocks.add(new BlockPlacement(pos, tick));
+        this.placedBlocks.add(new BlockPlacement(pos, index));
     }
     
-    public BlockPlacement pollFirstReadyEntry(int minTick)
+    public BlockPlacement pollFirstReadyEntry(int threshold)
     {
         if(placedBlocks.isEmpty()) return null;
                 
-            
-        if(placedBlocks.firstEntry().getElement().getTick() > minTick)
-        {
-            Adversity.log.info("too early " + placedBlocks.firstEntry().getElement().getTick() + " > " + minTick);
-            return null;
-        }
+        if(placedBlocks.first().getIndex() > threshold) return null;
         
-        return placedBlocks.pollFirstEntry().getElement();
+        return placedBlocks.pollFirst();
         
     }
 
+    public BlockPlacement pollLastReadyEntry(int threshold)
+    {
+        if(placedBlocks.isEmpty()) return null;
+            
+        if(placedBlocks.last().getIndex() > threshold) return null;
+        
+        return placedBlocks.pollLast();
+        
+    }
+    
     public class BlockPlacement implements Comparable<BlockPlacement>
     {
         private final int pos;
-        private final int tick;
+        private final int index;
 
-        protected BlockPlacement(BlockPos pos, int tick)
+        protected BlockPlacement(BlockPos pos, int index)
         {
-            this(RelativeBlockPos.getKey(pos, BlockManager.this.pos), tick);
+            this(RelativeBlockPos.getKey(pos, BlockManager.this.pos), index);
         }
 
-        protected BlockPlacement(int pos, int tick)
+        protected BlockPlacement(int pos, int index)
         {
             this.pos= pos;
-            this.tick = tick;
+            this.index = index;
         }
 
         public BlockPos getPos()
@@ -98,16 +106,16 @@ public class BlockManager
             return RelativeBlockPos.getPos(pos, BlockManager.this.pos);
         }
 
-        public int getTick()
+        public int getIndex()
         {
-            return tick;
+            return index;
         }
-
+        
         @Override
         public int compareTo(BlockPlacement other)
         {
             return ComparisonChain.start()
-                    .compare(this.tick, other.tick)
+                    .compare(this.index, other.index)
                     .compare(this.pos, other.pos)
                     .result();
         }
