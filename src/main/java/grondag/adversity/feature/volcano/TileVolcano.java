@@ -349,10 +349,27 @@ public class TileVolcano extends TileEntity implements ITickable{
 //            Adversity.log.info("placing " + placement.pos.toString());
             
             // don't spread sideways if can flow down or if already flowing down
-            if(!(addSpaceIfOpen(pPos.down(), pPos.down())
-                    || this.worldObj.getBlockState(pPos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK))
+            if(!addSpaceIfOpen(pPos.down(), pPos.down()))
             {
 //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
+                
+                if(isHardBasalt(this.worldObj.getBlockState(pPos.down())))
+                {
+                    this.worldObj.setBlockState(pPos.down(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+                            .withProperty(NiceBlock.META, 15));
+                    this.lavaBlocks.add(pPos.down(), ++lavaCounter);
+                    //this.basaltBlocks.add(pPos.down(), this.ticksActive + 200 + Useful.SALT_SHAKER.nextInt(200));
+                }
+
+                meltExposedBasalt(pPos.down().east());
+                meltExposedBasalt(pPos.down().west());
+                meltExposedBasalt(pPos.down().north());
+                meltExposedBasalt(pPos.down().south());
+                
+                meltExposedBasalt(pPos.down().east().north());
+                meltExposedBasalt(pPos.down().west().north());
+                meltExposedBasalt(pPos.down().east().south());
+                meltExposedBasalt(pPos.down().west().south());
                 
                 addSpaceIfOpen(pPos.east(), pOrigin);
                 addSpaceIfOpen(pPos.west(), pOrigin);
@@ -375,6 +392,26 @@ public class TileVolcano extends TileEntity implements ITickable{
         else
         {
 //            Adversity.log.info("skipping placement: not displaceable");
+        }
+    }
+    
+    private boolean isHardBasalt(IBlockState state)
+    {
+        return state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK
+                || state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_1_HEIGHT_BLOCK
+                || state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK
+                || state.getBlock() == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK;
+    }
+    
+    private void meltExposedBasalt(BlockPos pos)
+    {
+        //TODO handle filler blocks in addition to air
+        if(this.worldObj.isAirBlock(pos.up()) && isHardBasalt(this.worldObj.getBlockState(pos)))
+        {
+            this.worldObj.setBlockState(pos, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+                    .withProperty(NiceBlock.META, this.worldObj.getBlockState(pos).getValue(NiceBlock.META)));
+            this.lavaBlocks.add(pos, ++lavaCounter);
+            //this.basaltBlocks.add(pPos.down(), this.ticksActive + 200 + Useful.SALT_SHAKER.nextInt(200));
         }
     }
     
