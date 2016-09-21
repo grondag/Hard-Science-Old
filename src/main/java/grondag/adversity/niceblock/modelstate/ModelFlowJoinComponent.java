@@ -47,20 +47,15 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
             int yOrigin = pos.getY();
             IBlockState originState = state;
 
-            // If under another flow height block, handle similar to filler block.
-            // Not a perfect fix if they are stacked, but shouldn't normally be.
+            // If under another flow height block, always full height.
             if(IFlowBlock.isBlockFlowHeight(block))
             {
-                // try to use block above as height origin
-                originState = world.getBlockState(pos.up());
-                if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
+                if(IFlowBlock.isBlockFlowHeight(world.getBlockState(pos.up()).getBlock()))
                 {
-                    yOrigin++;
-                    yOffset = -1;
+                    return FlowHeightState.FULL_BLOCK_STATE_KEY;
                 }
                 else
                 {
-                    // didn't work, go back to using this block
                     originState = state;
                 }
             }
