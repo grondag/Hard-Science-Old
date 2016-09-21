@@ -232,7 +232,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(!isLoaded) return;
         
-        if(spaceManager.getCount() == 0 && lavaBlocks.getCount() == 0)
+        if(spaceManager.getCount() == 0 && lavaBlocks.getCount() == 0 && basaltBlocks.getCount() == 0)
         {
             placeIfPossible(this.getPos().up(), this.getPos().up());
             if(spaceManager.getCount() == 0)
