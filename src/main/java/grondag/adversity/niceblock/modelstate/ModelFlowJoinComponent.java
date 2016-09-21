@@ -52,16 +52,25 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
             if(IFlowBlock.isBlockFlowHeight(block))
             {
                 // try to use block above as height origin
-                originState = world.getBlockState(pos.up());
+                originState = world.getBlockState(pos.up().up());
                 if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
                 {
-                    yOrigin++;
-                    yOffset = -1;
+                    yOrigin += 2;
+                    yOffset = -2;
                 }
                 else
                 {
-                    // didn't work, go back to using this block
-                    originState = state;
+                    originState = world.getBlockState(pos.up());
+                    if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
+                    {
+                        yOrigin += 1;
+                        yOffset = -1;
+                    }
+                    else
+                    {
+                        // didn't work, handle as normal height block
+                        originState = state;
+                    }
                 }
             }
             else if(IFlowBlock.isBlockFlowFiller(block))

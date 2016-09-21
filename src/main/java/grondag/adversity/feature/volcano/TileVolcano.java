@@ -339,31 +339,9 @@ public class TileVolcano extends TileEntity implements ITickable{
             if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
             
             
-            IBlockState targetState; 
-            
-            IBlockState aboveBlock = this.worldObj.getBlockState(pPos.up());
-            
-            if(aboveBlock.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-            {
-                targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, FlowHeightState.FILL_META_DOWN1);
-            }
-            else
-            {
-                targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+            IBlockState targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
                         .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq));
-            }
             
-            // For falling streams, need to replace filler blocks with height blocks as we go down.
-            // Assuming these are always origin blocks.
-            if (aboveBlock.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK
-                    && aboveBlock.getValue(NiceBlock.META) == FlowHeightState.FILL_META_DOWN1)
-            {
-                this.worldObj.setBlockState(pPos.up(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, 15));
-                
-                // note - not adding to lava counter because should already be there.
-            }
             
             this.worldObj.setBlockState(pPos, targetState);
             this.lavaBlocks.add(pPos, ++lavaCounter);
