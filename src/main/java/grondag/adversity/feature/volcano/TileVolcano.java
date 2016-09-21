@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -7,20 +8,15 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.HashSet;
-import java.util.TreeMap;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.feature.volcano.SpaceManager.OpenSpace;
-//import grondag.adversity.Adversity;
-import grondag.adversity.library.RelativeBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 
 
 public class TileVolcano extends TileEntity implements ITickable{
@@ -192,7 +188,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         IBlockState state = this.worldObj.getBlockState(pos);
         
-        if (state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if (state.getBlock() instanceof IFlowBlock && !((IFlowBlock)state.getBlock()).isFiller())
         {
             return false;
         }
@@ -342,8 +338,33 @@ public class TileVolcano extends TileEntity implements ITickable{
             if(distanceSq > 49 || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
             
             
-            this.worldObj.setBlockState(pPos, NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq)));
+            IBlockState targetState; 
+            
+            IBlockState aboveBlock = this.worldObj.getBlockState(pPos.up());
+            
+            if(aboveBlock.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+            {
+                targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getDefaultState()
+                        .withProperty(NiceBlock.META, FlowHeightState.FILL_META_DOWN1);
+            }
+            else
+            {
+                targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+                        .withProperty(NiceBlock.META, 2 * (int)Math.sqrt(distanceSq));
+            }
+            
+            // For falling streams, need to replace filler blocks with height blocks as we go down.
+            // Assuming these are always origin blocks.
+            if (aboveBlock.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK
+                    && aboveBlock.getValue(NiceBlock.META) == FlowHeightState.FILL_META_DOWN1)
+            {
+                this.worldObj.setBlockState(pPos.up(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
+                        .withProperty(NiceBlock.META, 15));
+                
+                // note - not adding to lava counter because should already be there.
+            }
+            
+            this.worldObj.setBlockState(pPos, targetState);
             this.lavaBlocks.add(pPos, ++lavaCounter);
             
 //            Adversity.log.info("placing " + placement.pos.toString());
@@ -360,17 +381,17 @@ public class TileVolcano extends TileEntity implements ITickable{
                 addSpaceIfOpen(pPos.south(), pOrigin);
             }
             
-            fillIfNeeded(pPos.up());
+            adjustFillIfNeeded(pPos.up());
             
-            fillIfNeeded(pPos.east());
-            fillIfNeeded(pPos.west());
-            fillIfNeeded(pPos.north());
-            fillIfNeeded(pPos.south());
+            adjustFillIfNeeded(pPos.east());
+            adjustFillIfNeeded(pPos.west());
+            adjustFillIfNeeded(pPos.north());
+            adjustFillIfNeeded(pPos.south());
             
-            fillIfNeeded(pPos.east().north());
-            fillIfNeeded(pPos.west().north());
-            fillIfNeeded(pPos.east().south());
-            fillIfNeeded(pPos.west().south());
+            adjustFillIfNeeded(pPos.east().north());
+            adjustFillIfNeeded(pPos.west().north());
+            adjustFillIfNeeded(pPos.east().south());
+            adjustFillIfNeeded(pPos.west().south());
         }
         else
         {
@@ -378,9 +399,15 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
     }
     
-    private void fillIfNeeded(BlockPos spaceAbove)
+    private void adjustFillIfNeeded(BlockPos spaceAbove)
     {
-        if(this.canDisplace(spaceAbove) && IFlowBlock.needsTopFiller(this.worldObj.getBlockState(spaceAbove.down()), this.worldObj, spaceAbove.down()))
+        Block blockAbove = this.worldObj.getBlockState(spaceAbove).getBlock();
+        if(blockAbove instanceof IFlowBlock && ((IFlowBlock)blockAbove).isFiller()
+                && !IFlowBlock.needsTopFiller(this.worldObj.getBlockState(spaceAbove.down()), this.worldObj, spaceAbove.down()))
+        {
+            this.worldObj.setBlockToAir(spaceAbove);
+        }
+        else if(this.canDisplace(spaceAbove) && IFlowBlock.needsTopFiller(this.worldObj.getBlockState(spaceAbove.down()), this.worldObj, spaceAbove.down()))
         {
             this.worldObj.setBlockState(spaceAbove, NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, 3));

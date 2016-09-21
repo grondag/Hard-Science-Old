@@ -17,6 +17,14 @@ public class FlowHeightState
     public final static int MIN_HEIGHT = -32;
     public final static int NO_BLOCK = MIN_HEIGHT - 1;
     public final static int MAX_HEIGHT = 48;
+    
+    // Use these insted of magic number for filler block meta values
+    public final static int FILL_META_DOWN2 = 0;
+    public final static int FILL_META_DOWN1 = 1;
+    public final static int FILL_META_LEVEL = 2;
+    public final static int FILL_META_UP1 = 3;
+    public final static int FILL_META_UP2 = 4;
+    
 
     /**
      * Number of possible values for non-center blocks.
