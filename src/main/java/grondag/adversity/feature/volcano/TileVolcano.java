@@ -280,6 +280,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
                     this.worldObj.setBlockState(target, state);
                     this.basaltBlocks.add(target, this.ticksActive + 60 + Useful.SALT_SHAKER.nextInt(30));
+
     //                Adversity.log.info("place basalt meta=" + meta 
     //                        + " priorKey=" + modelStateKey
     //                        + " newKey=" + NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, worldObj, target));
