@@ -42,6 +42,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     
 	private SpaceManager spaceManager;
 	private BlockManager lavaBlocks;
+	private BlockManager basaltBlocks;
 	
 	//private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
 
@@ -226,6 +227,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             this.stage = VolcanoStage.ACTIVE;
             this.spaceManager = new SpaceManager(this.pos);
             this.lavaBlocks = new BlockManager(this.pos);
+            this.basaltBlocks = new BlockManager(this.pos);
         }
         
         if(!isLoaded) return;
@@ -281,7 +283,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     long modelStateKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getModelStateKey(state, this.worldObj, target);
                     state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
                     this.worldObj.setBlockState(target, state);
-//                    NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
+                    this.basaltBlocks.add(target, this.ticksActive + 60 + Useful.SALT_SHAKER.nextInt(30));
     //                Adversity.log.info("place basalt meta=" + meta 
     //                        + " priorKey=" + modelStateKey
     //                        + " newKey=" + NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, worldObj, target));
@@ -292,7 +294,39 @@ public class TileVolcano extends TileEntity implements ITickable{
                     long modelStateKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getModelStateKey(state, this.worldObj, target);
                     state = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
                     this.worldObj.setBlockState(target, state);
-//                    NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
+                    this.basaltBlocks.add(target, this.ticksActive + 60 + Useful.SALT_SHAKER.nextInt(30));
+                }
+            }
+        }
+        
+        if(basaltBlocks.getCount() != 0)// && placedLava.lastEntry().getValue().worldTick < this.worldObj.getWorldTime())
+        {
+            
+            BlockPlacement placement = basaltBlocks.pollFirstReadyEntry(this.ticksActive);
+
+            if(placement != null)
+            {
+                BlockPos target = placement.getPos();
+    
+                IBlockState state = this.worldObj.getBlockState(target);
+                if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK)
+                {
+                    int meta = state.getValue(NiceBlock.META);
+                    long modelStateKey = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, this.worldObj, target);
+                    state = NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
+                    this.worldObj.setBlockState(target, state);
+                    NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
+    //                Adversity.log.info("place basalt meta=" + meta 
+    //                        + " priorKey=" + modelStateKey
+    //                        + " newKey=" + NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getModelStateKey(state, worldObj, target));
+                }
+                else if(this.worldObj.getBlockState(target).getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK)
+                {
+                    int meta = state.getValue(NiceBlock.META);
+                    long modelStateKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getModelStateKey(state, this.worldObj, target);
+                    state = NiceBlockRegistrar.HOT_FLOWING_BASALT_2_FILLER_BLOCK.getDefaultState().withProperty(NiceBlock.META, meta);
+                    this.worldObj.setBlockState(target, state);
+                    NiceBlockRegistrar.HOT_FLOWING_BASALT_2_FILLER_BLOCK.setModelStateKey(state, this.worldObj, target, modelStateKey);
                 }
             }
         }
@@ -497,6 +531,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 		
         this.spaceManager = new SpaceManager(this.pos, tagCompound.getIntArray("spaceManager"));
         this.lavaBlocks = new BlockManager(this.pos, tagCompound.getIntArray("lavaBlocks"));
+        this.basaltBlocks = new BlockManager(this.pos, tagCompound.getIntArray("basaltBlocks"));
 		
 //		int nodeId = tagCompound.getInteger("nodeId");
 //		
@@ -534,6 +569,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 		
 		tagCompound.setIntArray("spaceManager", this.spaceManager.getArray());
 		tagCompound.setIntArray("lavaBlocks", this.lavaBlocks.getArray());
+		tagCompound.setIntArray("basaltBlocks", this.basaltBlocks.getArray());
 	      
 		
 //		if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
