@@ -53,12 +53,14 @@ public class TileVolcano extends TileEntity implements ITickable{
 	private static enum VolcanoStage
 	{
 	    NEW,
+	    FLOWING,
+	    COOLING,
 	    DORMANT,
-	    ACTIVE,
-	    NEW_LEVEL,
-	    BUILDING_INNER,
-	    BUILDING_LOWER,
-	    TESTING_OUTER,
+//	    ACTIVE,
+//	    NEW_LEVEL,
+//	    BUILDING_INNER,
+//	    BUILDING_LOWER,
+//	    TESTING_OUTER,
 	    DEAD
 	}
 	
@@ -240,7 +242,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
 //            this.node = Simulator.instance.getVolcanoManager().createNode();
             this.isLoaded = true;
-            this.stage = VolcanoStage.ACTIVE;
+            this.stage = VolcanoStage.FLOWING;
             this.spaceManager = new SpaceManager(this.pos);
             this.lavaBlocks = new BlockManager(this.pos, true);
             this.basaltBlocks = new BlockManager(this.pos, false);
@@ -438,10 +440,6 @@ public class TileVolcano extends TileEntity implements ITickable{
             
             adjustFillIfNeeded(pPos.up());
             
-        }
-        else  
-        {
-//            Adversity.log.info("skipping placement: not displaceable");
         }
     }
     /** 
