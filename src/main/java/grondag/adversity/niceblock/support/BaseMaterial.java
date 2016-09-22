@@ -14,7 +14,8 @@ public enum BaseMaterial {
 	HYPERSTONE("hyperstone", Material.IRON, SoundType.WOOD),
 	SUPERWOOD("superwood", Material.WOOD, SoundType.METAL),
 	BASALT("basalt", Material.ROCK, SoundType.STONE),
-    VOLCANIC_LAVA("volcanicLava", Material.LAVA, SoundType.STONE);
+	//can't use lava as material here - confuses the lava fluid renderer
+    VOLCANIC_LAVA("volcanicLava", Material.ROCK, SoundType.STONE);
 	public final String materialName;
 	public final Material material;
 	public final SoundType stepSound;
