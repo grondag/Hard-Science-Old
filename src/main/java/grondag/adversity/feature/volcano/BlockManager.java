@@ -13,19 +13,21 @@ import net.minecraft.util.math.BlockPos;
 public class BlockManager 
 {
     private final BlockPos pos;
+    private final boolean distanceRanked;
     private TreeSet<BlockPlacement> placedBlocks;
 
-    public BlockManager(BlockPos pos)
+    public BlockManager(BlockPos pos, boolean distanceRanked)
     {
         this.pos = pos;
+        this.distanceRanked = distanceRanked;
         placedBlocks =  new TreeSet<BlockPlacement>();
           
     }
 
-    public BlockManager(BlockPos pos, int[] values)
+    public BlockManager(BlockPos pos, boolean distanceRanked, int[] values)
     {
         
-        this(pos);
+        this(pos, distanceRanked);
         
         //to be valid, must have a multiple of two
         if(values.length % 2 != 0)
@@ -85,10 +87,24 @@ public class BlockManager
         
     }
     
+    /** 
+     * Gets ready block farthest from origin.
+     * Only useful if distanceRanked = true;
+     */
+    public BlockPlacement pollFarthestReadyEntry(int threshold)
+    {
+        if(placedBlocks.isEmpty()) return null;
+        
+        if(placedBlocks.last().getIndex() > threshold) return null;
+        
+        return placedBlocks.pollLast();
+    }
+    
     public class BlockPlacement implements Comparable<BlockPlacement>
     {
         private final int pos;
         private final int index;
+        private final int distance;
 
         protected BlockPlacement(BlockPos pos, int index)
         {
@@ -99,6 +115,7 @@ public class BlockManager
         {
             this.pos= pos;
             this.index = index;
+            this.distance = BlockManager.this.distanceRanked ? (int) this.getPos().distanceSq(BlockManager.this.pos) : 0;
         }
 
         public BlockPos getPos()
@@ -115,6 +132,7 @@ public class BlockManager
         public int compareTo(BlockPlacement other)
         {
             return ComparisonChain.start()
+                    .compare(this.distance, other.distance)
                     .compare(this.index, other.index)
                     .compare(this.pos, other.pos)
                     .result();
