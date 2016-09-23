@@ -8,6 +8,7 @@ import com.google.common.collect.TreeMultiset;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.library.RelativeBlockPos;
+import grondag.adversity.library.Useful;
 import net.minecraft.util.math.BlockPos;
 
 public class BlockManager 
@@ -65,6 +66,28 @@ public class BlockManager
     public void add(BlockPos pos, int index)
     {
         this.placedBlocks.add(new BlockPlacement(pos, index));
+    }
+    
+    /**
+     * Used to transfer laval blocks in distance-ranked order
+     * to a block manager that is indexed by tick index only.
+     * Allows us to start a new laval pass while cooling of last pass proceeds
+     * and keep correct cooling order.
+     */
+    public void transferWithOffset(BlockManager blocks, int startingIndex, int minOffset, int maxOffset)
+    {
+        int range = maxOffset - minOffset;
+        int index = startingIndex;
+        
+        while(!blocks.placedBlocks.isEmpty())
+        {
+            index += minOffset;
+            if(range > 0)
+            {
+                index += Useful.SALT_SHAKER.nextInt(range);
+            }   
+            this.placedBlocks.add(new BlockPlacement(blocks.placedBlocks.pollLast().pos, index));
+        }
     }
     
     public BlockPlacement pollFirstReadyEntry(int threshold)
