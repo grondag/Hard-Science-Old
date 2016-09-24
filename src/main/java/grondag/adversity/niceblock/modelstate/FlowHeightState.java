@@ -164,6 +164,10 @@ public class FlowHeightState
      */
     public int topFillerNeeded()
     {
+        //filler only applies to level blocks
+        if(yOffset != 0) 
+            return 0;
+        
         refreshVertexCalculationsIfNeeded();
         float max = getCenterVertexHeight();
         for(int i = 0; i < 4; i++)
@@ -179,11 +183,12 @@ public class FlowHeightState
     {
         refreshVertexCalculationsIfNeeded();
         float test = getCenterVertexHeight();
-        if(test < 1) return false;
+        double top = 1.0 + yOffset + QuadFactory.EPSILON;
+        if(test < top) return false;
         for(int i = 0; i < 4; i++)
         {
-            if(this.midSideHeight[i] < 1
-                    || this.midCornerHeight[i] < 1) return false;
+            if(this.midSideHeight[i] < top
+                    || this.midCornerHeight[i] < top) return false;
         }
         return true;
     }
@@ -200,7 +205,7 @@ public class FlowHeightState
     
     public float getCenterVertexHeight()
     {
-        return (float) getCenterHeight() / 16f - this.yOffset;
+        return (float) getCenterHeight() / 16f;
     }
 
     public float getFarCornerVertexHeight(HorizontalCorner corner)
@@ -255,7 +260,7 @@ public class FlowHeightState
             heightCorner = (max - 1) / 16 * 16;
         }
        
-        return ((float) heightCorner) / 16f - this.yOffset;
+        return ((float) heightCorner) / 16f;
     }
     
     /**
@@ -276,19 +281,19 @@ public class FlowHeightState
         
         float numerator = getCenterHeight() + heightSide1 + heightSide2 + heightCorner;
        
-        return numerator / 64f - this.yOffset;
+        return numerator / 64f;
         
     }
     
     private float calcFarSideVertexHeight(HorizontalFace face)
     {
-        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / 16f) - this.yOffset;
+        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / 16f);
     }
 
     private float calcMidSideVertexHeight(HorizontalFace face)
     {
         float sideHeight = getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : (float)getSideHeight(face);
-        return (sideHeight + (float) getCenterHeight()) / 32F - this.yOffset;
+        return (sideHeight + (float) getCenterHeight()) / 32F;
     }
 
     public String toString()

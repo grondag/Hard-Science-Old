@@ -75,11 +75,11 @@ public interface IFlowBlock
     
     /**
      * Use for filler blocks.
-     * Returns values from -2 to -1 and +1 to +2.
+     * Returns values from +1 to +2.
      */
     public static int getYOffsetFromState(IBlockState state)
     {
-        return FlowHeightState.getYOffsetFromTriad(state.getValue(NiceBlock.META));
+        return state.getValue(NiceBlock.META) + 1;
     }
     
     /**
@@ -88,7 +88,7 @@ public interface IFlowBlock
      */
     public static IBlockState stateWithYOffset(IBlockState state, int value)
     {
-        return state.withProperty(NiceBlock.META, FlowHeightState.getTriadWithYOffset(value));
+        return state.withProperty(NiceBlock.META, Math.min(1, Math.max(0, value - 1)));
     }
     
 }

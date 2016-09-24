@@ -5,6 +5,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 
@@ -17,28 +18,28 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
+import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //TEST
-//random heights
-//leveling
-//fix incomplete fillers
-//adjust fill 2 up
 
 //TODOS
 //replace fully enclosed blocks with regular cube blocks
 //bore clearing / mounding
 
-//fix block item model
+
 //fix model pinholes
 //fix lighting normals
 //final textures
 
-//simulation integration & control from simulation
+
 //detection item
 //volcano wand
+//remove block item/item model
+//simulation integration & control from simulation
 //world gen
 //biome
 //sound effects
@@ -377,21 +378,29 @@ public class TileVolcano extends TileEntity implements ITickable{
                     }
                     else
                     {
-                        FlowStaticBlock newBlock = getNextCoolingBlock(oldBlock);
-                        
-                        if(newBlock != null)
+                        if(isFullyStaticCube(target, oldState))
                         {
-                            int meta = oldState.getValue(NiceBlock.META);
-                            long modelStateKey = oldBlock.getModelStateKey(oldState, this.worldObj, target);
-                            IBlockState newState = newBlock.getDefaultState().withProperty(NiceBlock.META, meta);
-                            this.worldObj.setBlockState(target, newState);
-                            newBlock.setModelStateKey(newState, this.worldObj, target, modelStateKey);
+                            // use simple cubic basalt if not exposed and can't influence any flow blocks
+                            this.worldObj.setBlockState(target, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState());
+                        }
+                        else
+                        {
+                            FlowStaticBlock newBlock = getNextCoolingBlock(oldBlock);
                             
-                            if(!(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK
-                                    || newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK))
+                            if(newBlock != null)
                             {
-                                coolingBlocks.add(target, ticksActive + COOLING_LAG_TICKS);
-                            }                   
+                                int meta = oldState.getValue(NiceBlock.META);
+                                long modelStateKey = oldBlock.getModelStateKey(oldState, this.worldObj, target);
+                                IBlockState newState = newBlock.getDefaultState().withProperty(NiceBlock.META, meta);
+                                this.worldObj.setBlockState(target, newState);
+                                newBlock.setModelStateKey(newState, this.worldObj, target, modelStateKey);
+                                
+                                if(!(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK
+                                        || newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK))
+                                {
+                                    coolingBlocks.add(target, ticksActive + COOLING_LAG_TICKS);
+                                }                   
+                            }
                         }
                     }
                 }
@@ -404,6 +413,28 @@ public class TileVolcano extends TileEntity implements ITickable{
     {
         this.cooldownTicks = lavaBlocks.getCount() * (BASE_TICKS_PER_BLOCK + (RAND_TICKS_PER_BLOCK + 1)/2);
         this.coolingBlocks.transferWithOffset(lavaBlocks,  ticksActive, BASE_TICKS_PER_BLOCK, RAND_TICKS_PER_BLOCK);
+    }
+    
+    private boolean isFullyStaticCube(BlockPos pos, IBlockState state)
+    {
+        
+        if(!IFlowBlock.isFullCube(state, worldObj, pos)) return false;
+        
+        for(int x = -1; x <= 1; x++)
+        {
+            for(int z = -1; z <= 1; z++)
+            {
+                for(int y = -2; y <= 2; y++)
+                {
+                    if(!(x == 0 && y == 0 && z == 0))
+                    {
+                        if(worldObj.getBlockState(pos.add(x, y, z)) instanceof FlowDynamicBlock) return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
     }
     
     private FlowStaticBlock getNextCoolingBlock(Block blockIn)
@@ -455,13 +486,13 @@ public class TileVolcano extends TileEntity implements ITickable{
             {
 //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
                 
-                if(isHardBasalt(this.worldObj.getBlockState(pPos.down())))
+                if(isHardBasalt(this.worldObj.getBlockState(pPos.down()).getBlock()))
                 {
                     this.worldObj.setBlockState(pPos.down(), NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
                             .withProperty(NiceBlock.META, 15));
                     this.lavaBlocks.add(pPos.down(), ++lavaCounter);
                     //this.basaltBlocks.add(pPos.down(), this.ticksActive + 200 + Useful.SALT_SHAKER.nextInt(200));
-                    if(isHardBasalt(this.worldObj.getBlockState(pPos.down().down())))
+                    if(isHardBasalt(this.worldObj.getBlockState(pPos.down().down()).getBlock()))
                     {
                         this.worldObj.setBlockState(pPos.down().down(), NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
                                 .withProperty(NiceBlock.META, 15));
@@ -476,19 +507,33 @@ public class TileVolcano extends TileEntity implements ITickable{
                 addSpaceIfOpen(pPos.south(), pOrigin);
             }
 
-            BlockPos[] neighbors = new BlockPos[HorizontalCorner.values().length];
-            for(int i = 0; i < neighbors.length; i++)
+            for(int x = -1; x <= 1; x++)
             {
-                neighbors[i] = findTopFlowBlock(pPos.add(HorizontalCorner.values()[i].directionVector));
-                if(neighbors[i] != null) meltExposedBasalt(neighbors[i]);
+                for(int z = -1; z <= 1; z++)
+                {
+                    for(int y = -3; y <= 4; y++)
+                    {
+                        if(!(x == 0 && y == 0 && z == 0))
+                        {
+                            meltExposedBasalt(pPos.add(x, y, z));
+                        }
+                    }
+                }
             }
             
-            for(int i = 0; i < neighbors.length; i++)
+            for(int x = -1; x <= 1; x++)
             {
-                if(neighbors[i] != null) adjustFillIfNeeded(neighbors[i]);
-
+                for(int z = -1; z <= 1; z++)
+                {
+                    for(int y = -3; y <= 4; y++)
+                    {
+                        if(!(x == 0 && y == 0 && z == 0))
+                        {
+                            adjustFillIfNeeded(pPos.add(x, y, z));
+                        }
+                    }
+                }
             }
-            adjustFillIfNeeded(pPos);
         }
     }
     /** 
@@ -508,77 +553,103 @@ public class TileVolcano extends TileEntity implements ITickable{
         return null;
     }
     
-    private boolean isHardBasalt(IBlockState state)
+    private boolean isHardBasalt(Block block)
     {
-        return state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK
-                || state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_1_HEIGHT_BLOCK
-                || state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK
-                || state.getBlock() == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK;
+        return (block instanceof NiceBlockPlus 
+                && block instanceof IFlowBlock
+                && ((NiceBlockPlus)(block)).material == BaseMaterial.BASALT)
+                || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK;
     }
     
     private void meltExposedBasalt(BlockPos targetPos)
     {
         if(targetPos == null) return;
         
-        if(isHardBasalt(this.worldObj.getBlockState(targetPos)))
+        Block block = worldObj.getBlockState(targetPos).getBlock();
+        if(isHardBasalt(block))
         {
-            this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, this.worldObj.getBlockState(targetPos).getValue(NiceBlock.META)));
+            if(block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
+            {
+                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState());
+            }
+            else
+            {
+                NiceBlock targetBlock = IFlowBlock.isBlockFlowHeight(block)
+                        ? NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK
+                        : NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK;
+                
+                this.worldObj.setBlockState(targetPos, targetBlock.getDefaultState()
+                        .withProperty(NiceBlock.META, this.worldObj.getBlockState(targetPos).getValue(NiceBlock.META)));
+            }
             
             this.lavaBlocks.add(targetPos, ++lavaCounter);
-            
-            targetPos = targetPos.down();
-            
-            if(isHardBasalt(this.worldObj.getBlockState(targetPos)))
-            {
-                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, this.worldObj.getBlockState(targetPos).getValue(NiceBlock.META)));
-                
-                this.lavaBlocks.add(targetPos, ++lavaCounter);
-            }
         }
     }
     
+
+    
     private void adjustFillIfNeeded(BlockPos basePos)
     {
+        final int SHOULD_BE_AIR = -1;
+        
         IBlockState baseState = this.worldObj.getBlockState(basePos);
-        int fillerNeeded = IFlowBlock.topFillerNeeded(baseState, this.worldObj, basePos);
-        Block fillBlock = baseState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK
-                ? NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK
-                : NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK;
+        Block baseBlock = baseState.getBlock();
+        Block fillBlock = null;
         
-        BlockPos spaceAbove = basePos.up();
-        Block blockAbove = this.worldObj.getBlockState(spaceAbove).getBlock();
+        int targetMeta = SHOULD_BE_AIR;
         
-        BlockPos spaceTwoAbove = spaceAbove.up();
-        Block blockTwoAbove = this.worldObj.getBlockState(spaceTwoAbove).getBlock();
+        /**
+         * If space is occupied with a non-displaceable block, will be ignored.
+         * Otherwise, possible target states: air, fill +1, fill +2
+         * 
+         * Should be fill +1 if block below is a heightblock and needs a fill >= 1;
+         * Should be a fill +2 if block below is not a heightblock and block
+         * two below needs a fill = 2;
+         * Otherwise should be air.
+         */
+        IBlockState stateBelow = this.worldObj.getBlockState(basePos.down());
+        if(IFlowBlock.isBlockFlowHeight(stateBelow.getBlock()) 
+                && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
+        {
+            targetMeta = 0;
+            fillBlock = stateBelow.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK
+                    ? NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK
+                    : NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK;
+        }
+        else 
+        {
+            IBlockState stateTwoBelow = this.worldObj.getBlockState(basePos.down(2));
+            if((IFlowBlock.isBlockFlowHeight(stateTwoBelow.getBlock()) 
+                    && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
+            {
+                targetMeta = 1;
+                fillBlock = stateTwoBelow.getBlock() == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK
+                        ? NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK
+                        : NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK;
+            }
+        }
         
-        if(IFlowBlock.isBlockFlowFiller(blockAbove) && fillerNeeded == 0)
+        if(IFlowBlock.isBlockFlowFiller(baseBlock))
         {
-            this.worldObj.setBlockToAir(spaceAbove);
+            if(targetMeta == SHOULD_BE_AIR)
+            {
+                worldObj.setBlockToAir(basePos);
+            }
+            else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
+            {
+                worldObj.setBlockState(basePos, fillBlock.getDefaultState()
+                        .withProperty(NiceBlock.META, targetMeta));
+                this.lavaBlocks.add(basePos, ++lavaCounter);
+            }
+                //confirm filler needed and adjust/remove if needed
         }
-        else if(fillerNeeded > 0 && this.canDisplace(spaceAbove))
+        else if(targetMeta != SHOULD_BE_AIR && canDisplace(basePos) && fillBlock != null)
         {
-            this.worldObj.setBlockState(spaceAbove, fillBlock.getDefaultState()
-                    .withProperty(NiceBlock.META, 3));
-            this.lavaBlocks.add(spaceAbove, ++lavaCounter);
-            if(IFlowBlock.isFullCube(worldObj.getBlockState(spaceAbove), worldObj, spaceAbove))
-                Adversity.log.info("wut?");
+            worldObj.setBlockState(basePos, fillBlock.getDefaultState()
+                    .withProperty(NiceBlock.META, targetMeta));
+            this.lavaBlocks.add(basePos, ++lavaCounter);
         }
-        
-        if(IFlowBlock.isBlockFlowFiller(blockTwoAbove) && fillerNeeded < 2)
-        {
-            this.worldObj.setBlockToAir(spaceTwoAbove);
-        }
-        else if(fillerNeeded == 2 && this.canDisplace(spaceTwoAbove))
-        {
-            this.worldObj.setBlockState(spaceTwoAbove, fillBlock.getDefaultState()
-                    .withProperty(NiceBlock.META, 4));
-            this.lavaBlocks.add(spaceTwoAbove, ++lavaCounter);
-            if(IFlowBlock.isFullCube(worldObj.getBlockState(spaceTwoAbove), worldObj, spaceTwoAbove))
-                Adversity.log.info("wut?");
-
-        }
+         
     }
     
     private boolean addSpaceIfOpen(BlockPos posIn, BlockPos origin)

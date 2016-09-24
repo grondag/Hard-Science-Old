@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -57,7 +58,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public List<ItemStack> getSubItems()
     {
-        int itemCount = this.isFiller ? 5 : 16;
+        int itemCount = this.isFiller ? 2 : 16;
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
         for(int i = 0; i < itemCount; i++)
         {

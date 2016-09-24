@@ -199,13 +199,13 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
 
     
-    private final static ModelFactory.ModelInputs HOT_SQUARE_BASALT_INPUTS = new ModelFactory.ModelInputs("hot_basalt", false, BlockRenderLayer.TRANSLUCENT);
-    private final static SpeciesModelFactory HOT_SQUARE_BASALT_MODEL 
-        = new SpeciesModelFactory(HOT_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_4);
-    private static final ModelDispatcher HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher( COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
-    public static final NiceBlock HOT_SQUARE_BASALT_BLOCK = (NiceBlock) new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "hot");
-    public static final NiceItemBlock HOT_SQUARE_BASALT_ITEM = new NiceItemBlock(HOT_SQUARE_BASALT_BLOCK);
+//    private final static ModelFactory.ModelInputs HOT_SQUARE_BASALT_INPUTS = new ModelFactory.ModelInputs("hot_basalt", false, BlockRenderLayer.TRANSLUCENT);
+//    private final static SpeciesModelFactory HOT_SQUARE_BASALT_MODEL 
+//        = new SpeciesModelFactory(HOT_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
+//            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_4);
+//    private static final ModelDispatcher HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher( COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
+//    public static final NiceBlock HOT_SQUARE_BASALT_BLOCK = (NiceBlock) new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "hot");
+//    public static final NiceItemBlock HOT_SQUARE_BASALT_ITEM = new NiceItemBlock(HOT_SQUARE_BASALT_BLOCK);
 
     
     private final static ModelFactory.ModelInputs HEIGHT_STONE_INPUTS = new ModelFactory.ModelInputs("colored_stone", true, BlockRenderLayer.SOLID);

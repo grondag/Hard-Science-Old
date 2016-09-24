@@ -181,12 +181,12 @@ public class QuadContainer
         /** call after piping vertices into this instance */
         private int getQuadListKey()
         {
-            int key = 0;
+            long key = 0L;
             for(Long vk : vertexKeys)
             {
-               key += (Useful.longHash(vk) & 0xFFFFFFFF); 
+               key += Useful.longHash(vk); 
             }
-            return (key << 8) | (vertexKeys.size() & 0xFF);     
+            return (int)(key & 0xFFFFFFFF);     
         }
         
         @Override
@@ -217,7 +217,7 @@ public class QuadContainer
         public void put(int element, float... data)
         {
             //don't need to check which element - position is the only one included
-            vertexKeys.add((long) (Math.round(data[axis0] * 0xFFFFFFF) | (Math.round(data[axis1] * 0xFFFFFFF) << 32)));
+            vertexKeys.add(((long)(Float.floatToRawIntBits(data[axis0])) | ((long)(Float.floatToRawIntBits(data[axis1])) << 32)));
         }
 
         @Override
