@@ -74,17 +74,16 @@ public class BlockManager
      * Allows us to start a new laval pass while cooling of last pass proceeds
      * and keep correct cooling order.
      */
-    public void transferWithOffset(BlockManager blocks, int startingIndex, int minOffset, int maxOffset)
+    public void transferWithOffset(BlockManager blocks, int startingIndex, int baseTicks, int randTicks)
     {
-        int range = maxOffset - minOffset;
         int index = startingIndex;
         
         while(!blocks.placedBlocks.isEmpty())
         {
-            index += minOffset;
-            if(range > 0)
+            index += baseTicks;
+            if(randTicks > 0)
             {
-                index += Useful.SALT_SHAKER.nextInt(range);
+                index += Useful.SALT_SHAKER.nextInt(randTicks);
             }   
             this.placedBlocks.add(new BlockPlacement(blocks.placedBlocks.pollLast().pos, index));
         }
@@ -100,15 +99,15 @@ public class BlockManager
         
     }
 
-    public BlockPlacement pollLastReadyEntry(int threshold)
-    {
-        if(placedBlocks.isEmpty()) return null;
-            
-        if(placedBlocks.last().getIndex() > threshold) return null;
-        
-        return placedBlocks.pollLast();
-        
-    }
+//    public BlockPlacement pollLastReadyEntry(int threshold)
+//    {
+//        if(placedBlocks.isEmpty()) return null;
+//            
+//        if(placedBlocks.last().getIndex() < threshold) return null;
+//        
+//        return placedBlocks.pollLast();
+//        
+//    }
     
     /** 
      * Gets ready block farthest from origin.

@@ -51,13 +51,26 @@ public interface IFlowBlock
      * Use for height blocks.
      * True if the top face is not a full square.
      */
-    public static boolean needsTopFiller(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    public static int topFillerNeeded(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
-        if(!(block instanceof IFlowBlock && !((IFlowBlock)block).isFiller())) return false;
+        if(!IFlowBlock.isBlockFlowHeight(block)) return 0;
         FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
                 .getValue(ModelStateComponents.FLOW_JOIN);
-        return flowState.isTopFillerNeeded();
+        return flowState.topFillerNeeded();
+    }
+    
+    /** 
+     * Returns true of geometry of flow block is a full cube.
+     * Returns false if otherwise or if is not a flow block. 
+     */
+    public static boolean isFullCube(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    {
+        Block block = blockState.getBlock();
+        if(!(block instanceof IFlowBlock)) return false;
+        FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
+                .getValue(ModelStateComponents.FLOW_JOIN);
+        return flowState.isFullCube();
     }
     
     /**

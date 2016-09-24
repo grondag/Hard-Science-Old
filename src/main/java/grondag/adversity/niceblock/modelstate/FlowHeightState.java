@@ -1,7 +1,9 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
+import grondag.adversity.library.model.quadfactory.QuadFactory;
 
 public class FlowHeightState
 {
@@ -19,8 +21,11 @@ public class FlowHeightState
     public final static int MAX_HEIGHT = 48;
     
     // Use these insted of magic number for filler block meta values
+    /** This value is for a height block two below another height block, offset of 2 added to vertex heights*/
     public final static int FILL_META_DOWN2 = 0;
     public final static int FILL_META_DOWN1 = 1;
+    
+    /** This value indicates a top height block, means no offset, no effect on vertex calculations*/
     public final static int FILL_META_LEVEL = 2;
     public final static int FILL_META_UP1 = 3;
     public final static int FILL_META_UP2 = 4;
@@ -154,9 +159,10 @@ public class FlowHeightState
     }
 
     /**
-     * True if filler blocks are needed on top to cover a cut surface.
+     * Returns how many filler blocks are needed on top to cover a cut surface.
+     * Possible return values are 0, 1 and 2.
      */
-    public boolean isTopFillerNeeded()
+    public int topFillerNeeded()
     {
         refreshVertexCalculationsIfNeeded();
         float max = getCenterVertexHeight();
@@ -165,7 +171,21 @@ public class FlowHeightState
             max = Math.max(max, this.midSideHeight[i]);
             max = Math.max(max, this.midCornerHeight[i]);
         }
-        return max > 1;
+        int retval = max > 2.0 + QuadFactory.EPSILON ? 2 : max > 1.0 + QuadFactory.EPSILON ? 1 : 0;
+        return retval;
+    }
+    
+    public boolean isFullCube()
+    {
+        refreshVertexCalculationsIfNeeded();
+        float test = getCenterVertexHeight();
+        if(test < 1) return false;
+        for(int i = 0; i < 4; i++)
+        {
+            if(this.midSideHeight[i] < 1
+                    || this.midCornerHeight[i] < 1) return false;
+        }
+        return true;
     }
 
     /**
