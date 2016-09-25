@@ -2,7 +2,6 @@ package grondag.adversity.niceblock.base;
 
 import java.util.List;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;

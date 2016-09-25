@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.QuadContainer;

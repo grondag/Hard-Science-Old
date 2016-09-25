@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.support;
 
-import grondag.adversity.Config;
+import grondag.adversity.config.Config;
+import grondag.adversity.config.Substance;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 
@@ -30,7 +31,7 @@ public enum BaseMaterial {
 		this.material = material;
 		stepSound = sound;
 
-		Config.Substance props = Config.substances.get(name);
+		Substance props = Config.substances().get(name);
 		hardness = props.hardness;
 		resistance = props.resistance;
 		harvestTool = props.harvestTool;

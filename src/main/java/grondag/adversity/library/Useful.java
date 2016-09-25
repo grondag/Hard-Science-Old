@@ -270,4 +270,20 @@ public class Useful {
            }
        }
    }
+   
+   /** 
+    * Returns average world height around the given BlockPos.
+    */
+   public static int getAvgHeight(World world, BlockPos pos, int radius, int sampleCount)
+   {
+       int total = 0;
+       int range = radius * 2 + 1;
+       
+       for(int i = 0; i < sampleCount; i++)
+       {
+           total += world.getHeight(pos.east(SALT_SHAKER.nextInt(range) - radius).north(SALT_SHAKER.nextInt(range) - radius)).getY();
+       }
+       
+       return total / sampleCount;
+   }
 }

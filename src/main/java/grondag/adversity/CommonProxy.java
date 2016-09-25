@@ -1,6 +1,7 @@
 package grondag.adversity;
 
 
+import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.Volcano;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.simulator.Simulator;

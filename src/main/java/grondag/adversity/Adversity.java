@@ -22,6 +22,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.logging.log4j.Logger;
 
+import grondag.adversity.config.Config;
+
 
 @Mod(modid = Adversity.MODID, name = Adversity.MODNAME, version = Adversity.VERSION)
 public class Adversity {

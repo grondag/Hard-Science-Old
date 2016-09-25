@@ -3,7 +3,6 @@ package grondag.adversity.niceblock.support;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import grondag.adversity.Adversity;
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.IBlockTestFactory;
 import grondag.adversity.niceblock.base.ModelDispatcher;

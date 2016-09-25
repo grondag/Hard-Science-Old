@@ -3,10 +3,7 @@ package grondag.adversity.feature.volcano;
 import java.util.TreeSet;
 
 import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.TreeMultiset;
-
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.library.RelativeBlockPos;
 import grondag.adversity.library.Useful;
 import net.minecraft.util.math.BlockPos;

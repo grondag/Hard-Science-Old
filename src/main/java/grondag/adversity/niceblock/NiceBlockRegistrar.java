@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.feature.volcano.HotBasaltBlock;
+import grondag.adversity.feature.volcano.VolcanicLavaBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -21,7 +21,6 @@ import grondag.adversity.niceblock.model.ColumnSquareModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory;
 import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
-import grondag.adversity.niceblock.model.SpeciesModelFactory;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
@@ -270,13 +269,12 @@ public class NiceBlockRegistrar
     private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
     private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
-    public static final FlowDynamicBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
-            (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "flow", false)
-            .setLightLevel(4F/15F);
+    public static final VolcanicLavaBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
+             new VolcanicLavaBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "flow", false);
+    
     public static final NiceItemBlock HOT_FLOWING_LAVA_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_HEIGHT_BLOCK);
-    public static final FlowDynamicBlock HOT_FLOWING_LAVA_FILLER_BLOCK = 
-            (FlowDynamicBlock) new FlowDynamicBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "fill", true)
-            .setLightLevel(4F/15F);
+    public static final VolcanicLavaBlock HOT_FLOWING_LAVA_FILLER_BLOCK = 
+             new VolcanicLavaBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "fill", true);
     public static final NiceItemBlock HOT_FLOWING_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_FILLER_BLOCK);
 
     

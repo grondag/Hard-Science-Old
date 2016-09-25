@@ -1,147 +1,115 @@
 package grondag.adversity.feature.volcano;
 
-import java.util.HashSet;
-import java.util.TreeMap;
+import java.util.TreeSet;
+
+import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.RelativeBlockPos;
-import grondag.adversity.library.Useful;
 import net.minecraft.util.math.BlockPos;
 
 public class SpaceManager 
 {
-	private final BlockPos pos;
-	private TreeMap<Integer, HashSet<OpenSpace>> spaces;
-	private int spaceCount = 0;
+    private final BlockPos pos;
+    private TreeSet<OpenSpace> spaces;
 
-	public SpaceManager(BlockPos pos)
-	{
-		this.pos = pos;
-		spaces = new TreeMap<Integer, HashSet<OpenSpace>>();
-	}
+    public SpaceManager(BlockPos pos)
+    {
+        this.pos = pos;
+        spaces = new TreeSet<OpenSpace>();
+    }
 
-	public int getCount() 
-	{
-		return this.spaceCount;
-	}
-	
-	public SpaceManager(BlockPos pos, int[] values)
-	{
-		this(pos);
-		
+    public int getCount() 
+    {
+        return spaces.size();
+    }
+
+    public SpaceManager(BlockPos pos, int[] values)
+    {
+        this(pos);
+
         //to be valid, must have a multiple of two
         if(values.length % 2 != 0)
         {
             Adversity.log.warn("Invalid open space data loading volcano at " + pos.toString()
-                    + ". Volcano may not place lava properly.");
+            + ". Volcano may not place lava properly.");
             return;
         }
-        
-		int i = 0;
-		while(i < values.length)
-		{
-		    OpenSpace space = new OpenSpace(values[i++], values[i++]);
-	        int distanceHash = space.getDistanceHash();
-	        
-	        if(!spaces.containsKey(distanceHash))
-	        {
-	            spaces.put(distanceHash, new HashSet<OpenSpace>());
-	        }
-	        spaces.get(distanceHash).add(space);
-	        this.spaceCount++;
-		}
-	}
-	
-	public int[] getArray()
-	{
-	    int[] result = new int[this.spaceCount * 2];
-	    int i = 0;
-	    
-	    for(HashSet<OpenSpace> set: this.spaces.values())
-	    {
-	        for(OpenSpace space : set)
-	        {
-	            result[i++] = space.pos;
-	            result[i++] = space.origin;
-	        }
-	    }	    
-		return result;
-	}
 
-	public void add(BlockPos posIn, BlockPos origin)
-	{
-//	    Adversity.log.info("adding space @ " + posIn.toString() + " with origin " + origin.toString());
-        OpenSpace space = new OpenSpace(posIn, origin);
-        int distanceHash = space.getDistanceHash();
-        
-        if(!spaces.containsKey(distanceHash))
+        int i = 0;
+        while(i < values.length)
         {
-            spaces.put(distanceHash, new HashSet<OpenSpace>());
+            spaces.add(new OpenSpace(values[i++], values[i++]));
         }
-        spaces.get(distanceHash).add(space);
-        this.spaceCount++;
-	}
-	
-	public OpenSpace pollFirstEntry()
-	{
-		OpenSpace result = null;
-	    HashSet<OpenSpace> things = spaces.firstEntry().getValue();
-        if(!things.isEmpty())
+    }
+
+    public int[] getArray()
+    {
+        int[] result = new int[this.spaces.size() * 2];
+        int i = 0;
+
+        for(OpenSpace space: this.spaces)
         {
-        	result= things.iterator().next();
-            things.remove(result);
-            spaceCount--;
-            if(things.isEmpty())
-            {
-                spaces.remove(result.getDistanceHash());
-            }
-        }
+            result[i++] = space.pos;
+            result[i++] = space.origin;
+        }	    
         return result;
-	}
-	
-	public class OpenSpace
-	{
-		private final int pos;
-		private final int origin;
+    }
 
-		private OpenSpace(BlockPos pos, BlockPos origin)
-		{
-			this(RelativeBlockPos.getKey(pos, SpaceManager.this.pos), RelativeBlockPos.getKey(origin, SpaceManager.this.pos));
-		}
+    public void add(BlockPos posIn, BlockPos origin)
+    {
+        //	    Adversity.log.info("adding space @ " + posIn.toString() + " with origin " + origin.toString());
+        spaces.add(new OpenSpace(posIn, origin));
+    }
 
-		private OpenSpace(int pos, int origin)
-		{
-			this.pos = pos;
-			this.origin = origin;
-		}
+    public OpenSpace pollFirst()
+    {
+        return spaces.pollFirst();
+    }
 
-		public BlockPos getPos()
-		{
-			return RelativeBlockPos.getPos(pos, SpaceManager.this.pos);
-		}
+//    public OpenSpace pollLast()
+//    {
+//        return spaces.pollLast();
+//    }
 
-		public BlockPos getOrigin()
-		{
-			return RelativeBlockPos.getPos(origin, SpaceManager.this.pos);
-		}
+    public class OpenSpace implements Comparable<OpenSpace>
+    {
+        private final int pos;
+        private final int origin;
+        private final int distance;
 
-		/**
-		 * Generates hash keys that facilitate sorting of spaces for new placement.
-		 * Lower blocks come first.  Blocks within the same level are sorted by distance
-		 * from center of volcano.
-		 */
-		public int getDistanceHash()
-		{
-			BlockPos myPos = this.getPos();
-			int dx = myPos.getX() - SpaceManager.this.pos.getX();
-			int dz = myPos.getZ() - SpaceManager.this.pos.getZ();
-			return myPos.getY() << 20 | (dx * dx + dz * dz);
-		}
+        private OpenSpace(BlockPos pos, BlockPos origin)
+        {
+            this(RelativeBlockPos.getKey(pos, SpaceManager.this.pos), RelativeBlockPos.getKey(origin, SpaceManager.this.pos));
+        }
 
-		@Override
-		public int hashCode()
-		{
-			return (int) (Useful.longHash((((long)origin) << 32) | pos) & 0xFFFFFFFF);
-		}
-	}
+        private OpenSpace(int pos, int origin)
+        {
+            this.pos = pos;
+            this.origin = origin;
+            int dx = getPos().getX() - SpaceManager.this.pos.getX();
+            int dz = getPos().getZ() - SpaceManager.this.pos.getZ();
+            this.distance = dx * dx + dz * dz;
+        }
+
+        public BlockPos getPos()
+        {
+            return RelativeBlockPos.getPos(pos, SpaceManager.this.pos);
+        }
+
+        public BlockPos getOrigin()
+        {
+            return RelativeBlockPos.getPos(origin, SpaceManager.this.pos);
+        }
+
+        @Override
+        public int compareTo(OpenSpace other)
+        {
+            return ComparisonChain.start()
+                    .compare(this.getPos().getY(), other.getPos().getY())
+                    .compare(this.distance, other.distance)
+                    .compare(this.pos, other.pos)
+                    .result();
+        }
+    }
 }
