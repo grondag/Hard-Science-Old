@@ -42,7 +42,7 @@ public class HeightModelFactory extends ColorModelFactory implements ICollisionH
         result.rotation = state.getValue(rotationComponent);
         result.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
-        result.lightingMode = modelInputs.isShaded ? LightingMode.SHADED : LightingMode.FULLBRIGHT;
+        result.lightingMode = modelInputs.lightingMode;
         result.lockUV = true;
         result.setFace(face);
         double height = ((state.getValue(speciesComponent) & 15) + 1) / 16.0;

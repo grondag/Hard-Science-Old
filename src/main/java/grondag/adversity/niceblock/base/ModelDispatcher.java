@@ -8,6 +8,7 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
@@ -128,7 +129,7 @@ public class ModelDispatcher implements IBakedModel
                 {
                     renderLayerFlags[layer.ordinal()] = true;
                     layerList.add(layer);
-                    shadedFlags[layer.ordinal()] = shadedFlags[layer.ordinal()] || models[i].modelInputs.isShaded;
+                    shadedFlags[layer.ordinal()] = shadedFlags[layer.ordinal()] || models[i].modelInputs.lightingMode == LightingMode.SHADED;
                 }
             }
         }
@@ -225,7 +226,14 @@ public class ModelDispatcher implements IBakedModel
     public int getOcclusionKey(long modelStateKey, EnumFacing face)
     {
         if(this.renderLayerFlags[BlockRenderLayer.SOLID.ordinal()] == false) return 0;
-        return modelCache.get(modelStateKey).get(BlockRenderLayer.SOLID).getOcclusionHash(face);
+        QuadContainer container = modelCache.get(modelStateKey).get(BlockRenderLayer.SOLID);
+        if(container == null) 
+        {
+            //TODO: remove
+            Adversity.log.warn("Missing model for occlusion key.");
+            return 0;
+        }
+        return container.getOcclusionHash(face);
     }
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)

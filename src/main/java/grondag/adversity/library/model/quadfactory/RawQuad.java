@@ -40,6 +40,8 @@ public class RawQuad
         protected long ancestorQuadID = NO_ID;
         protected long[] lineID;
         
+        private static final Vec3d LIGHTING_NORMAL = new Vec3d(0, 1, 0.35).normalize();
+        
         public RawQuad()
         {
             this(4);
@@ -698,6 +700,8 @@ public class RawQuad
         
         public BakedQuad createBakedQuad()
         {
+            
+            //TODO: make this consistent with immutable interface - will break if createBakedQuad called again
             for (int r = 0; r < this.rotation.ordinal(); r++)
             {
                 rotateQuadUV();
@@ -736,10 +740,16 @@ public class RawQuad
                         break;
 
                     case COLOR:
+                        float shade = 1.0F;
+                        if(this.lightingMode == LightingMode.PRESHADED)
+                        {
+                            Vec3d surfaceNormal = getVertex(v).hasNormal() ? getVertex(v).getNormal() : this.getFaceNormal();
+                            shade = 0.4F + (float) ((surfaceNormal.dotProduct(LIGHTING_NORMAL) + 1) / 2.0 * 0.6);
+                        }
                         float[] colorRGBA = new float[4];
-                        colorRGBA[0] = ((float) (getVertex(v).color >> 16 & 0xFF)) / 255f;
-                        colorRGBA[1] = ((float) (getVertex(v).color >> 8 & 0xFF)) / 255f;
-                        colorRGBA[2] = ((float) (getVertex(v).color  & 0xFF)) / 255f;
+                        colorRGBA[0] = ((float) (getVertex(v).color >> 16 & 0xFF)) * shade / 255f;
+                        colorRGBA[1] = ((float) (getVertex(v).color >> 8 & 0xFF)) * shade / 255f;
+                        colorRGBA[2] = ((float) (getVertex(v).color  & 0xFF)) * shade / 255f;
                         colorRGBA[3] = ((float) (getVertex(v).color >> 24 & 0xFF)) / 255f;
                         LightUtil.pack(colorRGBA, vertexData, format, v, e);
                         break;

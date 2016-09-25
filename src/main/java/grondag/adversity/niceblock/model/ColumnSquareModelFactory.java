@@ -51,7 +51,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
         
         public ColumnSquareInputs(ModelInputs baseInputs, int cutCount, boolean areCutsOnEdge, ModelType modelType)
         {
-            super(baseInputs.textureName, baseInputs.isShaded, baseInputs.renderLayer);
+            super(baseInputs.textureName, baseInputs.lightingMode, baseInputs.renderLayer);
             this.cutCount = cutCount;
             this.areCutsOnEdge = areCutsOnEdge;
             this.modelType = modelType;

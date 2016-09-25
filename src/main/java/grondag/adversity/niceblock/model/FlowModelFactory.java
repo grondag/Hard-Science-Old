@@ -89,7 +89,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         template.rotation = state.getValue(this.rotationComponent);
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
-        template.lightingMode = modelInputs.isShaded? LightingMode.SHADED : LightingMode.FULLBRIGHT;
+        template.lightingMode = modelInputs.lightingMode;
   
         boolean isAnimated = template.textureSprite.hasAnimationMetadata();
         

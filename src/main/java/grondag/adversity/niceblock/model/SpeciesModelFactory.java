@@ -25,7 +25,7 @@ public class SpeciesModelFactory extends ColorModelFactory
         result.textureRotation = state.getValue(rotationComponent);
         result.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 buildTextureName(modelInputs.textureName, state.getValue(speciesComponent), state.getValue(textureComponent)));
-        result.isShaded = modelInputs.isShaded;
+        result.lightingMode = modelInputs.lightingMode;
         result.u0 = 0;
         result.v0 = 0;
         result.u1 = 16;

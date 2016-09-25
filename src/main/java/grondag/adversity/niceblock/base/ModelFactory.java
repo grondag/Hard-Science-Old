@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.base;
 import java.util.List;
 
 import grondag.adversity.library.model.QuadContainer;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
@@ -130,18 +131,18 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
     }
     
-    public boolean isShaded() { return modelInputs.isShaded; }
+//    public boolean isShaded() { return modelInputs.isShaded; }
     
     public static class ModelInputs
     {
         public final String textureName;
-        public final boolean isShaded;
+        public final LightingMode lightingMode;
         public final BlockRenderLayer renderLayer;
         
-        public ModelInputs(String textureName, boolean isShaded, BlockRenderLayer renderLayer)
+        public ModelInputs(String textureName, LightingMode lightingMode, BlockRenderLayer renderLayer)
         {
             this.textureName = textureName;
-            this.isShaded = isShaded;
+            this.lightingMode = lightingMode;
             this.renderLayer = renderLayer;
         }
     }

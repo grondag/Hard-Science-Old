@@ -46,7 +46,7 @@ public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs> impl
         template.rotation = state.getValue(rotationComponent);
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
                 buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
-        template.lightingMode = modelInputs.isShaded ? LightingMode.SHADED : LightingMode.FULLBRIGHT;
+        template.lightingMode = modelInputs.lightingMode;
     
        // CSGShape  delta = null;
         CSGShape result = null;

@@ -20,7 +20,7 @@ public class CubeInputs{
     public boolean rotateBottom = false;
     public boolean isOverlay = false;
     public boolean isItem = false;
-    public boolean isShaded = true;
+    public LightingMode lightingMode = LightingMode.SHADED;
 
     public CubeInputs()
     {
@@ -45,7 +45,7 @@ public class CubeInputs{
         RawQuad qi = new RawQuad();
         qi.color = this.color;
         //TODO: support flat lighting mode?
-        qi.lightingMode = this.isShaded ? LightingMode.SHADED : LightingMode.FULLBRIGHT;
+        qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
         qi.textureSprite = this.textureSprite;
 
