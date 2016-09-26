@@ -25,11 +25,12 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //TEST
-//bore clearing / mounding
+//bore clearing / mounding - make wider
+//filler placement
+//fix lighting normals
 
 //TODOS
 //fix model pinholes
-//fix lighting normals
 //water rendering
 //final textures
 

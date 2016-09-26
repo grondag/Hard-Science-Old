@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
  */
 public enum LightingMode
 {
-    PRESHADED,
     SHADED,
     FULLBRIGHT;
 

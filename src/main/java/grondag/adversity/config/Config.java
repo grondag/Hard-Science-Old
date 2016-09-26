@@ -14,6 +14,9 @@ public class Config {
 	private static Unobtanium unobtanium;
 	public static Unobtanium unobtanium() { return unobtanium; }
 	
+	private static Render render;
+	public static Render render() { return render; }
+	
 	private static Configuration config;
 
 	public static void init(File file) {
@@ -27,6 +30,7 @@ public class Config {
         volcano = new Volcano(config);
         substances = new Substances(config);
         unobtanium = new Unobtanium(config);
+        render = new Render(config);
         config.save(); 
 	}
 }

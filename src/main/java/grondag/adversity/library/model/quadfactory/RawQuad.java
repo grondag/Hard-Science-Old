@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import grondag.adversity.config.Config;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -740,11 +741,16 @@ public class RawQuad
                         break;
 
                     case COLOR:
-                        float shade = 1.0F;
-                        if(this.lightingMode == LightingMode.PRESHADED)
+                        float shade;
+                        if(this.lightingMode == LightingMode.SHADED)
                         {
                             Vec3d surfaceNormal = getVertex(v).hasNormal() ? getVertex(v).getNormal() : this.getFaceNormal();
-                            shade = 0.4F + (float) ((surfaceNormal.dotProduct(LIGHTING_NORMAL) + 1) / 2.0 * 0.6);
+                            shade = Config.render().minAmbientLight + 
+                                    (float) ((surfaceNormal.dotProduct(Config.render().lightingNormal) + 1) * Config.render().normalLightFactor);
+                        }
+                        else
+                        {
+                            shade = 1.0F;
                         }
                         float[] colorRGBA = new float[4];
                         colorRGBA[0] = ((float) (getVertex(v).color >> 16 & 0xFF)) * shade / 255f;
@@ -790,7 +796,8 @@ public class RawQuad
             //                    vertexToInts(this.v3.xCoord, this.v3.yCoord, this.v3.zCoord, this.v3.u, this.v3.v, v3.color, this.textureSprite),
             //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
-              return new BakedQuad(vertexData, color, this.face, textureSprite, lightingMode == LightingMode.SHADED, format);
+              return new BakedQuad(vertexData, color, this.face, textureSprite, 
+                      lightingMode == LightingMode.SHADED && !Config.render().enableCustomShading, format);
 
         }
 
