@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import net.minecraft.block.Block;
@@ -55,6 +56,7 @@ public interface IFlowBlock
     {
         Block block = blockState.getBlock();
         if(!IFlowBlock.isBlockFlowHeight(block)) return 0;
+        if(block instanceof FlowSimpleBlock) return 0;
         FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
                 .getValue(ModelStateComponents.FLOW_JOIN);
         return flowState.topFillerNeeded();
@@ -68,6 +70,7 @@ public interface IFlowBlock
     {
         Block block = blockState.getBlock();
         if(!(block instanceof IFlowBlock)) return false;
+        if(block instanceof FlowSimpleBlock) return true;
         FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
                 .getValue(ModelStateComponents.FLOW_JOIN);
         return flowState.isFullCube();

@@ -20,7 +20,9 @@ import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
+import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
@@ -274,29 +276,31 @@ public class TileVolcano extends TileEntity implements ITickable{
                     }
                     else
                     {
-                        if(isFullyStaticCube(target, oldState))
+             
+                        FlowStaticBlock newBlock = getNextCoolingBlock(oldBlock);
+                        int meta = oldState.getValue(NiceBlock.META);
+                        
+                        if(newBlock != null)
                         {
-                            // use simple cubic basalt if not exposed and can't influence any flow blocks
-                            this.worldObj.setBlockState(target, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState());
-                        }
-                        else
-                        {
-                            FlowStaticBlock newBlock = getNextCoolingBlock(oldBlock);
-                            
-                            if(newBlock != null)
+                            if(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK
+                                    && IFlowBlock.isFullCube(oldState, worldObj, target))
                             {
-                                int meta = oldState.getValue(NiceBlock.META);
+                                this.worldObj.setBlockState(target, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
+                                        .withProperty(NiceBlock.META, meta));
+                            }
+                            else
+                            {
                                 long modelStateKey = oldBlock.getModelStateKey(oldState, this.worldObj, target);
                                 IBlockState newState = newBlock.getDefaultState().withProperty(NiceBlock.META, meta);
                                 this.worldObj.setBlockState(target, newState);
                                 newBlock.setModelStateKey(newState, this.worldObj, target, modelStateKey);
-                                
-                                if(!(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK
-                                        || newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK))
-                                {
-                                    coolingBlocks.add(target, ticksActive + Config.volcano().coolingLagTicks);
-                                }                   
                             }
+                            
+                            if(!(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK
+                                    || newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK))
+                            {
+                                coolingBlocks.add(target, ticksActive + Config.volcano().coolingLagTicks);
+                            } 
                         }
                     }
                 }
@@ -316,28 +320,6 @@ public class TileVolcano extends TileEntity implements ITickable{
                     + (Config.volcano().randTicksPerBlock + 1)/2);
             this.coolingBlocks.transferWithOffset(topBlocks,  ticksActive, Config.volcano().baseTicksPerBlock, Config.volcano().randTicksPerBlock);
         }
-    }
-    
-    private boolean isFullyStaticCube(BlockPos pos, IBlockState state)
-    {
-        
-        if(!IFlowBlock.isFullCube(state, worldObj, pos)) return false;
-        
-        for(int x = -1; x <= 1; x++)
-        {
-            for(int z = -1; z <= 1; z++)
-            {
-                for(int y = -2; y <= 2; y++)
-                {
-                    if(!(x == 0 && y == 0 && z == 0))
-                    {
-                        if(worldObj.getBlockState(pos.add(x, y, z)) instanceof FlowDynamicBlock) return false;
-                    }
-                }
-            }
-        }
-        
-        return true;
     }
     
     private FlowStaticBlock getNextCoolingBlock(Block blockIn)
@@ -423,12 +405,13 @@ public class TileVolcano extends TileEntity implements ITickable{
                 addSpaceIfOpen(pPos.south(), pOrigin);
                 
             }
-
-            for(int x = -1; x <= 1; x++)
+            // TODO: do these numbers have to be so big? 
+            // Bumped up because not sure what is causing stragglers.
+            for(int x = -2; x <= 2; x++)
             {
-                for(int z = -1; z <= 1; z++)
+                for(int z = -2; z <= 2; z++)
                 {
-                    for(int y = -3; y <= 5; y++)
+                    for(int y = -4; y <= 6; y++)
                     {
                         if(!(x == 0 && y == 0 && z == 0))
                         {
@@ -438,11 +421,13 @@ public class TileVolcano extends TileEntity implements ITickable{
                 }
             }
             
-            for(int x = -1; x <= 1; x++)
+            // TODO: do these numbers have to be so big? 
+            // Bumped up because not sure what is causing stragglers.
+            for(int x = -2; x <= 2; x++)
             {
-                for(int z = -1; z <= 1; z++)
+                for(int z = -2; z <= 2; z++)
                 {
-                    for(int y = -3; y <= 5; y++)
+                    for(int y = -4; y <= 6; y++)
                     {
                         if(!(x == 0 && y == 0 && z == 0))
                         {
@@ -529,34 +514,38 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private boolean isHardBasalt(Block block)
     {
-        return (block instanceof NiceBlockPlus 
-                && block instanceof IFlowBlock
-                && ((NiceBlockPlus)(block)).material == BaseMaterial.BASALT)
-                || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK;
+        return ((NiceBlock)(block)).material == BaseMaterial.BASALT
+                && (block instanceof FlowStaticBlock || block instanceof FlowSimpleBlock);
     }
     
     private void meltExposedBasalt(BlockPos targetPos)
     {
         if(targetPos == null) return;
         
-        Block block = worldObj.getBlockState(targetPos).getBlock();
+        IBlockState state = worldObj.getBlockState(targetPos);
+        if(!(state.getBlock() instanceof NiceBlock)) return;
+        
+        NiceBlock block = (NiceBlock)state.getBlock();
         if(isHardBasalt(block))
         {
+            //If we have cubic basalt we need to convert it to flow type so we can reshape if needed
+            //then add to cool-down list so it can be converted back afterwards if appropriate.
             if(block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
             {
-                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState());
+                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK.getDefaultState()
+                        .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                state = worldObj.getBlockState(targetPos);
+                block = (NiceBlock)state.getBlock();
+                this.coolingBlocks.add(targetPos, ticksActive);
             }
-            else
+
+            long oldKey = block.getModelStateKey(state, worldObj, targetPos);
+            long newKey = block.dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, true, block, state, worldObj, targetPos);
+            //should always be a FlowStaticBlock at this point, check is for run-time safety in case there is a derp
+            if(newKey != oldKey && block instanceof FlowStaticBlock)
             {
-                NiceBlock targetBlock = IFlowBlock.isBlockFlowHeight(block)
-                        ? NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK
-                        : NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK;
-                
-                this.worldObj.setBlockState(targetPos, targetBlock.getDefaultState()
-                        .withProperty(NiceBlock.META, this.worldObj.getBlockState(targetPos).getValue(NiceBlock.META)));
+                ((FlowStaticBlock)block).setModelStateKey(state, worldObj, targetPos, newKey);
             }
-            
-            trackLavaBlock(targetPos);
         }
     }
     

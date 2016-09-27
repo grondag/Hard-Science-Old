@@ -12,6 +12,7 @@ import grondag.adversity.niceblock.block.BigBlock;
 import grondag.adversity.niceblock.block.CSGBlock;
 import grondag.adversity.niceblock.block.ColumnSquareBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
+import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.block.HeightBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory;
@@ -195,7 +196,7 @@ public class NiceBlockRegistrar
         = new ColorModelFactory(COOL_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher COOL_SQUARE_BASALT_DISPATCH = new ModelDispatcher(COOL_SQUARE_BASALT_MODEL);
-    public static final NiceBlock COOL_SQUARE_BASALT_BLOCK = new NiceBlock(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "cool");
+    public static final FlowSimpleBlock COOL_SQUARE_BASALT_BLOCK = new FlowSimpleBlock(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "cool");
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
 
     
