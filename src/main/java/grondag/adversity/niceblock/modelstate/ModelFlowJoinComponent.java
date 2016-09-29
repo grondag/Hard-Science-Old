@@ -35,8 +35,19 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
         return FlowHeightState.class;
     }
     
+    
     @Override
     public long getBitsFromWorld(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return getBitsFromWorldStatically(block, state, world, pos);
+    }
+    
+    public static FlowHeightState getFlowState(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return new FlowHeightState(getBitsFromWorldStatically(block, state, world, pos));
+    }
+    
+    private static long getBitsFromWorldStatically(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         int centerHeight;
         int sideHeight[] = new int[4];
@@ -140,6 +151,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
         }
         
     }
+    
 
     public class ModelFlowJoin extends ModelStateValue<ModelFlowJoinComponent.ModelFlowJoin, FlowHeightState>
     {

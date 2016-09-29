@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.base;
 
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -50,15 +51,14 @@ public interface IFlowBlock
 
     /**
      * Use for height blocks.
-     * True if the top face is not a full square.
+     * Returns number of filler blocks needed above: 0, 1 or 2.
      */
     public static int topFillerNeeded(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
         if(!IFlowBlock.isBlockFlowHeight(block)) return 0;
-        if(block instanceof FlowSimpleBlock) return 0;
-        FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
-                .getValue(ModelStateComponents.FLOW_JOIN);
+//        if(block instanceof FlowSimpleBlock) return 0;
+        FlowHeightState flowState = ModelFlowJoinComponent.getFlowState((NiceBlock) block, blockState, blockAccess, pos);
         return flowState.topFillerNeeded();
     }
     
