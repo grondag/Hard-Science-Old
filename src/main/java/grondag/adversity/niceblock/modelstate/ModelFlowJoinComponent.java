@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -42,6 +43,8 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
         int cornerHeight[] = new int[4];
         int yOffset = 0;
 
+//        Adversity.log.info("flowstate getBitsFromWorld @" + pos.toString());
+        
         if(block instanceof IFlowBlock)
         {
             int yOrigin = pos.getY();
@@ -51,12 +54,15 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
             // Not a perfect fix if they are stacked, but shouldn't normally be.
             if(IFlowBlock.isBlockFlowHeight(block))
             {
+//                Adversity.log.info("flowstate is height block");
+                
                 // try to use block above as height origin
                 originState = world.getBlockState(pos.up().up());
                 if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
                 {
                     yOrigin += 2;
                     yOffset = -2;
+//                    Adversity.log.info("origin 2 up");
                 }
                 else
                 {
@@ -65,11 +71,13 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                     {
                         yOrigin += 1;
                         yOffset = -1;
+//                        Adversity.log.info("origin 1 up");
                     }
                     else
                     {
                         // didn't work, handle as normal height block
                         originState = state;
+//                        Adversity.log.info("origin self");
                     }
                 }
             }

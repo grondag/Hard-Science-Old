@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.base;
 
-//import grondag.adversity.Adversity;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -78,16 +78,6 @@ public class NiceTileEntity extends TileEntity{
 //        }
     }
 
-//    /**
-//     * This is called during chunk loading and normally does nothing.
-//     * Using it here to set the world reference earlier than normal so
-//     * that we can find our block and dispatcher during ReadNBT without NPE.
-//     * World reference not normally set until worldObj.addTileEntity is called.
-//     */
-//    @Override
-//    protected void func_190201_b(World p_190201_1_)
-//    {
-//    }
     
     @SideOnly(Side.CLIENT)
     public void updateClientRenderState()
@@ -220,7 +210,7 @@ public class NiceTileEntity extends TileEntity{
         {
             //Block will be unknown if no world reference yet.
             //In that case, no reason to update only the persistent bits.
-            //Also always update if refresh mode indicates necessary.
+            //Also always use all bits from server if refresh mode indicates necessary.
             modelKey = (compound.getLong(MODEL_KEY_TAG));
 //            Adversity.log.info("doReadFromNBT static modelKey=" + modelKey);
 
