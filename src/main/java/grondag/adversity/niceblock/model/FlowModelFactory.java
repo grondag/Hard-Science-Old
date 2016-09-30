@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.QuadContainer;
@@ -395,6 +396,8 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         // if we end up with an empty list, default to standard cube
         if(rawQuads.isEmpty())
         {            
+            if(flowState.getYOffset() > 0)
+                Adversity.log.info("flowNeeded = " + flowState.topFillerNeeded());
             rawQuads.add(template.clone().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
             rawQuads.add(template.clone().setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
             rawQuads.add(template.clone().setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));

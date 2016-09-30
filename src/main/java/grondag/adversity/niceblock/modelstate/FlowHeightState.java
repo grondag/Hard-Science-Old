@@ -174,7 +174,7 @@ public class FlowHeightState
             max = Math.max(max, this.midSideHeight[i]);
             max = Math.max(max, this.midCornerHeight[i]);
         }
-        int retval = max > 2.08  ? 2 : max > 1.08 ? 1 : 0;
+        int retval = max > 2.01  ? 2 : max > 1.01 ? 1 : 0;
         return retval;
     }
     

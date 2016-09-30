@@ -23,12 +23,14 @@ import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
-//TEST
+//FIX/TEST
 //bore clearing / mounding - make wider
-//filler placement
-//fix lighting normals
+//orphaned filler placement
+//protruding cubic blocks
+//dark blocks in lava flows
 
 //TODOS
+//freeze nearby shapes on player break
 //fix model pinholes
 //water rendering
 //final textures
@@ -173,9 +175,9 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(!isLoaded) return;
         
-        int blockTrackingCount = spaceManager.getCount() + lavaBlocks.getCount() + coolingBlocks.getCount() + topBlocks.getCount();
+        int nonTopTrackingCount = spaceManager.getCount() + lavaBlocks.getCount() + coolingBlocks.getCount();
         
-        if(blockTrackingCount == 0)
+        if(nonTopTrackingCount == 0)
         {
             this.buildLevel = this.level;
             BlockPos startingPos = new BlockPos(this.getPos().getX(), this.level, this.getPos().getZ());
@@ -203,36 +205,39 @@ public class TileVolcano extends TileEntity implements ITickable{
             {
                 cooldownTicks--;
             }
-            else if(placementCountdown == 0 && blockTrackingCount <= Config.volcano().blockTrackingMax)
+            else if(placementCountdown == 0)
             {
-                OpenSpace place = spaceManager.pollFirst();
-            	int y = place.getPos().getY();
-            	
-            	if(y < this.backtrackLimit || y == this.level)
+                if( nonTopTrackingCount + topBlocks.getCount() <= Config.volcano().blockTrackingMax)
                 {
-            	    if(y == this.level)
-        	        {
-        	            backtrackLimit = this.level;
-        	            
-        	            //if back at top, enable cooling of blocks so far
-        	            if(this.buildLevel < y && this.lavaBlocks.getCount() > 0)
-        	            {
-        	                startLavaCoolingAndPause(false);
-        	            }
-        	        }
-                    placeIfPossible(place.getPos(), place.getOrigin());
-                    placementCountdown = Config.volcano().baseTicksPerBlock;
-                    if(Config.volcano().randTicksPerBlock > 0) placementCountdown += Useful.SALT_SHAKER.nextInt(Config.volcano().randTicksPerBlock);
-                    this.buildLevel = Math.min(buildLevel, y);
-                    this.backtrackLimit = Math.min(backtrackLimit, y + Config.volcano().backtrackIncrement);
+                    OpenSpace place = spaceManager.pollFirst();
+                	int y = place.getPos().getY();
+                	
+                	if(y < this.backtrackLimit || y == this.level)
+                    {
+                	    if(y == this.level)
+            	        {
+            	            backtrackLimit = this.level;
+            	            
+            	            //if back at top, enable cooling of blocks so far
+            	            if(this.buildLevel < y && this.lavaBlocks.getCount() > 0)
+            	            {
+            	                startLavaCoolingAndPause(false);
+            	            }
+            	        }
+                        placeIfPossible(place.getPos(), place.getOrigin());
+                        placementCountdown = Config.volcano().baseTicksPerBlock;
+                        if(Config.volcano().randTicksPerBlock > 0) placementCountdown += Useful.SALT_SHAKER.nextInt(Config.volcano().randTicksPerBlock);
+                        this.buildLevel = Math.min(buildLevel, y);
+                        this.backtrackLimit = Math.min(backtrackLimit, y + Config.volcano().backtrackIncrement);
+                    }
+                	else
+                	{
+                	    //Handle special (and hopefully rare) case where we have max blocks
+                        //and they are all lava blocks.  If this ever happens, have to enable
+                        //cooling so that the tracking count can go down.
+                        startLavaCoolingAndPause(false);
+                	}
                 }
-            }
-            else if(placementCountdown == 0 && (lavaBlocks.getCount() + topBlocks.getCount()) >= Config.volcano().blockTrackingMax)
-            {
-                //Handle special (and hopefully rare) case where we have max blocks
-                //and they are all lava blocks.  If this ever happens, have to enable
-                //cooling so that the tracking count can go down.
-                startLavaCoolingAndPause(false);
             }
         }
         else
@@ -448,27 +453,14 @@ public class TileVolcano extends TileEntity implements ITickable{
                 {
                     for(int y = -4; y <= 6; y++)
                     {
-//                        if(!(x == 0 && y == 0 && z == 0))
-//                        {
-                            if(y == -1 && isHardBasalt(worldObj.getBlockState(pPos.add(x, y, z)).getBlock()))
-
-                            meltExposedBasalt(pPos.add(x, y, z));
-//                        }
-                    }
-                }
-            }
-            
-            // TODO: do these numbers have to be so big? 
-            // Bumped up because not sure what is causing stragglers.
-            for(int x = -2; x <= 2; x++)
-            {
-                for(int z = -2; z <= 2; z++)
-                {
-                    for(int y = -4; y <= 6; y++)
-                    {
                         if(!(x == 0 && y == 0 && z == 0))
                         {
-                            adjustFillIfNeeded(pPos.add(x, y, z));
+                           
+    
+                            if(!adjustHeightBlockIfNeeded(pPos.add(x, y, z)));
+                            {
+                                adjustFillIfNeeded(pPos.add(x, y, z));
+                            }
                         }
                     }
                 }
@@ -557,41 +549,42 @@ public class TileVolcano extends TileEntity implements ITickable{
                 && ((NiceBlock)(block)).material == BaseMaterial.BASALT);
         
     }
-    
-    private void meltExposedBasalt(BlockPos targetPos)
+    /**
+     * Returns true if is a height block, even if no ajustement was needed.
+     */
+    private boolean adjustHeightBlockIfNeeded(BlockPos targetPos)
     {
 
-        if(targetPos == null) return;
+        if(targetPos == null) return false;
         
 //        Adversity.log.info("meltExposedBasalt @" + targetPos.toString());        
         
         IBlockState state = worldObj.getBlockState(targetPos);
-        if(!(state.getBlock() instanceof NiceBlock)) return;
+        if(!(state.getBlock() instanceof NiceBlock)) return false;
         
         NiceBlock block = (NiceBlock)state.getBlock();
+        
+        if(!IFlowBlock.isBlockFlowHeight(block)) return false;
+        
+        boolean isFullCube = IFlowBlock.isFullCube(state, worldObj, targetPos);
 
-        //If we have cubic basalt we need to convert it to flow type so we can reshape if needed
-        //then add to cool-down list so it can be converted back afterwards if appropriate.
-        if(block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
+
+        if(isFullCube)
         {
-            this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-            this.coolingBlocks.add(targetPos, ticksActive);
+            if(block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+            {
+                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
+                        .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+            }
         }
-        //static blocks may exist if player has broken blocks nearby - convert them back to dynamic version
-        else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK)
+        else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK 
+                || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK )
         {
             this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-            this.coolingBlocks.add(targetPos, ticksActive);
-        }
-        else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_FILLER_BLOCK)
-        {
-            this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-            this.coolingBlocks.add(targetPos, ticksActive);
         }
         
+        return true;
     }
     
     private void trackLavaBlock(BlockPos lavaPos)

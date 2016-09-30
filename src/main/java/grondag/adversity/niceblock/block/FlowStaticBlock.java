@@ -89,10 +89,8 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
 
         ItemStack stack = new ItemStack(this, 1, 0);
-        int [] quadrants = new int[] {15, 15, 15, 15};
-        long flowKey = FlowHeightState.computeStateKey(15, quadrants, quadrants, 0);
         long key = dispatcher.getStateSet()
-                .computeKey(ModelStateComponents.FLOW_JOIN.createValueFromBits(flowKey));
+                .computeKey(ModelStateComponents.FLOW_JOIN.createValueFromBits(FlowHeightState.FULL_BLOCK_STATE_KEY));
         NiceItemBlock.setModelStateKey(stack, key);
         itemBuilder.add(stack);
         
