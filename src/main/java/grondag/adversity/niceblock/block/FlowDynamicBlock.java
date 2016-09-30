@@ -4,12 +4,14 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -38,6 +40,27 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         return isFiller;
     }
     
+    @Override
+    public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        long result = super.getModelStateKey(state, world, pos);
+        if(this.isFiller && state.getValue(NiceBlock.META) ==1)
+        {
+            if(IFlowBlock.topFillerNeeded(world.getBlockState(pos.down()), world, pos.down()) == 0)
+            {
+                Adversity.log.info("wut?");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public ModelStateSetValue getModelState(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        // TODO Auto-generated method stub
+        return super.getModelState(state, world, pos);
+    }
+
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
@@ -105,11 +128,12 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         return false;
     }
 
-    @Override
-    public boolean needsCustomHighlight()
-    {
-        return true;
-    }
+    //TODO: put back
+//    @Override
+//    public boolean needsCustomHighlight()
+//    {
+//        return true;
+//    }
 
 //    @Override
 //    public int getPackedLightmapCoords(IBlockState state, IBlockAccess world, BlockPos pos)
