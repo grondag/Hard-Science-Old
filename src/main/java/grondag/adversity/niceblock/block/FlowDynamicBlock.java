@@ -41,27 +41,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     }
     
     @Override
-    public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        long result = super.getModelStateKey(state, world, pos);
-        if(this.isFiller && state.getValue(NiceBlock.META) ==1)
-        {
-            if(IFlowBlock.topFillerNeeded(world.getBlockState(pos.down()), world, pos.down()) == 0)
-            {
-                Adversity.log.info("wut?");
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public ModelStateSetValue getModelState(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getModelState(state, world, pos);
-    }
-
-    @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
@@ -128,12 +107,11 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         return false;
     }
 
-    //TODO: put back
-//    @Override
-//    public boolean needsCustomHighlight()
-//    {
-//        return true;
-//    }
+    @Override
+    public boolean needsCustomHighlight()
+    {
+        return true;
+    }
 
 //    @Override
 //    public int getPackedLightmapCoords(IBlockState state, IBlockAccess world, BlockPos pos)

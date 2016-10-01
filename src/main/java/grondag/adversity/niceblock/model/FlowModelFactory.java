@@ -405,7 +405,6 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         }
         
         return rawQuads;
-
     }
 
     @Override

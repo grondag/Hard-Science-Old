@@ -71,19 +71,28 @@ public class BlockManager
      * Allows us to start a new laval pass while cooling of last pass proceeds
      * and keep correct cooling order.
      */
-    public void transferWithOffset(BlockManager blocks, int startingIndex, int baseTicks, int randTicks)
+//    public void transferWithOffset(BlockManager blocks, int startingIndex, int baseTicks, int randTicks)
+//    {
+//        int index = startingIndex;
+//        
+//        while(!blocks.placedBlocks.isEmpty())
+//        {
+//            index += baseTicks;
+//            if(randTicks > 0)
+//            {
+//                index += Useful.SALT_SHAKER.nextInt(randTicks);
+//            }   
+//            this.placedBlocks.add(new BlockPlacement(blocks.placedBlocks.pollLast().pos, index));
+//        }
+//    }
+    
+    /** 
+     * Gets ready block farthest from origin.
+     * Only useful if distanceRanked = true;
+     */
+    public BlockPlacement pollLastEntry()
     {
-        int index = startingIndex;
-        
-        while(!blocks.placedBlocks.isEmpty())
-        {
-            index += baseTicks;
-            if(randTicks > 0)
-            {
-                index += Useful.SALT_SHAKER.nextInt(randTicks);
-            }   
-            this.placedBlocks.add(new BlockPlacement(blocks.placedBlocks.pollLast().pos, index));
-        }
+        return placedBlocks.pollLast();
     }
     
     public BlockPlacement pollFirstReadyEntry(int threshold)
@@ -106,19 +115,7 @@ public class BlockManager
 //        
 //    }
     
-    /** 
-     * Gets ready block farthest from origin.
-     * Only useful if distanceRanked = true;
-     */
-    public BlockPlacement pollFarthestReadyEntry(int threshold)
-    {
-        if(placedBlocks.isEmpty()) return null;
-        
-        if(placedBlocks.last().getIndex() > threshold) return null;
-        
-        return placedBlocks.pollLast();
-    }
-    
+   
     public class BlockPlacement implements Comparable<BlockPlacement>
     {
         private final int pos;
