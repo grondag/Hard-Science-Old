@@ -5,13 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
-import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -266,25 +264,11 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
             normCorner[corner.ordinal()] = shadowEnhance(normTemp).normalize();
         }
         
-        boolean sideIsSimple[] = new boolean[4];
-        boolean topIsSimple = true;
-        
-        for(HorizontalFace side: HorizontalFace.values())
-        {
-            double avg = flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getLeft()));
-            avg += flowState.getMidCornerVertexHeight(HorizontalCorner.find(side, side.getRight()));
-            avg /= 2;
-            sideIsSimple[side.ordinal()] = Math.abs(avg - flowState.getMidSideVertexHeight(side)) < 2.0 / 16.0;
-            topIsSimple = topIsSimple && sideIsSimple[side.ordinal()];
-        }
 
-        double cross1 = (flowState.getMidCornerVertexHeight(HorizontalCorner.NORTH_EAST) + flowState.getMidCornerVertexHeight(HorizontalCorner.SOUTH_WEST)) / 2.0;
-        double cross2 = (flowState.getMidCornerVertexHeight(HorizontalCorner.NORTH_WEST) + flowState.getMidCornerVertexHeight(HorizontalCorner.SOUTH_EAST)) / 2.0;
-        topIsSimple = topIsSimple & (Math.abs(cross1 - cross2) < 2.0 / 16.0);
         
         
         //single top face if it is relatively flat and all sides can be drawn without a mid vertex
-        if(topIsSimple)
+        if(flowState.isTopSimple())
         {
             template.setFace(EnumFacing.UP);
             RawQuad qi = new RawQuad(template, 4);
@@ -306,10 +290,10 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         {
            
             // don't use middle vertex if it is close to being in line with corners
-            if(sideIsSimple[side.ordinal()])
+            if(flowState.isSideSimple(side))
             {
                 // top
-                if(!topIsSimple)
+                if(!flowState.isTopSimple())
                 {
                     template.setFace(EnumFacing.UP);
                     RawQuad qi = new RawQuad(template, 3);
@@ -393,16 +377,17 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
         // will be useful for face culling
         rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getFace()) ? quad.getFace() : null));        
         
-        // if we end up with an empty list, default to standard cube
-        if(rawQuads.isEmpty())
-        {            
-            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
-            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
-            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
-            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
-            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
-            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
-        }
+        // Removed: if we end up with an empty list, default to standard cube
+        // Removed because block now behaves like air if this happens somehow.
+//        if(rawQuads.isEmpty())
+//        {            
+//            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+//            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+//            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+//            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
+//            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
+//            rawQuads.add(template.clone().setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+//        }
         
         return rawQuads;
     }

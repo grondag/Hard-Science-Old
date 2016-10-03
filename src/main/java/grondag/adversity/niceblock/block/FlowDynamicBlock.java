@@ -4,14 +4,12 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
-import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -75,13 +73,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         return itemBuilder.build();
     }
     
-//    @Override
-//    public boolean isFullBlock(IBlockState state)
-//    {
-//        return super.isFullBlock(state);
-//    }
-
-    
      // setting to false drops AO light value
     @Override
     public boolean isFullCube(IBlockState state)
@@ -102,9 +93,22 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        //TODO: make this dependent on model state
+        return IFlowBlock.isFullCube(state, world, pos);
+    }
+    
+    @Override
+    public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
+    {
+        return IFlowBlock.isEmpty(worldIn.getBlockState(pos), worldIn, pos);
+        
+//        return this.dispatcher.isEmpty(this.getModelStateKey(worldIn.getBlockState(pos), worldIn, pos));
+    }
 
-        return false;
+    @Override
+    public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return IFlowBlock.isEmpty(state, world, pos);
+//        return this.dispatcher.isEmpty(this.getModelStateKey(state, world, pos));
     }
 
     @Override

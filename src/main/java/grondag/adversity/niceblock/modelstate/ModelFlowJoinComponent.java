@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -100,7 +99,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                 originState = world.getBlockState(pos.down(offset));
                 if(!IFlowBlock.isBlockFlowHeight(originState.getBlock()))
                 {
-                    return FlowHeightState.FULL_BLOCK_STATE_KEY;
+                    return FlowHeightState.EMPTY_BLOCK_STATE_KEY;
                 }
             }
             

@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.support;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -22,17 +23,19 @@ public class CollisionBoxGenerator
 
     public static List<AxisAlignedBB> makeCollisionBox(List<RawQuad> quads)
     {
-        if(quads.isEmpty())
-        {
-            return new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, 1, 1)).build();
-        }
+//        if(quads.isEmpty())
+//        {
+//            return new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, 1, 1)).build();
+//        }
 
         // voxel method
         List<AxisAlignedBB> retVal = makeBoxVoxelMethod(quads);
 
         List<AxisAlignedBB> simple = makeBoxSimpleMethod(quads);
 
-        if(retVal.isEmpty() || getListVolume(simple) <= getListVolume(retVal))
+//        if(retVal.isEmpty() || getListVolume(simple) <= getListVolume(retVal))
+            
+        if(getListVolume(simple) <= getListVolume(retVal))
         {
             retVal = simple;
         }
@@ -53,6 +56,8 @@ public class CollisionBoxGenerator
     private static List<AxisAlignedBB> makeBoxVoxelMethod(List<RawQuad> quads)
     {
 
+        if(quads.isEmpty()) return Collections.emptyList();
+        
         ImmutableList.Builder<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>();
         Vec3d ray = new Vec3d(5525, 13123, 7435);
 
@@ -120,6 +125,8 @@ public class CollisionBoxGenerator
     private static List<AxisAlignedBB> makeBoxSimpleMethod(List<RawQuad> quads)
     {
 
+        if(quads.isEmpty()) return Collections.emptyList();
+        
         ImmutableList.Builder<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>();
 
         AxisAlignedBB simpleBox = null;

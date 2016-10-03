@@ -3,9 +3,14 @@ package grondag.adversity.feature.volcano;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
@@ -51,6 +56,37 @@ public class VolcanicLavaBlock extends FlowDynamicBlock
         return false;
     }
 
+    
+    
+    @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
+    {
+        super.neighborChanged(state, worldIn, pos, blockIn);
+        handleFallingBlocks(worldIn, pos, state);
+    }
+
+    @Override
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.onBlockAdded(worldIn, pos, state);
+        handleFallingBlocks(worldIn, pos, state);
+    }
+
+    private void handleFallingBlocks(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if(worldIn.isRemote) return;
+        
+        if(worldIn.getBlockState(pos.up()).getBlock() instanceof BlockFalling)
+        {
+            worldIn.setBlockToAir(pos.up());
+        }
+    }
+    
+    @Override
+    public int tickRate(World worldIn)
+    {
+        return 2;
+    }
 
 
 }

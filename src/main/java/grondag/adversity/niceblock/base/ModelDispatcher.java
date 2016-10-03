@@ -223,6 +223,11 @@ public class ModelDispatcher implements IBakedModel
         return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
     }
     
+//    public boolean isEmpty(long modelStateKey)
+//    {
+//        return modelCache.get(modelStateKey).isEmpty();
+//    } 
+    
     public int getOcclusionKey(long modelStateKey, EnumFacing face)
     {
         if(this.renderLayerFlags[BlockRenderLayer.SOLID.ordinal()] == false) return 0;

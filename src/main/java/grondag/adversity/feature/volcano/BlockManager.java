@@ -5,7 +5,6 @@ import java.util.TreeSet;
 import com.google.common.collect.ComparisonChain;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.RelativeBlockPos;
-import grondag.adversity.library.Useful;
 import net.minecraft.util.math.BlockPos;
 
 public class BlockManager 

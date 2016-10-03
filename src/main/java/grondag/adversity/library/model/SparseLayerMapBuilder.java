@@ -37,9 +37,29 @@ public class SparseLayerMapBuilder
     
     public abstract class SparseLayerMap
     {
+//        private byte emptyness = EMPTY_UNKNOWN;
+//        
+//        private static final byte EMPTY_UNKNOWN = 0;
+//        private static final byte EMPTY_YES = 1;
+//        private static final byte EMPTY_NO = 2;
+        
         public abstract QuadContainer get(BlockRenderLayer layer);
         
         public abstract void set(BlockRenderLayer layer, QuadContainer value);
+        
+//        public boolean isEmpty()
+//        {
+//            if(emptyness == EMPTY_UNKNOWN)
+//            {
+//                boolean result = true;
+//                for(BlockRenderLayer layer : layerList)
+//                {
+//                    result = result && get(layer).isEmpty();
+//                }
+//                emptyness = result == true ? EMPTY_YES : EMPTY_NO;
+//            }
+//            return emptyness == EMPTY_YES;
+//        }
     }
     
     private class SparseLayerArrayMap extends SparseLayerMap

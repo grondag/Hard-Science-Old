@@ -52,6 +52,7 @@ public interface IFlowBlock
     /**
      * Use for height blocks.
      * Returns number of filler blocks needed above: 0, 1 or 2.
+     * Is not perfect predictor so check filler block geometry after placement.
      */
     public static int topFillerNeeded(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
@@ -74,6 +75,21 @@ public interface IFlowBlock
         FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
                 .getValue(ModelStateComponents.FLOW_JOIN);
         return flowState.isFullCube();
+    }
+    
+    
+    /** 
+     * Returns true if geometry of flow block has nothing in it.
+     * Returns false if otherwise or if is not a flow block. 
+     */
+    public static boolean isEmpty(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    {
+        Block block = blockState.getBlock();
+        if(!(block instanceof IFlowBlock)) return false;
+        if(block instanceof FlowSimpleBlock) return true;
+        FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
+                .getValue(ModelStateComponents.FLOW_JOIN);
+        return flowState.isEmpty();
     }
     
     /**
