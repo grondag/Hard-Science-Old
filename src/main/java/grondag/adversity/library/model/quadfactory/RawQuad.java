@@ -31,6 +31,7 @@ public class RawQuad
         public boolean lockUV = false;
         public boolean isItem = false;
         public String tag = "";
+        public boolean shouldContractUVs = true;
 
         protected static AtomicLong nextQuadID = new AtomicLong(1);
         protected static long IS_AN_ANCESTOR = -1;
@@ -101,6 +102,7 @@ public class RawQuad
             this.isInverted = fromObject.isInverted;
             this.faceNormal = fromObject.faceNormal;
             this.tag = fromObject.tag;
+            this.shouldContractUVs = fromObject.shouldContractUVs;
         }
 
         public List<RawQuad> toQuads()
@@ -708,6 +710,20 @@ public class RawQuad
                 rotateQuadUV();
             }
 
+            //Used to manipulate UV without breaking immutability.
+            //Dimensions are vertex 0-4 and u/v 0-1.
+            float[][] uvData = new float[4][2];
+            for(int v = 0; v < 4; v++)
+            {
+                uvData[v][0] = (float) this.getVertex(v).u;
+                uvData[v][1] = (float) this.getVertex(v).v;
+            }
+            
+            if(this.shouldContractUVs)
+            {
+                contractUVs(uvData);
+            }
+            
             int[] vertexData = new int[28];
 
             // see LightingMode for more info on how this enables full brightness for block models.
@@ -778,10 +794,10 @@ public class RawQuad
                         else
                         {
                             // This block handles the normal case: texture UV coordinates
-                            float[] uvData = new float[2];
-                            uvData[0] = this.textureSprite.getInterpolatedU(getVertex(v).u);
-                            uvData[1] = this.textureSprite.getInterpolatedV(getVertex(v).v);
-                            LightUtil.pack(uvData, vertexData, format, v, e);
+                            float[] interpolatedUV = new float[2];
+                            interpolatedUV[0] = this.textureSprite.getInterpolatedU(uvData[v][0]);
+                            interpolatedUV[1] = this.textureSprite.getInterpolatedV(uvData[v][1]);
+                            LightUtil.pack(interpolatedUV, vertexData, format, v, e);
                         }
                         break;
 
@@ -799,6 +815,61 @@ public class RawQuad
               return new BakedQuad(vertexData, color, this.face, textureSprite, 
                       lightingMode == LightingMode.SHADED && !Config.render().enableCustomShading, format);
 
+        }
+        
+
+        /**
+         * Prevents visible seams along quad boundaries due to slight overlap
+         * with neighboring textures or empty texture buffer.
+         * Borrowed from Forge as implemented by Fry in UnpackedBakedQuad.build().
+         * Array dimensions are vertex 0-3, u/v 0-1
+         */
+        private void contractUVs(float[][] uvData)
+        {
+            if(!this.shouldContractUVs) return;
+            
+            final float eps = 1f / 0x100;
+
+            float tX = textureSprite.getOriginX() / textureSprite.getMinU();
+            float tY = textureSprite.getOriginY() / textureSprite.getMinV();
+            float tS = tX > tY ? tX : tY;
+            float ep = 1f / (tS * 0x100);
+
+            //uve refers to the uv element number in the format
+            //we will always have uv data directly
+            float center[] = new float[2];
+
+            for(int v = 0; v < 4; v++)
+            {
+                center[0] += uvData[v][0] / 4;
+                center[1] += uvData[v][1] / 4;
+            }
+                
+            for(int v = 0; v < 4; v++)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    float uo = uvData[v][i];
+                    float un = uo * (1 - eps) + center[i] * eps;
+                    float ud = uo - un;
+                    float aud = ud;
+                    if(aud < 0) aud = -aud;
+                    if(aud < ep) // not moving a fraction of a pixel
+                    {
+                        float udc = uo - center[i];
+                        if(udc < 0) udc = -udc;
+                        if(udc < 2 * ep) // center is closer than 2 fractions of a pixel, don't move too close
+                        {
+                            un = (uo + center[i]) / 2;
+                        }
+                        else // move at least by a fraction
+                        {
+                            un = uo + (ud < 0 ? ep : -ep);
+                        }
+                    }
+                    uvData[v][i] = un;
+                }
+            }
         }
 
         public Vec3d getFaceNormal()

@@ -24,14 +24,11 @@ import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
 //bad cubic basalt placement?
-//sand/gravel on lava
 
 //TODOS
-//freeze nearby shapes on player break
-//fix model pinholes
 //water rendering
 //final textures
-
+//freeze nearby shapes on player break
 
 //detection item
 //volcano wand
@@ -39,9 +36,11 @@ import grondag.adversity.simulator.Simulator;
 //simulation integration & control from simulation
 //world gen
 //biome
+//create falling-block explosion w/ configurable crater radius
 //explosion of mound
 //ignite surrounding blocks
-//sound effects
+//sound effects for volcano
+//sound for lava
 //smoke
 //haze
 //ash
