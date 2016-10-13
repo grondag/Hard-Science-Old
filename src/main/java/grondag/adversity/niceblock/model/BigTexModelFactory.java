@@ -5,6 +5,7 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -17,6 +18,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
 
 public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
@@ -153,7 +155,7 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
-            int faceIndex = FACE_SELECTORS[state.getValue(this.bigTexComponent)].selectors[face.ordinal()];
+            int faceIndex = FACE_SELECTORS[state.getValue(this.bigTexComponent).getIndex()].selectors[face.ordinal()];
             int cacheKey = makeCacheKey(state, faceIndex, face);
             List<BakedQuad> faceQuads = faceCache.get(cacheKey);
             
@@ -199,5 +201,28 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     public String buildTextureName(String baseName, int offset)
     {
         return "adversity:blocks/" + baseName;
+    }
+    
+    public static class BigTexInfo
+    {
+        private final int bits;
+        
+        public BigTexInfo(int bits)
+        {
+            this.bits = bits;
+        }
+        
+        public static int getBits(int meta, BlockPos pos)
+        {
+            return meta << 12 | ((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15);
+        }
+
+        public int getIndex() { return bits; }
+        
+        public int getX() { return (bits >> 8) & 15; }
+        public int getY() { return (bits >> 4) & 15; }
+        public int getZ() { return bits & 15; }
+        public int getMeta() { return (bits >> 12) & 15; }
+
     }
 }

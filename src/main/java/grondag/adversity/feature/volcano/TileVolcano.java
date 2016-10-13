@@ -26,7 +26,7 @@ import grondag.adversity.simulator.Simulator;
 //bad cubic basalt placement?
 
 //TODOS
-//water rendering
+
 //final textures
 //freeze nearby shapes on player break
 
@@ -44,6 +44,7 @@ import grondag.adversity.simulator.Simulator;
 //smoke
 //haze
 //ash
+//water rendering
 
 //performance tuning as needed
 
