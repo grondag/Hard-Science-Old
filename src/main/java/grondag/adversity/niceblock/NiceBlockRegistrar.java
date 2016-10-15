@@ -95,7 +95,7 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COLORED_STONE_ITEM = new NiceItemBlock(COLORED_STONE_BLOCK);
    
     private final static ModelFactory.ModelInputs BIGTEX_INPUTS = new ModelFactory.ModelInputs("weathered_smooth_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static BigTexModelFactory BIGTEX_MODEL = new BigTexModelFactory(BIGTEX_INPUTS, ModelStateComponents.COLORS_BLOCK,
+    private final static BigTexModelFactory BIGTEX_MODEL = new BigTexModelFactory(BIGTEX_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1);
     private static final ModelDispatcher BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL);
     public static final NiceBlockPlus BIGTEX_BLOCK = new NiceBlockPlus(BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigtex");
@@ -105,7 +105,7 @@ public class NiceBlockRegistrar
     private final static BorderModelFactory BORDER_MODEL = new BorderModelFactory(BORDER_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1);
 
-    private static final ModelDispatcher BORDER_BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL);//, BORDER_MODEL);
+    private static final ModelDispatcher BORDER_BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL, BORDER_MODEL);
     public static final BigBlock BORDER_BIGTEX_BLOCK = new BigBlock(BORDER_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "border", NicePlacement.PLACEMENT_3x3x3);
     public static final NiceItemBlock BORDER_BIGTEX_ITEM = new NiceItemBlock(BORDER_BIGTEX_BLOCK);
 

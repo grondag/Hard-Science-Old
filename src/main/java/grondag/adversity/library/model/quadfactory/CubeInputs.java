@@ -44,6 +44,10 @@ public class CubeInputs{
 
         RawQuad qi = new RawQuad();
         qi.color = this.color;
+        
+        //necessary for bigtex blocks
+        qi.useSimpleRotation = true;
+        
         //TODO: support flat lighting mode?
         qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;

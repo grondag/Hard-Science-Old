@@ -1,9 +1,13 @@
 package grondag.adversity.niceblock.model;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Rotation;
+import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
+import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
@@ -27,6 +31,27 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
     
     private final boolean hasMetaVariants;
+    
+    public static enum BigTexScale
+    {
+        /** 16x16 */
+        LARGE(1),
+        /** 8x8 */
+        MEDIUM(2),
+        /** 4x4 */
+        SMALL(4),
+        /** 2x2 */
+        TINY(8);
+        
+        protected final int sliceIncrement;
+        
+        private BigTexScale(int sliceIncrement)
+        {
+            this.sliceIncrement = sliceIncrement;
+        }
+      
+    }
+    private final BigTexScale scale;
 	
 	/** Tells us which face to select for each block within a 16x16x16 
 	 * space for up to 16 different meta values.
@@ -35,33 +60,48 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 	 */
 	protected final static FaceSelector[] FACE_SELECTORS = new FaceSelector[16 * 4096];
 
-	public BigTexModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+	public BigTexModelFactory(ModelInputs modelInputs, BigTexScale scale, ModelStateComponent<?,?>... components)
 	{
 		super(modelInputs, components);
 		this.hasMetaVariants = this.bigTexComponent.useMetaVariants;
+		this.scale = scale;
 	}
 
-	private List<BakedQuad> makeBigTexFace(ModelStateSetValue state, int faceIndex, EnumFacing face){
+	private List<BakedQuad> makeBigTexFace(ModelStateSetValue state, int faceIndex, EnumFacing face)
+	{
+		CubeInputs cube = new CubeInputs();
+		cube.color = state.getValue(colorComponent).getColor(EnumColorMap.BASE);
+		cube.textureSprite = 
+            Minecraft.getMinecraft().getTextureMapBlocks()
+            .getAtlasSprite(buildTextureName(modelInputs.textureName, 0));
 
-		int i = (faceIndex >> 4) & 15;
-		int j = faceIndex & 15;
+        int i = ((faceIndex >> 4) * scale.sliceIncrement) & 15;
+        int j = (faceIndex * scale.sliceIncrement) & 15;
+        
+        //top 4 bits of faceIndex are meta
+        // lower meta bits are uv flip and upper bits are rotation
+        int meta = (faceIndex >> 8) & 15;       
+        cube.textureRotation = Rotation.values()[(meta >> 2) & 3];
 		
-		CubeInputs cubeInputs = new CubeInputs();
-		cubeInputs.color = state.getValue(colorComponent).getColor(EnumColorMap.BASE);
-		cubeInputs.textureRotation = Rotation.values()[(faceIndex >> 10) & 3];
+        boolean flipU = (meta & 1) == 1;
+        boolean flipV = ((meta >> 1) & 1) == 1;
+        cube.u0 = flipU ? 16 - i : i;
+        cube.v0 = flipV ? 16 - j : j;
+        cube.u1 = cube.u0 + (flipU ? -1 : 1) * scale.sliceIncrement;
+        cube.v1 = cube.v0 + (flipV ? -1 : 1) * scale.sliceIncrement;
+        
+        
+        if(face == EnumFacing.UP)
+        {
+            Adversity.log.info("meta=" + meta
+                    + " i=" + i
+                    + " j=" + j
+                    + " flipU=" + flipU
+                    + " flipV=" + flipV
+                    );
+        }
+		return cube.makeFace(face);
 
-		boolean flipU = ((faceIndex >> 8) & 1) == 1;
-		boolean flipV = ((faceIndex >> 9) & 1) == 1;
-		cubeInputs.u0 = flipU ? 16 - i : i;
-		cubeInputs.v0 = flipV ? 16 - j : j;
-		cubeInputs.u1 = cubeInputs.u0 + (flipU ? -1 : 1);
-		cubeInputs.v1 = cubeInputs.v0 + (flipV ? -1 : 1);
-
-		cubeInputs.textureSprite = 
-				Minecraft.getMinecraft().getTextureMapBlocks()
-				.getAtlasSprite(buildTextureName(modelInputs.textureName, 0));
-
-		return cubeInputs.makeFace(face);
 	}
 
 	static
@@ -80,7 +120,7 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 					{
 
 						int facadeIndex = meta << 12 | x << 8 | y << 4 | z;
-						int faceIndexOffset = meta * 256;
+						int faceIndexOffset = meta << 8;
 
 						switch (Rotation.values()[(meta >> 2) & 3])
 						{
@@ -137,12 +177,8 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     private int makeCacheKey(ModelStateSetValue state, int faceIndex, EnumFacing face)
     {
         int key = face.ordinal();
-        
         key |= faceIndex << 3;
-        
-        // a big texture has 16x16=256 faces.  
-        // If meta variants enabled, then we have 16 versions of the 256.
-        key |= state.getValue(this.colorComponent).ordinal << (this.hasMetaVariants ? 11 : 7);
+        key |= state.getValue(this.colorComponent).ordinal << 15;
 
         return key;
     }
