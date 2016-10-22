@@ -7,6 +7,7 @@ import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
+import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
 import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
@@ -41,6 +42,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
     protected final ModelBigTexComponent bigTexComponent;
     protected final ModelSpeciesComponent speciesComponent;
     protected final ModelFlowJoinComponent flowJoinComponent;
+    protected final ModelFlowTexComponent flowTexComponent;
     
     public ModelFactory(V modelInputs, ModelStateComponent<?,?>... components)
     {
@@ -53,6 +55,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         ModelBigTexComponent bigTexComponent = null;
         ModelSpeciesComponent speciesComponent = null;
         ModelFlowJoinComponent flowJoinComponent = null;
+        ModelFlowTexComponent flowTexComponent = null;
         
         for(ModelStateComponent<?,?> c : components)
         {
@@ -68,6 +71,8 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
                 speciesComponent = (ModelSpeciesComponent) c;
             else if(c instanceof ModelFlowJoinComponent)
                 flowJoinComponent = (ModelFlowJoinComponent) c;
+            else if(c instanceof ModelFlowTexComponent)
+                flowTexComponent = (ModelFlowTexComponent) c;
         }
         
         this.colorComponent = colorComponent;
@@ -76,6 +81,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         this.bigTexComponent = bigTexComponent;
         this.speciesComponent = speciesComponent;
         this.flowJoinComponent = flowJoinComponent;
+        this.flowTexComponent = flowTexComponent;
     }
     
     public boolean canRenderInLayer(BlockRenderLayer renderLayer) 

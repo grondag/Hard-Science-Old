@@ -35,6 +35,11 @@ public class RawQuad
     public boolean isItem = false;
     public String tag = "";
     public boolean shouldContractUVs = true;
+    
+    public float minU = 0;
+    public float maxU = 16;
+    public float minV = 0;
+    public float maxV = 16;
 
     protected static AtomicLong nextQuadID = new AtomicLong(1);
     protected static long IS_AN_ANCESTOR = -1;
@@ -107,6 +112,10 @@ public class RawQuad
         this.tag = fromObject.tag;
         this.shouldContractUVs = fromObject.shouldContractUVs;
         this.useSimpleRotation = fromObject.useSimpleRotation;
+        this.minU = fromObject.minU;
+        this.maxU = fromObject.maxU;
+        this.minV = fromObject.minV;
+        this.maxV = fromObject.maxV;
     }
 
     public List<RawQuad> toQuads()
@@ -329,18 +338,7 @@ public class RawQuad
             vertexIn2 = rv2;
             vertexIn3 = rv3;
         }
-
-        //TODO: move this to baked quad creation - causes problems with CSG if done before
-        //            vertexIn0.x -= QuadFactory.EPSILON;
-        //            vertexIn3.x -= QuadFactory.EPSILON;
-        //            vertexIn0.y -= QuadFactory.EPSILON;
-        //            vertexIn1.y -= QuadFactory.EPSILON;
-        //
-        //            vertexIn2.x += QuadFactory.EPSILON;
-        //            vertexIn1.x += QuadFactory.EPSILON;
-        //            vertexIn3.y += QuadFactory.EPSILON;
-        //            vertexIn2.y += QuadFactory.EPSILON;
-
+        
         switch(this.getFace())
         {
         case UP:
@@ -734,13 +732,16 @@ public class RawQuad
             rotateQuadUV();
         }
 
+        float spanU = this.maxU - this.minU;
+        float spanV = this.maxV - this.minV;
+        
         //Used to manipulate UV without breaking immutability.
         //Dimensions are vertex 0-4 and u/v 0-1.
         float[][] uvData = new float[4][2];
         for(int v = 0; v < 4; v++)
         {
-            uvData[v][0] = (float) this.getVertex(v).u;
-            uvData[v][1] = (float) this.getVertex(v).v;
+            uvData[v][0] = this.minU + spanU * ((float)this.getVertex(v).u) / 16F;
+            uvData[v][1] = this.minV + spanV * ((float)this.getVertex(v).v) / 16F;
         }
 
         if(this.shouldContractUVs)

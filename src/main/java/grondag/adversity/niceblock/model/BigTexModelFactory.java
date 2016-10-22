@@ -1,15 +1,9 @@
 package grondag.adversity.niceblock.model;
-
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Rotation;
-import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
-import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -90,16 +84,6 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         cube.u1 = cube.u0 + (flipU ? -1 : 1) * scale.sliceIncrement;
         cube.v1 = cube.v0 + (flipV ? -1 : 1) * scale.sliceIncrement;
         
-        
-        if(face == EnumFacing.UP)
-        {
-            Adversity.log.info("meta=" + meta
-                    + " i=" + i
-                    + " j=" + j
-                    + " flipU=" + flipU
-                    + " flipV=" + flipV
-                    );
-        }
 		return cube.makeFace(face);
 
 	}

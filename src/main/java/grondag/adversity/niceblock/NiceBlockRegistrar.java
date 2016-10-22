@@ -21,6 +21,7 @@ import grondag.adversity.niceblock.model.CSGModelFactory;
 import grondag.adversity.niceblock.model.ColorModelFactory;
 import grondag.adversity.niceblock.model.ColumnSquareModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory;
+import grondag.adversity.niceblock.model.FlowModelFactory2;
 import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -272,9 +273,9 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COOL_STATIC_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_STATIC_BASALT_FILLER_BLOCK);
 
     
-    private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("volcanic_lava_flow", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION, ModelStateComponents.COLORS_WHITE);
+    private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("lava", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
+    private final static FlowModelFactory2 HOT_FLOWING_LAVA_MODEL = new FlowModelFactory2(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
     private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
     public static final VolcanicLavaBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
              new VolcanicLavaBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "flow", false);

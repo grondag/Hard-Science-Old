@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
@@ -88,11 +89,11 @@ public class FlowHeightState
     {
         return stateKey;
     }
-
+    
     public static long computeStateKey(int centerHeightIn, int[] sideHeightIn, int[] cornerHeightIn, int yOffsetIn)
     {
         long stateKey = (centerHeightIn - 1) | getTriadWithYOffset(yOffsetIn) << 4;
-
+        
         for(int i = 0; i < 4; i++)
         {
             long keyBlock = (cornerHeightIn[i] - NO_BLOCK) * VALUE_COUNT + (sideHeightIn[i] - NO_BLOCK); 
