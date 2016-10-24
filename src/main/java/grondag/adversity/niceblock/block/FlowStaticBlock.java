@@ -15,10 +15,12 @@ import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
 {    
@@ -152,6 +154,14 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     {
         return true;
     }
+
+    @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
+    {
+        IFlowBlock.freezeNeighbors(world, pos, state);
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+
 
 //    @Override
 //    public int getPackedLightmapCoords(IBlockState state, IBlockAccess world, BlockPos pos)

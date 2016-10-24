@@ -28,20 +28,29 @@ import grondag.adversity.simulator.Simulator;
 //TODOS
 //freeze nearby shapes on player break
 
-//detection item
+
+//create basalt cobble drop item
+//create basalt cobblestone block
+//make basalt cobble drop auto-compact into blocks
+
+//fix block item/item model
+//make volcano block unbreakable
 //volcano wand
-//remove block item/item model
+
 //simulation integration & control from simulation
+//detection item
 //world gen
+
 //biome
+//smoke
+//haze
+//ash
+
 //create falling-block explosion w/ configurable crater radius
 //explosion of mound
 //ignite surrounding blocks
 //sound effects for volcano
 //sound for lava
-//smoke
-//haze
-//ash
 //water rendering
 
 //performance tuning as needed
@@ -426,26 +435,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             return NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK;
     }   
 
-    //    private void updateStaticFlowShape(BlockPos targetPos)
-    //    {
-    ////        Adversity.log.info("updateStaticFlowShape @" + targetPos.toString());
-    //        
-    //        IBlockState state = worldObj.getBlockState(targetPos);
-    //        if(state.getBlock() instanceof FlowStaticBlock)
-    //        {
-    //            FlowStaticBlock block = (FlowStaticBlock) state.getBlock();
-    //        
-    //            long oldKey = block.getModelStateKey(state, worldObj, targetPos);
-    //            long newKey = block.dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, true, block, state, worldObj, targetPos);
-    //            //should always be a FlowStaticBlock at this point, check is for run-time safety in case there is a derp
-    //            if(newKey != oldKey)
-    //            {
-    //                block.setModelStateKey(state, worldObj, targetPos, newKey);
-    ////                Adversity.log.info("melt @" + targetPos.toString() + " oldKey=" + oldKey + " newKey=" + newKey);
-    //            }
-    //        }
-    //    }
-    //    
+   
     private void placeIfPossible(BlockPos pPos, BlockPos pOrigin)
     {
         //        Adversity.log.info("attempting to place @ " + pPos.toString() + " with origin " + pOrigin.toString());
@@ -615,15 +605,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         BaseMaterial material = ((NiceBlock)block).material;
         return (material == BaseMaterial.BASALT || material == BaseMaterial.VOLCANIC_LAVA);
     }
-    
-    private boolean isHardBasalt(Block block)
-    {
-        //        if(block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK) return true;
 
-        return ((block instanceof FlowStaticBlock || block instanceof FlowSimpleBlock) 
-                && ((NiceBlock)(block)).material == BaseMaterial.BASALT);
-
-    }
     /**
      * Returns true if is a height block, even if no ajustement was needed.
      */

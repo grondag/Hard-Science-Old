@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
+import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
@@ -9,6 +11,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public interface IFlowBlock 
 {
@@ -111,4 +114,40 @@ public interface IFlowBlock
         return state.withProperty(NiceBlock.META, Math.min(1, Math.max(0, value - 1)));
     }
     
+    /** 
+     * Looks for nearby dynamic blocks that might depend on this block for height state
+     * and converts them to static blocks if possible. 
+     */
+    public static void freezeNeighbors(World worldIn, BlockPos pos, IBlockState state)
+    {
+        Adversity.log.info("freezeNeightbors @" + pos.toString());
+        if(!(state.getBlock() instanceof IFlowBlock)) return;
+        IFlowBlock fromBlock = (IFlowBlock) state.getBlock();
+        
+        //filler blocks do not affect neighbors
+        if(fromBlock.isFiller()) return;
+                
+        IBlockState targetState;
+        Block targetBlock;
+        
+        for(int x = -2; x <= 2; x++)
+        {
+            for(int z = -2; z <= 2; z++)
+            {
+                for(int y = -4; y <= 4; y++)
+                {
+                    if(!(x == 0 && y == 0 && z == 0))
+                    {
+                        BlockPos targetPos = pos.add(x, y, z);
+                        targetState = worldIn.getBlockState(targetPos);
+                        targetBlock = targetState.getBlock();
+                        if(targetBlock instanceof FlowDynamicBlock)
+                        {
+                            ((FlowDynamicBlock)targetBlock).makeStatic(targetState, worldIn, targetPos);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
