@@ -122,7 +122,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                             b = bs.getBlock();
                             if(IFlowBlock.isBlockFlowHeight(b))
                             {
-                                neighborHeight[x][z] = y * 16 + IFlowBlock.getFlowHeightFromState(bs);
+                                neighborHeight[x][z] = y * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(bs);
                                 break;
                             }
                         }

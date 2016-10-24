@@ -8,18 +8,20 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 public class FlowHeightState
 {
 
-    public final static long FULL_BLOCK_STATE_KEY = FlowHeightState.computeStateKey(16, new int[] {16, 16, 16,16}, new int[] {16, 16, 16, 16}, 0 );
+    public final static long FULL_BLOCK_STATE_KEY = FlowHeightState.computeStateKey(12, new int[] {12, 12, 12,12}, new int[] {12, 12, 12, 12}, 0 );
     public final static long EMPTY_BLOCK_STATE_KEY = FlowHeightState.computeStateKey(1, new int[] {1, 1, 1,1}, new int[] {1, 1, 1, 1}, 1 );
 
-    /** Four 13-bit blocks that store a corner and side value,
+    /** Eight 6-bit blocks that store a corner and side value,
      * plus 4 bits for center height and 3 bits for offset */
-    public final static long STATE_BIT_COUNT = 59;
+    public final static long STATE_BIT_COUNT = 55;
 
-    public final static long STATE_BIT_MASK = 0x7FFFFFFFFFFFFFFL;
+    public final static long STATE_BIT_MASK = 0x7FFFFFFFFFFFFFL;
 
-    public final static int MIN_HEIGHT = -32;
+    public final static int BLOCK_LEVELS_INT = 12;
+    public final static float BLOCK_LEVELS_FLOAT = (float) BLOCK_LEVELS_INT;
+    public final static int MIN_HEIGHT = -24;
     public final static int NO_BLOCK = MIN_HEIGHT - 1;
-    public final static int MAX_HEIGHT = 48;
+    public final static int MAX_HEIGHT = 36;
     
     // Use these insted of magic number for filler block meta values
     /** This value is for a height block two below another height block, offset of 2 added to vertex heights*/
@@ -94,10 +96,13 @@ public class FlowHeightState
     {
         long stateKey = (centerHeightIn - 1) | getTriadWithYOffset(yOffsetIn) << 4;
         
+        int shift = 7;
         for(int i = 0; i < 4; i++)
         {
-            long keyBlock = (cornerHeightIn[i] - NO_BLOCK) * VALUE_COUNT + (sideHeightIn[i] - NO_BLOCK); 
-            stateKey |= keyBlock << (i * 13 + 7);
+            stateKey |= ((long)((sideHeightIn[i] - NO_BLOCK)) << shift);
+            shift += 6;
+            stateKey |= ((long)((cornerHeightIn[i] - NO_BLOCK)) << shift);
+            shift += 6;            
         }
         return stateKey;
     }
@@ -116,15 +121,17 @@ public class FlowHeightState
         centerHeight = (byte)((stateKey & 0xF) + 1);
         yOffset = (byte) getYOffsetFromTriad((int) ((stateKey >> 4) & 0x7));
 
+        int shift = 7;
         for(int i = 0; i < 4; i++)
         {
-            int keyBlock = (int) (stateKey >> (i * 13 + 7)) & 0x1FFF;
-            cornerHeight[i] = (byte) (keyBlock / VALUE_COUNT + NO_BLOCK);
-            sideHeight[i] = (byte) (keyBlock % VALUE_COUNT + NO_BLOCK);
-        }
+            sideHeight[i] = (byte) (((stateKey >> shift) & 63) + NO_BLOCK);
+            shift += 6;
+            cornerHeight[i] = (byte) (((stateKey >> shift) & 63) + NO_BLOCK);
+            shift += 6;
+        }        
     }
-    // Rendering height of center block ranges from 1 to 16
-    // and is stored in state key as values 0-15.
+    // Rendering height of center block ranges from 1 to 12
+    // and is stored in state key as values 0-11.
 
 //    public void setCenterHeight(int height)
 //    {
@@ -148,7 +155,7 @@ public class FlowHeightState
     }
 
     // Rendering height of corner and side neighbors ranges 
-    // from -32 to 48. 
+    // from -24 to 36. 
 
 //    public void setSideHeight(HorizontalFace side, int height)
 //    {
@@ -278,7 +285,7 @@ public class FlowHeightState
     
     public float getCenterVertexHeight()
     {
-        return (float) getCenterHeight() / 16f;
+        return (float) getCenterHeight() / BLOCK_LEVELS_FLOAT;
     }
 
     public float getFarCornerVertexHeight(HorizontalCorner corner)
@@ -329,14 +336,14 @@ public class FlowHeightState
             double avg = midCornerHeight[HorizontalCorner.find(side, side.getLeft()).ordinal()];
             avg += midCornerHeight[HorizontalCorner.find(side, side.getRight()).ordinal()];
             avg /= 2;
-            boolean sideIsSimple = Math.abs(avg - midSideHeight[side.ordinal()]) < 2.0 / 16.0;
+            boolean sideIsSimple = Math.abs(avg - midSideHeight[side.ordinal()]) < 2.0 / BLOCK_LEVELS_FLOAT;
             setSimpleFlag(side.ordinal(), sideIsSimple);
             topIsSimple = topIsSimple && sideIsSimple;
         }
 
         double cross1 = (midCornerHeight[HorizontalCorner.NORTH_EAST.ordinal()] + midCornerHeight[HorizontalCorner.SOUTH_WEST.ordinal()]) / 2.0;
         double cross2 = (midCornerHeight[HorizontalCorner.NORTH_WEST.ordinal()] + midCornerHeight[HorizontalCorner.SOUTH_EAST.ordinal()]) / 2.0;
-        setSimpleFlag(SIMPLE_FLAG_TOP_ORDINAL, topIsSimple & (Math.abs(cross1 - cross2) < 2.0 / 16.0));
+        setSimpleFlag(SIMPLE_FLAG_TOP_ORDINAL, topIsSimple & (Math.abs(cross1 - cross2) < 2.0 / BLOCK_LEVELS_FLOAT));
         
         vertexCalcsDone = true;
 
@@ -367,10 +374,10 @@ public class FlowHeightState
         if(heightCorner == FlowHeightState.NO_BLOCK)
         {
             int max = Math.max(Math.max(getSideHeight(corner.face1), getSideHeight(corner.face2)), getCenterHeight());
-            heightCorner = (max - 1) / 16 * 16;
+            heightCorner = (max - 1) / BLOCK_LEVELS_INT * BLOCK_LEVELS_INT;
         }
        
-        return ((float) heightCorner) / 16f;
+        return ((float) heightCorner) / BLOCK_LEVELS_FLOAT;
     }
     
     /**
@@ -383,7 +390,7 @@ public class FlowHeightState
         int heightCorner = getCornerHeight(corner);
         
         int max = Math.max(Math.max(heightSide1, heightSide2), Math.max(heightCorner, getCenterHeight()));
-        max = (max - 1) / 16 * 16;
+        max = (max - 1) / BLOCK_LEVELS_INT * BLOCK_LEVELS_INT;
                 
         if(heightSide1 == FlowHeightState.NO_BLOCK) heightSide1 = max;
         if(heightSide2 == FlowHeightState.NO_BLOCK) heightSide2 = max;
@@ -391,19 +398,19 @@ public class FlowHeightState
         
         float numerator = getCenterHeight() + heightSide1 + heightSide2 + heightCorner;
        
-        return numerator / 64f;
+        return numerator / (BLOCK_LEVELS_FLOAT * 4F);
         
     }
     
     private float calcFarSideVertexHeight(HorizontalFace face)
     {
-        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / 16f);
+        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / BLOCK_LEVELS_FLOAT);
     }
 
     private float calcMidSideVertexHeight(HorizontalFace face)
     {
         float sideHeight = getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : (float)getSideHeight(face);
-        return (sideHeight + (float) getCenterHeight()) / 32F;
+        return (sideHeight + (float) getCenterHeight()) / (BLOCK_LEVELS_FLOAT * 2F);
     }
 
     public String toString()

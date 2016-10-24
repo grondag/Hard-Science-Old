@@ -91,6 +91,11 @@ public class ModelStateComponents
     public static final ModelFlowJoinComponent FLOW_JOIN = register(new ModelFlowJoinComponent(counter++, WorldRefreshType.CACHED));
     public static final ModelFlowTexComponent FLOW_TEX = register(new ModelFlowTexComponent(counter++));
     
+    public static final ModelColorMapComponent COLORS_BASALT = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
+            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.NEUTRAL_DEEP, 0))));
+    
+    public static final ModelBigTexComponent BIG_TEX_IGNORE_META = register(new ModelBigTexComponent(counter++, false));
+    
     public static int getCount()
     {
         return counter;

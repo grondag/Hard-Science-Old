@@ -19,15 +19,13 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-//bad cubic basalt placement?
 
 //TODOS
-
-//final textures
 //freeze nearby shapes on player break
 
 //detection item
@@ -456,23 +454,21 @@ public class TileVolcano extends TileEntity implements ITickable{
         if(this.canDisplace(pPos))
         {
             double distanceSq = pPos.distanceSq(pOrigin);
-            int meta;
+            double height;
             if(pPos.getY() == this.level)
             {
                 if(distanceSq > Config.volcano().topSpreadRadiusSquared 
                         || (distanceSq > Config.volcano().boreRadiusSquared && Useful.SALT_SHAKER.nextInt(Config.volcano().boreRadiusSquared * 3) < distanceSq)) return;
-                meta = (int)Math.sqrt(distanceSq);
+                height = 1.05 - Math.sqrt(distanceSq) / Config.volcano().topSpreadRadius;
             }
             else 
             {
                 if(distanceSq > Config.volcano().lavaSpreadRadiusSquared || Useful.SALT_SHAKER.nextInt(99) < distanceSq) return;
-                meta = 2 * (int)Math.sqrt(distanceSq);
+                height = 1.05 - Math.sqrt(distanceSq) / Config.volcano().lavaSpreadRadius;
             }
 
-
-            meta = Math.min(15, Math.max(1, meta - 1 + Useful.SALT_SHAKER.nextInt(3)));
-            IBlockState targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, meta);
+            IBlockState targetState = IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(),
+                    Math.min(FlowHeightState.BLOCK_LEVELS_INT, Math.max(1, (int)(height * 12)) - 1 + Useful.SALT_SHAKER.nextInt(3)));
 
 //            Adversity.log.info("placeIfPossible: set block from " 
 //                    + worldObj.getBlockState(pPos).getBlock().getRegistryName() + " to " 

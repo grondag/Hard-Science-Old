@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
@@ -33,20 +34,20 @@ public interface IFlowBlock
     
     /**
      * Use for height blocks.
-     * Returns a value from 1 to 16 to indicate the center height of this block
+     * Returns a value from 1 to 12 to indicate the center height of this block
      */
     public static int getFlowHeightFromState(IBlockState state)
     {
-        return 16 - state.getValue(NiceBlock.META);
+        return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(NiceBlock.META));
     }
     
     /** 
      * Use for height blocks.
-     * Stores a value from 1 to 16 to indicate the center height of this block 
+     * Stores a value from 1 to 12 to indicate the center height of this block 
      */
     public static IBlockState stateWithFlowHeight(IBlockState state, int value)
     {
-        return state.withProperty(NiceBlock.META, Math.min(15, Math.max(0,value - 16)));
+        return state.withProperty(NiceBlock.META, Math.min(11, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
     }
 
     /**
