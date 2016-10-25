@@ -250,7 +250,9 @@ public class ModelDispatcher implements IBakedModel
     @Override
     public boolean isAmbientOcclusion()
     {
-        return shadedFlags[MinecraftForgeClient.getRenderLayer().ordinal()];
+        // Render layer will be null for block damage rendering.
+        BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+        return layer == null ? true : shadedFlags[MinecraftForgeClient.getRenderLayer().ordinal()];
     }
     
     @Override

@@ -68,17 +68,14 @@ public interface IFlowBlock
     }
     
     /** 
-     * Returns true of geometry of flow block is a full cube.
+     * Returns true of geometry of flow block should be a full cube based on self and neighboring flow blocks.
      * Returns false if otherwise or if is not a flow block. 
      */
-    public static boolean isFullCube(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    public static boolean shouldBeFullCube(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
         if(!(block instanceof IFlowBlock)) return false;
-        if(block instanceof FlowSimpleBlock) return true;
-        FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
-                .getValue(ModelStateComponents.FLOW_JOIN);
-        return flowState.isFullCube();
+        return ModelFlowJoinComponent.getFlowState((NiceBlock)block, blockState, blockAccess, pos).isFullCube();
     }
     
     

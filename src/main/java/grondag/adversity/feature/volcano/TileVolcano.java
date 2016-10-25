@@ -294,7 +294,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     if(newBlock != null)
                     {
                         if(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK
-                                && IFlowBlock.isFullCube(oldState, worldObj, target))
+                                && IFlowBlock.shouldBeFullCube(oldState, worldObj, target))
                         {
 //                            Adversity.log.info("doCooling: set block from " 
 //                                    + worldObj.getBlockState(target).getBlock().getRegistryName() + " to " 
@@ -607,7 +607,9 @@ public class TileVolcano extends TileEntity implements ITickable{
     }
 
     /**
-     * Returns true if is a height block, even if no ajustement was needed.
+     * Melts static height blocks if geometry would be different from current.
+     * And turns full cube dynamic blocks into static cube blocks.
+     * Returns true if is a height block, even if no adjustement was needed.
      */
     private boolean adjustHeightBlockIfNeeded(BlockPos targetPos)
     {
@@ -623,7 +625,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         if(!IFlowBlock.isBlockFlowHeight(block)) return false;
 
-        boolean isFullCube = IFlowBlock.isFullCube(state, worldObj, targetPos);
+        boolean isFullCube = IFlowBlock.shouldBeFullCube(state, worldObj, targetPos);
 
 
         if(isFullCube)
@@ -662,6 +664,11 @@ public class TileVolcano extends TileEntity implements ITickable{
     }
 
 
+    /**
+     * Adds or removes filler blocks as needed.
+     * Also replaces static filler blocks with dynamic version.
+     * @param basePos
+     */
     private void adjustFillIfNeeded(BlockPos basePos)
     {
         final int SHOULD_BE_AIR = -1;
@@ -701,16 +708,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         if(IFlowBlock.isBlockFlowFiller(baseBlock))
         {
-            
-            // IFlowBlock.topFillerNeeded is not a perfect predictor of filler geometry
-            // so if a filler is already in place, verify it is still needed.
-//            if(targetMeta != SHOULD_BE_AIR && baseBlock instanceof FlowDynamicBlock 
-//                    && ((FlowDynamicBlock)baseBlock).isAir(baseState, worldObj, basePos))
-//            {
-//                targetMeta = SHOULD_BE_AIR;
-//                Adversity.log.info("removed empty filler block, case #1");
-//            }
-            
+                        
             if(targetMeta == SHOULD_BE_AIR)
             {
 //                Adversity.log.info("adjustFillIfNeeded: set block from " 

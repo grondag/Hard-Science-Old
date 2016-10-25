@@ -12,8 +12,10 @@ import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -47,6 +49,9 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
         return itemBuilder.build();
     }
     
+    /**
+     * Prevent neighboring dynamic blocks from updating geometry by making them static.
+     */
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
@@ -54,5 +59,14 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
 
-
+    /**
+     * Prevent neighboring dynamic blocks from updating geometry by making them static.
+     */
+    @Override
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        IBlockState result = super.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
+        IFlowBlock.freezeNeighbors(worldIn, pos, result);
+        return result;
+    }
 }

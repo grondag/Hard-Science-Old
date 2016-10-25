@@ -105,7 +105,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return IFlowBlock.isFullCube(state, world, pos);
+        return IFlowBlock.shouldBeFullCube(state, world, pos);
     }
 
     @Override
