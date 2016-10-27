@@ -1,7 +1,9 @@
 package grondag.adversity.niceblock.base;
 
 import java.util.List;
+import java.util.Random;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
@@ -35,20 +37,46 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 	    return ModelRefreshMode.CACHE;
 	}
 	
+	
+	//TODO: can remove this once stop creating items for each color
 	@Override
     public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
     {
         return 0;
     }
 	
+    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    {
+        Adversity.log.info("getDrops");
+        List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
+
+//        Random rand = world instanceof World ? ((World)world).rand : RANDOM;
+//
+//        int count = quantityDropped(state, fortune, rand);
+//        for(int i = 0; i < count; i++)
+//        {
+//            Item item = this.getItemDropped(state, rand, fortune);
+//            if (item != null)
+//            {
+//                ret.add(new ItemStack(item, 1, this.damageDropped(state)));
+//            }
+//        }
+        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, state.getValue(NiceBlock.META));
+        long key = getModelStateKey(state, world, pos);
+        NiceItemBlock.setModelStateKey(stack, key);
+        ret.add(stack);
+        return ret;
+    }
+    
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
-        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, 0);
         //Do not trust the state passed in, because WAILA passes in a default state.
         //Doing so causes us to pass in bad meta value which determines a bad model key 
         //which is then cached, leading to strange render problems for blocks just placed up updated.
         IBlockState goodState = world.getBlockState(pos);
+        
+        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, goodState.getValue(NiceBlock.META));
         long key = getModelStateKey(goodState, world, pos);
         NiceItemBlock.setModelStateKey(stack, key);
         return stack;

@@ -34,12 +34,13 @@ public class CollisionBoxGenerator
         List<AxisAlignedBB> simple = makeBoxSimpleMethod(quads);
 
 //        if(retVal.isEmpty() || getListVolume(simple) <= getListVolume(retVal))
-            
-        if(getListVolume(simple) <= getListVolume(retVal))
+        double simpleVolume = getListVolume(simple);
+        double voxelVolume = getListVolume(retVal);
+        //use simple volume if voxel gives no box, simple is smaller, or if simple is not much bigger
+        if(voxelVolume == 0 || simpleVolume < voxelVolume || ((simpleVolume - voxelVolume) / voxelVolume) < 0.1)
         {
             retVal = simple;
         }
-
         return retVal;
     }
 
@@ -59,23 +60,17 @@ public class CollisionBoxGenerator
         if(quads.isEmpty()) return Collections.emptyList();
         
         ImmutableList.Builder<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>();
-        Vec3d ray = new Vec3d(5525, 13123, 7435);
 
         VoxelBitField voxels = new VoxelBitField(3);
 
+        
         for(int x = 0; x < 8; x++)
         {
             for(int y = 0; y < 8; y++)
             {
                 for(int z = 0; z < 8; z++)
                 {
-                    Vec3d point = new Vec3d((x+0.5)/8.0, (y+0.5)/8.0, (z+0.5)/8.0);
-                    int intersectionCount = 0;
-                    for(RawQuad quad : quads)
-                    {                  
-                        if(quad.intersectsWithRay(point, ray)) intersectionCount++;
-                    }          
-                    if((intersectionCount & 0x1) == 1)
+                    if(isVoxelPresent(x, y, z, quads))
                     {
                         voxels.setFilled(x, y, z, true);
                     }
@@ -83,6 +78,27 @@ public class CollisionBoxGenerator
             }
         }
 
+        // Handle special case of thin horizontal layer at bottom.
+        // Would be better to use Separating Axis Theorem tests to cover more edge cases,
+        // but not willing to take time to implement that right now.
+
+        for(RawQuad quad : quads)
+        {                  
+            if(quad.isOnFace(EnumFacing.DOWN))
+            {
+                for(int x = 0; x < 8; x++)
+                {
+                    for(int z = 0; z < 8; z++)
+                    {
+                        if(quad.containsPoint(new Vec3d((x+0.5)/8.0, 0.0, (z+0.5)/8.0)))
+                        {
+                            voxels.setFilled(x, 0, z, true);
+                        }
+                    }
+                }
+            }
+        } 
+        
         // use bigger voxels if doesn't inflate the volume too much
         VoxelBitField simplified =  voxels.simplify();
         //     Adversity.log.info("v:" + simplified.getFilledRatio() + " d:" + simplified.getDiscardedVolume() + " i:" + simplified.getInflatedVolume());
@@ -121,7 +137,24 @@ public class CollisionBoxGenerator
 
         return retVal.build();
     }
-
+    
+    private static boolean isVoxelPresent(double x, double y, double z, List<RawQuad> quads)
+    {
+        Vec3d point = new Vec3d((x+0.5)/8.0, (y+0.5)/8.0, (z+0.5)/8.0);
+        return isPointEnclosed(point, quads);
+    }
+    
+    private static final Vec3d VOXEL_TEST_RAY = new Vec3d(5525, 13123, 7435);
+    private static boolean isPointEnclosed(Vec3d point, List<RawQuad> quads)
+    {
+        int intersectionCount = 0;
+        for(RawQuad quad : quads)
+        {                  
+            if(quad.intersectsWithRay(point, VOXEL_TEST_RAY)) intersectionCount++;
+        }          
+        return (intersectionCount & 0x1) == 1;
+    }
+    
     private static List<AxisAlignedBB> makeBoxSimpleMethod(List<RawQuad> quads)
     {
 

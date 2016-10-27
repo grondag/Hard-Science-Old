@@ -85,6 +85,13 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         return itemBuilder.build();
     }
 
+    //TODO: Can remove this when override removed from NiceBlockPlus
+    @Override
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
+    {
+        return stack.getMetadata();
+    }
+    
     // setting to false drops AO light value
     @Override
     public boolean isFullCube(IBlockState state)
@@ -132,6 +139,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
+        Adversity.log.info("removedByPlayer");
         IFlowBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }

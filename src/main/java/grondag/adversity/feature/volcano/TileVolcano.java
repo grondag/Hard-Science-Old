@@ -24,20 +24,21 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
+// fix hitboxes for very thin flow blocks
 
 //TODOS
-//freeze nearby shapes on player break
+//block drops - silk touch
+//create basalt gravel drop item
+//create basalt gravel block
+//make basalt gravel drop auto-combine into full blocks
+//make lava unharvestable?
 
-
-//create basalt cobble drop item
-//create basalt cobblestone block
-//make basalt cobble drop auto-compact into blocks
-
-//fix block item/item model
+//fix volcano block item/item model
 //make volcano block unbreakable
 //volcano wand
 
 //simulation integration & control from simulation
+//update volcano wand as needed
 //detection item
 //world gen
 

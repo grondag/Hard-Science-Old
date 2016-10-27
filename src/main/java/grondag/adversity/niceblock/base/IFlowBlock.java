@@ -133,7 +133,7 @@ public interface IFlowBlock
             {
                 for(int y = -4; y <= 4; y++)
                 {
-                    if(!(x == 0 && y == 0 && z == 0))
+//                    if(!(x == 0 && y == 0 && z == 0))
                     {
                         BlockPos targetPos = pos.add(x, y, z);
                         targetState = worldIn.getBlockState(targetPos);

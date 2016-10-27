@@ -59,31 +59,6 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         {
             return !neighborState.doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
         }
-        
-//        
-//        if(blockAccess.getBlockState(pos.offset(side)).getBlock() instanceof FlowStaticBlock)
-//        {
-//            if(side == EnumFacing.UP || side == EnumFacing.DOWN)
-//            {
-//                return false;
-//            }
-//            else if(blockState instanceof IExtendedBlockState)
-//            {
-//                return this.dispatcher.getStateSet()
-//                        .getSetValueFromBits(((IExtendedBlockState)blockState)
-//                        .getValue(NiceBlock2.MODEL_KEY))
-//                        .getValue(ModelStateComponents.FLOW_JOIN)
-//                        .getSideHeight(HorizontalFace.find(side)) < 0;
-//            }
-//            else
-//            {
-//                return true;
-//            }
-//        }
-//        else
-//        {
-//            return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
-//        }
     }
 
     @Override
@@ -100,7 +75,12 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         return itemBuilder.build();
     }
     
-    
+    //TODO: Can remove this when override removed from NiceBlockPlus
+    @Override
+    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
+    {
+        return stack.getMetadata();
+    }
     
 //    @Override
 //    public boolean isFullBlock(IBlockState state)
@@ -176,6 +156,8 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         IFlowBlock.freezeNeighbors(worldIn, pos, result);
         return result;
     }
+    
+    
 
 
 //    @Override
