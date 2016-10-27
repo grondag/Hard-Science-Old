@@ -24,10 +24,12 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
+//remove item damage for NiceBlockPlus so that drops can stack
+//  -- all model state should be in modelstatekey
 
 //TODOS
-//block drops - silk touch
 //create basalt gravel drop item
+//add drops to block handling, separating silk touch
 //create basalt gravel block
 //make basalt gravel drop auto-combine into full blocks
 //make lava unharvestable?
