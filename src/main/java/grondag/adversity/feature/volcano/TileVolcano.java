@@ -24,7 +24,6 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-// fix hitboxes for very thin flow blocks
 
 //TODOS
 //block drops - silk touch
