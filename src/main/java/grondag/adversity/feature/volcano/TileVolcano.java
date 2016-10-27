@@ -24,10 +24,13 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-//remove item damage for NiceBlockPlus so that drops can stack
-//  -- all model state should be in modelstatekey
+
 
 //TODOS
+//add color gui to item stacks
+//remove item damage for NiceBlockPlus so that drops can stack
+//-- all model state should be in modelstatekey
+
 //create basalt gravel drop item
 //add drops to block handling, separating silk touch
 //create basalt gravel block
