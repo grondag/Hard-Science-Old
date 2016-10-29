@@ -6,7 +6,6 @@ import grondag.adversity.niceblock.color.FixedColorMapProvider;
 import grondag.adversity.niceblock.color.NoColorMapProvider;
 import grondag.adversity.niceblock.color.HueSet.Tint;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
-import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent.ModelFlowTex;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import grondag.adversity.niceblock.support.BlockTests;
 

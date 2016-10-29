@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;

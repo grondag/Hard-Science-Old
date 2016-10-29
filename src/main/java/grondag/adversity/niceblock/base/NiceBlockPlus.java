@@ -1,23 +1,17 @@
 package grondag.adversity.niceblock.base;
 
 import java.util.List;
-import java.util.Random;
-
 import javax.annotation.Nullable;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;

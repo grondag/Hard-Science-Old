@@ -20,7 +20,6 @@ import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
 import grondag.adversity.niceblock.model.ColorModelFactory;
 import grondag.adversity.niceblock.model.ColumnSquareModelFactory;
-import grondag.adversity.niceblock.model.FlowModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory2;
 import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;

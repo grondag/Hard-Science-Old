@@ -48,7 +48,7 @@ public class NiceBlockHighlighter {
     
     				// Draw collision boxes
     				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.getPlayer().worldObj, pos, bs)) {
-    					RenderGlobal.func_189697_a(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2), 0.0F, 0.0F, 0.0F, 0.4F);
+    					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2), 0.0F, 0.0F, 0.0F, 0.4F);
     				}
     
     				// TODO: want to enable this debug feature somehow?

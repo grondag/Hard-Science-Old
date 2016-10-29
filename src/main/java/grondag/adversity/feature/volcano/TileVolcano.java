@@ -8,7 +8,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
-import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.feature.volcano.SpaceManager.OpenSpace;
@@ -17,8 +16,6 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
-import grondag.adversity.niceblock.block.FlowSimpleBlock;
-import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
@@ -564,7 +561,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 //                + worldObj.getBlockState(top.up()).getBlock().getRegistryName() + " to " 
 //                + state.getBlock().getRegistryName() + " @ " + top.up().toString());
         
-        this.worldObj.setBlockState(top.up(), worldObj.getBiomeGenForCoords(top).fillerBlock);
+        this.worldObj.setBlockState(top.up(), worldObj.getBiome(top).fillerBlock);
     }
 
     private BlockPos findMoundSpot()
