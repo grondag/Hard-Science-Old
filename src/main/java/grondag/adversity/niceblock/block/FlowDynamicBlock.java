@@ -136,7 +136,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
-        Adversity.log.info("removedByPlayer");
         IFlowBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
@@ -146,8 +145,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
      */
     public void makeStatic(IBlockState state, World world, BlockPos pos)
     {
-        Adversity.log.info("makeStatic @" + pos.toString());
-
         if(this.staticVersion == null || state.getBlock() != this) return;
 
         long oldKey = this.getModelStateKey(state, world, pos);

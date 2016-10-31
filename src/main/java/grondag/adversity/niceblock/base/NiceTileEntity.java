@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.base;
 
 
+import mcjty.lib.entity.GenericTileEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -11,11 +12,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class NiceTileEntity extends TileEntity{
+public class NiceTileEntity extends GenericTileEntity{
 
     public static final String PLACEMENT_SHAPE_TAG = "APS";
     public static final String DAMAGE_TAG = "ADT";
     private static final String MODEL_KEY_TAG = "AMK";
+    
+    public static final String CMD_SET_MODEL_KEY = "setModelKey";
 
     private long modelKey;
 

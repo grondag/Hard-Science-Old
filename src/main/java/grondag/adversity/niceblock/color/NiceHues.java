@@ -1,30 +1,21 @@
 package grondag.adversity.niceblock.color;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.color.HueSet.HuePosition;
-import grondag.adversity.niceblock.color.HueSet.Tint;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
+import grondag.adversity.library.Color;
 
 public class NiceHues 
 {
     public static final NiceHues INSTANCE = new NiceHues();
     
-    private final HueSet HUES[];
+//    private final HueSet HUES[];
     
     private NiceHues()
     {
-        ArrayList<HueSet> colors = new ArrayList<HueSet>();
-        for(Hue h : Hue.values())
-        {
-            colors.add(new HueSet(h.hueDegrees()));
-        }
-        HUES = colors.toArray(new HueSet[0]);
+//        ArrayList<HueSet> colors = new ArrayList<HueSet>();
+//        for(Hue h : Hue.values())
+//        {
+//            colors.add(new HueSet(h.hueDegrees()));
+//        }
+//        HUES = colors.toArray(new HueSet[0]);
         
         // was used to probe limits of colors across all hues
 //      for(int c = 1; c < 100; c++)
@@ -57,91 +48,91 @@ public class NiceHues
 //      }
     }
     
-    public HueSet getHueSet(Hue hue)
-    {
-        return HUES[hue.ordinal()];
-    }
+//    public HueSet getHueSet(Hue hue)
+//    {
+//        return HUES[hue.ordinal()];
+//    }
     
-    public void writeColorAtlas(File folderName)
-    {
-        File output = new File(folderName, "adversity_color_atlas.html");
-        try
-        {
-            if(output.exists())
-            {
-                output.delete();
-            }
-            output.createNewFile();
-            
-            FileOutputStream fos = new FileOutputStream(output);
-            BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
-
-            buffer.write("<head>"); buffer.newLine();
-            buffer.write("<style>"); buffer.newLine();
-            buffer.write("table {"); buffer.newLine();
-            buffer.write("    border-spacing: 1px 1px;"); buffer.newLine();
-            buffer.write("}"); buffer.newLine();
-            buffer.write("th, td {"); buffer.newLine();
-            buffer.write("    height: 23px;"); buffer.newLine();
-            buffer.write("    width: 130px;"); buffer.newLine();
-            buffer.write("    vertical-align: center;");
-            buffer.write("}"); buffer.newLine();
-            buffer.write("th {"); buffer.newLine();
-            buffer.write("    text-align: center;");
-            buffer.write("}"); buffer.newLine();
-            buffer.write("td {"); buffer.newLine();
-            buffer.write("    text-align: right;");
-            buffer.write("}"); buffer.newLine();
-            buffer.write("</style>"); buffer.newLine();
-            buffer.write("</head>"); buffer.newLine();
-            for(Hue h : Hue.values())
-            {
-                buffer.write("<table class=\"w3-table-all\">"); buffer.newLine();
-                
-                buffer.write("<tr><th>" + h.hueName() + "</th>");
-                buffer.write("<th>" + HuePosition.NONE.positionName + "</th>");
-                buffer.write("<th>" + HuePosition.OPPOSITE.positionName + "</th>");
-                buffer.write("<th>" + HuePosition.FAR_LEFT.positionName + "</th>");
-                buffer.write("<th>" + HuePosition.NEAR_LEFT.positionName + "</th>");
-                buffer.write("<th>" + HuePosition.NONE.positionName + "</th>");
-                buffer.write("<th>" + HuePosition.NEAR_RIGHT.positionName + "</th>");
-                buffer.write("<th>" + HuePosition.FAR_RIGHT.positionName + "</th>");
-                buffer.write("</tr>");
-                
-                for(Tint t : Tint.values())
-                {
-                    buffer.write("<tr><td>" + t.tintName + "</td>");
-
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t) & 0xFFFFFF));
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.OPPOSITE).getColor(t) & 0xFFFFFF));
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_LEFT).getColor(t) & 0xFFFFFF));
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_LEFT).getColor(t) & 0xFFFFFF));
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t) & 0xFFFFFF));
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(t) & 0xFFFFFF));
-                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
-                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_RIGHT).getColor(t) & 0xFFFFFF));
-
-                    buffer.write("</tr>");
-                }
-                buffer.write("</table>");
-                buffer.write("<h1>&nbsp;</h1>");
-            }
-
-            buffer.close();
-            fos.close();
-
-        }
-        catch (IOException e)
-        {
-            Adversity.log.warn("Unable to output color atlas due to file error:" + e.getMessage());
-        }
-    }
+//    public void writeColorAtlas(File folderName)
+//    {
+//        File output = new File(folderName, "adversity_color_atlas.html");
+//        try
+//        {
+//            if(output.exists())
+//            {
+//                output.delete();
+//            }
+//            output.createNewFile();
+//            
+//            FileOutputStream fos = new FileOutputStream(output);
+//            BufferedWriter buffer = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
+//
+//            buffer.write("<head>"); buffer.newLine();
+//            buffer.write("<style>"); buffer.newLine();
+//            buffer.write("table {"); buffer.newLine();
+//            buffer.write("    border-spacing: 1px 1px;"); buffer.newLine();
+//            buffer.write("}"); buffer.newLine();
+//            buffer.write("th, td {"); buffer.newLine();
+//            buffer.write("    height: 23px;"); buffer.newLine();
+//            buffer.write("    width: 130px;"); buffer.newLine();
+//            buffer.write("    vertical-align: center;");
+//            buffer.write("}"); buffer.newLine();
+//            buffer.write("th {"); buffer.newLine();
+//            buffer.write("    text-align: center;");
+//            buffer.write("}"); buffer.newLine();
+//            buffer.write("td {"); buffer.newLine();
+//            buffer.write("    text-align: right;");
+//            buffer.write("}"); buffer.newLine();
+//            buffer.write("</style>"); buffer.newLine();
+//            buffer.write("</head>"); buffer.newLine();
+//            for(Hue h : Hue.values())
+//            {
+//                buffer.write("<table class=\"w3-table-all\">"); buffer.newLine();
+//                
+//                buffer.write("<tr><th>" + h.hueName() + "</th>");
+//                buffer.write("<th>" + HuePosition.NONE.positionName + "</th>");
+//                buffer.write("<th>" + HuePosition.OPPOSITE.positionName + "</th>");
+//                buffer.write("<th>" + HuePosition.FAR_LEFT.positionName + "</th>");
+//                buffer.write("<th>" + HuePosition.NEAR_LEFT.positionName + "</th>");
+//                buffer.write("<th>" + HuePosition.NONE.positionName + "</th>");
+//                buffer.write("<th>" + HuePosition.NEAR_RIGHT.positionName + "</th>");
+//                buffer.write("<th>" + HuePosition.FAR_RIGHT.positionName + "</th>");
+//                buffer.write("</tr>");
+//                
+//                for(Tint t : Tint.values())
+//                {
+//                    buffer.write("<tr><td>" + t.tintName + "</td>");
+//
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t) & 0xFFFFFF));
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.OPPOSITE).getColor(t) & 0xFFFFFF));
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_LEFT).getColor(t) & 0xFFFFFF));
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_LEFT).getColor(t) & 0xFFFFFF));
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NONE).getColor(t) & 0xFFFFFF));
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.NEAR_RIGHT).getColor(t) & 0xFFFFFF));
+//                    buffer.write(String.format("<td style=\"background:#%1$06X\"></td>", 
+//                            HUES[h.ordinal()].getColorSetForHue(HuePosition.FAR_RIGHT).getColor(t) & 0xFFFFFF));
+//
+//                    buffer.write("</tr>");
+//                }
+//                buffer.write("</table>");
+//                buffer.write("<h1>&nbsp;</h1>");
+//            }
+//
+//            buffer.close();
+//            fos.close();
+//
+//        }
+//        catch (IOException e)
+//        {
+//            Adversity.log.warn("Unable to output color atlas due to file error:" + e.getMessage());
+//        }
+//    }
      
     public static enum Hue
     {
@@ -179,6 +170,7 @@ public class NiceHues
          */
         private static final double HUE_SALT = 5.12;
 
+        private int hueSample = 0;
         
         Hue(String hueName)
         {
@@ -193,6 +185,19 @@ public class NiceHues
         public double hueDegrees()
         {
             return this.ordinal() * 360 / Hue.values().length + HUE_SALT;
+        }
+        
+        /**
+         * Initialized lazily because ordinal not available during instantiation.
+         * @return
+         */
+        public int hueSample()
+        {
+            if(hueSample == 0)
+            {
+                this.hueSample = Color.fromHCL(this.hueDegrees(), Color.HCL_MAX, Color.HCL_MAX).RGB_int | 0xFF000000;
+            }
+            return this.hueSample;
         }
     }
 

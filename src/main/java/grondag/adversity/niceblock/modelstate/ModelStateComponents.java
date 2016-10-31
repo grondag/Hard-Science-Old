@@ -3,8 +3,9 @@ package grondag.adversity.niceblock.modelstate;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.FixedColorMapProvider;
+import grondag.adversity.niceblock.color.HueSet.Chroma;
+import grondag.adversity.niceblock.color.HueSet.Luminance;
 import grondag.adversity.niceblock.color.NoColorMapProvider;
-import grondag.adversity.niceblock.color.HueSet.Tint;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import grondag.adversity.niceblock.support.BlockTests;
@@ -74,9 +75,9 @@ public class ModelStateComponents
 
     public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
     public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
-    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Tint.WHITE, 0))));
+    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT, 0))));
     public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
-            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.WHITE, 0))));
+            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT, 0))));
     
     public static final ModelSimpleJoinComponent MASONRY_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.MASONRY_MATCH));
 
@@ -91,7 +92,7 @@ public class ModelStateComponents
     public static final ModelFlowTexComponent FLOW_TEX = register(new ModelFlowTexComponent(counter++));
     
     public static final ModelColorMapComponent COLORS_BASALT = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
-            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Tint.NEUTRAL_DEEP, 0))));
+            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK, 0))));
     
     public static final ModelBigTexComponent BIG_TEX_IGNORE_META = register(new ModelBigTexComponent(counter++, false));
     

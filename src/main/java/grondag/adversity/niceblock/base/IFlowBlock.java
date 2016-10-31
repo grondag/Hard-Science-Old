@@ -116,7 +116,6 @@ public interface IFlowBlock
      */
     public static void freezeNeighbors(World worldIn, BlockPos pos, IBlockState state)
     {
-        Adversity.log.info("freezeNeightbors @" + pos.toString());
         if(!(state.getBlock() instanceof IFlowBlock)) return;
         IFlowBlock fromBlock = (IFlowBlock) state.getBlock();
         

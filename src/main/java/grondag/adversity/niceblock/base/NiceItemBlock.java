@@ -2,6 +2,8 @@ package grondag.adversity.niceblock.base;
 
 import java.util.List;
 
+import grondag.adversity.Adversity;
+import grondag.adversity.gui.AdversityGuiHandler;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -11,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -83,6 +86,16 @@ public class NiceItemBlock extends ItemBlock
             }
             tag.setLong(NiceItemBlock.ITEM_MODEL_KEY_TAG, key);
         }
+    }
+    
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World world, EntityPlayer player, EnumHand hand)
+    {
+        if (world.isRemote) {
+            player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        }
+        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
     }
     
     @Override
