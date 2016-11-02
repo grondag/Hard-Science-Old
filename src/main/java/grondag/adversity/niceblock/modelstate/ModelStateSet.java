@@ -201,7 +201,7 @@ public class ModelStateSet
     public ModelStateSetValue getValueWithUpdates(ModelStateSetValue valueIn, ModelStateValue<?,?>... components)
     {
         long mask = computeMask(components);
-        long key = (valueIn.key & mask) | computeKey(components);
+        long key = (valueIn.key & ~mask) | computeKey(components);
         return valueCache.getUnchecked(key);
     }
     

@@ -5,6 +5,8 @@ import java.util.List;
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.modelstate.ModelColorMapComponent.ModelColorMap;
+import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -85,6 +87,28 @@ public class NiceItemBlock extends ItemBlock
 
             }
             tag.setLong(NiceItemBlock.ITEM_MODEL_KEY_TAG, key);
+        }
+    }
+    
+    public int getColorMapID(ItemStack stack)
+    {
+        ModelDispatcher dispatch = ((NiceBlock)this.block).dispatcher;
+        ModelStateSet stateSet = dispatch.getStateSet();
+        return stateSet.getSetValueFromBits(getModelStateKey(stack)).getValue(stateSet.getFirstColorMapComponent()).ordinal;
+    }
+    
+    public void setColorMapID(ItemStack stack, int colorMapID)
+    {
+    
+        ModelDispatcher dispatch = ((NiceBlock)this.block).dispatcher;
+        ModelStateSet stateSet = dispatch.getStateSet();
+        ModelColorMap colorMap = stateSet.getFirstColorMapComponent().createValueFromBits(colorMapID);
+    //ModelComponent
+        long oldModelKey = getModelStateKey(stack);
+        long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromBits(oldModelKey), colorMap).getKey();
+        if(oldModelKey != newModelKey)
+        {
+            setModelStateKey(stack, newModelKey);
         }
     }
     

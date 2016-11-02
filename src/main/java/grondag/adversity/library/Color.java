@@ -147,6 +147,11 @@ public class Color
         return new Color(x, y, z);
     }
     
+    public static Color fromRGB(int rgb)
+    {
+        return new Color(rgb & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 16) & 0xFF);
+    }
+    
     protected Color (double x, double y, double z)
     {
         

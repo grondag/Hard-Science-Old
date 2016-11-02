@@ -2,7 +2,10 @@ package grondag.adversity.niceblock.color;
 
 import java.util.ArrayList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.Color;
+import grondag.adversity.library.Color.EnumHCLFailureMode;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.color.HueSet.Chroma;
 import grondag.adversity.niceblock.color.HueSet.Luminance;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
@@ -26,7 +29,9 @@ public class BlockColorMapProvider implements IColorMapProvider
             {
                 for(Chroma chroma : Chroma.values())
                 {
-                    if(Color.fromHCL(hue.hueDegrees(), chroma.value, luminance.value).IS_VISIBLE)
+                    Color testColor = Color.fromHCL(hue.hueDegrees(), chroma.value, luminance.value, EnumHCLFailureMode.REDUCE_CHROMA);
+                    
+                    if(testColor.IS_VISIBLE && testColor.HCL_C > chroma.value - 6)
                     {
                         ColorMap newMap = ColorMap.makeColorMap(hue, chroma, luminance, i++);
                         colorMaps.add(newMap);
@@ -49,5 +54,11 @@ public class BlockColorMapProvider implements IColorMapProvider
     public ColorMap getColorMap(int colorIndex)
     {
         return validColors[Math.max(0, Math.min(validColors.length-1, colorIndex))];
+    }
+    
+    /** may return NULL */
+    public ColorMap getColorMap(Hue hue, Chroma chroma, Luminance luminance)
+    {
+        return allColors[hue.ordinal()][chroma.ordinal()][luminance.ordinal()];
     }
 }

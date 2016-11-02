@@ -59,15 +59,17 @@ public class HueSet
        
        public static enum Chroma
        {
-           WHITE("White", 1.5),
-           GREY("Grey", 2.5),
-           NEUTRAL("Neutral", 5),
-           RICH_NEUTRAL("Rich Neutral", 10),
-           RICH("Rich", 15),
-           DEEP("Deep", 25),
-           BOLD("Bold", 40),
-           EXTRA_BOLD("Extra Bold", 55),
-           ULTRA_ACCENT("Ultra Accent", Color.HCL_MAX);
+           WHITE("Faint", 2.5),
+           GREY("Subtle", 5),
+           NEUTRAL("Neutral", 10),
+           RICH("Rich", 20),
+           DEEP("Deep", 30),
+           EXTRA_DEEP("Extra Deep", 40),
+           BOLD("Bold", 50),
+           SUPER_BOLD("Super Bold", 60),
+           ACCENT("Accent", 70),
+           ULTRA_ACCENT("Ultra Accent", 80),
+           SUPER_ACCENT("Whoa", 90);
            
            public final String name;
            public final double value;

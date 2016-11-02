@@ -2,14 +2,19 @@ package grondag.adversity.gui;
 
 
 import java.io.IOException;
-import grondag.adversity.niceblock.color.HueSet;
-import grondag.adversity.niceblock.color.NiceHues.Hue;
-import grondag.adversity.niceblock.color.NiceHues;
+
+import grondag.adversity.network.AdversityMessages;
+import grondag.adversity.network.PacketUpdateNiceItemBlock;
+import grondag.adversity.niceblock.base.NiceItemBlock;
+import grondag.adversity.niceblock.color.BlockColorMapProvider;
+import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 
 public class NiceGuiScreen extends GuiScreen
 {
@@ -26,6 +31,8 @@ public class NiceGuiScreen extends GuiScreen
 
     private ColorPicker colorPicker;
     
+    private int colorMapID = 0;
+    
     @Override
     public boolean doesGuiPauseGame()
     {
@@ -33,22 +40,30 @@ public class NiceGuiScreen extends GuiScreen
     }
 
     @Override
-    protected void mouseClicked(int x, int y, int button) throws IOException
+    protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
-        super.mouseClicked(x, y, button);
+        super.mouseClicked(mouseX, mouseY, clickedMouseButton);
+        colorPicker.handleMouseInput(mouseX, mouseY);
     }
-
+    
     @Override
-    public void handleMouseInput() throws IOException 
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
-        super.handleMouseInput();
+        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        colorPicker.handleMouseInput(mouseX, mouseY);
     }
-
+    
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) 
     {
         super.mouseReleased(mouseX, mouseY, state);
-        colorPicker.mouseReleased(mouseX, mouseY, state);
+        colorPicker.handleMouseInput(mouseX, mouseY);
+        
+        if(this.colorMapID != colorPicker.getColorMapID())
+        {
+            this.colorMapID = colorPicker.getColorMapID();
+            AdversityMessages.INSTANCE.sendToServer(new PacketUpdateNiceItemBlock(this.colorMapID));
+        }
     }
 
     @Override
@@ -61,19 +76,33 @@ public class NiceGuiScreen extends GuiScreen
     public void initGui()
     {
         super.initGui();
+                
         int margin = (int) (this.height * MARGIN_FACTOR);
         this.xStart = margin;
         this.yStart = margin;
         this.xSize = this.width - (margin - 1) * 2;
         this.ySize = this.height - (margin - 1) * 2;
+        
         if(colorPicker == null)
         {
+            ItemStack heldItem = mc.thePlayer.getHeldItem(EnumHand.MAIN_HAND);
+            if (heldItem == null || !(heldItem.getItem() instanceof NiceItemBlock)) 
+            {
+                // Cannot happen!
+                return;
+            }
+            NiceItemBlock niceItem = (NiceItemBlock)heldItem.getItem();
+            this.colorMapID = niceItem.getColorMapID(heldItem);
+            
             colorPicker = new ColorPicker(this.xStart + 10, this.yStart + 10, this.ySize - 20);
+            colorPicker.setColorMapID(this.colorMapID);
         }
         else
         {
             colorPicker.resize(this.xStart + 10, this.yStart + 10, this.ySize - 20);
         }
+        
+
     }
 
     @Override
@@ -82,8 +111,13 @@ public class NiceGuiScreen extends GuiScreen
         this.drawGradientRect(this.xStart, this.yStart, this.xStart + this.xSize, this.yStart + this.ySize, -1072689136, -804253680);
 
         this.colorPicker.drawControl(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, "WUT?", this.width / 2, this.yStart + 20, 16777215);
-
+        this.drawCenteredString(this.fontRendererObj, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
+        
+        int left = this.xStart + this.xSize / 2;
+        int top = this.yStart + this.ySize / 4;
+        drawRect(left, top , left + this.ySize / 2, top + this.ySize / 2, 
+                BlockColorMapProvider.INSTANCE.getColorMap(this.colorPicker.getColorMapID()).getColor(EnumColorMap.BASE));
+        
         super.drawScreen(mouseX, mouseY, partialTicks);
  
     }
