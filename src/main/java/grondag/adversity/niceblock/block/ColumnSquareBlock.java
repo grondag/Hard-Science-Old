@@ -13,11 +13,16 @@ import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ColumnSquareBlock extends NiceBlockPlus
 {
@@ -42,20 +47,28 @@ public class ColumnSquareBlock extends NiceBlockPlus
 
     }
 
-//    @Override
-//    public List<ItemStack> getSubItems()
-//    {
-//        ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
-//        int itemCount = (int) colorMap.getValueCount();
-//        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-//        for(int i = 0; i < itemCount; i++)
-//        {
-//            ItemStack stack = new ItemStack(this, 1, i);
-//            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i),
-//                    ModelStateComponents.AXIS.fromEnum(EnumFacing.Axis.Y));
-//            NiceItemBlock.setModelStateKey(stack, key);
-//            itemBuilder.add(stack);
-//        }
-//        return itemBuilder.build();
-//    }
+    //only display vertical variant in item search
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    {
+        list.add(getSubItems().get(Axis.Y.ordinal()));
+    }
+    
+    //including all variants here for benefit of WAILA model lookup
+    @Override
+    public List<ItemStack> getSubItems()
+    {
+        ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
+        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+        for(Axis axis : Axis.values())
+        {
+            ItemStack stack = new ItemStack(this, 1, axis.ordinal());
+            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(0),
+                        ModelStateComponents.AXIS.fromEnum(axis));
+                NiceItemBlock.setModelStateKey(stack, key);
+            itemBuilder.add(stack);
+        }
+        return itemBuilder.build();
+    }
 }

@@ -22,7 +22,6 @@ import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
 
-
 //TODOS
 //create basalt gravel drop item
 //add drops to block handling, separating silk touch
