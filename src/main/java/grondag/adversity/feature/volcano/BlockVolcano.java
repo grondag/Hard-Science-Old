@@ -20,7 +20,7 @@ public class BlockVolcano extends Block implements ITileEntityProvider {
 		this.setResistance(2000.0F);
 		this.setSoundType(SoundType.STONE);
 		this.setHarvestLevel("pickaxe", 5);
-        this.setRegistryName("blockVolcano");
+        this.setRegistryName("block_volcano");
         this.setUnlocalizedName(this.getRegistryName().toString());
 	}
 

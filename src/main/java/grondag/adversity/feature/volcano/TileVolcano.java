@@ -29,7 +29,6 @@ import grondag.adversity.simulator.Simulator;
 //make basalt gravel drop auto-combine into full blocks
 //make lava unharvestable?
 
-//fix volcano block item/item model
 //make volcano block unbreakable
 //volcano wand
 

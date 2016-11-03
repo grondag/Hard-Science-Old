@@ -1,7 +1,10 @@
 package grondag.adversity.feature.volcano;
 
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.BiomeManager.BiomeType;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -28,11 +31,24 @@ public class Volcano {
 //	public static Fluid				fluidVolcanicLava;
 
 	// TILE ENTITIES
-	public static BlockVolcano		blockVolcano = new BlockVolcano();
+	public static BlockVolcano		blockVolcano;
+	public static Item             itemBlockVolcano;
 
-	public static void preInit(FMLPreInitializationEvent event) {
+	public static void preInit(FMLPreInitializationEvent event) 
+	{
+	    blockVolcano = new BlockVolcano();
+	    GameRegistry.register(blockVolcano);
+	    itemBlockVolcano = new ItemBlock(blockVolcano).setRegistryName(blockVolcano.getRegistryName());
+	    GameRegistry.register(itemBlockVolcano);
+	    
+	    if(event.getSide() == Side.CLIENT)
+	    {
+	        ModelLoader.setCustomModelResourceLocation(itemBlockVolcano, 0, new ModelResourceLocation("adversity:block_volcano", "inventory"));
+	    }
 
- 
+	    // TILE ENTITIES
+	    GameRegistry.registerTileEntity(TileVolcano.class, "TileVolcano");
+	    
 		//GameRegistry.registerBlock(Volcano.blockHaze = new BlockHaze(Material.air), "Haze");
 		//GameRegistry.registerBlock(Volcano.blockHazeRising = new BlockHazeRising(Material.glass), "HazeRising");
 		//GameRegistry.registerBlock(Volcano.blockAsh = new BlockAsh("Ash", Material.snow), "Ash");
@@ -45,12 +61,8 @@ public class Volcano {
 //		blockVolcanicLava = (BlockVolcanicLava) new BlockVolcanicLava(Volcano.fluidVolcanicLava, Material.lava)
 //				.setRegistryName("volcanic_lava");
 //		GameRegistry.register(blockVolcanicLava);
-		GameRegistry.register(blockVolcano);
-		GameRegistry.register(new ItemBlock(blockVolcano).setRegistryName(blockVolcano.getRegistryName().getResourcePath()));
 //        GameRegistry.register(new ItemBlock(blockVolcanicLava).setRegistryName(blockVolcanicLava.getRegistryName().getResourcePath()));
 //        FluidRegistry.addBucketForFluid(fluidVolcanicLava);
-        if(event.getSide() == Side.CLIENT)
-        {
 //            final ModelResourceLocation volcanicLavaLocation = new ModelResourceLocation(Adversity.MODID.toLowerCase() + ":block/fluids", "volcanic_lava");
 
   //          Item volcanicLavaItem = Item.getItemFromBlock(blockVolcanicLava);
@@ -71,7 +83,7 @@ public class Volcano {
 //                    return volcanicLavaLocation;
 //                }
 //            });
-        }
+        
 
 		// ITEMS
 //		itemVolcanicLavaBucket = new ItemVolcanicLavaBucket(Volcano.blockVolcanicLava);
@@ -80,10 +92,6 @@ public class Volcano {
 //				new ItemStack(Items.bucket));
 
 		
-		// TILE ENTITIES
-		Volcano.blockVolcano = new BlockVolcano();
-//		GameRegistry.registerBlock(Volcano.blockVolcano, "BlockVolcano");
-		GameRegistry.registerTileEntity(TileVolcano.class, "TileVolcano");
 	}
 
 	public static void init(FMLInitializationEvent event) {
