@@ -42,20 +42,20 @@ public class ColumnSquareBlock extends NiceBlockPlus
 
     }
 
-    @Override
-    public List<ItemStack> getSubItems()
-    {
-        ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
-        int itemCount = (int) colorMap.getValueCount();
-        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-        for(int i = 0; i < itemCount; i++)
-        {
-            ItemStack stack = new ItemStack(this, 1, i);
-            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i),
-                    ModelStateComponents.AXIS.fromEnum(EnumFacing.Axis.Y));
-            NiceItemBlock.setModelStateKey(stack, key);
-            itemBuilder.add(stack);
-        }
-        return itemBuilder.build();
-    }
+//    @Override
+//    public List<ItemStack> getSubItems()
+//    {
+//        ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
+//        int itemCount = (int) colorMap.getValueCount();
+//        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+//        for(int i = 0; i < itemCount; i++)
+//        {
+//            ItemStack stack = new ItemStack(this, 1, i);
+//            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i),
+//                    ModelStateComponents.AXIS.fromEnum(EnumFacing.Axis.Y));
+//            NiceItemBlock.setModelStateKey(stack, key);
+//            itemBuilder.add(stack);
+//        }
+//        return itemBuilder.build();
+//    }
 }

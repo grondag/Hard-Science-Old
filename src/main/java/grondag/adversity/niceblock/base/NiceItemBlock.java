@@ -57,11 +57,20 @@ public class NiceItemBlock extends ItemBlock
     {
         if(stack.getItem() instanceof NiceItemBlock)
         {
-            //WAILA or other mods might create a stack with no NBT, which will not work in dispatcher.
+            //WAILA or other mods might create a stack with no NBT, which may not work in dispatcher.
             if(stack.getTagCompound() == null)
             {
                 List<ItemStack> subItems =  ((NiceBlock)((NiceItemBlock)stack.getItem()).block).getSubItems();
-                return subItems.get(Math.min(stack.getMetadata(), subItems.size()-1)).getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+                ItemStack defaultStack = subItems.get(Math.min(stack.getMetadata(), subItems.size()-1));
+                if(defaultStack.getTagCompound() == null)
+                {
+                    //if not tag provided, must be a dispatcher that doesn't care
+                    return 0L;
+                }
+                else
+                {
+                    return defaultStack.getTagCompound().getLong(NiceItemBlock.ITEM_MODEL_KEY_TAG);
+                }
             }
             else
             {

@@ -3,6 +3,8 @@ package grondag.adversity.niceblock.base;
 import java.util.List;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableList;
+
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
@@ -26,6 +28,14 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 		super(dispatcher, material, styleName);
 	}
 		
+    public List<ItemStack> getSubItems()
+    {
+        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
+        ItemStack stack = new ItemStack(this, 1, 0);
+        itemBuilder.add(stack);
+        return itemBuilder.build();
+    }
+	
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
 		return new NiceTileEntity();		
@@ -35,14 +45,6 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 	{
 	    return ModelRefreshMode.CACHE;
 	}
-	
-	
-	//TODO: can remove this once stop creating items for each color
-	@Override
-    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
-    {
-        return 0;
-    }
 	
 	/**
 	 * Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.

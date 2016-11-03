@@ -81,13 +81,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         }
         return itemBuilder.build();
     }
-
-    //TODO: Can remove this when override removed from NiceBlockPlus
-    @Override
-    public int getMetaForPlacedBlockFromStack(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
-    {
-        return stack.getMetadata();
-    }
     
     // setting to false drops AO light value
     @Override
