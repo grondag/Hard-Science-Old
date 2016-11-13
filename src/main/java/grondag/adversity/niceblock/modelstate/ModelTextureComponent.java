@@ -14,7 +14,7 @@ public class ModelTextureComponent extends ModelStateComponent<ModelTextureCompo
     public ModelTextureComponent(int ordinal, int alternateCount)
     {
         super(ordinal, alternateCount > 1 ? WorldRefreshType.CACHED : WorldRefreshType.NEVER, alternateCount);
-        alternator = Alternator.getAlternator(alternateCount);
+        alternator = Alternator.getAlternator(alternateCount, 957293844);
     }
 
     @Override

@@ -93,7 +93,7 @@ public class NiceBlockRegistrar
     private static final ModelDispatcher COLORED_STONE_DISPATCH = new ModelDispatcher(COLORED_STONE_MODEL);
     public static final NiceBlockPlus COLORED_STONE_BLOCK = new NiceBlockPlus(COLORED_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "colored");
     public static final NiceItemBlock COLORED_STONE_ITEM = new NiceItemBlock(COLORED_STONE_BLOCK);
-   
+    
     private final static ModelFactory.ModelInputs BIGTEX_INPUTS = new ModelFactory.ModelInputs("weathered_smooth_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static BigTexModelFactory BIGTEX_MODEL = new BigTexModelFactory(BIGTEX_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1);
@@ -284,7 +284,13 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COOL_FLOWING_BASALT_HEIGHT_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_HEIGHT_BLOCK);
     public static final FlowDynamicBlock COOL_FLOWING_BASALT_FILLER_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "fill", true, COOL_STATIC_BASALT_FILLER_BLOCK);
     public static final NiceItemBlock COOL_FLOWING_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_FILLER_BLOCK);
-
+    
+    private final static ModelFactory.ModelInputs BASALT_COBBLE_INPUTS = new ModelFactory.ModelInputs("cobble", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ColorModelFactory BASALT_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BASALT,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private static final ModelDispatcher BASALT_COBBLE_DISPATCH = new ModelDispatcher(BASALT_COBBLE_MODEL);
+    public static final NiceBlockPlus BASALT_COBBLE_BLOCK = new NiceBlockPlus(BASALT_COBBLE_DISPATCH, BaseMaterial.BASALT, "basalt_cobble");
+    public static final NiceItemBlock BASALT_COBBLE_ITEM = new NiceItemBlock(BASALT_COBBLE_BLOCK);
 
  
 

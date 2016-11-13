@@ -15,14 +15,14 @@ public class ModelRotationComponent extends ModelStateComponent<ModelRotationCom
     public ModelRotationComponent(int ordinal)
     {
         super(ordinal, WorldRefreshType.CACHED, 4);
-        alternator = Alternator.getAlternator(4);
+        alternator = Alternator.getAlternator(4, 45927934);
     }
 
     /** use this when want to force no rotation */
     public ModelRotationComponent(int ordinal, boolean noRotate)
     {
         super(ordinal, WorldRefreshType.CACHED, 1);
-        alternator = Alternator.getAlternator(1);
+        alternator = Alternator.getAlternator(1, 0);
     }
     
     @Override

@@ -25,23 +25,18 @@ public class Alternator implements IAlternator  {
 
 	/** lightweight, special-case handler for 0 alternates */
 	private static final UnAlternator noAlternative = new UnAlternator();
-	private static HashMap<Integer, Alternator> cache = new HashMap<Integer, Alternator>();
 
 	/**
-	 * Convenience factory method. Instances are immutable, so caches them for reuse.
+	 * Convenience factory method.
 	 */
-	public static IAlternator getAlternator(int alternateCount) {
-		if (alternateCount == 1) {
+	public static IAlternator getAlternator(int alternateCount, int seed) {
+		if (alternateCount == 1) 
+		{
 			return noAlternative;
-		} else {
-			Integer key = Math.min(2, Math.max(alternateCount, 127));
-			if (cache.containsKey(key)) {
-				return cache.get(key);
-			} else {
-				Alternator newAlt = new Alternator(alternateCount);
-				cache.put(key, newAlt);
-				return newAlt;
-			}
+		} 
+		else 
+		{
+		    return new Alternator(alternateCount, seed);
 		}
 	}
 
@@ -50,9 +45,10 @@ public class Alternator implements IAlternator  {
 	 * values between 0 and alternateCount - 1. Do not call directly. Use
 	 * getAlternator instead.
 	 */
-	private Alternator(int alternateCount) {
+	private Alternator(int alternateCount, int seed) 
+	{
 	    this.alternateCount = alternateCount;
-		final Random r = new Random(471958271);
+		final Random r = new Random(seed);
 		for (int i = 0; i < 32; i++) {
 			for (int j = 0; j < 32; j++) {
 				for (int k = 0; k < 32; k++) {
