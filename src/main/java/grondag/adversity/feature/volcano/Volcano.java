@@ -26,6 +26,7 @@ public class Volcano {
 
 	// ITEMS
 //	public static Item				itemVolcanicLavaBucket;
+	public static BasaltRubble basaltRubble;
 
 //	// FLUIDS
 //	public static Fluid				fluidVolcanicLava;
@@ -41,9 +42,15 @@ public class Volcano {
 	    itemBlockVolcano = new ItemBlock(blockVolcano).setRegistryName(blockVolcano.getRegistryName());
 	    GameRegistry.register(itemBlockVolcano);
 	    
+        basaltRubble = new BasaltRubble();
+        GameRegistry.register(basaltRubble);
+        
 	    if(event.getSide() == Side.CLIENT)
 	    {
 	        ModelLoader.setCustomModelResourceLocation(itemBlockVolcano, 0, new ModelResourceLocation("adversity:block_volcano", "inventory"));
+	    
+            ModelLoader.setCustomModelResourceLocation(basaltRubble, 0, new ModelResourceLocation("adversity:basalt_rubble", "inventory"));
+
 	    }
 
 	    // TILE ENTITIES
@@ -98,7 +105,6 @@ public class Volcano {
 //		Volcano.volcano = new BiomeVolcano(Config.BiomeIDs.volcano);
 //		BiomeManager.addBiome(BiomeType.DESERT, new BiomeEntry(Volcano.volcano, 0));
 //		BiomeDictionary.registerBiomeType(Volcano.volcano, BiomeDictionary.Type.HOT);
-		
 		
 	}
 

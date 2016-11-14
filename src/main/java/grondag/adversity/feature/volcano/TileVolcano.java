@@ -21,13 +21,12 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-//Not all rotations are appearing with cobble texture 0
+
 
 //TODOS
-//create basalt gravel drop item
+//finalize rubble texture
 //add drops to block handling, separating silk touch
-//create basalt gravel block
-//make basalt gravel drop auto-combine into full blocks
+//make basalt rubble drop auto-combine into full blocks
 
 //allow cobble appearance to be in flexstone/durastone, eliminate duplicate model
 //same for cut basalt

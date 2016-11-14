@@ -2,7 +2,7 @@
 
   "parent": "builtin/generated",
     "textures": {
-        "layer0": "adversity:items/basalt_stone"
+        "layer0": "adversity:items/basalt_rubble"
     },
   "display": {
     "thirdperson_righthand": {
