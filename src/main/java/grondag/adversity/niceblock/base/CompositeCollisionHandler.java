@@ -9,6 +9,7 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class CompositeCollisionHandler implements ICollisionHandler
@@ -41,7 +42,7 @@ public class CompositeCollisionHandler implements ICollisionHandler
     }
     
     @Override
-    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         long key = 0;
         for(int i = 0; i < handlers.length; i++)
@@ -52,7 +53,7 @@ public class CompositeCollisionHandler implements ICollisionHandler
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         if(handlers.length == 1) return handlers[0].getModelBounds(state, worldIn, pos);
 

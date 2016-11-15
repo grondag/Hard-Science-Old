@@ -286,4 +286,12 @@ public class Useful {
        
        return total / sampleCount;
    }
+   
+   /**
+    * Returns volume of given AABB
+    */
+   public static double AABBVolume(AxisAlignedBB box)
+   {
+       return (box.maxX - box.minX) * (box.maxY - box.minY) * (box.maxZ - box.minZ);
+   }
 }

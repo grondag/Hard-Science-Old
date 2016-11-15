@@ -26,6 +26,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
@@ -153,13 +154,13 @@ public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs> impl
     }
 
     @Override
-    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return 0;
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         Block block = state.getBlock();
         if(block instanceof CSGBlock )

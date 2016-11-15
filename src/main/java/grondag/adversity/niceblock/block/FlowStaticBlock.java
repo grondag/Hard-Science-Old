@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -19,6 +20,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -129,6 +131,18 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         return false;
     }
 
+    @Override
+    public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
+    {
+        double volume = 0;
+        for(AxisAlignedBB box : this.getCachedModelBounds(state, world, pos))
+        {
+            volume += Useful.AABBVolume(box);
+        }
+        
+        return (int) Math.min(9, volume * 9);
+    }
+    
     @Override
     public boolean needsCustomHighlight()
     {

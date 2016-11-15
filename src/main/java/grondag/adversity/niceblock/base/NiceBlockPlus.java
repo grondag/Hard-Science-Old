@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.base;
 
 import java.util.List;
+import java.util.Random;
+
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -12,9 +14,12 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -24,8 +29,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
-
+public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider 
+{
+    
 	public NiceBlockPlus(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
 	{
 		super(dispatcher, material, styleName);
@@ -59,6 +65,7 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 	{
 	    return ModelRefreshMode.CACHE;
 	}
+
 	
 	/**
 	 * Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
@@ -80,33 +87,6 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider {
 	    super.harvestBlock(worldIn, player, pos, state, te, stack);
 	    worldIn.setBlockToAir(pos);
 	}
-	
-	@Override
-    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
-    {
-        List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
-
-        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, state.getValue(NiceBlock.META));
-        
-        NiceItemBlock.setModelStateKey(stack, this.getModelStateKey(state, world, pos));
-        
-        ret.add(stack);
-        return ret;
-    }
-    
-    @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
-    {
-        //Do not trust the state passed in, because WAILA passes in a default state.
-        //Doing so causes us to pass in bad meta value which determines a bad model key 
-        //which is then cached, leading to strange render problems for blocks just placed up updated.
-        IBlockState goodState = world.getBlockState(pos);
-        
-        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, goodState.getValue(NiceBlock.META));
-        long key = getModelStateKey(goodState, world, pos);
-        NiceItemBlock.setModelStateKey(stack, key);
-        return stack;
-    }
 	
     @Override
     public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)

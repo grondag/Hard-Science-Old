@@ -11,6 +11,8 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 //import mcp.mobius.waila.api.IWailaConfigHandler;
 //import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
@@ -19,10 +21,14 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -113,6 +119,9 @@ public class NiceBlock extends Block // implements IWailaProvider
     public final ModelDispatcher dispatcher;
     
     private boolean isGlowing;
+    
+    /** non-null if this drops something other than itself */
+    private Item dropItem;
 
     public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
     {
@@ -212,17 +221,118 @@ public class NiceBlock extends Block // implements IWailaProvider
     
     // INTERACTION HANDLING
 
+    
+    /**
+     * Sets a drop other than this block if desired.
+     */
+    public NiceBlock setDropItem(Item dropItem)
+    {
+        this.dropItem = dropItem;
+        return this;
+    }
+    
+    @Override
+    public boolean canSilkHarvest()
+    {
+        return true;
+    }
+    
     @Override
     public int damageDropped(IBlockState state)
     {
         return state.getValue(META);
     }
 
+    //overridden to allow for world-sensitive drops
+    @Override
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 
+    {
+        player.addStat(StatList.getBlockStats(this));
+        player.addExhaustion(0.025F);
+
+        if (this.canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0)
+        {
+            java.util.List<ItemStack> items = new java.util.ArrayList<ItemStack>();
+            
+            //this is the part that is different from Vanilla
+            ItemStack itemstack = getStackFromBlock(state, worldIn, pos);
+
+            if (itemstack != null)
+            {
+                items.add(itemstack);
+            }
+
+            net.minecraftforge.event.ForgeEventFactory.fireBlockHarvesting(items, worldIn, pos, state, 0, 1.0f, true, player);
+            for (ItemStack item : items)
+            {
+                spawnAsEntity(worldIn, pos, item);
+            }
+        }
+        else
+        {
+            harvesters.set(player);
+            int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
+            this.dropBlockAsItem(worldIn, pos, state, i);
+            harvesters.set(null);
+        }
+    }
+    
+    @Override
+    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    {
+
+        List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
+
+        if(this.dropItem == null)
+        {
+            ItemStack stack = getStackFromBlock(state, world, pos);
+            if(stack != null)
+            {
+                ret.add(stack);
+            }
+        }
+        else
+        {
+            int count = quantityDropped(world, pos, state);
+            ret.add(new ItemStack(this.dropItem, count, 0));
+        }
+        return ret;
+    }
+    
+    /**
+     * Need a world-aware version because may need more than metadata
+     */
+    public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
+    {
+        return 1;
+    }
+    
+    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(state));
+        
+        if(stack != null)
+        {
+            NiceItemBlock.setModelStateKey(stack, this.getModelStateKey(state, world, pos));
+        }
+        return stack;
+    }
+    
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
-        return this.getSubItems().get(state.getValue(NiceBlock.META));
+        //Do not trust the state passed in, because WAILA passes in a default state.
+        //Doing so causes us to pass in bad meta value which determines a bad model key 
+        //which is then cached, leading to strange render problems for blocks just placed up updated.
+        IBlockState goodState = world.getBlockState(pos);
+
+        return getStackFromBlock(goodState, world, pos);
     }
+//    @Override
+//    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
+//    {
+//        return this.getSubItems().get(state.getValue(NiceBlock.META));
+//    }
     
     // RENDERING-RELATED THINGS AND STUFF
     // Note that some of the methods here are called server-side.
@@ -290,7 +400,7 @@ public class NiceBlock extends Block // implements IWailaProvider
      * Gets bounding box list for given state.
      * Should never be called unless collisionHandler is non-null.
      */
-    private List<AxisAlignedBB> getCachedModelBounds(IBlockState state, World worldIn, BlockPos pos)
+    protected List<AxisAlignedBB> getCachedModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         if(collisionHandler == null) return java.util.Collections.emptyList();
         

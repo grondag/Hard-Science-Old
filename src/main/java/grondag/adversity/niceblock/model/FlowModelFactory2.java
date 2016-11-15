@@ -33,6 +33,7 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
@@ -445,7 +446,7 @@ public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> im
     }
 
     @Override
-    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         Block block = state.getBlock();
         if(block instanceof IFlowBlock && block instanceof NiceBlock)
@@ -459,7 +460,7 @@ public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> im
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         Block block = state.getBlock();
         if(block instanceof IFlowBlock && block instanceof NiceBlock)

@@ -14,9 +14,11 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
@@ -32,7 +34,21 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
     {
         return false;
     }
+    
+    //allow mined blocks to stack - consistent with appearance of a full-height block
+    @Override
+    public int damageDropped(IBlockState state)
+    {
+        return 0;
+    }
 
+    //allow mined blocks to stack - don't put an NBT on them
+    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(state));
+    }
+    
+    
     public List<ItemStack> getSubItems()
     {
      

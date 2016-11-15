@@ -21,12 +21,10 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-
+//Mining hot basalt causes NPE
+//cobble and other normal drops have NBT on them - need to revert to using meta to index subitems unless need custom model state on stack
 
 //TODOS
-//add drops to block handling, separating silk touch
-//make basalt rubble drop auto-combine into full blocks
-
 //allow cobble appearance to be in flexstone/durastone, eliminate duplicate model
 //same for cut basalt
 
@@ -287,7 +285,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 if(oldBlock != NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
                         && oldBlock != NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
                 {   
-                    FlowDynamicBlock newBlock = getNextCoolingBlock(oldBlock);
+                    NiceBlock newBlock = getNextCoolingBlock(oldBlock);
                     int meta = oldState.getValue(NiceBlock.META);
 
                     if(newBlock != null)
@@ -389,7 +387,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
     }
 
-    private FlowDynamicBlock getNextCoolingBlock(Block blockIn)
+    private NiceBlock getNextCoolingBlock(Block blockIn)
     {
         if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK)
             return NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK;
@@ -413,7 +411,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     }
 
-    private FlowDynamicBlock getFillerBlock(Block blockIn)
+    private NiceBlock getFillerBlock(Block blockIn)
     {
         if (blockIn == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             return NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK;
@@ -674,7 +672,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         IBlockState baseState = this.worldObj.getBlockState(basePos);
         Block baseBlock = baseState.getBlock();
-        FlowDynamicBlock fillBlock = null;
+        NiceBlock fillBlock = null;
 
         int targetMeta = SHOULD_BE_AIR;
 

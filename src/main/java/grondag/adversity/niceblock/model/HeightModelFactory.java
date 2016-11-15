@@ -21,6 +21,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class HeightModelFactory extends ColorModelFactory implements ICollisionHandler
@@ -118,13 +119,13 @@ public class HeightModelFactory extends ColorModelFactory implements ICollisionH
     }
 
     @Override
-    public long getCollisionKey(IBlockState state, World worldIn, BlockPos pos)
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return (long) state.getValue(NiceBlock.META);
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, World worldIn, BlockPos pos)
+    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (state.getValue(NiceBlock.META) + 1)/16.0, 1)).build();
         return retVal;
