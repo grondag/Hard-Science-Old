@@ -1,7 +1,5 @@
 package grondag.adversity.niceblock.color;
 
-import grondag.adversity.library.Color;
-
 public class HueSet
    {
 //

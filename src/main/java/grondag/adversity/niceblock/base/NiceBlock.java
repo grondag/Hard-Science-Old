@@ -309,13 +309,7 @@ public class NiceBlock extends Block // implements IWailaProvider
     
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        ItemStack stack = new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(state));
-        
-        if(stack != null)
-        {
-            NiceItemBlock.setModelStateKey(stack, this.getModelStateKey(state, world, pos));
-        }
-        return stack;
+        return this.getSubItems().get(this.damageDropped(state));
     }
     
     @Override
@@ -328,11 +322,7 @@ public class NiceBlock extends Block // implements IWailaProvider
 
         return getStackFromBlock(goodState, world, pos);
     }
-//    @Override
-//    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
-//    {
-//        return this.getSubItems().get(state.getValue(NiceBlock.META));
-//    }
+
     
     // RENDERING-RELATED THINGS AND STUFF
     // Note that some of the methods here are called server-side.

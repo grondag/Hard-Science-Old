@@ -6,6 +6,7 @@ import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent.ModelColorMap;
+import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent.ModelFlowJoin;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -115,6 +116,20 @@ public class NiceItemBlock extends ItemBlock
     //ModelComponent
         long oldModelKey = getModelStateKey(stack);
         long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromBits(oldModelKey), colorMap).getKey();
+        if(oldModelKey != newModelKey)
+        {
+            setModelStateKey(stack, newModelKey);
+        }
+    }
+    /**
+     * Used by flow block to preserve shape in silk touch or pick-block drops
+     */
+    public void setFlowState(ItemStack stack, ModelFlowJoin flowJoin)
+    {
+        ModelDispatcher dispatch = ((NiceBlock)this.block).dispatcher;
+        ModelStateSet stateSet = dispatch.getStateSet();
+        long oldModelKey = getModelStateKey(stack);
+        long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromBits(oldModelKey), flowJoin).getKey();
         if(oldModelKey != newModelKey)
         {
             setModelStateKey(stack, newModelKey);

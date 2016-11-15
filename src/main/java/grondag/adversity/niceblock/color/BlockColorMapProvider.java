@@ -2,10 +2,8 @@ package grondag.adversity.niceblock.color;
 
 import java.util.ArrayList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Color;
 import grondag.adversity.library.Color.EnumHCLFailureMode;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.color.HueSet.Chroma;
 import grondag.adversity.niceblock.color.HueSet.Luminance;
 import grondag.adversity.niceblock.color.NiceHues.Hue;

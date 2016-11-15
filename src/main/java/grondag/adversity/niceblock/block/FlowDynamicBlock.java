@@ -10,9 +10,11 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -109,6 +111,21 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         }
         
         return (int) Math.min(9, volume * 9);
+    }
+    
+    @Override
+    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        ItemStack stack = super.getStackFromBlock(state, world, pos);
+        
+        if(stack != null)
+        {
+            NiceItemBlock myItem = (NiceItemBlock) Item.getItemFromBlock(this);
+            ModelStateSetValue modelState = this.dispatcher.getStateSet().getSetValueFromBits( this.getModelStateKey(state, world, pos));
+            myItem.setFlowState(stack, modelState.getWrappedValue(ModelStateComponents.FLOW_JOIN));
+        }
+
+        return stack;
     }
 
     @Override

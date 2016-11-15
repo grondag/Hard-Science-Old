@@ -32,7 +32,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 
 public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
 {
@@ -93,7 +92,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
   
         boolean isAnimated = template.textureSprite.hasAnimationMetadata();
         
-        FlowHeightState flowState = state.getValue(this.flowJoinComponent);
+        FlowHeightState flowState = state.getValue(ModelStateComponents.FLOW_JOIN);
                 
         
         // center vertex setup

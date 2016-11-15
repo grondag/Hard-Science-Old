@@ -1,6 +1,5 @@
 package grondag.adversity.gui;
 
-import grondag.adversity.library.Color;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;

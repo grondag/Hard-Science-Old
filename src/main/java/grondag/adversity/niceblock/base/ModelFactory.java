@@ -41,7 +41,6 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
     protected final ModelRotationComponent rotationComponent;
     protected final ModelBigTexComponent bigTexComponent;
     protected final ModelSpeciesComponent speciesComponent;
-    protected final ModelFlowJoinComponent flowJoinComponent;
     protected final ModelFlowTexComponent flowTexComponent;
     
     public ModelFactory(V modelInputs, ModelStateComponent<?,?>... components)
@@ -69,8 +68,6 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
                 bigTexComponent = (ModelBigTexComponent) c;
             else if(c instanceof ModelSpeciesComponent)
                 speciesComponent = (ModelSpeciesComponent) c;
-            else if(c instanceof ModelFlowJoinComponent)
-                flowJoinComponent = (ModelFlowJoinComponent) c;
             else if(c instanceof ModelFlowTexComponent)
                 flowTexComponent = (ModelFlowTexComponent) c;
         }
@@ -80,7 +77,6 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         this.rotationComponent = rotationComponent;
         this.bigTexComponent = bigTexComponent;
         this.speciesComponent = speciesComponent;
-        this.flowJoinComponent = flowJoinComponent;
         this.flowTexComponent = flowTexComponent;
     }
     

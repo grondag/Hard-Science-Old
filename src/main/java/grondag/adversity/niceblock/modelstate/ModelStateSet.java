@@ -285,6 +285,13 @@ public class ModelStateSet
             return type.getValueType().cast(values[index].getValue());
         }
         
+        public <T extends ModelStateValue<T, V>, V> T getWrappedValue(ModelStateComponent<T, V> type)
+        {
+            int index = typeIndexes[type.getOrdinal()];
+            if(index == ModelStateSet.NOT_PRESENT) return null;
+            return type.getStateType().cast(values[index]);
+        }
+        
         /**
          * Unique ID encapsulating entire state.
          */

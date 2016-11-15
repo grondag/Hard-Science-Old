@@ -1,8 +1,6 @@
 package grondag.adversity.niceblock.base;
 
 import java.util.List;
-import java.util.Random;
-
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -10,20 +8,16 @@ import com.google.common.collect.ImmutableList;
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -88,6 +82,21 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
 	    worldIn.setBlockToAir(pos);
 	}
 	
+	@Override
+    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        ItemStack stack = super.getStackFromBlock(state, world, pos);
+        
+        if(stack != null)
+        {
+            NiceItemBlock myItem = (NiceItemBlock) Item.getItemFromBlock(this);
+            ModelStateSetValue modelState = this.dispatcher.getStateSet().getSetValueFromBits( this.getModelStateKey(state, world, pos));
+            myItem.setColorMapID(stack, modelState.getValue(this.dispatcher.getStateSet().getFirstColorMapComponent()).ordinal);
+        }
+
+        return stack;
+    }
+
     @Override
     public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)
     {

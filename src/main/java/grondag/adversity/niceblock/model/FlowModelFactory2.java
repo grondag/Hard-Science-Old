@@ -34,7 +34,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 
 public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
 {
@@ -106,7 +105,7 @@ public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> im
         template.minV = flowTex.getZ() * 2;
         template.maxV = template.minV + 2;
 
-        FlowHeightState flowState = state.getValue(this.flowJoinComponent);
+        FlowHeightState flowState = state.getValue(ModelStateComponents.FLOW_JOIN);
 
         // center vertex setup
         FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0 - flowState.getCenterVertexHeight() + flowState.getYOffset());

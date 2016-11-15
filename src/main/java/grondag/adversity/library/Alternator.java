@@ -1,6 +1,5 @@
 package grondag.adversity.library;
 
-import java.util.HashMap;
 import java.util.Random;
 
 import net.minecraft.util.math.BlockPos;

@@ -15,14 +15,13 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-//Mining hot basalt causes NPE
-//cobble and other normal drops have NBT on them - need to revert to using meta to index subitems unless need custom model state on stack
+//Block breaking doesn't always get best quads - due to fix in SparseLayerMap returning first layer when RenderLayer = null
+//bordered block drops not stacking
 
 //TODOS
 //allow cobble appearance to be in flexstone/durastone, eliminate duplicate model
