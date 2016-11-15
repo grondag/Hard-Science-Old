@@ -24,7 +24,6 @@ import grondag.adversity.simulator.Simulator;
 
 
 //TODOS
-//finalize rubble texture
 //add drops to block handling, separating silk touch
 //make basalt rubble drop auto-combine into full blocks
 
