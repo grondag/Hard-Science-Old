@@ -74,8 +74,11 @@ public class ModelStateComponents
     public static final ModelBigTexComponent BIG_TEX_META_VARIED = register(new ModelBigTexComponent(counter++, true));
 
     public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
+    
+    //TODO: remove
     public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
     		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT, 0))));
+    //TODO: remove
     public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT, 0))));
     
@@ -91,6 +94,7 @@ public class ModelStateComponents
     public static final ModelFlowJoinComponent FLOW_JOIN = register(new ModelFlowJoinComponent(counter++, WorldRefreshType.CACHED));
     public static final ModelFlowTexComponent FLOW_TEX = register(new ModelFlowTexComponent(counter++));
     
+    //TODO: remove
     public static final ModelColorMapComponent COLORS_BASALT = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK, 0))));
     

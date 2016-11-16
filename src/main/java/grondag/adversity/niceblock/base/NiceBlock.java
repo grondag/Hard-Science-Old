@@ -163,22 +163,22 @@ public class NiceBlock extends Block // implements IWailaProvider
 
     // BASIC METADATA MECHANICS
 
+    //only display one item meta variant for item search
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
     {
-        list.addAll(getSubItems());
+        list.add(getSubItems().get(0));
     }
-
+    
     public List<ItemStack> getSubItems()
     {
         ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
-        int itemCount = (int) colorMap.getValueCount();
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-        for(int i = 0; i < itemCount; i++)
+        for(int i = 0; i < 16; i++)
         {
             ItemStack stack = new ItemStack(this, 1, i);
-            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(i));
+            long key = dispatcher.getStateSet().computeKey(colorMap.createValueFromBits(this.material.defaultColorMapID));
             NiceItemBlock.setModelStateKey(stack, key);
             itemBuilder.add(stack);
         }

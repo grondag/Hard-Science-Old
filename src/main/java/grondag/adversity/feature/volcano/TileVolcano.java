@@ -20,7 +20,7 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-//don't display GUI on right click when very close to a block
+
 
 //TODOS
 //allow cobble appearance to be in flexstone/durastone, eliminate duplicate model

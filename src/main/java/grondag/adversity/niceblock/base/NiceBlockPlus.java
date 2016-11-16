@@ -31,24 +31,6 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
 		super(dispatcher, material, styleName);
 	}
 		
-    //only display one item meta variant for item search
-	@Override
-    @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
-    {
-        list.add(getSubItems().get(0));
-    }
-    
-    public List<ItemStack> getSubItems()
-    {
-        ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
-        for(int i = 0; i < 16; i++)
-        {
-            ItemStack stack = new ItemStack(this, 1, i);
-            itemBuilder.add(stack);
-        }
-        return itemBuilder.build();
-    }
 	
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
