@@ -96,6 +96,13 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
 
         return stack;
     }
+	
+	//for tile-entity blocks, almost never use meta on items
+    @Override
+    public int damageDropped(IBlockState state)
+    {
+        return 0;
+    }
 
     @Override
     public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)

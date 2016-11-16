@@ -47,6 +47,13 @@ public class ColumnSquareBlock extends NiceBlockPlus
 
     }
 
+    //always drop Y-axis varient
+    @Override
+    public int damageDropped(IBlockState state)
+    {
+        return Axis.Y.ordinal();
+    }
+    
     //only display vertical variant in item search
     @Override
     @SideOnly(Side.CLIENT)

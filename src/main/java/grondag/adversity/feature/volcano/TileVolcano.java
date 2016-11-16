@@ -20,8 +20,7 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 
 //FIX/TEST
-//Block breaking doesn't always get best quads - due to fix in SparseLayerMap returning first layer when RenderLayer = null
-//bordered block drops not stacking
+//don't display GUI on right click when very close to a block
 
 //TODOS
 //allow cobble appearance to be in flexstone/durastone, eliminate duplicate model

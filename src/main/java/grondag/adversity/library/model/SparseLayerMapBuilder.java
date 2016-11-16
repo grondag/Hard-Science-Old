@@ -41,6 +41,7 @@ public class SparseLayerMapBuilder
         
         public abstract void set(BlockRenderLayer layer, QuadContainer value);
         
+        public abstract QuadContainer[] getAll();
     }
     
     private class SparseLayerArrayMap extends SparseLayerMap
@@ -54,9 +55,7 @@ public class SparseLayerMapBuilder
         
         public QuadContainer get(BlockRenderLayer layer)
         {
-            // block breaking can send us layers that don't exist for this model
-            // in that case default to the first layer provided
-            return values[layer == null ? 0 : layerIndices[layer.ordinal()]];
+            return values[layerIndices[layer.ordinal()]];
         }
         
         public void set(BlockRenderLayer layer, QuadContainer value)
@@ -64,6 +63,10 @@ public class SparseLayerMapBuilder
             values[layerIndices[layer.ordinal()]] = value;
         }
         
+        public QuadContainer[] getAll()
+        {
+            return this.values;
+        }
     }
      
     private class SparseLayerSingletonMap extends SparseLayerMap
@@ -83,6 +86,11 @@ public class SparseLayerMapBuilder
         public void set(BlockRenderLayer layer, QuadContainer value)
         {
             this.value = value;
+        }
+        
+        public QuadContainer[] getAll()
+        {
+            return new QuadContainer[] { this.value };
         }
     }
 }

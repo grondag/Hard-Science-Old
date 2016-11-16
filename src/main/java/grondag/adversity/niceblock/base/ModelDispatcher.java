@@ -220,7 +220,26 @@ public class ModelDispatcher implements IBakedModel
 
         long key = ((IExtendedBlockState)state).getValue(NiceBlock.MODEL_KEY);
         
-        return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
+        BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+        
+        // If no layer can be determined than probably getting request from block breaking
+        // In that case, return quads from all layers
+        if(layer == null)
+        {
+            ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+            
+            for(QuadContainer qc : modelCache.get(key).getAll())
+            {
+                builder.addAll(qc.getQuads(side));
+            }
+            
+            return builder.build();
+            
+        }
+        else
+        {
+            return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
+        }
     }
     
 //    public boolean isEmpty(long modelStateKey)
