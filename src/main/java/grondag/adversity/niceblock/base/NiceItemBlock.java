@@ -8,7 +8,9 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent.ModelColorMap;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent.ModelFlowJoin;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -139,11 +141,18 @@ public class NiceItemBlock extends ItemBlock
     @Override
     public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World world, EntityPlayer player, EnumHand hand)
     {
-        if (world.isRemote) {
-            player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
-            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        if (world.isRemote) 
+        {
+            BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
+            //if trying to place a block but too close, is annoying to get GUI
+            //so only display if clicking on air
+            if (world.getBlockState(blockpos).getMaterial() == Material.AIR)
+            {
+                player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+                return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+            }
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        return new ActionResult<>(EnumActionResult.PASS, stack);
     }
     
     @Override
