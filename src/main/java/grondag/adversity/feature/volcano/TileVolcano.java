@@ -23,10 +23,6 @@ import grondag.adversity.simulator.Simulator;
 
 
 //TODOS
-//allow cobble appearance to be in flexstone/durastone, eliminate duplicate model
-//same for cut basalt
-
-//make lava unharvestable?
 
 //make volcano block unbreakable
 //volcano wand

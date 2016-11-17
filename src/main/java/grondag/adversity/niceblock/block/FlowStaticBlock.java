@@ -147,6 +147,12 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     }
     
     @Override
+    public boolean hasAppearanceGui()
+    {
+        return false;
+    }
+    
+    @Override
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         ItemStack stack = super.getStackFromBlock(state, world, pos);

@@ -16,10 +16,9 @@ public class BlockVolcano extends Block implements ITileEntityProvider {
 	public BlockVolcano() {
 		super(Material.ROCK);
 		this.setCreativeTab(Adversity.tabAdversity);
-		this.setHardness(2000.0F);
 		this.setResistance(2000.0F);
 		this.setSoundType(SoundType.STONE);
-		this.setHarvestLevel("pickaxe", 5);
+		this.setBlockUnbreakable();
         this.setRegistryName("block_volcano");
         this.setUnlocalizedName(this.getRegistryName().toString());
 	}

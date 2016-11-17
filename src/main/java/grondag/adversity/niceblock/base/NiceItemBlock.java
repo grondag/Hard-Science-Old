@@ -146,7 +146,7 @@ public class NiceItemBlock extends ItemBlock
             BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
             //if trying to place a block but too close, is annoying to get GUI
             //so only display if clicking on air
-            if (world.getBlockState(blockpos).getMaterial() == Material.AIR)
+            if (world.getBlockState(blockpos).getMaterial() == Material.AIR && ((NiceBlock)this.block).hasAppearanceGui())
             {
                 player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
                 return new ActionResult<>(EnumActionResult.SUCCESS, stack);

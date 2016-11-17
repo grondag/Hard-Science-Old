@@ -75,12 +75,6 @@ public class ModelStateComponents
 
     public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
     
-    //TODO: remove
-    public static final ModelColorMapComponent COLORS_RAW_FLEXSTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
-    		new FixedColorMapProvider(ColorMap.makeColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT, 0))));
-    //TODO: remove
-    public static final ModelColorMapComponent COLORS_RAW_DURASTONE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
-            new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT, 0))));
     
     public static final ModelSimpleJoinComponent MASONRY_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.MASONRY_MATCH));
 

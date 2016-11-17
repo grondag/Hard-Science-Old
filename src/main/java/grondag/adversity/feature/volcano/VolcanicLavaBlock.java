@@ -19,8 +19,8 @@ public class VolcanicLavaBlock extends FlowDynamicBlock
     {
         super(dispatcher, material, styleName, isFiller);
         this.setLightLevel(4F/15F);
-        this.setBlockUnbreakable();
-        this.setResistance(2000F);
+//        this.setBlockUnbreakable();
+//        this.setResistance(2000F);
     }
 
     @Override

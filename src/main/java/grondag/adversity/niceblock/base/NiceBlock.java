@@ -117,22 +117,17 @@ public class NiceBlock extends Block // implements IWailaProvider
     private final TLongObjectHashMap<AxisAlignedBB> combinedBounds;
 
     public final ModelDispatcher dispatcher;
-    
-    private boolean isGlowing;
-    
+        
     /** non-null if this drops something other than itself */
     private Item dropItem;
+    
+    /** Allow silk harvest. Defaults true. Use setAllowSilk to change */
+    private boolean allowSilkHarvest = true;
 
     public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
     {
-        this(dispatcher, material, styleName, false);
-    }
-    
-    public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isGlowing)
-    {
         super(material.material);
         this.material = material;
-        this.isGlowing = isGlowing;
         this.styleName = styleName;
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
@@ -154,7 +149,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         // let registrar know to register us when appropriate
         NiceBlockRegistrar.allBlocks.add(this);
     }
-
+    
     @Override
     protected BlockStateContainer createBlockState()
     {
@@ -223,6 +218,14 @@ public class NiceBlock extends Block // implements IWailaProvider
 
     
     /**
+     * True if block has a configurable appearance.
+     */
+    public boolean hasAppearanceGui()
+    {
+        return false;
+    }
+    
+    /**
      * Sets a drop other than this block if desired.
      */
     public NiceBlock setDropItem(Item dropItem)
@@ -231,10 +234,22 @@ public class NiceBlock extends Block // implements IWailaProvider
         return this;
     }
     
+    public NiceBlock setAllowSilkHarvest(boolean allow)
+    {
+        this.allowSilkHarvest = allow;
+        return this;
+    }
+    
     @Override
     public boolean canSilkHarvest()
     {
-        return true;
+        return allowSilkHarvest;
+    }
+    
+    @Override
+    public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player)
+    {
+        return this.canSilkHarvest();
     }
     
     @Override
@@ -344,12 +359,6 @@ public class NiceBlock extends Block // implements IWailaProvider
         return dispatcher.canRenderInLayer(layer);
     }
 
-    @Override
-    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        return this.isGlowing ? 15 << 20 | 15 << 4 : super.getPackedLightmapCoords(state, source, pos);
-    }
-  
 //  private long elapsedTime;
 //  private int timerCount = 0;
 

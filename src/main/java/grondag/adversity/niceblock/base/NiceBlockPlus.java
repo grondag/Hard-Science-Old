@@ -85,6 +85,12 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
     {
         return 0;
     }
+    
+    @Override
+    public boolean hasAppearanceGui()
+    {
+        return true;
+    }
 
     @Override
     public long getModelStateKey(IBlockState state, IBlockAccess world, BlockPos pos)

@@ -75,7 +75,7 @@ public class NiceBlockRegistrar
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
     private final static ModelFactory.ModelInputs RAW_FLEXSTONE_INPUTS = new ModelFactory.ModelInputs("raw_flexstone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static ColorModelFactory RAW_FLEXSTONE_MODEL = new ColorModelFactory(RAW_FLEXSTONE_INPUTS, ModelStateComponents.COLORS_RAW_FLEXSTONE,
+    private final static ColorModelFactory RAW_FLEXSTONE_MODEL = new ColorModelFactory(RAW_FLEXSTONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher RAW_FLEXSTONE_DISPATCH = new ModelDispatcher(RAW_FLEXSTONE_MODEL);
     public static final NiceBlock RAW_FLEXSTONE_BLOCK = new NiceBlock(RAW_FLEXSTONE_DISPATCH, BaseMaterial.FLEXSTONE, "raw");
@@ -245,34 +245,34 @@ public class NiceBlockRegistrar
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_0_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_0_MODEL);    
     public static final NiceBlock HOT_FLOWING_BASALT_0_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_flow", false)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_0_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_HEIGHT_BLOCK);
     public static final NiceBlock HOT_FLOWING_BASALT_0_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_fill", true)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_0_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_FILLER_BLOCK);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_1_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_1_MODEL);    
     public static final NiceBlock HOT_FLOWING_BASALT_1_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_flow", false)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_1_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_HEIGHT_BLOCK);
     public static final NiceBlock HOT_FLOWING_BASALT_1_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_fill", true)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_1_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_FILLER_BLOCK);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_2_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_2_MODEL);    
     public static final NiceBlock HOT_FLOWING_BASALT_2_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_flow", false)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_2_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_HEIGHT_BLOCK);
     public static final NiceBlock HOT_FLOWING_BASALT_2_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_fill", true)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_2_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_FILLER_BLOCK);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_3_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_3_MODEL);    
     public static final NiceBlock HOT_FLOWING_BASALT_3_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_flow", false)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_3_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_HEIGHT_BLOCK);
     public static final NiceBlock HOT_FLOWING_BASALT_3_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_fill", true)
-            .setDropItem(Volcano.basaltRubble);
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
     public static final NiceItemBlock HOT_FLOWING_BASALT_3_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_FILLER_BLOCK);
 
     private static final ModelDispatcher COOL_FLOWING_BASALT_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL); 
@@ -296,9 +296,19 @@ public class NiceBlockRegistrar
     private final static ColorModelFactory BASALT_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BASALT,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher BASALT_COBBLE_DISPATCH = new ModelDispatcher(BASALT_COBBLE_MODEL);
-    public static final NiceBlockPlus BASALT_COBBLE_BLOCK = new NiceBlockPlus(BASALT_COBBLE_DISPATCH, BaseMaterial.BASALT, "basalt_cobble");
+    public static final NiceBlock BASALT_COBBLE_BLOCK = new NiceBlock(BASALT_COBBLE_DISPATCH, BaseMaterial.BASALT, "basalt_cobble");
     public static final NiceItemBlock BASALT_COBBLE_ITEM = new NiceItemBlock(BASALT_COBBLE_BLOCK);
 
+    private final static ColorModelFactory COLORED_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private static final ModelDispatcher COLORED_COBBLE_DISPATCH = new ModelDispatcher(COLORED_COBBLE_MODEL);
+    public static final NiceBlock COBBLE_FLEXSTONE_BLOCK = new NiceBlockPlus(COLORED_COBBLE_DISPATCH, BaseMaterial.FLEXSTONE, "cobble");
+    public static final NiceItemBlock COBBLE_FLEXSTONE_ITEM = new NiceItemBlock(COBBLE_FLEXSTONE_BLOCK);
+
+    public static final NiceBlock COBBLE_DURASTONE_BLOCK = new NiceBlockPlus(COLORED_COBBLE_DISPATCH, BaseMaterial.DURASTONE, "cobble");
+    public static final NiceItemBlock COBBLE_DURASTONE_ITEM = new NiceItemBlock(COBBLE_DURASTONE_BLOCK);
+
+    
     private final static ModelFactory.ModelInputs COOL_SQUARE_BASALT_INPUTS = new ModelFactory.ModelInputs("basalt_cut", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static BigTexModelFactory COOL_SQUARE_BASALT_MODEL 
         = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BASALT,
@@ -308,8 +318,19 @@ public class NiceBlockRegistrar
             .setDropItem(BASALT_COBBLE_ITEM);
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
     
+    private final static BigTexModelFactory COLORED_BASALT_MODEL 
+        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BLOCK,
+                ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1);
+    private static final ModelDispatcher COLORED_BASALT_DISPATCH = new ModelDispatcher(COLORED_BASALT_MODEL);
+    
+    public static final NiceBlock CUT_ROCK_FLEXSTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "cut_rock");
+    public static final NiceItemBlock CUT_ROCK_FLEXSTONE_ITEM = new NiceItemBlock(CUT_ROCK_FLEXSTONE_BLOCK);
+    
+    public static final NiceBlock CUT_ROCK_DURASTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BaseMaterial.DURASTONE, "cut_rock");
+    public static final NiceItemBlock CUT_ROCK_DURASTONE_ITEM = new NiceItemBlock(CUT_ROCK_DURASTONE_BLOCK);
+
     private final static ModelFactory.ModelInputs CSG_TEST_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static CSGModelFactory CSG_TEST_MODEL = new CSGModelFactory(CSG_TEST_INPUTS, ModelStateComponents.COLORS_WHITE,
+    private final static CSGModelFactory CSG_TEST_MODEL = new CSGModelFactory(CSG_TEST_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher CSG_TEST_DISPATCH = new ModelDispatcher(CSG_TEST_MODEL);
     public static final CSGBlock CSG_TEST_BLOCK = new CSGBlock(CSG_TEST_DISPATCH, BaseMaterial.FLEXSTONE, "csg_test");
