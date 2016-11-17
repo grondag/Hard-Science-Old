@@ -36,6 +36,8 @@ public class CommonProxy {
         
         ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.MODID, Simulator.instance);
         MinecraftForge.EVENT_BUS.register(Simulator.instance);
+        MinecraftForge.EVENT_BUS.register(CommonEventHandler.INSTANCE);
+        
 	}
 
 	public void init(FMLInitializationEvent event) {

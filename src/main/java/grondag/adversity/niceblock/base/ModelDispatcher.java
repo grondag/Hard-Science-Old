@@ -238,7 +238,7 @@ public class ModelDispatcher implements IBakedModel
         }
         else
         {
-            return modelCache.get(key).get(MinecraftForgeClient.getRenderLayer()).getQuads(side);
+            return modelCache.get(key).get(layer).getQuads(side);
         }
     }
     

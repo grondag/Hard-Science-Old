@@ -23,8 +23,6 @@ import grondag.adversity.simulator.Simulator;
 
 
 //TODOS
-
-//make volcano block unbreakable
 //volcano wand
 
 //simulation integration & control from simulation
