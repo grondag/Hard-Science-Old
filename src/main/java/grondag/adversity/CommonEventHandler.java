@@ -21,14 +21,16 @@ public class CommonEventHandler
     //TODO: localize
     //TODO: localize
     private static final String[] DENIALS = 
-        {
-                "Absolutely not.",
-                "Nope.",
-                "Not happening",
-                "Doctor No sends his regards.",
-                "You must be joking.",
-                "I made a list of things that aren't possible, and what you just tried is near the top."
-        };
+    {
+        "Absolutely not.",
+        "Nope.",
+        "Not happening",
+        "Doctor No sends his regards.",
+        "You must be joking.",
+        "I made a list of things that aren't going to happen, and what you just tried is near the top.",
+        "Nice try.",
+        "That's not going to work."
+    };
     
     @SubscribeEvent(priority = EventPriority.HIGH) 
     public void onFillBucket(FillBucketEvent event)
