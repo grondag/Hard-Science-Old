@@ -54,7 +54,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     {
         
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
-        if(neighborState.getBlock() instanceof IFlowBlock)
+        if(IFlowBlock.isFlowBlock(neighborState.getBlock()))
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());

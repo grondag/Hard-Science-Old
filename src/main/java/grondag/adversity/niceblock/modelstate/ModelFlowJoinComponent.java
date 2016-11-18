@@ -54,21 +54,30 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
         int yOffset = 0;
 
 //        Adversity.log.info("flowstate getBitsFromWorld @" + pos.toString());
-        
-        if(block instanceof IFlowBlock)
-        {
+
             int yOrigin = pos.getY();
             IBlockState originState = state;
 
-            // If under another flow height block, handle similar to filler block.
-            // Not a perfect fix if they are stacked, but shouldn't normally be.
-            if(IFlowBlock.isBlockFlowHeight(block))
+            if(block.isFlowFiller)
             {
+                int offset = IFlowBlock.getYOffsetFromState(state);
+                yOrigin -= offset;
+                yOffset = offset;
+                originState = world.getBlockState(pos.down(offset));
+                if(!IFlowBlock.isFlowHeight(originState.getBlock()))
+                {
+                    return FlowHeightState.EMPTY_BLOCK_STATE_KEY;
+                }
+            }
+            else
+            {
+                // If under another flow height block, handle similar to filler block.
+                // Not a perfect fix if they are stacked, but shouldn't normally be.
 //                Adversity.log.info("flowstate is height block");
                 
                 // try to use block above as height origin
                 originState = world.getBlockState(pos.up().up());
-                if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
+                if(IFlowBlock.isFlowHeight(originState.getBlock()))
                 {
                     yOrigin += 2;
                     yOffset = -2;
@@ -77,7 +86,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                 else
                 {
                     originState = world.getBlockState(pos.up());
-                    if(IFlowBlock.isBlockFlowHeight(originState.getBlock()))
+                    if(IFlowBlock.isFlowHeight(originState.getBlock()))
                     {
                         yOrigin += 1;
                         yOffset = -1;
@@ -89,17 +98,6 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                         originState = state;
 //                        Adversity.log.info("origin self");
                     }
-                }
-            }
-            else if(IFlowBlock.isBlockFlowFiller(block))
-            {
-                int offset = IFlowBlock.getYOffsetFromState(state);
-                yOrigin -= offset;
-                yOffset = offset;
-                originState = world.getBlockState(pos.down(offset));
-                if(!IFlowBlock.isBlockFlowHeight(originState.getBlock()))
-                {
-                    return FlowHeightState.EMPTY_BLOCK_STATE_KEY;
                 }
             }
             
@@ -120,7 +118,7 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
                         {
                             bs = world.getBlockState(new BlockPos(pos.getX() - 1 + x, yOrigin + y, pos.getZ() - 1 + z));
                             b = bs.getBlock();
-                            if(IFlowBlock.isBlockFlowHeight(b))
+                            if(IFlowBlock.isFlowHeight(b))
                             {
                                 neighborHeight[x][z] = y * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(bs);
                                 break;
@@ -143,13 +141,9 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
             }
             
             return FlowHeightState.computeStateKey(centerHeight, sideHeight, cornerHeight, yOffset);
-        }
-        else
-        {
-            return FlowHeightState.FULL_BLOCK_STATE_KEY;
-        }
         
     }
+
     
 
     public class ModelFlowJoin extends ModelStateValue<ModelFlowJoinComponent.ModelFlowJoin, FlowHeightState>

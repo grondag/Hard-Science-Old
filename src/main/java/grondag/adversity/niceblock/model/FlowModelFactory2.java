@@ -448,7 +448,7 @@ public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> im
     public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         Block block = state.getBlock();
-        if(block instanceof IFlowBlock && block instanceof NiceBlock)
+        if(IFlowBlock.isFlowBlock(block))
         {
             return ((NiceBlock) block).getModelStateKey(state, worldIn, pos);
         }
@@ -462,7 +462,7 @@ public class FlowModelFactory2 extends ModelFactory<ModelFactory.ModelInputs> im
     public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         Block block = state.getBlock();
-        if(block instanceof IFlowBlock && block instanceof NiceBlock)
+        if(IFlowBlock.isFlowBlock(block))
         {
 
             return CollisionBoxGenerator.makeCollisionBox(

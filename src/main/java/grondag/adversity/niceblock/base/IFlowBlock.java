@@ -18,19 +18,27 @@ public interface IFlowBlock
     public boolean isFiller();
     
     /**
+     * Convenience method to check for flow block. 
+     */
+    public static boolean isFlowBlock(Block block)
+    {
+        return block instanceof NiceBlock && ((NiceBlock)block).isFlowBlock;
+    }
+    
+    /**
      * Convenience method to check for filler block. 
      */
-    public static boolean isBlockFlowFiller(Block block)
+    public static boolean isFlowFiller(Block block)
     {
-        return block instanceof IFlowBlock && ((IFlowBlock)block).isFiller();
+        return block instanceof NiceBlock && ((NiceBlock)block).isFlowFiller;
     }
     
     /**
      * Convenience method to check for height block. 
      */
-    public static boolean isBlockFlowHeight(Block block)
+    public static boolean isFlowHeight(Block block)
     {
-        return block instanceof IFlowBlock && !((IFlowBlock)block).isFiller();
+        return block instanceof NiceBlock && ((NiceBlock)block).isFlowBlock;
     }
     
     /**
@@ -59,7 +67,7 @@ public interface IFlowBlock
     public static int topFillerNeeded(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
-        if(!IFlowBlock.isBlockFlowHeight(block)) return 0;
+        if(!IFlowBlock.isFlowHeight(block)) return 0;
 //        if(block instanceof FlowSimpleBlock) return 0;
         FlowHeightState flowState = ModelFlowJoinComponent.getFlowState((NiceBlock) block, blockState, blockAccess, pos);
         return flowState.topFillerNeeded();
@@ -72,7 +80,7 @@ public interface IFlowBlock
     public static boolean shouldBeFullCube(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
-        if(!(block instanceof IFlowBlock)) return false;
+        if(!isFlowBlock(block)) return false;
         return ModelFlowJoinComponent.getFlowState((NiceBlock)block, blockState, blockAccess, pos).isFullCube();
     }
     
@@ -84,7 +92,7 @@ public interface IFlowBlock
     public static boolean isEmpty(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
-        if(!(block instanceof IFlowBlock)) return false;
+        if(!isFlowBlock(block)) return false;
         if(block instanceof FlowSimpleBlock) return true;
         FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
                 .getValue(ModelStateComponents.FLOW_JOIN);
@@ -115,11 +123,8 @@ public interface IFlowBlock
      */
     public static void freezeNeighbors(World worldIn, BlockPos pos, IBlockState state)
     {
-        if(!(state.getBlock() instanceof IFlowBlock)) return;
-        IFlowBlock fromBlock = (IFlowBlock) state.getBlock();
-        
-        //filler blocks do not affect neighbors
-        if(fromBlock.isFiller()) return;
+        //only height blocks affect neighbors
+        if(!isFlowHeight(state.getBlock())) return;
                 
         IBlockState targetState;
         Block targetBlock;

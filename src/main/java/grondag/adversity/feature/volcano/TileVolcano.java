@@ -127,7 +127,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         if(pos.getY() == this.level && isWithinBore(pos)) return true;
 
-        if (IFlowBlock.isBlockFlowFiller(state.getBlock())) return true;
+        if (IFlowBlock.isFlowFiller(state.getBlock())) return true;
 
         if (material == Material.CLAY) return false;
         if (material == Material.DRAGON_EGG ) return false;
@@ -612,7 +612,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         NiceBlock block = (NiceBlock)state.getBlock();
 
-        if(!IFlowBlock.isBlockFlowHeight(block)) return false;
+        if(!IFlowBlock.isFlowHeight(block)) return false;
 
         boolean isFullCube = IFlowBlock.shouldBeFullCube(state, worldObj, targetPos);
 
@@ -678,7 +678,7 @@ public class TileVolcano extends TileEntity implements ITickable{
          * Otherwise should be air.
          */
         IBlockState stateBelow = this.worldObj.getBlockState(basePos.down());
-        if(IFlowBlock.isBlockFlowHeight(stateBelow.getBlock()) 
+        if(IFlowBlock.isFlowHeight(stateBelow.getBlock()) 
                 && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
         {
             targetMeta = 0;
@@ -687,7 +687,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         else 
         {
             IBlockState stateTwoBelow = this.worldObj.getBlockState(basePos.down(2));
-            if((IFlowBlock.isBlockFlowHeight(stateTwoBelow.getBlock()) 
+            if((IFlowBlock.isFlowHeight(stateTwoBelow.getBlock()) 
                     && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
             {
                 targetMeta = 1;
@@ -695,7 +695,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
         }
 
-        if(IFlowBlock.isBlockFlowFiller(baseBlock))
+        if(IFlowBlock.isFlowFiller(baseBlock))
         {
                         
             if(targetMeta == SHOULD_BE_AIR)
