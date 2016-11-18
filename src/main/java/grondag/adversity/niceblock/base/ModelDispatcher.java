@@ -1,8 +1,10 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.library.SimpleCacheLoader;
-import grondag.adversity.library.SimpleLoadingCache;
+import grondag.adversity.library.cache.ILoadingCache;
+import grondag.adversity.library.cache.ManagedLoadingCache;
+import grondag.adversity.library.cache.SimpleCacheLoader;
+import grondag.adversity.library.cache.SimpleLoadingCache;
 import grondag.adversity.library.model.ItemModelDelegate;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.SimpleItemBlockModel;
@@ -54,8 +56,8 @@ public class ModelDispatcher implements IBakedModel
     private TextureAtlasSprite particleTexture;
 
 
-    private final SimpleLoadingCache<SparseLayerMap> modelCache = new SimpleLoadingCache<SparseLayerMap>(new BlockCacheLoader(), 1024);
-    private final SimpleLoadingCache<SimpleItemBlockModel> itemCache = new SimpleLoadingCache<SimpleItemBlockModel>( new ItemCacheLoader(), 256);
+    private final ILoadingCache<SparseLayerMap> modelCache = new ManagedLoadingCache<SparseLayerMap>(new BlockCacheLoader(), 1024, 0xFFFF);
+    private final ILoadingCache<SimpleItemBlockModel> itemCache = new ManagedLoadingCache<SimpleItemBlockModel>( new ItemCacheLoader(), 256, 0xFFF);
     
     
     private class BlockCacheLoader implements SimpleCacheLoader<SparseLayerMap>

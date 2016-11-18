@@ -1,21 +1,19 @@
-package grondag.adversity.library;
+package grondag.adversity.library.cache;
+
+import grondag.adversity.library.Useful;
 
 //import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimpleLoadingCache<V>
+public class SimpleLoadingCache<V> implements ILoadingCache<V>
 {
-    private class CacheState
-    {
-        private long[] keys;
-        private V[] values;
-        private int positionMask;
-        private int zeroLocation;
-    }
+
     private volatile int capacity;
     private volatile int maxFill;
     private volatile int size;
     
-    private volatile CacheState state;
+    public int getSize() { return size; }
+    
+    private volatile CacheState<V> state;
     
 //    public AtomicInteger calls = new AtomicInteger(0);
 //    public AtomicInteger hits = new AtomicInteger(0);
@@ -23,7 +21,7 @@ public class SimpleLoadingCache<V>
     
     private Object writeLock = new Object();
     
-    private final SimpleCacheLoader<V> loader;
+    private volatile SimpleCacheLoader<V> loader;
     
     private final static float LOAD_FACTOR = 0.75F;
 
@@ -33,13 +31,20 @@ public class SimpleLoadingCache<V>
         capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR)) + 1);
         this.clear();
     }
-    
+
+    /** releases loader and afterwards returns null for any keys not found */
+    public SimpleStaticCache<V> getStaticCache()
+    {
+        return new SimpleStaticCache<V>(this.state);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void clear()
     {
         synchronized(writeLock)
         {
-            CacheState newState = new CacheState();
+            CacheState<V> newState = new CacheState<V>();
             newState.keys = new long[capacity + 1];
             newState.values = (V[]) new Object[capacity + 1];
             newState.positionMask = capacity - 1;
@@ -50,11 +55,12 @@ public class SimpleLoadingCache<V>
         }
     }
     
+    @Override
     public V get(long key)
     {
 //        calls.incrementAndGet();
         
-        CacheState localState = state;
+        CacheState<V> localState = state;
         
         // Zero value normally indicates an unused spot in key array
         // so requires special handling to prevent search weirdness.
@@ -108,7 +114,7 @@ public class SimpleLoadingCache<V>
     
     private V load(long key, long keyHash)
     {
-        CacheState localState = state;
+        CacheState<V> localState = state;
         
         // no need to handle zero key here - is handled as special case in get();
         int position = (int) (keyHash & localState.positionMask);
@@ -171,8 +177,8 @@ public class SimpleLoadingCache<V>
             capacity = capacity << 1;
             maxFill = (int) (capacity * LOAD_FACTOR);
             int positionMask = capacity - 1;
-            CacheState oldState = state;
-            CacheState newState = new CacheState();
+            CacheState<V> oldState = state;
+            CacheState<V> newState = new CacheState<V>();
             newState.positionMask = positionMask;
             newState.zeroLocation = capacity;
             final long[] oldKeys = oldState.keys;
@@ -205,5 +211,5 @@ public class SimpleLoadingCache<V>
             state = newState;
         }
     }
-
+    
 }

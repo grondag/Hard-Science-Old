@@ -1,4 +1,4 @@
-package grondag.adversity.library;
+package grondag.adversity.library.cache;
 
 public interface SimpleCacheLoader<V>
 {
