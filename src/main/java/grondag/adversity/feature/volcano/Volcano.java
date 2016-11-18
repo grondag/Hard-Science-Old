@@ -28,15 +28,18 @@ public class Volcano {
 
     // ITEMS
     //	public static Item				itemVolcanicLavaBucket;
-    public static final BasaltRubble basaltRubble = new BasaltRubble();;
+    public static final Item basaltRubble = new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble");
+    public static final VolcanoWand  volcanoWand = new VolcanoWand();
 
     //	// FLUIDS
     //	public static Fluid				fluidVolcanicLava;
 
     // TILE ENTITIES
     public static BlockVolcano		blockVolcano;
+    
     public static Item             itemBlockVolcano;
-
+    
+    
     public static void preInit(FMLPreInitializationEvent event) 
     {
         blockVolcano = new BlockVolcano();
@@ -45,12 +48,14 @@ public class Volcano {
         GameRegistry.register(itemBlockVolcano);
 
         GameRegistry.register(basaltRubble);
+        GameRegistry.register(volcanoWand);
 
         if(event.getSide() == Side.CLIENT)
         {
             ModelLoader.setCustomModelResourceLocation(itemBlockVolcano, 0, new ModelResourceLocation("adversity:block_volcano", "inventory"));
-
             ModelLoader.setCustomModelResourceLocation(basaltRubble, 0, new ModelResourceLocation("adversity:basalt_rubble", "inventory"));
+            ModelLoader.setCustomModelResourceLocation(volcanoWand, 0, new ModelResourceLocation("adversity:volcano_wand", "inventory"));
+            
 
         }
 
