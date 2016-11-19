@@ -12,6 +12,7 @@ import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -37,16 +38,25 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         this.staticVersion = staticVersion;
     }
 
-    //    @Override 
-    //    public boolean isDynamic()
-    //    {
-    //        return true;
-    //    }
-  
+    /** 
+     * This is an egregious hack to avoids performance hit of instanceof.
+     * (Based on performance profile results.)
+     * Returns true if this is a type of IFlowBlock
+     */
     @Override
-    public boolean isFiller()
+    public boolean isAssociatedBlock(Block other)
+    {
+        return other == IFlowBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+    }
+
+    public boolean isFlowFiller()
     {
         return isFiller;
+    }
+
+    public boolean isFlowHeight()
+    {
+        return !isFiller;
     }
 
     @Override

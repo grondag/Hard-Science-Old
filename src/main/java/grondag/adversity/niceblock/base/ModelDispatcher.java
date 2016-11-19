@@ -4,7 +4,6 @@ import grondag.adversity.Adversity;
 import grondag.adversity.library.cache.ILoadingCache;
 import grondag.adversity.library.cache.ManagedLoadingCache;
 import grondag.adversity.library.cache.SimpleCacheLoader;
-import grondag.adversity.library.cache.SimpleLoadingCache;
 import grondag.adversity.library.model.ItemModelDelegate;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.SimpleItemBlockModel;

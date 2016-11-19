@@ -2,7 +2,6 @@ package grondag.adversity;
 
 import grondag.adversity.feature.volcano.VolcanicLavaBlock;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.event.entity.player.FillBucketEvent;

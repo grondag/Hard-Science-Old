@@ -7,13 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
-import grondag.adversity.niceblock.modelstate.ModelStateComponents;
-import grondag.adversity.niceblock.modelstate.ModelStateGroup;
-import grondag.adversity.niceblock.modelstate.ModelStateSet;
 
 public class SimpleLoadingCacheTest
 {

@@ -11,6 +11,7 @@ import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,10 +30,24 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
         super(dispatcher, material, styleName);
     }
 
+    /** 
+     * This is an egregious hack to avoids performance hit of instanceof.
+     * (Based on performance profile results.)
+     * Returns true if this is a type of IFlowBlock
+     */
     @Override
-    public boolean isFiller()
+    public boolean isAssociatedBlock(Block other)
+    {
+        return other == IFlowBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+    }
+    public boolean isFlowFiller()
     {
         return false;
+    }
+
+    public boolean isFlowHeight()
+    {
+        return true;
     }
     
     //allow mined blocks to stack - consistent with appearance of a full-height block

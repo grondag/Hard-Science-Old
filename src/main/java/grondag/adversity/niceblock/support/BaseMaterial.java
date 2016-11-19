@@ -2,13 +2,10 @@ package grondag.adversity.niceblock.support;
 
 import grondag.adversity.config.Config;
 import grondag.adversity.config.Substance;
-import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.HueSet.Chroma;
 import grondag.adversity.niceblock.color.HueSet.Luminance;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
-import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 

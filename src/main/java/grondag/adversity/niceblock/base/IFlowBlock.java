@@ -1,11 +1,13 @@
 package grondag.adversity.niceblock.base;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -13,16 +15,14 @@ import net.minecraft.world.World;
 
 public interface IFlowBlock 
 {
-    
-    /** height block if false, filler if true */
-    public boolean isFiller();
+    public static final Block FLOW_BLOCK_INDICATOR = new Block(Material.AIR);
     
     /**
      * Convenience method to check for flow block. 
      */
     public static boolean isFlowBlock(Block block)
     {
-        return block instanceof NiceBlock && ((NiceBlock)block).isFlowBlock;
+        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR);
     }
     
     /**
@@ -30,7 +30,7 @@ public interface IFlowBlock
      */
     public static boolean isFlowFiller(Block block)
     {
-        return block instanceof NiceBlock && ((NiceBlock)block).isFlowFiller;
+        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR) && ((NiceBlock)block).isFlowFiller();
     }
     
     /**
@@ -38,7 +38,7 @@ public interface IFlowBlock
      */
     public static boolean isFlowHeight(Block block)
     {
-        return block instanceof NiceBlock && ((NiceBlock)block).isFlowBlock;
+        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR) && ((NiceBlock)block).isFlowHeight();
     }
     
     /**
@@ -47,6 +47,10 @@ public interface IFlowBlock
      */
     public static int getFlowHeightFromState(IBlockState state)
     {
+        if(!(state.getBlock() instanceof NiceBlock))
+        {
+            Adversity.log.info("derp");
+        }
         return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(NiceBlock.META));
     }
     

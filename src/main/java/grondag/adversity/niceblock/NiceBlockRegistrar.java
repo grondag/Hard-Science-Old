@@ -21,7 +21,7 @@ import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
 import grondag.adversity.niceblock.model.ColorModelFactory;
 import grondag.adversity.niceblock.model.ColumnSquareModelFactory;
-import grondag.adversity.niceblock.model.FlowModelFactory2;
+import grondag.adversity.niceblock.model.FlowModelFactory;
 import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -212,7 +212,7 @@ public class NiceBlockRegistrar
 
     
     private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("lava", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory2 HOT_FLOWING_LAVA_MODEL = new FlowModelFactory2(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
     private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
     public static final VolcanicLavaBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
@@ -224,23 +224,23 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock HOT_FLOWING_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_FILLER_BLOCK);
     
     private final static ModelFactory.ModelInputs COOL_FLOWING_BASALT_INPUTS = new ModelFactory.ModelInputs("basalt_cool", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory2 COOL_FLOWING_BASALT_MODEL = new FlowModelFactory2(COOL_FLOWING_BASALT_INPUTS, true, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory COOL_FLOWING_BASALT_MODEL = new FlowModelFactory(COOL_FLOWING_BASALT_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
     
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_0_INPUTS = new ModelFactory.ModelInputs("basalt_cooling", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory2 HOT_FLOWING_BASALT_0_MODEL = new FlowModelFactory2(HOT_FLOWING_BASALT_0_INPUTS, false, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_0_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_0_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_1_INPUTS = new ModelFactory.ModelInputs("basalt_warm", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory2 HOT_FLOWING_BASALT_1_MODEL = new FlowModelFactory2(HOT_FLOWING_BASALT_1_INPUTS, false, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_1_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_1_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_2_INPUTS = new ModelFactory.ModelInputs("basalt_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory2 HOT_FLOWING_BASALT_2_MODEL = new FlowModelFactory2(HOT_FLOWING_BASALT_2_INPUTS, false, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_2_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_2_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
     private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_3_INPUTS = new ModelFactory.ModelInputs("basalt_very_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory2 HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory2(HOT_FLOWING_BASALT_3_INPUTS, false, ModelStateComponents.FLOW_JOIN,
+    private final static FlowModelFactory HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_3_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
     private static final ModelDispatcher HOT_FLOWING_BASALT_0_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_0_MODEL);    

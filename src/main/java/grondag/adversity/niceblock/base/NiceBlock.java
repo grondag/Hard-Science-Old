@@ -124,26 +124,6 @@ public class NiceBlock extends Block // implements IWailaProvider
     /** Allow silk harvest. Defaults true. Use setAllowSilk to change */
     private boolean allowSilkHarvest = true;
     
-    /** 
-     * True if this is an instance of an IFlowBlock.
-     * Avoids performance hit of instanceof and cast operations.
-     * (Based on performance profile results.)
-     */
-    public final boolean isFlowBlock;
-    
-    /** 
-     * True if this is an instance of an IFlowBlock and also a filler block.
-     * Avoids performance hit of instanceof and cast operations.
-     * (Based on performance profile results.)
-     */
-    public final boolean isFlowFiller;
-
-    /** 
-     * True if this is an instance of an IFlowBlock and also a height block.
-     * Avoids performance hit of instanceof and cast operations.
-     * (Based on performance profile results.)
-     */    public final boolean isFlowHeight;
-    
     public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
     {
         super(material.material);
@@ -157,9 +137,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         this.dispatcher = dispatcher;
         this.setRegistryName(material.materialName + "." + styleName);
         this.setUnlocalizedName(this.getRegistryName().toString());
-        this.isFlowBlock = this instanceof IFlowBlock;
-        this.isFlowFiller = isFlowBlock && ((IFlowBlock)this).isFiller();
-        this.isFlowHeight = isFlowBlock && !isFlowFiller;
+
         
         String makeName = I18n.translateToLocal(getStyleName());
         if(makeName == null || makeName == "") makeName = getStyleName();
@@ -545,6 +523,26 @@ public class NiceBlock extends Block // implements IWailaProvider
 	public String getStyleName() {
 		return styleName;
 	}
+
+    /** 
+     * True if this is an instance of an IFlowBlock and also a filler block.
+     * Avoids performance hit of casting to the IFlowBlock Interface.
+     * (Based on performance profile results.)
+     */
+    public boolean isFlowFiller()
+    {
+        return false;
+    }
+
+    /** 
+     * True if this is an instance of an IFlowBlock and also a height block.
+     * Avoids performance hit of casting to the IFlowBlock Interface.
+     * (Based on performance profile results.)
+     */
+    public boolean isFlowHeight()
+    {
+        return false;
+    }
 	
 //    @Override
 //    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)

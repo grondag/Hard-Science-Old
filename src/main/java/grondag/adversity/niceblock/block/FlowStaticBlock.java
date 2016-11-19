@@ -13,10 +13,10 @@ import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent.ModelFlowJoin;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,16 +37,25 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         this.isFiller = isFiller;
     }
 
-//    @Override 
-//    public boolean isDynamic()
-//    {
-//        return false;
-//    }
-    
+    /** 
+     * This is an egregious hack to avoids performance hit of instanceof.
+     * (Based on performance profile results.)
+     * Returns true if this is a type of IFlowBlock
+     */
     @Override
-    public boolean isFiller()
+    public boolean isAssociatedBlock(Block other)
+    {
+        return other == IFlowBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+    }
+
+    public boolean isFlowFiller()
     {
         return isFiller;
+    }
+
+    public boolean isFlowHeight()
+    {
+        return !isFiller;
     }
     
     @Override
