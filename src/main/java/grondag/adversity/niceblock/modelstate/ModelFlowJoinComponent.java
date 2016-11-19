@@ -139,31 +139,31 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
         IBlockState state = world.getBlockState(pos);
         
         if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return 2 * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(world.getBlockState(pos));
+            return 2 * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
 
         if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(world.getBlockState(pos));
+            return FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
 
         if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return IFlowBlock.getFlowHeightFromState(world.getBlockState(pos));
+            return IFlowBlock.getFlowHeightFromState(state);
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
 
         if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return -FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(world.getBlockState(pos));
+            return -FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
 
         if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return -2 * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(world.getBlockState(pos));
+            return -2 * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
 
         return FlowHeightState.NO_BLOCK;
     }

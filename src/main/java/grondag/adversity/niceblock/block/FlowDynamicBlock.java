@@ -65,6 +65,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
         if(IFlowBlock.isFlowBlock(neighborState.getBlock()))
         {
+            if(neighborState.getBlock() == this) return false;
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
             return myOcclusionKey != otherOcclusionKey;
