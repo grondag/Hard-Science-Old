@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap;
@@ -23,7 +24,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class HeightModelFactory extends ColorModelFactory implements ICollisionHandler
+public class HeightModelFactory extends ColorModelFactory
 {
     public HeightModelFactory(ModelFactory.ModelInputs modelInputs, ModelStateComponent<?, ?>... components)
     {
@@ -112,28 +113,36 @@ public class HeightModelFactory extends ColorModelFactory implements ICollisionH
     }
     
     @Override
-    public ICollisionHandler getCollisionHandler()
+    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
-        return this;
+        return new HeightCollisionHandler(dispatcher);
     }
 
-    @Override
-    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public class HeightCollisionHandler  implements ICollisionHandler
     {
-        return (long) state.getValue(NiceBlock.META);
-    }
-
-    @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (state.getValue(NiceBlock.META) + 1)/16.0, 1)).build();
-        return retVal;
-    }
-
-
-    @Override
-    public int getKeyBitLength()
-    {
-        return 4;
+        private HeightCollisionHandler(ModelDispatcher dispatcher)
+        {
+            //NOOP
+        }
+        
+        @Override
+        public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+        {
+            return (long) state.getValue(NiceBlock.META);
+        }
+    
+        @Override
+        public List<AxisAlignedBB> getModelBounds(long collisionKey)
+        {
+            ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (collisionKey + 1)/16.0, 1)).build();
+            return retVal;
+        }
+    
+    
+        @Override
+        public int getKeyBitLength()
+        {
+            return 4;
+        }
     }
 }

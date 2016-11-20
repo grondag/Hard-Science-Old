@@ -20,7 +20,6 @@ import grondag.adversity.niceblock.support.ICollisionHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.state.IBlockState;
@@ -54,10 +53,57 @@ public class ModelDispatcher implements IBakedModel
     
     private TextureAtlasSprite particleTexture;
 
-
+    //custom loading cache is almost 2X faster than guava LoadingCache for our use case
     private final ILoadingCache<SparseLayerMap> modelCache = new ManagedLoadingCache<SparseLayerMap>(new BlockCacheLoader(), 1024, 0xFFFF);
     private final ILoadingCache<SimpleItemBlockModel> itemCache = new ManagedLoadingCache<SimpleItemBlockModel>( new ItemCacheLoader(), 256, 0xFFF);
     
+    
+//    private final LoadingCache<Long, SparseLayerMap> cache = CacheBuilder.newBuilder().initialCapacity(1024).maximumSize(0xFFFF).build(new LoaderThingy());
+//
+//    private class LoaderThingy extends CacheLoader<Long, SparseLayerMap> 
+//    {
+//        @Override
+//        public SparseLayerMap load(Long key) throws Exception
+//        {
+//            ModelStateSetValue state = stateSet.getSetValueFromBits(key);
+//            
+//            SparseLayerMap result = layerMapBuilder.makeNewMap();
+//            for(BlockRenderLayer layer : layerMapBuilder.layerList)
+//            {
+//                ArrayList<QuadContainer> containers = new ArrayList<QuadContainer>();
+//                for(ModelFactory<?> model : models)
+//                {
+//                    containers.add(model.getFaceQuads(state, layer));
+//                }
+//                result.set(layer, QuadContainer.merge(containers));
+//            }
+//            return result;
+//        }
+//        
+//    }
+    
+//    private static AtomicLong duration = new AtomicLong(0);
+//    private static AtomicLong count = new AtomicLong(0);
+//    private static  AtomicLong sample = new AtomicLong(0);
+//    private SparseLayerMap getModel(long key)
+//    {
+//        long start = System.nanoTime();
+////        SparseLayerMap result = modelCache.get(key);
+//        SparseLayerMap result = cache.getUnchecked(key);
+//        duration.addAndGet(System.nanoTime() - start);
+//        count.incrementAndGet();
+//        synchronized(sample)
+//        {     
+//            if(count.get() >= 0x9FFFFL)
+//            {
+//                Adversity.log.info("Sample=" + sample.getAndIncrement() + " Avg time= " + duration.get() / count.get() );
+//                duration.set(0);
+//                count.set(0);
+//
+//            }
+//        }
+//        return result;        
+//    }
     
     private class BlockCacheLoader implements SimpleCacheLoader<SparseLayerMap>
     {
@@ -119,9 +165,10 @@ public class ModelDispatcher implements IBakedModel
         for(int i = 0; i < models.length; i++)
         {
             groups[i] = models[i].getStateGroup();
-            if(models[i].getCollisionHandler() != null)
+            ICollisionHandler handler = models[i].getCollisionHandler(this);
+            if(handler != null)
             {
-                collisionHandlers.add(models[i].getCollisionHandler());
+                collisionHandlers.add(handler);
             }
             
             for(BlockRenderLayer layer : BlockRenderLayer.values())
@@ -229,6 +276,7 @@ public class ModelDispatcher implements IBakedModel
         {
             ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
             
+//            for(QuadContainer qc : getModel(key).getAll())
             for(QuadContainer qc : modelCache.get(key).getAll())
             {
                 builder.addAll(qc.getQuads(side));
@@ -239,6 +287,7 @@ public class ModelDispatcher implements IBakedModel
         }
         else
         {
+//            return getModel(key).get(layer).getQuads(side);
             return modelCache.get(key).get(layer).getQuads(side);
         }
     }
@@ -251,11 +300,11 @@ public class ModelDispatcher implements IBakedModel
     public int getOcclusionKey(long modelStateKey, EnumFacing face)
     {
         if(this.renderLayerFlags[BlockRenderLayer.SOLID.ordinal()] == false) return 0;
+//        QuadContainer container = getModel(modelStateKey).get(BlockRenderLayer.SOLID);
         QuadContainer container = modelCache.get(modelStateKey).get(BlockRenderLayer.SOLID);
         if(container == null) 
         {
-            //TODO: remove
-            Adversity.log.warn("Missing model for occlusion key.");
+//            Adversity.log.warn("Missing model for occlusion key.");
             return 0;
         }
         return container.getOcclusionHash(face);

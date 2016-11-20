@@ -52,16 +52,16 @@ public class CompositeCollisionHandler implements ICollisionHandler
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public List<AxisAlignedBB> getModelBounds(long collisionKey)
     {
-        if(handlers.length == 1) return handlers[0].getModelBounds(state, worldIn, pos);
+        if(handlers.length == 1) return handlers[0].getModelBounds(collisionKey);
 
         if(handlers.length == 0) return java.util.Collections.emptyList();
         
         ImmutableList.Builder<AxisAlignedBB> builder = new ImmutableList.Builder<>();
         for(int i = 0; i < handlers.length; i++)
         {
-            builder.addAll(handlers[i].getModelBounds(state, worldIn, pos));
+            builder.addAll(handlers[i].getModelBounds(collisionKey >> shiftBits[i] & bitMasks[i]));
         }
         return builder.build();
     }

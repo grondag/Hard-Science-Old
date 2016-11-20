@@ -4,7 +4,6 @@ import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
@@ -105,13 +104,15 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
         int[][] neighborHeight = new int[3][3];
         neighborHeight[1][1] = IFlowBlock.getFlowHeightFromState(originState);
 
+        MutableBlockPos mutablePos = new MutableBlockPos();
         for(int x = 0; x < 3; x++)
         {
             for(int z = 0; z < 3; z++)
             {
                 if(x == 1 && z == 1 ) continue;
+                mutablePos.setPos(pos.getX() - 1 + x, yOrigin, pos.getZ() - 1 + z);
 
-                neighborHeight[x][z] = getFlowHeight(world, new BlockPos(pos.getX() - 1 + x, yOrigin, pos.getZ() - 1 + z));
+                neighborHeight[x][z] = getFlowHeight(world, mutablePos);
 
             }
         }
@@ -132,9 +133,14 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
 
     }
 
-    private static int getFlowHeight(IBlockAccess world, BlockPos center)
+    /** 
+     * Pass in pos with Y of flow block for which we are getting data.
+     * Returns relative flow height based on blocks 2 above through 2 down.
+     * Gets called frequently, thus the use of mutable pos.
+     */
+    private static int getFlowHeight(IBlockAccess world, MutableBlockPos pos)
     {
-        MutableBlockPos pos = new MutableBlockPos(center.up(2));
+        pos.setY(pos.getY() + 2);;
         
         IBlockState state = world.getBlockState(pos);
         

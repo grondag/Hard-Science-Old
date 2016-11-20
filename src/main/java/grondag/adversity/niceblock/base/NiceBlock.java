@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.cache.ManagedLoadingCache;
+import grondag.adversity.library.cache.SimpleCacheLoader;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
@@ -47,7 +49,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Base class for Adversity building blocks. Should be instantiated and set up in NiceBlockRegistrar.
@@ -99,22 +100,11 @@ public class NiceBlock extends Block // implements IWailaProvider
      */
     public final ICollisionHandler collisionHandler;
     
-    //TODO: replace with cacheloader
     /**
-     * Cache collision box lists.
-     * Override getCollisionHandler and getModelBounds if need something 
-     * other than standard cubes.  Has to be here and not in parent because
-     * the number of models is specific to cookbook.
-     * 
+     * Cache for collision box info.
      * NULL if collisionHandler is NULL.
      */
-    private final TLongObjectHashMap<List<AxisAlignedBB>> modelBounds;
-    
-    //TODO: replace with cacheloader
-    /**
-     * Cached union of model bounds.  NULL if collisionHandler is NULL.  
-     */
-    private final TLongObjectHashMap<AxisAlignedBB> combinedBounds;
+    private final ManagedLoadingCache<ModelBounds> modelBounds;
 
     public final ModelDispatcher dispatcher;
         
@@ -144,11 +134,46 @@ public class NiceBlock extends Block // implements IWailaProvider
         displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
 
         collisionHandler = dispatcher.getCollisionHandler();
-        modelBounds = collisionHandler == null ? null : new TLongObjectHashMap<List<AxisAlignedBB>>();
-        combinedBounds = collisionHandler == null ? null :  new TLongObjectHashMap<AxisAlignedBB>();
+        modelBounds = collisionHandler == null ? null : new ManagedLoadingCache<ModelBounds>(new BoundsLoader(), 0xF, 0xFFF);
 
         // let registrar know to register us when appropriate
         NiceBlockRegistrar.allBlocks.add(this);
+    }
+    
+    private static class ModelBounds
+    {
+        private final List<AxisAlignedBB> boundsList;
+        private AxisAlignedBB combinedBounds;
+        
+        private ModelBounds(List<AxisAlignedBB> boundsList)
+        {
+            this.boundsList = boundsList;
+        }
+        
+        public List<AxisAlignedBB> getBounds() { return boundsList; }
+        
+        public AxisAlignedBB getCombinedBounds()
+        {
+            if(combinedBounds == null)
+            {
+                for (AxisAlignedBB aabb : this.boundsList) 
+                {
+                    combinedBounds = combinedBounds == null ? aabb : combinedBounds.union(aabb);
+                }
+            }
+            return combinedBounds;
+        }
+    }
+    
+    private class BoundsLoader implements SimpleCacheLoader<ModelBounds>
+    {
+
+        @Override
+        public ModelBounds load(long key)
+        {
+            return new ModelBounds(NiceBlock.this.collisionHandler.getModelBounds(key));
+        }
+        
     }
     
     @Override
@@ -406,15 +431,8 @@ public class NiceBlock extends Block // implements IWailaProvider
         
         long key = collisionHandler.getCollisionKey(state, worldIn, pos);
         
-        List<AxisAlignedBB> retVal = modelBounds.get(key);
-        
-        if(retVal == null)
-        {
-            retVal = collisionHandler.getModelBounds(state, worldIn, pos);
-            modelBounds.put(key, retVal);
-        }
-
-        return retVal;
+        return modelBounds.get(key).boundsList;
+    
     }
     
   
@@ -450,18 +468,7 @@ public class NiceBlock extends Block // implements IWailaProvider
         else
         {
             long collisionKey = collisionHandler.getCollisionKey(state, worldIn, pos);
-            AxisAlignedBB retVal = this.combinedBounds.get(collisionKey);
-            
-            if(retVal == null)
-            {
-                for (AxisAlignedBB aabb : this.getCachedModelBounds(state, worldIn, pos)) 
-                {
-                  retVal = retVal == null ? aabb : retVal.union(aabb);
-                }
-                combinedBounds.put(collisionKey, retVal);
-            }
-            
-            return retVal;
+            return this.modelBounds.get(collisionKey).getCombinedBounds();
         }
     }
     

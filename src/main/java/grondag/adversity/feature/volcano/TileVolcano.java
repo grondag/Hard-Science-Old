@@ -110,7 +110,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private boolean isWithinBore(BlockPos posIn)
     {
-        return posIn.distanceSq(new BlockPos(this.pos.getX(), posIn.getY(), this.pos.getZ())) <= Config.volcano().boreRadiusSquared;
+        return posIn.distanceSq(this.pos.getX(), posIn.getY(), this.pos.getZ()) <= Config.volcano().boreRadiusSquared;
     }
 
     private boolean canDisplace(BlockPos pos) 

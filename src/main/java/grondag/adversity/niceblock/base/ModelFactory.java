@@ -93,7 +93,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
     /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
-    public ICollisionHandler getCollisionHandler()
+    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
         return null;
     }

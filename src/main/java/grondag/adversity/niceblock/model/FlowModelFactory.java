@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
@@ -12,6 +11,7 @@ import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
@@ -35,11 +35,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 
-public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> implements ICollisionHandler
+public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
     private final boolean enableCollision;
-    //TODO: add caching to reduce memory consumption for multi-layer dispatchers and multi-species dispatchers
-    // Also, make it configurable via parameter, because not all blocks need it.
 
     public FlowModelFactory(ModelInputs modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
     {
@@ -439,45 +437,45 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs> imp
     }
     
     @Override
-    public ICollisionHandler getCollisionHandler()
+    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
-        return enableCollision ? this : null;
+        return enableCollision ? new FlowCollisionHandler(dispatcher) : null;
     }
 
-    @Override
-    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public class FlowCollisionHandler implements ICollisionHandler
     {
-        Block block = state.getBlock();
-        if(IFlowBlock.isFlowBlock(block))
+        private final ModelDispatcher dispatcher;
+        
+        private FlowCollisionHandler(ModelDispatcher dispatcher)
         {
-            return ((NiceBlock) block).getModelStateKey(state, worldIn, pos);
+            this.dispatcher = dispatcher;
         }
-        else
+        
+        @Override
+        public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
         {
-            return 0;
+            Block block = state.getBlock();
+            if(IFlowBlock.isFlowBlock(block))
+            {
+                return ((NiceBlock) block).getModelStateKey(state, worldIn, pos);
+            }
+            else
+            {
+                return 0;
+            }
         }
-    }
-
-    @Override
-    public List<AxisAlignedBB> getModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        Block block = state.getBlock();
-        if(IFlowBlock.isFlowBlock(block))
+    
+        @Override
+        public List<AxisAlignedBB> getModelBounds(long collisionKey)
         {
-
-            return CollisionBoxGenerator.makeCollisionBox(
-                    makeRawQuads(((NiceBlock) block).dispatcher.getStateSet().getSetValueFromBits(getCollisionKey(state, worldIn, pos))));
+                return CollisionBoxGenerator.makeCollisionBox(
+                        makeRawQuads(dispatcher.getStateSet().getSetValueFromBits(collisionKey)));
         }
-        else
+    
+        @Override
+        public int getKeyBitLength()
         {
-            return Collections.emptyList();
+            return ModelStateComponents.FLOW_JOIN.getBitLength();
         }
-    }
-
-
-    @Override
-    public int getKeyBitLength()
-    {
-        return ModelStateComponents.FLOW_JOIN.getBitLength();
     }
 }

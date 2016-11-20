@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
+import grondag.adversity.library.cache.ILoadingCache;
+import grondag.adversity.library.cache.ManagedLoadingCache;
+import grondag.adversity.library.cache.SimpleCacheLoader;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
@@ -54,11 +53,12 @@ public class ModelStateSet
         return result;
     }
 
+    private final ILoadingCache<ModelStateSetValue> valueCache = new ManagedLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024, 0xFFFF);
     
-    private LoadingCache<Long, ModelStateSetValue> valueCache = CacheBuilder.newBuilder().maximumSize(0xFFFF).build(new CacheLoader<Long, ModelStateSetValue>()
+    private class StateCacheLoader implements SimpleCacheLoader<ModelStateSetValue>
     {
         @Override
-        public ModelStateSetValue load(Long key)
+        public ModelStateSetValue load(long key)
         {
             ArrayList<ModelStateValue<?,?>> parts = new ArrayList<>(typeCount);
             for(ModelStateComponent<?,?> c : includedTypes)
@@ -67,7 +67,7 @@ public class ModelStateSet
             }
             return new ModelStateSetValue(key, parts); 
         }
-    });
+    }
     
     private ModelStateSet(ModelStateGroup... groups)
     {
@@ -195,14 +195,14 @@ public class ModelStateSet
     
     public ModelStateSetValue getValue(ModelStateValue<?,?>... components)
     {
-        return valueCache.getUnchecked(computeKey(components));
+        return valueCache.get(computeKey(components));
     }
     
     public ModelStateSetValue getValueWithUpdates(ModelStateSetValue valueIn, ModelStateValue<?,?>... components)
     {
         long mask = computeMask(components);
         long key = (valueIn.key & ~mask) | computeKey(components);
-        return valueCache.getUnchecked(key);
+        return valueCache.get(key);
     }
     
     public boolean canRefreshFromWorld() { return this.usesWorldState; }
@@ -245,7 +245,7 @@ public class ModelStateSet
     
     public ModelStateSetValue getSetValueFromBits(long bits)
     {
-        return valueCache.getUnchecked(bits);
+        return valueCache.get(bits);
     }
     
     public class ModelStateSetValue
