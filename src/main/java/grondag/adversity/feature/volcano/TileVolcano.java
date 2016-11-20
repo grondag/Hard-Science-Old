@@ -23,10 +23,10 @@ import grondag.adversity.simulator.Simulator;
 
 
 //TODOS
-//volcano wand
-
+//fix face visibility for flow blocks
+//tune lava flow shape
 //simulation integration & control from simulation
-//update volcano wand as needed
+//volcano wand
 //detection item
 //world gen
 
@@ -42,7 +42,6 @@ import grondag.adversity.simulator.Simulator;
 //sound for lava
 //water rendering
 
-//performance tuning as needed
 
 
 public class TileVolcano extends TileEntity implements ITickable{

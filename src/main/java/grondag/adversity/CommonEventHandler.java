@@ -1,10 +1,12 @@
 package grondag.adversity;
 
+import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.VolcanicLavaBlock;
 import grondag.adversity.library.Useful;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -45,6 +47,14 @@ public class CommonEventHandler
             }
             event.setCanceled(true);
         }
+    }
+    
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) 
+    {
+        Config.reload();
+        //TODO: remove
+        Adversity.log.info("config reloaded");
     }
 //
 //	@SubscribeEvent

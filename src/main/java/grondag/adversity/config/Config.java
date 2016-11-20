@@ -17,20 +17,29 @@ public class Config {
 	private static Render render;
 	public static Render render() { return render; }
 	
-	private static Configuration config;
+	public static Configuration instance;
 
 	public static void init(File file) {
-		config = new Configuration(file);
+		instance = new Configuration(file);
 		load();
 	}
 	
-	public static void load()
+	private static void load()
 	{
-        config.load();
-        volcano = new Volcano(config);
-        substances = new Substances(config);
-        unobtanium = new Unobtanium(config);
-        render = new Render(config);
-        config.save(); 
+        instance.load();
+        volcano = new Volcano(instance);
+        substances = new Substances(instance);
+        unobtanium = new Unobtanium(instance);
+        render = new Render(instance);
+        instance.save(); 
+	}
+	
+	public static void reload()
+	{
+	    if(instance.hasChanged())
+        {
+	        render = new Render(instance);
+	        instance.save(); 
+        }
 	}
 }

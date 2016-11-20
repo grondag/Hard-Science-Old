@@ -25,7 +25,8 @@ import org.apache.logging.log4j.Logger;
 import grondag.adversity.config.Config;
 
 
-@Mod(modid = Adversity.MODID, name = Adversity.MODNAME, version = Adversity.VERSION)
+@Mod(modid = Adversity.MODID, name = Adversity.MODNAME, version = Adversity.VERSION
+        , guiFactory = "grondag.adversity.config.AdversityModGuiFactory")
 public class Adversity {
 	public static final String MODID = "adversity";
 	public static final String VERSION = "@VERSION@";
@@ -84,11 +85,5 @@ public class Adversity {
        proxy.serverStopping(event);
    }
    
-	@SubscribeEvent
-	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equals(MODID)) {
-			Config.load();
-		}
-	}
 
 }
