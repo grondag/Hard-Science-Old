@@ -164,8 +164,10 @@ public class TileVolcano extends TileEntity implements ITickable{
     private boolean isSupportingBlock(BlockPos pos)
     {
         IBlockState state = this.worldObj.getBlockState(pos);
-        return !((state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK && isWithinBore(pos))
-                || canDisplace(state, pos, state.getBlock()));
+        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+            return isWithinBore(pos);
+        else
+            return !canDisplace(state, pos, state.getBlock());
     }
     
     
@@ -500,7 +502,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         else if(this.worldObj.getBlockState(pPos.up()).getBlock() != NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
                 && this.worldObj.getBlockState(pPos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
-            //don't place on top of flowing lava unless descending from a height block
+            //don't place on top of flowing lava unless descending from a height block (or inside bore)
             return;
         }
 
