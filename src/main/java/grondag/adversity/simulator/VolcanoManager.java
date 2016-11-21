@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
-import grondag.adversity.feature.volcano.TileVolcano;
 import grondag.adversity.feature.volcano.TileVolcano.VolcanoStage;
 import grondag.adversity.library.Useful;
 import grondag.adversity.simulator.base.NodeRoots;
@@ -241,9 +240,12 @@ public class VolcanoManager extends SimulationNodeRunnable
             node = nodes[i];
             if(node != null && node.isSaveDirty())
             {
-                node.writeToNBT(nbtSubNodes.getCompoundTag(node.getTagKey()));
+                NBTTagCompound nodeTag = new NBTTagCompound();
+                node.writeToNBT(nodeTag);
+                nbtSubNodes.setTag(node.getTagKey(), nodeTag);
             }
         }
+        nbtVolcanoManager.setTag(NodeRoots.SUBNODES_TAG, nbtSubNodes);
 
         nbt.setTag(NodeRoots.VOLCANO_MANAGER.getTagKey(), nbtVolcanoManager);
     }

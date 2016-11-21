@@ -129,13 +129,15 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private boolean canDisplace(BlockPos pos) 
     {
-
         IBlockState state = this.worldObj.getBlockState(pos);
+        return canDisplace(state, pos, state.getBlock());
+    }
+    
+    private boolean canDisplace(IBlockState state, BlockPos pos, Block block)
+    {
         Material material = state.getMaterial();
 
         if(material == Material.AIR) return true;
-
-        Block block = state.getBlock();
 
         if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK) return false;
 
@@ -155,9 +157,18 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         // Volcanic lava don't give no shits about your stuff.
         return true;        
-
     };
-
+    
+    // True if block at this position cannot be displaced and is not already lava.
+    // Lava within bore counts as supporting.
+    private boolean isSupportingBlock(BlockPos pos)
+    {
+        IBlockState state = this.worldObj.getBlockState(pos);
+        return !((state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK && isWithinBore(pos))
+                || canDisplace(state, pos, state.getBlock()));
+    }
+    
+    
     public void update() 
     {
         boolean isNodeUpdateNeeded = false;
@@ -170,6 +181,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             
             if(this.stage == VolcanoStage.NEW)
             {
+                Adversity.log.info("setting up new Volcano @" + this.pos.toString());
+                
                 this.node = Simulator.instance.getVolcanoManager().createNode();
                 this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
                 this.stage = VolcanoStage.DORMANT;
@@ -184,6 +197,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
             else
             {
+                Adversity.log.info("retrieving Volcano node @" + this.pos.toString());
+
                   this.node = Simulator.instance.getVolcanoManager().findNode(this.nodeId);
                   if(this.node == null)
                   {
@@ -246,7 +261,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 }
                 else
                 {
-                    if(placementCountdown == 0) 
+                    if(placementCountdown <= 0) 
                     {
                         doFlowing();
                         placementCountdown = getRandomBlockTicks();
@@ -298,6 +313,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         if(isNodeUpdateNeeded || (this.ticksActive & 0xF) == 0xF )
         {
               node.updateWorldState(ticksActive + 1000, level, stage);
+              Adversity.log.info("updating Volcano status " + stage.name() + " @" + this.pos.toString());
         }
         
         this.markDirty();
@@ -477,8 +493,16 @@ public class TileVolcano extends TileEntity implements ITickable{
    
     private void placeIfPossible(BlockPos pPos, BlockPos pOrigin)
     {
-        //        Adversity.log.info("attempting to place @ " + pPos.toString() + " with origin " + pOrigin.toString());
-        if(isWithinBore(pPos)) clearBore(pPos);
+        if(isWithinBore(pPos))
+        {
+            clearBore(pPos);
+        }
+        else if(this.worldObj.getBlockState(pPos.up()).getBlock() != NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
+                && this.worldObj.getBlockState(pPos.down()).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        {
+            //don't place on top of flowing lava unless descending from a height block
+            return;
+        }
 
         if(this.canDisplace(pPos))
         {
@@ -507,35 +531,28 @@ public class TileVolcano extends TileEntity implements ITickable{
             trackLavaBlock(pPos);
 
             //            Adversity.log.info("placing " + placement.pos.toString());
-
-            // don't spread sideways if can flow down or if already flowing down
-            if(!addSpaceIfOpen(pPos.down(), pPos.down()))
+            
+            BlockPos posDown = pPos.down();
+            addSpaceIfOpen(posDown, posDown);
+            boolean isFlowingDown =  !isSupportingBlock(posDown);
+            
+            // don't spread sideways if can flow down or if already flowing down unless adjacent block is supported
+            if(isFlowingDown)
             {
-                //                Adversity.log.info("skipping side placements for " + placement.pos.toString());
-
-                //                if(isHardBasalt(this.worldObj.getBlockState(pPos.down()).getBlock()))
-                //                {
-                //                    this.worldObj.setBlockState(pPos.down(), NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
-                //                            .withProperty(NiceBlock.META, 15));
-                //                    trackLavaBlock(pPos.down());
-                //                    //this.basaltBlocks.add(pPos.down(), this.ticksActive + 200 + Useful.SALT_SHAKER.nextInt(200));
-                //                    if(isHardBasalt(this.worldObj.getBlockState(pPos.down(2)).getBlock()))
-                //                    {
-                //                        this.worldObj.setBlockState(pPos.down(2), NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
-                //                                .withProperty(NiceBlock.META, 15));
-                //                        trackLavaBlock(pPos.down(2));
-                //                        //this.basaltBlocks.add(pPos.down(), this.ticksActive + 200 + Useful.SALT_SHAKER.nextInt(200));
-                //                    }
-                //                }
-
-
+                if(isSupportingBlock(pPos.east().down())) addSpaceIfOpen(pPos.east(), pOrigin);
+                if(isSupportingBlock(pPos.west().down())) addSpaceIfOpen(pPos.west(), pOrigin);
+                if(isSupportingBlock(pPos.north().down())) addSpaceIfOpen(pPos.north(), pOrigin);
+                if(isSupportingBlock(pPos.south().down())) addSpaceIfOpen(pPos.south(), pOrigin);
+            }
+            else
+            {
                 addSpaceIfOpen(pPos.east(), pOrigin);
                 addSpaceIfOpen(pPos.west(), pOrigin);
                 addSpaceIfOpen(pPos.north(), pOrigin);
                 addSpaceIfOpen(pPos.south(), pOrigin);
 
             }
-
+            
             for(int x = -2; x <= 2; x++)
             {
                 for(int z = -2; z <= 2; z++)
@@ -696,6 +713,9 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private void trackLavaBlock(BlockPos lavaPos)
     {
+        //blocks within bore never cool so no reason to track them
+        if(isWithinBore(lavaPos)) return;
+        
         if(lavaPos.getY() >= level)
             this.topBlocks.add(lavaPos, ++lavaCounter);
         else
@@ -829,7 +849,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         if(canDisplace(posIn))
         {
-            spaceManager.add(posIn, origin);
+            spaceManager.add(posIn, origin, this.isSupportingBlock(posIn.down()));
             return true;
         }
         else

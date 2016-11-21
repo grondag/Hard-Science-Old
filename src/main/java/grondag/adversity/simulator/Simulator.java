@@ -106,6 +106,8 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                 Adversity.log.info("creating sim");
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
+    	        this.currentSimTick.set(0);
+    	        this.lastSimTick = 0;
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
     	        PersistenceManager.registerNode(world, this.volcanoManager);
@@ -204,6 +206,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
+        Adversity.log.info("Simulator read from NBT");
         this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);

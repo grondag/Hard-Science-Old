@@ -28,8 +28,8 @@ public class SpaceManager
     {
         this(pos);
 
-        //to be valid, must have a multiple of two
-        if(values.length % 2 != 0)
+        //to be valid, must have a multiple of three
+        if(values.length % 3 != 0)
         {
             Adversity.log.warn("Invalid open space data loading volcano at " + pos.toString()
             + ". Volcano may not place lava properly.");
@@ -39,27 +39,28 @@ public class SpaceManager
         int i = 0;
         while(i < values.length)
         {
-            spaces.add(new OpenSpace(values[i++], values[i++]));
+            spaces.add(new OpenSpace(values[i++], values[i++], values[i++] == 1));
         }
     }
 
     public int[] getArray()
     {
-        int[] result = new int[this.spaces.size() * 2];
+        int[] result = new int[this.spaces.size() * 3];
         int i = 0;
 
         for(OpenSpace space: this.spaces)
         {
             result[i++] = space.pos;
             result[i++] = space.origin;
+            result[i++] = space.isSupported ? 1 : 0;
         }	    
         return result;
     }
 
-    public void add(BlockPos posIn, BlockPos origin)
+    public void add(BlockPos posIn, BlockPos origin, boolean isSupported)
     {
         //	    Adversity.log.info("adding space @ " + posIn.toString() + " with origin " + origin.toString());
-        spaces.add(new OpenSpace(posIn, origin));
+        spaces.add(new OpenSpace(posIn, origin, isSupported));
     }
 
     public OpenSpace pollFirst()
@@ -82,16 +83,18 @@ public class SpaceManager
         private final int pos;
         private final int origin;
         private final int distance;
+        private final boolean isSupported;
 
-        private OpenSpace(BlockPos pos, BlockPos origin)
+        private OpenSpace(BlockPos pos, BlockPos origin, boolean isSupported)
         {
-            this(RelativeBlockPos.getKey(pos, SpaceManager.this.pos), RelativeBlockPos.getKey(origin, SpaceManager.this.pos));
+            this(RelativeBlockPos.getKey(pos, SpaceManager.this.pos), RelativeBlockPos.getKey(origin, SpaceManager.this.pos), isSupported);
         }
 
-        private OpenSpace(int pos, int origin)
+        private OpenSpace(int pos, int origin, boolean isSupported)
         {
             this.pos = pos;
             this.origin = origin;
+            this.isSupported = isSupported;
             int dx = getPos().getX() - SpaceManager.this.pos.getX();
             int dz = getPos().getZ() - SpaceManager.this.pos.getZ();
             this.distance = dx * dx + dz * dz;
@@ -111,6 +114,7 @@ public class SpaceManager
         public int compareTo(OpenSpace other)
         {
             return ComparisonChain.start()
+                    .compareTrueFirst(this.isSupported, other.isSupported)
                     .compare(this.getPos().getY(), other.getPos().getY())
                     .compare(this.distance, other.distance)
                     .compare(this.pos, other.pos)

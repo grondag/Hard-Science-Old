@@ -81,7 +81,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        
         //see Config.render().enableFaceCullingOnFlowBlocks for explanation
         
 //        boolean result;
@@ -89,7 +88,6 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
         if(Config.render().enableFaceCullingOnFlowBlocks && IFlowBlock.isFlowBlock(neighborState.getBlock()))
         {
-            if(neighborState.getBlock() == this) return false;
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
 //            result = myOcclusionKey != otherOcclusionKey;
