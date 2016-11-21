@@ -67,6 +67,11 @@ public class SpaceManager
         return spaces.pollFirst();
     }
 
+    public OpenSpace peekFirst()
+    {
+        return spaces.first();
+    }
+    
 //    public OpenSpace pollLast()
 //    {
 //        return spaces.pollLast();

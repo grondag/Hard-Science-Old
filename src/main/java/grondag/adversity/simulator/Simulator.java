@@ -61,6 +61,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     private World world;
     
     private volatile boolean isRunning = false;
+    public boolean isRunning() { return isRunning; }
     
     private final TaskCounter taskCounter = new TaskCounter();
 
@@ -96,13 +97,18 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
 	        
-            if(!PersistenceManager.loadNode(world, this))
+            if(PersistenceManager.loadNode(world, this))
+            {
+                PersistenceManager.loadNode(world, this.volcanoManager);
+            }
+            else
     	    {
                 Adversity.log.info("creating sim");
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
+    	        PersistenceManager.registerNode(world, this.volcanoManager);
 
     	    }
     		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -201,14 +207,12 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
-        
-        volcanoManager.readFromNBT(nbt);
     }
 
     @Override
     public boolean isSaveDirty()
     {
-        return super.isSaveDirty() || volcanoManager.isSaveDirty();
+        return super.isSaveDirty();
     }
 
     @Override
@@ -218,7 +222,6 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         nbt.setInteger(TAG_CURRENT_SIM_TICK, currentSimTick.get());
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
-        volcanoManager.writeToNBT(nbt);
     }
     
     public World getWorld() { return this.world; }
@@ -308,7 +311,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
              * 
              * Hypermaterial Manager? - probably best to leave this world-side
              */
-            if((currentSimTick.get() & 1023) == 1023)
+            if((currentSimTick.get() & 0xF) == 0xF)
             {
                 executor.execute(volcanoManager);
             }

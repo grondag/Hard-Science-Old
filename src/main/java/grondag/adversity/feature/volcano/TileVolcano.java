@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.feature.volcano.SpaceManager.OpenSpace;
@@ -18,15 +19,15 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 
 //FIX/TEST
 
 
 //TODOS
-//fix face visibility for flow blocks
-//tune lava flow shape
 //simulation integration & control from simulation
 //volcano wand
+//tune lava flow shape
 //detection item
 //world gen
 
@@ -48,44 +49,58 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     // Activity cycle.
     private VolcanoStage stage = VolcanoStage.NEW;
+    /** max Y level of the volcano */
     private int						level;
+    /** current Y level for placing blocks */
     private int						buildLevel;
     private int						groundLevel;
-    /** Weight used by simulation to calculate odds of activation. 
-     * Incremented whenever this TE is loaded and ticks. */
-    private int                     weight = 2400000;
     private int backtrackLimit = 0;
     private int ticksActive = 0;
     private int lavaCounter = 0;
     private int lavaCooldownTicks = 0;
     private int placementCountdown = 0;
 
-    //	private VolcanoNode             node;
-
+    /** simulation delegate */
+	private VolcanoNode             node;
+	/** 
+	 * id for VolcanoNode 
+	 * Set during ReadNBT so it can be obtained from simulation after ticks have started
+	 */
+	private int nodeId = -1;
+	private static final int NODE_NOT_FOUND = -1;
+	
+	/**
+	 * Spaces potentially available for flowing lava.
+	 */
     private SpaceManager spaceManager;
+    
+    /**
+     * Placed lava blocks that need to be cooled when flowing is done or paused.
+     */
     private BlockManager lavaBlocks;
+    
+    /**
+     * Top lava blocks that should only be cooled once flowing is done for this level.
+     */
     private BlockManager topBlocks;
+    
+    /**
+     * Blocks ready to be cooled at any time, irrespective of state.
+     */
     private BlockManager coolingBlocks;
 
     //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
 
-    // these are all derived or ephemeral - not saved to NBT
-    private boolean isLoaded = false;
 
     private int						hazeTimer		= 60;
 
-    private static enum VolcanoStage
+    public static enum VolcanoStage
     {
         NEW,
         FLOWING,
         /** Flow temporarily stopped to allow for cooling. */
         COOLING,
         DORMANT,
-        //	    ACTIVE,
-        //	    NEW_LEVEL,
-        //	    BUILDING_INNER,
-        //	    BUILDING_LOWER,
-        //	    TESTING_OUTER,
         DEAD
     }
 
@@ -145,119 +160,170 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     public void update() 
     {
-        if(this.worldObj.isRemote || this.stage == VolcanoStage.DORMANT) return;
-
-        ticksActive++;
-        if(placementCountdown > 0) placementCountdown--;
-
-        this.markDirty();
-
-        if(this.stage == VolcanoStage.NEW && Simulator.instance.getVolcanoManager() != null)
+        boolean isNodeUpdateNeeded = false;
+        
+        if(this.worldObj.isRemote) return;
+        
+        if(this.node == null)
         {
-            //            this.node = Simulator.instance.getVolcanoManager().createNode();
-            this.isLoaded = true;
-            this.stage = VolcanoStage.FLOWING;
-            this.level = this.pos.up().getY();
-            this.spaceManager = new SpaceManager(this.pos);
-            this.lavaBlocks = new BlockManager(this.pos, true);
-            this.topBlocks = new BlockManager(this.pos, true);
-            this.coolingBlocks = new BlockManager(this.pos, false);
-            this.lavaCooldownTicks = 0;
-            int moundRadius = Config.volcano().moundRadius;
-            this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
-        }
-
-        if(!isLoaded) return;
-
-    
-
-        if(this.stage == VolcanoStage.FLOWING)
-        {
-            int nonTopTrackingCount = spaceManager.getCount() + lavaBlocks.getCount() + coolingBlocks.getCount();
+            if(!Simulator.instance.isRunning()) return;
             
-            if(nonTopTrackingCount == 0)
-            {       
-                this.buildLevel = this.level;
-                BlockPos startingPos = new BlockPos(this.getPos().getX(), this.level, this.getPos().getZ());
-                placeIfPossible(startingPos, startingPos);
-                backtrackLimit = level;
-    
-                if(spaceManager.getCount() == 0)
-                {
-                    if(this.level < Config.volcano().maxYLevel)
-                    {
-                        startLavaCoolingAndPause(true);
-                        this.level++;
-                    }
-                    else
-                    {
-                        this.stage = VolcanoStage.DORMANT;
-                    }
-                }
+            if(this.stage == VolcanoStage.NEW)
+            {
+                this.node = Simulator.instance.getVolcanoManager().createNode();
+                this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+                this.stage = VolcanoStage.DORMANT;
+                this.level = this.pos.getY();
+                this.spaceManager = new SpaceManager(this.pos);
+                this.lavaBlocks = new BlockManager(this.pos, true);
+                this.topBlocks = new BlockManager(this.pos, true);
+                this.coolingBlocks = new BlockManager(this.pos, false);
+                this.lavaCooldownTicks = 0;
+                int moundRadius = Config.volcano().moundRadius;
+                this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
             else
             {
-                if(placementCountdown == 0 && spaceManager.getCount() != 0)
+                  this.node = Simulator.instance.getVolcanoManager().findNode(this.nodeId);
+                  if(this.node == null)
+                  {
+                      Adversity.log.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
+                      + ". Created new simulation node.  Simulation state was lost.");
+                      this.node = Simulator.instance.getVolcanoManager().createNode();
+                      this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+                  }
+            }
+            isNodeUpdateNeeded = true;
+        }
+ 
+        ticksActive++;
+        
+        //TODO: handle dead condition
+//        if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
+//        {
+//            this.weight = 0;
+//            this.stage = VolcanoStage.DEAD;
+//            this.node.deActivate();
+        switch(this.stage)
+        {
+        case DORMANT:
+            if(this.level >= Config.volcano().maxYLevel)
+            {
+                this.stage = VolcanoStage.DEAD;
+                isNodeUpdateNeeded = true;
+            }
+            else if (this.node.isActive())
+            {
+                startFlowingAtNewLevel();
+                this.stage = VolcanoStage.FLOWING;
+                isNodeUpdateNeeded = true;
+            }
+            break;
+            
+        case FLOWING:
+            //skip flowing if have too many cooling blocks - to wait for blocks to cool
+            if(this.coolingBlocks.getCount() > Config.volcano().blockTrackingMax) break;
+            
+            //if no more spaces, allow cooling of top blocks
+            if(spaceManager.getCount() == 0)
+            {
+                while(topBlocks.getCount() > 0)
                 {
-                    if( nonTopTrackingCount + topBlocks.getCount() <= Config.volcano().blockTrackingMax)
-                    {
-                        OpenSpace place = spaceManager.pollFirst();
-                        int y = place.getPos().getY();
-
-                        if(y < this.backtrackLimit || y == this.level)
-                        {
-                            if(y == this.level)
-                            {
-                                backtrackLimit = this.level;
-
-                                //if back at top, enable cooling of blocks so far
-                                if(this.buildLevel < y && this.lavaBlocks.getCount() > 0)
-                                {
-                                    startLavaCoolingAndPause(false);
-                                    this.buildLevel = this.level;
-                                }
-                            }
-                            placeIfPossible(place.getPos(), place.getOrigin());
-                            placementCountdown = getRandomBlockTicks();
-                            this.buildLevel = Math.min(buildLevel, y);
-                            this.backtrackLimit = Math.min(backtrackLimit, y + Config.volcano().backtrackIncrement);
-                        }
-                        else
-                        {
-                            //Handle special (and hopefully rare) case where we have max blocks
-                            //and they are all lava blocks.  If this ever happens, have to enable
-                            //cooling so that the tracking count can go down.
-                            startLavaCoolingAndPause(false);
-                        }
-                    }
-                    
+                    this.lavaBlocks.add(topBlocks.pollLastEntry().getPos(), lavaCounter++);
+                }
+                this.stage = VolcanoStage.COOLING;
+            }
+            else
+            {
+                //if back at top, enable cooling of blocks so far
+                if(this.buildLevel < this.level 
+                        && this.lavaBlocks.getCount() > 0
+                        && spaceManager.peekFirst().getPos().getY() == this.level)
+                {
+                    this.buildLevel = this.level;
+                    this.backtrackLimit = this.level + 1;
+                    this.stage = VolcanoStage.COOLING;
                 }
                 else
                 {
-                    // no more lava to place in this stream, enable cooling
-                    if(this.lavaBlocks.getCount() > 0)
+                    if(placementCountdown == 0) 
                     {
-                        startLavaCoolingAndPause(false);
+                        doFlowing();
+                        placementCountdown = getRandomBlockTicks();
+                    }
+                    else
+                    {
+                        placementCountdown--;
                     }
                 }
             }
-        }
-        else if(this.stage == VolcanoStage.COOLING)
-        {
+            break;
+            
+        case COOLING:
             doLavaCooling();
-            if(lavaBlocks.getCount() == 0)
+            if(lavaBlocks.isEmpty())
             {
-                this.stage = VolcanoStage.FLOWING;
+                //continue with current level if still have spaces
+                if(this.spaceManager.getCount() > 0)
+                {
+                    this.stage = VolcanoStage.FLOWING;
+                }
+                //if no more spaces and still active, go up a level
+                else if(this.node.isActive() && this.level < Config.volcano().maxYLevel)
+                {
+                    startFlowingAtNewLevel();
+                    this.stage = VolcanoStage.FLOWING;
+                }
+                else
+                {
+                    this.stage = VolcanoStage.DORMANT;
+                }
             }
+            break;
+            
+        case DEAD:
+        case NEW:
+        default:
+            //NOOP
+            //new case is handled above
+            break;
         }
-       
+        
 
         if(coolingBlocks.getCount() != 0)// && placedLava.lastEntry().getValue().worldTick < this.worldObj.getWorldTime())
         {
             doCooling();
         }
+        
+        if(isNodeUpdateNeeded || (this.ticksActive & 0xF) == 0xF )
+        {
+              node.updateWorldState(ticksActive + 1000, level, stage);
+        }
+        
+        this.markDirty();
     }
 
+    private void startFlowingAtNewLevel()
+    {
+        this.level++;
+        this.buildLevel = this.level;
+        backtrackLimit = level + 1;
+        BlockPos startingPos = new BlockPos(this.getPos().getX(), this.level, this.getPos().getZ());
+        placeIfPossible(startingPos, startingPos);
+    }
+    
+    private void doFlowing()
+    {
+        OpenSpace place = spaceManager.pollFirst();
+        int y = place.getPos().getY();
+        if(y < this.backtrackLimit)
+        {
+            placeIfPossible(place.getPos(), place.getOrigin());
+            this.buildLevel = Math.min(buildLevel, y);
+            this.backtrackLimit = Math.min(backtrackLimit, y + Config.volcano().backtrackIncrement);
+        }
+    }
+    
     private void doCooling()
     {
         BlockPlacement placement = coolingBlocks.pollFirstReadyEntry(this.ticksActive);
@@ -325,7 +391,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             lavaCooldownTicks--;
         }
-        else
+        else if(!lavaBlocks.isEmpty())
         {
             lavaCooldownTicks = getRandomBlockTicks();
             
@@ -363,21 +429,6 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
     }
     
-    private void startLavaCoolingAndPause(boolean includeTopBlocks)
-    {
-//        Adversity.log.info("startLavaCoollingAndPause " + includeTopBlocks);
-
-        this.stage = VolcanoStage.COOLING;
-        
-        if(includeTopBlocks)
-        {
-            while(topBlocks.getCount() > 0)
-            {
-                this.lavaBlocks.add(topBlocks.pollLastEntry().getPos(), lavaCounter++);
-            }
-        }
-    }
-
     private NiceBlock getNextCoolingBlock(Block blockIn)
     {
         if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK)
@@ -901,11 +952,14 @@ public class TileVolcano extends TileEntity implements ITickable{
     //	}
 
     @Override
-    public void readFromNBT(NBTTagCompound tagCompound) {
+    public void readFromNBT(NBTTagCompound tagCompound) 
+    {
         super.readFromNBT(tagCompound);
+        
+        Adversity.log.info("readNBT volcanoTile");
+        
         this.stage = VolcanoStage.values()[tagCompound.getInteger("stage")];
         this.level = tagCompound.getInteger("level");
-        this.weight= tagCompound.getInteger("weight");
         this.buildLevel = tagCompound.getInteger("buildLevel");
         this.groundLevel = tagCompound.getInteger("groundLevel");
         this.ticksActive = tagCompound.getInteger("ticksActive");
@@ -918,33 +972,17 @@ public class TileVolcano extends TileEntity implements ITickable{
         this.topBlocks = new BlockManager(this.pos, true, tagCompound.getIntArray("topBlocks"));
         this.coolingBlocks = new BlockManager(this.pos, false, tagCompound.getIntArray("basaltBlocks"));
 
-        //		int nodeId = tagCompound.getInteger("nodeId");
-        //		
-        //		if(nodeId != 0)
-        //		{
-        //		    this.node = Simulator.instance.getVolcanoManager().findNode(nodeId);
-        //		    if(this.node == null)
-        //		    {
-        //		        Adversity.log.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
-        //		        + ". Created new simulation node.  Simulation state was lost.");
-        //		    }
-        //		}
-        //		
-        //		if(nodeId == 0 || this.node == null)
-        //		{
-        //		    this.node = Simulator.instance.getVolcanoManager().createNode();
-        //		    this.markDirty();
-        //		}
+        this.nodeId = tagCompound.getInteger("nodeId");
+   
 
-        this.isLoaded = true;
         //this.hazeMaker.readFromNBT(tagCompound);
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tagCompound) 
+    {        
         tagCompound.setInteger("stage", this.stage.ordinal());
         tagCompound.setInteger("level", this.level);
-        tagCompound.setInteger("weight", this.weight);
         tagCompound.setInteger("buildLevel", this.buildLevel);
         tagCompound.setInteger("groundLevel", this.groundLevel);
         tagCompound.setInteger("ticksActive", this.ticksActive);
@@ -957,7 +995,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         tagCompound.setIntArray("topBlocks", this.topBlocks.getArray());
         tagCompound.setIntArray("basaltBlocks", this.coolingBlocks.getArray());      
 
-        //		if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
+		if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
         return super.writeToNBT(tagCompound);
 
         //this.hazeMaker.writeToNBT(tagCompound);

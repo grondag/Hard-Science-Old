@@ -34,7 +34,7 @@ public class CommonProxy {
        //     WailaDataProvider.register();
         }
         
-        ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.MODID, Simulator.instance);
+        ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.instance, Simulator.instance);
         MinecraftForge.EVENT_BUS.register(Simulator.instance);
         MinecraftForge.EVENT_BUS.register(CommonEventHandler.INSTANCE);
         

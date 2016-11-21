@@ -46,6 +46,11 @@ public class BlockManager
         return placedBlocks.size();
     }
 
+    public boolean isEmpty()
+    {
+        return placedBlocks.isEmpty();
+    }
+    
     public int[] getArray()
     {
         int[] result = new int[placedBlocks.size() * 2];
@@ -130,7 +135,10 @@ public class BlockManager
         {
             this.pos= pos;
             this.index = index;
-            this.distance = BlockManager.this.distanceRanked ? (int) this.getPos().distanceSq(BlockManager.this.pos) : 0;
+            //for distance ranked, want to start with farthest down, then farthest from center
+            this.distance = BlockManager.this.distanceRanked 
+                    ? (int) this.getPos().distanceSq(BlockManager.this.pos.getX(), 255, BlockManager.this.pos.getZ()) 
+                    : 0;
         }
 
         public BlockPos getPos()

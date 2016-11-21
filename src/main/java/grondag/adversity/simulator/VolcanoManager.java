@@ -2,16 +2,19 @@ package grondag.adversity.simulator;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.config.Config;
+import grondag.adversity.feature.volcano.TileVolcano;
+import grondag.adversity.feature.volcano.TileVolcano.VolcanoStage;
 import grondag.adversity.library.Useful;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.SimulationNodeRunnable;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -25,10 +28,7 @@ public class VolcanoManager extends SimulationNodeRunnable
     
     private AtomicInteger maxIdInUse = new AtomicInteger(-1);
     
-    private ConcurrentLinkedQueue<Integer> availableIDs;
-    
-    private VolcanoNode[] nodes;
-    
+    private volatile VolcanoNode[] nodes = new VolcanoNode[MAX_NODES];
     
     private static final int NO_ACTIVE_INDEX = -1;
     private volatile int activeIndex = NO_ACTIVE_INDEX;
@@ -41,7 +41,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         super(NodeRoots.VOLCANO_MANAGER.ordinal(), taskCounter);
     }
 
-    private NBTTagCompound nbtVolcanoManager;
+    private NBTTagCompound nbtVolcanoManager = new NBTTagCompound();;
         
     /** not thread-safe - to be called on world sever thread */
     public void updateChunkLoading()
@@ -103,7 +103,7 @@ public class VolcanoManager extends SimulationNodeRunnable
             
             for ( int i = 0; i <= maxIdInUse.get(); i++) {
                 VolcanoNode node = nodes[i];
-                if(node != null && !node.isDeleted()
+                if(node != null 
                         && node.getWeight() > 0
                         && node.wantsToActivate())
                 {
@@ -162,19 +162,11 @@ public class VolcanoManager extends SimulationNodeRunnable
     
     public VolcanoNode createNode()
     {
-        
         // TODO: expand array or switch to a concurrent structure
         
-        if(maxIdInUse.get() == MAX_NODES -1) return null;
-        
-        Integer nodeID;
-        
-        nodeID = availableIDs.poll();
-        
-        if(nodeID == null)
-        {
-            nodeID = maxIdInUse.incrementAndGet();
-        }
+        int nodeID = maxIdInUse.incrementAndGet();
+
+        if(nodeID >= MAX_NODES) return null;
   
         synchronized(nodes)
         {
@@ -191,11 +183,13 @@ public class VolcanoManager extends SimulationNodeRunnable
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
+        
+        Adversity.log.info("readNBT volcanoManager");
+        
         nbtVolcanoManager = nbt.getCompoundTag(NodeRoots.VOLCANO_MANAGER.getTagKey());
         NBTTagCompound nbtSubNodes;
         this.maxIdInUse.set(-1);
         nodes = new VolcanoNode[MAX_NODES];
-        availableIDs = new ConcurrentLinkedQueue<Integer>();
         
         if(nbtVolcanoManager == null)
         {
@@ -223,19 +217,9 @@ public class VolcanoManager extends SimulationNodeRunnable
                 this.maxIdInUse.set(Math.max(this.maxIdInUse.get(), node.getID()));
                 //simNodes.put(node.getID(), node);
                 //saveNodes.put(node.getID(), node);   
-            }
-            
-            if(this.maxIdInUse.get() >= 0)
-            {
-                for(int i = 0; i < this.maxIdInUse.get(); i++)
-                {
-                    if(nodes[i] == null)
-                    {
-                        availableIDs.offer(new Integer(i));
-                    }
-                }
-            }
-        }    
+            }   
+        }
+
     }
 
     @Override
@@ -248,25 +232,16 @@ public class VolcanoManager extends SimulationNodeRunnable
         if(maxIdInUse.get() == -1) return;
         
         NBTTagCompound nbtSubNodes = nbtVolcanoManager.getCompoundTag(NodeRoots.SUBNODES_TAG);
+        if(nbtSubNodes == null) nbtSubNodes = new NBTTagCompound();
+        
         VolcanoNode node;
         
-        for ( int i = 0; i <= maxIdInUse.get(); i++) {
+        for (int i = 0; i <= maxIdInUse.get(); i++)
+        {
             node = nodes[i];
-            if(node != null)
+            if(node != null && node.isSaveDirty())
             {
-                if(node.isDeleted())
-                {
-                    nbtSubNodes.removeTag(node.getTagKey());
-                    synchronized(nodes)
-                    {
-                        nodes[nodeID] = null;
-                    }
-                    availableIDs.offer(new Integer(i));
-                }
-                else if (node.isSaveDirty())
-                {
-                    node.writeToNBT(nbtSubNodes.getCompoundTag(node.getTagKey()));
-                }
+                node.writeToNBT(nbtSubNodes.getCompoundTag(node.getTagKey()));
             }
         }
 
@@ -275,12 +250,6 @@ public class VolcanoManager extends SimulationNodeRunnable
 
     public class VolcanoNode extends SimulationNode
     {
-        public static final int MAX_VOLCANO_HEIGHT = 180;
-        private static final int MIN_DORMANT_TICKS = 4 * 24000;
-        private static final int MAX_DORMANT_TICKS = 20 * 24000;
-        
-        private volatile boolean isDeleted = false;
-        
         /** 
          * Occasionally updated by TE based on how
          * long the containing chunk has been inhabited.
@@ -289,6 +258,9 @@ public class VolcanoManager extends SimulationNodeRunnable
          */
         private int weight = 0;
         private static final String TAG_WEIGHT = "w";
+        
+        private VolcanoStage stage;
+        private static final String TAG_STAGE = "s";
         
         private int height = 0;
         private static final String TAG_HEIGHT = "h";
@@ -335,7 +307,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         /** 
          * Called by TE from world tick thread.
          */
-        public void updateWorldState(int newWeight, int newHeight)
+        public void updateWorldState(int newWeight, int newHeight, VolcanoStage newStage)
         {
             if(newWeight != weight)
             {
@@ -345,6 +317,11 @@ public class VolcanoManager extends SimulationNodeRunnable
             if(newHeight != height)
             {
                 this.height = newHeight;
+                this.setSaveDirty(true);
+            }
+            if(newStage != stage)
+            {
+                this.stage = newStage;
                 this.setSaveDirty(true);
             }
             this.keepAlive = Simulator.instance.getWorld().getTotalWorldTime();
@@ -357,9 +334,8 @@ public class VolcanoManager extends SimulationNodeRunnable
             if(this.isActive && this.keepAlive + 2048L < Simulator.instance.getWorld().getTotalWorldTime())
             {
                 Adversity.log.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
-                + " has not reported in. Deactivating and removing volcano simulation node.");
+                + " has not reported in. Deactivating volcano simulation node.");
                 this.deActivate();
-                this.delete();
             }
         }
         
@@ -368,6 +344,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         {
             this.weight = nbt.getInteger(TAG_WEIGHT);                  
             this.height = nbt.getInteger(TAG_HEIGHT);
+            this.stage = VolcanoStage.values()[nbt.getInteger(TAG_STAGE)];
             this.x = nbt.getInteger(TAG_X);
             this.y = nbt.getInteger(TAG_Y);
             this.z = nbt.getInteger(TAG_Z);
@@ -384,6 +361,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                 this.setSaveDirty(false);
                 nbt.setInteger(TAG_WEIGHT, this.weight);
                 nbt.setInteger(TAG_HEIGHT, this.height);
+                nbt.setInteger(TAG_STAGE, this.stage.ordinal());
                 nbt.setInteger(TAG_X, this.x);
                 nbt.setInteger(TAG_Y, this.y);
                 nbt.setInteger(TAG_Z, this.z);
@@ -392,24 +370,14 @@ public class VolcanoManager extends SimulationNodeRunnable
                 nbt.setInteger(TAG_LAST_ACTIVATION_TICK, this.lastActivationTick);
             }
         }
-        
-        public boolean isDeleted() { return this.isDeleted;  }
-        
-        public void delete() 
-        { 
-            this.isDeleted = true; 
-            this.weight = 0;
-            this.deActivate();
-            this.setSaveDirty(true);
-        }
 
-        public void setLocation(int x, int y, int z, int dimension) 
+        public void setLocation(BlockPos pos, int dimension) 
         { 
             synchronized(this)
             {
-                this.x = x;
-                this.y = y;
-                this.z = z;
+                this.x = pos.getX();
+                this.y = pos.getY();
+                this.z = pos.getZ();
                 this.dimension = dimension; 
                 this.setSaveDirty(true);
             }
@@ -417,13 +385,13 @@ public class VolcanoManager extends SimulationNodeRunnable
         
         public boolean wantsToActivate()
         {
-            if(this.isActive || this.isDeleted || this.height == VolcanoNode.MAX_VOLCANO_HEIGHT) return false;
+            if(this.isActive || this.height >= Config.volcano().maxYLevel) return false;
             
             int dormantTime = Simulator.instance.getCurrentSimTick() - this.lastActivationTick;
             
-            if(dormantTime < VolcanoNode.MIN_DORMANT_TICKS) return false;
+            if(dormantTime < Config.volcano().minDormantTicks) return false;
             
-            float chance = dormantTime / MAX_DORMANT_TICKS;
+            float chance = (float)dormantTime / Config.volcano().maxDormantTicks;
             chance = chance * chance * chance;
             
             return Useful.SALT_SHAKER.nextFloat() <= chance;
