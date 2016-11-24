@@ -188,6 +188,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         nbtVolcanoManager = nbt.getCompoundTag(NodeRoots.VOLCANO_MANAGER.getTagKey());
         NBTTagCompound nbtSubNodes;
         this.maxIdInUse.set(-1);
+        this.activeIndex = NO_ACTIVE_INDEX;
         nodes = new VolcanoNode[MAX_NODES];
         
         if(nbtVolcanoManager == null)

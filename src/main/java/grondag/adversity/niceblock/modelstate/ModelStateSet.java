@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.cache.ILoadingCache;
 import grondag.adversity.library.cache.ManagedLoadingCache;
 import grondag.adversity.library.cache.SimpleCacheLoader;
@@ -245,7 +246,13 @@ public class ModelStateSet
     
     public ModelStateSetValue getSetValueFromBits(long bits)
     {
-        return valueCache.get(bits);
+        ModelStateSetValue result = valueCache.get(bits);
+        //TODO: remove
+        if(result == null)
+        {
+            Adversity.log.info("unable to retrieve model state set value");
+        }
+        return result;
     }
     
     public class ModelStateSetValue

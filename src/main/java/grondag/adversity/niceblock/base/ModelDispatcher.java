@@ -301,10 +301,17 @@ public class ModelDispatcher implements IBakedModel
     {
         if(this.renderLayerFlags[BlockRenderLayer.SOLID.ordinal()] == false) return 0;
 //        QuadContainer container = getModel(modelStateKey).get(BlockRenderLayer.SOLID);
-        QuadContainer container = modelCache.get(modelStateKey).get(BlockRenderLayer.SOLID);
+        SparseLayerMap map = modelCache.get(modelStateKey);
+        if(map == null) 
+        {
+            Adversity.log.warn("Missing layer map for occlusion key.");
+            return 0;
+        }
+        
+        QuadContainer container = map.get(BlockRenderLayer.SOLID);
         if(container == null) 
         {
-//            Adversity.log.warn("Missing model for occlusion key.");
+            Adversity.log.warn("Missing model for occlusion key.");
             return 0;
         }
         return container.getOcclusionHash(face);

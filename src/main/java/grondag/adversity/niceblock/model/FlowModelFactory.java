@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.QuadContainer;
@@ -88,6 +89,11 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     {
         CSGShape rawQuads = new CSGShape();
         RawQuad template = new RawQuad();
+        //TODO: remove
+        if(state == null || this.colorComponent == null)
+        {
+            Adversity.log.warn("derp!");
+        }
         template.color = state.getValue(this.colorComponent).getColor(EnumColorMap.BASE);
         template.lockUV = true;
         //        template.rotation = state.getValue(this.rotationComponent);

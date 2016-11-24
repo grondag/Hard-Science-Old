@@ -132,8 +132,9 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
                 //Will simply reload if necessary next time.
                 if(state.keys[position] == 0 && state.positionMask == localState.positionMask)
                 {
-                    localState.keys[position] = key;
+                    //write value first in case another thread tries to read it based on key before we can write it
                     localState.values[position] = result;
+                    localState.keys[position] = key;
                     if(++size >= maxFill) expand(); 
                 }
             }
@@ -154,8 +155,9 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
                     //Will simply reload if necessary next time.
                     if(state.keys[position] == 0 && state.positionMask == localState.positionMask)
                     {
-                        localState.keys[position] = key;
+                        //write value first in case another thread tries to read it based on key before we can write it
                         localState.values[position] = result;
+                        localState.keys[position] = key;
                         if(++size >= maxFill) expand(); 
                     }
                 }

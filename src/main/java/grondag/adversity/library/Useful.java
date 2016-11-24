@@ -10,6 +10,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -293,5 +294,60 @@ public class Useful {
    public static double AABBVolume(AxisAlignedBB box)
    {
        return (box.maxX - box.minX) * (box.maxY - box.minY) * (box.maxZ - box.minZ);
+   }
+   
+   /**
+    * Returns true if the given ray intersects with the given AABB.
+    */
+   public static boolean doesRayIntersectAABB(Vec3d origin, Vec3d direction, AxisAlignedBB box)
+   {
+
+       double tmin = Double.NEGATIVE_INFINITY;
+       double tmax = Double.POSITIVE_INFINITY;
+      
+       double t1, t2;
+       
+       if(direction.xCoord != 0)
+       {
+           t1 = (box.minX - origin.xCoord)/direction.xCoord;
+           t2 = (box.maxX - origin.xCoord)/direction.xCoord;
+           tmin = Math.max(tmin, Math.min(t1, t2));
+           tmax = Math.min(tmax, Math.max(t1, t2));
+       }
+       else if (origin.xCoord <= box.minX || origin.xCoord >= box.maxX) 
+       {
+           return false;
+       }
+       
+       if(direction.yCoord != 0)
+       {
+           t1 = (box.minY - origin.yCoord)/direction.yCoord;
+           t2 = (box.maxY - origin.yCoord)/direction.yCoord;
+           tmin = Math.max(tmin, Math.min(t1, t2));
+           tmax = Math.min(tmax, Math.max(t1, t2));
+       }
+       else if (origin.yCoord <= box.minY || origin.yCoord >= box.maxY) 
+       {
+           return false;
+       }
+           
+       if(direction.zCoord != 0)
+       {
+           t1 = (box.minZ - origin.zCoord)/direction.zCoord;
+           t2 = (box.maxZ - origin.zCoord)/direction.zCoord;
+           tmin = Math.max(tmin, Math.min(t1, t2));
+           tmax = Math.min(tmax, Math.max(t1, t2));
+       }
+       else if (origin.zCoord <= box.minZ || origin.zCoord >= box.maxZ) 
+       {
+           return false;
+       }
+        
+       return tmax > tmin && tmax > 0.0;   
+   }
+   
+   public static int squared(int x) 
+   {
+       return x * x;
    }
 }
