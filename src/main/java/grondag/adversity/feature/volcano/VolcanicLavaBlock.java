@@ -1,13 +1,20 @@
 package grondag.adversity.feature.volcano;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
@@ -83,5 +90,13 @@ public class VolcanicLavaBlock extends FlowDynamicBlock
         return 2;
     }
 
+    //TODO: make this work or remove it
+    @Override
+    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+    {
+        ArrayList<String> lines = new ArrayList<String>(2);
+        lines.add("Testing!");
+        return lines;
+    }
 
 }

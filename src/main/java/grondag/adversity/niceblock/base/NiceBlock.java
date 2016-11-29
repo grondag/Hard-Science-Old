@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.library.cache.ManagedLoadingCache;
 import grondag.adversity.library.cache.SimpleCacheLoader;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -9,8 +10,11 @@ import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.ICollisionHandler;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -65,7 +69,7 @@ import com.google.common.collect.ImmutableList.Builder;
  * If block getLightValue > 0 and lightOpacity > 0
  * then block stays lit when nearby light sources are removed.
  */
-public class NiceBlock extends Block // implements IWailaProvider
+public class NiceBlock extends Block implements IWailaProvider
 {
 
     /**
@@ -551,11 +555,11 @@ public class NiceBlock extends Block // implements IWailaProvider
         return false;
     }
 	
-//    @Override
-//    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
-//    {
-//        return this.blockModelHelper.getWailaBody(itemStack, currenttip, accessor, config);
-//    }
+    @Override
+    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
+    {
+        return Collections.emptyList();
+    }
 
     // BLOCK TESTS
 
