@@ -28,7 +28,7 @@ run
 ._*
 
 #stuff
-config
+#config
 logs
 .html
 discarded textures
