@@ -30,7 +30,8 @@ public class Volcano {
     //	public static Item				itemVolcanicLavaBucket;
     public static final Item basaltRubble = new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble");
     public static final VolcanoWand  volcanoWand = new VolcanoWand();
-
+    public static final TerrainWand  terrainWand = new TerrainWand();
+    
     //	// FLUIDS
     //	public static Fluid				fluidVolcanicLava;
 
@@ -49,14 +50,14 @@ public class Volcano {
 
         GameRegistry.register(basaltRubble);
         GameRegistry.register(volcanoWand);
+        GameRegistry.register(terrainWand);
 
         if(event.getSide() == Side.CLIENT)
         {
             ModelLoader.setCustomModelResourceLocation(itemBlockVolcano, 0, new ModelResourceLocation("adversity:block_volcano", "inventory"));
             ModelLoader.setCustomModelResourceLocation(basaltRubble, 0, new ModelResourceLocation("adversity:basalt_rubble", "inventory"));
             ModelLoader.setCustomModelResourceLocation(volcanoWand, 0, new ModelResourceLocation("adversity:volcano_wand", "inventory"));
-            
-
+            ModelLoader.setCustomModelResourceLocation(terrainWand, 0, new ModelResourceLocation("adversity:terrain_wand", "inventory"));            
         }
 
         // TILE ENTITIES

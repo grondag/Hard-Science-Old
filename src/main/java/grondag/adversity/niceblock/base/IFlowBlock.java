@@ -1,6 +1,8 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.config.Config;
+import grondag.adversity.feature.volcano.LavaManager;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;

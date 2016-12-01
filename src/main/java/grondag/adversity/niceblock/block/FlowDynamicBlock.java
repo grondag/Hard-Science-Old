@@ -30,18 +30,19 @@ import net.minecraft.world.World;
 public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
 {    
     private final boolean isFiller;
-    private final FlowStaticBlock staticVersion;
+    private FlowStaticBlock staticVersion;
+
 
     public FlowDynamicBlock (ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller) {
-        this(dispatcher, material, styleName, isFiller, null);
-    }
-
-    public FlowDynamicBlock (ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller, FlowStaticBlock staticVersion) {
         super(dispatcher, material, styleName);
         this.isFiller = isFiller;
-        this.staticVersion = staticVersion;
     }
 
+    public void setStaticVersion(FlowStaticBlock staticVersion)
+    {
+    	this.staticVersion = staticVersion;
+    }
+    
     /** 
      * This is an egregious hack to avoids performance hit of instanceof.
      * (Based on performance profile results.)
@@ -211,7 +212,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     }
 
     /**
-     * Convert this block to a static version of itself if a static version was given at instantiation.
+     * Convert this block to a static version of itself if a static version was given.
      */
     public void makeStatic(IBlockState state, World world, BlockPos pos)
     {

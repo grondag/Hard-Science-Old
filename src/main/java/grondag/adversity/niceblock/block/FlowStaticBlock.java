@@ -32,11 +32,18 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
 {    
     private final boolean isFiller;
     
+    private FlowDynamicBlock dynamicVersion;
+
     public FlowStaticBlock (ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller) {
         super(dispatcher, material, styleName);
         this.isFiller = isFiller;
     }
 
+    public void setDynamicVersion(FlowDynamicBlock dynamicVersion)
+    {
+    	this.dynamicVersion = dynamicVersion;
+    }
+    
     /** 
      * This is an egregious hack to avoids performance hit of instanceof.
      * (Based on performance profile results.)
@@ -203,7 +210,17 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         return result;
     }
     
-    
+
+    /**
+     * Convert this block to a dynamic version of itself if a static version was given.
+     */
+    public void makeDynamic(IBlockState state, World world, BlockPos pos)
+    {
+        if(this.dynamicVersion == null || state.getBlock() != this) return;
+
+        world.setBlockState(pos, this.dynamicVersion.getDefaultState()
+                .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), 3);
+    }
 
 
 //    @Override

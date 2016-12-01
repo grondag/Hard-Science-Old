@@ -33,6 +33,7 @@ import grondag.adversity.niceblock.support.NicePlacement;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.color.IItemColor;
@@ -284,13 +285,13 @@ public class NiceBlockRegistrar
             .setDropItem(Volcano.basaltRubble);
     public static final NiceItemBlock COOL_STATIC_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_STATIC_BASALT_FILLER_BLOCK);
    
-    public static final NiceBlock COOL_FLOWING_BASALT_HEIGHT_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "flow", false, COOL_STATIC_BASALT_HEIGHT_BLOCK)
+    public static final NiceBlock COOL_FLOWING_BASALT_HEIGHT_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "flow", false)
             .setDropItem(Volcano.basaltRubble);
     public static final NiceItemBlock COOL_FLOWING_BASALT_HEIGHT_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_HEIGHT_BLOCK);
-    public static final NiceBlock COOL_FLOWING_BASALT_FILLER_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "fill", true, COOL_STATIC_BASALT_FILLER_BLOCK)
+    public static final NiceBlock COOL_FLOWING_BASALT_FILLER_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "fill", true)
             .setDropItem(Volcano.basaltRubble);
     public static final NiceItemBlock COOL_FLOWING_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_FILLER_BLOCK);
-    
+   
     
     private final static ModelFactory.ModelInputs BASALT_COBBLE_INPUTS = new ModelFactory.ModelInputs("cobble", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static ColorModelFactory BASALT_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BASALT,
@@ -336,7 +337,31 @@ public class NiceBlockRegistrar
     public static final CSGBlock CSG_TEST_BLOCK = new CSGBlock(CSG_TEST_DISPATCH, BaseMaterial.FLEXSTONE, "csg_test");
     public static final NiceItemBlock CSG_TEST_ITEM = new NiceItemBlock(CSG_TEST_BLOCK);
 
+    static
+    {
+        ((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
+        
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
+        
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_1_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_1_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
+        
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_2_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_2_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
+        
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_3_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_3_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
+        
+        ((FlowDynamicBlock)HOT_FLOWING_LAVA_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_LAVA_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
+        
+        ((FlowStaticBlock)COOL_STATIC_BASALT_HEIGHT_BLOCK).setDynamicVersion((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK);
+        ((FlowStaticBlock)COOL_STATIC_BASALT_FILLER_BLOCK).setDynamicVersion((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK);   
+     
     
+    }
     // csg block
 
     
@@ -473,6 +498,29 @@ public class NiceBlockRegistrar
         }
     }
 
+    
+    public static NiceBlock getFillerBlock(Block blockIn)
+    {
+        if (blockIn == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+            return NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK;
+
+        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK)
+            return NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK;
+
+        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK)
+            return NiceBlockRegistrar.HOT_FLOWING_BASALT_2_FILLER_BLOCK;
+
+        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_1_HEIGHT_BLOCK)
+            return NiceBlockRegistrar.HOT_FLOWING_BASALT_1_FILLER_BLOCK;
+
+        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK)
+            return NiceBlockRegistrar.HOT_FLOWING_BASALT_0_FILLER_BLOCK;
+
+        else 
+            return NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK;
+    }   
+     
+    
     // /**
     // * Centralized event handler for NiceModel texture stitch.
     // */

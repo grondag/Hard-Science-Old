@@ -578,27 +578,6 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     }
 
-    private NiceBlock getFillerBlock(Block blockIn)
-    {
-        if (blockIn == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-            return NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK;
-
-        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK)
-            return NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK;
-
-        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_2_HEIGHT_BLOCK)
-            return NiceBlockRegistrar.HOT_FLOWING_BASALT_2_FILLER_BLOCK;
-
-        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_1_HEIGHT_BLOCK)
-            return NiceBlockRegistrar.HOT_FLOWING_BASALT_1_FILLER_BLOCK;
-
-        else if(blockIn == NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK)
-            return NiceBlockRegistrar.HOT_FLOWING_BASALT_0_FILLER_BLOCK;
-
-        else 
-            return NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK;
-    }   
-
 
 //    private void placeIfPossible(BlockPos pPos, BlockPos pOrigin, boolean isDescending)
 //    {
@@ -1006,7 +985,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
         {
             targetMeta = 0;
-            fillBlock = getFillerBlock(stateBelow.getBlock());
+            fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
         }
         else 
         {
@@ -1015,7 +994,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
             {
                 targetMeta = 1;
-                fillBlock = getFillerBlock(stateTwoBelow.getBlock());
+                fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
             }
         }
 
