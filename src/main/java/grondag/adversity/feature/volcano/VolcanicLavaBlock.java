@@ -1,7 +1,6 @@
 package grondag.adversity.feature.volcano;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import grondag.adversity.niceblock.base.ModelDispatcher;

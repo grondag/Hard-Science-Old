@@ -1,7 +1,6 @@
 package grondag.adversity.feature.volcano;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,11 +12,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.HashSet;
+import java.util.Queue;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
-import grondag.adversity.feature.volcano.SpaceManager.OpenSpace;
+import grondag.adversity.feature.volcano.lava.LavaBlockUpdate;
+import grondag.adversity.feature.volcano.lava.LavaManager2;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -115,6 +116,9 @@ public class TileVolcano extends TileEntity implements ITickable{
      * Save persistence data here for load on first tick.
      */
     private int[] lavaManagerData;
+    
+    
+    private LavaManager2 cellManager;
     
     private int						hazeTimer		= 60;
 
@@ -261,7 +265,25 @@ public class TileVolcano extends TileEntity implements ITickable{
         ticksActive++;
 
         VolcanoStage oldStage = this.stage;
-        doBlockUpdates();
+        
+        
+        if(cellManager == null)
+        {
+            cellManager = new LavaManager2(pos, worldObj);
+        }
+        
+        Queue<LavaBlockUpdate> blockUpdates = cellManager.getBlockUpdates();
+        
+        LavaBlockUpdate update = blockUpdates.poll();       
+        while(update != null)
+        {
+            worldObj.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+            this.adjustmentList.add(update.pos);
+            update = blockUpdates.poll();
+        }
+        
+        
+        //doBlockUpdates();
         
         doAdjustments();
 

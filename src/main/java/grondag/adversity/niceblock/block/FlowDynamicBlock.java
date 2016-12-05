@@ -1,11 +1,8 @@
 package grondag.adversity.niceblock.block;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.IFlowBlock;

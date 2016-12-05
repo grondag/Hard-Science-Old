@@ -1,8 +1,6 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.config.Config;
-import grondag.adversity.feature.volcano.LavaManager;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -62,7 +60,12 @@ public interface IFlowBlock
      */
     public static IBlockState stateWithFlowHeight(IBlockState state, int value)
     {
-        return state.withProperty(NiceBlock.META, Math.min(11, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
+        return state.withProperty(NiceBlock.META, Math.min(FlowHeightState.BLOCK_LEVELS_INT - 1, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
+    }
+
+    public static IBlockState stateWithFlowHeight(IBlockState state, float value)
+    {
+        return stateWithFlowHeight(state, (int) Math.round(value * FlowHeightState.BLOCK_LEVELS_INT));
     }
 
     /**
