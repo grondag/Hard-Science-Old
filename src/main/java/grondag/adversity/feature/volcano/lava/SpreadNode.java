@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano.lava;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -7,6 +8,7 @@ import net.minecraft.world.World;
 
 public class SpreadNode extends FlowNode
 {
+    private HashSet<LavaCell> cells = new HashSet<LavaCell>();
 
     public SpreadNode(LavaManager2 lavaManager)
     {
@@ -36,6 +38,13 @@ public class SpreadNode extends FlowNode
     {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    protected void updateCellLevel(float newLevel)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

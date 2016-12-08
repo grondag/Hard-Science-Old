@@ -19,8 +19,13 @@ public class CoreNode extends FlowNode
         this.cell = cell;
         cell.setFlowNode(this);
         float startingLevel = Math.min(cell.getCeiling(), cell.getFloor() + 1);
-        cell.setLevel(startingLevel);
         this.setLevel(startingLevel);
+    }
+    
+    @Override
+    public void updateCellLevel(float newLevel)
+    {
+        cell.setLevel(newLevel);
     }
 
     @Override
@@ -38,27 +43,40 @@ public class CoreNode extends FlowNode
         LinkedList<FlowNode> result = new LinkedList<FlowNode>();
         result.add(this);
         
-        if(this.isBlocked())
+        if(this.isBlocked() && (this.getOutputs().isEmpty() || this.blockedCount > DEFAULT_BLOCKED_RETRY_COUNT))
         {
-            if(this.getOutputs().isEmpty() || this.blockedCount > DEFAULT_BLOCKED_RETRY_COUNT)
+            //give new output(s) or level a chance to unblock us
+            this.blockedCount = 0;
+            
+            //look first for new outputs
+            boolean foundNewOutput = false;
+
+            List<LavaCell> neighbors = lavaManager.cellTracker
+                    .getAdjacentCells(cell.x, cell.z, cell.getFloor(), this.getLeve(), LavaCell.MINIMUM_OPENING);
+            
+            for(LavaCell n : neighbors)
             {
-                //look first for new outputs
-                List<LavaCell> neighbors = lavaManager.cellTracker
-                        .getAdjacentCells(cell.x, cell.z, cell.getFloor(), cell.getCeiling(), LavaCell.MINIMUM_OPENING);
-                
-                for(LavaCell n : neighbors)
+                if(!this.isCellAnOutput(n))
                 {
-                    FlowNode node = n.getFlowNode();
-                    if(node == null)
+                    foundNewOutput = true;
+                    
+                    FlowNode openNode = n.getFlowNode();
+                    if(openNode == null)
                     {
-                        //TODO: FINISH
+                        openNode = FlowFactory.createFlowFromCell(lavaManager, n, this);
                     }
+                    
+                    result.add(openNode);
                 }
-                
-                //TODO: go higher if can't create new outputs
             }
             
+            // Go higher if can't create new outputs.
+            if(!foundNewOutput)
+            {
+                this.setLevel(this.getLeve() + FlowNode.MINIMUM_LEVEL_INCREMENT);
+            }
         }
+            
         return result;
     }
 

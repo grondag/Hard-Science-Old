@@ -4,6 +4,8 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import grondag.adversity.niceblock.base.IFlowBlock;
 import net.minecraft.util.math.BlockPos;
 
 public class LavaCell
@@ -21,6 +23,13 @@ public class LavaCell
     
     /** absolute in-world bottom of cell, from 0 to 255 */
     private float floor;
+    
+    /** 
+     * True if block defining floor of this cell is a Flow block.  
+     * False if normal block.
+     * Drop nodes on flow blocks can have thinner flows and still cover underlying terrain.
+     */
+    private boolean hasFlowBlockFloor = false;
     
     /** 
      * Absolute in-world top of lava contained in cell.
@@ -46,13 +55,17 @@ public class LavaCell
         POOL    // all adjacent cells (if any) are at higher level
     }
     
-    protected LavaCell(int x, int z, float floor, float ceiling, CellTracker tracker)
+    /**
+    * Send isFloorFlowBlock true if this space is the open, upper part of a flow block, or if the block below is a full-height flow block.
+    */
+    protected LavaCell(int x, int z, float floor, float ceiling, CellTracker tracker, boolean isFloorFlowBlock)
     {
         this.x = x;
         this.z = z;
         this.floor = floor;
         this.ceiling = ceiling;
         this.id = tracker.getNextCellID();
+        this.hasFlowBlockFloor = isFloorFlowBlock;
     }
           
     public void setFlowNode(FlowNode node)
@@ -162,13 +175,18 @@ public class LavaCell
     /** 
      * Returns true if space is already fully or partially included in this cell, or if space is vertically adjacent.
      * If the space is vertically adjacent, this cell is expanded to include the space. 
+     * Send isFloorFlowBlock true if this space is the open, upper part of a flow block, or if the block below is a full-height flow block.
      */
-    public boolean addOrConfirmSpace(float floor, float ceiling)
+    public boolean addOrConfirmSpace(float floor, float ceiling, boolean isFloorFlowBlock)
     {
         if(this.isVerticallyAdjacentTo(floor, ceiling) || this.intersectsWith(floor, ceiling))
         {
             this.ceiling = Math.max(this.ceiling, ceiling);
             this.floor = Math.min(this.floor, floor);
+            
+            //if this space defines our floor, then update if we are resting on a flow boundary
+            if(this.floor == floor) this.hasFlowBlockFloor = isFloorFlowBlock;
+            
             return true;
         }
         else
@@ -246,5 +264,10 @@ public class LavaCell
     public void setLevel(float level)
     {
         this.level = level;
+    }
+    
+    public boolean hasFlowBlockFloor()
+    {
+        return this.hasFlowBlockFloor;
     }
 }

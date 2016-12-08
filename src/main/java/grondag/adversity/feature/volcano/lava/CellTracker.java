@@ -7,6 +7,8 @@ import java.util.List;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.LavaManager;
+import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,7 +20,7 @@ public class CellTracker
     private final int xOffset;
     private final int zOffset;
     private final int arrayLength;
-    private final World world;
+    protected final World world;
     
     private final ArrayList<LavaCell>[][] cells;
     
@@ -45,13 +47,32 @@ public class CellTracker
             for(int z = -radius; z <= radius; z++)
             {
                 int worldZ = this.origin.getZ() + z;
+                boolean blockBelowWasFullHeightFlowBlock = false;
                 for(int y = 0; y < 256; y++)
                 {
                     IBlockState state 
                         = world.getBlockState(new BlockPos(worldX, y, worldZ));
                     if(LavaManager.canDisplace(state))
                     {
-                        addOrConfirmSpace(worldX, worldZ, y, y+1);
+                        addOrConfirmSpace(worldX, worldZ, y, y+1, blockBelowWasFullHeightFlowBlock);
+                        blockBelowWasFullHeightFlowBlock = false;
+                    }
+                    else if(IFlowBlock.isFlowHeight(state.getBlock()))
+                    {
+                        int levels = IFlowBlock.getFlowHeightFromState(state);
+                        if(levels == FlowHeightState.BLOCK_LEVELS_INT)
+                        {
+                            blockBelowWasFullHeightFlowBlock = true;
+                        }
+                        else
+                        {
+                            addOrConfirmSpace(worldX, worldZ, (float)y + (float)levels / FlowHeightState.BLOCK_LEVELS_INT, y+1, true);
+                            blockBelowWasFullHeightFlowBlock = false;
+                        }
+                    }
+                    else
+                    {
+                        blockBelowWasFullHeightFlowBlock = false;
                     }
                 }
             }
@@ -149,7 +170,10 @@ public class CellTracker
         return cells[arrayX][arrayZ] == null ? Collections.emptyList() : cells[arrayX][arrayZ];
     }
     
-    public void addOrConfirmSpace(int x, int z, float floor, float ceiling)
+    /**
+    * Send isFloorFlowBlock true if this space is the open, upper part of a flow block, or if the block below is a full-height flow block.
+    */
+    public void addOrConfirmSpace(int x, int z, float floor, float ceiling, boolean isFloorFlowBlock)
     {
         List<LavaCell> existing = getCells(x, z);
         LavaCell firstFound = null;
@@ -177,11 +201,11 @@ public class CellTracker
         
         if(firstFound == null)
         {
-            this.addCell(new LavaCell(x, z, floor, ceiling, this));
+            this.addCell(new LavaCell(x, z, floor, ceiling, this, isFloorFlowBlock));
         }
         else if(secondFound == null)
         {
-            firstFound.addOrConfirmSpace(floor, ceiling);
+            firstFound.addOrConfirmSpace(floor, ceiling, isFloorFlowBlock);
         }
         else
         {
@@ -194,7 +218,7 @@ public class CellTracker
     
     public void removeSpace(BlockPos pos)
     {
-        
+        //TODO - is needed?
     }
     
     /**

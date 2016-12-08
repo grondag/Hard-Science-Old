@@ -1,11 +1,13 @@
 package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.minecraft.world.World;
+
 
 public abstract class FlowNode
 {    
@@ -18,15 +20,19 @@ public abstract class FlowNode
     
     private float level = 0;
     
+    /** prevent reporting blocked when first created so has chance to establish outputs */
+    private boolean isNew = true;
+    
     public static final float MINIMUM_LEVEL_INCREMENT = 1F/12F;
     public static final int DEFAULT_BLOCKED_RETRY_COUNT = 3;
     
-    public abstract List<FlowNode> flow(LavaManager2 lavaManager, World world);
     public abstract Set<LavaCell> getCells();
+    
+    /** Called by setLevel to update lava levels in cells contained by this node */
+    protected abstract void updateCellLevel(float newLevel);
     
     /** can this flow accept lava at its current vertical level? */
     public abstract boolean canAcceptAtCurrentLevel();
-    
     
     /**
      * Add self to tracking list at creation time
@@ -36,22 +42,27 @@ public abstract class FlowNode
         lavaManager.registerFlow(this);
     }
     
+    public List<FlowNode> flow(LavaManager2 lavaManager, World world)
+    {
+        isNew = false;
+        
+        LinkedList<FlowNode> result = new LinkedList<FlowNode>();
+        
+        return result;
+        
+        /**
+         * 
+         */
+    }
+    
     public boolean isCellAnInput(LavaCell cell)
     {
-        for(FlowNode input: this.getInputs())
-        {
-            if(input.getCells().contains(cell)) return true;
-        }
-        return false;
+        return cell.getFlowNode() != null && this.inputs.contains(cell.getFlowNode());
     }
     
     public boolean isCellAnOutput(LavaCell cell)
     {
-        for(FlowNode output: this.getOutputs())
-        {
-            if(output.getCells().contains(cell)) return true;
-        }
-        return false;
+        return cell.getFlowNode() != null && this.outputs.contains(cell.getFlowNode());
     }
     
     //FLOW TRACKING
@@ -147,7 +158,10 @@ public abstract class FlowNode
     
     public boolean isBlocked()
     {
-        return this.isBlocked;
+        if(isNew)
+            return false;
+        else
+            return this.isBlocked;
     }
     
     protected void setCutOff(boolean isCutOff)
@@ -267,6 +281,7 @@ public abstract class FlowNode
                 this.notifyAllOutputsToCheckForCutoff();
             }
         }
+        this.updateCellLevel(newLevel);
     }
     
     /** 
