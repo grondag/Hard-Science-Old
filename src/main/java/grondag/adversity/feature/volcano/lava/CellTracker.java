@@ -2,8 +2,10 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.LavaManager;
@@ -23,6 +25,10 @@ public class CellTracker
     protected final World world;
     
     private final ArrayList<LavaCell>[][] cells;
+    
+    private final HashSet<LavaCell> cellsWithLava = new HashSet<LavaCell>();
+    private final HashSet<LavaCell> pendingAdds = new HashSet<LavaCell>();
+    private final HashSet<LavaCell> pendingRemovals = new HashSet<LavaCell>();
     
     private int nextCellID = 0;
     
@@ -74,6 +80,19 @@ public class CellTracker
                     {
                         blockBelowWasFullHeightFlowBlock = false;
                     }
+                }
+            }
+        }
+        
+        for(int x = 0; x < arrayLength; x++)
+        {
+            for(int z = 0; z < arrayLength; z++)
+            {
+                for(LavaCell cell : cells[x][z])
+                {
+                    if(x == 64 && z == 64) 
+                        Adversity.log.info("yot!");
+                    cell.updateConnections();
                 }
             }
         }
@@ -230,13 +249,13 @@ public class CellTracker
      * @param ceiling
      * @param minimumWindow
      */
-    public List<LavaCell> getAdjacentCells(int x, int z, float floor, float ceiling, float minimumWindow)
+    Set<LavaCell> getMinimallyAdjacentCells(LavaCell cell)
     {
-        LinkedList<LavaCell> result = new LinkedList<LavaCell>();
-        result.addAll(getIntersectingCells(x+1, z, floor, ceiling, minimumWindow));
-        result.addAll(getIntersectingCells(x-1, z, floor, ceiling, minimumWindow));
-        result.addAll(getIntersectingCells(x, z+1, floor, ceiling, minimumWindow));
-        result.addAll(getIntersectingCells(x, z-1, floor, ceiling, minimumWindow));
+        HashSet<LavaCell> result = new HashSet<LavaCell>();
+        result.addAll(getMinimallyIntersectingCellsDiscretely(cell.x+1, cell.z, cell.getFloor(), cell.getCeiling()));
+        result.addAll(getMinimallyIntersectingCellsDiscretely(cell.x-1, cell.z, cell.getFloor(), cell.getCeiling()));
+        result.addAll(getMinimallyIntersectingCellsDiscretely(cell.x, cell.z+1, cell.getFloor(), cell.getCeiling()));
+        result.addAll(getMinimallyIntersectingCellsDiscretely(cell.x, cell.z-1, cell.getFloor(), cell.getCeiling()));
         return result;
     }
     
@@ -247,16 +266,36 @@ public class CellTracker
      * @param z
      * @param floor
      * @param ceiling
-     * @param minimumWindow
      */
-    public List<LavaCell> getIntersectingCells(int x, int z, float floor, float ceiling, float minimumWindow)
+    private List<LavaCell> getMinimallyIntersectingCellsDiscretely(int x, int z, int floor, int ceiling)
     {
         LinkedList<LavaCell> result = new LinkedList<LavaCell>();
         
         for(LavaCell cell : getCells(x, z))
         {
-            if(cell.intersectsWith(floor, ceiling)
-                && Math.min(ceiling, cell.getCeiling()) - Math.max(floor, cell.getFloor()) >= minimumWindow)
+            if(cell.intersectsMinimallyWithDiscretely(floor, ceiling))
+            {
+                result.add(cell);
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Returns cells in the given column that overlap with the 
+     * volume defined by floor and ceiling by any amount.
+     * @param x
+     * @param z
+     * @param floor
+     * @param ceiling
+     */
+    public List<LavaCell> getIntersectingCells(int x, int z, float floor, float ceiling)
+    {
+        LinkedList<LavaCell> result = new LinkedList<LavaCell>();
+        
+        for(LavaCell cell : getCells(x, z))
+        {
+            if(cell.intersectsWith(floor, ceiling))
             {
                 result.add(cell);
             }
@@ -266,7 +305,7 @@ public class CellTracker
     
     public LavaCell getCellForBlockPos(BlockPos pos)
     {
-        List<LavaCell> candidates = getIntersectingCells(pos.getX(), pos.getZ(), pos.getY(), pos.getY() + 1, 0.5F);
+        List<LavaCell> candidates = getIntersectingCells(pos.getX(), pos.getZ(), pos.getY(), pos.getY() + 1);
         if(candidates.isEmpty())
         {
             return null;
@@ -275,5 +314,34 @@ public class CellTracker
         {
             return candidates.get(0);
         }
+    }
+    
+    public void addPendingLavaCell(LavaCell cell)
+    {
+        this.pendingAdds.add(cell);
+        
+    }
+    
+    public void removePendingLavaCell(LavaCell cell)
+    {
+        this.pendingRemovals.add(cell);
+        
+    }
+    
+    public Set<LavaCell> getLavaCells()
+    {
+        return this.cellsWithLava;
+    }
+    
+    public void applyPendingLavaCellAdds()
+    {
+        this.cellsWithLava.addAll(this.pendingAdds);
+        this.pendingAdds.clear();
+    }
+    
+    public void applyPendingLavaCellRemovals()
+    {
+        this.cellsWithLava.removeAll(this.pendingRemovals);
+        this.pendingRemovals.clear();
     }
 }
