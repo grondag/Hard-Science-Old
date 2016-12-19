@@ -20,6 +20,8 @@ public class LavaManager2
     private LinkedList<LavaBlockUpdate> blockUpdates = new LinkedList<LavaBlockUpdate>();
     private final LavaCell core;
     
+    public final static int STEPS_PER_SECOND = 20;
+    
     public LavaManager2(BlockPos origin, World world)
     {
         this.origin = origin;
@@ -33,21 +35,21 @@ public class LavaManager2
     
     public void flow()
     {
-        core.addLava(1);
-        
-        for(LavaCell cell : cellTracker.getLavaCells())
-        {
-             cell.flow();
-        }
-        
-        cellTracker.applyPendingLavaCellAdds();
-        
-        for(LavaCell cell : cellTracker.getLavaCells())
-        {
-            blockUpdates.addAll(cell.getBlockUpdates());
-        }
-        
-        cellTracker.applyPendingLavaCellRemovals();
+//        core.addLava(1);
+//        
+//        for(LavaCell cell : cellTracker.getLavaCells())
+//        {
+//             cell.flow();
+//        }
+//        
+//        cellTracker.applyPendingLavaCellAdds();
+//        
+//        for(LavaCell cell : cellTracker.getLavaCells())
+//        {
+//            blockUpdates.addAll(cell.getBlockUpdates());
+//        }
+//        
+//        cellTracker.applyPendingLavaCellRemovals();
         
 //        flowUpdates.addFirst(core);
 //        int updateCount = flowUpdates.size();

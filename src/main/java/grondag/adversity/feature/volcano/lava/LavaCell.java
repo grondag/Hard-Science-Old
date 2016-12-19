@@ -54,7 +54,21 @@ public class LavaCell
      */
     private short lastVisibleLevel = 0;  
     
-    public final HashSet<LavaCell> connections = new HashSet<LavaCell>();
+    public final HashSet<CellConnection> connections = new HashSet<CellConnection>();
+    
+    
+    /** update this on each search pass - if less than current search index has not been visited yet */
+    protected int lastSearchIndex = 0;
+
+    /** generating counter for lastSearchIndex values */
+    protected static int nextSearchIndex = 1;
+    
+    /** update this on each simulation time step - if less than current step index then per-step values must be refreshed*/
+    protected int lastStepIndex = 0;
+    
+    
+    //TODO: temporary
+    protected float interpolatedTerrainHeight;
     
 //    private final TreeSet<LavaCell> inputs = new TreeSet<LavaCell>();
 //    private final TreeSet<LavaCell> outputs = new TreeSet<LavaCell>();
@@ -64,7 +78,11 @@ public class LavaCell
 //    
 //    private boolean areConnectionsDirty = false;
     
+    /**
+     * Cell can flow down this much (in fluid units) in one second.
+     */
     public static final int FLUID_UNITS_PER_BLOCK = 12;
+    public static final short MAX_VERTICAL_DROP_PER_SECOND = 5 * FLUID_UNITS_PER_BLOCK;
     public static final short MAX_LEVEL = 255 * FLUID_UNITS_PER_BLOCK;
     
     //TODO: make configurable
@@ -114,48 +132,48 @@ public class LavaCell
         if(this.getDepth() <= this.getMinimumDepth()) return;
         
         HashSet<LavaCell> visited = new HashSet<LavaCell>();
-        LavaCell best = this.getBestDestination(this, visited);
+//        LinkedList<LavaCell> best = this.getPathToBestDestination(this, nextSearchIndex++);
         
-        if(best != null && best.level < this.level)
-        {
-            this.addLava(-1);
-            best.addLava(1);
-        }
-        
+//        if(!best.isEmpty()  && best.getLast().level < this.level)
+//        {
+//            this.addLava(-1);
+//            best.getLast().addLava(1);
+//        }
+//        
     }
     
-    private LavaCell getBestDestination(LavaCell origin, Set<LavaCell> visited)
-    {
-        
-        visited.add(this);
-   
-        LavaCell result = null;
-
-        //default to self if have useful capacity
-        if(this.level < this.ceiling && this.level < origin.level) 
-        {
-            result = this;
-        }
-        
-        //can't transmit if can't flow  TODO: remove? - check may be redundant of check made in flow - or remove there
-        if(this.getDepth() >= this.getMinimumDepth()) 
-        {
-            
-            for(LavaCell connection : this.connections)
-            {
-                if(!visited.contains(connection))
-                {
-                    LavaCell candidate = connection.getBestDestination(origin, visited);
-                    if(candidate != null && (result == null || candidate.level < result.level))
-                    {
-                        result = candidate;
-                    }
-                }
-            }
-        }
-        
-        return result;
-    }
+//    private LinkedList<LavaCell> getPathToBestDestination(LavaCell origin, int searchIndex)
+//    {
+//        
+//   
+//        LavaCell result = null;
+//
+//        //default to self if have useful capacity
+//        if(this.level < this.ceiling && this.level < origin.level) 
+//        {
+//            result = this;
+//        }
+//        
+//        //can't transmit if can't flow  TODO: remove? - check may be redundant of check made in flow - or remove there
+//        if(this.getDepth() >= this.getMinimumDepth()) 
+//        {
+//            
+//            for(CellConnection connection : this.connections)
+//            {
+//                LavaCell otherCell = connection.getOther(this);
+//                if(!visited.contains(otherCell))
+//                {
+//                    LavaCell candidate = otherCell.getBestDestination(origin, visited);
+//                    if(candidate != null && (result == null || candidate.level < result.level))
+//                    {
+//                        result = candidate;
+//                    }
+//                }
+//            }
+//        }
+//        
+//        return result;
+//    }
     
     private int getMinimumDepth()
     {
@@ -167,8 +185,17 @@ public class LavaCell
      */
     public void updateConnections()
     {
+        for(CellConnection connection: this.connections)
+        {
+            connection.getOther(this).connections.remove(connection);
+        }
        this.connections.clear();
-       this.connections.addAll(tracker.getMinimallyAdjacentCells(this));
+       
+       for(LavaCell neighbor : tracker.getMinimallyAdjacentCells(this))
+       {
+           // constructor adds itself to collections of each cell
+           CellConnection connection = new CellConnection(this, neighbor);
+       }
     }
     
 //    public boolean isCellAnInput(LavaCell cell)
@@ -627,55 +654,6 @@ public class LavaCell
         }
     }
     
-//    public void updateConnections()
-//    {
-//        if(!this.areConnectionsDirty) return;
-//        
-//        this.areConnectionsDirty = false;
-//        
-//        
-//        List<LavaCell> neighbors = this.tracker.getMinimallyAdjacentCells(this);
-//
-//        if(this.level == this.floor)
-//        {
-//            if(!this.outputs.isEmpty())
-//            {
-//                for(LavaCell output : this.outputs)
-//                {
-//                    this.removeOutput(output);
-//                }
-//            }
-//        }
-//        else
-//        {
-//            for(LavaCell n : neighbors)
-//            {
-//                //I will output to neighbor if I can help fill it, or if I can flow downward through it
-//                if(this.level > n.level || this.floor > n.floor)
-//                {
-//                    if(!this.outputs.contains(n))
-//                    {
-//                        this.addOutput(n);
-//                    }
-//                }
-//                //if neighbor is even and not outputting to me, then I should be the output to it
-//                else if(this.level == n.level && !this.inputs.contains(n))
-//                {
-//                    
-//                }
-//            }
-//        }
-        
-//        if(!this.checkForBlocked())
-//        {
-//            this.notifyAllInputsToCheckForBlocked();
-//        }
-//        
-//        if(!this.checkForCutOff())
-//        {
-//            this.notifyAllOutputsToCheckForCutoff();
-//        }
-//    }
     
     //TODO: temporary hacky testing method
     public void addLava(int fluidUnits)
@@ -712,6 +690,14 @@ public class LavaCell
     public short getCeiling()
     {
         return this.ceiling;
+    }
+    
+    /** 
+     * returns fluid units
+     */
+    public short getLevel()
+    {
+        return this.level;
     }
   
 }

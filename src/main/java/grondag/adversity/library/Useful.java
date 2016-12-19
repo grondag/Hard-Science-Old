@@ -2,6 +2,7 @@ package grondag.adversity.library;
 
 import java.util.Random;
 
+import javax.annotation.Nullable;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -10,8 +11,12 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 
@@ -227,14 +232,29 @@ public class Useful {
    	return retVal;
    }
    
-   public static void fill2dCircleInPlaneXZ(World worldObj, int x0, int y, int z0, int radius, IBlockState state) {
+   public interface CircleFillCallBack
+   {
+       /** return true to cancel remaining fill */
+       public boolean handleCircleFill(BlockPos origin, BlockPos pos);
+   }
+   
+   public static void fill2dCircleInPlaneXZ(int x0, int y, int z0, int radius, CircleFillCallBack callback) 
+   {
+       fill2dCircleInPlaneXZ(new BlockPos(x0, y, z0), radius, callback);
+   }
+   
+   public static void fill2dCircleInPlaneXZ(BlockPos origin, int radius, CircleFillCallBack callback) {
 
        // uses midpoint circle algorithm
 
        if (radius <= 0)
            return;
-
-       worldObj.setBlockState(new BlockPos(x0, y, z0), state);
+       
+       int x0 = origin.getX();
+       int y = origin.getY();
+       int z0 = origin.getZ();
+       
+       if(callback.handleCircleFill(origin, new BlockPos(x0, y, z0))) return;
 
        for (int r = 1; r <= radius; ++r) {
 
@@ -244,27 +264,27 @@ public class Useful {
 
            while (z <= x) {
                
-               worldObj.setBlockState(new BlockPos(x + x0, y, z + z0), state); // Octant 1
-               worldObj.setBlockState(new BlockPos(z + x0, y, x + z0), state); // Octant 2
-               worldObj.setBlockState(new BlockPos(-x + x0, y, z + z0), state); // Octant 3
-               worldObj.setBlockState(new BlockPos(-z + x0, y, x + z0), state); // Octant 4
-               worldObj.setBlockState(new BlockPos(-x + x0, y, -z + z0), state); // Octant 5
-               worldObj.setBlockState(new BlockPos(-z + x0, y, -x + z0), state); // Octant 6
-               worldObj.setBlockState(new BlockPos(x + x0, y, -z + z0), state); // Octant 7
-               worldObj.setBlockState(new BlockPos(z + x0, y, -x + z0), state); // Octant 8
+               if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, z + z0))) return; // Octant 1
+               if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, x + z0))) return; // Octant 2
+               if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, z + z0))) return; // Octant 3
+               if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, x + z0))) return; // Octant 4
+               if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, -z + z0))) return; // Octant 5
+               if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, -x + z0))) return; // Octant 6
+               if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, -z + z0))) return; // Octant 7
+               if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, -x + z0))) return; // Octant 8
                z++;
 
                if (decisionOver2 <= 0) {
                    decisionOver2 += 2 * z + 1; // Change in decision criterion for y -> y+1
                } else {
-                   worldObj.setBlockState(new BlockPos(x + x0, y, z + z0), state); // Octant 1
-                   worldObj.setBlockState(new BlockPos(z + x0, y, x + z0), state); // Octant 2
-                   worldObj.setBlockState(new BlockPos(-x + x0, y, z + z0), state); // Octant 3
-                   worldObj.setBlockState(new BlockPos(-z + x0, y, x + z0), state); // Octant 4
-                   worldObj.setBlockState(new BlockPos(-x + x0, y, -z + z0), state); // Octant 5
-                   worldObj.setBlockState(new BlockPos(-z + x0, y, -x + z0), state); // Octant 6
-                   worldObj.setBlockState(new BlockPos(x + x0, y, -z + z0), state); // Octant 7
-                   worldObj.setBlockState(new BlockPos(z + x0, y, -x + z0), state); // Octant 8
+                   if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, z + z0))) return; // Octant 1
+                   if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, x + z0))) return; // Octant 2
+                   if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, z + z0))) return; // Octant 3
+                   if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, x + z0))) return; // Octant 4
+                   if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, -z + z0))) return; // Octant 5
+                   if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, -x + z0))) return; // Octant 6
+                   if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, -z + z0))) return; // Octant 7
+                   if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, -x + z0))) return; // Octant 8
                    x--;
                    decisionOver2 += 2 * (z - x) + 1; // Change for y -> y+1, x -> x-1
                }
@@ -345,6 +365,8 @@ public class Useful {
         
        return tmax > tmin && tmax > 0.0;   
    }
+   
+ 
    
    public static int squared(int x) 
    {

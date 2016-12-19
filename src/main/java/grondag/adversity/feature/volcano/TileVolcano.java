@@ -453,7 +453,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         this.buildLevel = this.level;
         backtrackLimit = level + 1;
         BlockPos startingPos = new BlockPos(this.getPos().getX(), this.level, this.getPos().getZ());
-        IBlockState targetState = IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT);
+        IBlockState targetState = IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT);
         this.worldObj.setBlockState(startingPos, targetState);
 //        lavaManager.trackLavaAt(startingPos, startingPos, FlowHeightState.BLOCK_LEVELS_INT, true);
     }
@@ -691,7 +691,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     {
                         int distance = (int) Math.round(Math.sqrt(fromPos.distanceSq(testPos)));
                         int newHeight = Math.max(IFlowBlock.getFlowHeightFromState(state), Math.min(distance + 1,  FlowHeightState.BLOCK_LEVELS_INT));
-                        this.worldObj.setBlockState(testPos, IFlowBlock.stateWithFlowHeight(state, newHeight));
+                        this.worldObj.setBlockState(testPos, IFlowBlock.stateWithDiscreteFlowHeight(state, newHeight));
                         adjustmentList.add(testPos);
     
                         if(!testPos.equals(origin))
@@ -722,6 +722,8 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         adjustmentList.clear();
         
+        HashSet<BlockPos> updated = new HashSet<BlockPos>();
+        
         for(BlockPos target : targets)
         {
             for(int y = -4; y <= 4; y++)
@@ -729,9 +731,15 @@ public class TileVolcano extends TileEntity implements ITickable{
                 BlockPos p = target.add(0, y, 0);
                 if(!adjustHeightBlockIfNeeded(p));
                 {
-                    adjustFillIfNeeded(p);
+                    IFlowBlock.adjustFillIfNeeded(this.worldObj, p, updated);
                 }
             }
+        }
+        
+        for(BlockPos uPos : updated)
+        {
+          //TODO: don't add to cooling if not needed
+            coolingBlocks.add(uPos, ticksActive + Config.volcano().coolingLagTicks);
         }
     }
     
@@ -980,91 +988,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 //    }
 
 
-    /**
-     * Adds or removes filler blocks as needed.
-     * Also replaces static filler blocks with dynamic version.
-     * @param basePos
-     */
-    private void adjustFillIfNeeded(BlockPos basePos)
-    {
-        final int SHOULD_BE_AIR = -1;
-
-        IBlockState baseState = this.worldObj.getBlockState(basePos);
-        Block baseBlock = baseState.getBlock();
-        NiceBlock fillBlock = null;
-
-        int targetMeta = SHOULD_BE_AIR;
-
-        /**
-         * If space is occupied with a non-displaceable block, will be ignored.
-         * Otherwise, possible target states: air, fill +1, fill +2
-         * 
-         * Should be fill +1 if block below is a heightblock and needs a fill >= 1;
-         * Should be a fill +2 if block below is not a heightblock and block
-         * two below needs a fill = 2;
-         * Otherwise should be air.
-         */
-        IBlockState stateBelow = this.worldObj.getBlockState(basePos.down());
-        if(IFlowBlock.isFlowHeight(stateBelow.getBlock()) 
-                && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
-        {
-            targetMeta = 0;
-            fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
-        }
-        else 
-        {
-            IBlockState stateTwoBelow = this.worldObj.getBlockState(basePos.down(2));
-            if((IFlowBlock.isFlowHeight(stateTwoBelow.getBlock()) 
-                    && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
-            {
-                targetMeta = 1;
-                fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
-            }
-        }
-
-        if(IFlowBlock.isFlowFiller(baseBlock))
-        {
-
-            if(targetMeta == SHOULD_BE_AIR)
-            {
-                worldObj.setBlockToAir(basePos);
-            }
-            else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
-            {
-             
-                worldObj.setBlockState(basePos, fillBlock.getDefaultState()
-                        .withProperty(NiceBlock.META, targetMeta));
-
-//                if(fillBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
-//                {
-//                    trackLavaBlock(basePos);
-//                }
-//                else
-//                {
-                    //TODO: don't add to cooling if not needed
-                    coolingBlocks.add(basePos, ticksActive + Config.volcano().coolingLagTicks);
-//                }
-            }
-            //confirm filler needed and adjust/remove if needed
-        }
-        else if(targetMeta != SHOULD_BE_AIR && LavaManager.canDisplace(baseState) && fillBlock != null)
-        {
-            worldObj.setBlockState(basePos, fillBlock.getDefaultState()
-                    .withProperty(NiceBlock.META, targetMeta));
-
-//            if(fillBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
-//            {
-//                trackLavaBlock(basePos);
-//            }
-//            else
-//            {
-                //TODO: don't add to cooling if not needed
-                coolingBlocks.add(basePos, ticksActive + Config.volcano().coolingLagTicks);
-//            }
-            //            }
-        }
-
-    }
+  
 
     //	@Override
     //	public void updateOld() {

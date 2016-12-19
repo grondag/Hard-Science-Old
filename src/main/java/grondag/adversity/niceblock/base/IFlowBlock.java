@@ -1,6 +1,12 @@
 package grondag.adversity.niceblock.base;
 
+import java.util.Collection;
+import java.util.List;
+
 import grondag.adversity.Adversity;
+import grondag.adversity.config.Config;
+import grondag.adversity.feature.volcano.LavaManager;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -58,14 +64,14 @@ public interface IFlowBlock
      * Use for height blocks.
      * Stores a value from 1 to 12 to indicate the center height of this block 
      */
-    public static IBlockState stateWithFlowHeight(IBlockState state, int value)
+    public static IBlockState stateWithDiscreteFlowHeight(IBlockState state, int value)
     {
         return state.withProperty(NiceBlock.META, Math.min(FlowHeightState.BLOCK_LEVELS_INT - 1, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
     }
 
     public static IBlockState stateWithFlowHeight(IBlockState state, float value)
     {
-        return stateWithFlowHeight(state, (int) Math.round(value * FlowHeightState.BLOCK_LEVELS_INT));
+        return stateWithDiscreteFlowHeight(state, (int) Math.round(value * FlowHeightState.BLOCK_LEVELS_INT));
     }
 
     /**
@@ -80,6 +86,75 @@ public interface IFlowBlock
 //        if(block instanceof FlowSimpleBlock) return 0;
         FlowHeightState flowState = ModelFlowJoinComponent.getFlowState((NiceBlock) block, blockState, blockAccess, pos);
         return flowState.topFillerNeeded();
+    }
+    
+    /**
+     * Adds or removes filler blocks as needed.
+     * Also replaces static filler blocks with dynamic version.
+     * Adds updated block positions to the provided collection if non-null.
+     */
+    public static void adjustFillIfNeeded(World worldObj, BlockPos basePos, Collection<BlockPos> updatedList)
+    {
+        final int SHOULD_BE_AIR = -1;
+        
+        IBlockState baseState = worldObj.getBlockState(basePos);
+        Block baseBlock = baseState.getBlock();
+        NiceBlock fillBlock = null;
+
+        int targetMeta = SHOULD_BE_AIR;
+
+        /**
+         * If space is occupied with a non-displaceable block, will be ignored.
+         * Otherwise, possible target states: air, fill +1, fill +2
+         * 
+         * Should be fill +1 if block below is a heightblock and needs a fill >= 1;
+         * Should be a fill +2 if block below is not a heightblock and block
+         * two below needs a fill = 2;
+         * Otherwise should be air.
+         */
+        IBlockState stateBelow = worldObj.getBlockState(basePos.down());
+        if(IFlowBlock.isFlowHeight(stateBelow.getBlock()) 
+                && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
+        {
+            targetMeta = 0;
+            fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
+        }
+        else 
+        {
+            IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
+            if((IFlowBlock.isFlowHeight(stateTwoBelow.getBlock()) 
+                    && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
+            {
+                targetMeta = 1;
+                fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
+            }
+        }
+
+        if(IFlowBlock.isFlowFiller(baseBlock))
+        {
+
+            if(targetMeta == SHOULD_BE_AIR)
+            {
+                worldObj.setBlockToAir(basePos);
+            }
+            else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
+            {
+             
+                worldObj.setBlockState(basePos, fillBlock.getDefaultState()
+                        .withProperty(NiceBlock.META, targetMeta));
+
+                if(updatedList !=null) updatedList.add(basePos);
+
+            }
+            //confirm filler needed and adjust/remove if needed
+        }
+        else if(targetMeta != SHOULD_BE_AIR && LavaManager.canDisplace(baseState) && fillBlock != null)
+        {
+            worldObj.setBlockState(basePos, fillBlock.getDefaultState()
+                    .withProperty(NiceBlock.META, targetMeta));
+
+            if(updatedList !=null) updatedList.add(basePos);
+        }
     }
     
     /** 

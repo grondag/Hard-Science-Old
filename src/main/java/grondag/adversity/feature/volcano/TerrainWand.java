@@ -158,7 +158,7 @@ public class TerrainWand extends Item
                 if(level > 1)
                 {	
                     targetPos = pos;
-                    targetState = IFlowBlock.stateWithFlowHeight(stateIn, level - 1);
+                    targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, level - 1);
                     playerIn.addChatComponentMessage(new TextComponentString("Level " + (level - 1)));
 
                 }
@@ -179,14 +179,14 @@ public class TerrainWand extends Item
                 if(level < FlowHeightState.BLOCK_LEVELS_INT)
                 {
                     targetPos = pos;
-                    targetState = IFlowBlock.stateWithFlowHeight(stateIn, level + 1);
+                    targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, level + 1);
                     playerIn.addChatComponentMessage(new TextComponentString("Level " + (level + 1)));
                 }
                 else if(worldIn.getBlockState(pos.up()).getBlock().isReplaceable(worldIn, pos.up())
                         || IFlowBlock.isFlowFiller(worldIn.getBlockState(pos.up()).getBlock()))
                 {
                     targetPos = pos.up();
-                    targetState = IFlowBlock.stateWithFlowHeight(stateIn, 1);
+                    targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, 1);
                     playerIn.addChatComponentMessage(new TextComponentString("Level 1 (added new block)"));
                 }
                 else

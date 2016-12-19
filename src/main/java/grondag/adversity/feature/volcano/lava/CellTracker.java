@@ -9,7 +9,9 @@ import java.util.Set;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.LavaManager;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -47,6 +49,8 @@ public class CellTracker
     //TODO: make incremental
     public void initializeSpaces()
     {
+        TerrainHelper terrainThingy = new TerrainHelper(this.world);
+        
         for(int x = -radius; x <= radius; x++)
         {
             int worldX = this.origin.getX() + x;
@@ -84,15 +88,63 @@ public class CellTracker
             }
         }
         
+        //updateConnections is bi-directional, so can call 
+        //it in a checkerboard pattern to cover all connections
+        
+        for(int x = 0; x < arrayLength; x += 2)
+        {
+            for(int z = 0; z < arrayLength; z +=2)
+            {
+                for(LavaCell cell : cells[x][z])
+                {
+//                    if(x == 64 && z == 64) 
+//                        Adversity.log.info("yot!");
+                    cell.updateConnections();
+                }
+            }
+        }
+        
+        for(int x = 1; x < arrayLength; x += 2)
+        {
+            for(int z = 1; z < arrayLength; z +=2)
+            {
+                for(LavaCell cell : cells[x][z])
+                {
+                    cell.updateConnections();
+                }
+            }
+        }
+        
         for(int x = 0; x < arrayLength; x++)
         {
             for(int z = 0; z < arrayLength; z++)
             {
                 for(LavaCell cell : cells[x][z])
                 {
-                    if(x == 64 && z == 64) 
-                        Adversity.log.info("yot!");
-                    cell.updateConnections();
+                    BlockPos pos = new BlockPos(cell.x, cell.getMinY(), cell.z);
+                    cell.interpolatedTerrainHeight  = terrainThingy.computeIdealBaseFlowHeight(pos);
+               
+                }
+            }
+        }
+       
+        for(int x = 0; x < arrayLength; x++)
+        {
+            for(int z = 0; z < arrayLength; z++)
+            {
+                for(LavaCell cell : cells[x][z])
+                {
+                    BlockPos pos = new BlockPos(cell.x, cell.getMinY(), cell.z);
+                    float h = cell.interpolatedTerrainHeight;
+                    if(h > 1)
+                    {
+//                        world.setBlockState(pos, NiceBlockRegistrar.HEIGHT_STONE_BLOCK.getDefaultState().withProperty(NiceBlock.META, 15));
+                        world.setBlockState(pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState(), 1F));
+                        pos = pos.up();
+                        h -= 1F;
+                    }
+//                    world.setBlockState(pos, NiceBlockRegistrar.HEIGHT_STONE_BLOCK.getDefaultState().withProperty(NiceBlock.META, (int) Math.max(0, (Math.round((h * 16) - 1)))));
+                    world.setBlockState(pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState(), h));
                 }
             }
         }
