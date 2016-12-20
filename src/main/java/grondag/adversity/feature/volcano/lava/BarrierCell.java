@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import net.minecraft.util.math.BlockPos;
 
-public class BarrierCell extends FluidCell
+public class BarrierCell extends LavaSimCell
 {
     public static final BarrierCell INSTANCE = new BarrierCell();
 
@@ -14,37 +14,37 @@ public class BarrierCell extends FluidCell
     }
 
     @Override
-    public boolean isCellOnGround(FluidTracker tracker)
+    public boolean isCellOnGround(LavaSimulator tracker)
     {
         return false;
     }
 
     @Override
-    public void doStep(FluidTracker tracker, double seconds)
+    public void doStep(LavaSimulator tracker, double seconds)
     {
         //NOOP
     }
 
     @Override
-    public boolean canAcceptFluidDirectly(FluidTracker tracker)
+    public boolean canAcceptFluidDirectly(LavaSimulator tracker)
     {
         return false;
     }
 
     @Override
-    public void changeLevel(FluidTracker tracker, float amount)
+    public void changeLevel(LavaSimulator tracker, float amount)
     {
         //NOOP
     }
 
     @Override
-    public void applyUpdates(FluidTracker tracker)
+    public void applyUpdates(LavaSimulator tracker)
     {
         //NOOP
     }
 
     @Override
-    public void provideBlockUpdate(FluidTracker tracker, Collection<LavaBlockUpdate> updateList)
+    public void provideBlockUpdate(LavaSimulator tracker, Collection<LavaBlockUpdate> updateList)
     {
         //NOOP
     }
@@ -62,7 +62,7 @@ public class BarrierCell extends FluidCell
     }
 
     @Override
-    public void delete(FluidTracker tracker)
+    public void delete(LavaSimulator tracker)
     {
         //NOOP
     }

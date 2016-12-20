@@ -1,7 +1,7 @@
 package grondag.adversity.feature.volcano;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.FluidParticle;
+import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
 import grondag.adversity.feature.volcano.lava.LavaBlobItem;
 import grondag.adversity.feature.volcano.lava.RenderFluidParticle;
 import grondag.adversity.library.fluid.FluidSimParticle;
@@ -63,7 +63,7 @@ public class Volcano {
         GameRegistry.register(lavaBlob);
         
       
-        EntityRegistry.registerModEntity(FluidParticle.class, "adversity:lava_blob", 1, Adversity.instance, 64, 10, true);
+        EntityRegistry.registerModEntity(EntityLavaParticle.class, "adversity:lava_blob", 1, Adversity.instance, 64, 10, true);
         
         
         GameRegistry.register(basaltRubble);
@@ -79,7 +79,7 @@ public class Volcano {
             
             ModelLoader.setCustomModelResourceLocation(lavaBlob, 0, new ModelResourceLocation("minecraft:fire_charge", "inventory"));  
             
-            RenderingRegistry.registerEntityRenderingHandler(FluidParticle.class, RenderFluidParticle.factory());
+            RenderingRegistry.registerEntityRenderingHandler(EntityLavaParticle.class, RenderFluidParticle.factory());
 
         }
 

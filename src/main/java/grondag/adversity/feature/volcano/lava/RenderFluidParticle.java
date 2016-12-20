@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 @SideOnly(Side.CLIENT)
-public class RenderFluidParticle extends Render<FluidParticle>
+public class RenderFluidParticle extends Render<EntityLavaParticle>
 {
     
     private final float scale;
@@ -31,7 +31,7 @@ public class RenderFluidParticle extends Render<FluidParticle>
     /**
      * Renders the desired {@code T} type Entity.
      */
-    public void doRender(FluidParticle entity, double x, double y, double z, float entityYaw, float partialTicks)
+    public void doRender(EntityLavaParticle entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         GlStateManager.pushMatrix();
         this.bindEntityTexture(entity);
@@ -78,12 +78,12 @@ public class RenderFluidParticle extends Render<FluidParticle>
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
      */
-    protected ResourceLocation getEntityTexture(FluidParticle entity)
+    protected ResourceLocation getEntityTexture(EntityLavaParticle entity)
     {
         return TextureMap.LOCATION_BLOCKS_TEXTURE;
     }
 
-    public static IRenderFactory<FluidParticle> factory() {
+    public static IRenderFactory<EntityLavaParticle> factory() {
         return manager -> new RenderFluidParticle(manager, 1F);
     }
     

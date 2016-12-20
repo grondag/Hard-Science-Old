@@ -36,11 +36,7 @@ public class LavaBlobItem extends Item
 
             if (!worldIn.isRemote)
             {
-                if(FluidTracker.egregiousHack == null)
-                {
-                    FluidTracker.egregiousHack = new FluidTracker(worldIn);
-                }
-                FluidParticle blob = new FluidParticle(FluidTracker.egregiousHack, 1, new Vec3d(playerIn.posX, playerIn.posY + (double)playerIn.getEyeHeight() - 0.10000000149011612D, playerIn.posZ), Vec3d.ZERO);
+                EntityLavaParticle blob = new EntityLavaParticle(1, new Vec3d(playerIn.posX, playerIn.posY + (double)playerIn.getEyeHeight() - 0.10000000149011612D, playerIn.posZ), Vec3d.ZERO);
                 blob.setHeadingFromThrower(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, 1.5F, 1.0F);
                 worldIn.spawnEntityInWorld(blob);
             }

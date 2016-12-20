@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.LavaManager;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -23,7 +24,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class FluidParticle extends Entity
+public class EntityLavaParticle extends Entity
 {
     private static int nextParticleID;
 
@@ -36,7 +37,8 @@ public class FluidParticle extends Entity
     private double velocityY;
     private double velocityZ;
 
-    private final FluidTracker tracker;
+    //TODO: is this alias needed?
+    private final LavaSimulator simulator;
 
 
     @Override
@@ -45,9 +47,9 @@ public class FluidParticle extends Entity
         return this.id;
     }
 
-    protected FluidParticle(FluidTracker tracker, float amount, Vec3d position, Vec3d velocity)
+    protected EntityLavaParticle(float amount, Vec3d position, Vec3d velocity)
     {
-        this(tracker.world, amount);
+        this(amount);
         this.setPosition(position.xCoord, position.yCoord, position.zCoord);
 
 
@@ -63,23 +65,19 @@ public class FluidParticle extends Entity
         //        this.velocityY = velocity.yCoord;
         //        this.velocityZ = velocity.zCoord;
 
-        tracker.allParticles.add(this);
+        Simulator.instance.getFluidTracker().allParticles.add(this);
     }
 
-    public FluidParticle(World world)
+    public EntityLavaParticle()
     {
-        this(world, 1);
+        this(1);
     }
 
-    public FluidParticle(World world, float amount)
+    public EntityLavaParticle(float amount)
     {
-        super(world);
+        super(Simulator.instance.getFluidTracker().world);
         this.id = nextParticleID++;
-        if(FluidTracker.egregiousHack == null)
-        {
-            FluidTracker.egregiousHack = new FluidTracker(world);
-        }
-        this.tracker = FluidTracker.egregiousHack;
+        this.simulator = Simulator.instance.getFluidTracker();
         this.amount = amount;
         this.forceSpawn = true;
         this.setSize(1F, 1F);
@@ -100,7 +98,7 @@ public class FluidParticle extends Entity
                 || blockY != Math.floor(this.positionY)
                 || blockZ != Math.floor(this.positionZ))
         {
-            tracker.movedParticles.add(this);
+            simulator.movedParticles.add(this);
         }        
     }
 
@@ -196,7 +194,8 @@ public class FluidParticle extends Entity
 
         if (!this.worldObj.isRemote & !LavaManager.canDisplace(this.worldObj.getBlockState(this.getPosition().down())))
         {
-            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
+            this.simulator.addLava(this.getPosition(), this.amount);
+//            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
             this.setDead();
         }
 

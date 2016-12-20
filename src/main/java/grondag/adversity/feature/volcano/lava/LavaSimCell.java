@@ -6,14 +6,14 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public class FluidCell
+public class LavaSimCell
 {
     private float currentLevel = 0; // 1.0 is one full block of fluid at surface pressure
     
     private static int nextCellID = 0;
     
     //alias for readability
-    private static final FluidCell BARRIER_CELL = BarrierCell.INSTANCE;
+    private static final LavaSimCell BARRIER_CELL = BarrierCell.INSTANCE;
     
     /** 
      * If this is at or near surface, level will not drop below this - to emulate surface tension/viscosity.
@@ -35,7 +35,7 @@ public class FluidCell
     
     private final int id;
     
-    private FluidCell[] neighbors = new FluidCell[EnumFacing.VALUES.length];
+    private LavaSimCell[] neighbors = new LavaSimCell[EnumFacing.VALUES.length];
     
     private final static float PRESSURE_FACTOR = 1.05F;
 //    private final static float PRESSURE_FACTOR_INVERSE = 1/1.05F;
@@ -49,7 +49,7 @@ public class FluidCell
         return this.id;
     }
     
-    public FluidCell(FluidTracker tracker, BlockPos pos)
+    public LavaSimCell(LavaSimulator tracker, BlockPos pos)
     {
         this.pos = pos;
                 
@@ -63,7 +63,7 @@ public class FluidCell
         }
         else
         {
-            FluidCell below = getNeighbor(tracker, EnumFacing.DOWN);
+            LavaSimCell below = getNeighbor(tracker, EnumFacing.DOWN);
             if(below != BARRIER_CELL && below.retainedLevel > 1)
             {
                 this.retainedLevel = below.retainedLevel - 1F;
@@ -79,14 +79,14 @@ public class FluidCell
      * True if rests on a solid surface.  
      * Particles that collide with this cell should add to it.
      */
-    public boolean isCellOnGround(FluidTracker tracker)
+    public boolean isCellOnGround(LavaSimulator tracker)
     {
         return this.retainedLevel > 0 && !tracker.terrainHelper.isLavaSpace(tracker.world.getBlockState(pos.down()));
     }
     
-    private FluidCell getNeighbor(FluidTracker tracker, EnumFacing face)
+    private LavaSimCell getNeighbor(LavaSimulator tracker, EnumFacing face)
     {
-        FluidCell result = this.neighbors[face.ordinal()];
+        LavaSimCell result = this.neighbors[face.ordinal()];
         if(result == null || result.isDeleted)
         {
             result = tracker.getCell(pos.add(face.getDirectionVec()));
@@ -95,27 +95,27 @@ public class FluidCell
         return result;
     }
     
-    public void doStep(FluidTracker tracker, double seconds)
+    public void doStep(LavaSimulator tracker, double seconds)
     {
         float available = this.currentLevel - this.retainedLevel;
         
         if(available <= 0) return;
         
         //fall down if possible
-        FluidCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
+        LavaSimCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
         if(down.canAcceptFluidParticles(tracker))
         {
-            new FluidParticle(tracker, this.currentLevel, new Vec3d(this.pos.getX() + 0.5, this.pos.getY() - 0.1, this.pos.getZ() + 0.5), Vec3d.ZERO);
+            new EntityLavaParticle(this.currentLevel, new Vec3d(this.pos.getX() + 0.5, this.pos.getY() - 0.1, this.pos.getZ() + 0.5), Vec3d.ZERO);
             this.changeLevel(tracker, -available);
             return;
         }
         
-        FluidCell east = this.getNeighbor(tracker, EnumFacing.EAST);
-        FluidCell west = this.getNeighbor(tracker, EnumFacing.WEST);
-        FluidCell north = this.getNeighbor(tracker, EnumFacing.NORTH);
-        FluidCell south = this.getNeighbor(tracker, EnumFacing.SOUTH);
+        LavaSimCell east = this.getNeighbor(tracker, EnumFacing.EAST);
+        LavaSimCell west = this.getNeighbor(tracker, EnumFacing.WEST);
+        LavaSimCell north = this.getNeighbor(tracker, EnumFacing.NORTH);
+        LavaSimCell south = this.getNeighbor(tracker, EnumFacing.SOUTH);
 
-        FluidCell[] outputs = new FluidCell[6];
+        LavaSimCell[] outputs = new LavaSimCell[6];
         int outputCount = 0;
         
         //fall to sides if possible
@@ -128,7 +128,7 @@ public class FluidCell
         {
             for(int i = 0; i < outputCount; i++)
             {
-                new FluidParticle(tracker, available / outputCount, new Vec3d(outputs[i].pos.getX() + 0.5, outputs[i].pos.getY() + 0.1, outputs[i].pos.getZ() + 0.5), Vec3d.ZERO);
+                new EntityLavaParticle(available / outputCount, new Vec3d(outputs[i].pos.getX() + 0.5, outputs[i].pos.getY() + 0.1, outputs[i].pos.getZ() + 0.5), Vec3d.ZERO);
             }
             
             this.changeLevel(tracker, -available);
@@ -136,7 +136,7 @@ public class FluidCell
         }
         
         //get pressure from cell above
-        FluidCell up = this.getNeighbor(tracker, EnumFacing.UP);
+        LavaSimCell up = this.getNeighbor(tracker, EnumFacing.UP);
         float verticalPressure = up == BARRIER_CELL 
                 ? 1
                 : Math.max(1, up.currentLevel);
@@ -221,7 +221,7 @@ public class FluidCell
      * Will return true if on the ground and has capacity, or if has fluid and has capacity,
      * or if sits on top of a surface cell that is full.
      */
-    public boolean canAcceptFluidDirectly(FluidTracker tracker)
+    public boolean canAcceptFluidDirectly(LavaSimulator tracker)
     {
         if (this == BARRIER_CELL) return false;
         
@@ -234,7 +234,7 @@ public class FluidCell
      * True if fluid particles can be created in this cell.
      * Will return true if above the ground or fluid surface and is not a barrier,
      */
-    public boolean canAcceptFluidParticles(FluidTracker tracker)
+    public boolean canAcceptFluidParticles(LavaSimulator tracker)
     {
         if (this == BARRIER_CELL) return false;
         
@@ -243,7 +243,7 @@ public class FluidCell
                 && this.getNeighbor(tracker, EnumFacing.DOWN).currentLevel < 1;
     }
     
-    public void changeLevel(FluidTracker tracker, float amount)
+    public void changeLevel(LavaSimulator tracker, float amount)
     {
         if(amount != 0)
         {
@@ -252,7 +252,7 @@ public class FluidCell
         }
     }
     
-    public void applyUpdates(FluidTracker tracker)
+    public void applyUpdates(LavaSimulator tracker)
     {
         if(this.delta != 0)
         {
@@ -280,7 +280,7 @@ public class FluidCell
         }
     }
     
-    public void provideBlockUpdate(FluidTracker tracker, Collection<LavaBlockUpdate> updateList)
+    public void provideBlockUpdate(LavaSimulator tracker, Collection<LavaBlockUpdate> updateList)
     {
         if(this.lastVisibleLevel != this.currentLevel)
         {
@@ -299,7 +299,7 @@ public class FluidCell
         return this.delta;
     }
     
-    public void delete(FluidTracker tracker)
+    public void delete(LavaSimulator tracker)
     {
         tracker.cellsWithFluid.remove(this);
         tracker.allCells.remove(this);

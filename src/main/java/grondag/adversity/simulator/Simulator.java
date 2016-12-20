@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.collect.Lists;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;
@@ -55,6 +56,8 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	
     private VolcanoManager volcanoManager;
     
+    private LavaSimulator fluidTracker;
+    
 	private static ExecutorService executor;
     
     /** used for world time */
@@ -96,6 +99,9 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
+	        
+	        //TODO add persistence and move to appropriate branch
+	        this.fluidTracker = new LavaSimulator(this.world);
 	        
             if(PersistenceManager.loadNode(world, this))
             {
@@ -157,6 +163,9 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         if(event.phase == TickEvent.Phase.END && this.isRunning)
         {
 
+            //TODO - quick hack, needs proper integration into sim
+            this.fluidTracker.doStep(1.0/20.0);
+            
             int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
 
             // Simulation clock can't move backwards.
@@ -231,6 +240,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public int getCurrentSimTick() { return this.currentSimTick.get(); }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
+    public LavaSimulator getFluidTracker() { return this.fluidTracker; }
 
     // Frame execution logic
 

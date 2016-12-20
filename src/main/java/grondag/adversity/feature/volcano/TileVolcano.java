@@ -99,11 +99,11 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
     
-    /**
-     * Blocks that need to be melted or checked for filler after placement.
-     * Not saved to NBT because should be fully processed and cleared every tick.
-     */
-    private HashSet<BlockPos> adjustmentList;
+//    /**
+//     * Blocks that need to be melted or checked for filler after placement.
+//     * Not saved to NBT because should be fully processed and cleared every tick.
+//     */
+//    private HashSet<BlockPos> adjustmentList;
 
 
     /**
@@ -230,7 +230,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 //                this.lavaBlocks = new BlockManager(this.pos, true);
 //                this.topBlocks = new BlockManager(this.pos, true);
                 this.coolingBlocks = new BlockManager(this.pos, false);
-                this.adjustmentList = new HashSet<BlockPos>();
+//                this.adjustmentList = new HashSet<BlockPos>();
                 this.lavaCooldownTicks = 0;
                 int moundRadius = Config.volcano().moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
@@ -274,20 +274,20 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         cellManager.flow();
         
-        Queue<LavaBlockUpdate> blockUpdates = cellManager.getBlockUpdates();
-        
-        LavaBlockUpdate update = blockUpdates.poll();       
-        while(update != null)
-        {
-            worldObj.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
-            this.adjustmentList.add(update.pos);
-            update = blockUpdates.poll();
-        }
-        
+//        Queue<LavaBlockUpdate> blockUpdates = cellManager.getBlockUpdates();
+//        
+//        LavaBlockUpdate update = blockUpdates.poll();       
+//        while(update != null)
+//        {
+//            worldObj.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+//            this.adjustmentList.add(update.pos);
+//            update = blockUpdates.poll();
+//        }
+//        
         
         //doBlockUpdates();
         
-        doAdjustments();
+//        doAdjustments();
 
         isNodeUpdateNeeded = isNodeUpdateNeeded || this.stage != oldStage;
 
@@ -656,92 +656,92 @@ public class TileVolcano extends TileEntity implements ITickable{
 //        }
 //    }
 
-    /**
-     * Recursively elevates lava blocks on line between fromPos and origin, including origin,
-     * starting at posting startPos, based on distance to origin. From block is assumed to be one high.
-     * EachOrigin should be distance high, up to the max. 
-     * If lava block is already as high as distance would indicate, does not affect it.
-     */
-    private void raiseLavaToOrigin(BlockPos fromPos, BlockPos startPos, BlockPos origin)
-    {
-        //methods below wants 3d not 3i, and also need to go from middle of blocks
-        Vec3d from3d = new Vec3d(0.5 + fromPos.getX(), 0.5 + fromPos.getY(), 0.5 + fromPos.getZ());
-        Vec3d to3d = new Vec3d(0.5 + origin.getX(), 0.5 + origin.getY(), 0.5 + origin.getZ());
-        
-        int distanceSquaredToOrigin = Useful.squared(origin.getX() - startPos.getX()) 
-                + Useful.squared(origin.getZ() - startPos.getZ());
-        
-        Vec3d direction = to3d.subtract(from3d);
-        for(int i = 0; i < HorizontalFace.values().length; i++)
-        {
-            BlockPos testPos = startPos.add(HorizontalFace.values()[i].directionVector);
-            
-            //block has to be closer to origin than the starting position
-            if(distanceSquaredToOrigin > Useful.squared(origin.getX() - testPos.getX()) 
-                    + Useful.squared(origin.getZ() - testPos.getZ()))
-            {
-                //Use AABB slightly larger than block to handle case of 45deg angle
-                //Otherwise would need special handling for diagonals and adjacent in that case.
-                AxisAlignedBB box = new AxisAlignedBB(-0.1 + testPos.getX(), testPos.getY(), -0.1 + testPos.getZ(),
-                1.1 + testPos.getX(), 1 + testPos.getY(), 1.1 + testPos.getZ());
-                if(Useful.doesRayIntersectAABB(from3d, direction, box))
-                {
-                    IBlockState state = this.worldObj.getBlockState(testPos);
-                    if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-                    {
-                        int distance = (int) Math.round(Math.sqrt(fromPos.distanceSq(testPos)));
-                        int newHeight = Math.max(IFlowBlock.getFlowHeightFromState(state), Math.min(distance + 1,  FlowHeightState.BLOCK_LEVELS_INT));
-                        this.worldObj.setBlockState(testPos, IFlowBlock.stateWithDiscreteFlowHeight(state, newHeight));
-                        adjustmentList.add(testPos);
+//    /**
+//     * Recursively elevates lava blocks on line between fromPos and origin, including origin,
+//     * starting at posting startPos, based on distance to origin. From block is assumed to be one high.
+//     * EachOrigin should be distance high, up to the max. 
+//     * If lava block is already as high as distance would indicate, does not affect it.
+//     */
+//    private void raiseLavaToOrigin(BlockPos fromPos, BlockPos startPos, BlockPos origin)
+//    {
+//        //methods below wants 3d not 3i, and also need to go from middle of blocks
+//        Vec3d from3d = new Vec3d(0.5 + fromPos.getX(), 0.5 + fromPos.getY(), 0.5 + fromPos.getZ());
+//        Vec3d to3d = new Vec3d(0.5 + origin.getX(), 0.5 + origin.getY(), 0.5 + origin.getZ());
+//        
+//        int distanceSquaredToOrigin = Useful.squared(origin.getX() - startPos.getX()) 
+//                + Useful.squared(origin.getZ() - startPos.getZ());
+//        
+//        Vec3d direction = to3d.subtract(from3d);
+//        for(int i = 0; i < HorizontalFace.values().length; i++)
+//        {
+//            BlockPos testPos = startPos.add(HorizontalFace.values()[i].directionVector);
+//            
+//            //block has to be closer to origin than the starting position
+//            if(distanceSquaredToOrigin > Useful.squared(origin.getX() - testPos.getX()) 
+//                    + Useful.squared(origin.getZ() - testPos.getZ()))
+//            {
+//                //Use AABB slightly larger than block to handle case of 45deg angle
+//                //Otherwise would need special handling for diagonals and adjacent in that case.
+//                AxisAlignedBB box = new AxisAlignedBB(-0.1 + testPos.getX(), testPos.getY(), -0.1 + testPos.getZ(),
+//                1.1 + testPos.getX(), 1 + testPos.getY(), 1.1 + testPos.getZ());
+//                if(Useful.doesRayIntersectAABB(from3d, direction, box))
+//                {
+//                    IBlockState state = this.worldObj.getBlockState(testPos);
+//                    if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+//                    {
+//                        int distance = (int) Math.round(Math.sqrt(fromPos.distanceSq(testPos)));
+//                        int newHeight = Math.max(IFlowBlock.getFlowHeightFromState(state), Math.min(distance + 1,  FlowHeightState.BLOCK_LEVELS_INT));
+//                        this.worldObj.setBlockState(testPos, IFlowBlock.stateWithDiscreteFlowHeight(state, newHeight));
+//                        adjustmentList.add(testPos);
+//    
+//                        if(!testPos.equals(origin))
+//                        {
+//                            raiseLavaToOrigin(fromPos, testPos, origin);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     
-                        if(!testPos.equals(origin))
-                        {
-                            raiseLavaToOrigin(fromPos, testPos, origin);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    private void doAdjustments()
-    {
-        HashSet<BlockPos> targets = new HashSet<BlockPos>();
-    
-        for(BlockPos changed : adjustmentList)
-        {
-            targets.add(changed.east());
-            targets.add(changed.west());
-            targets.add(changed.north());
-            targets.add(changed.south());
-            targets.add(changed.north().east());
-            targets.add(changed.south().east());
-            targets.add(changed.north().west());
-            targets.add(changed.south().west());
-        }
-
-        adjustmentList.clear();
-        
-        HashSet<BlockPos> updated = new HashSet<BlockPos>();
-        
-        for(BlockPos target : targets)
-        {
-            for(int y = -4; y <= 4; y++)
-            {
-                BlockPos p = target.add(0, y, 0);
-                if(!adjustHeightBlockIfNeeded(p));
-                {
-                    IFlowBlock.adjustFillIfNeeded(this.worldObj, p, updated);
-                }
-            }
-        }
-        
-        for(BlockPos uPos : updated)
-        {
-          //TODO: don't add to cooling if not needed
-            coolingBlocks.add(uPos, ticksActive + Config.volcano().coolingLagTicks);
-        }
-    }
+//    private void doAdjustments()
+//    {
+//        HashSet<BlockPos> targets = new HashSet<BlockPos>();
+//    
+//        for(BlockPos changed : adjustmentList)
+//        {
+//            targets.add(changed.east());
+//            targets.add(changed.west());
+//            targets.add(changed.north());
+//            targets.add(changed.south());
+//            targets.add(changed.north().east());
+//            targets.add(changed.south().east());
+//            targets.add(changed.north().west());
+//            targets.add(changed.south().west());
+//        }
+//
+//        adjustmentList.clear();
+//        
+//        HashSet<BlockPos> updated = new HashSet<BlockPos>();
+//        
+//        for(BlockPos target : targets)
+//        {
+//            for(int y = -4; y <= 4; y++)
+//            {
+//                BlockPos p = target.add(0, y, 0);
+//                if(!adjustHeightBlockIfNeeded(p));
+//                {
+//                    IFlowBlock.adjustFillIfNeeded(this.worldObj, p, updated);
+//                }
+//            }
+//        }
+//        
+//        for(BlockPos uPos : updated)
+//        {
+//          //TODO: don't add to cooling if not needed
+//            coolingBlocks.add(uPos, ticksActive + Config.volcano().coolingLagTicks);
+//        }
+//    }
     
     /** 
      * Flow into adjacent sides that are lower than the block supporting this one
@@ -925,56 +925,56 @@ public class TileVolcano extends TileEntity implements ITickable{
         return (material == BaseMaterial.BASALT || material == BaseMaterial.VOLCANIC_LAVA);
     }
 
-    /**
-     * Melts static height blocks if geometry would be different from current.
-     * And turns full cube dynamic blocks into static cube blocks.
-     * Returns true if is a height block, even if no adjustement was needed.
-     */
-    private boolean adjustHeightBlockIfNeeded(BlockPos targetPos)
-    {
-
-        if(targetPos == null) return false;
-
-        //        Adversity.log.info("meltExposedBasalt @" + targetPos.toString());        
-
-        IBlockState state = worldObj.getBlockState(targetPos);
-        if(!(state.getBlock() instanceof NiceBlock)) return false;
-
-        NiceBlock block = (NiceBlock)state.getBlock();
-
-        if(!IFlowBlock.isFlowHeight(block)) return false;
-
-        boolean isFullCube = IFlowBlock.shouldBeFullCube(state, worldObj, targetPos);
-
-
-        if(isFullCube)
-        {
-            if(block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
-            {
-                //                Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
-                //                        + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
-                //                        + NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
-                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-            }
-        }
-        else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK 
-                || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK 
-                || block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
-        {
-
-            //            Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
-            //                    + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
-            //                    + NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
-
-
-            this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-            this.coolingBlocks.add(targetPos, ticksActive + Config.volcano().coolingLagTicks);
-        }
-
-        return true;
-    }
+//    /**
+//     * Melts static height blocks if geometry would be different from current.
+//     * And turns full cube dynamic blocks into static cube blocks.
+//     * Returns true if is a height block, even if no adjustement was needed.
+//     */
+//    private boolean adjustHeightBlockIfNeeded(BlockPos targetPos)
+//    {
+//
+//        if(targetPos == null) return false;
+//
+//        //        Adversity.log.info("meltExposedBasalt @" + targetPos.toString());        
+//
+//        IBlockState state = worldObj.getBlockState(targetPos);
+//        if(!(state.getBlock() instanceof NiceBlock)) return false;
+//
+//        NiceBlock block = (NiceBlock)state.getBlock();
+//
+//        if(!IFlowBlock.isFlowHeight(block)) return false;
+//
+//        boolean isFullCube = IFlowBlock.shouldBeFullCube(state, worldObj, targetPos);
+//
+//
+//        if(isFullCube)
+//        {
+//            if(block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+//            {
+//                //                Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
+//                //                        + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
+//                //                        + NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
+//                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
+//                        .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+//            }
+//        }
+//        else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK 
+//                || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK 
+//                || block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+//        {
+//
+//            //            Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
+//            //                    + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
+//            //                    + NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
+//
+//
+//            this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
+//                    .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+//            this.coolingBlocks.add(targetPos, ticksActive + Config.volcano().coolingLagTicks);
+//        }
+//
+//        return true;
+//    }
 
 //    private void trackLavaBlock(BlockPos lavaPos)
 //    {
