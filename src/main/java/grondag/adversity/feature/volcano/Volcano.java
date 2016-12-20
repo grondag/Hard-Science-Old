@@ -1,7 +1,10 @@
 package grondag.adversity.feature.volcano;
 
+import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.FluidParticle;
+import grondag.adversity.feature.volcano.lava.LavaBlobItem;
 import grondag.adversity.feature.volcano.lava.RenderFluidParticle;
-import grondag.adversity.library.fluid.FluidParticle;
+import grondag.adversity.library.fluid.FluidSimParticle;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -16,6 +19,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -45,14 +49,23 @@ public class Volcano {
     
     public static Item             itemBlockVolcano;
     
+    public static Item      lavaBlob;
     
     public static void preInit(FMLPreInitializationEvent event) 
     {
         blockVolcano = new BlockVolcano();
         GameRegistry.register(blockVolcano);
+        
         itemBlockVolcano = new ItemBlock(blockVolcano).setRegistryName(blockVolcano.getRegistryName());
         GameRegistry.register(itemBlockVolcano);
 
+        lavaBlob = new LavaBlobItem().setRegistryName("lava_blob").setUnlocalizedName("lava_blob");;
+        GameRegistry.register(lavaBlob);
+        
+      
+        EntityRegistry.registerModEntity(FluidParticle.class, "adversity:lava_blob", 1, Adversity.instance, 64, 10, true);
+        
+        
         GameRegistry.register(basaltRubble);
         GameRegistry.register(volcanoWand);
         GameRegistry.register(terrainWand);
@@ -62,11 +75,11 @@ public class Volcano {
             ModelLoader.setCustomModelResourceLocation(itemBlockVolcano, 0, new ModelResourceLocation("adversity:block_volcano", "inventory"));
             ModelLoader.setCustomModelResourceLocation(basaltRubble, 0, new ModelResourceLocation("adversity:basalt_rubble", "inventory"));
             ModelLoader.setCustomModelResourceLocation(volcanoWand, 0, new ModelResourceLocation("adversity:volcano_wand", "inventory"));
-            ModelLoader.setCustomModelResourceLocation(terrainWand, 0, new ModelResourceLocation("adversity:terrain_wand", "inventory"));   
+            ModelLoader.setCustomModelResourceLocation(terrainWand, 0, new ModelResourceLocation("adversity:terrain_wand", "inventory")); 
             
-            Class<FluidParticle> clazz = FluidParticle.class;
+            ModelLoader.setCustomModelResourceLocation(lavaBlob, 0, new ModelResourceLocation("minecraft:fire_charge", "inventory"));  
             
-            RenderingRegistry.registerEntityRenderingHandler(clazz, RenderFluidParticle.FACTORY);
+            RenderingRegistry.registerEntityRenderingHandler(FluidParticle.class, RenderFluidParticle.factory());
 
         }
 

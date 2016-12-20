@@ -11,6 +11,8 @@ import net.minecraft.world.World;
 
 public class FluidTracker
 {
+    public static FluidTracker egregiousHack;
+    
     protected final World world;
     protected final TerrainHelper terrainHelper;
 //    protected final BlockPos origin;
@@ -39,7 +41,7 @@ public class FluidTracker
     protected final HashSet<FluidParticle> movedParticles = new HashSet<FluidParticle>();
 
     
-    public FluidTracker(World world, BlockPos origin)
+    public FluidTracker(World world)
     {
         this.world = world;
         this.terrainHelper = new TerrainHelper(world);

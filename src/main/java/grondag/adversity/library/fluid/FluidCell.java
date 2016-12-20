@@ -12,10 +12,10 @@ public class FluidCell
 //     */  
 //    public byte capacity;
     
-    public LinkedList<FluidParticle> particles;
+    public LinkedList<FluidSimParticle> particles;
     
-    public void addParticle(FluidParticle particle)
+    public void addParticle(FluidSimParticle particle)
     {
-        if(this.particles == null) this.particles = new LinkedList<FluidParticle>();
+        if(this.particles == null) this.particles = new LinkedList<FluidSimParticle>();
     }
 }

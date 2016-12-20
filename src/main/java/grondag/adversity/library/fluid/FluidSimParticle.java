@@ -4,7 +4,7 @@ import javax.vecmath.Vector3f;
 
 import net.minecraft.util.math.Vec3d;
 
-public class FluidParticle
+public class FluidSimParticle
 {
     private static int nextParticleID = 0;
     
@@ -20,13 +20,13 @@ public class FluidParticle
     protected float pressure;
     protected float density;
     
-    protected FluidParticle nextParticle;
+    protected FluidSimParticle nextParticle;
     
     //TODO: not sure if this or if index is needed
     public final int id;
     public int index;
     
-    public FluidParticle(Vec3d position, Vec3d velocity, FluidSimulator sim)
+    public FluidSimParticle(Vec3d position, Vec3d velocity, FluidSimulator sim)
     {
         this.position = position;
         this.velocity = velocity;

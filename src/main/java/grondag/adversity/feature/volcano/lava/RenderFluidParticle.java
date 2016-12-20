@@ -19,7 +19,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderFluidParticle extends Render<FluidParticle>
 {
-    public static final IRenderFactory<FluidParticle> FACTORY = new Factory();
     
     private final float scale;
 
@@ -84,12 +83,9 @@ public class RenderFluidParticle extends Render<FluidParticle>
         return TextureMap.LOCATION_BLOCKS_TEXTURE;
     }
 
-    private static class Factory implements IRenderFactory<FluidParticle>
-    {
-        @Override
-        public Render<FluidParticle> createRenderFor(RenderManager manager)
-        {
-            return new RenderFluidParticle(manager, 1F);
-        }
+    public static IRenderFactory<FluidParticle> factory() {
+        return manager -> new RenderFluidParticle(manager, 1F);
     }
+    
+   
 }

@@ -65,9 +65,9 @@ public class FluidSimulator
     
     public final float massPerParticle;
     
-    private FluidParticle[] particles;
+    private FluidSimParticle[] particles;
     
-    private FluidParticle[] cellParticles;
+    private FluidSimParticle[] cellParticles;
     
     /**
      * How much fluid cell can contain
@@ -97,10 +97,10 @@ public class FluidSimulator
         this.fluidDensity = fluidDensity;
         this.massPerParticle = fluidDensity / PARTICLES_PER_BLOCK;
         
-        this.particles = new FluidParticle[MAX_PARTICLES];
+        this.particles = new FluidSimParticle[MAX_PARTICLES];
         this.cellCount = this.xLength * 256 * this.zLength;
         this.cellCapacity = new byte[cellCount];
-        this.cellParticles = new FluidParticle[cellCount];
+        this.cellParticles = new FluidSimParticle[cellCount];
     }
     
     private int getCellIndex(int x, int y, int z)
@@ -118,7 +118,7 @@ public class FluidSimulator
     {
         if(this.particleCount >= MAX_PARTICLES) return;
         
-        FluidParticle newParticle = new FluidParticle(position, velocity, this);
+        FluidSimParticle newParticle = new FluidSimParticle(position, velocity, this);
         newParticle.index = this.particleCount;
         particles[this.particleCount] = newParticle;
         this.particleCount++;
