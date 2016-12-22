@@ -166,6 +166,8 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
             //TODO - quick hack, needs proper integration into sim
             this.fluidTracker.doStep(1.0/20.0);
             
+            this.fluidTracker.doBlockUpdates();
+            
             int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
 
             // Simulation clock can't move backwards.

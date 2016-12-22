@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
 
+import grondag.adversity.Adversity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -97,6 +98,7 @@ public class LavaSimCell
     
     public void doStep(LavaSimulator tracker, double seconds)
     {
+        Adversity.log.info("LavaSimCell doStep id=" + this.id + "w/ level=" + this.currentLevel + " @" + this.pos.toString());
         float available = this.currentLevel - this.retainedLevel;
         
         if(available <= 0) return;
@@ -105,7 +107,8 @@ public class LavaSimCell
         LavaSimCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
         if(down.canAcceptFluidParticles(tracker))
         {
-            new EntityLavaParticle(this.currentLevel, new Vec3d(this.pos.getX() + 0.5, this.pos.getY() - 0.1, this.pos.getZ() + 0.5), Vec3d.ZERO);
+            tracker.world.spawnEntityInWorld(new EntityLavaParticle(tracker.world, this.currentLevel, 
+                    new Vec3d(this.pos.getX() + 0.5, this.pos.getY() - 0.1, this.pos.getZ() + 0.5), Vec3d.ZERO));
             this.changeLevel(tracker, -available);
             return;
         }
@@ -128,7 +131,8 @@ public class LavaSimCell
         {
             for(int i = 0; i < outputCount; i++)
             {
-                new EntityLavaParticle(available / outputCount, new Vec3d(outputs[i].pos.getX() + 0.5, outputs[i].pos.getY() + 0.1, outputs[i].pos.getZ() + 0.5), Vec3d.ZERO);
+                tracker.world.spawnEntityInWorld(new EntityLavaParticle(tracker.world, available / outputCount, 
+                        new Vec3d(outputs[i].pos.getX() + 0.5, outputs[i].pos.getY() + 0.1, outputs[i].pos.getZ() + 0.5), Vec3d.ZERO));
             }
             
             this.changeLevel(tracker, -available);
@@ -158,28 +162,28 @@ public class LavaSimCell
         //equalize with sides that have a lower level
         float outputLevels = 0;
         
-        if(east.canAcceptFluidParticles(tracker) && east.currentLevel < remainingLevel)
+        if(east.canAcceptFluidDirectly(tracker) && east.currentLevel < remainingLevel)
         {
 
             outputLevels += east.currentLevel;
             outputs[outputCount++] = east;
         }
         
-        if(west.canAcceptFluidParticles(tracker) && west.currentLevel < remainingLevel)
+        if(west.canAcceptFluidDirectly(tracker) && west.currentLevel < remainingLevel)
         {
 
             outputLevels += west.currentLevel;
             outputs[outputCount++] = west;
         }
         
-        if(north.canAcceptFluidParticles(tracker) && north.currentLevel < remainingLevel)
+        if(north.canAcceptFluidDirectly(tracker) && north.currentLevel < remainingLevel)
         {
 
             outputLevels += north.currentLevel;
             outputs[outputCount++] = north;
         }
         
-        if(south.canAcceptFluidParticles(tracker) && south.currentLevel < remainingLevel)
+        if(south.canAcceptFluidDirectly(tracker) && south.currentLevel < remainingLevel)
         {
 
             outputLevels += south.currentLevel;
@@ -245,6 +249,7 @@ public class LavaSimCell
     
     public void changeLevel(LavaSimulator tracker, float amount)
     {
+        Adversity.log.info("changeLevel amount=" + amount);
         if(amount != 0)
         {
             this.delta += amount;
@@ -254,9 +259,11 @@ public class LavaSimCell
     
     public void applyUpdates(LavaSimulator tracker)
     {
+        Adversity.log.info("LavaSimCell applyUpdates id=" + this.id + "w/ delta=" + this.delta + " @" + this.pos.toString());
+        
         if(this.delta != 0)
         {
-            if(this.currentLevel == 0)
+            if(this.currentLevel == 0 && this.delta > 0)
             {
                 tracker.cellsWithFluid.add(this);
             }
@@ -268,15 +275,17 @@ public class LavaSimCell
             
             this.currentLevel += delta;
             
-            if(this.currentLevel == 0)
+            if(this.currentLevel <= 0)
             {
-                tracker.cellsWithFluid.add(this);
+                tracker.cellsWithFluid.remove(this);
             }
             
             if(this.currentLevel == this.lastVisibleLevel)
             {
                 tracker.dirtyCells.remove(this);
             }
+            
+            this.delta = 0;
         }
     }
     

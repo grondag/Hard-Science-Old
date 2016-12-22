@@ -28,18 +28,14 @@ public class EntityLavaParticle extends Entity
 {
     private static int nextParticleID;
 
-    private final float amount;
+    private float amount;
     private final int id;
-    private double positionX;
-    private double positionY;
-    private double positionZ;
-    private double velocityX;
-    private double velocityY;
-    private double velocityZ;
+
 
     //TODO: is this alias needed?
     private final LavaSimulator simulator;
 
+    private static final String TAG_AMOUNT = "amt";
 
     @Override
     public int hashCode()
@@ -47,9 +43,10 @@ public class EntityLavaParticle extends Entity
         return this.id;
     }
 
-    protected EntityLavaParticle(float amount, Vec3d position, Vec3d velocity)
+    protected EntityLavaParticle(World world, float amount, Vec3d position, Vec3d velocity)
     {
-        this(amount);
+        this(world, amount);
+        Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
         this.setPosition(position.xCoord, position.yCoord, position.zCoord);
 
 
@@ -57,25 +54,18 @@ public class EntityLavaParticle extends Entity
         this.motionY = velocity.yCoord;
         this.motionZ = velocity.zCoord;
 
-        //        this.positionX = position.xCoord;
-        //        this.positionY = position.yCoord;
-        //        this.positionZ = position.zCoord;
-        //        
-        //        this.velocityX = velocity.xCoord;
-        //        this.velocityY = velocity.yCoord;
-        //        this.velocityZ = velocity.zCoord;
+     }
 
-        Simulator.instance.getFluidTracker().allParticles.add(this);
+    public EntityLavaParticle(World world)
+    {
+        this(world, 1);
+        Adversity.log.info("EntityLavaParticle no params");
     }
 
-    public EntityLavaParticle()
+    public EntityLavaParticle(World world, float amount)
     {
-        this(1);
-    }
-
-    public EntityLavaParticle(float amount)
-    {
-        super(Simulator.instance.getFluidTracker().world);
+        super(world);
+        Adversity.log.info("EntityLavaParticle amount=" + amount);
         this.id = nextParticleID++;
         this.simulator = Simulator.instance.getFluidTracker();
         this.amount = amount;
@@ -83,24 +73,6 @@ public class EntityLavaParticle extends Entity
         this.setSize(1F, 1F);
     }
 
-    public void doStep(double seconds)
-    {
-        double blockX = Math.floor(this.positionX);
-        double blockY = Math.floor(this.positionY);
-        double blockZ = Math.floor(this.positionZ);
-
-        this.velocityY -= seconds * 9.8;
-        this.positionX += this.velocityX * seconds;
-        this.positionY += this.velocityY * seconds;
-        this.positionZ += this.velocityZ * seconds;
-
-        if(blockX != Math.floor(this.positionX)
-                || blockY != Math.floor(this.positionY)
-                || blockZ != Math.floor(this.positionZ))
-        {
-            simulator.movedParticles.add(this);
-        }        
-    }
 
     /**
      * Sets throwable heading based on an entity that's throwing it
@@ -148,27 +120,6 @@ public class EntityLavaParticle extends Entity
     public float getAmount()
     {
         return this.amount;
-    }
-
-    //    public Vec3d getPosition()
-    //    {
-    //        return new Vec3d(this.positionX, this.positionY, this.positionZ);
-    //    }
-
-
-    //    @Override
-    //    public BlockPos getPosition()
-    //    {
-    //        return new BlockPos(this.positionX, this.positionY, this.positionZ);
-    //    }
-
-
-
-    @Override
-    protected void entityInit()
-    {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -357,51 +308,25 @@ public class EntityLavaParticle extends Entity
         }
         blockpos$pooledmutableblockpos.release();
     }
+   
     
-    @Override
-    public void onEntityUpdate()
-    {
-//        Adversity.log.info("onEntityUpdate id=" + this.id);
-        // TODO Auto-generated method stub
-        super.onEntityUpdate();
-    }
-
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        // TODO Auto-generated method stub
-
+        this.amount = compound.getFloat(TAG_AMOUNT);
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        // TODO Auto-generated method stub
-
+        compound.setFloat(TAG_AMOUNT, this.amount);
     }
 
     @Override
-    public void setDead()
-    {
-        Adversity.log.info("setDead id=" + this.id);
-        // TODO Auto-generated method stub
-        super.setDead();
-    }
-
-    @Override
-    protected void kill()
+    protected void entityInit()
     {
         // TODO Auto-generated method stub
-        Adversity.log.info("kill id=" + this.id);
-        super.kill();
+        
     }
-
-    @Override
-    public boolean shouldRenderInPass(int pass)
-    {
-        // TODO Auto-generated method stub
-        return super.shouldRenderInPass(pass);
-    }
-
 
 }

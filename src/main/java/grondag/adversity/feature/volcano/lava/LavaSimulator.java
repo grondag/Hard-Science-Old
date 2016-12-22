@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
@@ -44,16 +45,8 @@ public class LavaSimulator
     /** cells that may need a block update */
     protected final HashSet<LavaSimCell> dirtyCells = new HashSet<LavaSimCell>();
     
-    protected final HashSet<EntityLavaParticle> allParticles = new HashSet<EntityLavaParticle>();
-    
     private final LinkedList<LavaBlockUpdate> blockUpdates = new LinkedList<LavaBlockUpdate>();
 
-    /**
-     * Particles that have moved to a new block space and thus require check for collision.
-     */
-    protected final HashSet<EntityLavaParticle> movedParticles = new HashSet<EntityLavaParticle>();
-
-    
     public LavaSimulator(World world)
     {
         this.world = world;
@@ -66,6 +59,7 @@ public class LavaSimulator
     
     public void doStep(double seconds)
     {
+
         //update particles
 //        for(FluidParticle particle : this.allParticles)
 //        {
@@ -80,9 +74,19 @@ public class LavaSimulator
 //            //TODO: handle horizontal collisions - won't happen now because all are pure vertical drops
 //        }
         
+        if(cellsWithFluid.size() > 0)
+        {
+            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
+        }
+        
         for(LavaSimCell cell : cellsWithFluid)
         {
             cell.doStep(this, seconds);
+        }
+        
+        if(updatedCells.size() > 0)
+        {
+            Adversity.log.info("LavaSim updatedCells, cell count=" + updatedCells.size() );
         }
         
         for(LavaSimCell cell : this.updatedCells)
@@ -125,11 +129,44 @@ public class LavaSimulator
     
    
     /**
-     * Adds lava to the given cell.
+     * Adds lava in or on top of the given cell.
+     * TODO: handle when not all the lava can be used.
      */
     public void addLava(BlockPos pos, float amount)
     {
-        //TODO
+        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
+        
+        float available = amount;
+        
+        LavaSimCell target = this.getCell(pos.down());
+        if(target.canAcceptFluidDirectly(this) && target.getCurrentLevel() < 1)
+        {
+            float capacity = Math.min(amount, 1 - target.getCurrentLevel());
+            target.changeLevel(this, capacity);
+            available -= capacity;
+        }
+        
+        if(available > 0)
+        {
+            target = this.getCell(pos);
+            if(target.canAcceptFluidDirectly(this) && target.getCurrentLevel() < 1)
+            {
+                float capacity = Math.min(amount, 1 - target.getCurrentLevel());
+                target.changeLevel(this, capacity);
+                available -= capacity;
+            }
+            
+            if(available > 0)
+            {
+                target = this.getCell(pos.up());
+                if(target.canAcceptFluidDirectly(this) && target.getCurrentLevel() < 1)
+                {
+                    float capacity = Math.min(amount, 1 - target.getCurrentLevel());
+                    target.changeLevel(this, capacity);
+                    available -= capacity;
+                }
+            }
+        }
     }
     
     
@@ -138,13 +175,16 @@ public class LavaSimulator
      */
     protected void notifyCellChange(LavaSimCell cell)
     {
+        Adversity.log.info("notifyCellChange cell=" + cell.hashCode());
         if(cell.getDelta() == 0)
         {
             //was changed, and now no longer needs to be changed
             this.updatedCells.remove(cell);
+            Adversity.log.info("notifyCellChange cell removed");
         }
         else
         {
+            Adversity.log.info("notifyCellChange cell added");
             this.updatedCells.add(cell);
         }
     }
@@ -161,12 +201,20 @@ public class LavaSimulator
 
     public void doBlockUpdates()
     {
+//        Adversity.log.info("LavaSim doBlockUpdates");
+
         Queue<LavaBlockUpdate> blockUpdates = getBlockUpdates();
             
             LavaBlockUpdate update = blockUpdates.poll();       
             while(update != null)
-            {
-                this.world.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+            {   if(update.level == 0 && world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                {
+                    world.setBlockToAir(update.pos);
+                }
+                else
+                {
+                    this.world.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+                }
                 this.adjustmentList.add(update.pos);
                 update = blockUpdates.poll();
             }
