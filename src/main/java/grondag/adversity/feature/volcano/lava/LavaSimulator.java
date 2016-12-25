@@ -2,39 +2,47 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Queue;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
+import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.simulator.PersistenceManager;
+import grondag.adversity.simulator.base.NodeRoots;
+import grondag.adversity.simulator.base.SimulationNode;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class LavaSimulator
+public class LavaSimulator extends SimulationNode
 {
     protected final World world;
-    protected final TerrainHelper terrainHelper;
-//    protected final BlockPos origin;
-//    public final int xOffset;
-//    public final int zOffset;
-    
-//    private final FluidCell [][][] cells;
-//    
-//    private final static int RADIUS = 256;
-//    private final static int ARRAY_LENGTH = RADIUS * 2 + 1;
+    protected final LavaTerrainHelper terrainHelper;
+
     
     protected final HashMap<BlockPos, LavaSimCell> allCells = new HashMap<BlockPos, LavaSimCell>();
     private final HashSet<LavaSimCell> updatedCells = new HashSet<LavaSimCell>();
     protected final HashSet<LavaSimCell> cellsWithFluid = new HashSet<LavaSimCell>();
+    
+    //TODO: make config
+    private static final int VALIDATION_TICKS = 20;
+    private int ticksUntilNextValidation = VALIDATION_TICKS;
+    
+    //TODO: make config
+    private static final int CACHE_TICKS = 60;
+    private int ticksUntilCacheCleanup = CACHE_TICKS;
     
     /**
      * Blocks that need to be melted or checked for filler after placement.
@@ -46,32 +54,24 @@ public class LavaSimulator
     protected final HashSet<LavaSimCell> dirtyCells = new HashSet<LavaSimCell>();
     
     private final LinkedList<LavaBlockUpdate> blockUpdates = new LinkedList<LavaBlockUpdate>();
+    
+    protected final static String TAG_SAVE_DATA = "lavacells";
 
     public LavaSimulator(World world)
     {
+        super(NodeRoots.LAVA_SIMULATOR.ordinal());
         this.world = world;
-        this.terrainHelper = new TerrainHelper(world);
-//        this.origin = origin;
-//        this.xOffset = RADIUS - origin.getX();
-//        this.zOffset = RADIUS - origin.getZ();
-//        this.cells = new FluidCell[ARRAY_LENGTH][256][ARRAY_LENGTH];
+        this.terrainHelper = new LavaTerrainHelper(world);
     }
     
     public void doStep(double seconds)
     {
 
-        //update particles
-//        for(FluidParticle particle : this.allParticles)
+//        if(--ticksUntilNextValidation == 0)
 //        {
-//            particle.doStep(seconds);
-//        }
-//        
-//        //Check particles for collision.
-//        for(FluidParticle particle : this.movedParticles)
-//        {
-//            //Add lava from collided particles and remove them from sim.
-//            
-//            //TODO: handle horizontal collisions - won't happen now because all are pure vertical drops
+//            Adversity.log.info("LavaSim doStep validatingAllCells, cell count=" + this.allCells.size() );
+//            validateAllCells();
+//            ticksUntilNextValidation = VALIDATION_TICKS;
 //        }
         
         if(cellsWithFluid.size() > 0)
@@ -87,14 +87,49 @@ public class LavaSimulator
         if(updatedCells.size() > 0)
         {
             Adversity.log.info("LavaSim updatedCells, cell count=" + updatedCells.size() );
+            
+            for(LavaSimCell cell : this.updatedCells)
+            {
+                cell.applyUpdates(this);
+            }
+            
+            this.updatedCells.clear();
+            
+            this.setSaveDirty(true);
         }
         
-        for(LavaSimCell cell : this.updatedCells)
+//        if(--ticksUntilCacheCleanup == 0)
+//        {
+//            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
+//            cleanCellCache();
+//            ticksUntilCacheCleanup = CACHE_TICKS;
+//            Adversity.log.info("LavaSim doStep cleanCellCache, cell ending count=" + this.allCells.size() );
+//        }
+        
+    }
+    
+    private void validateAllCells()
+    {
+        //TODO: make parallel
+        for(LavaSimCell cell : this.allCells.values())
         {
-            cell.applyUpdates(this);
+            cell.validate(this, false);
         }
-        
-        this.updatedCells.clear();
+    }
+    
+    private void cleanCellCache()
+    {
+       //TODO: make parallel
+        Iterator<Entry<BlockPos, LavaSimCell>> it = this.allCells.entrySet().iterator();
+        while(it.hasNext())
+        {
+            Entry<BlockPos, LavaSimCell> next = it.next();
+            
+            if(next.getValue().clearNeighborCache())
+            {
+                it.remove();
+            }
+        }
     }
     
     protected LavaSimCell getCell(BlockPos pos)
@@ -113,21 +148,48 @@ public class LavaSimulator
         
         if(result == null)
         {
-            IBlockState state = world.getBlockState(pos);
-            if(terrainHelper.isLavaSpace(state))
-            {
-                result = new LavaSimCell(this, pos);
-                allCells.put(pos, result);
-            }
-            else
-            {
-                result = BarrierCell.INSTANCE;
-            }
+            result = new LavaSimCell(this, pos);
+            allCells.put(pos, result);
         }
         return result;
     }
     
    
+    /**
+     * Update simulation from world when blocks are placed via creative mode or other methods.
+     * Unfortunately, this will ALSO be called by our own block updates, 
+     * so ignores call if visible level already matches.
+     */
+    public void registerPlacedLava(World worldIn, BlockPos pos, IBlockState state)
+    {
+        LavaSimCell target = this.getCell(pos);
+        int worldLevel = IFlowBlock.getFlowHeightFromState(state);
+        if(target.getVisibleLevel() != worldLevel)
+        {
+            target.changeLevel(this, (worldLevel - target.getVisibleLevel()) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+            target.applyUpdates(this);
+            target.clearBlockUpdate();
+            this.setSaveDirty(true);
+        }
+    }
+    
+    /**
+     * Update simulation from world when blocks are removed via creative mode or other methods.
+     * Unfortunately, this will ALSO be called by our own block updates, 
+     * so ignores call if visible level already matches.
+     */
+    public void unregisterDestroyedLava(World worldIn, BlockPos pos, IBlockState state)
+    {
+        LavaSimCell target = this.getCell(pos);
+        if(target.getCurrentLevel() > 0)
+        {
+            target.changeLevel(this, - target.getCurrentLevel());
+            target.applyUpdates(this);
+            target.clearBlockUpdate();
+            this.setSaveDirty(true);
+        }
+    }
+    
     /**
      * Adds lava in or on top of the given cell.
      * TODO: handle when not all the lava can be used.
@@ -175,6 +237,8 @@ public class LavaSimulator
      */
     protected void notifyCellChange(LavaSimCell cell)
     {
+        //TODO: prevent duplicate notification when there are multiple changes in a step?
+        
         Adversity.log.info("notifyCellChange cell=" + cell.hashCode());
         if(cell.getDelta() == 0)
         {
@@ -213,7 +277,7 @@ public class LavaSimulator
                 }
                 else
                 {
-                    this.world.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+                    this.world.setBlockState(update.pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
                 }
                 this.adjustmentList.add(update.pos);
                 update = blockUpdates.poll();
@@ -363,5 +427,54 @@ public class LavaSimulator
         }
 
         return true;
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt)
+    {
+        allCells.clear();
+        updatedCells.clear();
+        cellsWithFluid.clear();
+        adjustmentList.clear();
+        dirtyCells.clear();
+        blockUpdates.clear();
+        
+        int[] saveData = nbt.getIntArray(TAG_SAVE_DATA);
+        
+        //to be valid, must have a multiple of two
+        if(saveData == null || saveData.length % 4 != 0)
+        {
+            Adversity.log.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
+            return;
+        }
+        
+        int i = 0;
+        while(i < saveData.length)
+        {
+            LavaSimCell cell = new LavaSimCell(this, new BlockPos(saveData[i++], saveData[i++], saveData[i++]), Float.intBitsToFloat(saveData[i++]));
+            cell.clearBlockUpdate();;
+            this.allCells.put(cell.pos, cell);
+            this.cellsWithFluid.add(cell);
+        }
+  
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound nbt)
+    {
+       
+        int[] saveData = new int[cellsWithFluid.size() * 4];
+        int i = 0;
+        
+        for(LavaSimCell cell: cellsWithFluid)
+        {
+            saveData[i++] = cell.pos.getX();
+            saveData[i++] = cell.pos.getY();
+            saveData[i++] = cell.pos.getZ();
+            saveData[i++] = Float.floatToIntBits(cell.getCurrentLevel());
+        }       
+        
+        nbt.setIntArray(TAG_SAVE_DATA, saveData);
+        
     }
 }

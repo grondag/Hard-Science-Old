@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano;
 
+import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -149,10 +150,9 @@ public class TerrainWand extends Item
         IBlockState targetState = null;
         BlockPos targetPos = null;
 
-        if(IFlowBlock.isFlowHeight(blockIn))
+        int level = IFlowBlock.getFlowHeightFromState(stateIn);
+        if(level > 0)
         {
-            int level = IFlowBlock.getFlowHeightFromState(stateIn);
-
             if(playerIn.isSneaking())
             {	
                 if(level > 1)
@@ -294,7 +294,7 @@ public class TerrainWand extends Item
                 }
 
             }
-            else if(targetMeta != SHOULD_BE_AIR && LavaManager.canDisplace(baseState) && fillBlock != null)
+            else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
             {
                 worldObj.setBlockState(basePos, fillBlock.getDefaultState()
                         .withProperty(NiceBlock.META, targetMeta));

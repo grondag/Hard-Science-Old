@@ -18,7 +18,7 @@ import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.feature.volcano.lava.LavaBlockUpdate;
-import grondag.adversity.feature.volcano.lava.LavaManager2;
+import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -117,8 +117,6 @@ public class TileVolcano extends TileEntity implements ITickable{
      */
 //    private int[] lavaManagerData;
     
-    
-    private LavaManager2 cellManager;
     
     private int						hazeTimer		= 60;
 
@@ -266,13 +264,6 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         VolcanoStage oldStage = this.stage;
         
-        
-        if(cellManager == null)
-        {
-            cellManager = new LavaManager2(pos, worldObj);
-        }
-        
-        cellManager.flow();
         
 //        Queue<LavaBlockUpdate> blockUpdates = cellManager.getBlockUpdates();
 //        
@@ -860,7 +851,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         IBlockState state = worldObj.getBlockState(top);
 
-        while(!LavaManager.canDisplace(state) && state.getBlock() != Blocks.BEDROCK
+        while(!LavaTerrainHelper.canLavaDisplace(state) && state.getBlock() != Blocks.BEDROCK
                 && top.getY() >= 0)
         {
             //            Adversity.log.info("buildMound: set block from " 
@@ -893,7 +884,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             dz = (int) (Useful.SALT_SHAKER.nextGaussian() * Config.volcano().moundRadius);
             BlockPos candidate = this.worldObj.getHeight(this.pos.east(dx).north(dz));
             while(candidate.getY() > 0 && !isVolcanoBlock(worldObj.getBlockState(candidate).getBlock()) 
-                    && LavaManager.canDisplace(worldObj.getBlockState(candidate)))
+                    && LavaTerrainHelper.canLavaDisplace(worldObj.getBlockState(candidate)))
             {
                 candidate = candidate.down();
             }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
-import grondag.adversity.feature.volcano.LavaManager;
+import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
@@ -49,15 +49,25 @@ public interface IFlowBlock
     
     /**
      * Use for height blocks.
-     * Returns a value from 1 to 12 to indicate the center height of this block
+     * Returns a value from 1 to 12 to indicate the center height of this block.
+     * Returns zero if not a flow block.
      */
     public static int getFlowHeightFromState(IBlockState state)
     {
-        if(!(state.getBlock() instanceof NiceBlock))
+        if(isFlowHeight(state.getBlock()))
         {
-            Adversity.log.info("derp");
+            return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(NiceBlock.META));
         }
-        return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(NiceBlock.META));
+        else
+        {
+            return 0;
+        }
+        
+//        if(!(state.getBlock() instanceof NiceBlock))
+//        {
+//            Adversity.log.info("derp");
+//        }
+//        return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(NiceBlock.META));
     }
     
     /** 
@@ -148,7 +158,7 @@ public interface IFlowBlock
             }
             //confirm filler needed and adjust/remove if needed
         }
-        else if(targetMeta != SHOULD_BE_AIR && LavaManager.canDisplace(baseState) && fillBlock != null)
+        else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
         {
             worldObj.setBlockState(basePos, fillBlock.getDefaultState()
                     .withProperty(NiceBlock.META, targetMeta));

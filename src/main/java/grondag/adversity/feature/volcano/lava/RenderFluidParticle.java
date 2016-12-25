@@ -20,12 +20,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderFluidParticle extends Render<EntityLavaParticle>
 {
     
-    private final float scale;
-
-    public RenderFluidParticle(RenderManager renderManagerIn, float scaleIn)
+      public RenderFluidParticle(RenderManager renderManagerIn)
     {
         super(renderManagerIn);
-        this.scale = scaleIn;
     }
 
     /**
@@ -37,7 +34,7 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
         this.bindEntityTexture(entity);
         GlStateManager.translate((float)x, (float)y, (float)z);
         GlStateManager.enableRescaleNormal();
-        GlStateManager.scale(this.scale, this.scale, this.scale);
+        GlStateManager.scale(entity.getScale(), entity.getScale(), entity.getScale());
         TextureAtlasSprite textureatlassprite = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(Items.FIRE_CHARGE);
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -84,7 +81,7 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
     }
 
     public static IRenderFactory<EntityLavaParticle> factory() {
-        return manager -> new RenderFluidParticle(manager, 1F);
+        return manager -> new RenderFluidParticle(manager);
     }
     
    

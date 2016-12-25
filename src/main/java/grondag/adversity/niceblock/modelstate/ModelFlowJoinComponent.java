@@ -141,35 +141,29 @@ public class ModelFlowJoinComponent extends ModelStateComponent<ModelFlowJoinCom
     private static int getFlowHeight(IBlockAccess world, MutableBlockPos pos)
     {
         pos.setY(pos.getY() + 2);;
-        
         IBlockState state = world.getBlockState(pos);
-        
-        if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return 2 * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
+        int h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return 2 * FlowHeightState.BLOCK_LEVELS_INT + h;
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
-
-        if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
-
-        pos.setY(pos.getY() - 1);
-        state = world.getBlockState(pos);
-
-        if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return IFlowBlock.getFlowHeightFromState(state);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return FlowHeightState.BLOCK_LEVELS_INT + h;
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
-
-        if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return -FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return h;
 
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return -FlowHeightState.BLOCK_LEVELS_INT + h;
 
-        if(IFlowBlock.isFlowHeight(state.getBlock()))
-            return -2 * FlowHeightState.BLOCK_LEVELS_INT + IFlowBlock.getFlowHeightFromState(state);
+        pos.setY(pos.getY() - 1);
+        state = world.getBlockState(pos);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return -2 * FlowHeightState.BLOCK_LEVELS_INT + h;
 
         return FlowHeightState.NO_BLOCK;
     }

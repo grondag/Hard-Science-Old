@@ -6,9 +6,11 @@ import java.util.List;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.simulator.Simulator;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -71,8 +73,16 @@ public class VolcanicLavaBlock extends FlowDynamicBlock
     {
         super.onBlockAdded(worldIn, pos, state);
         handleFallingBlocks(worldIn, pos, state);
+        Simulator.instance.getFluidTracker().registerPlacedLava(worldIn, pos, state);
     }
-
+    
+    @Override
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.breakBlock(worldIn, pos, state);
+        Simulator.instance.getFluidTracker().unregisterDestroyedLava(worldIn, pos, state);
+    }
+    
     private void handleFallingBlocks(World worldIn, BlockPos pos, IBlockState state)
     {
         if(worldIn.isRemote) return;

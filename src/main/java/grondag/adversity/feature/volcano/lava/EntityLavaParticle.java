@@ -3,7 +3,6 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.List;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.LavaManager;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
@@ -17,6 +16,9 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +30,6 @@ public class EntityLavaParticle extends Entity
 {
     private static int nextParticleID;
 
-    private float amount;
     private final int id;
 
 
@@ -36,6 +37,9 @@ public class EntityLavaParticle extends Entity
     private final LavaSimulator simulator;
 
     private static final String TAG_AMOUNT = "amt";
+    private float amount;
+    
+    private static final DataParameter<Float> SCALE = EntityDataManager.<Float>createKey(Entity.class, DataSerializers.FLOAT);
 
     @Override
     public int hashCode()
@@ -69,10 +73,21 @@ public class EntityLavaParticle extends Entity
         this.id = nextParticleID++;
         this.simulator = Simulator.instance.getFluidTracker();
         this.amount = amount;
+        float scale = getScaleFromAmount(amount);
+        this.dataManager.set(SCALE, Float.valueOf(scale));        
         this.forceSpawn = true;
-        this.setSize(1F, 1F);
+        //TODO: is this the right minimum diameter? 
+        float diameter = (float) Math.min(1, Math.max(0.1, scale * 0.75));
+        this.setSize(diameter, diameter);
     }
 
+    /**
+     * Is essentially the diameter of a sphere with volume = amount.
+     */
+    private float getScaleFromAmount(float amount)
+    {
+        return (float) (2 * Math.pow(amount * 3 * Math.PI / 4, 1/3));
+    }
 
     /**
      * Sets throwable heading based on an entity that's throwing it
@@ -117,18 +132,23 @@ public class EntityLavaParticle extends Entity
         this.prevRotationPitch = this.rotationPitch;
     }
 
-    public float getAmount()
+    public float getScale()
     {
-        return this.amount;
+        return this.dataManager.get(SCALE).floatValue();
     }
 
     @Override
     public void onUpdate()
     {
         //    Adversity.log.info("onUpdate id=" + this.id + " starting x,y,z=" + this.getPositionVector().toString());
-
+        
+        //TODO: remove
+        if(this.isDead) 
+            Adversity.log.info("Dead entity derp");
+        
         super.onUpdate();
 
+        
 
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
@@ -143,8 +163,9 @@ public class EntityLavaParticle extends Entity
         this.motionY *= 0.9800000190734863D;
         this.motionZ *= 0.9800000190734863D;
 
-        if (!this.worldObj.isRemote & !LavaManager.canDisplace(this.worldObj.getBlockState(this.getPosition().down())))
+        if (!this.worldObj.isRemote & !LavaTerrainHelper.canLavaDisplace(this.worldObj.getBlockState(this.getPosition().down())))
         {
+          Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.amount);
             this.simulator.addLava(this.getPosition(), this.amount);
 //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
             this.setDead();
@@ -299,7 +320,7 @@ public class EntityLavaParticle extends Entity
                 {
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
 
-                    if(!worldObj.isAirBlock(blockpos$pooledmutableblockpos) && LavaManager.canDisplace(worldObj.getBlockState(blockpos$pooledmutableblockpos)))
+                    if(!worldObj.isAirBlock(blockpos$pooledmutableblockpos) && LavaTerrainHelper.canLavaDisplace(worldObj.getBlockState(blockpos$pooledmutableblockpos)))
                     {
                         this.worldObj.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }
@@ -313,7 +334,8 @@ public class EntityLavaParticle extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.amount = compound.getFloat(TAG_AMOUNT);
+        this.amount = compound.getFloat(TAG_AMOUNT);     
+        this.dataManager.set(SCALE, Float.valueOf(this.getScaleFromAmount(this.amount)));
     }
 
     @Override
@@ -325,8 +347,7 @@ public class EntityLavaParticle extends Entity
     @Override
     protected void entityInit()
     {
-        // TODO Auto-generated method stub
-        
+        this.dataManager.register(SCALE, 1F);
     }
 
 }

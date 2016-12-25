@@ -40,7 +40,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         super(NodeRoots.VOLCANO_MANAGER.ordinal(), taskCounter);
     }
 
-    private NBTTagCompound nbtVolcanoManager = new NBTTagCompound();;
+    private NBTTagCompound nbtVolcanoManager = new NBTTagCompound();
         
     /** not thread-safe - to be called on world sever thread */
     public void updateChunkLoading()
@@ -183,7 +183,7 @@ public class VolcanoManager extends SimulationNodeRunnable
     public void readFromNBT(NBTTagCompound nbt)
     {
         
-        Adversity.log.info("readNBT volcanoManager");
+//        Adversity.log.info("readNBT volcanoManager");
         
         nbtVolcanoManager = nbt.getCompoundTag(NodeRoots.VOLCANO_MANAGER.getTagKey());
         NBTTagCompound nbtSubNodes;

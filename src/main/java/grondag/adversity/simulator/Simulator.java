@@ -56,7 +56,8 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	
     private VolcanoManager volcanoManager;
     
-    private LavaSimulator fluidTracker;
+    private LavaSimulator lavaSimulator
+    ;
     
 	private static ExecutorService executor;
     
@@ -99,13 +100,12 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
-	        
-	        //TODO add persistence and move to appropriate branch
-	        this.fluidTracker = new LavaSimulator(this.world);
+	        this.lavaSimulator = new LavaSimulator(this.world);
 	        
             if(PersistenceManager.loadNode(world, this))
             {
                 PersistenceManager.loadNode(world, this.volcanoManager);
+                PersistenceManager.loadNode(world, this.lavaSimulator);
             }
             else
     	    {
@@ -117,6 +117,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
     	        PersistenceManager.registerNode(world, this.volcanoManager);
+    	        PersistenceManager.registerNode(world, this.lavaSimulator);
 
     	    }
     		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -164,9 +165,9 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         {
 
             //TODO - quick hack, needs proper integration into sim
-            this.fluidTracker.doStep(1.0/20.0);
+            this.lavaSimulator.doStep(1.0/20.0);
             
-            this.fluidTracker.doBlockUpdates();
+            this.lavaSimulator.doBlockUpdates();
             
             int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
 
@@ -242,7 +243,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public int getCurrentSimTick() { return this.currentSimTick.get(); }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
-    public LavaSimulator getFluidTracker() { return this.fluidTracker; }
+    public LavaSimulator getFluidTracker() { return this.lavaSimulator; }
 
     // Frame execution logic
 

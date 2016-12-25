@@ -2,14 +2,13 @@ package grondag.adversity.feature.volcano;
 
 import java.util.HashMap;
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.RelativeBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 
@@ -182,36 +181,6 @@ public class LavaManager extends HashMap<BlockPos, LavaManager.LavaFlow>
         return result;
     }
 
-    public static boolean canDisplace(IBlockState state)
-    {
-        Material material = state.getMaterial();
-
-        if(material == Material.AIR) return true;
-        if (material == Material.CLAY) return false;
-        if (material == Material.DRAGON_EGG ) return false;
-        if (material == Material.GROUND ) return false;
-        if (material == Material.IRON ) return false;
-        if (material == Material.SAND ) return false;
-        if (material == Material.PORTAL ) return false;
-        if (material == Material.ROCK ) return false;
-        if (material == Material.ANVIL ) return false;
-        if (material == Material.GRASS ) return false;
-
-        Block block = state.getBlock();
-        
-        //can only displace core lava at top
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-        {
-           return false;
-        }
-
-        if (IFlowBlock.isFlowFiller(block)) return true;
-
-
-        // Volcanic lava don't give no shits about your stuff.
-        return true;        
-    };
-    
     private static int computeNominalVolume(BlockPos pos, BlockPos origin)
     {
         return Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - 2 * (int) Math.sqrt(Useful.squared(pos.getX() - origin.getX()) 
@@ -294,7 +263,7 @@ public class LavaManager extends HashMap<BlockPos, LavaManager.LavaFlow>
                     return this.isSource ? this.flowLevel : startingLevel - amount;
                 }
                 
-                if(canDisplace(volcano.getWorld().getBlockState(downPos)))
+                if(LavaTerrainHelper.canLavaDisplace(volcano.getWorld().getBlockState(downPos)))
                 {
                     LavaManager.this.addNewFlow(downPos, this.origin, availableAmount);
                     if(this.isSource) didAnySourceBlockDonate = true;
@@ -375,7 +344,7 @@ public class LavaManager extends HashMap<BlockPos, LavaManager.LavaFlow>
 ;
                         }
                     }
-                    else if(canDisplace(volcano.getWorld().getBlockState(sidePos)))
+                    else if(LavaTerrainHelper.canLavaDisplace(volcano.getWorld().getBlockState(sidePos)))
                     {
                         int newVolume = computeNominalVolume(sidePos, this.origin);
                         volume[i] = newVolume;

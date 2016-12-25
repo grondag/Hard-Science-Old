@@ -1,32 +1,38 @@
 package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.LavaManager;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.Useful.CircleFillCallBack;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.IFlowBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TerrainHelper
+public class LavaTerrainHelper
 {
 
     private final World world;
     private final ClosestRiseCallBack riseCallBack;
     private final ClosestFallCallBack fallCallBack;
 
-    public TerrainHelper(World world)
+    public LavaTerrainHelper(World world)
     {
         this.world = world;
         this.riseCallBack = new ClosestRiseCallBack();
         this.fallCallBack = new ClosestFallCallBack();
     }
 
+    /**
+     * Returns true if space already contains lava or could contain lava.
+     * IOW, like canLavaDisplace except returns true if contains lava height block.
+     */
     public boolean isLavaSpace(IBlockState state)
     {
-        return state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || LavaManager.canDisplace(state);
+        return state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || LavaTerrainHelper.canLavaDisplace(state);
         
     }
     
@@ -186,6 +192,41 @@ public class TerrainHelper
                 //        down in range, no up = max(1, .5 + (dist - 1) * .1)
         //        up and down in range = 1.5 - (up dist / (combined dist - 1))
 
+    }
+
+    public static boolean canLavaDisplace(IBlockState state)
+    {
+        //TODO: make material list configurable
+        
+        Material material = state.getMaterial();
+    
+        if(material == Material.AIR) return true;
+        if (material == Material.CLAY) return false;
+        if (material == Material.DRAGON_EGG ) return false;
+        if (material == Material.GROUND ) return false;
+        if (material == Material.IRON ) return false;
+        if (material == Material.SAND ) return false;
+        if (material == Material.PORTAL ) return false;
+        if (material == Material.ROCK ) return false;
+        if (material == Material.ANVIL ) return false;
+        if (material == Material.GRASS ) return false;
+        
+        //TODO: remove, is for testing
+        if (material == Material.GLASS) return false;
+    
+        Block block = state.getBlock();
+        
+        //can only displace core lava at top
+        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        {
+           return false;
+        }
+    
+        if (IFlowBlock.isFlowFiller(block)) return true;
+    
+    
+        // Volcanic lava don't give no shits about your stuff.
+        return true;        
     }
 
 
