@@ -74,9 +74,9 @@ public class LavaSimulator extends SimulationNode
         this.terrainHelper = new LavaTerrainHelper(world);
     }
     
-    public void doStep(double seconds)
+    
+    public void doTick()
     {
-
         if(--ticksUntilNextValidation == 0)
         {
 //            Adversity.log.info("LavaSim doStep validatingAllCells, cell count=" + this.allCells.size() );
@@ -90,6 +90,34 @@ public class LavaSimulator extends SimulationNode
 //        }
 //      
         
+        this.doStep(0.25/20.0);
+        this.doStep(0.25/20.0);
+        this.doStep(0.25/20.0);
+        this.doStep(0.25/20.0);
+        
+        this.doBlockUpdates();
+        
+        if(--ticksUntilCacheCleanup == 0)
+        {
+//            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
+            cleanCellCache();
+            ticksUntilCacheCleanup = CACHE_TICKS;
+            Adversity.log.info("LavaSim doStep cleanCellCache, cell ending count=" + this.allCells.size() );
+            
+//            this.allCells.values().forEach(cell -> {Adversity.log.info("hash=" + cell.hashCode() + "pos=" + cell.pos.toString() + " level=" + cell.getCurrentLevel());});
+//            this.connections.values().forEach(connection -> {Adversity.log.info("firstHash=" + connection.firstCell.hashCode() + " firstPos=" + connection.firstCell.pos.toString() + " firstLevel=" + connection.firstCell.getCurrentLevel() + "secondHash=" + connection.secondCell.hashCode() + " secondPos=" + connection.secondCell.pos.toString() + " secondLevel=" + connection.secondCell.getCurrentLevel());});
+
+            float totalFluid = 0;
+            for(LavaCell cell : cellsWithFluid.values())
+            {
+                totalFluid += cell.getCurrentLevel();
+            }
+            Adversity.log.info("Total fluid = " + totalFluid);
+        }
+    }
+    
+    public void doStep(double seconds)
+    {
         this.processNewConnectionRequests();
         
         if(this.connections.size() > 0)
@@ -117,39 +145,7 @@ public class LavaSimulator extends SimulationNode
 
         }
         
-//        if(updatedCells.size() > 0)
-//        {
-//            Adversity.log.info("LavaSim updatedCells, cell count=" + updatedCells.size() );
-//            
-//            for(LavaCell cell : this.updatedCells)
-//            {
-//                cell.applyUpdates(this);
-//            }
-//            
-//            this.updatedCells.clear();
-//            
-//            this.setSaveDirty(true);
-//        }
-        
         //TODO: handle particles with connection-oriented model
-        
-        if(--ticksUntilCacheCleanup == 0)
-        {
-//            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
-            cleanCellCache();
-            ticksUntilCacheCleanup = CACHE_TICKS;
-            Adversity.log.info("LavaSim doStep cleanCellCache, cell ending count=" + this.allCells.size() );
-            
-//            this.allCells.values().forEach(cell -> {Adversity.log.info("hash=" + cell.hashCode() + "pos=" + cell.pos.toString() + " level=" + cell.getCurrentLevel());});
-//            this.connections.values().forEach(connection -> {Adversity.log.info("firstHash=" + connection.firstCell.hashCode() + " firstPos=" + connection.firstCell.pos.toString() + " firstLevel=" + connection.firstCell.getCurrentLevel() + "secondHash=" + connection.secondCell.hashCode() + " secondPos=" + connection.secondCell.pos.toString() + " secondLevel=" + connection.secondCell.getCurrentLevel());});
-
-            float totalFluid = 0;
-            for(LavaCell cell : cellsWithFluid.values())
-            {
-                totalFluid += cell.getCurrentLevel();
-            }
-            Adversity.log.info("Total fluid = " + totalFluid);
-        }
         
     }
     
@@ -253,12 +249,12 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("fluid status retain");
             if(!cellsWithFluid.containsKey(cell.pos))
             {
-                cell.retain();
+                cell.retain("updateFluidStatus self");
                 this.cellsWithFluid.put(cell.pos, cell);
                 for(EnumFacing face : EnumFacing.VALUES)
                 {
                     LavaCell other = cell.getNeighbor(this, face);
-                    other.retain();
+                    other.retain("updateFluidStatus " + face.toString() + " from " + this.hashCode());
                     if(!other.isBarrier())
                     {
                         this.requestNewConnection(cell.pos, other.pos);
@@ -276,11 +272,11 @@ public class LavaSimulator extends SimulationNode
             if(cellsWithFluid.containsKey(cell.pos))
             {
                 cellsWithFluid.remove(cell.pos);
-                cell.release();
+                cell.release("updateFluidStatus self");
                 for(EnumFacing face : EnumFacing.VALUES)
                 {
                     LavaCell other = cell.getNeighbor(this, face);
-                    other.release();
+                    other.release("updateFluidStatus " + face.toString() + " from " + this.hashCode());
                 }
             }
             else
@@ -391,9 +387,12 @@ public class LavaSimulator extends SimulationNode
             
             LavaBlockUpdate update = blockUpdates.poll();       
             while(update != null)
-            {   if(update.level == 0 && world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+            {   if(update.level == 0)
                 {
-                    world.setBlockToAir(update.pos);
+                    if(world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                    {
+                        world.setBlockToAir(update.pos);
+                    }
                 }
                 else
                 {

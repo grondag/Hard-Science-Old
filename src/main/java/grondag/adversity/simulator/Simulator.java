@@ -165,9 +165,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         {
 
             //TODO - quick hack, needs proper integration into sim
-            this.lavaSimulator.doStep(1.0/20.0);
-            
-            this.lavaSimulator.doBlockUpdates();
+             this.lavaSimulator.doTick();
             
             int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
 

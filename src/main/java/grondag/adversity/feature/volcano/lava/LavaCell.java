@@ -457,7 +457,10 @@ public class LavaCell
      */
     public void changeLevel(LavaSimulator tracker, float amount, boolean notifySimulator)
     {
-//        Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
+        
+        if(this.id == 44)
+                    Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
+        
         if(amount != 0)
         {
             this.delta += amount;
@@ -676,10 +679,13 @@ public class LavaCell
     private static int retainCallCount = 0;
     private static int releaseCallCount = 0;
     private static long lastUpdateNanoTime = System.nanoTime();
+    private StringBuilder builder = new StringBuilder();
     
-    public void retain()
+    public void retain(String desc)
     {
 
+        builder.append("retain " + desc + System.lineSeparator());
+        
         //TODO: remove
         if(System.nanoTime() - lastUpdateNanoTime >= 10000000000L)
         {
@@ -695,15 +701,20 @@ public class LavaCell
         this.referenceCount++;
     }
     
-    public void release()
+    public void release(String desc)
     {
+        builder.append("release " + desc + System.lineSeparator());
+        
         releaseCallCount++;
         
 //        Adversity.log.info("release id=" + this.id);
         this.referenceCount--;
         
         if (this.referenceCount < 0) 
+        {
             Adversity.log.info("negative reference count " + this.referenceCount + " for cell id=" + this.id);
+            Adversity.log.info(builder.toString());
+        }
     }
     
     public boolean isRetained()
