@@ -3,7 +3,11 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -13,11 +17,13 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public class LavaSimCell
+public class LavaCell
 {
     private float currentLevel = 0; // 1.0 is one full block of fluid at surface pressure
     
     private static int nextCellID = 0;
+    
+    private byte referenceCount = 0;
     
     /** 
      * If this is at or near surface, level will not drop below this - to emulate surface tension/viscosity.
@@ -38,9 +44,7 @@ public class LavaSimCell
     public final BlockPos pos;
     
     private final int id;
-    
-    private LavaSimCell[] neighbors = new LavaSimCell[EnumFacing.VALUES.length];
-    
+
     private final static float PRESSURE_FACTOR = 1.05F;
 //    private final static float PRESSURE_FACTOR_INVERSE = 1/1.05F;
     
@@ -49,7 +53,7 @@ public class LavaSimCell
     
     private boolean isBarrier;
     
-    private boolean isDeleted;
+//    private boolean isDeleted;
     
     @Override 
     public int hashCode()
@@ -60,7 +64,7 @@ public class LavaSimCell
     /**
      * Creates a lava cell without any notification or addition to collections.
      */
-    public LavaSimCell(LavaSimulator tracker, BlockPos pos)
+    public LavaCell(LavaSimulator tracker, BlockPos pos)
     {
      this(tracker, pos, 0);
     }
@@ -68,7 +72,7 @@ public class LavaSimCell
     /**
      * Creates a lava cell without any notification or addition to collections.
      */
-    public LavaSimCell(LavaSimulator tracker, BlockPos pos, float level)
+    public LavaCell(LavaSimulator tracker, BlockPos pos, float level)
     {
         this.pos = pos;
         this.currentLevel = level;
@@ -76,8 +80,6 @@ public class LavaSimCell
         this.id = nextCellID++;
         
         if(tracker == null || pos == null) return;
-        
-        this.validate(tracker, true);
     }
     
 //    /**
@@ -89,15 +91,12 @@ public class LavaSimCell
 //        return this.retainedLevel > 0 && !tracker.terrainHelper.isLavaSpace(tracker.world.getBlockState(pos.down()));
 //    }
     
-    private LavaSimCell getNeighbor(LavaSimulator tracker, EnumFacing face)
+    protected LavaCell getNeighbor(LavaSimulator tracker, EnumFacing face)
     {  
-        LavaSimCell result = this.neighbors[face.ordinal()];
-        if(result == null || result.isDeleted)
-        {
-            result = tracker.getCell(pos.add(face.getDirectionVec()));
-            this.neighbors[face.ordinal()] = result;
-        }
-        return result;
+        //TODO: performance?  
+        //Suspect DOWN and UP are most accessed - could store cells in 256-tall vertical arrays within an x,z hash table
+        //Vertical access would then be very fast without need to cache references
+        return tracker.getCell(pos.add(face.getDirectionVec()));
     }
     
     public void doStep(LavaSimulator tracker, double seconds)
@@ -113,13 +112,13 @@ public class LavaSimCell
         
         if(available <= 0) return;
         
-        Adversity.log.info("LavaSimCell doStep id=" + this.id + " w/ level=" + this.currentLevel + " @" + this.pos.toString());
+//        Adversity.log.info("LavaSimCell doStep id=" + this.id + " w/ level=" + this.currentLevel + " @" + this.pos.toString());
 
         //fall down if possible
-        LavaSimCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
+        LavaCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
         if(down.canAcceptFluidParticles(tracker))
         {
-            Adversity.log.info("LavaSimCell fall down id=" + this.id + " amount=" + available + " @" + this.pos.toString());
+//            Adversity.log.info("LavaSimCell fall down id=" + this.id + " amount=" + available + " @" + this.pos.toString());
             tracker.world.spawnEntityInWorld(new EntityLavaParticle(tracker.world, this.currentLevel, 
                     new Vec3d(this.pos.getX() + 0.5, this.pos.getY() - 0.1, this.pos.getZ() + 0.5), Vec3d.ZERO));
             this.changeLevel(tracker, -available);
@@ -129,7 +128,7 @@ public class LavaSimCell
         //flow down if possible
         
         //get pressure from cell above
-        LavaSimCell up = this.getNeighbor(tracker, EnumFacing.UP);
+        LavaCell up = this.getNeighbor(tracker, EnumFacing.UP);
         float pressureFromAbove = up.getDownwardPressure();
                             
         //output down if vertical pressure is sufficient
@@ -143,20 +142,20 @@ public class LavaSimCell
             this.changeLevel(tracker, -amount);
             down.changeLevel(tracker, amount);
             
-            Adversity.log.info("LavaSimCell flow down id=" + this.id + " verticalPressure=" + pressureFromAbove + " amount=" + amount + " @" + this.pos.toString());
+//            Adversity.log.info("LavaSimCell flow down id=" + this.id + " verticalPressure=" + pressureFromAbove + " amount=" + amount + " @" + this.pos.toString());
         }
         
         if(available < MIN_FLOW) return;
 
-        LavaSimCell east = this.getNeighbor(tracker, EnumFacing.EAST);
-        LavaSimCell west = this.getNeighbor(tracker, EnumFacing.WEST);
-        LavaSimCell north = this.getNeighbor(tracker, EnumFacing.NORTH);
-        LavaSimCell south = this.getNeighbor(tracker, EnumFacing.SOUTH);
+        LavaCell east = this.getNeighbor(tracker, EnumFacing.EAST);
+        LavaCell west = this.getNeighbor(tracker, EnumFacing.WEST);
+        LavaCell north = this.getNeighbor(tracker, EnumFacing.NORTH);
+        LavaCell south = this.getNeighbor(tracker, EnumFacing.SOUTH);
         
         // NOTE: THESE GET REUSED WITHOUT REINITIALIZATION BELOW
         // Is okay because will be empty if we get there
         // because if any side can accept particles we are done.
-        LavaSimCell[] sides = new LavaSimCell[4];
+        LavaCell[] sides = new LavaCell[4];
         int sideCount = 0;
         
         //fall to sides if possible
@@ -174,7 +173,7 @@ public class LavaSimCell
                             new Vec3d(sides[i].pos.getX() + 0.5, sides[i].pos.getY() + 0.1, sides[i].pos.getZ() + 0.5), Vec3d.ZERO));
                 }
                 
-                Adversity.log.info("LavaSimCell particle(s) sideways id=" + this.id + " amount=" + available + " @" + this.pos.toString());
+//                Adversity.log.info("LavaSimCell particle(s) sideways id=" + this.id + " amount=" + available + " @" + this.pos.toString());
 
                 this.changeLevel(tracker, -available);
                 return;
@@ -224,7 +223,7 @@ public class LavaSimCell
                 {
                     if(sides[0].currentLevel > sides[1].currentLevel)
                     {
-                        LavaSimCell temp = sides[0];
+                        LavaCell temp = sides[0];
                         sides[0] = sides[1];
                         sides[1] = temp;
                     }
@@ -264,7 +263,7 @@ public class LavaSimCell
                     sides[i].changeLevel(tracker, donation);
                     available -= donation;
                     amountDonated += donation;
-                    Adversity.log.info("LavaSimCell flow sideways FromID=" + this.id + " toID=" + sides[i].id + " verticalPressure=" + pressureFromAbove + " amount=" + amountDonated + " @" + this.pos.toString());
+//                    Adversity.log.info("LavaSimCell flow sideways FromID=" + this.id + " toID=" + sides[i].id + " verticalPressure=" + pressureFromAbove + " amount=" + amountDonated + " @" + this.pos.toString());
                 }
             }
         }
@@ -277,7 +276,7 @@ public class LavaSimCell
             //prevent creating new fluid blocks above with tiny amounts of fluid
             //TODO: make threshold configurable
             if(up.currentLevel == 0 && amount < 0.001) return;
-            Adversity.log.info("equalizing up from=" + this.id + " to=" + up.id + "forecastedLevelB4Up=" + (this.currentLevel - amountDonated) +" amount=" + amount + " verticalPressure=" + pressureFromAbove);
+//            Adversity.log.info("equalizing up from=" + this.id + " to=" + up.id + "forecastedLevelB4Up=" + (this.currentLevel - amountDonated) +" amount=" + amount + " verticalPressure=" + pressureFromAbove);
             this.changeLevel(tracker, -amount);
             up.changeLevel(tracker, amount);
             available -= amount;
@@ -309,9 +308,9 @@ public class LavaSimCell
     /**
      * Optimized sort for three element array of cells
      */
-    private void sort3Cells(LavaSimCell[] cells)
+    private void sort3Cells(LavaCell[] cells)
     {
-        LavaSimCell temp;
+        LavaCell temp;
         
         if (cells[0].currentLevel < cells[1].currentLevel)
         {
@@ -362,9 +361,9 @@ public class LavaSimCell
     /**
      * Optimized sort for four element array of cells
      */
-    private void sort4Cells(LavaSimCell[] cells)
+    private void sort4Cells(LavaCell[] cells)
     {
-        LavaSimCell low1, high1, low2, high2, middle1, middle2, lowest, highest;
+        LavaCell low1, high1, low2, high2, middle1, middle2, lowest, highest;
         
         if (cells[0].currentLevel < cells[1].currentLevel)
         {
@@ -435,7 +434,7 @@ public class LavaSimCell
         
         if (this.currentLevel > 0) return true;
         
-        LavaSimCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
+        LavaCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
         return down.isBarrier || down.currentLevel >= 1;
     }
     
@@ -450,17 +449,25 @@ public class LavaSimCell
     
     public void changeLevel(LavaSimulator tracker, float amount)
     {
-        Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
+        this.changeLevel(tracker, amount, true);
+    }
+    
+    /**
+     * Set notifySimulator = false if going to call applyUpdate directly
+     */
+    public void changeLevel(LavaSimulator tracker, float amount, boolean notifySimulator)
+    {
+//        Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
         if(amount != 0)
         {
             this.delta += amount;
-            tracker.notifyCellChange(this);
+            if(notifySimulator) tracker.notifyCellChange(this);
         }
     }
     
     public void applyUpdates(LavaSimulator tracker)
     {
-        Adversity.log.info("LavaSimCell applyUpdates id=" + this.id + "w/ delta=" + this.delta + " @" + this.pos.toString());
+//        Adversity.log.info("LavaSimCell applyUpdates id=" + this.id + "w/ delta=" + this.delta + " @" + this.pos.toString());
         
         if(this.delta != 0)
         {
@@ -468,14 +475,20 @@ public class LavaSimCell
             
             if(this.currentLevel == 0 && this.delta > 0)
             {
-                tracker.cellsWithFluid.add(this);
+                tracker.updateFluidStatus(this, true);
             }
             
             this.currentLevel += delta;
             
-            if(this.currentLevel <= 0)
+            if(this.currentLevel < 0)
             {
-                tracker.cellsWithFluid.remove(this);
+                Adversity.log.info("Negative cell level detected: " + this.currentLevel + " cellID=" + this.id + " pos=" + this.pos.toString());
+                this.currentLevel = 0;
+            }
+            
+            if(this.currentLevel == 0)
+            {
+                tracker.updateFluidStatus(this, false);
             }
             
             if(wasDirty)
@@ -537,57 +550,69 @@ public class LavaSimCell
         return this.delta;
     }
     
-    public void markdeleted()
-    {
-        this.isDeleted = true;
-    }
+//    public void markdeleted()
+//    {
+//        this.isDeleted = true;
+//    }
     
     /**
      * Synchronizes cell with world state.
      * Updates retained level based on surrounding terrain if flag is set or if was previously a barrier cell.
-     * Updates tracker cellsWithFluid collection if appropriate.
+     * Updates simulator cellsWithFluid collection if appropriate.
      */
-    public void validate(LavaSimulator tracker, boolean updateRetainedLevel)
+    public void validate(LavaSimulator sim, boolean updateRetainedLevel)
     {
-        IBlockState myState = tracker.world.getBlockState(this.pos);
-        if(tracker.terrainHelper.isLavaSpace(myState))
+        IBlockState myState = sim.world.getBlockState(this.pos);
+        if(sim.terrainHelper.isLavaSpace(myState))
         {
             //Space can contain lava, so we should be non-barrier
             //and be either empty or have lava.
-            
-            if(this.isBarrier || updateRetainedLevel)
+
+            if(this.isBarrier)
             {
+                // If was a barrier, need to create connections with neighboring fluid cells
+                // May be redundant of requests made from applyUpdates below if we have fluid, but shouldn't matter.
+                updateRetainedLevel = true;
                 this.isBarrier = false;
-                
-                if(tracker.terrainHelper.isLavaSpace(tracker.world.getBlockState(pos.down())))
+                for(EnumFacing face : EnumFacing.VALUES)
                 {
-                    if(tracker.terrainHelper.isLavaSpace(tracker.world.getBlockState(pos.down().down())))
+                    LavaCell other = this.getNeighbor(sim, face);
+                    if(!other.isBarrier() && other.currentLevel > 0)
+                    {
+                        sim.requestNewConnection(this.pos, other.pos);
+                    }
+                }
+            }
+            
+           if(updateRetainedLevel) 
+           {
+                if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down())))
+                {
+                    if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down().down())))
                     {
                         //if two blocks below is also open/lava, then will have no retained level
                         this.retainedLevel = 0;
                     }
                     else
                     {
-                        //if two blocks below is a barrier, then will have a retained level
-                        //when the retained level below is > 1
-                        this.retainedLevel = Math.max(0, tracker.terrainHelper.computeIdealBaseFlowHeight(pos.down()) - 1F);
+                        // If two blocks below is a barrier, then will have a retained level
+                        // when the retained level below is > 1.
+                        // Clamp this to 1 so that laval can flow out of this block.
+                        this.retainedLevel = Math.max(0, sim.terrainHelper.computeIdealBaseFlowHeight(pos.down()) - 1F);
                     }
                 }
                 else
                 {
-                    this.retainedLevel = tracker.terrainHelper.computeIdealBaseFlowHeight(pos);
+                    this.retainedLevel = Math.min(1, sim.terrainHelper.computeIdealBaseFlowHeight(pos));
                 }
             }
             
-            int worldLevel = IFlowBlock.getFlowHeightFromState(tracker.world.getBlockState(this.pos));
+            // sim wins over world state
+            int worldLevel = IFlowBlock.getFlowHeightFromState(sim.world.getBlockState(this.pos));
             int myLevel = this.getVisibleLevel();
             if(worldLevel != myLevel)
             {
-                //update my level if it doesn't match the world
-                this.changeLevel(tracker, (worldLevel - myLevel) / FlowHeightState.BLOCK_LEVELS_FLOAT);
-                this.applyUpdates(tracker);
-                this.clearBlockUpdate();
-                tracker.setSaveDirty(true);
+                sim.dirtyCells.add(this);
             }
         }
         else
@@ -597,10 +622,10 @@ public class LavaSimCell
             {
                 if(this.currentLevel != 0)
                 {
-                    this.changeLevel(tracker, (-this.currentLevel));
-                    this.applyUpdates(tracker);
+                    this.changeLevel(sim, (-this.currentLevel), false);
+                    this.applyUpdates(sim);
                     this.clearBlockUpdate();
-                    tracker.setSaveDirty(true);
+                    sim.setSaveDirty(true);
                 }
                 this.isBarrier = true;
             }
@@ -608,32 +633,81 @@ public class LavaSimCell
    
     }
    
-    /**
-     * Removes all non-fluid blocks from neighbor cache
-     * Returns true if NO neighboring blocks contain fluid
-     * AND this block also contains no fluid. 
-     * If result is true, means this node can be safely 
-     * deleted from allCells cache if all cells are executing this method.
-     */
-    public boolean clearNeighborCache()
+//    public void addConnection(LavaCellConnection connection)
+//    {
+//        this.connections.add(connection);
+//    }
+//    
+//    public void removeConnection(LavaCellConnection connection)
+//    {
+//        this.connections.remove(connection);
+//    }
+//    
+//    public void clearConnections()
+//    {
+//        this.connections.clear();
+//    }
+//    
+//    public Set<LavaCellConnection> getConnections()
+//    {
+//        return Collections.<LavaCellConnection>unmodifiableSet(this.connections);
+//    }
+    
+    public float getRetainedLevel()
     {
-        boolean fluidFound = this.currentLevel > 0;
-        
-        for(int i = 0; i < 6; i++)
+        return this.retainedLevel;
+    }
+    
+    public boolean isBarrier()
+    {
+        return this.isBarrier;
+    }
+    
+    /**
+     * True if directly above a barrier or if cell below is full (level >= 1).
+    */
+    public boolean isSupported(LavaSimulator sim)
+    {
+        LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
+        return bottom.isBarrier || bottom.getCurrentLevel() >= 1;
+    }
+    
+    //TODO: remove
+    private static int retainCallCount = 0;
+    private static int releaseCallCount = 0;
+    private static long lastUpdateNanoTime = System.nanoTime();
+    
+    public void retain()
+    {
+
+        //TODO: remove
+        if(System.nanoTime() - lastUpdateNanoTime >= 10000000000L)
         {
-            if(this.neighbors[i] != null)
-            {
-                if(this.neighbors[i].currentLevel == 0)
-                {
-                    this.neighbors[i] = null;
-                }
-                else
-                {
-                    fluidFound = true;
-                }
-            }
+            Adversity.log.info("cell retains/sec=" + retainCallCount / (lastUpdateNanoTime/1000000000));
+            Adversity.log.info("cell release/sec=" + releaseCallCount / (lastUpdateNanoTime/1000000000));
+            retainCallCount = 0;
+            releaseCallCount = 0;
+            lastUpdateNanoTime = System.nanoTime();
         }
+        retainCallCount++;
         
-        return !fluidFound;
+//        Adversity.log.info("retain id=" + this.id);
+        this.referenceCount++;
+    }
+    
+    public void release()
+    {
+        releaseCallCount++;
+        
+//        Adversity.log.info("release id=" + this.id);
+        this.referenceCount--;
+        
+        if (this.referenceCount < 0) 
+            Adversity.log.info("negative reference count " + this.referenceCount + " for cell id=" + this.id);
+    }
+    
+    public boolean isRetained()
+    {
+        return this.referenceCount > 0;
     }
 }
