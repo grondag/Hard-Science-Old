@@ -196,8 +196,18 @@ public class LavaTerrainHelper
 
     public static boolean canLavaDisplace(IBlockState state)
     {
-        //TODO: make material list configurable
+        Block block = state.getBlock();
         
+        if (IFlowBlock.isFlowFiller(block)) return true;
+
+        //can only displace core lava at top
+        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        {
+            return false;
+        }
+        
+        //TODO: make material list configurable
+   
         Material material = state.getMaterial();
     
         if(material == Material.AIR) return true;
@@ -213,17 +223,7 @@ public class LavaTerrainHelper
         
         //TODO: remove, is for testing
         if (material == Material.GLASS) return false;
-    
-        Block block = state.getBlock();
-        
-        //can only displace core lava at top
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-        {
-           return false;
-        }
-    
-        if (IFlowBlock.isFlowFiller(block)) return true;
-    
+
     
         // Volcanic lava don't give no shits about your stuff.
         return true;        

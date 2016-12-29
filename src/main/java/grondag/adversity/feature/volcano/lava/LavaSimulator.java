@@ -32,11 +32,26 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+/**
+ * FIX/TEST
+ * Remove directional bias / try per-connection velocity
+ * 
+ * FEATURES
+ * Particles
+ * Per-connection flow limits
+ * Integer vs. FP quantization (trial)
+ * Cooling
+ * Performance / parallelism
+ * Handle multiple worlds
+ * Handle unloaded chunks
+ * Cleanup
+ */
 public class LavaSimulator extends SimulationNode
 {
     protected final World world;
     protected final LavaTerrainHelper terrainHelper;
 
+    private float totalFluidRegistered = 0;
     
     protected final HashMap<BlockPos, LavaCell> allCells = new HashMap<BlockPos, LavaCell>();
     private final HashSet<LavaCell> updatedCells = new HashSet<LavaCell>();
@@ -45,6 +60,9 @@ public class LavaSimulator extends SimulationNode
     private final TreeMap<CellConnectionPos, LavaCellConnection> connections = new TreeMap<CellConnectionPos, LavaCellConnection>();
     
     private final LinkedList<CellConnectionPos> newConnections = new LinkedList<CellConnectionPos>();
+    
+    /** Set true when doing block placements so we known not to register them as newly placed lava. */
+    private boolean itMe = false;
     
     //TODO: make config
     private static final int VALIDATION_TICKS = 20;
@@ -112,7 +130,7 @@ public class LavaSimulator extends SimulationNode
             {
                 totalFluid += cell.getCurrentLevel();
             }
-            Adversity.log.info("Total fluid = " + totalFluid);
+            Adversity.log.info("Total fluid in cells = " + totalFluid + "  Total registered fluid =" + totalFluidRegistered);
         }
     }
     
@@ -204,15 +222,21 @@ public class LavaSimulator extends SimulationNode
     /**
      * Update simulation from world when blocks are placed via creative mode or other methods.
      * Unfortunately, this will ALSO be called by our own block updates, 
-     * so ignores call if visible level already matches.
+     * so ignores call if we are currently placing blocks.
      */
     public void registerPlacedLava(World worldIn, BlockPos pos, IBlockState state)
     {
+        if(itMe) return;
+        
         LavaCell target = this.getCell(pos);
         int worldLevel = IFlowBlock.getFlowHeightFromState(state);
         if(target.getVisibleLevel() != worldLevel)
-        {
-            target.changeLevel(this, (worldLevel - target.getVisibleLevel()) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+        {           
+            float amt = (worldLevel / FlowHeightState.BLOCK_LEVELS_FLOAT) - target.getCurrentLevel();
+            if(amt != 1F || target.getDelta() != 0)
+                Adversity.log.info("boop");
+            totalFluidRegistered += amt;
+            target.changeLevel(this, amt);
             target.applyUpdates(this);
             target.clearBlockUpdate();
             this.setSaveDirty(true);
@@ -226,9 +250,12 @@ public class LavaSimulator extends SimulationNode
      */
     public void unregisterDestroyedLava(World worldIn, BlockPos pos, IBlockState state)
     {
+        if(itMe) return;
+        
         LavaCell target = this.getCell(pos);
         if(target.getCurrentLevel() > 0)
         {
+            totalFluidRegistered -= target.getCurrentLevel();
             target.changeLevel(this, - target.getCurrentLevel(), false);
             target.applyUpdates(this);
             target.clearBlockUpdate();
@@ -335,16 +362,16 @@ public class LavaSimulator extends SimulationNode
     {
         //TODO: prevent duplicate notification when there are multiple changes in a step?
         
-        Adversity.log.info("notifyCellChange cell=" + cell.hashCode());
+//        Adversity.log.info("notifyCellChange cell=" + cell.hashCode());
         if(cell.getDelta() == 0)
         {
             //was changed, and now no longer needs to be changed
             this.updatedCells.remove(cell);
-            Adversity.log.info("notifyCellChange cell removed");
+//            Adversity.log.info("notifyCellChange cell removed");
         }
         else
         {
-            Adversity.log.info("notifyCellChange cell added");
+//            Adversity.log.info("notifyCellChange cell added");
             this.updatedCells.add(cell);
         }
     }
@@ -384,28 +411,29 @@ public class LavaSimulator extends SimulationNode
 //        Adversity.log.info("LavaSim doBlockUpdates");
 
         Queue<LavaBlockUpdate> blockUpdates = getBlockUpdates();
-            
-            LavaBlockUpdate update = blockUpdates.poll();       
-            while(update != null)
-            {   if(update.level == 0)
+        
+        this.itMe = true;
+        LavaBlockUpdate update = blockUpdates.poll();       
+        while(update != null)
+        {   if(update.level == 0)
+            {
+                if(world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
                 {
-                    if(world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-                    {
-                        world.setBlockToAir(update.pos);
-                    }
+                    world.setBlockToAir(update.pos);
                 }
-                else
-                {
-                    this.world.setBlockState(update.pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
-                }
-                this.adjustmentList.add(update.pos);
-                update = blockUpdates.poll();
             }
-            
-            
-            //doBlockUpdates();
-            
-            doAdjustments();
+            else
+            {
+                this.world.setBlockState(update.pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+            }
+            this.adjustmentList.add(update.pos);
+            update = blockUpdates.poll();
+        }
+        this.itMe = false;
+        
+        //doBlockUpdates();
+        
+        doAdjustments();
     }
     
     private void doAdjustments()
@@ -559,6 +587,7 @@ public class LavaSimulator extends SimulationNode
         adjustmentList.clear();
         dirtyCells.clear();
         blockUpdates.clear();
+        totalFluidRegistered = 0;
         
         int[] saveData = nbt.getIntArray(TAG_SAVE_DATA);
         
@@ -572,14 +601,14 @@ public class LavaSimulator extends SimulationNode
         int i = 0;
         while(i < saveData.length)
         {
-            LavaCell cell = new LavaCell(this, new BlockPos(saveData[i++], saveData[i++], saveData[i++]), Float.intBitsToFloat(saveData[i++]));
+            LavaCell cell = this.getCell(new BlockPos(saveData[i++], saveData[i++], saveData[i++]));
             
             // protect against corrupt saves
-            if(cell.getCurrentLevel() > 0 && !this.cellsWithFluid.containsKey(cell.pos))
+            if(cell.getCurrentLevel() == 0)
             {
-                cell.validate(this, true);
-                this.allCells.put(cell.pos, cell);
-                this.updateFluidStatus(cell, true);
+                cell.changeLevel(this, Float.intBitsToFloat(saveData[i++]), false);
+                cell.applyUpdates(this);
+                this.totalFluidRegistered += cell.getCurrentLevel();
             }
         }
   

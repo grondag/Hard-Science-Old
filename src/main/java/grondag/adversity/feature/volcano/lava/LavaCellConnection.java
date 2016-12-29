@@ -28,6 +28,11 @@ public class LavaCellConnection
     public LavaCellConnection(LavaCell firstCell, LavaCell secondCell)
     {
 
+        
+        // TODO: remove
+        if((firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
+            Adversity.log.info("boop");
+        
         this.id = nextConnectionID++;
         
 //        Adversity.log.info("connection create");
@@ -201,6 +206,8 @@ public class LavaCellConnection
     public void doStep(LavaSimulator sim, double seconds)
     {
         // TODO: Particle output
+        
+        // TODO: remove
         if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
             Adversity.log.info("boop");
 
@@ -245,6 +252,12 @@ public class LavaCellConnection
      */
     public void releaseCells()
     {
+        
+        // TODO: remove
+        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
+            Adversity.log.info("boop");
+        
+        
 //        Adversity.log.info("connection release");
         this.firstCell.release("connection");
         this.secondCell.release("connection");

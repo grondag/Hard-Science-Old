@@ -77,6 +77,10 @@ public class LavaCell
         this.pos = pos;
         this.currentLevel = level;
                 
+        
+        if(pos.getX() == 70 && pos.getY() == 79 && pos.getZ() == 110)
+            Adversity.log.info("boop");
+        
         this.id = nextCellID++;
         
         if(tracker == null || pos == null) return;
@@ -565,6 +569,14 @@ public class LavaCell
      */
     public void validate(LavaSimulator sim, boolean updateRetainedLevel)
     {
+        
+        //TODO: remove
+        if(pos.getX() == 70 && pos.getY() == 78 && pos.getZ() == 110)
+            Adversity.log.info("boop");
+        
+        if(pos.getX() == 70 && pos.getY() == 79 && pos.getZ() == 110)
+            Adversity.log.info("boop");
+        
         IBlockState myState = sim.world.getBlockState(this.pos);
         if(sim.terrainHelper.isLavaSpace(myState))
         {

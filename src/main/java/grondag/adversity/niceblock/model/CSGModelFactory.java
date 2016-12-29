@@ -60,7 +60,11 @@ public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 //        result = result.union(delta);
         
         // cylinder/cone test
-        result = new CSGShape(QuadFactory.makeCylinder(new Vec3d(.5, 0, .5), new Vec3d(.5, 1, .5), 0.5, 0, template));
+//        result = new CSGShape(QuadFactory.makeCylinder(new Vec3d(.5, 0, .5), new Vec3d(.5, 1, .5), 0.5, 0, template));
+        
+        // icosahedron (sphere) test
+      result = new CSGShape(QuadFactory.makeIcosahedron(new Vec3d(.5, .5, .5), 0.5, template));
+
         
 //        CSGShape quadsA = new CSGShape(QuadFactory.makeBox(new AxisAlignedBB(0, 0.4, 0.4, 1.0, 0.6, 0.6), template));
 //        template.color = colorMap.getColorMap(EnumColorMap.BORDER);

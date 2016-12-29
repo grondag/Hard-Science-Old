@@ -206,6 +206,92 @@ public class QuadFactory
             return axisX.scale(Math.cos(angle)).add(axisY.scale(Math.sin(angle)));
     }
     
+    
+    /**
+     * Makes a regular icosahedron, which is a very close approximation to a sphere for most purposes.
+     * Loosely based on http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
+     */
+    public static List<RawQuad> makeIcosahedron(Vec3d center, double radius, RawQuad template) 
+    {
+        /** vertex scale */
+        double s = radius  / (2 * Math.sin(2 * Math.PI / 5));
+        
+        Vec3d[] vertexes = new Vec3d[12];
+        
+        // create 12 vertices of a icosahedron
+        double t = s * (1.0 + Math.sqrt(5.0)) / 2.0;
+        int vi = 0;
+        
+        vertexes[vi++] = new Vec3d(-s,  t,  0).add(center);
+        vertexes[vi++] = new Vec3d( s,  t,  0).add(center);
+        vertexes[vi++] = new Vec3d(-s, -t,  0).add(center);
+        vertexes[vi++] = new Vec3d( s, -t,  0).add(center);
+        
+        vertexes[vi++] = new Vec3d( 0, -s,  t).add(center);
+        vertexes[vi++] = new Vec3d( 0,  s,  t).add(center);
+        vertexes[vi++] = new Vec3d( 0, -s, -t).add(center);
+        vertexes[vi++] = new Vec3d( 0,  s, -t).add(center);
+        
+        vertexes[vi++] = new Vec3d( t,  0, -s).add(center);
+        vertexes[vi++] = new Vec3d( t,  0,  s).add(center);
+        vertexes[vi++] = new Vec3d(-t,  0, -s).add(center);
+        vertexes[vi++] = new Vec3d(-t,  0,  s).add(center);
+
+        Vec3d[] normals = new Vec3d[12];
+        for(int i = 0; i < 12; i++)
+        {
+            normals[i] = vertexes[i].subtract(center).normalize();
+        }
+        
+        // create 20 triangles of the icosahedron
+        List<RawQuad> results = new ArrayList<RawQuad>(20);
+
+
+        // 5 faces around point 0
+        results.add(makeIcosahedronFace(0, 11, 5, vertexes, normals, template));
+        results.add(makeIcosahedronFace(0, 5, 1, vertexes, normals, template));
+        results.add(makeIcosahedronFace(0, 1, 7, vertexes, normals, template));
+        results.add(makeIcosahedronFace(0, 7, 10, vertexes, normals, template));
+        results.add(makeIcosahedronFace(0, 10, 11, vertexes, normals, template));
+
+        // 5 adjacent faces 
+        results.add(makeIcosahedronFace(1, 5, 9, vertexes, normals, template));
+        results.add(makeIcosahedronFace(5, 11, 4, vertexes, normals, template));
+        results.add(makeIcosahedronFace(11, 10, 2, vertexes, normals, template));
+        results.add(makeIcosahedronFace(10, 7, 6, vertexes, normals, template));
+        results.add(makeIcosahedronFace(7, 1, 8, vertexes, normals, template));
+
+        // 5 faces around point 3
+        results.add(makeIcosahedronFace(3, 9, 4, vertexes, normals, template));
+        results.add(makeIcosahedronFace(3, 4, 2, vertexes, normals, template));
+        results.add(makeIcosahedronFace(3, 2, 6, vertexes, normals, template));
+        results.add(makeIcosahedronFace(3, 6, 8, vertexes, normals, template));
+        results.add(makeIcosahedronFace(3, 8, 9, vertexes, normals, template));
+
+        // 5 adjacent faces 
+        results.add(makeIcosahedronFace(4, 9, 5, vertexes, normals, template));
+        results.add(makeIcosahedronFace(2, 4, 11, vertexes, normals, template));
+        results.add(makeIcosahedronFace(6, 2, 10, vertexes, normals, template));
+        results.add(makeIcosahedronFace(8, 6, 7, vertexes, normals, template));
+        results.add(makeIcosahedronFace(9, 8, 1, vertexes, normals, template));
+  
+        return results;
+    }
+    
+    private static RawQuad makeIcosahedronFace(int p1, int p2, int p3, Vec3d[] points, Vec3d[] normals, RawQuad template)
+    {
+        RawQuad newQuad = new RawQuad(template, 3);
+        
+        newQuad.setVertex(0, new Vertex(points[p1], 0, 0, template.color, normals[p1]));
+        newQuad.setVertex(1, new Vertex(points[p2], 1, 0, template.color, normals[p2]));
+        newQuad.setVertex(2, new Vertex(points[p3], 1, 1, template.color, normals[p3]));
+
+        // used for testing
+//        newQuad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000);
+        
+        return newQuad;
+    }
+    
     //    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)
     //    {
     //
