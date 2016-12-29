@@ -35,10 +35,10 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Remove directional bias / try per-connection velocity
+ * Per-connection flow limits
  * 
  * FEATURES
  * Particles
- * Per-connection flow limits
  * Integer vs. FP quantization (trial)
  * Cooling
  * Performance / parallelism
@@ -63,6 +63,8 @@ public class LavaSimulator extends SimulationNode
     
     /** Set true when doing block placements so we known not to register them as newly placed lava. */
     private boolean itMe = false;
+    
+    private int tickIndex = 0;
     
     //TODO: make config
     private static final int VALIDATION_TICKS = 20;
@@ -95,6 +97,8 @@ public class LavaSimulator extends SimulationNode
     
     public void doTick()
     {
+        this.tickIndex++;
+        
         if(--ticksUntilNextValidation == 0)
         {
 //            Adversity.log.info("LavaSim doStep validatingAllCells, cell count=" + this.allCells.size() );
@@ -106,12 +110,13 @@ public class LavaSimulator extends SimulationNode
 //        {
 //            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
 //        }
-//      
+      
+        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
         
-        this.doStep(0.25/20.0);
-        this.doStep(0.25/20.0);
-        this.doStep(0.25/20.0);
-        this.doStep(0.25/20.0);
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
         
         this.doBlockUpdates();
         
@@ -134,7 +139,7 @@ public class LavaSimulator extends SimulationNode
         }
     }
     
-    public void doStep(double seconds)
+    public void doStep()
     {
         this.processNewConnectionRequests();
         
@@ -157,7 +162,7 @@ public class LavaSimulator extends SimulationNode
                 }
                 else
                 {
-                    connection.doStep(this, seconds);
+                    connection.doStep(this);
                 }
             }
 
@@ -632,5 +637,10 @@ public class LavaSimulator extends SimulationNode
         
         nbt.setIntArray(TAG_SAVE_DATA, saveData);
         
+    }
+    
+    public int getTickIndex()
+    {
+        return this.tickIndex;
     }
 }

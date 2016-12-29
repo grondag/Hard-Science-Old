@@ -14,6 +14,11 @@ public class LavaCellConnection
     
     public final int id;
     
+    private float flowThisTick = 0;
+    private int lastFlowTick = 0;
+    
+    private float currentFlowRate = 0;
+    
     private final static float PRESSURE_PER_LEVEL = 0.05F;
     private final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
     
@@ -203,26 +208,35 @@ public class LavaCellConnection
 
     }
     
-    public void doStep(LavaSimulator sim, double seconds)
+    public void updateFlowRate(LavaSimulator sim)
+    {
+        // barriers don't need processing - TODO: may not be needed because checked in connection processing loop
+        if(this.firstCell.isBarrier() || this.secondCell.isBarrier())
+        {
+            this.currentFlowRate = 0;
+        }
+        else            
+        {
+            this.currentFlowRate = this.isVertical ? this.getVerticalFlow(sim) : this.getHorizontalFlow(sim);            
+        }
+    }
+    
+    public void doStep(LavaSimulator sim)
     {
         // TODO: Particle output
         
         // TODO: remove
-        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
-            Adversity.log.info("boop");
-
-        // barriers don't need processing - TODO: may not be needed because checked in connection processing loop
-        if(this.firstCell.isBarrier() || this.secondCell.isBarrier()) return;
+//        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
+//            Adversity.log.info("boop");
         
-        // compute flow based on pressure differential
-        float flow = this.isVertical ? this.getVerticalFlow(sim) : this.getHorizontalFlow(sim);
+        if (this.currentFlowRate == 0) return;
         
-        if (flow == 0) return;
+        float flow = this.currentFlowRate;
         
         // restrict flow amount by retained height and maximum flow rate
         
         // TODO: make configurable
-        float bound = 0.05F;
+        float bound = 0.05F - this.getFlowThisTick(sim);
         
         //TODO: clamp retained level at 1.0 for lower cell?
         
@@ -237,8 +251,23 @@ public class LavaCellConnection
             flow = Math.max(flow, -bound);
         }
         
+        this.flowAcross(sim, flow);
+    }
+    
+    public void flowAcross(LavaSimulator sim, float flow)
+    {
         // shouldn't be needed but was getting zeros here - maybe floating-point weirdness?
         if(flow ==0) return;
+        
+        if(sim.getTickIndex() != this.lastFlowTick)
+        {
+            lastFlowTick = sim.getTickIndex();
+            this.flowThisTick = flow;
+        }
+        else
+        {
+            this.flowThisTick += flow;
+        }
         
         this.firstCell.changeLevel(sim, -flow, false);
         this.secondCell.changeLevel(sim, flow, false);
@@ -247,6 +276,11 @@ public class LavaCellConnection
         sim.setSaveDirty(true);
     }
     
+    public float getFlowThisTick(LavaSimulator sim)
+    {
+        return sim.getTickIndex() == this.lastFlowTick ? this.flowThisTick : 0;
+    }
+
     /**
      * Call when removing this connection so that cell references can be removed if appropriate.
      */
