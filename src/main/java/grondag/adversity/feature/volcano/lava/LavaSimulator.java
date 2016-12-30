@@ -2,15 +2,11 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-
-import com.google.common.collect.ComparisonChain;
-
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
@@ -59,18 +55,7 @@ public class LavaSimulator extends SimulationNode
     
     protected final HashMap<BlockPos, LavaCell> allCells = new HashMap<BlockPos, LavaCell>();
     private final HashSet<LavaCell> updatedCells = new HashSet<LavaCell>();
-//    private final HashMap<BlockPos, LavaCell> cellsWithFluid = new HashMap<BlockPos, LavaCell>();
-    private final TreeMap<BlockPos, LavaCell> cellsWithFluid = new TreeMap<BlockPos, LavaCell>( new Comparator<BlockPos>() 
-    {
-        @Override
-        public int compare(BlockPos o1, BlockPos o2)
-        {
-            return ComparisonChain.start()
-                    .compare(o1.getY(), o2.getY())
-                    .compare(o1.getX(), o2.getX())
-                    .compare(o1.getZ(), o2.getZ())
-                    .result();
-        }});
+    private final HashMap<BlockPos, LavaCell> cellsWithFluid = new HashMap<BlockPos, LavaCell>();
     
     private final TreeMap<CellConnectionPos, LavaCellConnection> connections = new TreeMap<CellConnectionPos, LavaCellConnection>();
     
@@ -125,6 +110,8 @@ public class LavaSimulator extends SimulationNode
 //        {
 //            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
 //        }
+      
+        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
         
         this.doStep();
         this.doStep();
@@ -154,16 +141,35 @@ public class LavaSimulator extends SimulationNode
     
     public void doStep()
     {
-        this.clearDeadConnections();
         this.processNewConnectionRequests();
-        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);});
-
-        for(LavaCell c : this.cellsWithFluid.values().toArray(new LavaCell[0]))
+        
+        if(this.connections.size() > 0)
         {
-            c.doStep(this);
+//            Adversity.log.info("LavaSim connection processing, count=" + connections.size() );
+
+            //use iterator and hold changes in other collections
+            Iterator<Entry<CellConnectionPos, LavaCellConnection>> it = this.connections.entrySet().iterator();
+            while(it.hasNext())
+            {
+                Entry<CellConnectionPos, LavaCellConnection> next = it.next();
+                LavaCellConnection connection = next.getValue();
+                //remove connections to barriers or between cells with no fluid
+                if(connection.firstCell.isBarrier() || connection.secondCell.isBarrier()
+                        || (connection.firstCell.getCurrentLevel() == 0 && connection.secondCell.getCurrentLevel() == 0))
+                {
+                    connection.releaseCells();
+                    it.remove();
+                }
+                else
+                {
+                    connection.doStep(this);
+                }
+            }
+
         }
-       
-        this.updatedCells.forEach((LavaCell c) -> {c.applyUpdates(this);});
+        
+        //TODO: handle particles with connection-oriented model
+        
     }
     
     private void validateAllCells()
@@ -217,10 +223,6 @@ public class LavaSimulator extends SimulationNode
         return result;
     }
     
-    protected LavaCellConnection getConnection(BlockPos pos1, BlockPos pos2)
-    {
-        return this.connections.get(new CellConnectionPos(pos1, pos2));
-    }
    
     /**
      * Update simulation from world when blocks are placed via creative mode or other methods.
@@ -395,23 +397,6 @@ public class LavaSimulator extends SimulationNode
                 LavaCell cell1 = this.getCell(pos.getLowerPos());
                 LavaCell cell2 = this.getCell(pos.getUpperPos());
                 this.connections.put(pos, new LavaCellConnection(cell1, cell2));
-            }
-        }
-    }
-    
-    private void clearDeadConnections()
-    {
-        Iterator<Entry<CellConnectionPos, LavaCellConnection>> it = this.connections.entrySet().iterator();
-        while(it.hasNext())
-        {
-            Entry<CellConnectionPos, LavaCellConnection> next = it.next();
-            LavaCellConnection connection = next.getValue();
-            //remove connections to barriers or between cells with no fluid
-            if(connection.firstCell.isBarrier() || connection.secondCell.isBarrier()
-                    || (connection.firstCell.getCurrentLevel() == 0 && connection.secondCell.getCurrentLevel() == 0))
-            {
-                connection.releaseCells();
-                it.remove();
             }
         }
     }
