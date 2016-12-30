@@ -26,7 +26,7 @@ public class LavaCellConnection
      * Don't create cells with less than this amount of fluid.
      * Vertical cells with less than this amount will be compressed into the cell below.
      */
-    private final static float MINIMUM_CELL_CONTENT = 1F/24F;
+    public final static float MINIMUM_CELL_CONTENT = 1F/24F;
     
     private final boolean isVertical;
     
@@ -236,6 +236,7 @@ public class LavaCellConnection
         // restrict flow amount by retained height and maximum flow rate
         
         // TODO: make configurable
+        // BUG: bound should be signed based on direction, but probably getting rid of this method
         float bound = 0.05F - this.getFlowThisTick(sim);
         
         //TODO: clamp retained level at 1.0 for lower cell?
@@ -251,10 +252,10 @@ public class LavaCellConnection
             flow = Math.max(flow, -bound);
         }
         
-        this.flowAcross(sim, flow);
+        this.flowAcross(sim, flow, false);
     }
     
-    public void flowAcross(LavaSimulator sim, float flow)
+    public void flowAcross(LavaSimulator sim, float flow, boolean deferUpdate)
     {
         // shouldn't be needed but was getting zeros here - maybe floating-point weirdness?
         if(flow ==0) return;
@@ -269,10 +270,13 @@ public class LavaCellConnection
             this.flowThisTick += flow;
         }
         
-        this.firstCell.changeLevel(sim, -flow, false);
-        this.secondCell.changeLevel(sim, flow, false);
-        this.firstCell.applyUpdates(sim);
-        this.secondCell.applyUpdates(sim);
+        this.firstCell.changeLevel(sim, -flow, deferUpdate);
+        this.secondCell.changeLevel(sim, flow, deferUpdate);
+        if(!deferUpdate)
+        {
+            this.firstCell.applyUpdates(sim);
+            this.secondCell.applyUpdates(sim);
+        }
         sim.setSaveDirty(true);
     }
     
@@ -281,6 +285,68 @@ public class LavaCellConnection
         return sim.getTickIndex() == this.lastFlowTick ? this.flowThisTick : 0;
     }
 
+    /**
+     * If the input cell is one end of this connection and flow
+     * current flow rate is out of that cell, returns a positive number
+     * representing the unconstrained degree of flow.
+     * 
+     * Returns 0 if not a cell on this connection, or if flow is in opposite direction.
+     */
+    public float getOutboundFlowRate(LavaCell cell)
+    {
+        if(cell == this.firstCell)
+        {
+            return this.currentFlowRate > 0 ? this.currentFlowRate : 0;
+        }
+        else if(cell == this.secondCell)
+        {
+            return this.currentFlowRate < 0 ? -this.currentFlowRate : 0;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    
+    /**
+     * If the input cell is one end of this connection and flow
+     * current flow rate is out of that cell, returns a positive number
+     * representing the degree of flow, bounded by the maximum rate
+     * less any flow across the connection that has already occurred.
+     * 
+     * Returns 0 if max flow rate already reached, or if flow is in opposite direction.
+     */
+    public float getMaxOutboundFlow(LavaSimulator sim, LavaCell cell)
+    {
+        float flow = this.getOutboundFlowRate(cell);
+        
+        
+        float bound = 0.05F - Math.abs(this.getFlowThisTick(sim));
+        
+        return Math.min(flow, bound);
+     
+    }
+    
+    /**
+     * Calls flow across with appropriate sign based on which end of the connection is requesting.
+     * Expects flowAmount to be a positive number.  Does not notify updates.
+     */
+    public void flowAcrossFrom(LavaSimulator sim, LavaCell cell, float flowAmount)
+    {
+        if(cell == this.firstCell)
+        {
+            this.flowAcross(sim, flowAmount, true);
+        }
+        else if(cell == this.secondCell)
+        {
+            this.flowAcross(sim, -flowAmount, true);
+        }
+        else
+        {
+            Adversity.log.info("LavaCellConnection.flowAcrossFrom called by unknown cell. Should never happen.");
+        }
+    }
+    
     /**
      * Call when removing this connection so that cell references can be removed if appropriate.
      */
