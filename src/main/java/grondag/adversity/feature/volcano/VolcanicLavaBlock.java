@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import grondag.adversity.feature.volcano.lava.LavaCell;
+import grondag.adversity.feature.volcano.lava.LavaCellConnection;
+import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -116,18 +118,32 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        LavaCell cell = Simulator.instance.getFluidTracker().getCell(data.getPos());
+        LavaSimulator sim = Simulator.instance.getFluidTracker();
+        LavaCell cell = sim.getCell(data.getPos());
         if(cell == null)
         {
             probeInfo.text("Cell not found.");
         }
         else
         {
+            LavaCellConnection up = sim.getConnection(data.getPos(), data.getPos().up());
+            LavaCellConnection down = sim.getConnection(data.getPos(), data.getPos().down());
+            LavaCellConnection east = sim.getConnection(data.getPos(), data.getPos().east());
+            LavaCellConnection west = sim.getConnection(data.getPos(), data.getPos().west());
+            LavaCellConnection north = sim.getConnection(data.getPos(), data.getPos().north());
+            LavaCellConnection south = sim.getConnection(data.getPos(), data.getPos().south());
+            
             probeInfo.text("Cell ID = " + cell.hashCode())
                 .text("Current Level = " + Float.toString(cell.getCurrentLevel()))
                 .text("Delta = " + Float.toString(cell.getDelta()))
                 .text("Retained Level = " + Float.toString(cell.getRetainedLevel()))
-                .text("Retained Level = " + cell.getVisibleLevel());
+                .text("Visible Level = " + cell.getVisibleLevel())
+                .text("Up: " + (up == null ? "null" : "sortKey=" + up.getSortKey() + "  curAllowedFlow=" + up.getCurrentFlowRate() + "  avgAllowedFlow=" + up.avgCurrentFlowRate))
+                .text("Down: " + (down == null ? "null" : "sortKey=" + down.getSortKey() + "  curAllowedFlow=" + down.getCurrentFlowRate() + "  avgAllowedFlow=" + down.avgCurrentFlowRate))
+                .text("East: " + (east == null ? "null" : "sortKey=" + east.getSortKey() + "  curAllowedFlow=" + east.getCurrentFlowRate() + "  avgAllowedFlow=" + east.avgCurrentFlowRate))
+                .text("West: " + (west == null ? "null" : "sortKey=" + west.getSortKey() + "  curAllowedFlow=" + west.getCurrentFlowRate() + "  avgAllowedFlow=" + west.avgCurrentFlowRate))
+                .text("North: " + (north == null ? "null" : "sortKey=" + north.getSortKey() + "  curAllowedFlow=" + north.getCurrentFlowRate() + "  avgAllowedFlow=" + north.avgCurrentFlowRate))
+                .text("South: " + (south == null ? "null" : "sortKey=" + south.getSortKey() + "  curAllowedFlow=" + south.getCurrentFlowRate() + "  avgAllowedFlow=" + south.avgCurrentFlowRate));
         }
         
     }

@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Useful;
 
 public class LavaCellConnection
 {
@@ -14,10 +15,16 @@ public class LavaCellConnection
     
     public final int id;
     
+    private final int rand = Useful.SALT_SHAKER.nextInt(64);
+    
     private float flowThisTick = 0;
     private int lastFlowTick = 0;
     
     private float currentFlowRate = 0;
+    
+    //TODO: remove
+    public float avgCurrentFlowRate = 0;
+    public float avgActualFlowRate = 0;
     
     private final static float PRESSURE_PER_LEVEL = 0.05F;
     private final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
@@ -115,7 +122,7 @@ public class LavaCellConnection
         float totalAmount = firstCell.getCurrentLevel() + secondCell.getCurrentLevel();
         
         // no need to constrain vertical flows if everything can flow into bottom block
-        if(totalAmount <= 1 + MINIMUM_CELL_CONTENT)
+        if(totalAmount <= 1) // + MINIMUM_CELL_CONTENT)
         {
             return -secondCell.getCurrentLevel();
         }
@@ -135,7 +142,7 @@ public class LavaCellConnection
             
             float newUpperLevel = (totalAmount - 1) * INVERSE_PRESSURE_FACTOR;
             
-            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
+//            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
             
             //want downward flow to result in negative value
             return newUpperLevel - secondCell.getCurrentLevel();
@@ -149,7 +156,7 @@ public class LavaCellConnection
             
             float newUpperLevel = (totalAmount - PRESSURE_PER_LEVEL) * 0.5F;
             
-            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
+//            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
             
             //want downward flow to result in negative value
             return newUpperLevel - secondCell.getCurrentLevel();
@@ -199,10 +206,10 @@ public class LavaCellConnection
         
         //Generally shouldn't come up for horizontal cells except in deep pools
         //In those cases, will eventually be absorbed by lower cells if not enough pressure to sustain.
-        if(pressure1 - result < MINIMUM_CELL_CONTENT || pressure2 + result < MINIMUM_CELL_CONTENT)
-        {
-            result = 0;
-        }
+//        if(pressure1 - result < MINIMUM_CELL_CONTENT || pressure2 + result < MINIMUM_CELL_CONTENT)
+//        {
+//            result = 0;
+//        }
         
         return result;
 
@@ -218,6 +225,12 @@ public class LavaCellConnection
         else            
         {
             this.currentFlowRate = this.isVertical ? this.getVerticalFlow(sim) : this.getHorizontalFlow(sim);            
+        }
+        
+        if(currentFlowRate != 0)
+        {
+            this.avgCurrentFlowRate -= this.avgCurrentFlowRate * 0.05F;
+            this.avgCurrentFlowRate += this.currentFlowRate * 0.05F;
         }
     }
     
@@ -304,5 +317,30 @@ public class LavaCellConnection
 //        Adversity.log.info("connection release");
         this.firstCell.release("connection");
         this.secondCell.release("connection");
+    }
+    
+    /** 
+     * Absolute difference in base elevation, or if base is same, in retained level.
+     * Zero if there is no difference.
+     * Horizontal cells above the ground have a drop of 0.
+     * Vertical cells have a drop of 1.
+     * Higher drop means higher priority for flowing. 
+     */
+    public float getDrop()
+    {
+        return this.isVertical ? 1 : Math.abs(firstCell.getRetainedLevel() - secondCell.getRetainedLevel());
+    }
+    
+    public int getSortKey()
+    {
+        int axisBit = this.isVertical ? 0 : 1;
+        int y = 255 - this.firstCell.pos.getY();
+        int slope = 63 - (int) (63F * this.getDrop());
+        return (axisBit << 20) | (y << 12) | (slope << 6) | this.rand;
+    }
+    
+    public float getCurrentFlowRate()
+    {
+        return this.currentFlowRate;
     }
 }
