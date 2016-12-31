@@ -229,26 +229,24 @@ public class LavaCellConnection
 //        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
 //            Adversity.log.info("boop");
         
+        //TODO: make this local again if going to update each time
+        this.updateFlowRate(sim);
+        
         if (this.currentFlowRate == 0) return;
         
         float flow = this.currentFlowRate;
         
-        // restrict flow amount by retained height and maximum flow rate
-        
-        // TODO: make configurable
-        float bound = 0.05F - this.getFlowThisTick(sim);
-        
-        //TODO: clamp retained level at 1.0 for lower cell?
-        
+        //TODO: make bound configurable
+         
         // Positive numbers means 1st cell has higher pressure.
         if(flow > 0)
         {
-            flow = Math.min(flow, bound);
+            flow = Math.min(flow, 0.05F - this.getFlowThisTick(sim));
         }
         else
         {
-            // flow is negative in this case, so need to flip application of bound
-            flow = Math.max(flow, -bound);
+            // flow is negative in this case, so need to flip handling of bound
+            flow = Math.max(flow, -0.05F - this.getFlowThisTick(sim));
         }
         
         this.flowAcross(sim, flow);
@@ -271,8 +269,19 @@ public class LavaCellConnection
         
         this.firstCell.changeLevel(sim, -flow, false);
         this.secondCell.changeLevel(sim, flow, false);
+
+        if(!this.isVertical && this.firstCell.getCurrentLevel() >= this.firstCell.getRetainedLevel() && this.firstCell.getCurrentLevel() + this.firstCell.getDelta() < this.firstCell.getRetainedLevel())
+        {
+            Adversity.log.info("DERP!!");
+        }
+        if(!this.isVertical && this.secondCell.getCurrentLevel() >= this.secondCell.getRetainedLevel() && this.secondCell.getCurrentLevel() + this.secondCell.getDelta() < this.secondCell.getRetainedLevel())
+        {
+            Adversity.log.info("DERP!!");
+        }
+        
         this.firstCell.applyUpdates(sim);
         this.secondCell.applyUpdates(sim);
+
         sim.setSaveDirty(true);
     }
     

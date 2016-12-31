@@ -111,7 +111,8 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
 //        }
       
-        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
+        //Was causing slow propagation and overflow not doing this each step just prior to flow
+//        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
         
         this.doStep();
         this.doStep();
@@ -200,7 +201,7 @@ public class LavaSimulator extends SimulationNode
 
     }
     
-    protected LavaCell getCell(BlockPos pos)
+    public LavaCell getCell(BlockPos pos)
     {
 //        int arrayX = pos.getX() + xOffset;
 //        int arrayZ = pos.getZ() + zOffset;
@@ -643,4 +644,13 @@ public class LavaSimulator extends SimulationNode
     {
         return this.tickIndex;
     }
+
+
+    @Override
+    public boolean isSaveDirty()
+    {
+        return super.isSaveDirty();
+    }
+    
+    
 }

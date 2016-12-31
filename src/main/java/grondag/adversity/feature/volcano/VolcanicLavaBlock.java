@@ -3,10 +3,15 @@ package grondag.adversity.feature.volcano;
 import java.util.ArrayList;
 import java.util.List;
 
+import grondag.adversity.feature.volcano.lava.LavaCell;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
+import mcjty.theoneprobe.api.IProbeHitData;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.IProbeInfoAccessor;
+import mcjty.theoneprobe.api.ProbeMode;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
@@ -21,7 +26,7 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class VolcanicLavaBlock extends FlowDynamicBlock
+public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAccessor
 {
     public VolcanicLavaBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller)
     {
@@ -106,6 +111,25 @@ public class VolcanicLavaBlock extends FlowDynamicBlock
         ArrayList<String> lines = new ArrayList<String>(2);
         lines.add("Testing!");
         return lines;
+    }
+
+    @Override
+    public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
+    {
+        LavaCell cell = Simulator.instance.getFluidTracker().getCell(data.getPos());
+        if(cell == null)
+        {
+            probeInfo.text("Cell not found.");
+        }
+        else
+        {
+            probeInfo.text("Cell ID = " + cell.hashCode())
+                .text("Current Level = " + Float.toString(cell.getCurrentLevel()))
+                .text("Delta = " + Float.toString(cell.getDelta()))
+                .text("Retained Level = " + Float.toString(cell.getRetainedLevel()))
+                .text("Retained Level = " + cell.getVisibleLevel());
+        }
+        
     }
 
 }

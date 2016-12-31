@@ -104,8 +104,17 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	        
             if(PersistenceManager.loadNode(world, this))
             {
-                PersistenceManager.loadNode(world, this.volcanoManager);
-                PersistenceManager.loadNode(world, this.lavaSimulator);
+                if(!PersistenceManager.loadNode(world, this.volcanoManager))
+                {
+                    Adversity.log.info("Volcano manager data not found - recreating.  Some world state may be lost.");
+                    PersistenceManager.registerNode(world, this.volcanoManager);
+                }
+                
+                if(!PersistenceManager.loadNode(world, this.lavaSimulator))
+                {
+                    Adversity.log.info("Lava simulator data not found - recreating.  Some world state may be lost.");
+                    PersistenceManager.registerNode(world, this.lavaSimulator);
+                }
             }
             else
     	    {

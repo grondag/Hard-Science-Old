@@ -1,14 +1,6 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -479,13 +471,10 @@ public class LavaCell
         if(this.delta != 0)
         {
             boolean wasDirty = this.getVisibleLevel() != this.lastVisibleLevel;
+            boolean oldFluidState = this.currentLevel > 0;
             
-            if(this.currentLevel == 0 && this.delta > 0)
-            {
-                tracker.updateFluidStatus(this, true);
-            }
-            
-            this.currentLevel += delta;
+            this.currentLevel += this.delta;
+            this.delta = 0;
             
             if(this.currentLevel < 0)
             {
@@ -493,9 +482,10 @@ public class LavaCell
                 this.currentLevel = 0;
             }
             
-            if(this.currentLevel == 0)
+            
+            if(oldFluidState != this.currentLevel > 0)
             {
-                tracker.updateFluidStatus(this, false);
+                tracker.updateFluidStatus(this, this.currentLevel > 0);
             }
             
             if(wasDirty)
@@ -511,7 +501,7 @@ public class LavaCell
                 tracker.dirtyCells.add(this);
             }
             
-            this.delta = 0;
+
         }
     }
     
