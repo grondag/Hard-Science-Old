@@ -29,12 +29,6 @@ public class LavaCellConnection
     private final static float PRESSURE_PER_LEVEL = 0.05F;
     private final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
     
-    /** 
-     * Don't create cells with less than this amount of fluid.
-     * Vertical cells with less than this amount will be compressed into the cell below.
-     */
-    private final static float MINIMUM_CELL_CONTENT = 1F/24F;
-    
     private final boolean isVertical;
     
     public LavaCellConnection(LavaCell firstCell, LavaCell secondCell)

@@ -523,7 +523,7 @@ public class LavaCell
      */
     public int getVisibleLevel()
     {
-        if(this.currentLevel == 0) 
+        if(this.currentLevel < MINIMUM_CELL_CONTENT) 
             return 0;
         else
             return Math.round(Math.max(1, Math.min(FlowHeightState.BLOCK_LEVELS_FLOAT, this.currentLevel * FlowHeightState.BLOCK_LEVELS_FLOAT)));
@@ -682,6 +682,12 @@ public class LavaCell
     private static int releaseCallCount = 0;
     private static long lastUpdateNanoTime = System.nanoTime();
     private StringBuilder builder = new StringBuilder();
+
+    /** 
+     * Don't create cells with less than this amount of fluid.
+     * Vertical cells with less than this amount will be compressed into the cell below.
+     */
+    private final static float MINIMUM_CELL_CONTENT = 1F/24F;
     
     public void retain(String desc)
     {

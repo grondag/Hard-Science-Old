@@ -138,12 +138,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                 .text("Delta = " + Float.toString(cell.getDelta()))
                 .text("Retained Level = " + Float.toString(cell.getRetainedLevel()))
                 .text("Visible Level = " + cell.getVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "sortKey=" + up.getSortKey() + "  curAllowedFlow=" + up.getCurrentFlowRate() + "  avgAllowedFlow=" + up.avgCurrentFlowRate))
-                .text("Down: " + (down == null ? "null" : "sortKey=" + down.getSortKey() + "  curAllowedFlow=" + down.getCurrentFlowRate() + "  avgAllowedFlow=" + down.avgCurrentFlowRate))
-                .text("East: " + (east == null ? "null" : "sortKey=" + east.getSortKey() + "  curAllowedFlow=" + east.getCurrentFlowRate() + "  avgAllowedFlow=" + east.avgCurrentFlowRate))
-                .text("West: " + (west == null ? "null" : "sortKey=" + west.getSortKey() + "  curAllowedFlow=" + west.getCurrentFlowRate() + "  avgAllowedFlow=" + west.avgCurrentFlowRate))
-                .text("North: " + (north == null ? "null" : "sortKey=" + north.getSortKey() + "  curAllowedFlow=" + north.getCurrentFlowRate() + "  avgAllowedFlow=" + north.avgCurrentFlowRate))
-                .text("South: " + (south == null ? "null" : "sortKey=" + south.getSortKey() + "  curAllowedFlow=" + south.getCurrentFlowRate() + "  avgAllowedFlow=" + south.avgCurrentFlowRate));
+                .text("Up: " + (up == null ? "null" : "sortKey=" + up.getSortKey() + "  curFlow=" + up.getCurrentFlowRate() + "  drop=" + up.getDrop()))
+                .text("Down: " + (down == null ? "null" : "sortKey=" + down.getSortKey() + "  curFlow=" + down.getCurrentFlowRate() + "  drop=" + down.getDrop()))
+                .text("East: " + (east == null ? "null" : "sortKey=" + east.getSortKey() + "  curFlow=" + east.getCurrentFlowRate() + "  drop=" + east.getDrop()))
+                .text("West: " + (west == null ? "null" : "sortKey=" + west.getSortKey() + "  curFlow=" + west.getCurrentFlowRate() + "  drop=" + west.getDrop()))
+                .text("North: " + (north == null ? "null" : "sortKey=" + north.getSortKey() + "  curFlow=" + north.getCurrentFlowRate() + "  drop=" + north.getDrop()))
+                .text("South: " + (south == null ? "null" : "sortKey=" + south.getSortKey() + "  curFlow=" + south.getCurrentFlowRate() + "  drop=" + south.getDrop()));
         }
         
     }
