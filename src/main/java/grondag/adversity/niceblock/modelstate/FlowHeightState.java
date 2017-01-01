@@ -18,7 +18,7 @@ public class FlowHeightState
 
     public final static int BLOCK_LEVELS_INT = 12;
     public final static float BLOCK_LEVELS_FLOAT = (float) BLOCK_LEVELS_INT;
-    public final static int MIN_HEIGHT = -24;
+    public final static int MIN_HEIGHT = -23;
     public final static int NO_BLOCK = MIN_HEIGHT - 1;
     public final static int MAX_HEIGHT = 36;
     
@@ -106,13 +106,6 @@ public class FlowHeightState
         return stateKey;
     }
     
-//    public FlowHeightState(byte centerHeightIn, int[] sideHeightIn, int[] cornerHeightIn, int yOffsetIn)
-//    {
-//        centerHeight = centerHeightIn;
-//        yOffset = (byte) Math.min(2, Math.max(-2, yOffsetIn));
-//        this.sideHeight = sideHeightIn;
-//        this.cornerHeight = cornerHeightIn;
-//    }
 
     public FlowHeightState(long stateKey)
     {
@@ -129,6 +122,8 @@ public class FlowHeightState
             shift += 6;
         }        
     }
+    
+   
     // Rendering height of center block ranges from 1 to 12
     // and is stored in state key as values 0-11.
 
@@ -143,11 +138,6 @@ public class FlowHeightState
         return this.centerHeight;
     }
 
-//    public void setYOffset(int offset)
-//    {
-//        this.yOffset = (byte) Math.min(2, Math.max(-2, offset));
-//    }
- 
     public int getYOffset()
     {
         return this.yOffset;
@@ -155,23 +145,10 @@ public class FlowHeightState
 
     // Rendering height of corner and side neighbors ranges 
     // from -24 to 36. 
-
-//    public void setSideHeight(HorizontalFace side, int height)
-//    {
-//        this.sideHeight[side.ordinal()] = (byte)height;
-//        vertexCalcsDone = false;
-//    }
-
     public int getSideHeight(HorizontalFace side)
     {
         return this.sideHeight[side.ordinal()];
     }
-
-//    public void setCornerHeight(HorizontalCorner corner, int height)
-//    {
-//        this.cornerHeight[corner.ordinal()] = (byte)height;
-//        vertexCalcsDone = false;
-//    }
 
     public int getCornerHeight(HorizontalCorner corner)
     {
@@ -373,23 +350,20 @@ public class FlowHeightState
         if(heightCorner == FlowHeightState.NO_BLOCK)
         {
             int max = Math.max(Math.max(getSideHeight(corner.face1), getSideHeight(corner.face2)), getCenterHeight());
-            heightCorner = (max - 1) / BLOCK_LEVELS_INT * BLOCK_LEVELS_INT;
+            heightCorner = max - BLOCK_LEVELS_INT;
         }
        
         return ((float) heightCorner) / BLOCK_LEVELS_FLOAT;
     }
     
-    /**
-     * Doesn't use getFarCornerHeight because would be redundant check of neighbor heights
-     */
+    
     private float calcMidCornerVertexHeight(HorizontalCorner corner)
     {
         int heightSide1 = getSideHeight(corner.face1);
         int heightSide2 = getSideHeight(corner.face2);
         int heightCorner = getCornerHeight(corner);
         
-        int max = Math.max(Math.max(heightSide1, heightSide2), Math.max(heightCorner, getCenterHeight()));
-        max = (max - 1) / BLOCK_LEVELS_INT * BLOCK_LEVELS_INT;
+        int max = Math.max(Math.max(heightSide1, heightSide2), Math.max(heightCorner, getCenterHeight())) - BLOCK_LEVELS_INT;
                 
         if(heightSide1 == FlowHeightState.NO_BLOCK) heightSide1 = max;
         if(heightSide2 == FlowHeightState.NO_BLOCK) heightSide2 = max;
@@ -403,12 +377,12 @@ public class FlowHeightState
     
     private float calcFarSideVertexHeight(HorizontalFace face)
     {
-        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : ((float)getSideHeight(face)) / BLOCK_LEVELS_FLOAT);
+        return (getSideHeight(face) == FlowHeightState.NO_BLOCK ? getCenterHeight() - BLOCK_LEVELS_INT: ((float)getSideHeight(face)) / BLOCK_LEVELS_FLOAT);
     }
 
     private float calcMidSideVertexHeight(HorizontalFace face)
     {
-        float sideHeight = getSideHeight(face) == FlowHeightState.NO_BLOCK ? 0 : (float)getSideHeight(face);
+        float sideHeight = getSideHeight(face) == FlowHeightState.NO_BLOCK ? getCenterHeight() - BLOCK_LEVELS_INT : (float)getSideHeight(face);
         return (sideHeight + (float) getCenterHeight()) / (BLOCK_LEVELS_FLOAT * 2F);
     }
 

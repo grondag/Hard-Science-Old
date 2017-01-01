@@ -339,8 +339,9 @@ public class NiceBlockRegistrar
 
     static
     {
-        ((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-        ((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
+        //TODO: put back
+//        ((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+//        ((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
         
         ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
         ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   

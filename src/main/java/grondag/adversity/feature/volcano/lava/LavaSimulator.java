@@ -28,12 +28,14 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
- * Remove directional bias / try per-connection velocity
+ * Flow block rendering at low levels
  * 
  * FEATURES
+ * Cooling
+ * Handle flowing terrain
  * Particles
  * Integer vs. FP quantization (trial)
- * Cooling
+ *
  * Performance / parallelism
  * Handle multiple worlds
  * Handle unloaded chunks
