@@ -28,8 +28,9 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
- * Flow block rendering at low levels
+ * Smooth visible block level changes over time
  * Filler block placement - some being missed?
+ * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
  * 
  * FEATURES
  * Cooling
@@ -113,6 +114,10 @@ public class LavaSimulator extends SimulationNode
         //Was causing slow propagation and overflow not doing this each step just prior to flow
 //        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
         
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
         this.doStep();
         this.doStep();
         this.doStep();

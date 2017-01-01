@@ -22,12 +22,17 @@ public class LavaCellConnection
     
     private float currentFlowRate = 0;
     
-    //TODO: remove
-    public float avgCurrentFlowRate = 0;
-    public float avgActualFlowRate = 0;
-    
+ 
     private final static float PRESSURE_PER_LEVEL = 0.05F;
     public final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
+    
+    //TODO: make configurable?
+    /** Maximum flow through any block connection in a single tick. 
+     * Not changing this to vary with pressure because most lava flows are 
+     * along the surface and higher-velocity flows (down a slope) will also
+     * have a smaller cross-section due to retained height calculations.
+     */
+    private final static float MAX_FLOW_PER_TICK = 0.1F;
     
     private final boolean isVertical;
     
@@ -167,34 +172,75 @@ public class LavaCellConnection
      */
     private float getHorizontalFlow(LavaSimulator sim)
     {
-        float pressure1 = this.firstCell.getCurrentLevel();
-        float pressure2 = this.secondCell.getCurrentLevel();
+        float level1 = this.firstCell.getCurrentLevel();
+        float level2 = this.secondCell.getCurrentLevel();
+        
 
         // For horizontal connection, flow is always towards cell with no bottom
         // and if neither has a bottom, there is no flow.
-        if(!this.firstCell.isSupported(sim)) pressure1 = 0;
-        if(!this.secondCell.isSupported(sim)) pressure2 = 0;
+        if(!this.firstCell.isSupported(sim)) level1 = 0;
+        if(!this.secondCell.isSupported(sim)) level2 = 0;
         
-        float difference = pressure1 - pressure2;
+        float difference = level1 - level2;
         
         if(difference == 0) return 0;
+        
+        
+        /**
+         * If both cells have a non-zero retention level 
+         * and donatating cell has more than half its retention level already,
+         * then will donate enough to bring target closer to its half-retention level,
+         * so that DonorLevel/DonorRetention = 2 * TargetLevel/TargetRetention.  
+         * This prevents steep edges of flows.
+         */
+        float retention1 = this.firstCell.getRetainedLevel();
+        float retention2 = this.secondCell.getRetainedLevel();
         
         // Positive numbers means 1st cell has higher pressure.
         if(difference > 0)
         {
-            float bound = pressure1 - this.firstCell.getRetainedLevel();
-            if(bound <= 0) return 0;
-            difference = Math.min(difference, bound);
+            //see note on retention level above
+            if(retention1 > 0 && retention2 > 0 && level1 > Math.max(0.5F * retention1, 0.5F)  && level2 < 0.5F * retention2 )
+            {
+                float ratio = retention1 / retention2;
+                float total = level1 + level2;
+                float newLevel1 = 2 * total * ratio / (1 + 2 * ratio);
+                newLevel1 = Math.max(newLevel1, Math.max(0.5F * retention2, 0.5F));
+                
+                return level1 - newLevel1;
+            }
+            else
+            {
+                //otherwise just donate anything above my retention level
+                float bound = level1 - this.firstCell.getRetainedLevel();
+                if(bound <= 0) return 0;
+                difference = Math.min(difference, bound);
+            }
         }
         else
         {
-            float bound = pressure2 - this.secondCell.getRetainedLevel();
-            if(bound <= 0) return 0;
-            // flow is negative in this case, so need to flip application of bound
-            difference = Math.max(difference, -bound);
+            //see note on retention level above
+            if(retention1 > 0 && retention2 > 0 && level2 > Math.max(0.5F * retention2, 0.5F)  && level1 < 0.5F * retention1 )
+            {
+                float ratio = retention2 / retention1;
+                float total = level1 + level2;
+                float newLevel2 = 2 * total * ratio / (1 + 2 * ratio);
+                newLevel2 = Math.max(newLevel2, Math.max(0.5F * retention2, 0.5F));
+                
+                return -(level2 - newLevel2);
+            }
+            else
+            {
+                float bound = level2 - this.secondCell.getRetainedLevel();
+                if(bound <= 0) return 0;
+                // flow is negative in this case, so need to flip application of bound
+                difference = Math.max(difference, -bound);
+            }
         }
         
-        //TODO: probably needs to vary for slope, drops
+        
+        //TODO: does this need to vary for slope?
+        //TODO: should donate full amount if going to a drop cell/particle
         // split the difference to average out the pressure
         float result = difference * 0.5F;
         
@@ -220,12 +266,7 @@ public class LavaCellConnection
         {
             this.currentFlowRate = this.isVertical ? this.getVerticalFlow(sim) : this.getHorizontalFlow(sim);            
         }
-        
-        if(currentFlowRate != 0)
-        {
-            this.avgCurrentFlowRate -= this.avgCurrentFlowRate * 0.05F;
-            this.avgCurrentFlowRate += this.currentFlowRate * 0.05F;
-        }
+
     }
     
     public void doStep(LavaSimulator sim)
@@ -248,12 +289,12 @@ public class LavaCellConnection
         // Positive numbers means 1st cell has higher pressure.
         if(flow > 0)
         {
-            flow = Math.min(flow, 0.05F - this.getFlowThisTick(sim));
+            flow = Math.min(flow, MAX_FLOW_PER_TICK - this.getFlowThisTick(sim));
         }
         else
         {
             // flow is negative in this case, so need to flip handling of bound
-            flow = Math.max(flow, -0.05F - this.getFlowThisTick(sim));
+            flow = Math.max(flow, -MAX_FLOW_PER_TICK - this.getFlowThisTick(sim));
         }
         
         this.flowAcross(sim, flow);
@@ -277,14 +318,15 @@ public class LavaCellConnection
         this.firstCell.changeLevel(sim, -flow, false);
         this.secondCell.changeLevel(sim, flow, false);
 
-        if(!this.isVertical && this.firstCell.getCurrentLevel() >= this.firstCell.getRetainedLevel() && this.firstCell.getCurrentLevel() + this.firstCell.getDelta() < this.firstCell.getRetainedLevel())
-        {
-            Adversity.log.info("DERP!!");
-        }
-        if(!this.isVertical && this.secondCell.getCurrentLevel() >= this.secondCell.getRetainedLevel() && this.secondCell.getCurrentLevel() + this.secondCell.getDelta() < this.secondCell.getRetainedLevel())
-        {
-            Adversity.log.info("DERP!!");
-        }
+        //TODO: remove
+//        if(!this.isVertical && this.firstCell.getCurrentLevel() >= this.firstCell.getRetainedLevel() && this.firstCell.getCurrentLevel() + this.firstCell.getDelta() < this.firstCell.getRetainedLevel())
+//        {
+//            Adversity.log.info("DERP!!");
+//        }
+//        if(!this.isVertical && this.secondCell.getCurrentLevel() >= this.secondCell.getRetainedLevel() && this.secondCell.getCurrentLevel() + this.secondCell.getDelta() < this.secondCell.getRetainedLevel())
+//        {
+//            Adversity.log.info("DERP!!");
+//        }
         
         this.firstCell.applyUpdates(sim);
         this.secondCell.applyUpdates(sim);
