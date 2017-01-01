@@ -29,17 +29,21 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Flow block rendering at low levels
+ * Filler block placement - some being missed?
  * 
  * FEATURES
  * Cooling
  * Handle flowing terrain
+ *      Update Drop Calculation
  * Particles
- * Integer vs. FP quantization (trial)
  *
  * Performance / parallelism
+ *      Integer vs. FP quantization (trial)
+ *      Better/faster connection sorting
  * Handle multiple worlds
  * Handle unloaded chunks
  * Cleanup
+ * Lava texture needs more character, more reddish?
  */
 public class LavaSimulator extends SimulationNode
 {

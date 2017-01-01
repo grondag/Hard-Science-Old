@@ -27,7 +27,7 @@ public class LavaCellConnection
     public float avgActualFlowRate = 0;
     
     private final static float PRESSURE_PER_LEVEL = 0.05F;
-    private final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
+    public final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
     
     private final boolean isVertical;
     
@@ -36,8 +36,8 @@ public class LavaCellConnection
 
         
         // TODO: remove
-        if((firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
-            Adversity.log.info("boop");
+//        if((firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
+//            Adversity.log.info("boop");
         
         this.id = nextConnectionID++;
         

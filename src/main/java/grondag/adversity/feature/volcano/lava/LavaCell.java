@@ -561,11 +561,11 @@ public class LavaCell
     {
         
         //TODO: remove
-        if(pos.getX() == 70 && pos.getY() == 78 && pos.getZ() == 110)
-            Adversity.log.info("boop");
-        
-        if(pos.getX() == 70 && pos.getY() == 79 && pos.getZ() == 110)
-            Adversity.log.info("boop");
+//        if(pos.getX() == 70 && pos.getY() == 78 && pos.getZ() == 110)
+//            Adversity.log.info("boop");
+//        
+//        if(pos.getX() == 70 && pos.getY() == 79 && pos.getZ() == 110)
+//            Adversity.log.info("boop");
         
         IBlockState myState = sim.world.getBlockState(this.pos);
         if(sim.terrainHelper.isLavaSpace(myState))
@@ -608,7 +608,17 @@ public class LavaCell
                 }
                 else
                 {
-                    this.retainedLevel = Math.min(1, sim.terrainHelper.computeIdealBaseFlowHeight(pos));
+                    // if retained level > 1, want to clamp it at the equilibrium point
+                    float level = sim.terrainHelper.computeIdealBaseFlowHeight(pos);
+                    if(level <= 1)
+                    {
+                        this.retainedLevel = level;
+                    }
+                    else
+                    {
+                        this.retainedLevel  = level - (level - 1) * LavaCellConnection.INVERSE_PRESSURE_FACTOR;
+//                        this.retainedLevel = Math.min(1, sim.terrainHelper.computeIdealBaseFlowHeight(pos));
+                    }
                 }
             }
             
