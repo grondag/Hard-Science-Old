@@ -28,7 +28,6 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
- * Smooth visible block level changes over time
  * Filler block placement - some being missed?
  * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
  * 
@@ -445,11 +444,28 @@ public class LavaSimulator extends SimulationNode
         return this.blockUpdates;
     }
 
+    private static int blockUpdatesCounter;
+    private static int updateReportCounter = 60;
+    
     public void doBlockUpdates()
     {
 //        Adversity.log.info("LavaSim doBlockUpdates");
 
+        
         Queue<LavaBlockUpdate> blockUpdates = getBlockUpdates();
+        
+        blockUpdatesCounter += blockUpdates.size();
+        
+        if(updateReportCounter <= 0)
+        {
+            Adversity.log.info("Lava expAvg block updates per tick = " + blockUpdatesCounter/60);
+            updateReportCounter = 60;
+            blockUpdatesCounter = 0;
+        }
+        else
+        {
+            updateReportCounter--;
+        }
         
         this.itMe = true;
         LavaBlockUpdate update = blockUpdates.poll();       
