@@ -29,6 +29,8 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Filler block placement - some being missed?
+ * Prevent very small particles
+ * Prevent particles from pushing out so much off of each other
  * 
  * FEATURES
  * Particles
@@ -140,7 +142,10 @@ public class LavaSimulator extends SimulationNode
         this.doStep();
         this.doStep();
         
+        this.doParticles();
+        
         this.doBlockUpdates();
+        
         
         if(--ticksUntilCacheCleanup == 0)
         {
@@ -159,6 +164,30 @@ public class LavaSimulator extends SimulationNode
             }
             Adversity.log.info("Total fluid in cells = " + totalFluid + "  Total registered fluid =" + totalFluidRegistered);
         }
+    }
+    
+    private int particleCounter = 10;
+    
+    private void doParticles()
+    {
+        if(particleCounter-- == 0)
+        {
+            particleCounter = 5 + Useful.SALT_SHAKER.nextInt(5);
+            
+            //TODO: sort bottom up
+            for(LavaCell cell : cellsWithFluid.values().toArray(new LavaCell[0]))
+            {
+                float amount = cell.getCurrentLevel();
+                if(amount > 0 && cell.isDrop(this))
+                {
+                    world.spawnEntityInWorld(new EntityLavaParticle(world, amount, 
+                        new Vec3d(cell.pos.getX() + 0.5, cell.pos.getY() - 0.1, cell.pos.getZ() + 0.5), Vec3d.ZERO));
+                        cell.changeLevel(this, -amount, false);
+                        cell.applyUpdates(this);
+                }
+            }
+        }
+    
     }
     
     public void doStep()

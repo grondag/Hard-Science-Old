@@ -37,14 +37,8 @@ public class LavaCell
     
     private final int id;
 
-    private final static float PRESSURE_FACTOR = 1.05F;
-//    private final static float PRESSURE_FACTOR_INVERSE = 1/1.05F;
-    
-    //TODO: make configurable
-    private final static float MIN_FLOW = 0.001F;
-    
     private boolean isBarrier;
-    
+
 //    private boolean isDeleted;
     
     @Override 
@@ -93,331 +87,9 @@ public class LavaCell
         //Suspect DOWN and UP are most accessed - could store cells in 256-tall vertical arrays within an x,z hash table
         //Vertical access would then be very fast without need to cache references
         return tracker.getCell(pos.add(face.getDirectionVec()));
-    }
-    
-    public void doStep(LavaSimulator tracker, double seconds)
-    {
-        //TODO: remove
-        if(this.retainedLevel < 0)
-        {
-            Adversity.log.info("DERP!");
-        }
-        
-        float available = this.currentLevel - this.retainedLevel;
-        float amountDonated = 0;
-        
-        if(available <= 0) return;
-        
-//        Adversity.log.info("LavaSimCell doStep id=" + this.id + " w/ level=" + this.currentLevel + " @" + this.pos.toString());
 
-        //fall down if possible
-        LavaCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
-        if(down.canAcceptFluidParticles(tracker))
-        {
-//            Adversity.log.info("LavaSimCell fall down id=" + this.id + " amount=" + available + " @" + this.pos.toString());
-            tracker.world.spawnEntityInWorld(new EntityLavaParticle(tracker.world, this.currentLevel, 
-                    new Vec3d(this.pos.getX() + 0.5, this.pos.getY() - 0.1, this.pos.getZ() + 0.5), Vec3d.ZERO));
-            this.changeLevel(tracker, -available);
-            return;
-        }
-        
-        //flow down if possible
-        
-        //get pressure from cell above
-        LavaCell up = this.getNeighbor(tracker, EnumFacing.UP);
-        float pressureFromAbove = up.getDownwardPressure();
-                            
-        //output down if vertical pressure is sufficient
-
-        
-        if(down.canAcceptFluidDirectly(tracker) && down.currentLevel < this.getDownwardPressure())
-        {
-            float amount = Math.min(available, this.getDownwardPressure() - down.currentLevel);
-            available -= amount;
-            amountDonated += amount;
-            this.changeLevel(tracker, -amount);
-            down.changeLevel(tracker, amount);
-            
-//            Adversity.log.info("LavaSimCell flow down id=" + this.id + " verticalPressure=" + pressureFromAbove + " amount=" + amount + " @" + this.pos.toString());
-        }
-        
-        if(available < MIN_FLOW) return;
-
-        LavaCell east = this.getNeighbor(tracker, EnumFacing.EAST);
-        LavaCell west = this.getNeighbor(tracker, EnumFacing.WEST);
-        LavaCell north = this.getNeighbor(tracker, EnumFacing.NORTH);
-        LavaCell south = this.getNeighbor(tracker, EnumFacing.SOUTH);
-        
-        // NOTE: THESE GET REUSED WITHOUT REINITIALIZATION BELOW
-        // Is okay because will be empty if we get there
-        // because if any side can accept particles we are done.
-        LavaCell[] sides = new LavaCell[4];
-        int sideCount = 0;
-        
-        //fall to sides if possible
-        {
-            if(east.canAcceptFluidParticles(tracker)) sides[sideCount++] = east;
-            if(west.canAcceptFluidParticles(tracker)) sides[sideCount++] = west;
-            if(north.canAcceptFluidParticles(tracker)) sides[sideCount++] = north;
-            if(south.canAcceptFluidParticles(tracker)) sides[sideCount++] = south;
-        
-            if(sideCount > 0)
-            {
-                for(int i = 0; i < sideCount; i++)
-                {
-                    tracker.world.spawnEntityInWorld(new EntityLavaParticle(tracker.world, available / sideCount, 
-                            new Vec3d(sides[i].pos.getX() + 0.5, sides[i].pos.getY() + 0.1, sides[i].pos.getZ() + 0.5), Vec3d.ZERO));
-                }
-                
-//                Adversity.log.info("LavaSimCell particle(s) sideways id=" + this.id + " amount=" + available + " @" + this.pos.toString());
-
-                this.changeLevel(tracker, -available);
-                return;
-            }
-        }
-        
-        // NB: WILL NOT GET TO THIS POINT IF CAN OUTPUT A PARTICLE TO ANY SIDE
- 
-        // Find sides that would be lower than our level,
-        // NOPE, REMOVED(...even after we equalize vertical pressure).
-        float sideTotal = 0;
-        {
-//            float forecastedNewLevel = Math.min(verticalPressure, this.currentLevel - amountDonated);
-            float forecastedNewLevel = this.currentLevel - amountDonated;
-            
-            if(east.canAcceptFluidDirectly(tracker) && east.currentLevel < forecastedNewLevel)
-            {
-                sides[sideCount++] = east;
-                sideTotal += east.currentLevel;
-            }
-            if(west.canAcceptFluidDirectly(tracker) && west.currentLevel < forecastedNewLevel)
-            {
-                sides[sideCount++] = west;
-                sideTotal += west.currentLevel;
-            }
-            if(north.canAcceptFluidDirectly(tracker) && north.currentLevel < forecastedNewLevel)
-            {
-                sides[sideCount++] = north;
-                sideTotal += north.currentLevel;
-            }
-            if(south.canAcceptFluidDirectly(tracker) && south.currentLevel < forecastedNewLevel)
-            {
-                sides[sideCount++] = south;
-                sideTotal += south.currentLevel;
-            }
-        }
-        
-        if(sideCount > 0)
-        {
-            // Sort outputs by level lowest to highest.
-            // This is going to get called many times so using specialized 
-            // sort methods to exploit small number of elements.
-            
-            if(sideCount < 3)
-            {
-                if(sideCount == 2)
-                {
-                    if(sides[0].currentLevel > sides[1].currentLevel)
-                    {
-                        LavaCell temp = sides[0];
-                        sides[0] = sides[1];
-                        sides[1] = temp;
-                    }
-                }
-            }
-            else if(sideCount == 3)
-            {
-                this.sort3Cells(sides);
-            }
-            else
-            {
-                this.sort4Cells(sides);
-            }
-            
-            /** Mean of this cell with adjacent cells of level lower than my forecasted level.
-             *  Will donate to cells with a level less than this.
-             *  Also is the lowest that my level will go.
-             */
-            float targetMean = (this.currentLevel + sideTotal) / (1 + sideCount);
-            float donorTotal = Math.min(this.currentLevel - targetMean, available);;
-        
-            int donorCount = 0;
-            while( donorCount < sideCount && sides[donorCount].currentLevel < targetMean)
-            {
-                donorTotal+= sides[donorCount].currentLevel;
-                donorCount++;
-            }
-            
-            float donorNewMean = donorTotal / donorCount;
-            
-            for(int i = 0; i < donorCount; i++)
-            {
-                float donation = donorNewMean - sides[i].currentLevel;
-                if(donation > 0)
-                {
-                    this.changeLevel(tracker, -donation);
-                    sides[i].changeLevel(tracker, donation);
-                    available -= donation;
-                    amountDonated += donation;
-//                    Adversity.log.info("LavaSimCell flow sideways FromID=" + this.id + " toID=" + sides[i].id + " verticalPressure=" + pressureFromAbove + " amount=" + amountDonated + " @" + this.pos.toString());
-                }
-            }
-        }
-       
-        if(available <= 0) return;
-        
-        if(!up.isBarrier && this.currentLevel - amountDonated > pressureFromAbove)
-        {
-            float amount = Math.min(available, (this.currentLevel - amountDonated - pressureFromAbove));
-            //prevent creating new fluid blocks above with tiny amounts of fluid
-            //TODO: make threshold configurable
-            if(up.currentLevel == 0 && amount < 0.001) return;
-//            Adversity.log.info("equalizing up from=" + this.id + " to=" + up.id + "forecastedLevelB4Up=" + (this.currentLevel - amountDonated) +" amount=" + amount + " verticalPressure=" + pressureFromAbove);
-            this.changeLevel(tracker, -amount);
-            up.changeLevel(tracker, amount);
-            available -= amount;
-            amountDonated += amount;
-        }
-       
     }
-    
-    /**
-     * Returns the pressure that this cell exerts on the cell below due to the influence of gravity.
-     * Our fluid is slightly compressible to enable flowing upwards through pipe-like openings.
-     */
-    private float getDownwardPressure()
-    {
-        if(this.isBarrier || this.currentLevel <= 0)
-        {
-            return 1;
-        }
-        else if(this.currentLevel < 1)
-        {
-            return this.currentLevel * (PRESSURE_FACTOR - 1) + 1;
-        }
-        else
-        {
-            return this.currentLevel * PRESSURE_FACTOR;
-        }
-    }
-    
-    /**
-     * Optimized sort for three element array of cells
-     */
-    private void sort3Cells(LavaCell[] cells)
-    {
-        LavaCell temp;
-        
-        if (cells[0].currentLevel < cells[1].currentLevel)
-        {
-            if (cells[1].currentLevel > cells[2].currentLevel)
-            {
-                if (cells[0].currentLevel < cells[2].currentLevel)
-                {
-                    temp = cells[1];
-                    cells[1] = cells[2];
-                    cells[2] = temp;
-                }
-                else
-                {
-                    temp = cells[0];
-                    cells[0] = cells[2];
-                    cells[2] = cells[1];
-                    cells[1] = temp;
-                }
-            }
-        }
-        else
-        {
-            if (cells[1].currentLevel < cells[2].currentLevel)
-            {
-                if (cells[0].currentLevel < cells[2].currentLevel)
-                {
-                    temp = cells[0];
-                    cells[0] = cells[1];
-                    cells[1] = temp;
-                }
-                else
-                {
-                    temp = cells[0];
-                    cells[0] = cells[1];
-                    cells[1] = cells[2];
-                    cells[2] = temp;
-                }
-            }
-            else
-            {
-                temp = cells[0];
-                cells[0] = cells[2];
-                cells[2] = temp;
-            }
-        }
-    }
-    
-    /**
-     * Optimized sort for four element array of cells
-     */
-    private void sort4Cells(LavaCell[] cells)
-    {
-        LavaCell low1, high1, low2, high2, middle1, middle2, lowest, highest;
-        
-        if (cells[0].currentLevel < cells[1].currentLevel)
-        {
-            low1 = cells[0];
-            high1 = cells[1];
-        }
-        else 
-        {
-            low1 = cells[1];
-            high1 = cells[0];
-        }
-        if (cells[2].currentLevel < cells[3].currentLevel)
-        {
-            low2 = cells[2];
-            high2 = cells[3];
-        }
-        else
-        {
-            low2 = cells[3];
-            high2 = cells[2];
-        }
-        if (low1.currentLevel < low2.currentLevel)
-        {
-            lowest = low1;
-            middle1 = low2;
-        }
-        else
-        {
-            lowest = low2;
-            middle1 = low1;
-        }
-        
-        if (high1.currentLevel > high2.currentLevel)
-        {
-            highest = high1;
-            middle2 = high2;
-        }
-        else
-        {
-            highest = high2;
-            middle2 = high1;
-        }
-
-        if (middle1.currentLevel < middle2.currentLevel)
-        {
-            cells[0] = lowest;
-            cells[1] = middle1;
-            cells[2] = middle2;
-            cells[3] = highest;
-        }
-        else
-        {
-            cells[0] = lowest;
-            cells[1] = middle2;
-            cells[2] = middle1;
-            cells[3] = highest;
-        }
-    }
+   
     
     /**
      * True if fluid can be added directly to this cell.
@@ -648,26 +320,6 @@ public class LavaCell
    
     }
    
-//    public void addConnection(LavaCellConnection connection)
-//    {
-//        this.connections.add(connection);
-//    }
-//    
-//    public void removeConnection(LavaCellConnection connection)
-//    {
-//        this.connections.remove(connection);
-//    }
-//    
-//    public void clearConnections()
-//    {
-//        this.connections.clear();
-//    }
-//    
-//    public Set<LavaCellConnection> getConnections()
-//    {
-//        return Collections.<LavaCellConnection>unmodifiableSet(this.connections);
-//    }
-    
     public float getRetainedLevel()
     {
         return this.retainedLevel;
@@ -685,6 +337,12 @@ public class LavaCell
     {
         LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
         return bottom.isBarrier || bottom.getCurrentLevel() >= 1;
+    }
+    
+    public boolean isDrop(LavaSimulator sim)
+    {
+        LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
+        return !bottom.isBarrier && bottom.getCurrentLevel() == 0;
     }
     
     //TODO: remove

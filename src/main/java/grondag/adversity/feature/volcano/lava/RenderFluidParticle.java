@@ -48,7 +48,8 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
         this.bindEntityTexture(entity);
         GlStateManager.translate((float)x, (float)y, (float)z);
         GlStateManager.enableRescaleNormal();
-        GlStateManager.scale(entity.getScale(), entity.getScale(), entity.getScale());
+        float scale = entity.getScale();
+        GlStateManager.scale(scale, scale, scale);
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
 

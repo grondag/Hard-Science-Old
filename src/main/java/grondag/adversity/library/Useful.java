@@ -9,6 +9,7 @@ import javax.vecmath.Quat4f;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import grondag.adversity.feature.volcano.lava.LavaCell;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -372,4 +373,124 @@ public class Useful {
    {
        return x * x;
    }
+   
+//   /**
+//    * Kept for possible future use.
+//    * Optimized sort for three element array
+//    */
+//   private void sort3Cells(LavaCell[] cells)
+//   {
+//       LavaCell temp;
+//       
+//       if (cells[0].currentLevel < cells[1].currentLevel)
+//       {
+//           if (cells[1].currentLevel > cells[2].currentLevel)
+//           {
+//               if (cells[0].currentLevel < cells[2].currentLevel)
+//               {
+//                   temp = cells[1];
+//                   cells[1] = cells[2];
+//                   cells[2] = temp;
+//               }
+//               else
+//               {
+//                   temp = cells[0];
+//                   cells[0] = cells[2];
+//                   cells[2] = cells[1];
+//                   cells[1] = temp;
+//               }
+//           }
+//       }
+//       else
+//       {
+//           if (cells[1].currentLevel < cells[2].currentLevel)
+//           {
+//               if (cells[0].currentLevel < cells[2].currentLevel)
+//               {
+//                   temp = cells[0];
+//                   cells[0] = cells[1];
+//                   cells[1] = temp;
+//               }
+//               else
+//               {
+//                   temp = cells[0];
+//                   cells[0] = cells[1];
+//                   cells[1] = cells[2];
+//                   cells[2] = temp;
+//               }
+//           }
+//           else
+//           {
+//               temp = cells[0];
+//               cells[0] = cells[2];
+//               cells[2] = temp;
+//           }
+//       }
+//   }
+   
+//   /**
+//    * Kept for future use
+//    * Optimized sort for four element array
+//    */
+//   private void sort4Cells(LavaCell[] cells)
+//   {
+//       LavaCell low1, high1, low2, high2, middle1, middle2, lowest, highest;
+//       
+//       if (cells[0].currentLevel < cells[1].currentLevel)
+//       {
+//           low1 = cells[0];
+//           high1 = cells[1];
+//       }
+//       else 
+//       {
+//           low1 = cells[1];
+//           high1 = cells[0];
+//       }
+//       if (cells[2].currentLevel < cells[3].currentLevel)
+//       {
+//           low2 = cells[2];
+//           high2 = cells[3];
+//       }
+//       else
+//       {
+//           low2 = cells[3];
+//           high2 = cells[2];
+//       }
+//       if (low1.currentLevel < low2.currentLevel)
+//       {
+//           lowest = low1;
+//           middle1 = low2;
+//       }
+//       else
+//       {
+//           lowest = low2;
+//           middle1 = low1;
+//       }
+//       
+//       if (high1.currentLevel > high2.currentLevel)
+//       {
+//           highest = high1;
+//           middle2 = high2;
+//       }
+//       else
+//       {
+//           highest = high2;
+//           middle2 = high1;
+//       }
+//
+//       if (middle1.currentLevel < middle2.currentLevel)
+//       {
+//           cells[0] = lowest;
+//           cells[1] = middle1;
+//           cells[2] = middle2;
+//           cells[3] = highest;
+//       }
+//       else
+//       {
+//           cells[0] = lowest;
+//           cells[1] = middle2;
+//           cells[2] = middle1;
+//           cells[3] = highest;
+//       }
+//   }
 }

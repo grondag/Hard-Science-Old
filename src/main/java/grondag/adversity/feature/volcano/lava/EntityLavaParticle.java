@@ -39,7 +39,7 @@ public class EntityLavaParticle extends Entity
     private static final String TAG_AMOUNT = "amt";
     private float amount;
     
-    private static final DataParameter<Float> SCALE = EntityDataManager.<Float>createKey(Entity.class, DataSerializers.FLOAT);
+    private static final DataParameter<Float> SCALE = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
 
     @Override
     public int hashCode()
@@ -74,7 +74,10 @@ public class EntityLavaParticle extends Entity
         this.simulator = Simulator.instance.getFluidTracker();
         this.amount = amount;
         float scale = getScaleFromAmount(amount);
-        this.dataManager.set(SCALE, Float.valueOf(scale));        
+        if(!world.isRemote)
+        {
+            this.dataManager.set(SCALE, Float.valueOf(scale)); 
+        }
         this.forceSpawn = true;
         //TODO: is this the right minimum diameter? 
         float diameter = (float) Math.min(1, Math.max(0.1, scale * 0.75));
@@ -86,7 +89,7 @@ public class EntityLavaParticle extends Entity
      */
     private float getScaleFromAmount(float amount)
     {
-        return (float) (2 * Math.pow(amount * 3 * Math.PI / 4, 1/3));
+        return (float) (2 * Math.pow(amount * 3 / (Math.PI * 4), 1F/3F));
     }
 
     /**
