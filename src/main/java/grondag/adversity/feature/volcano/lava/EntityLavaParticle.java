@@ -319,8 +319,8 @@ public class EntityLavaParticle extends Entity
                 for (int i2 = i1; i2 < j1; ++i2)
                 {
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
-
-                    if(!worldObj.isAirBlock(blockpos$pooledmutableblockpos) && LavaTerrainHelper.canLavaDisplace(worldObj.getBlockState(blockpos$pooledmutableblockpos)))
+                    IBlockState state = worldObj.getBlockState(blockpos$pooledmutableblockpos);
+                    if(state.getMaterial() != Material.AIR && state.getBlock() != NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK && LavaTerrainHelper.canLavaDisplace(state))
                     {
                         this.worldObj.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }

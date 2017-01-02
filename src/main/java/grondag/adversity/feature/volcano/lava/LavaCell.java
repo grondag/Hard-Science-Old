@@ -431,7 +431,7 @@ public class LavaCell
         if (this.currentLevel > 0) return true;
         
         LavaCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
-        return down.isBarrier || down.currentLevel >= 1;
+        return down.isBarrier || down.getVisibleLevel() >= FlowHeightState.BLOCK_LEVELS_INT;
     }
     
     /**

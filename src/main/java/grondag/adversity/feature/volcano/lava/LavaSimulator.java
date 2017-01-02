@@ -29,20 +29,24 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Filler block placement - some being missed?
- * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
  * 
  * FEATURES
+ * Particles
  * Cooling
  * Handle flowing terrain
  *      Update Drop Calculation
- * Particles
+ *
+ * Handle multiple worlds
+ * Handle unloaded chunks
  *
  * Performance / parallelism
  *      Integer vs. FP quantization (trial)
  *      Better/faster connection sorting
- * Handle multiple worlds
- * Handle unloaded chunks
- * Cleanup
+
+ * Code Cleanup
+ * 
+ * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
+ * Particle model/rendering polish
  * Lava texture needs more character, more reddish?
  */
 public class LavaSimulator extends SimulationNode
@@ -97,6 +101,20 @@ public class LavaSimulator extends SimulationNode
     public void doTick()
     {
         this.tickIndex++;
+        
+        if(updatedCells.size() > 0)
+        {
+            Adversity.log.info("LavaSim updatedCells, cell count=" + updatedCells.size() );
+            
+            for(LavaCell cell : this.updatedCells)
+            {
+                cell.applyUpdates(this);
+            }
+            
+            this.updatedCells.clear();
+            
+            this.setSaveDirty(true);
+        }
         
         if(--ticksUntilNextValidation == 0)
         {

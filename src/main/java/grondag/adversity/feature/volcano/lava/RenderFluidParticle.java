@@ -1,6 +1,12 @@
 package grondag.adversity.feature.volcano.lava;
 
+import java.util.List;
+
+import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.model.quadfactory.Vertex;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelMagmaCube;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -9,8 +15,10 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.init.Items;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -24,6 +32,11 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
     {
         super(renderManagerIn);
     }
+      
+      private static final ResourceLocation TEXTURE = new ResourceLocation("adversity:textures/entity/lava.png");
+      
+      private static final List<RawQuad> quads = QuadFactory.makeIcosahedron(new Vec3d(0.5,0.5,0.5), 0.5, new RawQuad());
+
 
     /**
      * Renders the desired {@code T} type Entity.
@@ -31,17 +44,14 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
     public void doRender(EntityLavaParticle entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         GlStateManager.pushMatrix();
+        GlStateManager.disableLighting();
         this.bindEntityTexture(entity);
         GlStateManager.translate((float)x, (float)y, (float)z);
         GlStateManager.enableRescaleNormal();
         GlStateManager.scale(entity.getScale(), entity.getScale(), entity.getScale());
-        TextureAtlasSprite textureatlassprite = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(Items.FIRE_CHARGE);
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
-        float f = textureatlassprite.getMinU();
-        float f1 = textureatlassprite.getMaxU();
-        float f2 = textureatlassprite.getMinV();
-        float f3 = textureatlassprite.getMaxV();
+
 //            float f4 = 1.0F;
 //            float f5 = 0.5F;
 //            float f6 = 0.25F;
@@ -54,11 +64,21 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
             GlStateManager.enableOutlineMode(this.getTeamColor(entity));
         }
 
+        //TODO: use display lists or AddVertexData
+        //TODO: prebake quad or at least convert normals to floats
+        
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
-        vertexbuffer.pos(-0.5D, -0.25D, 0.0D).tex((double)f, (double)f3).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexbuffer.pos(0.5D, -0.25D, 0.0D).tex((double)f1, (double)f3).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexbuffer.pos(0.5D, 0.75D, 0.0D).tex((double)f1, (double)f2).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexbuffer.pos(-0.5D, 0.75D, 0.0D).tex((double)f, (double)f2).normal(0.0F, 1.0F, 0.0F).endVertex();
+        
+        for(RawQuad q : quads)
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                Vertex v = q.getVertex(i);
+                Vec3d n = v.getNormal();
+                vertexbuffer.pos(v.xCoord, v.yCoord, v.zCoord).tex(v.u, v.v).normal((float)n.xCoord, (float)n.yCoord, (float)n.zCoord).endVertex();
+            }
+        }
+        
         tessellator.draw();
 
         if (this.renderOutlines)
@@ -68,6 +88,7 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
         }
 
         GlStateManager.disableRescaleNormal();
+        GlStateManager.enableLighting();
         GlStateManager.popMatrix();
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
@@ -77,7 +98,7 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
      */
     protected ResourceLocation getEntityTexture(EntityLavaParticle entity)
     {
-        return TextureMap.LOCATION_BLOCKS_TEXTURE;
+        return TEXTURE;
     }
 
     public static IRenderFactory<EntityLavaParticle> factory() {

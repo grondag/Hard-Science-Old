@@ -9,8 +9,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class Vertex extends Vec3d
 {
-    protected final double u;
-    protected final double v;
+    public final double u;
+    public final double v;
     public final int color;
     protected final Vec3d normal;
     
