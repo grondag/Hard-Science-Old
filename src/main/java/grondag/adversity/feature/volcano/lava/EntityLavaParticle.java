@@ -33,9 +33,10 @@ public class EntityLavaParticle extends Entity
     private final int id;
 
     private static final String TAG_AMOUNT = "amt";
-    private float amount;
     
-    private static final DataParameter<Float> SCALE = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
+    private float renderScale;
+    
+    private static final DataParameter<Float> FLUID_AMOUNT = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
 
     @Override
     public int hashCode()
@@ -67,25 +68,43 @@ public class EntityLavaParticle extends Entity
         super(world);
         Adversity.log.info("EntityLavaParticle amount=" + amount);
         this.id = nextParticleID++;
-        this.amount = amount;
-        float scale = getScaleFromAmount(amount);
         if(!world.isRemote)
         {
-            this.dataManager.set(SCALE, Float.valueOf(scale)); 
+            this.dataManager.set(FLUID_AMOUNT, Float.valueOf(amount)); 
         }
         this.forceSpawn = true;
-        //TODO: is this the right minimum diameter? 
-        float diameter = (float) Math.min(1, Math.max(0.1, scale * 0.75));
-        this.setSize(diameter, diameter);
+        this.updateAmountDependentData();
     }
 
-    /**
-     * Is essentially the diameter of a sphere with volume = amount.
-     */
-    private float getScaleFromAmount(float amount)
+    private void updateAmountDependentData()
     {
-        return (float) (2 * Math.pow(amount * 3 / (Math.PI * 4), 1F/3F));
+        float amount = this.dataManager.get(FLUID_AMOUNT).floatValue();
+        
+        // Give bounding box same volume as model, but small enough to fit through a one block space and not too small to interact
+        float edgeLength = (float) Math.min(0.8, Math.max(0.1, Math.pow(amount, 0.3333333333333)));
+        this.setSize(edgeLength, edgeLength);
+        
+        /**
+         * Is essentially the diameter of a sphere with volume = amount.
+         */
+        this.renderScale = (float) (2 * Math.pow(amount * 3 / (Math.PI * 4), 1F/3F));
+        
+        Adversity.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
     }
+    
+    @Override
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        super.notifyDataManagerChange(key);
+        
+        //resize once we have our amount
+        if (FLUID_AMOUNT.equals(key) && this.worldObj.isRemote)
+        {
+            this.updateAmountDependentData();
+        }
+    }
+
+
 
     /**
      * Sets throwable heading based on an entity that's throwing it
@@ -132,7 +151,7 @@ public class EntityLavaParticle extends Entity
 
     public float getScale()
     {
-        return this.dataManager.get(SCALE).floatValue();
+        return this.renderScale;
     }
 
     @Override
@@ -163,9 +182,9 @@ public class EntityLavaParticle extends Entity
 
         if (!this.worldObj.isRemote & !LavaTerrainHelper.canLavaDisplace(this.worldObj.getBlockState(this.getPosition().down())))
         {
-          Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.amount);
+          Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.dataManager.get(FLUID_AMOUNT).floatValue());
          
-          Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.amount);
+          Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.dataManager.get(FLUID_AMOUNT).floatValue());
 //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
             this.setDead();
         }
@@ -333,20 +352,19 @@ public class EntityLavaParticle extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.amount = compound.getFloat(TAG_AMOUNT);     
-        this.dataManager.set(SCALE, Float.valueOf(this.getScaleFromAmount(this.amount)));
+        this.dataManager.set(FLUID_AMOUNT, Float.valueOf(compound.getFloat(TAG_AMOUNT)));
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        compound.setFloat(TAG_AMOUNT, this.amount);
+        compound.setFloat(TAG_AMOUNT, this.dataManager.get(FLUID_AMOUNT).floatValue());
     }
 
     @Override
     protected void entityInit()
     {
-        this.dataManager.register(SCALE, 1F);
+        this.dataManager.register(FLUID_AMOUNT, 1F);
     }
 
 }
