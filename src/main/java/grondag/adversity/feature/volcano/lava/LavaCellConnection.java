@@ -197,12 +197,15 @@ public class LavaCellConnection
          */
         float retention1 = this.firstCell.getRetainedLevel();
         float retention2 = this.secondCell.getRetainedLevel();
+        boolean dropFlag = false;
         
         // Positive numbers means 1st cell has higher pressure.
         if(difference > 0)
         {
+            dropFlag = this.secondCell.isDrop(sim);
+            
             //see note on retention level above
-            if(retention1 > 0 && retention2 > 0 && level1 > Math.max(0.5F * retention1, 0.5F)  && level2 < 0.5F * retention2 )
+            if(!dropFlag && retention1 > 0 && retention2 > 0 && level1 > Math.max(0.5F * retention1, 0.5F)  && level2 < 0.5F * retention2 )
             {
                 float ratio = retention1 / retention2;
                 float total = level1 + level2;
@@ -221,8 +224,10 @@ public class LavaCellConnection
         }
         else
         {
+            dropFlag = this.firstCell.isDrop(sim);
+            
             //see note on retention level above
-            if(retention1 > 0 && retention2 > 0 && level2 > Math.max(0.5F * retention2, 0.5F)  && level1 < 0.5F * retention1 )
+            if(!dropFlag && retention1 > 0 && retention2 > 0 && level2 > Math.max(0.5F * retention2, 0.5F)  && level1 < 0.5F * retention1 )
             {
                 float ratio = retention2 / retention1;
                 float total = level1 + level2;
@@ -240,20 +245,10 @@ public class LavaCellConnection
             }
         }
         
+        // Donate full amount if going to a drop cell/particle.
+        // Otherwise split the difference to average out the pressure
+        return dropFlag? difference : difference * 0.5F;
         
-        //TODO: does this need to vary for slope?
-        //TODO: should donate full amount if going to a drop cell/particle
-        // split the difference to average out the pressure
-        float result = difference * 0.5F;
-        
-        //Generally shouldn't come up for horizontal cells except in deep pools
-        //In those cases, will eventually be absorbed by lower cells if not enough pressure to sustain.
-//        if(pressure1 - result < MINIMUM_CELL_CONTENT || pressure2 + result < MINIMUM_CELL_CONTENT)
-//        {
-//            result = 0;
-//        }
-        
-        return result;
 
     }
     

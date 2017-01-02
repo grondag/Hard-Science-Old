@@ -32,10 +32,6 @@ public class EntityLavaParticle extends Entity
 
     private final int id;
 
-
-    //TODO: is this alias needed?
-    private final LavaSimulator simulator;
-
     private static final String TAG_AMOUNT = "amt";
     private float amount;
     
@@ -71,7 +67,6 @@ public class EntityLavaParticle extends Entity
         super(world);
         Adversity.log.info("EntityLavaParticle amount=" + amount);
         this.id = nextParticleID++;
-        this.simulator = Simulator.instance.getFluidTracker();
         this.amount = amount;
         float scale = getScaleFromAmount(amount);
         if(!world.isRemote)
@@ -169,7 +164,8 @@ public class EntityLavaParticle extends Entity
         if (!this.worldObj.isRemote & !LavaTerrainHelper.canLavaDisplace(this.worldObj.getBlockState(this.getPosition().down())))
         {
           Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.amount);
-            this.simulator.addLava(this.getPosition(), this.amount);
+         
+          Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.amount);
 //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
             this.setDead();
         }

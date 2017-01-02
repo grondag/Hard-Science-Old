@@ -29,7 +29,6 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Filler block placement - some being missed?
- * Prevent very small particles
  * Prevent particles from pushing out so much off of each other
  * 
  * FEATURES
