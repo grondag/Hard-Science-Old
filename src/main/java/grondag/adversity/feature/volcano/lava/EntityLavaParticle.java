@@ -36,6 +36,8 @@ public class EntityLavaParticle extends Entity
     
     private float renderScale;
     
+    private int tickCount = 0;
+    
     private static final DataParameter<Float> FLUID_AMOUNT = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
 
     @Override
@@ -47,7 +49,7 @@ public class EntityLavaParticle extends Entity
     protected EntityLavaParticle(World world, float amount, Vec3d position, Vec3d velocity)
     {
         this(world, amount);
-        Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
+        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
         this.setPosition(position.xCoord, position.yCoord, position.zCoord);
 
 
@@ -60,13 +62,13 @@ public class EntityLavaParticle extends Entity
     public EntityLavaParticle(World world)
     {
         this(world, 1);
-        Adversity.log.info("EntityLavaParticle no params");
+        if(!world.isRemote) Adversity.log.info("EntityLavaParticle no params");
     }
 
     public EntityLavaParticle(World world, float amount)
     {
         super(world);
-        Adversity.log.info("EntityLavaParticle amount=" + amount);
+        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount);
         this.id = nextParticleID++;
         if(!world.isRemote)
         {
@@ -89,7 +91,7 @@ public class EntityLavaParticle extends Entity
          */
         this.renderScale = (float) (2 * Math.pow(amount * 3 / (Math.PI * 4), 1F/3F));
         
-        Adversity.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
+//        Adversity.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
     }
     
     @Override
@@ -165,6 +167,11 @@ public class EntityLavaParticle extends Entity
         
         super.onUpdate();
 
+        if(this.tickCount++ > 600)
+        {
+            Adversity.log.info("Too long. What's up?");
+        }
+        
         
 
         this.prevPosX = this.posX;
@@ -173,14 +180,13 @@ public class EntityLavaParticle extends Entity
 
         this.motionY -= 0.03999999910593033D;
 
-        this.noClip = this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
         this.moveEntity(this.motionX, this.motionY, this.motionZ);
 
         this.motionX *= 0.9800000190734863D;
         this.motionY *= 0.9800000190734863D;
         this.motionZ *= 0.9800000190734863D;
 
-        if (!this.worldObj.isRemote & !LavaTerrainHelper.canLavaDisplace(this.worldObj.getBlockState(this.getPosition().down())))
+        if (!this.worldObj.isRemote & this.onGround)
         {
           Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.dataManager.get(FLUID_AMOUNT).floatValue());
          
@@ -202,122 +208,116 @@ public class EntityLavaParticle extends Entity
     @Override
     public void moveEntity(double x, double y, double z)
     {
-        if (this.noClip)
+        this.worldObj.theProfiler.startSection("move");
+
+        //shouldn't actually happen because web will be set to air before we collide, but just in case...
+        if (this.isInWeb)
         {
-            this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, y, z));
-            this.resetPositionToBB();
+            this.isInWeb = false;
+            this.worldObj.setBlockToAir(this.getPosition());
         }
-        else
-        {
-            this.worldObj.theProfiler.startSection("move");
+        
 
-            //shouldn't actually happen because web will be set to air before we collide, but just in case...
-            if (this.isInWeb)
-            {
-                this.isInWeb = false;
-                this.worldObj.setBlockToAir(this.getPosition());
-            }
-            
+        AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
 
-            AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
-//            if(!this.worldObj.isRemote)
-//            {
-                this.destroyCollidingDisplaceableBlocks(targetBox);
-//            }
-            
-            double startingX = x;
-            double startingY = y;
-            double startingZ = z;
-           
-            List<AxisAlignedBB> list1 = this.worldObj.getCollisionBoxes(this, targetBox);
+        this.destroyCollidingDisplaceableBlocks(targetBox);
+        
+        double startingX = x;
+        double startingY = y;
+        double startingZ = z;
+       
+        List<AxisAlignedBB> blockCollisions = this.worldObj.getCollisionBoxes(targetBox);
+        
+        //TODO: entity collisions and damage
 //            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
-            int i = 0;
+        int i = 0;
 
-            for (int j = list1.size(); i < j; ++i)
-            {
-                y = ((AxisAlignedBB)list1.get(i)).calculateYOffset(this.getEntityBoundingBox(), y);
-            }
-
-            this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
-//            boolean i_ = this.onGround || startingY != y && startingY < 0.0D;
-            int j4 = 0;
-
-            for (int k = list1.size(); j4 < k; ++j4)
-            {
-                x = ((AxisAlignedBB)list1.get(j4)).calculateXOffset(this.getEntityBoundingBox(), x);
-            }
-
-            this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, 0.0D, 0.0D));
-            j4 = 0;
-
-            for (int k4 = list1.size(); j4 < k4; ++j4)
-            {
-                z = ((AxisAlignedBB)list1.get(j4)).calculateZOffset(this.getEntityBoundingBox(), z);
-            }
-
-            this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
-
-            this.worldObj.theProfiler.endSection();
-            this.worldObj.theProfiler.startSection("rest");
-            this.resetPositionToBB();
-            this.isCollidedHorizontally = startingX != x || startingZ != z;
-            this.isCollidedVertically = startingY != y;
-            this.onGround = this.isCollidedVertically && startingY < 0.0D;
-            this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
-            j4 = MathHelper.floor_double(this.posX);
-            int l4 = MathHelper.floor_double(this.posY - 0.20000000298023224D);
-            int i5 = MathHelper.floor_double(this.posZ);
-            BlockPos blockpos = new BlockPos(j4, l4, i5);
-            IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
-
-            if (iblockstate.getMaterial() == Material.AIR)
-            {
-                BlockPos blockpos1 = blockpos.down();
-                IBlockState iblockstate1 = this.worldObj.getBlockState(blockpos1);
-                Block block1 = iblockstate1.getBlock();
-
-                if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate)
-                {
-                    iblockstate = iblockstate1;
-                    blockpos = blockpos1;
-                }
-            }
-
-            this.updateFallState(y, this.onGround, iblockstate, blockpos);
-
-            if (startingX != x)
-            {
-                this.motionX = 0.0D;
-            }
-
-            if (startingZ != z)
-            {
-                this.motionZ = 0.0D;
-            }
-
-            Block block = iblockstate.getBlock();
-
-            if (startingY != y)
-            {
-                block.onLanded(this.worldObj, this);
-            }
-
-    
-            try
-            {
-                this.doBlockCollisions();
-            }
-            catch (Throwable throwable)
-            {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
-                this.addEntityCrashInfo(crashreportcategory);
-                throw new ReportedException(crashreport);
-            }
-
-
-            this.worldObj.theProfiler.endSection();
+        for (int j = blockCollisions.size(); i < j; ++i)
+        {
+            y = ((AxisAlignedBB)blockCollisions.get(i)).calculateYOffset(this.getEntityBoundingBox(), y);
         }
+
+        this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
+//            boolean i_ = this.onGround || startingY != y && startingY < 0.0D;
+        int j4 = 0;
+
+        for (int k = blockCollisions.size(); j4 < k; ++j4)
+        {
+            x = ((AxisAlignedBB)blockCollisions.get(j4)).calculateXOffset(this.getEntityBoundingBox(), x);
+        }
+
+        this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, 0.0D, 0.0D));
+        j4 = 0;
+
+        for (int k4 = blockCollisions.size(); j4 < k4; ++j4)
+        {
+            z = ((AxisAlignedBB)blockCollisions.get(j4)).calculateZOffset(this.getEntityBoundingBox(), z);
+        }
+
+        this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
+
+        this.worldObj.theProfiler.endSection();
+        this.worldObj.theProfiler.startSection("rest");
+        this.resetPositionToBB();
+        this.isCollidedHorizontally = startingX != x || startingZ != z;
+        this.isCollidedVertically = startingY != y;
+        this.onGround = this.isCollidedVertically && startingY < 0.0D;
+        this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
+        j4 = MathHelper.floor_double(this.posX);
+        int l4 = MathHelper.floor_double(this.posY - 0.20000000298023224D);
+        int i5 = MathHelper.floor_double(this.posZ);
+        BlockPos blockpos = new BlockPos(j4, l4, i5);
+        IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+
+        if (iblockstate.getMaterial() == Material.AIR)
+        {
+            BlockPos blockpos1 = blockpos.down();
+            IBlockState iblockstate1 = this.worldObj.getBlockState(blockpos1);
+            Block block1 = iblockstate1.getBlock();
+
+            if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate)
+            {
+                iblockstate = iblockstate1;
+                blockpos = blockpos1;
+            }
+        }
+
+        //TODO: use it or get rid of it?
+        this.updateFallState(y, this.onGround, iblockstate, blockpos);
+
+        if (startingX != x)
+        {
+            this.motionX = 0.0D;
+        }
+
+        if (startingZ != z)
+        {
+            this.motionZ = 0.0D;
+        }
+
+        Block block = iblockstate.getBlock();
+
+        if (startingY != y)
+        {
+            block.onLanded(this.worldObj, this);
+        }
+
+        //TODO: is needed?
+        try
+        {
+            this.doBlockCollisions();
+        }
+        catch (Throwable throwable)
+        {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
+            this.addEntityCrashInfo(crashreportcategory);
+            throw new ReportedException(crashreport);
+        }
+
+
+        this.worldObj.theProfiler.endSection();
+        
     }
 
     private void destroyCollidingDisplaceableBlocks(AxisAlignedBB bb)

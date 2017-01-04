@@ -254,15 +254,27 @@ public class LavaCellConnection
     
     public void updateFlowRate(LavaSimulator sim)
     {
+        float flow;
         // barriers don't need processing - TODO: may not be needed because checked in connection processing loop
         if(this.firstCell.isBarrier() || this.secondCell.isBarrier())
         {
-            this.currentFlowRate = 0;
+            flow = 0;
         }
-        else            
+        else if(this.isVertical)
         {
-            this.currentFlowRate = this.isVertical ? this.getVerticalFlow(sim) : this.getHorizontalFlow(sim);            
+            flow = this.getVerticalFlow(sim);    
+          //Damp tiny oscillations, but always allow downward flow
+            if(flow > 0 && flow < 0.0001) flow = 0;
         }
+        else
+        {
+            flow = this.getHorizontalFlow(sim);
+            
+            //Damp tiny oscillations
+            //TODO: make threshold configurable
+            if(Math.abs(flow) < 0.00001) flow = 0;
+        }
+        this.currentFlowRate = flow;
 
     }
     

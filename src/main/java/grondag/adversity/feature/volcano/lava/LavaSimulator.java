@@ -45,7 +45,7 @@ import net.minecraft.world.World;
  *      Better/faster connection sorting
 
  * Code Cleanup
- * 
+ * Sounds
  * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
  * Particle model/rendering polish
  * Lava texture needs more character, more reddish?
@@ -211,14 +211,14 @@ public class LavaSimulator extends SimulationNode
             {
                 if(c.firstCell.isBarrier() || c.secondCell.isBarrier()
                       || (c.firstCell.getCurrentLevel() == 0 && c.secondCell.getCurrentLevel() == 0))
-              {
-                  c.releaseCells();
-                  this.connections.remove(new CellConnectionPos(c.firstCell.pos, c.secondCell.pos));
-              }
-              else
-              {
-                  c.doStep(this);
-              }
+                {
+                    c.releaseCells();
+                    this.connections.remove(new CellConnectionPos(c.firstCell.pos, c.secondCell.pos));
+                }
+                else
+                {
+                    c.doStep(this);
+                }
             }
             
             //use iterator and hold changes in other collections

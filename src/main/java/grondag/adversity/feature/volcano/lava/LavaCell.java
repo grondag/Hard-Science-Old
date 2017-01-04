@@ -126,9 +126,9 @@ public class LavaCell
     public void changeLevel(LavaSimulator tracker, float amount, boolean notifySimulator)
     {
         
-//        if(this.id == 44)
-//                    Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
-//        
+        if(this.id == 1947 || this.id == 3196 || this.id == 3198)
+                    Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
+        
         if(amount != 0)
         {
             this.delta += amount;
