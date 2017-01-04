@@ -35,7 +35,7 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
       
       private static final ResourceLocation TEXTURE = new ResourceLocation("adversity:textures/entity/lava.png");
       
-      private static final List<RawQuad> quads = QuadFactory.makeIcosahedron(new Vec3d(0.5,0.5,0.5), 0.5, new RawQuad());
+      private static final List<RawQuad> quads = QuadFactory.makeIcosahedron(new Vec3d(0,0,0), 0.5, new RawQuad());
 
 
     /**

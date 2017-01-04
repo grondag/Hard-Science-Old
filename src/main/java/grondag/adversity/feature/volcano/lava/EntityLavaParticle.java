@@ -33,11 +33,11 @@ public class EntityLavaParticle extends Entity
     private final int id;
 
     private static final String TAG_AMOUNT = "amt";
-    
+
     private float renderScale;
-    
+
     private int tickCount = 0;
-    
+
     private static final DataParameter<Float> FLUID_AMOUNT = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
 
     @Override
@@ -57,7 +57,7 @@ public class EntityLavaParticle extends Entity
         this.motionY = velocity.yCoord;
         this.motionZ = velocity.zCoord;
 
-     }
+    }
 
     public EntityLavaParticle(World world)
     {
@@ -81,24 +81,24 @@ public class EntityLavaParticle extends Entity
     private void updateAmountDependentData()
     {
         float amount = this.dataManager.get(FLUID_AMOUNT).floatValue();
-        
+
         // Give bounding box same volume as model, but small enough to fit through a one block space and not too small to interact
         float edgeLength = (float) Math.min(0.8, Math.max(0.1, Math.pow(amount, 0.3333333333333)));
         this.setSize(edgeLength, edgeLength);
-        
+
         /**
          * Is essentially the diameter of a sphere with volume = amount.
          */
         this.renderScale = (float) (2 * Math.pow(amount * 3 / (Math.PI * 4), 1F/3F));
-        
-//        Adversity.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
+
+        //        Adversity.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
     }
-    
+
     @Override
     public void notifyDataManagerChange(DataParameter<?> key)
     {
         super.notifyDataManagerChange(key);
-        
+
         //resize once we have our amount
         if (FLUID_AMOUNT.equals(key) && this.worldObj.isRemote)
         {
@@ -160,19 +160,19 @@ public class EntityLavaParticle extends Entity
     public void onUpdate()
     {
         //    Adversity.log.info("onUpdate id=" + this.id + " starting x,y,z=" + this.getPositionVector().toString());
-        
+
         //TODO: remove
         if(this.isDead) 
             Adversity.log.info("Dead entity derp");
-        
+
         super.onUpdate();
 
         if(this.tickCount++ > 600)
         {
             Adversity.log.info("Too long. What's up?");
         }
-        
-        
+
+
 
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
@@ -188,20 +188,34 @@ public class EntityLavaParticle extends Entity
 
         if (!this.worldObj.isRemote & this.onGround)
         {
-          Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.dataManager.get(FLUID_AMOUNT).floatValue());
-         
-          Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.dataManager.get(FLUID_AMOUNT).floatValue());
-//            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
+            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.dataManager.get(FLUID_AMOUNT).floatValue());
+
+            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.dataManager.get(FLUID_AMOUNT).floatValue());
+            //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
+            this.shouldDie = true;
             this.setDead();
         }
 
         //TODO: handle webs, tree leaves and other destructable blocks
-        
+
 
         //        Adversity.log.info("onUpdate id=" + this.id + " ending x,y,z=" + this.getPositionVector().toString());
 
     }
-    
+
+    //TODO: remove, was for debug
+
+    private boolean shouldDie = false;
+    @Override
+    public void setDead()
+    {
+        if(!this.worldObj.isRemote & !this.shouldDie)
+        {
+            Adversity.log.info("unintended particle death");
+        }
+        super.setDead();
+    }
+
     /**
      * Tries to move the entity towards the specified location.
      */
@@ -216,20 +230,20 @@ public class EntityLavaParticle extends Entity
             this.isInWeb = false;
             this.worldObj.setBlockToAir(this.getPosition());
         }
-        
+
 
         AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
 
         this.destroyCollidingDisplaceableBlocks(targetBox);
-        
+
         double startingX = x;
         double startingY = y;
         double startingZ = z;
-       
+
         List<AxisAlignedBB> blockCollisions = this.worldObj.getCollisionBoxes(targetBox);
-        
+
         //TODO: entity collisions and damage
-//            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        //            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
         int i = 0;
 
         for (int j = blockCollisions.size(); i < j; ++i)
@@ -238,7 +252,7 @@ public class EntityLavaParticle extends Entity
         }
 
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
-//            boolean i_ = this.onGround || startingY != y && startingY < 0.0D;
+        //            boolean i_ = this.onGround || startingY != y && startingY < 0.0D;
         int j4 = 0;
 
         for (int k = blockCollisions.size(); j4 < k; ++j4)
@@ -261,13 +275,24 @@ public class EntityLavaParticle extends Entity
         this.resetPositionToBB();
         this.isCollidedHorizontally = startingX != x || startingZ != z;
         this.isCollidedVertically = startingY != y;
-        this.onGround = this.isCollidedVertically && startingY < 0.0D;
+        //        this.onGround = this.isCollidedVertically && startingY < 0.0D;
+        //having negative Y offset is not determinative because tops of blocks can
+        //force us up even if we aren't really fully on top of them.
         this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
         j4 = MathHelper.floor_double(this.posX);
         int l4 = MathHelper.floor_double(this.posY - 0.20000000298023224D);
         int i5 = MathHelper.floor_double(this.posZ);
         BlockPos blockpos = new BlockPos(j4, l4, i5);
         IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+        this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate);
+
+        //this is very crude, but if we are vertically collided but not resting on top of the ground
+        //re-center on our block pos so that we have a better chance to fall down
+        if(this.isCollidedVertically && !this.onGround)
+        {
+            this.setEntityBoundingBox(this.getEntityBoundingBox().offset(this.posX - (blockpos.getX() +0.5), 0.0D, this.posZ - (blockpos.getZ() +0.5)));
+            this.resetPositionToBB();
+        }
 
         if (iblockstate.getMaterial() == Material.AIR)
         {
@@ -285,15 +310,24 @@ public class EntityLavaParticle extends Entity
         //TODO: use it or get rid of it?
         this.updateFallState(y, this.onGround, iblockstate, blockpos);
 
-        if (startingX != x)
+        //because lava is sticky, want to stop all horizontal motion once collided
+        if (startingX != x || startingZ != z)
         {
             this.motionX = 0.0D;
-        }
-
-        if (startingZ != z)
-        {
             this.motionZ = 0.0D;
         }
+
+        //        if (startingX != x)
+        //        {
+        //            this.motionX = 0.0D;
+        //        }
+        //
+        //        if (startingZ != z)
+        //        {
+        //            this.motionZ = 0.0D;
+        //        }
+
+
 
         Block block = iblockstate.getBlock();
 
@@ -317,7 +351,7 @@ public class EntityLavaParticle extends Entity
 
 
         this.worldObj.theProfiler.endSection();
-        
+
     }
 
     private void destroyCollidingDisplaceableBlocks(AxisAlignedBB bb)
@@ -347,8 +381,8 @@ public class EntityLavaParticle extends Entity
         }
         blockpos$pooledmutableblockpos.release();
     }
-   
-    
+
+
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {

@@ -29,10 +29,9 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Filler block placement - some being missed?
- * Prevent particles from pushing out so much off of each other
  * 
  * FEATURES
- * Particles
+ * Particle damage to entities
  * Cooling
  * Handle flowing terrain
  *      Update Drop Calculation
@@ -408,9 +407,9 @@ public class LavaSimulator extends SimulationNode
         float available = amount;
         
         LavaCell target = this.getCell(pos.down());
-        if(target.canAcceptFluidDirectly(this) && target.getCurrentLevel() < 1)
+        if(!target.isBarrier() && target.getCurrentLevel() < 1)
         {
-            float capacity = Math.min(amount, 1 - target.getCurrentLevel());
+            float capacity = Math.min(available, 1 - target.getCurrentLevel());
             target.changeLevel(this, capacity);
             available -= capacity;
         }
@@ -418,9 +417,9 @@ public class LavaSimulator extends SimulationNode
         if(available > 0)
         {
             target = this.getCell(pos);
-            if(target.canAcceptFluidDirectly(this) && target.getCurrentLevel() < 1)
+            if(!target.isBarrier() && target.getCurrentLevel() < 1)
             {
-                float capacity = Math.min(amount, 1 - target.getCurrentLevel());
+                float capacity = Math.min(available, 1 - target.getCurrentLevel());
                 target.changeLevel(this, capacity);
                 available -= capacity;
             }
@@ -428,12 +427,17 @@ public class LavaSimulator extends SimulationNode
             if(available > 0)
             {
                 target = this.getCell(pos.up());
-                if(target.canAcceptFluidDirectly(this) && target.getCurrentLevel() < 1)
+                if(!target.isBarrier() && target.getCurrentLevel() < 1)
                 {
-                    float capacity = Math.min(amount, 1 - target.getCurrentLevel());
+                    float capacity = Math.min(available, 1 - target.getCurrentLevel());
                     target.changeLevel(this, capacity);
                     available -= capacity;
                 }
+            }
+            
+            if(available > 0)
+            {
+                Adversity.log.info("LAVA EATING IS A THING! Amount=" + available + " @" + pos.toString());
             }
         }
     }
