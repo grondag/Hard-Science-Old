@@ -7,7 +7,6 @@ import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 public class LavaCell
 {
@@ -38,8 +37,9 @@ public class LavaCell
     private final int id;
 
     private boolean isBarrier;
-
-//    private boolean isDeleted;
+    
+    /** marks the last time lava flowed in or out of this cell */
+    private int lastFlowTick;
     
     @Override 
     public int hashCode()
@@ -50,93 +50,66 @@ public class LavaCell
     /**
      * Creates a lava cell without any notification or addition to collections.
      */
-    public LavaCell(LavaSimulator tracker, BlockPos pos)
+    public LavaCell(LavaSimulator sim, BlockPos pos)
     {
-     this(tracker, pos, 0);
+     this(sim, pos, 0);
     }
     
     /**
      * Creates a lava cell without any notification or addition to collections.
      */
-    public LavaCell(LavaSimulator tracker, BlockPos pos, float level)
+    public LavaCell(LavaSimulator sim, BlockPos pos, float level)
+    {
+        this(sim, pos, level, (level == 0 | sim == null) ? 0 : sim.getTickIndex());
+
+    }
+    
+    /**
+     * Creates a lava cell without any notification or addition to collections.
+     * tickindex should be zero if there has never been a flow.
+     */
+    public LavaCell(LavaSimulator sim, BlockPos pos, float level, int tickIndex)
     {
         this.pos = pos;
         this.currentLevel = level;
-                
-        
-        if(pos.getX() == 70 && pos.getY() == 79 && pos.getZ() == 110)
-            Adversity.log.info("boop");
-        
         this.id = nextCellID++;
-        
-        if(tracker == null || pos == null) return;
+        this.lastFlowTick = tickIndex;
     }
     
-//    /**
-//     * True if rests on a solid surface.  
-//     * Particles that collide with this cell should add to it.
-//     */
-//    public boolean isCellOnGround(LavaSimulator tracker)
-//    {
-//        return this.retainedLevel > 0 && !tracker.terrainHelper.isLavaSpace(tracker.world.getBlockState(pos.down()));
-//    }
     
-    protected LavaCell getNeighbor(LavaSimulator tracker, EnumFacing face)
+    protected LavaCell getNeighbor(LavaSimulator sim, EnumFacing face)
     {  
-        //TODO: performance?  
+        //TODO: cache for performance?  
         //Suspect DOWN and UP are most accessed - could store cells in 256-tall vertical arrays within an x,z hash table
         //Vertical access would then be very fast without need to cache references
-        return tracker.getCell(pos.add(face.getDirectionVec()));
+        return sim.getCell(pos.add(face.getDirectionVec()));
 
     }
-   
+  
     
-    /**
-     * True if fluid can be added directly to this cell.
-     * Will return true if already has fluid 
-     * or if directly above the ground or another cell that is full. 
-     */
-    public boolean canAcceptFluidDirectly(LavaSimulator tracker)
+    public void changeLevel(LavaSimulator sim, float amount)
     {
-        if (this.isBarrier) return false;
-        
-        if (this.currentLevel > 0) return true;
-        
-        LavaCell down = this.getNeighbor(tracker, EnumFacing.DOWN);
-        return down.isBarrier || down.getVisibleLevel() >= FlowHeightState.BLOCK_LEVELS_INT;
-    }
-    
-    /**
-     * True if fluid particles can be created in this cell.
-     * True if not a barrier and can't accept fluid directly.
-     */
-    public boolean canAcceptFluidParticles(LavaSimulator tracker)
-    {   
-        return !this.isBarrier && !this.canAcceptFluidDirectly(tracker);
-    }
-    
-    public void changeLevel(LavaSimulator tracker, float amount)
-    {
-        this.changeLevel(tracker, amount, true);
+        this.changeLevel(sim, amount, true);
     }
     
     /**
      * Set notifySimulator = false if going to call applyUpdate directly
      */
-    public void changeLevel(LavaSimulator tracker, float amount, boolean notifySimulator)
+    public void changeLevel(LavaSimulator sim, float amount, boolean notifySimulator)
     {
         
-        if(this.id == 1947 || this.id == 3196 || this.id == 3198)
-                    Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
+//        if(this.id == 1947 || this.id == 3196 || this.id == 3198)
+//                    Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
         
         if(amount != 0)
         {
+            this.lastFlowTick = sim.getTickIndex();
             this.delta += amount;
-            if(notifySimulator) tracker.notifyCellChange(this);
+            if(notifySimulator) sim.notifyCellChange(this);
         }
     }
     
-    public void applyUpdates(LavaSimulator tracker)
+    public void applyUpdates(LavaSimulator sim)
     {
 //        Adversity.log.info("LavaSimCell applyUpdates id=" + this.id + "w/ delta=" + this.delta + " @" + this.pos.toString());
         
@@ -157,27 +130,27 @@ public class LavaCell
             
             if(oldFluidState != this.currentLevel > 0)
             {
-                tracker.updateFluidStatus(this, this.currentLevel > 0);
+                sim.updateFluidStatus(this, this.currentLevel > 0);
             }
             
             if(wasDirty)
             {
                 if(this.getVisibleLevel() == this.lastVisibleLevel) 
                 {
-                    tracker.dirtyCells.remove(this);
+                    sim.dirtyCells.remove(this);
                 }
                 
             }
             else if(this.getVisibleLevel() != this.lastVisibleLevel)
             {
-                tracker.dirtyCells.add(this);
+                sim.dirtyCells.add(this);
             }
             
 
         }
     }
     
-    public void provideBlockUpdate(LavaSimulator tracker, Collection<LavaBlockUpdate> updateList)
+    public void provideBlockUpdate(LavaSimulator sim, Collection<LavaBlockUpdate> updateList)
     {
         if(this.isBarrier) return;
         
@@ -396,5 +369,16 @@ public class LavaCell
     public boolean isRetained()
     {
         return this.referenceCount > 0;
+    }
+    
+    public int getLastFlowTick()
+    {
+        return this.lastFlowTick;
+    }
+    
+    /** for use by NBT loader */
+    public void setLastFlowTick(int lastFlowTick)
+    {
+        this.lastFlowTick = lastFlowTick;
     }
 }

@@ -8,7 +8,6 @@ import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockWall;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -35,8 +34,6 @@ public class EntityLavaParticle extends Entity
     private static final String TAG_AMOUNT = "amt";
 
     private float renderScale;
-
-    private int tickCount = 0;
 
     private static final DataParameter<Float> FLUID_AMOUNT = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
 
@@ -167,7 +164,7 @@ public class EntityLavaParticle extends Entity
 
         super.onUpdate();
 
-        if(this.tickCount++ > 600)
+        if(this.ticksExisted > 600)
         {
             Adversity.log.info("Too long. What's up?");
         }

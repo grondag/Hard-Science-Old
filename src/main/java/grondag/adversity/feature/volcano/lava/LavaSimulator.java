@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
-import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -21,7 +20,6 @@ import grondag.adversity.simulator.base.SimulationNode;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -31,10 +29,11 @@ import net.minecraft.world.World;
  * Filler block placement - some being missed?
  * 
  * FEATURES
- * Particle damage to entities
  * Cooling
+ * Reintegrate with volcano
  * Handle flowing terrain
  *      Update Drop Calculation
+ * Particle damage to entities
  *
  * Handle multiple worlds
  * Handle unloaded chunks
@@ -102,6 +101,7 @@ public class LavaSimulator extends SimulationNode
     {
         this.tickIndex++;
         
+        //TODO: not sure if still needed - not doing any deferred updates
         if(updatedCells.size() > 0)
         {
             Adversity.log.info("LavaSim updatedCells, cell count=" + updatedCells.size() );
@@ -115,6 +115,8 @@ public class LavaSimulator extends SimulationNode
             
             this.setSaveDirty(true);
         }
+        
+        this.doCooling();
         
         if(--ticksUntilNextValidation == 0)
         {
@@ -186,6 +188,35 @@ public class LavaSimulator extends SimulationNode
             }
         }
     
+    }
+    
+    private int coolingCounter = 20;
+    
+    private void doCooling()
+    {
+        if(coolingCounter-- == 0)
+        {
+            coolingCounter = 20;
+            
+            for(LavaCell cell : cellsWithFluid.values().toArray(new LavaCell[0]))
+            {
+                float amount = cell.getCurrentLevel();
+                if(amount > 0 && this.getTickIndex() - cell.getLastFlowTick() > 200)
+                {
+                    int visibleLevel = cell.getVisibleLevel();
+                    cell.changeLevel(this, -amount, false);
+                    cell.applyUpdates(this);
+                    cell.clearBlockUpdate();
+                    if(visibleLevel > 0)
+                    {
+                        this.world.setBlockState(cell.pos, IFlowBlock.stateWithDiscreteFlowHeight(
+                                NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK.getDefaultState(), visibleLevel));
+                        cell.validate(this, true);
+                    }
+                };
+            }
+        }
+     
     }
     
     public void doStep()
@@ -581,54 +612,6 @@ public class LavaSimulator extends SimulationNode
     }
     
     /**
-     * Recursively elevates lava blocks on line between fromPos and origin, including origin,
-     * starting at posting startPos, based on distance to origin. From block is assumed to be one high.
-     * EachOrigin should be distance high, up to the max. 
-     * If lava block is already as high as distance would indicate, does not affect it.
-     */
-    private void raiseLavaToOrigin(BlockPos fromPos, BlockPos startPos, BlockPos origin)
-    {
-        //methods below wants 3d not 3i, and also need to go from middle of blocks
-        Vec3d from3d = new Vec3d(0.5 + fromPos.getX(), 0.5 + fromPos.getY(), 0.5 + fromPos.getZ());
-        Vec3d to3d = new Vec3d(0.5 + origin.getX(), 0.5 + origin.getY(), 0.5 + origin.getZ());
-        
-        int distanceSquaredToOrigin = Useful.squared(origin.getX() - startPos.getX()) 
-                + Useful.squared(origin.getZ() - startPos.getZ());
-        
-        Vec3d direction = to3d.subtract(from3d);
-        for(int i = 0; i < HorizontalFace.values().length; i++)
-        {
-            BlockPos testPos = startPos.add(HorizontalFace.values()[i].directionVector);
-            
-            //block has to be closer to origin than the starting position
-            if(distanceSquaredToOrigin > Useful.squared(origin.getX() - testPos.getX()) 
-                    + Useful.squared(origin.getZ() - testPos.getZ()))
-            {
-                //Use AABB slightly larger than block to handle case of 45deg angle
-                //Otherwise would need special handling for diagonals and adjacent in that case.
-                AxisAlignedBB box = new AxisAlignedBB(-0.1 + testPos.getX(), testPos.getY(), -0.1 + testPos.getZ(),
-                1.1 + testPos.getX(), 1 + testPos.getY(), 1.1 + testPos.getZ());
-                if(Useful.doesRayIntersectAABB(from3d, direction, box))
-                {
-                    IBlockState state = this.world.getBlockState(testPos);
-                    if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-                    {
-                        int distance = (int) Math.round(Math.sqrt(fromPos.distanceSq(testPos)));
-                        int newHeight = Math.max(IFlowBlock.getFlowHeightFromState(state), Math.min(distance + 1,  FlowHeightState.BLOCK_LEVELS_INT));
-                        this.world.setBlockState(testPos, IFlowBlock.stateWithDiscreteFlowHeight(state, newHeight));
-                        adjustmentList.add(testPos);
-    
-                        if(!testPos.equals(origin))
-                        {
-                            raiseLavaToOrigin(fromPos, testPos, origin);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
      * Melts static height blocks if geometry would be different from current.
      * And turns full cube dynamic blocks into static cube blocks.
      * Returns true if is a height block, even if no adjustement was needed.
@@ -696,8 +679,8 @@ public class LavaSimulator extends SimulationNode
         
         int[] saveData = nbt.getIntArray(TAG_SAVE_DATA);
         
-        //to be valid, must have a multiple of two
-        if(saveData == null || saveData.length % 4 != 0)
+        //confirm correct size
+        if(saveData == null || saveData.length % 5 != 0)
         {
             Adversity.log.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
             return;
@@ -708,11 +691,12 @@ public class LavaSimulator extends SimulationNode
         {
             LavaCell cell = this.getCell(new BlockPos(saveData[i++], saveData[i++], saveData[i++]));
             
-            // protect against corrupt saves
+            // protect against corrupt saves that contain same cell twice
             if(cell.getCurrentLevel() == 0)
             {
                 cell.changeLevel(this, Float.intBitsToFloat(saveData[i++]), false);
                 cell.applyUpdates(this);
+                cell.setLastFlowTick(saveData[i++]);
                 this.totalFluidRegistered += cell.getCurrentLevel();
             }
         }
@@ -724,7 +708,7 @@ public class LavaSimulator extends SimulationNode
     public void writeToNBT(NBTTagCompound nbt)
     {
         Adversity.log.info("Saving " + cellsWithFluid.size() + " lava cells.");
-        int[] saveData = new int[cellsWithFluid.size() * 4];
+        int[] saveData = new int[cellsWithFluid.size() * 5];
         int i = 0;
         
         for(LavaCell cell: cellsWithFluid.values())
@@ -733,6 +717,7 @@ public class LavaSimulator extends SimulationNode
             saveData[i++] = cell.pos.getY();
             saveData[i++] = cell.pos.getZ();
             saveData[i++] = Float.floatToIntBits(cell.getCurrentLevel());
+            saveData[i++] = cell.getLastFlowTick();
         }       
         
         nbt.setIntArray(TAG_SAVE_DATA, saveData);
