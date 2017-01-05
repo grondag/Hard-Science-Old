@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock;
 
+import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.VolcanicLavaBlock;
 import grondag.adversity.feature.volcano.Volcano;
 import grondag.adversity.library.model.quadfactory.LightingMode;
@@ -211,7 +212,7 @@ public class NiceBlockRegistrar
     public static final NiceBlockPlus HEIGHT_STONE_BLOCK = new HeightBlock(HEIGHT_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "stacked");
     public static final NiceItemBlock HEIGHT_STONE_ITEM = new NiceItemBlock(HEIGHT_STONE_BLOCK);
 
-    
+    //TODO: move all these to volcano package
     private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("lava", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
     private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
@@ -244,54 +245,92 @@ public class NiceBlockRegistrar
     private final static FlowModelFactory HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_3_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
-    private static final ModelDispatcher HOT_FLOWING_BASALT_0_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_0_MODEL);    
-    public static final NiceBlock HOT_FLOWING_BASALT_0_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_flow", false)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_0_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_HEIGHT_BLOCK);
-    public static final NiceBlock HOT_FLOWING_BASALT_0_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_fill", true)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_0_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_FILLER_BLOCK);
-
-    private static final ModelDispatcher HOT_FLOWING_BASALT_1_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_1_MODEL);    
-    public static final NiceBlock HOT_FLOWING_BASALT_1_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_flow", false)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_1_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_HEIGHT_BLOCK);
-    public static final NiceBlock HOT_FLOWING_BASALT_1_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_fill", true)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_1_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_FILLER_BLOCK);
-
-    private static final ModelDispatcher HOT_FLOWING_BASALT_2_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_2_MODEL);    
-    public static final NiceBlock HOT_FLOWING_BASALT_2_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_flow", false)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_2_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_HEIGHT_BLOCK);
-    public static final NiceBlock HOT_FLOWING_BASALT_2_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_fill", true)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_2_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_FILLER_BLOCK);
-
-    private static final ModelDispatcher HOT_FLOWING_BASALT_3_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_3_MODEL);    
-    public static final NiceBlock HOT_FLOWING_BASALT_3_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_flow", false)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_3_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_HEIGHT_BLOCK);
-    public static final NiceBlock HOT_FLOWING_BASALT_3_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_fill", true)
-            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
-    public static final NiceItemBlock HOT_FLOWING_BASALT_3_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_FILLER_BLOCK);
-
+    // COOL BASALT
     private static final ModelDispatcher COOL_FLOWING_BASALT_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL); 
-    
-    public static final FlowStaticBlock COOL_STATIC_BASALT_HEIGHT_BLOCK = (FlowStaticBlock) new FlowStaticBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "static_flow", false)
-            .setDropItem(Volcano.basaltRubble);
-    public static final NiceItemBlock COOL_STATIC_BASALT_HEIGHT_ITEM = new NiceItemBlock(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-    public static final FlowStaticBlock COOL_STATIC_BASALT_FILLER_BLOCK = (FlowStaticBlock) new FlowStaticBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "static_fill", true)
-            .setDropItem(Volcano.basaltRubble);
-    public static final NiceItemBlock COOL_STATIC_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_STATIC_BASALT_FILLER_BLOCK);
-   
+    // DYNAMIC VERSION
     public static final NiceBlock COOL_FLOWING_BASALT_HEIGHT_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "flow", false)
             .setDropItem(Volcano.basaltRubble);
     public static final NiceItemBlock COOL_FLOWING_BASALT_HEIGHT_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_HEIGHT_BLOCK);
     public static final NiceBlock COOL_FLOWING_BASALT_FILLER_BLOCK = new FlowDynamicBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "fill", true)
             .setDropItem(Volcano.basaltRubble);
     public static final NiceItemBlock COOL_FLOWING_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_FLOWING_BASALT_FILLER_BLOCK);
-   
+    // STATIC VERSION
+    public static final FlowStaticBlock COOL_STATIC_BASALT_HEIGHT_BLOCK = (FlowStaticBlock) new FlowStaticBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "static_flow", false)
+            .setDropItem(Volcano.basaltRubble);
+    public static final NiceItemBlock COOL_STATIC_BASALT_HEIGHT_ITEM = new NiceItemBlock(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+    public static final FlowStaticBlock COOL_STATIC_BASALT_FILLER_BLOCK = (FlowStaticBlock) new FlowStaticBlock(COOL_FLOWING_BASALT_DISPATCH, BaseMaterial.BASALT, "static_fill", true)
+            .setDropItem(Volcano.basaltRubble);
+    public static final NiceItemBlock COOL_STATIC_BASALT_FILLER_ITEM = new NiceItemBlock(COOL_STATIC_BASALT_FILLER_BLOCK);
+ 
+    
+    // COOLING BASALT
+    private static final ModelDispatcher HOT_FLOWING_BASALT_0_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_0_MODEL);    
+    // DNYAMIC VERSION
+    public static final NiceBlock HOT_FLOWING_BASALT_0_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_flow", false)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_0_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_FLOWING_BASALT_0_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "cooling_fill", true)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_0_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_0_FILLER_BLOCK);
+    // STATIC VERSION
+    public static final NiceBlock HOT_STATIC_BASALT_0_HEIGHT_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "static_cooling_flow", false)
+            .setCoolingBlockInfo(COOL_STATIC_BASALT_HEIGHT_BLOCK, 1).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_0_HEIGHT_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_0_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_STATIC_BASALT_0_FILLER_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_0_DISPATCH, BaseMaterial.BASALT, "static_cooling_fill", true)
+            .setCoolingBlockInfo(COOL_STATIC_BASALT_FILLER_BLOCK, 1).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_0_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_0_FILLER_BLOCK);
+
+    // WARM BASALT
+    private static final ModelDispatcher HOT_FLOWING_BASALT_1_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_1_MODEL);
+    // DYNAMIC VERSION
+    public static final NiceBlock HOT_FLOWING_BASALT_1_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_flow", false)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_1_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_FLOWING_BASALT_1_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "warm_fill", true)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_1_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_1_FILLER_BLOCK);
+    // STATIC VERSION
+    public static final NiceBlock HOT_STATIC_BASALT_1_HEIGHT_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "static_warm_flow", false)
+            .setCoolingBlockInfo((FlowStaticBlock) HOT_STATIC_BASALT_0_HEIGHT_BLOCK, 2).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_1_HEIGHT_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_1_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_STATIC_BASALT_1_FILLER_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_1_DISPATCH, BaseMaterial.BASALT, "static_warm_fill", true)
+            .setCoolingBlockInfo((FlowStaticBlock) HOT_STATIC_BASALT_0_FILLER_BLOCK, 2).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_1_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_1_FILLER_BLOCK);
+    
+    // HOT BASALT
+    private static final ModelDispatcher HOT_FLOWING_BASALT_2_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_2_MODEL);
+    // DYNAMIC VERSION
+    public static final NiceBlock HOT_FLOWING_BASALT_2_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_flow", false)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_2_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_FLOWING_BASALT_2_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "hot_fill", true)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_2_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_2_FILLER_BLOCK);
+    // STATIC VERSION
+    public static final NiceBlock HOT_STATIC_BASALT_2_HEIGHT_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "static_hot_flow", false)
+            .setCoolingBlockInfo((FlowStaticBlock) HOT_STATIC_BASALT_1_HEIGHT_BLOCK, 3).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_2_HEIGHT_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_2_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_STATIC_BASALT_2_FILLER_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_2_DISPATCH, BaseMaterial.BASALT, "static_hot_fill", true)
+            .setCoolingBlockInfo((FlowStaticBlock) HOT_STATIC_BASALT_1_FILLER_BLOCK, 3).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_2_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_2_FILLER_BLOCK);
+
+    // VERY HOT BASALT
+    private static final ModelDispatcher HOT_FLOWING_BASALT_3_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL, HOT_FLOWING_BASALT_3_MODEL);  
+    // DYNAMIC VERSION
+    public static final NiceBlock HOT_FLOWING_BASALT_3_HEIGHT_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_flow", false)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_3_HEIGHT_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_FLOWING_BASALT_3_FILLER_BLOCK = new FlowDynamicBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "very_hot_fill", true)
+            .setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_FLOWING_BASALT_3_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_BASALT_3_FILLER_BLOCK);
+    // STATIC VERSION
+    public static final NiceBlock HOT_STATIC_BASALT_3_HEIGHT_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "static_very_hot_flow", false)
+            .setCoolingBlockInfo((FlowStaticBlock) HOT_STATIC_BASALT_2_HEIGHT_BLOCK, 4).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_3_HEIGHT_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_3_HEIGHT_BLOCK);
+    public static final NiceBlock HOT_STATIC_BASALT_3_FILLER_BLOCK = new CoolingBlock(HOT_FLOWING_BASALT_3_DISPATCH, BaseMaterial.BASALT, "static_very_hot_fill", true)
+            .setCoolingBlockInfo((FlowStaticBlock) HOT_STATIC_BASALT_2_FILLER_BLOCK, 4).setDropItem(Volcano.basaltRubble).setAllowSilkHarvest(false);
+    public static final NiceItemBlock HOT_STATIC_BASALT_3_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_BASALT_3_FILLER_BLOCK);
+  
     
     private final static ModelFactory.ModelInputs BASALT_COBBLE_INPUTS = new ModelFactory.ModelInputs("cobble", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static ColorModelFactory BASALT_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BASALT,
@@ -340,26 +379,39 @@ public class NiceBlockRegistrar
     static
     {
         //TODO: put back
-//        ((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-//        ((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
+        ((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
+    
+        //TODO: won't need these if use static version exclusively
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_HEIGHT_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_0_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_FILLER_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_0_FILLER_BLOCK);   
         
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_0_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_1_HEIGHT_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_1_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_1_FILLER_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_1_FILLER_BLOCK);
         
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_1_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_1_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_2_HEIGHT_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_2_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_2_FILLER_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_2_FILLER_BLOCK);   
         
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_2_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_2_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
-        
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_3_HEIGHT_BLOCK).setStaticVersion(COOL_STATIC_BASALT_HEIGHT_BLOCK);
-        ((FlowDynamicBlock)HOT_FLOWING_BASALT_3_FILLER_BLOCK).setStaticVersion(COOL_STATIC_BASALT_FILLER_BLOCK);   
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_3_HEIGHT_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_3_HEIGHT_BLOCK);
+        ((FlowDynamicBlock)HOT_FLOWING_BASALT_3_FILLER_BLOCK).setStaticVersion((FlowStaticBlock)HOT_STATIC_BASALT_3_FILLER_BLOCK);   
         
         ((FlowDynamicBlock)HOT_FLOWING_LAVA_HEIGHT_BLOCK).setStaticVersion(null);
         ((FlowDynamicBlock)HOT_FLOWING_LAVA_FILLER_BLOCK).setStaticVersion(null);   
         
         ((FlowStaticBlock)COOL_STATIC_BASALT_HEIGHT_BLOCK).setDynamicVersion((FlowDynamicBlock)COOL_FLOWING_BASALT_HEIGHT_BLOCK);
         ((FlowStaticBlock)COOL_STATIC_BASALT_FILLER_BLOCK).setDynamicVersion((FlowDynamicBlock)COOL_FLOWING_BASALT_FILLER_BLOCK);   
+        
+        ((FlowStaticBlock)HOT_STATIC_BASALT_0_HEIGHT_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_0_HEIGHT_BLOCK);
+        ((FlowStaticBlock)HOT_STATIC_BASALT_0_FILLER_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_0_FILLER_BLOCK);   
+        
+        ((FlowStaticBlock)HOT_STATIC_BASALT_1_HEIGHT_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_1_HEIGHT_BLOCK);
+        ((FlowStaticBlock)HOT_STATIC_BASALT_1_FILLER_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_1_FILLER_BLOCK);
+        
+        ((FlowStaticBlock)HOT_STATIC_BASALT_2_HEIGHT_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_2_HEIGHT_BLOCK);
+        ((FlowStaticBlock)HOT_STATIC_BASALT_2_FILLER_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_2_FILLER_BLOCK);   
+        
+        ((FlowStaticBlock)HOT_STATIC_BASALT_3_HEIGHT_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_3_HEIGHT_BLOCK);
+        ((FlowStaticBlock)HOT_STATIC_BASALT_3_FILLER_BLOCK).setDynamicVersion((FlowDynamicBlock)HOT_FLOWING_BASALT_3_FILLER_BLOCK);  
      
     
     }

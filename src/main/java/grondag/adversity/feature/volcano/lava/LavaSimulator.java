@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,9 +15,11 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -190,16 +193,28 @@ public class LavaSimulator extends SimulationNode
     
     }
     
-    private int coolingCounter = 20;
+    private int coolingCounter = 21;
+    
+    private LinkedList<LavaCell> coolingCells = new LinkedList<LavaCell>();
     
     private void doCooling()
     {
-        if(coolingCounter-- == 0)
+     
+        coolingCounter--;        
+        
+        if(!coolingCells.isEmpty())
         {
-            coolingCounter = 20;
+            //max shouldn't be needed b/c will be empty b4 we get to zero, but safer
+            int count = coolingCells.size() / Math.max(1, coolingCounter);
             
-            for(LavaCell cell : cellsWithFluid.values().toArray(new LavaCell[0]))
+            if(coolingCounter > 0 && coolingCells.size() > (count * coolingCounter) && Useful.SALT_SHAKER.nextInt(coolingCounter + 1) < (coolingCells.size() - count * coolingCounter))
             {
+                count++;
+            }
+            
+            for(int i = 0; i < count; i++)
+            {
+                LavaCell cell = coolingCells.removeFirst();
                 float amount = cell.getCurrentLevel();
                 if(amount > 0 && this.getTickIndex() - cell.getLastFlowTick() > 200)
                 {
@@ -209,14 +224,63 @@ public class LavaSimulator extends SimulationNode
                     cell.clearBlockUpdate();
                     if(visibleLevel > 0)
                     {
-                        this.world.setBlockState(cell.pos, IFlowBlock.stateWithDiscreteFlowHeight(
-                                NiceBlockRegistrar.HOT_FLOWING_BASALT_0_HEIGHT_BLOCK.getDefaultState(), visibleLevel));
+                        coolLava(cell.pos.up(2), true);
+                        coolLava(cell.pos.up(), true);
+                        coolLava(cell.pos, false);
                         cell.validate(this, true);
                     }
                 };
+                
+            }
+        }
+        else if(coolingCounter <= 0)
+        {
+            coolingCounter = 21;
+            
+            LavaCell[] cells = cellsWithFluid.values().toArray(new LavaCell[0]);
+            Arrays.sort(cells, new Comparator<LavaCell>() 
+            {
+                @Override
+                public int compare(LavaCell o1, LavaCell o2)
+                {
+                    // note reverse order
+                    return Integer.compare(o2.getLastFlowTick(), o1.getLastFlowTick());
+                }
+            });
+            
+            for( LavaCell cell : cells)
+            {
+                if(this.getTickIndex() - cell.getLastFlowTick() > 200)
+                    coolingCells.add(cell);
+                else
+                    break;
             }
         }
      
+    }
+    
+    private void coolLava(BlockPos pos, boolean fillerOnly)
+    {
+        IBlockState state = this.world.getBlockState(pos);
+        Block currentBlock = state.getBlock();
+        FlowStaticBlock newBlock = null;
+        long modelKey = 0;
+        if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        {
+            modelKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getModelStateKey(state, world, pos);
+            newBlock = (FlowStaticBlock) NiceBlockRegistrar.HOT_STATIC_BASALT_3_FILLER_BLOCK;
+        }
+        else if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK && !fillerOnly)
+        {
+            modelKey = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getModelStateKey(state, world, pos);
+            newBlock = (FlowStaticBlock) NiceBlockRegistrar.HOT_STATIC_BASALT_3_HEIGHT_BLOCK;
+        }
+        
+        if(newBlock != null)
+        {
+            this.world.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+            newBlock.setModelStateKey(state, world, pos, modelKey);
+        }
     }
     
     public void doStep()
