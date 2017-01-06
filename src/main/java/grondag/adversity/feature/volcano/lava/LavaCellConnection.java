@@ -264,7 +264,7 @@ public class LavaCellConnection
         {
             flow = this.getVerticalFlow(sim);    
           //Damp tiny oscillations, but always allow downward flow
-            if(flow > 0 && flow < 0.0001) flow = 0;
+            if(flow > 0 && flow < 0.001) flow = 0;
         }
         else
         {
@@ -272,7 +272,7 @@ public class LavaCellConnection
             
             //Damp tiny oscillations
             //TODO: make threshold configurable
-            if(Math.abs(flow) < 0.00001) flow = 0;
+            if(Math.abs(flow) < 0.001) flow = 0;
         }
         this.currentFlowRate = flow;
 

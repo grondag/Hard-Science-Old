@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
@@ -24,6 +25,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityLavaParticle extends Entity
 {
@@ -369,7 +372,7 @@ public class EntityLavaParticle extends Entity
                 {
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
                     IBlockState state = worldObj.getBlockState(blockpos$pooledmutableblockpos);
-                    if(state.getMaterial() != Material.AIR && state.getBlock() != NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK && LavaTerrainHelper.canLavaDisplace(state))
+                    if(state.getMaterial() != Material.AIR && !IFlowBlock.isFlowFiller(state.getBlock()) && LavaTerrainHelper.canLavaDisplace(state))
                     {
                         this.worldObj.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }
@@ -396,6 +399,12 @@ public class EntityLavaParticle extends Entity
     protected void entityInit()
     {
         this.dataManager.register(FLUID_AMOUNT, 1F);
+    }
+    
+    @SideOnly(Side.CLIENT)
+    public int getBrightnessForRender(float partialTicks)
+    {
+        return 15728880;
     }
 
 }

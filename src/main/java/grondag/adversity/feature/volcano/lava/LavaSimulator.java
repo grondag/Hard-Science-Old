@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Filler block placement - some being missed?
+ * Handle lastFlowTick overrun
  * 
  * FEATURES
  * Cooling
@@ -218,16 +219,29 @@ public class LavaSimulator extends SimulationNode
                 float amount = cell.getCurrentLevel();
                 if(amount > 0 && this.getTickIndex() - cell.getLastFlowTick() > 200)
                 {
-                    int visibleLevel = cell.getVisibleLevel();
-                    cell.changeLevel(this, -amount, false);
-                    cell.applyUpdates(this);
-                    cell.clearBlockUpdate();
-                    if(visibleLevel > 0)
+                    boolean hotNeighborFound = false;
+                    for(EnumFacing face : EnumFacing.VALUES)
                     {
-                        coolLava(cell.pos.up(2), true);
-                        coolLava(cell.pos.up(), true);
-                        coolLava(cell.pos, false);
-                        cell.validate(this, true);
+                        LavaCell neighbor = this.cellsWithFluid.get(cell.pos.add(face.getDirectionVec()));
+                        if(neighbor != null && neighbor.getCurrentLevel() > 0 && this.getTickIndex() - neighbor.getLastFlowTick() < 200)
+                        {
+                            hotNeighborFound = true;
+                            break;
+                        }
+                    }
+                    if(!hotNeighborFound)
+                    {
+                        int visibleLevel = cell.getVisibleLevel();
+                        cell.changeLevel(this, -amount, false);
+                        cell.applyUpdates(this);
+                        cell.clearBlockUpdate();
+                        if(visibleLevel > 0)
+                        {
+                            coolLava(cell.pos.up(2), true);
+                            coolLava(cell.pos.up(), true);
+                            coolLava(cell.pos, false);
+                            cell.validate(this, true);
+                        }
                     }
                 };
                 
@@ -243,8 +257,7 @@ public class LavaSimulator extends SimulationNode
                 @Override
                 public int compare(LavaCell o1, LavaCell o2)
                 {
-                    // note reverse order
-                    return Integer.compare(o2.getLastFlowTick(), o1.getLastFlowTick());
+                    return Integer.compare(o1.getLastFlowTick(), o2.getLastFlowTick());
                 }
             });
             
@@ -278,8 +291,10 @@ public class LavaSimulator extends SimulationNode
         
         if(newBlock != null)
         {
+            this.itMe = true;
             this.world.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
             newBlock.setModelStateKey(state, world, pos, modelKey);
+            this.itMe = false;
         }
     }
     
@@ -740,6 +755,7 @@ public class LavaSimulator extends SimulationNode
         dirtyCells.clear();
         blockUpdates.clear();
         totalFluidRegistered = 0;
+        this.tickIndex = 0;
         
         int[] saveData = nbt.getIntArray(TAG_SAVE_DATA);
         
@@ -761,6 +777,7 @@ public class LavaSimulator extends SimulationNode
                 cell.changeLevel(this, Float.intBitsToFloat(saveData[i++]), false);
                 cell.applyUpdates(this);
                 cell.setLastFlowTick(saveData[i++]);
+                this.tickIndex = Math.max(this.tickIndex, cell.getLastFlowTick());
                 this.totalFluidRegistered += cell.getCurrentLevel();
             }
         }
