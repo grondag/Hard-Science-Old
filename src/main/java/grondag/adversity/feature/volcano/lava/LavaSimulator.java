@@ -33,10 +33,9 @@ import net.minecraft.world.World;
  * Handle lastFlowTick overrun
  * 
  * FEATURES
- * Cooling
- * Reintegrate with volcano
  * Handle flowing terrain
  *      Update Drop Calculation
+ * Reintegrate with volcano
  * Particle damage to entities
  *
  * Handle multiple worlds
@@ -206,45 +205,44 @@ public class LavaSimulator extends SimulationNode
         if(!coolingCells.isEmpty())
         {
             //max shouldn't be needed b/c will be empty b4 we get to zero, but safer
-            int count = coolingCells.size() / Math.max(1, coolingCounter);
+            int chance = 1 + coolingCells.size() / 20;
             
-            if(coolingCounter > 0 && coolingCells.size() > (count * coolingCounter) && Useful.SALT_SHAKER.nextInt(coolingCounter + 1) < (coolingCells.size() - count * coolingCounter))
-            {
-                count++;
-            }
+            int count = Math.min(coolingCells.size(), chance - Useful.SALT_SHAKER.nextInt(20));
             
-            for(int i = 0; i < count; i++)
+            if(count > 0)
             {
-                LavaCell cell = coolingCells.removeFirst();
-                float amount = cell.getCurrentLevel();
-                if(amount > 0 && this.getTickIndex() - cell.getLastFlowTick() > 200)
+                for(int i = 0; i < count; i++)
                 {
-                    boolean hotNeighborFound = false;
-                    for(EnumFacing face : EnumFacing.VALUES)
+                    LavaCell cell = coolingCells.removeFirst();
+                    float amount = cell.getCurrentLevel();
+                    if(amount > 0 && this.getTickIndex() - cell.getLastFlowTick() > 200)
                     {
-                        LavaCell neighbor = this.cellsWithFluid.get(cell.pos.add(face.getDirectionVec()));
-                        if(neighbor != null && neighbor.getCurrentLevel() > 0 && this.getTickIndex() - neighbor.getLastFlowTick() < 200)
+                        boolean hotNeighborFound = false;
+                        for(EnumFacing face : EnumFacing.VALUES)
                         {
-                            hotNeighborFound = true;
-                            break;
+                            LavaCell neighbor = this.cellsWithFluid.get(cell.pos.add(face.getDirectionVec()));
+                            if(neighbor != null && neighbor.getCurrentLevel() > 0 && this.getTickIndex() - neighbor.getLastFlowTick() < 200)
+                            {
+                                hotNeighborFound = true;
+                                break;
+                            }
+                        }
+                        if(!hotNeighborFound)
+                        {
+                            int visibleLevel = cell.getVisibleLevel();
+                            cell.changeLevel(this, -amount, false);
+                            cell.applyUpdates(this);
+                            cell.clearBlockUpdate();
+                            if(visibleLevel > 0)
+                            {
+                                coolLava(cell.pos.up(2), true);
+                                coolLava(cell.pos.up(), true);
+                                coolLava(cell.pos, false);
+                                cell.validate(this, true);
+                            }
                         }
                     }
-                    if(!hotNeighborFound)
-                    {
-                        int visibleLevel = cell.getVisibleLevel();
-                        cell.changeLevel(this, -amount, false);
-                        cell.applyUpdates(this);
-                        cell.clearBlockUpdate();
-                        if(visibleLevel > 0)
-                        {
-                            coolLava(cell.pos.up(2), true);
-                            coolLava(cell.pos.up(), true);
-                            coolLava(cell.pos, false);
-                            cell.validate(this, true);
-                        }
-                    }
-                };
-                
+                }
             }
         }
         else if(coolingCounter <= 0)
