@@ -10,7 +10,9 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Queue;
 
@@ -18,6 +20,8 @@ import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
 import grondag.adversity.feature.volcano.lava.LavaBlockUpdate;
+import grondag.adversity.feature.volcano.lava.LavaCell;
+import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.Useful;
@@ -31,11 +35,9 @@ import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 
 //FIX/TEST
 
-
 //TODOS
 //simulation integration & control from simulation
 //volcano wand
-//tune lava flow shape
 //detection item
 //world gen
 
@@ -57,16 +59,28 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     // Activity cycle.
     private VolcanoStage stage = VolcanoStage.NEW;
+    
     /** max Y level of the volcano */
-    private int						level;
+    private int	level;
     /** current Y level for placing blocks */
-    private int						buildLevel;
-    private int						groundLevel;
-    private int backtrackLimit = 0;
+    private int	buildLevel;
+    private int	groundLevel;
+    
+    /** Y level of current clearing operation */
+    private int clearingLevel = CLEARING_LEVEL_RESTART;
+    
+    private static final int CLEARING_LEVEL_RESTART = -1;
+    
+    /** position within BORE_OFFSET list for array clearing.  Not persisited */
+    private int  offsetIndex;
+    
+    /** True if have made if all blocks in bore at current clearing level had lava */
+    private boolean levelAllClear;
+
     private int ticksActive = 0;
     private int lavaCounter = 0;
     private int lavaCooldownTicks = 0;
-    private int placementCountdown = 0;
+
 
     /** simulation delegate */
     private VolcanoNode             node;
@@ -77,55 +91,39 @@ public class TileVolcano extends TileEntity implements ITickable{
     private int nodeId = -1;
     private static final int NODE_NOT_FOUND = -1;
 
-    /**
-     * Spaces potentially available for flowing lava.
-     */
-//    private SpaceManager spaceManager;
-
-    /**
-     * Placed lava blocks that need to be cooled when flowing is done or paused.
-     */
-//    private BlockManager lavaBlocks;
-
-    /**
-     * Top lava blocks that should only be cooled once flowing is done for this level.
-     */
-//    private BlockManager topBlocks;
-
-    /**
-     * Blocks ready to be cooled at any time, irrespective of state.
-     */
-    private BlockManager coolingBlocks;
-
     //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
     
-//    /**
-//     * Blocks that need to be melted or checked for filler after placement.
-//     * Not saved to NBT because should be fully processed and cleared every tick.
-//     */
-//    private HashSet<BlockPos> adjustmentList;
-
-
-    /**
-     * Fluid simulator for lava blocks
-     */
-//    private LavaManager lavaManager;
-
-    /**
-     * lavaManager wants access to World, which will not work during ReadNBT.
-     * Save persistence data here for load on first tick.
-     */
-//    private int[] lavaManagerData;
-    
-    
     private int						hazeTimer		= 60;
+    
+    private static final int BORE_RADIUS = 5;
+    private static final int BORE_RADIUS_SQUARED = BORE_RADIUS * BORE_RADIUS;
+    
+    private static final ArrayList<Vec3i>  BORE_OFFSETS = new ArrayList<Vec3i>();
+    
+    static
+    {
+        for(int x = -BORE_RADIUS; x <= BORE_RADIUS; x++)
+        {
+            for(int z = -BORE_RADIUS; z <= BORE_RADIUS; z++)
+            {
+                if(x * x + z * z <= BORE_RADIUS_SQUARED)
+                {
+                    BORE_OFFSETS.add(new Vec3i(x, 0, z));
+                }
+            }
+        }
+    }
 
     public static enum VolcanoStage
     {
         NEW,
+        /** Clearing central bore, verifying can see sky */
+        CLEARING,
+        /** Can see sky and blowing out lava */
         FLOWING,
         /** Flow temporarily stopped to allow for cooling. */
         COOLING,
+        /** Waiting for activation */
         DORMANT,
         DEAD
     }
@@ -146,63 +144,10 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
     }
 
-
-
     private boolean isWithinBore(BlockPos posIn)
     {
-        return posIn.distanceSq(this.pos.getX(), posIn.getY(), this.pos.getZ()) <= Config.volcano().boreRadiusSquared;
+        return posIn.distanceSq(this.pos.getX(), posIn.getY(), this.pos.getZ()) <= BORE_RADIUS_SQUARED;
     }
-
-
-//    private boolean canDisplace(IBlockState state, BlockPos pos, Block block, boolean allowLava)
-//    {
-//        Material material = state.getMaterial();
-//
-//        if(material == Material.AIR) return true;
-//
-//        //can only displace core lava at top
-//        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-//        {
-//            if(this.isWithinBore(pos))
-//            {
-//                return allowLava && pos.getY() == this.level;
-//            }
-//            else
-//            {
-//                return allowLava;
-//            }
-//            
-//        }
-//
-//        if(pos.getY() == this.level && isWithinBore(pos)) return true;
-//
-//        if (IFlowBlock.isFlowFiller(state.getBlock())) return true;
-//
-//        if (material == Material.CLAY) return false;
-//        if (material == Material.DRAGON_EGG ) return false;
-//        if (material == Material.GROUND ) return false;
-//        if (material == Material.IRON ) return false;
-//        if (material == Material.SAND ) return false;
-//        if (material == Material.PORTAL ) return false;
-//        if (material == Material.ROCK ) return false;
-//        if (material == Material.ANVIL ) return false;
-//        if (material == Material.GRASS ) return false;
-//
-//        // Volcanic lava don't give no shits about your stuff.
-//        return true;        
-//    };
-
-    // True if block at this position cannot be displaced and is not already lava.
-    // Lava within bore counts as supporting.
-//    private boolean isSupportingBlock(BlockPos pos)
-//    {
-//        IBlockState state = this.worldObj.getBlockState(pos);
-//        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-//            return isWithinBore(pos);
-//        else
-//            return !canDisplace(state, pos, state.getBlock());
-//    }
-
 
     @Override
     public void update() 
@@ -223,13 +168,6 @@ public class TileVolcano extends TileEntity implements ITickable{
                 this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
                 this.stage = VolcanoStage.DORMANT;
                 this.level = this.pos.getY();
-//                this.lavaManager = new LavaManager(this);
-//                this.spaceManager = new SpaceManager(this.pos);
-//                this.lavaBlocks = new BlockManager(this.pos, true);
-//                this.topBlocks = new BlockManager(this.pos, true);
-                this.coolingBlocks = new BlockManager(this.pos, false);
-//                this.adjustmentList = new HashSet<BlockPos>();
-                this.lavaCooldownTicks = 0;
                 int moundRadius = Config.volcano().moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
@@ -246,51 +184,134 @@ public class TileVolcano extends TileEntity implements ITickable{
                     this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
                 }
             }
+            // no need to markDirty here - will be prompted by isNodeUpdateNeeded
             isNodeUpdateNeeded = true;
             
-            //Needs to happen after tile entity and chunk it is in are fully loaded
-            //because LavaManager needs access to the world. 
-            //Using node==null as trigger for 1st-time load.
-            //NB: tried this in onload - doesn't work because chunk isn't loaded 
-            //and recurses trying to retrieve the chunk containing the tile entity
-//            if(this.lavaManager == null && this.lavaManagerData != null)
-//            {
-//                this.lavaManager = new LavaManager(this, this.lavaManagerData);
-//                this.lavaManagerData = null;
-//            }
         }
 
         ticksActive++;
 
         VolcanoStage oldStage = this.stage;
         
-        
-//        Queue<LavaBlockUpdate> blockUpdates = cellManager.getBlockUpdates();
-//        
-//        LavaBlockUpdate update = blockUpdates.poll();       
-//        while(update != null)
-//        {
-//            worldObj.setBlockState(update.pos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
-//            this.adjustmentList.add(update.pos);
-//            update = blockUpdates.poll();
-//        }
-//        
-        
-        //doBlockUpdates();
-        
-//        doAdjustments();
-
-        isNodeUpdateNeeded = isNodeUpdateNeeded || this.stage != oldStage;
-
-        if(isNodeUpdateNeeded || (this.ticksActive & 0xF) == 0xF )
+        switch(this.stage)
         {
-            node.updateWorldState(ticksActive + 1000, level, stage);
-//            Adversity.log.info("updating Volcano status " + stage.name() + " @" + this.pos.toString());
+            case DORMANT:
+                // no need to markDirty here - will be prompted by state change
+                if(node.isActive()) this.stage = VolcanoStage.CLEARING;
+                break;
+                
+            case CLEARING:
+                this.stage = doClearing();
+                this.markDirty();
+                break;
+                
+            case COOLING:
+                this.stage = doCooling();
+                break;
+                
+            case FLOWING:
+                this.stage = node.isActive() ? doFlowing() : VolcanoStage.DORMANT;
+                this.markDirty();
+                break;
+                
+            case NEW:
+            default:
+                // New state is normally handled above.
+                // If this somehow happens, try to reestablish normalcy.
+                this.stage = VolcanoStage.DORMANT;
+                break;
+        
         }
 
-        this.markDirty();
+
+        if(isNodeUpdateNeeded || this.stage != oldStage || (this.ticksActive & 0xFF) == 0xFF )
+        {
+            node.updateWorldState(ticksActive + 1000, level, stage);
+            this.markDirty();
+        }
+
     }
 
+    /** 
+     * Clears out central bore and fills with lava until can see sky.
+     * Returns FLOWING if done and can move to next stage 
+     */
+    private VolcanoStage doClearing()
+    {
+        if(!node.isActive())
+        {
+            this.clearingLevel = CLEARING_LEVEL_RESTART;
+            return VolcanoStage.DORMANT;
+        }
+        
+        if(clearingLevel == CLEARING_LEVEL_RESTART)
+        {
+            this.clearingLevel = this.pos.getY() + 1;
+            this.level = Math.max(this.level, clearingLevel);
+            this.offsetIndex = 0;
+            this.levelAllClear = true;
+        }
+        
+        if(offsetIndex >= BORE_OFFSETS.size())
+        {
+            if(levelAllClear)
+            {
+                if(this.worldObj.canBlockSeeSky(this.pos.up(clearingLevel - pos.getY())))
+                {
+                    this.clearingLevel = CLEARING_LEVEL_RESTART;
+                    return VolcanoStage.FLOWING;
+                }
+                else
+                {
+                    this.clearingLevel++;
+                    this.levelAllClear = true;
+                    this.offsetIndex = 0;
+                    this.level = Math.max(this.level, clearingLevel);
+                }
+            }
+            else
+            {
+                this.levelAllClear = true;
+                this.offsetIndex = 0;
+            }
+        }
+        
+        Vec3i offset = BORE_OFFSETS.get(offsetIndex++);
+        BlockPos clearPos = new BlockPos(this.pos.getX() + offset.getX(), this.clearingLevel, this.pos.getZ() + offset.getZ());
+        
+        //if lava is somehow leaking, drop down a level
+        if(clearingLevel > this.pos.getY() + 1 && !clearBore(clearPos.down()))
+        {
+            clearingLevel--;
+            offsetIndex = 0;
+            this.levelAllClear = true;
+        }
+        else
+        {
+            if(!clearBore(clearPos)) this.levelAllClear = false;
+        }
+        return VolcanoStage.CLEARING;
+        
+    }
+    
+    /** 
+     * Waits for the number of active lava blocks in simulator to drop below the configured threshold.
+     * Return CLEARING if done and can move to next stage. 
+     */
+    private VolcanoStage doCooling()
+    {
+        return VolcanoStage.COOLING;
+    }
+    
+    /** 
+     * Ejects lava from top of volcano.
+     * Returns COOLING if too many lava blocks and needs cooling or CLEARING if blocked and needs clearing.
+     */
+    private VolcanoStage doFlowing()
+    {
+        return VolcanoStage.FLOWING;
+    }
+    
     private void doBlockUpdates()
     {
 
@@ -442,7 +463,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     {
         this.level++;
         this.buildLevel = this.level;
-        backtrackLimit = level + 1;
+//        backtrackLimit = level + 1;
         BlockPos startingPos = new BlockPos(this.getPos().getX(), this.level, this.getPos().getZ());
         IBlockState targetState = IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT);
         this.worldObj.setBlockState(startingPos, targetState);
@@ -461,57 +482,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 //        }
 //    }
 
-    private void doCooling()
-    {
-        BlockPlacement placement = coolingBlocks.pollFirstReadyEntry(this.ticksActive);
 
-        while(placement != null)
-        {
-            BlockPos target = placement.getPos();
-
-            IBlockState oldState = this.worldObj.getBlockState(target);
-
-            if(IFlowBlock.isFlowBlock(oldState.getBlock()))
-            {
-                NiceBlock oldBlock = (NiceBlock)oldState.getBlock();
-
-                //lava blocks should only be cooled as part of lava cooling
-         
-                NiceBlock newBlock = getNextCoolingBlock(oldBlock);
-                int meta = oldState.getValue(NiceBlock.META);
-
-                if(newBlock != null)
-                {
-                    if(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK
-                            && IFlowBlock.shouldBeFullCube(oldState, worldObj, target))
-                    {
-                        //                            Adversity.log.info("doCooling: set block from " 
-                        //                                    + worldObj.getBlockState(target).getBlock().getRegistryName() + " to " 
-                        //                                    + NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getRegistryName() + " @ " + target.toString());
-
-                        this.worldObj.setBlockState(target, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
-                                .withProperty(NiceBlock.META, meta));
-                    }
-                    else
-                    {
-                        //                            Adversity.log.info("doCooling: set block from " 
-                        //                                    + worldObj.getBlockState(target).getBlock().getRegistryName() + " to " 
-                        //                                    + newBlock.getRegistryName() + " @ " + target.toString());
-
-                        this.worldObj.setBlockState(target, newBlock.getDefaultState().withProperty(NiceBlock.META, meta));
-                    }
-
-                    if(!(newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK
-                            || newBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK))
-                    {
-                        coolingBlocks.add(target, ticksActive + Config.volcano().coolingLagTicks);
-                    } 
-                }
-            }
-
-            placement = coolingBlocks.pollFirstReadyEntry(this.ticksActive);
-        }
-    }
 
     private int getRandomBlockTicks()
     {
@@ -824,22 +795,54 @@ public class TileVolcano extends TileEntity implements ITickable{
 //        }
 //    }
     
-    private void clearBore(BlockPos clearPos)
+    
+    /**
+     * Sets to non-cooling lava if can be.
+     * Returns true if was already bedrock or mostly full of lava.
+     */
+    private boolean clearBore(BlockPos clearPos)
     {
-        if(!this.worldObj.isAirBlock(clearPos) 
-                && !(this.worldObj.getBlockState(clearPos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK))
+        IBlockState state = this.worldObj.getBlockState(clearPos);
+        Block block = state.getBlock();
+        if(block == Blocks.BEDROCK)
         {
-            //            Adversity.log.info("clearBore: set block from "
-            //                    + worldObj.getBlockState(clearPos).getBlock().getRegistryName() 
-            //                    + " to air @ " + clearPos.toString());
-
+            return true;
+        }
+        else if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        {
+            LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, false);
+            
+            //takes long time to get every cell to perfectly full - just has to be close enough
+            if(cell.getFluidAmount() > 0.95F) 
+            {
+                cell.setNeverCools(true);
+                return true;
+            }
+            else
+            {
+                Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity());
+                cell.setNeverCools(true);
+                return false;
+            }
+            
+        }
+        else
+        {
             this.worldObj.setBlockToAir(clearPos);
-            if(clearPos.getY() < this.groundLevel)
+            LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, true);
+            Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity());
+            cell.setNeverCools(true);
+            // don't build mound if above ground or if melting Basalt
+            if(clearPos.getY() < this.groundLevel && 
+                    !(block instanceof NiceBlock && ((NiceBlock)block).material == BaseMaterial.BASALT))
             {
                 buildMound();
             }
+            return false;
         }
     }
+    
+
 
     private void buildMound()
     {
@@ -862,12 +865,12 @@ public class TileVolcano extends TileEntity implements ITickable{
             top = top.down();
             state = this.worldObj.getBlockState(top);
         }
-        //avoid duplication of valuable blocks by clever nerds
 
         //        Adversity.log.info("buildMound: set block from " 
         //                + worldObj.getBlockState(top.up()).getBlock().getRegistryName() + " to " 
         //                + state.getBlock().getRegistryName() + " @ " + top.up().toString());
 
+        //avoid duplication of valuable blocks by clever nerds
         this.worldObj.setBlockState(top.up(), worldObj.getBiome(top).fillerBlock);
     }
 
@@ -916,69 +919,18 @@ public class TileVolcano extends TileEntity implements ITickable{
         return (material == BaseMaterial.BASALT || material == BaseMaterial.VOLCANIC_LAVA);
     }
 
-//    /**
-//     * Melts static height blocks if geometry would be different from current.
-//     * And turns full cube dynamic blocks into static cube blocks.
-//     * Returns true if is a height block, even if no adjustement was needed.
-//     */
-//    private boolean adjustHeightBlockIfNeeded(BlockPos targetPos)
-//    {
-//
-//        if(targetPos == null) return false;
-//
-//        //        Adversity.log.info("meltExposedBasalt @" + targetPos.toString());        
-//
-//        IBlockState state = worldObj.getBlockState(targetPos);
-//        if(!(state.getBlock() instanceof NiceBlock)) return false;
-//
-//        NiceBlock block = (NiceBlock)state.getBlock();
-//
-//        if(!IFlowBlock.isFlowHeight(block)) return false;
-//
-//        boolean isFullCube = IFlowBlock.shouldBeFullCube(state, worldObj, targetPos);
-//
-//
-//        if(isFullCube)
-//        {
-//            if(block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
-//            {
-//                //                Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
-//                //                        + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
-//                //                        + NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
-//                this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
-//                        .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-//            }
-//        }
-//        else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK 
-//                || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK 
-//                || block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
-//        {
-//
-//            //            Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
-//            //                    + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
-//            //                    + NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
-//
-//
-//            this.worldObj.setBlockState(targetPos, NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK.getDefaultState()
-//                    .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-//            this.coolingBlocks.add(targetPos, ticksActive + Config.volcano().coolingLagTicks);
-//        }
-//
-//        return true;
-//    }
-
-//    private void trackLavaBlock(BlockPos lavaPos)
-//    {
-//        //blocks within bore never cool so no reason to track them
-//        if(isWithinBore(lavaPos)) return;
-//
-//        if(lavaPos.getY() >= level)
-//            this.topBlocks.add(lavaPos, ++lavaCounter);
-//        else
-//            this.lavaBlocks.add(lavaPos, ++lavaCounter);
-//    }
-
-
+    /**
+     * Simplified version.  We are always under bedrock so should have no need to update neighbors.
+     * Our metadata never changes and we don't care about redstone signals.
+     */
+    @Override
+    public void markDirty()
+    {
+        if (this.worldObj != null)
+        {
+            this.worldObj.markChunkDirty(this.pos, this);
+        }
+    }
   
 
     //	@Override
@@ -1106,7 +1058,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         this.buildLevel = tagCompound.getInteger("buildLevel");
         this.groundLevel = tagCompound.getInteger("groundLevel");
         this.ticksActive = tagCompound.getInteger("ticksActive");
-        this.backtrackLimit = tagCompound.getInteger("backtrackLimit");
+        this.clearingLevel = tagCompound.getInteger("clearingLevel");
         this.lavaCounter = tagCompound.getInteger("lavaCounter");
         this.lavaCooldownTicks = tagCompound.getInteger("cooldownTicks");
 
@@ -1132,7 +1084,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         tagCompound.setInteger("buildLevel", this.buildLevel);
         tagCompound.setInteger("groundLevel", this.groundLevel);
         tagCompound.setInteger("ticksActive", this.ticksActive);
-        tagCompound.setInteger("backtrackLimit", this.backtrackLimit);
+        tagCompound.setInteger("clearingLevel", this.clearingLevel);
         tagCompound.setInteger("lavaCounter", this.lavaCounter);
         tagCompound.setInteger("cooldownTicks", lavaCooldownTicks);
 

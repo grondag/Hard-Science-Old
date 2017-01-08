@@ -43,8 +43,13 @@ public class LavaCell
 
     private boolean isBarrier;
 
-    /** marks the last time lava flowed in or out of this cell */
-    private int lastFlowTick;
+    private static final int NEVER_COOLS = -1;
+    /**
+     *  Marks the last time lava flowed in or out of this cell.
+     *  Set to NEVER_COOLS (negative value) if should never cool.
+     */
+    private int lastFlowTick = 0;
+    
 
     @Override 
     public int hashCode()
@@ -78,39 +83,17 @@ public class LavaCell
         //TODO: cache for performance?  
         //Suspect DOWN and UP are most accessed - could store cells in 256-tall vertical arrays within an x,z hash table
         //Vertical access would then be very fast without need to cache references
-        return sim.getCell(pos.add(face.getDirectionVec()));
-
+        return sim.getCell(pos.add(face.getDirectionVec()), false);
     }
 
 
     public void changeLevel(LavaSimulator sim, float amount)
     {
-        this.changeLevel(sim, amount, true);
-    }
-
-    /**
-     * Set notifySimulator = false if going to call applyUpdate directly
-     */
-    public void changeLevel(LavaSimulator sim, float amount, boolean notifySimulator)
-    {
-
-        //        if(this.id == 1947 || this.id == 3196 || this.id == 3198)
-        //                    Adversity.log.info("changeLevel cell=" + this.id + " amount=" + amount);
-
         if(amount != 0)
         {
-            this.lastFlowTick = sim.getTickIndex();
-            this.delta += amount;
-            if(notifySimulator) sim.notifyCellChange(this);
-        }
-    }
-
-    public void applyUpdates(LavaSimulator sim)
-    {
-        //        Adversity.log.info("LavaSimCell applyUpdates id=" + this.id + "w/ delta=" + this.delta + " @" + this.pos.toString());
-
-        if(this.delta != 0)
-        {
+            // don't update lastflowTick if this is marked to never cool
+            if(this.lastFlowTick != NEVER_COOLS) this.lastFlowTick = sim.getTickIndex();
+            
             final boolean wasDirty = this.getVisibleLevel() != this.lastVisibleLevel;
             boolean oldFluidState = false;
             
@@ -118,7 +101,7 @@ public class LavaCell
             {
                 oldFluidState = true;
             }
-            else if(this.delta > 0)
+            else if(amount > 0)
             {
                 
                 // When fluid is first added to a cell with a floor - we melt the floor and include it in the lava.
@@ -126,9 +109,8 @@ public class LavaCell
                 this.fluidAmount = this.floorLevel;
             }
                 
-            this.fluidAmount += this.delta;
-            this.delta = 0;
-
+            this.fluidAmount += amount;
+      
             if(this.fluidAmount < 0)
             {
                 Adversity.log.info("Negative cell level detected: " + this.fluidAmount + " cellID=" + this.id + " pos=" + this.pos.toString());
@@ -153,10 +135,9 @@ public class LavaCell
             {
                 sim.dirtyCells.add(this);
             }
-
-
         }
     }
+
 
     public void provideBlockUpdate(LavaSimulator sim, Collection<LavaBlockUpdate> updateList)
     {
@@ -207,7 +188,7 @@ public class LavaCell
     //    }
 
     /**
-     * Synchronizes cell with world state.
+     * Synchronizes cell with world state. World state generally wins.
      * Updates retained level based on surrounding terrain if flag is set 
      * OR if was previously a barrier cell or if floor level has changed.
      * Clears floor value and updates retained level if discovers world lava in a cell thought to be empty.
@@ -240,35 +221,39 @@ public class LavaCell
             {
                 // yay! We agree with world this is a lava cell.
 
-                // If we dont' agree on the particulars, simulation wins.
+                // If we dont' agree on the particulars, world wins.
                 if(worldVisibleLevel != this.getVisibleLevel())
                 {
-                    // ask for a block update
-                    sim.dirtyCells.add(this);
+                    this.changeLevel(sim, ((worldVisibleLevel - this.getVisibleLevel()) / FlowHeightState.BLOCK_LEVELS_FLOAT)); 
+                    this.clearBlockUpdate();
+                    sim.setSaveDirty(true);
                 }
             }
             else
             {
                 // Uh oh! World has lava and we don't!
 
-                // If I had a floor, it's probably not valid now because we don't know what happened.
-                // And if floor is changing should force update of retained height also.
-                if(this.floorLevel != 0)
-                {
-                    this.floorLevel = 0;
-                    updateRetainedLevel = true;
-                }
-
                 // Not a barrier any longer.
                 // Adding fluid below will cause me to form connections,
                 // so don't need to do that here.
                 this.isBarrier = false;
-
-                // Make us a fluid cell.
-                this.changeLevel(sim, (worldVisibleLevel / FlowHeightState.BLOCK_LEVELS_FLOAT), false);
-                this.applyUpdates(sim);
-                this.clearBlockUpdate();
-                sim.setSaveDirty(true);
+                
+                //Avoid stack overflow when bulk loading at start - many new cells just created won't match world blocks with fluid then.
+                if(!sim.isLoading)
+                {
+                    // If I had a floor, it's probably not valid now because we don't know what happened.
+                    // And if floor is changing should force update of retained height also.
+                    if(this.floorLevel != 0)
+                    {
+                        this.floorLevel = 0;
+                        updateRetainedLevel = true;
+                    }
+    
+                    // Make us a fluid cell.
+                    this.changeLevel(sim, (worldVisibleLevel / FlowHeightState.BLOCK_LEVELS_FLOAT));
+                    this.clearBlockUpdate();
+                    sim.setSaveDirty(true);
+                }
             }
         }
         else
@@ -278,8 +263,7 @@ public class LavaCell
             // If we have lava, remove it UNLESS world is open space and we just don't have enough lava to be visible
             if(this.fluidAmount > 0 && (isBarrierInWorld || this.getVisibleLevel() > 0))
             {
-                this.changeLevel(sim, (-this.fluidAmount), false);
-                this.applyUpdates(sim);
+                this.changeLevel(sim, (-this.fluidAmount));
                 this.clearBlockUpdate();
                 sim.setSaveDirty(true);
 
@@ -445,9 +429,13 @@ public class LavaCell
         return this.referenceCount > 0;
     }
 
+    /**
+     * Returns last sim tick when fluid flowed in or out of this cell.
+     * If cell is marked to never cool, returns Integer.MAX_VALUE.
+     */
     public int getLastFlowTick()
     {
-        return this.lastFlowTick;
+        return this.lastFlowTick == NEVER_COOLS ? Integer.MAX_VALUE : this.lastFlowTick;
     }
 
     /** for use by NBT loader */
@@ -456,6 +444,22 @@ public class LavaCell
         this.lastFlowTick = lastFlowTick;
     }
 
+    /** 
+     * Prevent cooling by disabling lastFlowTick updates
+     * and causes getLastFlowTick to always return Integer.MAX_VALUE.
+     */
+    public void setNeverCools(boolean neverCools)
+    {
+        if(neverCools)
+        {
+            this.lastFlowTick = NEVER_COOLS;
+        }
+        else if(this.lastFlowTick == NEVER_COOLS)
+        {
+            this.lastFlowTick = 0;
+        }
+    }
+    
     public float getFloor()
     {
         return this.floorLevel;

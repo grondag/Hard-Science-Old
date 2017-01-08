@@ -258,9 +258,10 @@ public class LavaCellConnection
             }
         }
         
-        // Donate full amount if going to a drop cell/particle.
-        // Otherwise split the difference to average out the pressure
-        return dropFlag? difference : difference * 0.5F;
+        // If going to a drop cell/particle donate full amount 
+        // unless would result in very small particle. (Do nothing in that case.)
+        // If not drop split the difference to average out the pressure
+        return dropFlag? difference > 0.0834 ? difference : 0 : difference * 0.5F;
         
 
     }
@@ -337,8 +338,8 @@ public class LavaCellConnection
             this.flowThisTick += flow;
         }
         
-        this.firstCell.changeLevel(sim, -flow, false);
-        this.secondCell.changeLevel(sim, flow, false);
+        this.firstCell.changeLevel(sim, -flow);
+        this.secondCell.changeLevel(sim, flow);
 
         //TODO: remove
 //        if(!this.isVertical && this.firstCell.getCurrentLevel() >= this.firstCell.getRetainedLevel() && this.firstCell.getCurrentLevel() + this.firstCell.getDelta() < this.firstCell.getRetainedLevel())
@@ -350,8 +351,6 @@ public class LavaCellConnection
 //            Adversity.log.info("DERP!!");
 //        }
         
-        this.firstCell.applyUpdates(sim);
-        this.secondCell.applyUpdates(sim);
 
         sim.setSaveDirty(true);
     }

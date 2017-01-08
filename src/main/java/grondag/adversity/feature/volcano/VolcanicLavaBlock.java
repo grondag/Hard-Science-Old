@@ -119,7 +119,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
         LavaSimulator sim = Simulator.instance.getFluidTracker();
-        LavaCell cell = sim.getCell(data.getPos());
+        LavaCell cell = sim.getCell(data.getPos(), false);
         if(cell == null)
         {
             probeInfo.text("Cell not found.");
