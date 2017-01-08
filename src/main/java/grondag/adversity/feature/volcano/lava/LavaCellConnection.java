@@ -116,16 +116,23 @@ public class LavaCellConnection
     private float getVerticalFlow(LavaSimulator sim)
     {
         // Nothing to do if top cell is empty unless have upwards pressure
-        if(secondCell.getCurrentLevel() == 0 && firstCell.getCurrentLevel() <= 1) return 0;
+        if(secondCell.getFluidAmount() == 0 && firstCell.getFluidAmount() <= 1) return 0;
         
-        float totalAmount = firstCell.getCurrentLevel() + secondCell.getCurrentLevel();
+        float firstCellAdjustedLevel = firstCell.getFluidAmount();
+        // add floor of an empty first cell that will become melted if we flow down into it
+        if(firstCellAdjustedLevel == 0 && firstCell.getFloor() > 0) 
+        {
+            firstCellAdjustedLevel += firstCell.getFloor();
+        }
+        
+        float totalAmount = firstCellAdjustedLevel + secondCell.getFluidAmount();
         
         // no need to constrain vertical flows if everything can flow into bottom block
         // But don't flow down if lower cell is an empty drop cell.
         // This implies upper cell is also a drop cell - wait for particles.
         if(totalAmount <= 1) // + MINIMUM_CELL_CONTENT)
         {
-            return (firstCell.getCurrentLevel() == 0 && firstCell.isDrop(sim)) ? 0 : -secondCell.getCurrentLevel();
+            return (firstCell.getFluidAmount() == 0 && firstCell.isDrop(sim)) ? 0 : -secondCell.getFluidAmount();
         }
         else if(totalAmount < 2 + PRESSURE_PER_LEVEL)
         {
@@ -146,7 +153,7 @@ public class LavaCellConnection
 //            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
             
             //want downward flow to result in negative value
-            return newUpperLevel - secondCell.getCurrentLevel();
+            return newUpperLevel - secondCell.getFluidAmount();
         }
         else
         {
@@ -160,7 +167,7 @@ public class LavaCellConnection
 //            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
             
             //want downward flow to result in negative value
-            return newUpperLevel - secondCell.getCurrentLevel();
+            return newUpperLevel - secondCell.getFluidAmount();
         }
     }
     
@@ -174,9 +181,8 @@ public class LavaCellConnection
      */
     private float getHorizontalFlow(LavaSimulator sim)
     {
-        float level1 = this.firstCell.getCurrentLevel();
-        float level2 = this.secondCell.getCurrentLevel();
-        
+        float level1 = Math.max(this.firstCell.getFluidAmount(), this.firstCell.getFloor());
+        float level2 = Math.max(this.secondCell.getFluidAmount(), this.secondCell.getFloor());
 
         // For horizontal connection, flow is always towards cell with no bottom
         // and if neither has a bottom, there is no flow.
@@ -202,6 +208,9 @@ public class LavaCellConnection
         // Positive numbers means 1st cell has higher pressure.
         if(difference > 0)
         {
+            //if 1st cell is solid, nothing to do
+            if(this.firstCell.getFluidAmount() == 0) return 0;
+            
             dropFlag = this.secondCell.isDrop(sim);
             
             //see note on retention level above
@@ -222,8 +231,12 @@ public class LavaCellConnection
                 difference = Math.min(difference, bound);
             }
         }
+        // Negative numbers means 2nd cell has higher pressure.
         else
         {
+            //if 2nd cell is solid, nothing to do
+            if(this.secondCell.getFluidAmount() == 0) return 0;
+            
             dropFlag = this.firstCell.isDrop(sim);
             
             //see note on retention level above

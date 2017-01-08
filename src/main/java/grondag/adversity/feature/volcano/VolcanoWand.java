@@ -74,17 +74,17 @@ public class VolcanoWand extends Item
         }
         worldIn.setBlockState(targetPos, IFlowBlock.stateWithFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), h));
 
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.up(), null);
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.up());
         
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.east(), null);
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.west(), null);
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.north(), null);
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.south(), null);
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.east());
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.west());
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.north());
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.south());
         
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.north().east(), null);
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.south().east(), null);
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.north().west(), null);
-        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.south().west(), null);
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.north().east());
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.south().east());
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.north().west());
+        IFlowBlock.adjustFillIfNeeded(worldIn, targetPos.south().west());
         return EnumActionResult.SUCCESS;
     }
 

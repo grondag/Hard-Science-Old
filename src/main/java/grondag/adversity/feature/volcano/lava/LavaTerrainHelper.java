@@ -211,15 +211,15 @@ public class LavaTerrainHelper
         Material material = state.getMaterial();
     
         if(material == Material.AIR) return true;
+        if (material == Material.GRASS ) return false;
+        if (material == Material.GROUND ) return false;
+        if (material == Material.SAND ) return false;
+        if (material == Material.ROCK ) return false;
         if (material == Material.CLAY) return false;
         if (material == Material.DRAGON_EGG ) return false;
-        if (material == Material.GROUND ) return false;
         if (material == Material.IRON ) return false;
-        if (material == Material.SAND ) return false;
         if (material == Material.PORTAL ) return false;
-        if (material == Material.ROCK ) return false;
         if (material == Material.ANVIL ) return false;
-        if (material == Material.GRASS ) return false;
         
         //TODO: remove, is for testing
         if (material == Material.GLASS) return false;

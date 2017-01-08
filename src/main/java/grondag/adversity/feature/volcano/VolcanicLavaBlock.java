@@ -134,7 +134,8 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             LavaCellConnection south = sim.getConnection(data.getPos(), data.getPos().south());
             
             probeInfo.text("Cell ID = " + cell.hashCode())
-                .text("Current Level = " + Float.toString(cell.getCurrentLevel()))
+                .text("Current Fluid Level = " + Float.toString(cell.getFluidAmount()))
+                .text("Floor Level = " + Float.toString(cell.getFloor()))
                 .text("Delta = " + Float.toString(cell.getDelta()))
                 .text("Retained Level = " + Float.toString(cell.getRetainedLevel()))
                 .text("Visible Level = " + cell.getVisibleLevel())

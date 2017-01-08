@@ -3,9 +3,13 @@ package grondag.adversity.feature.volcano;
 import java.util.Random;
 
 import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -13,9 +17,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class CoolingBlock extends FlowStaticBlock
+public class CoolingBlock extends FlowDynamicBlock
 {
-    protected FlowStaticBlock nextCoolingBlock;
+    protected FlowDynamicBlock nextCoolingBlock;
     
     protected int heatLevel = 0;
     
@@ -32,8 +36,16 @@ public class CoolingBlock extends FlowStaticBlock
         if(state.getBlock() == this && canCool(worldIn, pos, state, rand))
         {
             long modelKey = this.getModelStateKey(state, worldIn, pos);
-            worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), 3);
-            nextCoolingBlock.setModelStateKey(state, worldIn, pos, modelKey);
+            
+            if(this.nextCoolingBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK 
+                    && IFlowBlock.shouldBeFullCube(state, worldIn, pos))
+            {
+                worldIn.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), 3);
+            }
+            else
+            {
+                worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), 3);
+            }
         }
         
     }
@@ -69,7 +81,7 @@ public class CoolingBlock extends FlowStaticBlock
         return coolerFaceCount >= 4 || (coolerFaceCount == 3 && rand.nextGaussian() < 0.2);
     }
     
-    public CoolingBlock setCoolingBlockInfo(FlowStaticBlock nextCoolingBlock, int heatLevel)
+    public CoolingBlock setCoolingBlockInfo(FlowDynamicBlock nextCoolingBlock, int heatLevel)
     {
         this.nextCoolingBlock = nextCoolingBlock;
         this.heatLevel = heatLevel;

@@ -103,7 +103,7 @@ public interface IFlowBlock
      * Also replaces static filler blocks with dynamic version.
      * Adds updated block positions to the provided collection if non-null.
      */
-    public static void adjustFillIfNeeded(World worldObj, BlockPos basePos, Collection<BlockPos> updatedList)
+    public static void adjustFillIfNeeded(World worldObj, BlockPos basePos)
     {
         final int SHOULD_BE_AIR = -1;
         
@@ -152,9 +152,6 @@ public interface IFlowBlock
              
                 worldObj.setBlockState(basePos, fillBlock.getDefaultState()
                         .withProperty(NiceBlock.META, targetMeta));
-
-                if(updatedList !=null) updatedList.add(basePos);
-
             }
             //confirm filler needed and adjust/remove if needed
         }
@@ -162,8 +159,6 @@ public interface IFlowBlock
         {
             worldObj.setBlockState(basePos, fillBlock.getDefaultState()
                     .withProperty(NiceBlock.META, targetMeta));
-
-            if(updatedList !=null) updatedList.add(basePos);
         }
     }
     
