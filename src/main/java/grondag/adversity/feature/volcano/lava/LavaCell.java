@@ -12,7 +12,12 @@ import net.minecraft.util.math.BlockPos;
 
 public class LavaCell
 {
-    private float fluidAmount = 0; // 1.0 is one full block of fluid at surface pressure
+    public static final int FLUID_UNITS_PER_LEVEL = 1000;
+    public static final int FLUID_UNITS_PER_BLOCK = FLUID_UNITS_PER_LEVEL * FlowHeightState.BLOCK_LEVELS_INT;
+    public static final int FLUID_UNTIS_PER_HALF_BLOCK = FLUID_UNITS_PER_BLOCK / 2;
+
+    
+    private int fluidAmount = 0; // 1.0 is one full block of fluid at surface pressure
 
     private static int nextCellID = 0;
 
@@ -24,15 +29,13 @@ public class LavaCell
      * Because we don't support multi-part yet, this level will be "melted" and included in our currentLevel
      * when the cell is created by adding lava to it.
      */
-    private float floorLevel = 0;
+    private int floorLevel = 0;
 
     /** 
      * If this is at or near surface, level will not drop below this - to emulate surface tension/viscosity.
-     * Can be > 1 if block above should also retain fluid,
+     * Can be > FLUID_UNITS_PER_BLOCK if block above should also retain fluid,
      */
-    private float retainedLevel;
-
-    private float delta = 0;
+    private int retainedLevel;
 
     /** for tracking block updates */
     private int lastVisibleLevel = 0;
@@ -69,7 +72,7 @@ public class LavaCell
      * Creates a lava cell without any notification or addition to collections.
      * tickindex should be zero if there has never been a flow.
      */
-    public LavaCell(LavaSimulator sim, BlockPos pos, float fluidAmount)
+    public LavaCell(LavaSimulator sim, BlockPos pos, int fluidAmount)
     {
         this.pos = pos;
         this.fluidAmount = fluidAmount;
@@ -87,7 +90,7 @@ public class LavaCell
     }
 
 
-    public void changeLevel(LavaSimulator sim, float amount)
+    public void changeLevel(LavaSimulator sim, int amount)
     {
         if(amount != 0)
         {
@@ -160,7 +163,7 @@ public class LavaCell
         if(this.fluidAmount < MINIMUM_CELL_CONTENT) 
             return 0;
         else
-            return Math.round(Math.max(1, Math.min(FlowHeightState.BLOCK_LEVELS_FLOAT, this.fluidAmount * FlowHeightState.BLOCK_LEVELS_FLOAT)));
+            return Math.round(Math.max(1, Math.min(this.fluidAmount, FLUID_UNITS_PER_BLOCK) / FLUID_UNITS_PER_LEVEL));
     }
 
     /**
@@ -172,20 +175,10 @@ public class LavaCell
     }
 
 
-    public float getFluidAmount()
+    public int getFluidAmount()
     {
         return this.fluidAmount;
     }
-
-    public float getDelta()
-    {
-        return this.delta;
-    }
-
-    //    public void markdeleted()
-    //    {
-    //        this.isDeleted = true;
-    //    }
 
     /**
      * Synchronizes cell with world state. World state generally wins.
@@ -224,7 +217,7 @@ public class LavaCell
                 // If we dont' agree on the particulars, world wins.
                 if(worldVisibleLevel != this.getVisibleLevel())
                 {
-                    this.changeLevel(sim, ((worldVisibleLevel - this.getVisibleLevel()) / FlowHeightState.BLOCK_LEVELS_FLOAT)); 
+                    this.changeLevel(sim, ((worldVisibleLevel - this.getVisibleLevel()) * FLUID_UNITS_PER_LEVEL)); 
                     this.clearBlockUpdate();
                     sim.setSaveDirty(true);
                 }
@@ -250,7 +243,7 @@ public class LavaCell
                     }
     
                     // Make us a fluid cell.
-                    this.changeLevel(sim, (worldVisibleLevel / FlowHeightState.BLOCK_LEVELS_FLOAT));
+                    this.changeLevel(sim, (worldVisibleLevel * FLUID_UNITS_PER_LEVEL));
                     this.clearBlockUpdate();
                     sim.setSaveDirty(true);
                 }
@@ -291,7 +284,7 @@ public class LavaCell
                     }
                 }
 
-                float newFloor =  worldVisibleLevel / FlowHeightState.BLOCK_LEVELS_FLOAT;
+                int newFloor =  worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
                 if(this.floorLevel != newFloor)
                 {
                     // should force update of retained level if floor is new
@@ -314,7 +307,7 @@ public class LavaCell
         {
             if(this.floorLevel > 0)
             {
-                this.retainedLevel = this.floorLevel + 0.5F;
+                this.retainedLevel = this.floorLevel + FLUID_UNTIS_PER_HALF_BLOCK;
             }
             else if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down())))
             {
@@ -327,25 +320,26 @@ public class LavaCell
                 {
                     // If two blocks below is a barrier, then will have a retained level
                     // when the retained level below is > 1.
-                    this.retainedLevel = Math.max(0, sim.terrainHelper.computeIdealBaseFlowHeight(pos.down()) - 1F);
+                    //TODO: optimize for integer math
+                    this.retainedLevel = Math.max(0, (int)((sim.terrainHelper.computeIdealBaseFlowHeight(pos.down()) - 1F) * FLUID_UNITS_PER_BLOCK));
                 }
             }
             else
             {
-                this.retainedLevel = sim.terrainHelper.computeIdealBaseFlowHeight(pos);
+                this.retainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(pos) * FLUID_UNITS_PER_BLOCK);
             }
             
          
-            if(this.retainedLevel > 1)
+            if(this.retainedLevel > FLUID_UNITS_PER_BLOCK)
             {
-                // if retained level > 1, want to clamp it at the equilibrium point
-                this.retainedLevel  = this.retainedLevel - (this.retainedLevel - 1) * LavaCellConnection.INVERSE_PRESSURE_FACTOR;
+                // if retained level > full block, want to clamp it at the equilibrium point
+                this.retainedLevel  = this.retainedLevel - (int)((this.retainedLevel - FLUID_UNITS_PER_BLOCK) * LavaCellConnection.INVERSE_PRESSURE_FACTOR);
             }
             
         }
     }
 
-    public float getRetainedLevel()
+    public int getRetainedLevel()
     {
         return this.retainedLevel;
     }
@@ -356,12 +350,12 @@ public class LavaCell
     }
 
     /**
-     * True if directly above a barrier or if cell below is full (level >= 1).
+     * True if directly above a barrier or if cell below is full (level >= FLUID_UNITS_PER_BLOCK).
      */
     public boolean isSupported(LavaSimulator sim)
     {
         LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
-        return bottom.isBarrier || bottom.fluidAmount >= 1;
+        return bottom.isBarrier || bottom.fluidAmount >= FLUID_UNITS_PER_BLOCK;
     }
 
     /**
@@ -386,7 +380,7 @@ public class LavaCell
      * Don't create cells with less than this amount of fluid.
      * Vertical cells with less than this amount will be compressed into the cell below.
      */
-    private final static float MINIMUM_CELL_CONTENT = 1F/24F;
+    private final static int MINIMUM_CELL_CONTENT = FLUID_UNITS_PER_BLOCK/24;
 
     public void retain(String desc)
     {
@@ -460,7 +454,7 @@ public class LavaCell
         }
     }
     
-    public float getFloor()
+    public int getFloor()
     {
         return this.floorLevel;
     }
@@ -470,13 +464,13 @@ public class LavaCell
      * Used by simulation addLava method.
      * Takes floor into account if this is an empty cell witha flow bottom.
      */
-    public float getCapacity()
+    public int getCapacity()
     {
-        return this.isBarrier ? 0 : Math.max(0, Math.max(1, this.retainedLevel) - Math.max(this.floorLevel, this.fluidAmount));
+        return this.isBarrier ? 0 : Math.max(0, Math.max(FLUID_UNITS_PER_BLOCK, this.retainedLevel) - Math.max(this.floorLevel, this.fluidAmount));
     }
 
     /** for use by NBT loader */
-    public void setFloor(float floor)
+    public void setFloor(int floor)
     {
         this.floorLevel = floor;
     }

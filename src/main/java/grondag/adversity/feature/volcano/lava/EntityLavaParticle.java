@@ -38,7 +38,7 @@ public class EntityLavaParticle extends Entity
 
     private float renderScale;
 
-    private static final DataParameter<Float> FLUID_AMOUNT = EntityDataManager.<Float>createKey(EntityLavaParticle.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.<Integer>createKey(EntityLavaParticle.class, DataSerializers.VARINT);
 
     @Override
     public int hashCode()
@@ -46,10 +46,10 @@ public class EntityLavaParticle extends Entity
         return this.id;
     }
 
-    protected EntityLavaParticle(World world, float amount, Vec3d position, Vec3d velocity)
+    protected EntityLavaParticle(World world, int amount, Vec3d position, Vec3d velocity)
     {
         this(world, amount);
-        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
+//        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
         this.setPosition(position.xCoord, position.yCoord, position.zCoord);
 
 
@@ -61,18 +61,18 @@ public class EntityLavaParticle extends Entity
 
     public EntityLavaParticle(World world)
     {
-        this(world, 1);
-        if(!world.isRemote) Adversity.log.info("EntityLavaParticle no params");
+        this(world, LavaCell.FLUID_UNITS_PER_BLOCK);
+//        if(!world.isRemote) Adversity.log.info("EntityLavaParticle no params");
     }
 
-    public EntityLavaParticle(World world, float amount)
+    public EntityLavaParticle(World world, int amount)
     {
         super(world);
-        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount);
+//        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount);
         this.id = nextParticleID++;
         if(!world.isRemote)
         {
-            this.dataManager.set(FLUID_AMOUNT, Float.valueOf(amount)); 
+            this.dataManager.set(FLUID_AMOUNT, Integer.valueOf(amount)); 
         }
         this.forceSpawn = true;
         this.updateAmountDependentData();
@@ -80,16 +80,16 @@ public class EntityLavaParticle extends Entity
 
     private void updateAmountDependentData()
     {
-        float amount = this.dataManager.get(FLUID_AMOUNT).floatValue();
+        float unitAmout = (float)this.dataManager.get(FLUID_AMOUNT).intValue() / LavaCell.FLUID_UNITS_PER_BLOCK;
 
         // Give bounding box same volume as model, but small enough to fit through a one block space and not too small to interact
-        float edgeLength = (float) Math.min(0.8, Math.max(0.1, Math.pow(amount, 0.3333333333333)));
+        float edgeLength = (float) Math.min(0.8, Math.max(0.1, Math.pow(unitAmout, 0.3333333333333)));
         this.setSize(edgeLength, edgeLength);
 
         /**
          * Is essentially the diameter of a sphere with volume = amount.
          */
-        this.renderScale = (float) (2 * Math.pow(amount * 3 / (Math.PI * 4), 1F/3F));
+        this.renderScale = (float) (2 * Math.pow(unitAmout * 3 / (Math.PI * 4), 1F/3F));
 
         //        Adversity.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
     }
@@ -190,7 +190,7 @@ public class EntityLavaParticle extends Entity
         {
 //            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.dataManager.get(FLUID_AMOUNT).floatValue());
 
-            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.dataManager.get(FLUID_AMOUNT).floatValue());
+            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.dataManager.get(FLUID_AMOUNT).intValue());
             //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
             this.shouldDie = true;
             this.setDead();
@@ -386,19 +386,19 @@ public class EntityLavaParticle extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.dataManager.set(FLUID_AMOUNT, Float.valueOf(compound.getFloat(TAG_AMOUNT)));
+        this.dataManager.set(FLUID_AMOUNT, Integer.valueOf(compound.getInteger(TAG_AMOUNT)));
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        compound.setFloat(TAG_AMOUNT, this.dataManager.get(FLUID_AMOUNT).floatValue());
+        compound.setInteger(TAG_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
     }
 
     @Override
     protected void entityInit()
     {
-        this.dataManager.register(FLUID_AMOUNT, 1F);
+        this.dataManager.register(FLUID_AMOUNT, LavaCell.FLUID_UNITS_PER_BLOCK);
     }
     
     @SideOnly(Side.CLIENT)

@@ -17,14 +17,17 @@ public class LavaCellConnection
     
     private final int rand = Useful.SALT_SHAKER.nextInt(64);
     
-    private float flowThisTick = 0;
+    private int flowThisTick = 0;
     private int lastFlowTick = 0;
     
-    private float currentFlowRate = 0;
+    private int currentFlowRate = 0;
     
  
-    private final static float PRESSURE_PER_LEVEL = 0.05F;
-    public final static float INVERSE_PRESSURE_FACTOR = 1F/(PRESSURE_PER_LEVEL + 1);
+    private final static int PRESSURE_PER_LEVEL = LavaCell.FLUID_UNITS_PER_BLOCK / 20;
+    private final static int MINIMUM_FLOW_UNITS = PRESSURE_PER_LEVEL / 10;
+    private final static int UNITS_PER_ONE_BLOCK_WITH_PRESSURE = LavaCell.FLUID_UNITS_PER_BLOCK + PRESSURE_PER_LEVEL;
+    private final static int UNITS_PER_TWO_BLOCKS = LavaCell.FLUID_UNITS_PER_BLOCK * 2 + PRESSURE_PER_LEVEL;
+    public final static float INVERSE_PRESSURE_FACTOR = (float)LavaCell.FLUID_UNITS_PER_BLOCK/UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
     
     //TODO: make configurable?
     /** Maximum flow through any block connection in a single tick. 
@@ -32,7 +35,7 @@ public class LavaCellConnection
      * along the surface and higher-velocity flows (down a slope) will also
      * have a smaller cross-section due to retained height calculations.
      */
-    private final static float MAX_FLOW_PER_TICK = 0.1F;
+    private final static int MAX_FLOW_PER_TICK = LavaCell.FLUID_UNITS_PER_BLOCK / 10;
     
     private final boolean isVertical;
     
@@ -113,28 +116,28 @@ public class LavaCellConnection
      * Negative numbers mean 2nd cell has higher pressure (downward flow in vertical connections).
      * Negative numbers result in flow from 2nd to 1st.
      */
-    private float getVerticalFlow(LavaSimulator sim)
+    private int getVerticalFlow(LavaSimulator sim)
     {
         // Nothing to do if top cell is empty unless have upwards pressure
-        if(secondCell.getFluidAmount() == 0 && firstCell.getFluidAmount() <= 1) return 0;
+        if(secondCell.getFluidAmount() == 0 && firstCell.getFluidAmount() <= LavaCell.FLUID_UNITS_PER_BLOCK) return 0;
         
-        float firstCellAdjustedLevel = firstCell.getFluidAmount();
+        int firstCellAdjustedLevel = firstCell.getFluidAmount();
         // add floor of an empty first cell that will become melted if we flow down into it
         if(firstCellAdjustedLevel == 0 && firstCell.getFloor() > 0) 
         {
             firstCellAdjustedLevel += firstCell.getFloor();
         }
         
-        float totalAmount = firstCellAdjustedLevel + secondCell.getFluidAmount();
+        int totalAmount = firstCellAdjustedLevel + secondCell.getFluidAmount();
         
         // no need to constrain vertical flows if everything can flow into bottom block
         // But don't flow down if lower cell is an empty drop cell.
         // This implies upper cell is also a drop cell - wait for particles.
-        if(totalAmount <= 1) // + MINIMUM_CELL_CONTENT)
+        if(totalAmount <= LavaCell.FLUID_UNITS_PER_BLOCK) // + MINIMUM_CELL_CONTENT)
         {
             return (firstCell.getFluidAmount() == 0 && firstCell.isDrop(sim)) ? 0 : -secondCell.getFluidAmount();
         }
-        else if(totalAmount < 2 + PRESSURE_PER_LEVEL)
+        else if(totalAmount < UNITS_PER_TWO_BLOCKS)
         {
             // we want end state to be such that
             // 1 + pu = d  AND u + d = starting_total
@@ -148,7 +151,7 @@ public class LavaCellConnection
             // u(p + 1) = t - 1;
             // u = (t-1)/(p + 1)
             
-            float newUpperLevel = (totalAmount - 1) * INVERSE_PRESSURE_FACTOR;
+            int newUpperLevel = (totalAmount - LavaCell.FLUID_UNITS_PER_BLOCK) * LavaCell.FLUID_UNITS_PER_BLOCK / UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
             
 //            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
             
@@ -162,7 +165,7 @@ public class LavaCellConnection
             // where    p = pressure per level
             //          d, u = ending down and upper levels
             
-            float newUpperLevel = (totalAmount - PRESSURE_PER_LEVEL) * 0.5F;
+            int newUpperLevel = (totalAmount - PRESSURE_PER_LEVEL) / 2;
             
 //            if(newUpperLevel < MINIMUM_CELL_CONTENT) newUpperLevel = 0;
             
@@ -179,17 +182,14 @@ public class LavaCellConnection
      * Negative numbers mean 2nd cell has higher pressure (flow from higher to lower coordinate).
      * Negative numbers result in flow from 2nd to 1st.
      */
-    private float getHorizontalFlow(LavaSimulator sim)
+    private int getHorizontalFlow(LavaSimulator sim)
     {
-        float level1 = Math.max(this.firstCell.getFluidAmount(), this.firstCell.getFloor());
-        float level2 = Math.max(this.secondCell.getFluidAmount(), this.secondCell.getFloor());
-
         // For horizontal connection, flow is always towards cell with no bottom
         // and if neither has a bottom, there is no flow.
-        if(!this.firstCell.isSupported(sim)) level1 = 0;
-        if(!this.secondCell.isSupported(sim)) level2 = 0;
+        int level1 = this.firstCell.isSupported(sim) ? Math.max(this.firstCell.getFluidAmount(), this.firstCell.getFloor()) : 0;
+        int level2 = this.secondCell.isSupported(sim) ? Math.max(this.secondCell.getFluidAmount(), this.secondCell.getFloor()) : 0;
         
-        float difference = level1 - level2;
+        int difference = level1 - level2;
         
         if(difference == 0) return 0;
         
@@ -201,8 +201,8 @@ public class LavaCellConnection
          * so that DonorLevel/DonorRetention = 2 * TargetLevel/TargetRetention.  
          * This prevents steep edges of flows.
          */
-        float retention1 = this.firstCell.getRetainedLevel();
-        float retention2 = this.secondCell.getRetainedLevel();
+        int retention1 = this.firstCell.getRetainedLevel();
+        int retention2 = this.secondCell.getRetainedLevel();
         boolean dropFlag = false;
         
         // Positive numbers means 1st cell has higher pressure.
@@ -214,19 +214,19 @@ public class LavaCellConnection
             dropFlag = this.secondCell.isDrop(sim);
             
             //see note on retention level above
-            if(!dropFlag && retention1 > 0 && retention2 > 0 && level1 > Math.max(0.5F * retention1, 0.5F)  && level2 < 0.5F * retention2 )
+            if(!dropFlag && retention1 > 0 && retention2 > 0 && level1 > Math.max(retention1 / 2, LavaCell.FLUID_UNTIS_PER_HALF_BLOCK)  && level2 < retention2 / 2)
             {
-                float ratio = retention1 / retention2;
+                float ratioDoubled = 2 * retention1 / retention2;
                 float total = level1 + level2;
-                float newLevel1 = 2 * total * ratio / (1 + 2 * ratio);
-                newLevel1 = Math.max(newLevel1, Math.max(0.5F * retention2, 0.5F));
+                int newLevel1 =  (int) (total * ratioDoubled / (1 + ratioDoubled));
+                newLevel1 = Math.max(newLevel1, Math.max(retention2 / 2, LavaCell.FLUID_UNTIS_PER_HALF_BLOCK));
                 
                 return level1 - newLevel1;
             }
             else
             {
                 //otherwise just donate anything above my retention level
-                float bound = level1 - this.firstCell.getRetainedLevel();
+                int bound = level1 - this.firstCell.getRetainedLevel();
                 if(bound <= 0) return 0;
                 difference = Math.min(difference, bound);
             }
@@ -240,18 +240,18 @@ public class LavaCellConnection
             dropFlag = this.firstCell.isDrop(sim);
             
             //see note on retention level above
-            if(!dropFlag && retention1 > 0 && retention2 > 0 && level2 > Math.max(0.5F * retention2, 0.5F)  && level1 < 0.5F * retention1 )
+            if(!dropFlag && retention1 > 0 && retention2 > 0 && level2 > Math.max(retention2 / 2, LavaCell.FLUID_UNTIS_PER_HALF_BLOCK)  && level1 < retention1 / 2)
             {
-                float ratio = retention2 / retention1;
+                float ratioDoubled = 2 * retention2 / retention1;
                 float total = level1 + level2;
-                float newLevel2 = 2 * total * ratio / (1 + 2 * ratio);
-                newLevel2 = Math.max(newLevel2, Math.max(0.5F * retention2, 0.5F));
+                int newLevel2 = (int) (total * ratioDoubled / (1 + ratioDoubled));
+                newLevel2 = Math.max(newLevel2, Math.max(retention2 / 2, LavaCell.FLUID_UNTIS_PER_HALF_BLOCK));
                 
                 return -(level2 - newLevel2);
             }
             else
             {
-                float bound = level2 - this.secondCell.getRetainedLevel();
+                int bound = level2 - this.secondCell.getRetainedLevel();
                 if(bound <= 0) return 0;
                 // flow is negative in this case, so need to flip application of bound
                 difference = Math.max(difference, -bound);
@@ -261,14 +261,14 @@ public class LavaCellConnection
         // If going to a drop cell/particle donate full amount 
         // unless would result in very small particle. (Do nothing in that case.)
         // If not drop split the difference to average out the pressure
-        return dropFlag? difference > 0.0834 ? difference : 0 : difference * 0.5F;
+        return dropFlag? difference >= LavaCell.FLUID_UNITS_PER_LEVEL ? difference : 0 : difference / 2;
         
 
     }
     
     public void updateFlowRate(LavaSimulator sim)
     {
-        float flow;
+        int flow;
         // barriers don't need processing - TODO: may not be needed because checked in connection processing loop
         if(this.firstCell.isBarrier() || this.secondCell.isBarrier())
         {
@@ -278,7 +278,7 @@ public class LavaCellConnection
         {
             flow = this.getVerticalFlow(sim);    
           //Damp tiny oscillations, but always allow downward flow
-            if(flow > 0 && flow < 0.001) flow = 0;
+            if(flow > 0 && flow < MINIMUM_FLOW_UNITS) flow = 0;
         }
         else
         {
@@ -286,7 +286,7 @@ public class LavaCellConnection
             
             //Damp tiny oscillations
             //TODO: make threshold configurable
-            if(Math.abs(flow) < 0.001) flow = 0;
+            if(Math.abs(flow) < MINIMUM_FLOW_UNITS) flow = 0;
         }
         this.currentFlowRate = flow;
 
@@ -305,7 +305,7 @@ public class LavaCellConnection
         
         if (this.currentFlowRate == 0) return;
         
-        float flow = this.currentFlowRate;
+        int flow = this.currentFlowRate;
         
         //TODO: make bound configurable
          
@@ -323,7 +323,7 @@ public class LavaCellConnection
         this.flowAcross(sim, flow);
     }
     
-    public void flowAcross(LavaSimulator sim, float flow)
+    public void flowAcross(LavaSimulator sim, int flow)
     {
         // shouldn't be needed but was getting zeros here - maybe floating-point weirdness?
         if(flow ==0) return;
@@ -355,7 +355,7 @@ public class LavaCellConnection
         sim.setSaveDirty(true);
     }
     
-    public float getFlowThisTick(LavaSimulator sim)
+    public int getFlowThisTick(LavaSimulator sim)
     {
         return sim.getTickIndex() == this.lastFlowTick ? this.flowThisTick : 0;
     }
@@ -365,12 +365,6 @@ public class LavaCellConnection
      */
     public void releaseCells()
     {
-        
-        // TODO: remove
-        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
-            Adversity.log.info("boop");
-        
-        
 //        Adversity.log.info("connection release");
         this.firstCell.release("connection");
         this.secondCell.release("connection");
@@ -383,20 +377,20 @@ public class LavaCellConnection
      * Vertical cells have a drop of 1.
      * Higher drop means higher priority for flowing. 
      */
-    public float getDrop()
+    public int getDrop()
     {
-        return this.isVertical ? 1 : Math.abs(firstCell.getRetainedLevel() - secondCell.getRetainedLevel());
+        return this.isVertical ? LavaCell.FLUID_UNITS_PER_BLOCK : Math.abs(firstCell.getRetainedLevel() - secondCell.getRetainedLevel());
     }
     
     public int getSortKey()
     {
         int axisBit = this.isVertical ? 0 : 1;
         int y = 255 - this.firstCell.pos.getY();
-        int slope = 63 - (int) (63F * this.getDrop());
+        int slope = 63 - this.getDrop() >> 8;
         return (axisBit << 20) | (y << 12) | (slope << 6) | this.rand;
     }
     
-    public float getCurrentFlowRate()
+    public int getCurrentFlowRate()
     {
         return this.currentFlowRate;
     }
