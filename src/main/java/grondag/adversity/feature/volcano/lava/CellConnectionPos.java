@@ -17,6 +17,9 @@ import net.minecraft.util.math.Vec3i;
 public class CellConnectionPos implements Comparable<CellConnectionPos>
 {
     private final BlockPos lowerPos;
+    
+    //TODO: is axis really needed here?  
+    // Seems mathematically redundant of ordered cell positions - is implied
     private final EnumFacing.Axis axis;
     
     public CellConnectionPos(BlockPos lowerPos, EnumFacing.Axis axis)

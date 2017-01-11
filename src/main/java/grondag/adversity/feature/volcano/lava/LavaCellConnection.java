@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
+import grondag.adversity.niceblock.base.IFlowBlock;
 
 public class LavaCellConnection
 {
@@ -15,13 +16,14 @@ public class LavaCellConnection
     
     public final int id;
     
-    private final int rand = Useful.SALT_SHAKER.nextInt(64);
+    public final int rand = Useful.SALT_SHAKER.nextInt();
     
     private int flowThisTick = 0;
     private int lastFlowTick = 0;
     
     private int currentFlowRate = 0;
     
+    private int sortDrop;
  
     private final static int PRESSURE_PER_LEVEL = LavaCell.FLUID_UNITS_PER_BLOCK / 20;
     private final static int MINIMUM_FLOW_UNITS = PRESSURE_PER_LEVEL / 10;
@@ -37,7 +39,7 @@ public class LavaCellConnection
      */
     private final static int MAX_FLOW_PER_TICK = LavaCell.FLUID_UNITS_PER_BLOCK / 10;
     
-    private final boolean isVertical;
+    public final boolean isVertical;
     
     public LavaCellConnection(LavaCell firstCell, LavaCell secondCell)
     {
@@ -94,6 +96,7 @@ public class LavaCellConnection
                 this.firstCell = secondCell;
             }
         }
+        this.updateSortDrop();
     }
     
     public LavaCell getOther(LavaCell cellIAlreadyHave)
@@ -193,6 +196,10 @@ public class LavaCellConnection
         
         if(difference == 0) return 0;
         
+//        if(this.firstCell.hashCode() == 4414 || this.secondCell.hashCode() == 4414)
+//        {
+//            Adversity.log.info("boop");
+//        }
         
         /**
          * If both cells have a non-zero retention level 
@@ -279,6 +286,9 @@ public class LavaCellConnection
             flow = this.getVerticalFlow(sim);    
           //Damp tiny oscillations, but always allow downward flow
             if(flow > 0 && flow < MINIMUM_FLOW_UNITS) flow = 0;
+            
+//            if(flow < -100)
+//                Adversity.log.info("boop");
         }
         else
         {
@@ -299,7 +309,17 @@ public class LavaCellConnection
         // TODO: remove
 //        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
 //            Adversity.log.info("boop");
+      
+//        if(firstCell.hashCode() == 2711 || secondCell.hashCode() == 2711 )
+//        {
+//          Adversity.log.info("boop");
+//        }
         
+//        if(this.isVertical && firstCell.getFluidAmount() == 0 && IFlowBlock.isFlowHeight(sim.world.getBlockState(firstCell.pos).getBlock()))
+//        {
+//          Adversity.log.info("boop");
+//        }
+            
         //TODO: make this local again if going to update each time
         this.updateFlowRate(sim);
         
@@ -382,12 +402,20 @@ public class LavaCellConnection
         return this.isVertical ? LavaCell.FLUID_UNITS_PER_BLOCK : Math.abs(firstCell.getRetainedLevel() - secondCell.getRetainedLevel());
     }
     
-    public int getSortKey()
+    /**
+     * Drop can change on validation, but is also used for sorting.
+     * To maintain validity of sort index for retrieval, need to preserve drop
+     * value until sort can be properly updated.
+     * @return
+     */
+    public int geSortDrop()
     {
-        int axisBit = this.isVertical ? 0 : 1;
-        int y = 255 - this.firstCell.pos.getY();
-        int slope = 63 - this.getDrop() >> 8;
-        return (axisBit << 20) | (y << 12) | (slope << 6) | this.rand;
+        return this.sortDrop;
+    }
+    
+    public void updateSortDrop()
+    {
+        this.sortDrop = this.getDrop();
     }
     
     public int getCurrentFlowRate()

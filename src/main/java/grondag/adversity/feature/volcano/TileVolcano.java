@@ -288,7 +288,8 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
         else
         {
-            if(!clearBore(clearPos)) this.levelAllClear = false;
+            if(!clearBore(clearPos)) 
+                this.levelAllClear = false;
         }
         return VolcanoStage.CLEARING;
         
@@ -808,18 +809,20 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             return true;
         }
-        else if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        // allow air blocks if sim shows lava in them because simulator may not do block updates immediately
+        else if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == Blocks.AIR)
         {
             LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, false);
             
             //takes long time to get every cell to perfectly full - just has to be close enough
-            if(cell.getFluidAmount() > 0.95F) 
+            if(cell.getFluidAmount() > 10000) 
             {
                 cell.setNeverCools(true);
                 return true;
             }
             else
             {
+//                Adversity.log.info("Topping off lava @" + clearPos.toString());
                 Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity());
                 cell.setNeverCools(true);
                 return false;
@@ -828,6 +831,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
         else
         {
+//            Adversity.log.info("Clearing and placing lava @" + clearPos.toString());
             this.worldObj.setBlockToAir(clearPos);
             LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, true);
             Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity());

@@ -284,7 +284,7 @@ public class EntityLavaParticle extends Entity
         int i5 = MathHelper.floor_double(this.posZ);
         BlockPos blockpos = new BlockPos(j4, l4, i5);
         IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
-        this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate);
+        this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || IFlowBlock.isFlowFiller(iblockstate.getBlock());
 
         //this is very crude, but if we are vertically collided but not resting on top of the ground
         //re-center on our block pos so that we have a better chance to fall down

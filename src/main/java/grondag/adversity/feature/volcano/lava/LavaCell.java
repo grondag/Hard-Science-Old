@@ -46,7 +46,7 @@ public class LavaCell
 
     private boolean isBarrier;
 
-    private static final int NEVER_COOLS = -1;
+    private static final int NEVER_COOLS = Integer.MAX_VALUE;
     /**
      *  Marks the last time lava flowed in or out of this cell.
      *  Set to NEVER_COOLS (negative value) if should never cool.
@@ -94,6 +94,10 @@ public class LavaCell
     {
         if(amount != 0)
         {
+            
+//            if(this.id == 757)
+//                Adversity.log.info("boop");
+            
             // don't update lastflowTick if this is marked to never cool
             if(this.lastFlowTick != NEVER_COOLS) this.lastFlowTick = sim.getTickIndex();
             
@@ -350,12 +354,12 @@ public class LavaCell
     }
 
     /**
-     * True if directly above a barrier or if cell below is full (level >= FLUID_UNITS_PER_BLOCK).
+     * True if directly above a barrier or if cell below has fluid.
      */
     public boolean isSupported(LavaSimulator sim)
     {
         LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
-        return bottom.isBarrier || bottom.fluidAmount >= FLUID_UNITS_PER_BLOCK;
+        return bottom.isBarrier || bottom.fluidAmount > 0;
     }
 
     /**
@@ -429,7 +433,7 @@ public class LavaCell
      */
     public int getLastFlowTick()
     {
-        return this.lastFlowTick == NEVER_COOLS ? Integer.MAX_VALUE : this.lastFlowTick;
+        return this.lastFlowTick;
     }
 
     /** for use by NBT loader */
@@ -452,6 +456,11 @@ public class LavaCell
         {
             this.lastFlowTick = 0;
         }
+    }
+    
+    public boolean getNeverCools()
+    {
+        return this.lastFlowTick == NEVER_COOLS;
     }
     
     public int getFloor()

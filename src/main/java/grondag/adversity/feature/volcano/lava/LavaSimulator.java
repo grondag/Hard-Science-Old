@@ -29,6 +29,9 @@ import net.minecraft.world.World;
  * FIX/TEST
  * Filler block placement - some being missed?
  * Handle lastFlowTick overrun
+ * Performance / parallelism
+ *  Handle changes to sort keys on connections due to world updates
+ * Debug reference counting - some cells have high reference counts
  * 
  * FEATURES
  * Handle flowing terrain
@@ -39,10 +42,6 @@ import net.minecraft.world.World;
  * Handle multiple worlds
  * Handle unloaded chunks
  *
- * Performance / parallelism
- *      Integer vs. FP quantization (trial)
- *      Better/faster connection sorting
-
  * Code Cleanup
  * Sounds
  * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
@@ -55,42 +54,43 @@ public class LavaSimulator extends SimulationNode
     protected final LavaTerrainHelper terrainHelper;
 
     private int totalFluidRegistered = 0;
-    
+
     protected final HashMap<BlockPos, LavaCell> allCells = new HashMap<BlockPos, LavaCell>();
-    
+
     private final HashMap<BlockPos, LavaCell> cellsWithFluid = new HashMap<BlockPos, LavaCell>();
-    
+
     private final ConnectionMap connections = new ConnectionMap();
-    
-    private final LinkedList<CellConnectionPos> newConnections = new LinkedList<CellConnectionPos>();
-    
+
+    private final HashSet<CellConnectionPos> newConnections = new HashSet<CellConnectionPos>();
+    private final HashSet<CellConnectionPos> deadConnections = new HashSet<CellConnectionPos>();
+
     /** Set true when doing block placements so we known not to register them as newly placed lava. */
     private boolean itMe = false;
-    
+
     /** prevent synchoniziation with existing world fluid during loading */
     protected boolean isLoading = false;
-    
+
     private int tickIndex = 0;
-    
+
     //TODO: make config
     private static final int VALIDATION_TICKS = 20;
     private int ticksUntilNextValidation = VALIDATION_TICKS;
-    
+
     //TODO: make config
     private static final int CACHE_TICKS = 60;
     private int ticksUntilCacheCleanup = CACHE_TICKS;
-    
+
     /**
      * Blocks that need to be melted or checked for filler after placement.
      * Not saved to NBT because should be fully processed and cleared every tick.
      */
     private HashSet<BlockPos> adjustmentList = new HashSet<BlockPos>();
-    
+
     /** cells that may need a block update */
     protected final HashSet<LavaCell> dirtyCells = new HashSet<LavaCell>();
-    
+
     private final LinkedList<LavaBlockUpdate> blockUpdates = new LinkedList<LavaBlockUpdate>();
-    
+
     protected final static String TAG_SAVE_DATA = "lavacells";
 
     public LavaSimulator(World world)
@@ -99,91 +99,91 @@ public class LavaSimulator extends SimulationNode
         this.world = world;
         this.terrainHelper = new LavaTerrainHelper(world);
     }
-    
-    
+
+
     public void doTick()
     {
         this.tickIndex++;
-        
+
         this.doCooling();
-        
+
         if((this.tickIndex & 0xFF) == 0xFF)
         {
             Adversity.log.info("Particle time this sample = " + particleTime / 1000000);
             particleTime = 0;
-            
+
             Adversity.log.info("Validation time this sample = " + validationTime / 1000000);
             validationTime = 0;
-            
+
             Adversity.log.info("Block update time this sample = " + blockUpdateTime / 1000000);
             blockUpdateTime = 0;
+            Adversity.log.info("Block updates this sample = " + blockUpdatesCounter + " or " + blockUpdatesCounter / 0xFF + " per tick");
+            blockUpdatesCounter  = 0;
             
             Adversity.log.info("Cache cleanup time this sample = " + cacheCleanTime / 1000000);
             cacheCleanTime = 0;
-            
+
             Adversity.log.info("Step time this sample = " + stepTime / 1000000);
             stepTime = 0;
-            
+
             Adversity.log.info("New connection proccessing time this sample = " + connectionRequestTime / 1000000 
                     + " for " + connectionRequestCount + "requests @" + ((connectionRequestCount > 0) ? connectionRequestTime / connectionRequestCount : "") + " each");
             connectionRequestCount = 0;
             connectionRequestTime = 0;
-            
-            Adversity.log.info("Connection sort proccessing time this sample = " + sortTime / 1000000 
-                    + " for " + sortCount + "requests @" + ((sortCount > 0) ? sortTime / sortCount : "") + " each");
-            sortCount = 0;
-            sortTime = 0;
-            
+
             Adversity.log.info("Connection flow proccessing time this sample = " + connectionProcessTime / 1000000 
                     + " for " + connectionProcessCount + "requests @" + ((connectionProcessCount > 0) ? connectionProcessTime / connectionProcessCount : "") + " each");
             connectionProcessCount = 0;
             connectionProcessTime = 0;
-        }
-        
-        long startTime = System.nanoTime();
-        if(--ticksUntilNextValidation == 0)
-        {
-//            Adversity.log.info("LavaSim doStep validatingAllCells, cell count=" + this.allCells.size() );
-            validateAllCells();
-            ticksUntilNextValidation = VALIDATION_TICKS;
-        }
-        this.validationTime += (System.nanoTime() - startTime);
-        
-//        if(cellsWithFluid.size() > 0)
-//        {
-//            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
-//        }
-      
-        //Was causing slow propagation and overflow not doing this each step just prior to flow
-//        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
-        
-        startTime = System.nanoTime();
-        
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        
-        this.stepTime += (System.nanoTime() - startTime);
-        
-        this.doParticles();
-        
-        this.doBlockUpdates();
-        
-        startTime = System.nanoTime();
-        if(--ticksUntilCacheCleanup == 0)
-        {
-//            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
-            cleanCellCache();
-            ticksUntilCacheCleanup = CACHE_TICKS;
-            Adversity.log.info("LavaSim doStep cleanCellCache, cell ending count=" + this.allCells.size() );
             
-//            this.allCells.values().forEach(cell -> {Adversity.log.info("hash=" + cell.hashCode() + "pos=" + cell.pos.toString() + " level=" + cell.getCurrentLevel());});
-//            this.connections.values().forEach(connection -> {Adversity.log.info("firstHash=" + connection.firstCell.hashCode() + " firstPos=" + connection.firstCell.pos.toString() + " firstLevel=" + connection.firstCell.getCurrentLevel() + "secondHash=" + connection.secondCell.hashCode() + " secondPos=" + connection.secondCell.pos.toString() + " secondLevel=" + connection.secondCell.getCurrentLevel());});
+            Adversity.log.info("Connection removal time this sample = " + connectionRemovalTime / 1000000 
+                    + " for " + connectionRemovalCount + "requests @" + ((connectionRemovalCount > 0) ? connectionRemovalTime / connectionRemovalCount : "") + " each");
+            connectionRemovalCount = 0;
+            connectionRemovalTime = 0;
+            
+
+        }
+
+              //        if(cellsWithFluid.size() > 0)
+        //        {
+        //            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
+        //        }
+
+        //Was causing slow propagation and overflow not doing this each step just prior to flow
+        //        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
+
+        long startTime = System.nanoTime();
+
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
+        this.doStep();
+
+        this.stepTime += (System.nanoTime() - startTime);
+
+        this.doParticles();
+
+        if((this.tickIndex & 0x1F) == 0x1F)
+        {
+            this.doBlockUpdates();
+            
+            startTime = System.nanoTime();
+            //            Adversity.log.info("LavaSim doStep validatingAllCells, cell count=" + this.allCells.size() );
+            validateAllCells();
+            this.validationTime += (System.nanoTime() - startTime);
+
+            startTime = System.nanoTime();
+    
+            //            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
+            cleanCellCache();
+            Adversity.log.info("LavaSim doStep cleanCellCache, cell ending count=" + this.allCells.size() );
+
+            //            this.allCells.values().forEach(cell -> {Adversity.log.info("hash=" + cell.hashCode() + "pos=" + cell.pos.toString() + " level=" + cell.getCurrentLevel());});
+            //            this.connections.values().forEach(connection -> {Adversity.log.info("firstHash=" + connection.firstCell.hashCode() + " firstPos=" + connection.firstCell.pos.toString() + " firstLevel=" + connection.firstCell.getCurrentLevel() + "secondHash=" + connection.secondCell.hashCode() + " secondPos=" + connection.secondCell.pos.toString() + " secondLevel=" + connection.secondCell.getCurrentLevel());});
 
             int totalFluid = 0;
             for(LavaCell cell : cellsWithFluid.values())
@@ -192,23 +192,22 @@ public class LavaSimulator extends SimulationNode
             }
             Adversity.log.info("Total fluid in cells = " + totalFluid / LavaCell.FLUID_UNITS_PER_BLOCK + "  Total registered fluid =" + totalFluidRegistered / LavaCell.FLUID_UNITS_PER_BLOCK);
         }
-        
+
         this.cacheCleanTime += (System.nanoTime() - startTime);
 
     }
-    
+
     private int particleCounter = 10;
-    
+
     private long particleTime;
     private void doParticles()
     {
         long startTime = System.nanoTime();
-        if((this.tickIndex & 0xFF) == 0xFF)
-        
+       
         if(particleCounter-- == 0)
         {
             particleCounter = 5 + Useful.SALT_SHAKER.nextInt(5);
-            
+
             //TODO: sort bottom up
             for(LavaCell cell : cellsWithFluid.values().toArray(new LavaCell[0]))
             {
@@ -216,21 +215,21 @@ public class LavaSimulator extends SimulationNode
                 if(amount > 0 && cell.isDrop(this))
                 {
                     world.spawnEntityInWorld(new EntityLavaParticle(world, amount, 
-                        new Vec3d(cell.pos.getX() + 0.5, cell.pos.getY() - 0.1, cell.pos.getZ() + 0.5), Vec3d.ZERO));
-                        cell.changeLevel(this, -amount);
+                            new Vec3d(cell.pos.getX() + 0.5, cell.pos.getY() - 0.1, cell.pos.getZ() + 0.5), Vec3d.ZERO));
+                    cell.changeLevel(this, -amount);
                 }
             }
         }
-    
+
         this.particleTime += (System.nanoTime() - startTime);
     }
-    
+
     private int coolingCounter = 21;
-    
+
     private LinkedList<LavaCell> coolingCells = new LinkedList<LavaCell>();
-    
+
     private long coolingTime;
-    
+
     private void doCooling()
     {
         long startTime = System.nanoTime();
@@ -239,16 +238,16 @@ public class LavaSimulator extends SimulationNode
             Adversity.log.info("Cooling time this sample = " + coolingTime / 1000000);
             coolingTime = 0;
         }
-     
+
         coolingCounter--;        
-        
+
         if(!coolingCells.isEmpty())
         {
             //max shouldn't be needed b/c will be empty b4 we get to zero, but safer
             int chance = 1 + coolingCells.size() / 20;
-            
+
             int count = Math.min(coolingCells.size(), chance - Useful.SALT_SHAKER.nextInt(20));
-            
+
             if(count > 0)
             {
                 for(int i = 0; i < count; i++)
@@ -287,7 +286,7 @@ public class LavaSimulator extends SimulationNode
         else if(coolingCounter <= 0)
         {
             coolingCounter = 21;
-            
+
             LavaCell[] cells = cellsWithFluid.values().toArray(new LavaCell[0]);
             Arrays.sort(cells, new Comparator<LavaCell>() 
             {
@@ -297,7 +296,7 @@ public class LavaSimulator extends SimulationNode
                     return Integer.compare(o1.getLastFlowTick(), o2.getLastFlowTick());
                 }
             });
-            
+
             for( LavaCell cell : cells)
             {
                 if(this.getTickIndex() - cell.getLastFlowTick() > 200)
@@ -306,10 +305,10 @@ public class LavaSimulator extends SimulationNode
                     break;
             }
         }
-     
+
         this.coolingTime += (System.nanoTime() - startTime);
     }
-    
+
     private void coolLava(BlockPos pos, boolean fillerOnly)
     {
         IBlockState state = this.world.getBlockState(pos);
@@ -323,22 +322,23 @@ public class LavaSimulator extends SimulationNode
         {
             newBlock = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK;
         }
-        
+
         if(newBlock != null)
         {
+//            Adversity.log.info("Cooling lava @" + pos.toString());
             this.itMe = true;
             this.world.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
             this.itMe = false;
         }
     }
-    
+
     private long stepTime;
     private long connectionRequestTime;
     private int connectionRequestCount;
-    private long sortTime;
-    private int sortCount;
     private long connectionProcessTime;
     private int connectionProcessCount;
+    private long connectionRemovalTime;
+    private int connectionRemovalCount;
     
     public void doStep()
     {
@@ -347,88 +347,84 @@ public class LavaSimulator extends SimulationNode
         connectionRequestCount += newConnections.size();
         this.processNewConnectionRequests();
         this.connectionRequestTime += (System.nanoTime() - startTime);
-        
+
         if(this.connections.size() > 0)
         {
+
             startTime = System.nanoTime();
-            sortCount += this.connections.size();
-            
-            LavaCellConnection[] links = this.connections.values().toArray(new LavaCellConnection[0]);
-            Arrays.sort(links, new Comparator<LavaCellConnection>() {
-                @Override
-                public int compare(LavaCellConnection o1, LavaCellConnection o2)
-                {
-                    return Integer.compare(o1.getSortKey(), o2.getSortKey());
-                }});
-            
-            this.sortTime += (System.nanoTime() - startTime);
-            
-            startTime = System.nanoTime();
-            connectionProcessCount += links.length;
-            
-            for(LavaCellConnection c : links)
+
+            connectionProcessCount += this.connections.size();
+
+            for(LavaCellConnection c : this.connections.getSortedValues())
             {
                 if(c.firstCell.isBarrier() || c.secondCell.isBarrier()
-                      || (c.firstCell.getFluidAmount() == 0 && c.secondCell.getFluidAmount() == 0))
+                        || (c.firstCell.getFluidAmount() == 0 && c.secondCell.getFluidAmount() == 0))
                 {
-                    c.releaseCells();
-                    this.connections.remove(new CellConnectionPos(c.firstCell.pos, c.secondCell.pos));
+                    this.deadConnections.add(new CellConnectionPos(c.firstCell.pos, c.secondCell.pos));
                 }
                 else
                 {
                     c.doStep(this);
                 }
             }
-            
+
             this.connectionProcessTime += (System.nanoTime() - startTime);
+
+
+            startTime = System.nanoTime();
+            connectionRemovalCount += deadConnections.size();
+            this.processDeadConnections();
+            this.connectionRemovalTime += (System.nanoTime() - startTime);
+
+
             //use iterator and hold changes in other collections
-//            Iterator<Entry<CellConnectionPos, LavaCellConnection>> it = this.connections.entrySet().iterator();
-//            while(it.hasNext())
-//            {
-//                Entry<CellConnectionPos, LavaCellConnection> next = it.next();
-//                LavaCellConnection connection = next.getValue();
-//                //remove connections to barriers or between cells with no fluid
-//                if(connection.firstCell.isBarrier() || connection.secondCell.isBarrier()
-//                        || (connection.firstCell.getCurrentLevel() == 0 && connection.secondCell.getCurrentLevel() == 0))
-//                {
-//                    connection.releaseCells();
-//                    it.remove();
-//                }
-//                else
-//                {
-//                    connection.doStep(this);
-//                }
-//            }
+            //            Iterator<Entry<CellConnectionPos, LavaCellConnection>> it = this.connections.entrySet().iterator();
+            //            while(it.hasNext())
+            //            {
+            //                Entry<CellConnectionPos, LavaCellConnection> next = it.next();
+            //                LavaCellConnection connection = next.getValue();
+            //                //remove connections to barriers or between cells with no fluid
+            //                if(connection.firstCell.isBarrier() || connection.secondCell.isBarrier()
+            //                        || (connection.firstCell.getCurrentLevel() == 0 && connection.secondCell.getCurrentLevel() == 0))
+            //                {
+            //                    connection.releaseCells();
+            //                    it.remove();
+            //                }
+            //                else
+            //                {
+            //                    connection.doStep(this);
+            //                }
+            //            }
 
         }
-        
+
         //TODO: handle particles with connection-oriented model
 
     }
-    
+
     private long validationTime;
-    
+
     private void validateAllCells()
     {
 
-        
+
         //TODO: make parallel
         for(LavaCell cell : this.allCells.values().toArray(new LavaCell[0]))
         {
             cell.validate(this, false);
         }
-        
+
     }
-    
+
     private long cacheCleanTime;
-    
+
     private void cleanCellCache()
     {
-       
-//        this.allCells.values().parallelStream().forEach((LavaCell c) -> {if(c.getCurrentLevel() > 0) c.clearNeighborCache();});
+
+        //        this.allCells.values().parallelStream().forEach((LavaCell c) -> {if(c.getCurrentLevel() > 0) c.clearNeighborCache();});
 
         Iterator<Entry<BlockPos, LavaCell>> it = this.allCells.entrySet().iterator();
-        
+
         while(it.hasNext())
         {
             Entry<BlockPos, LavaCell> next = it.next();
@@ -439,25 +435,25 @@ public class LavaSimulator extends SimulationNode
         }
 
     }
-    
+
     /**
      * Retrieves existing cell or creates new if not found.
      * For existing cells, will validate vs. world if validateExisting = true;
      */
     public LavaCell getCell(BlockPos pos, boolean validateExisting)
     {
-//        int arrayX = pos.getX() + xOffset;
-//        int arrayZ = pos.getZ() + zOffset;
-//        
-//        //Will get called by boundary lookups - 
-//        //just ignore these, effective creates a barrier at boundary
-//        if(arrayX >= ARRAY_LENGTH || arrayX < 0 || arrayZ >= ARRAY_LENGTH || arrayZ < 0)
-//        {
-//            return null;
-//        }
-        
+        //        int arrayX = pos.getX() + xOffset;
+        //        int arrayZ = pos.getZ() + zOffset;
+        //        
+        //        //Will get called by boundary lookups - 
+        //        //just ignore these, effective creates a barrier at boundary
+        //        if(arrayX >= ARRAY_LENGTH || arrayX < 0 || arrayZ >= ARRAY_LENGTH || arrayZ < 0)
+        //        {
+        //            return null;
+        //        }
+
         LavaCell result = allCells.get(pos);
-        
+
         if(result == null)
         {
             result = new LavaCell(this, pos);
@@ -470,13 +466,13 @@ public class LavaSimulator extends SimulationNode
         }
         return result;
     }
-    
+
     public LavaCellConnection getConnection(BlockPos pos1, BlockPos pos2)
     {
         return connections.get(new CellConnectionPos(pos1, pos2));
     }
-    
-   
+
+
     /**
      * Update simulation from world when blocks are placed via creative mode or other methods.
      * Unfortunately, this will ALSO be called by our own block updates, 
@@ -485,7 +481,7 @@ public class LavaSimulator extends SimulationNode
     public void registerPlacedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
-        
+
         int worldLevel = IFlowBlock.getFlowHeightFromState(state);
         LavaCell target = this.getCell(pos, false);
         if(target.getVisibleLevel() != worldLevel)
@@ -495,7 +491,7 @@ public class LavaSimulator extends SimulationNode
         }
         this.setSaveDirty(true);
     }
-    
+
     /**
      * Update simulation from world when blocks are removed via creative mode or other methods.
      * Unfortunately, this will ALSO be called by our own block updates, 
@@ -504,7 +500,7 @@ public class LavaSimulator extends SimulationNode
     public void unregisterDestroyedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
-        
+
         LavaCell target = this.getCell(pos, false);
         totalFluidRegistered -= target.getFluidAmount();
         if(target.getFluidAmount() > 0)
@@ -513,7 +509,7 @@ public class LavaSimulator extends SimulationNode
         }
         this.setSaveDirty(true);
     }
-    
+
     /**
      * Call when a cell transitions between having and not having any fluid.
      * Maintains the list of connections with cells that have fluid.
@@ -524,7 +520,7 @@ public class LavaSimulator extends SimulationNode
     {
         if(hasFluid)
         {
-//            Adversity.log.info("fluid status retain");
+            //            Adversity.log.info("fluid status retain");
             if(!cellsWithFluid.containsKey(cell.pos))
             {
                 cell.retain("updateFluidStatus self");
@@ -546,7 +542,7 @@ public class LavaSimulator extends SimulationNode
         }
         else
         {
-//            Adversity.log.info("fluid status release");
+            //            Adversity.log.info("fluid status release");
             if(cellsWithFluid.containsKey(cell.pos))
             {
                 cellsWithFluid.remove(cell.pos);
@@ -563,17 +559,17 @@ public class LavaSimulator extends SimulationNode
             }
         }
     }
-    
+
     /**
      * Adds lava in or on top of the given cell.
      * TODO: handle when not all the lava can be used.
      */
     public void addLava(BlockPos pos, int amount)
     {
-//        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
-        
+        //        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
+
         int available = amount;
-        
+
         LavaCell target = this.getCell(pos.down(), true);
         int capacity = target.getCapacity();
         int flow = Math.min(capacity, available);
@@ -582,7 +578,7 @@ public class LavaSimulator extends SimulationNode
             target.changeLevel(this, flow);
             available -= flow;
         }
-        
+
         if(available > 0)
         {
             target = this.getCell(pos, true);
@@ -593,7 +589,7 @@ public class LavaSimulator extends SimulationNode
                 target.changeLevel(this, flow);
                 available -= flow;
             }
-            
+
             if(available > 0)
             {
                 target = this.getCell(pos.up(), true);
@@ -605,37 +601,46 @@ public class LavaSimulator extends SimulationNode
                     available -= flow;
                 }
             }
-            
+
             if(available > 0)
             {
                 Adversity.log.info("LAVA EATING IS A THING! Amount=" + available + " @" + pos.toString());
             }
         }
     }
-    
-    
+
+
     public void requestNewConnection(BlockPos pos1, BlockPos pos2)
     {
         this.newConnections.add(new CellConnectionPos(pos1, pos2));
     }
-    
 
-    
+
+
     private void processNewConnectionRequests()
     {
-       while(!newConnections.isEmpty())
+        if(!this.newConnections.isEmpty())
         {
-            CellConnectionPos pos = newConnections.removeFirst();
-            
-            if(!this.connections.containsKey(pos))
+            for(CellConnectionPos pos : this.newConnections)
             {
-                LavaCell cell1 = this.getCell(pos.getLowerPos(), false);
-                LavaCell cell2 = this.getCell(pos.getUpperPos(), false);
-                this.connections.put(pos, new LavaCellConnection(cell1, cell2));
+                this.connections.createConnectionIfNotPresent(this, pos);
             }
+            this.newConnections.clear();
         }
     }
-    
+
+    private void processDeadConnections()
+    {
+        if(!deadConnections.isEmpty())
+        {
+            for(CellConnectionPos pos : this.deadConnections)
+            {
+                this.connections.remove(pos);
+            }
+            this.deadConnections.clear();
+        }
+    }
+
     private Queue<LavaBlockUpdate> getBlockUpdates()
     {
         for(LavaCell cell : this.dirtyCells)
@@ -647,61 +652,49 @@ public class LavaSimulator extends SimulationNode
     }
 
     private static int blockUpdatesCounter;
-    private static int updateReportCounter = 60;
-    
+
     private long blockUpdateTime;
     public void doBlockUpdates()
     {
-//        Adversity.log.info("LavaSim doBlockUpdates");
+        //        Adversity.log.info("LavaSim doBlockUpdates");
         long startTime = System.nanoTime();
-        
+
         Queue<LavaBlockUpdate> blockUpdates = getBlockUpdates();
-        
+
         blockUpdatesCounter += blockUpdates.size();
-        
-        if(updateReportCounter <= 0)
-        {
-            Adversity.log.info("Lava expAvg block updates per tick = " + blockUpdatesCounter/60);
-            updateReportCounter = 60;
-            blockUpdatesCounter = 0;
-        }
-        else
-        {
-            updateReportCounter--;
-        }
-        
+
         this.itMe = true;
         LavaBlockUpdate update = blockUpdates.poll();       
         while(update != null)
         {   if(update.level == 0)
+        {
+            if(world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
             {
-                if(world.getBlockState(update.pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-                {
-                    world.setBlockToAir(update.pos);
-                }
+                world.setBlockToAir(update.pos);
             }
-            else
-            {
-                this.world.setBlockState(update.pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
-            }
-            this.adjustmentList.add(update.pos);
-            update = blockUpdates.poll();
+        }
+        else
+        {
+            this.world.setBlockState(update.pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), update.level));
+        }
+        this.adjustmentList.add(update.pos);
+        update = blockUpdates.poll();
         }
         this.itMe = false;
-        
-        //doBlockUpdates();
-        
-        doAdjustments();
 
+        //doBlockUpdates();
+
+        doAdjustments();
+        
         this.blockUpdateTime += (System.nanoTime() - startTime);
     }
-    
+
     private void doAdjustments()
     {
         //TODO: Use mutable blockpos here - gets called frequently 
-        
+
         HashSet<BlockPos> targets = new HashSet<BlockPos>();
-    
+
         for(BlockPos changed : adjustmentList)
         {
             targets.add(changed.east());
@@ -715,7 +708,7 @@ public class LavaSimulator extends SimulationNode
         }
 
         adjustmentList.clear();
-        
+
         for(BlockPos target : targets)
         {
             for(int y = -2; y <= 2; y++)
@@ -728,7 +721,7 @@ public class LavaSimulator extends SimulationNode
             }
         }
     }
-    
+
     /**
      * Melts static height blocks if geometry would be different from current.
      * And turns full cube dynamic blocks into static cube blocks.
@@ -773,9 +766,9 @@ public class LavaSimulator extends SimulationNode
 
             this.world.setBlockState(targetPos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-            
+
             //TODO: handle cooling
-//            this.coolingBlocks.add(targetPos, ticksActive + Config.volcano().coolingLagTicks);
+            //            this.coolingBlocks.add(targetPos, ticksActive + Config.volcano().coolingLagTicks);
         }
 
         return true;
@@ -788,36 +781,40 @@ public class LavaSimulator extends SimulationNode
         cellsWithFluid.clear();
         connections.clear();
         newConnections.clear();
+        deadConnections.clear();
         adjustmentList.clear();
         dirtyCells.clear();
         blockUpdates.clear();
         totalFluidRegistered = 0;
         this.tickIndex = 0;
-        
+
         int[] saveData = nbt.getIntArray(TAG_SAVE_DATA);
-        
+
         //confirm correct size
         if(saveData == null || saveData.length % 6 != 0)
         {
             Adversity.log.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
             return;
         }
-        
+
         int i = 0;
         this.isLoading = true;
         while(i < saveData.length)
         {
             LavaCell cell = this.getCell(new BlockPos(saveData[i++], saveData[i++], saveData[i++]), false);
-          
+
             cell.changeLevel(this, saveData[i++] - cell.getFluidAmount());
             cell.setLastFlowTick(saveData[i++]);
             cell.setFloor(saveData[i++]);
-            this.tickIndex = Math.max(this.tickIndex, cell.getLastFlowTick());
+            if(!cell.getNeverCools())
+            {
+                this.tickIndex = Math.max(this.tickIndex, cell.getLastFlowTick());
+            }
             this.totalFluidRegistered += cell.getFluidAmount();
-            
+
         }
         this.isLoading = false;
-  
+
         Adversity.log.info("Loaded " + cellsWithFluid.size() + " lava cells.");
     }
 
@@ -827,7 +824,7 @@ public class LavaSimulator extends SimulationNode
         Adversity.log.info("Saving " + cellsWithFluid.size() + " lava cells.");
         int[] saveData = new int[cellsWithFluid.size() * 6];
         int i = 0;
-        
+
         for(LavaCell cell: cellsWithFluid.values())
         {
             saveData[i++] = cell.pos.getX();
@@ -837,11 +834,11 @@ public class LavaSimulator extends SimulationNode
             saveData[i++] = cell.getLastFlowTick();
             saveData[i++] = cell.getFloor();
         }       
-        
+
         nbt.setIntArray(TAG_SAVE_DATA, saveData);
-        
+
     }
-    
+
     public int getTickIndex()
     {
         return this.tickIndex;
@@ -853,6 +850,6 @@ public class LavaSimulator extends SimulationNode
     {
         return super.isSaveDirty();
     }
-    
-    
+
+
 }
