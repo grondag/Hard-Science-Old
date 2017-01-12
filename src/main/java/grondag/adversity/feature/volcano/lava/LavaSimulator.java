@@ -8,13 +8,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
 import net.minecraft.block.Block;
@@ -27,16 +27,14 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
- * Filler block placement - some being missed?
+ * Too many particles
  * Handle lastFlowTick overrun
  * Performance / parallelism
  *  Handle changes to sort keys on connections due to world updates
- * Debug reference counting - some cells have high reference counts
+ * Negative cell levels
  * 
  * FEATURES
- * Handle flowing terrain
- *      Update Drop Calculation
- * Reintegrate with volcano
+ * Improve Drop/slope Calculation for flowing terrain
  * Particle damage to entities
  *
  * Handle multiple worlds
@@ -60,10 +58,12 @@ public class LavaSimulator extends SimulationNode
     private final HashMap<BlockPos, LavaCell> cellsWithFluid = new HashMap<BlockPos, LavaCell>();
 
     private final ConnectionMap connections = new ConnectionMap();
+    
+    private final ParticleManager particles = new ParticleManager();
 
     private final HashSet<CellConnectionPos> newConnections = new HashSet<CellConnectionPos>();
     private final HashSet<CellConnectionPos> deadConnections = new HashSet<CellConnectionPos>();
-
+    
     /** Set true when doing block placements so we known not to register them as newly placed lava. */
     private boolean itMe = false;
 
@@ -197,29 +197,36 @@ public class LavaSimulator extends SimulationNode
 
     }
 
-    private int particleCounter = 10;
+//    private int particleCounter = 10;
 
     private long particleTime;
     private void doParticles()
     {
         long startTime = System.nanoTime();
-       
-        if(particleCounter-- == 0)
+       //TODO: make configurable
+        int capacity =  10 - EntityLavaParticle.getLiveParticleCount();
+        
+        while(capacity-- > 0 && this.particles.size() > 0 )
         {
-            particleCounter = 5 + Useful.SALT_SHAKER.nextInt(5);
-
-            //TODO: sort bottom up
-            for(LavaCell cell : cellsWithFluid.values().toArray(new LavaCell[0]))
-            {
-                int amount = cell.getFluidAmount();
-                if(amount > 0 && cell.isDrop(this))
-                {
-                    world.spawnEntityInWorld(new EntityLavaParticle(world, amount, 
-                            new Vec3d(cell.pos.getX() + 0.5, cell.pos.getY() - 0.1, cell.pos.getZ() + 0.5), Vec3d.ZERO));
-                    cell.changeLevel(this, -amount);
-                }
-            }
+            world.spawnEntityInWorld(this.particles.pollFirst());
         }
+      
+//        if(particleCounter-- == 0)
+//        {
+//            particleCounter = 5 + Useful.SALT_SHAKER.nextInt(5);
+//
+//            //TODO: sort bottom up
+//            for(LavaCell cell : cellsWithFluid.values().toArray(new LavaCell[0]))
+//            {
+//                int amount = cell.getFluidAmount();
+//                if(amount > 0 && cell.isDrop(this))
+//                {
+//                    world.spawnEntityInWorld(new EntityLavaParticle(world, amount, 
+//                            new Vec3d(cell.pos.getX() + 0.5, cell.pos.getY() - 0.1, cell.pos.getZ() + 0.5), Vec3d.ZERO));
+//                    cell.changeLevel(this, -amount);
+//                }
+//            }
+//        }
 
         this.particleTime += (System.nanoTime() - startTime);
     }
@@ -609,6 +616,10 @@ public class LavaSimulator extends SimulationNode
         }
     }
 
+    public void queueParticle(BlockPos pos, int amount)
+    {
+        
+    }
 
     public void requestNewConnection(BlockPos pos1, BlockPos pos2)
     {

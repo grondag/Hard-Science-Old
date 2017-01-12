@@ -32,11 +32,15 @@ public class EntityLavaParticle extends Entity
 {
     private static int nextParticleID;
 
-    private final int id;
+    public final int id;
 
     private static final String TAG_AMOUNT = "amt";
 
     private float renderScale;
+    
+    private int cachedAmount;
+    
+    private static int liveParticleCount = 0;
 
     private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.<Integer>createKey(EntityLavaParticle.class, DataSerializers.VARINT);
 
@@ -46,6 +50,11 @@ public class EntityLavaParticle extends Entity
         return this.id;
     }
 
+    public static int getLiveParticleCount()
+    {
+        return liveParticleCount;
+    }
+    
     protected EntityLavaParticle(World world, int amount, Vec3d position, Vec3d velocity)
     {
         this(world, amount);
@@ -72,6 +81,7 @@ public class EntityLavaParticle extends Entity
         this.id = nextParticleID++;
         if(!world.isRemote)
         {
+            this.cachedAmount = amount;
             this.dataManager.set(FLUID_AMOUNT, Integer.valueOf(amount)); 
         }
         this.forceSpawn = true;
@@ -80,7 +90,7 @@ public class EntityLavaParticle extends Entity
 
     private void updateAmountDependentData()
     {
-        float unitAmout = (float)this.dataManager.get(FLUID_AMOUNT).intValue() / LavaCell.FLUID_UNITS_PER_BLOCK;
+        float unitAmout = (float)this.getFluidAmount() / LavaCell.FLUID_UNITS_PER_BLOCK;
 
         // Give bounding box same volume as model, but small enough to fit through a one block space and not too small to interact
         float edgeLength = (float) Math.min(0.8, Math.max(0.1, Math.pow(unitAmout, 0.3333333333333)));
@@ -102,6 +112,7 @@ public class EntityLavaParticle extends Entity
         //resize once we have our amount
         if (FLUID_AMOUNT.equals(key) && this.worldObj.isRemote)
         {
+            this.cachedAmount = this.dataManager.get(FLUID_AMOUNT).intValue();
             this.updateAmountDependentData();
         }
     }
@@ -156,11 +167,26 @@ public class EntityLavaParticle extends Entity
         return this.renderScale;
     }
 
+    public int getFluidAmount()
+    {
+        return this.cachedAmount;
+    }
+    
+    public void setFluidAmount(int amount)
+    {
+        this.cachedAmount = amount;
+        this.dataManager.set(FLUID_AMOUNT, amount);
+        this.updateAmountDependentData();
+
+    }
+    
     @Override
     public void onUpdate()
     {
         //    Adversity.log.info("onUpdate id=" + this.id + " starting x,y,z=" + this.getPositionVector().toString());
 
+        if(this.firstUpdate) liveParticleCount++;
+        
         //TODO: remove
         if(this.isDead) 
             Adversity.log.info("Dead entity derp");
@@ -190,7 +216,7 @@ public class EntityLavaParticle extends Entity
         {
 //            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.dataManager.get(FLUID_AMOUNT).floatValue());
 
-            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.dataManager.get(FLUID_AMOUNT).intValue());
+            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount());
             //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
             this.shouldDie = true;
             this.setDead();
@@ -213,6 +239,7 @@ public class EntityLavaParticle extends Entity
         {
             Adversity.log.info("unintended particle death");
         }
+        liveParticleCount--;
         super.setDead();
     }
 
@@ -386,7 +413,9 @@ public class EntityLavaParticle extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.dataManager.set(FLUID_AMOUNT, Integer.valueOf(compound.getInteger(TAG_AMOUNT)));
+        this.cachedAmount = compound.getInteger(TAG_AMOUNT);
+        this.dataManager.set(FLUID_AMOUNT, cachedAmount);
+        this.updateAmountDependentData();
     }
 
     @Override
@@ -406,5 +435,4 @@ public class EntityLavaParticle extends Entity
     {
         return 15728880;
     }
-
 }

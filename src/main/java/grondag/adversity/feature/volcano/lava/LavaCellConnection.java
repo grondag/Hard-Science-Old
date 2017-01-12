@@ -134,11 +134,12 @@ public class LavaCellConnection
         int totalAmount = firstCellAdjustedLevel + secondCell.getFluidAmount();
         
         // no need to constrain vertical flows if everything can flow into bottom block
-        // But don't flow down if lower cell is an empty drop cell.
-        // This implies upper cell is also a drop cell - wait for particles.
+        // REMOVED: But don't flow down if lower cell is an empty drop cell.
+        // REMOVED: This implies upper cell is also a drop cell - wait for particles.
         if(totalAmount <= LavaCell.FLUID_UNITS_PER_BLOCK) // + MINIMUM_CELL_CONTENT)
         {
-            return (firstCell.getFluidAmount() == 0 && firstCell.isDrop(sim)) ? 0 : -secondCell.getFluidAmount();
+//            return (firstCell.getFluidAmount() == 0 && firstCell.isDrop(sim)) ? 0 : -secondCell.getFluidAmount();
+            return -secondCell.getFluidAmount();
         }
         else if(totalAmount < UNITS_PER_TWO_BLOCKS)
         {

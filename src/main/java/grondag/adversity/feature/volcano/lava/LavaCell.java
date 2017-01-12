@@ -110,10 +110,18 @@ public class LavaCell
             }
             else if(amount > 0)
             {
-                
-                // When fluid is first added to a cell with a floor - we melt the floor and include it in the lava.
-                // Necessary because we don't have any kind of multipart capability yet to retain pre-existing block.
-                this.fluidAmount = this.floorLevel;
+                //if this is an empty drop cell, queue a drop particle instead of adding the lava
+                if(this.isDrop(sim))
+                {
+                    sim.queueParticle(this.pos, amount);
+                    return;
+                }
+                else
+                {
+                    // When fluid is first added to a cell with a floor - we melt the floor and include it in the lava.
+                    // Necessary because we don't have any kind of multipart capability yet to retain pre-existing block.
+                    this.fluidAmount = this.floorLevel;
+                }
             }
                 
             this.fluidAmount += amount;
