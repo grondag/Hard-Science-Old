@@ -14,20 +14,19 @@ import net.minecraft.util.math.Vec3d;
 public class ParticleManager
 {
     
-    private final HashMap<BlockPos, EntityLavaParticle> map = new HashMap<BlockPos, EntityLavaParticle>();
+    private final HashMap<BlockPos, ParticleInfo> map = new HashMap<BlockPos, ParticleInfo>();
 
-    private final TreeSet<EntityLavaParticle> set = new TreeSet<EntityLavaParticle>(
-            new Comparator<EntityLavaParticle>() {
+    private final TreeSet<ParticleInfo> set = new TreeSet<ParticleInfo>(
+            new Comparator<ParticleInfo>() {
                 @Override
-                public int compare(EntityLavaParticle o1, EntityLavaParticle o2)
+                public int compare(ParticleInfo o1, ParticleInfo o2)
                 {
                     return ComparisonChain.start()
+                    // oldest first
+                    .compare(o1.tickCreated, o2.tickCreated)
                     // larger first
-                    .compare(o2.getFluidAmount(), o1.getFluidAmount())
-                    // unique key
-                    .compare(o1.id, o2.id)
+                    .compare(o2.fluidUnits, o1.fluidUnits)
                     .result();
-                  
                 }});
 
             
@@ -42,36 +41,25 @@ public class ParticleManager
         return map.size();
     }
    
-    public EntityLavaParticle get(BlockPos pos)
-    {
-        return map.get(pos);
-    }
-    
     public void addLavaForParticle(LavaSimulator sim, BlockPos pos, int fluidAmount)
     {
-        EntityLavaParticle particle = map.get(pos);
+        ParticleInfo particle = map.get(pos);
         
         if(particle == null)
         {
-            // important that Y < 0.5 because getPosition from Entity adds .5 and don't want to round up or hashMap will have a key mismatch with TreeSet
-            particle = new EntityLavaParticle(sim.world, fluidAmount, 
-                    new Vec3d(pos.getX() + 0.5, pos.getY() + 0.4, pos.getZ() + 0.5), Vec3d.ZERO);
+            particle = new ParticleInfo(sim.getTickIndex(), pos, fluidAmount);
             map.put(pos, particle);
-            if(map.get(particle.getPosition()) != particle)
-            {
-                Adversity.log.warn("key mismatch in particle tracker");
-            }
             set.add(particle);
-            Adversity.log.info("ParticleManager added new particle @" + particle.getPosition().toString() + " with amount=" + particle.getFluidAmount());
+            Adversity.log.info("ParticleManager added new particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits());
         }
         else
         {
             //need to remove from tree before changing amount so can be successfully found
             //and then re-add once updated
             set.remove(particle);
-            particle.setFluidAmount(particle.getFluidAmount() + fluidAmount);
+            particle.addFluid(fluidAmount);
             set.add(particle);
-            Adversity.log.info("ParticleManager updated particle @" + particle.getPosition().toString() + " with amount=" + particle.getFluidAmount() + " added " + fluidAmount);
+            Adversity.log.info("ParticleManager updated particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits() + " added " + fluidAmount);
         }
         
      
@@ -83,13 +71,19 @@ public class ParticleManager
         
     }
     
-    public EntityLavaParticle pollFirst()
+    public EntityLavaParticle pollFirstEligible(LavaSimulator sim)
     {
+        if(set.isEmpty()) return null;
         
-        EntityLavaParticle result = this.set.pollFirst();
-        if(result != null)
+        ParticleInfo result = this.set.first();
+
+        // wait until full size or at least five ticks old
+        if(result != null && (result.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK || sim.getTickIndex() - result.tickCreated > 4))
         {
-            map.remove(result.getPosition());
+            
+            set.pollFirst();
+            
+            map.remove(result.pos);
          
             //TODO: remove for release
             if(map.size() != set.size())
@@ -97,10 +91,39 @@ public class ParticleManager
                 Adversity.log.warn("Connection tracking error: set size does not match map size.");
             }
             
-            Adversity.log.info("ParticleManager poll particle @" + result.getPosition().toString() + " with amount=" + result.getFluidAmount());
+            Adversity.log.info("ParticleManager poll particle @" + result.pos.toString() + " with amount=" + result.getFluidUnits());
+            
+            return new EntityLavaParticle(sim.world, result.fluidUnits, new Vec3d(result.pos.getX() + 0.5, result.pos.getY() + 0.4, result.pos.getZ() + 0.5), Vec3d.ZERO);
         }
-        return result;
+        else
+        {
+            return null;
+        }
+        
     }
     
+    public static class ParticleInfo
+    {
+        public final int tickCreated;
+        private int fluidUnits = 0;
+        public final BlockPos pos;
+        
+        private ParticleInfo(int tickCreated, BlockPos pos, int fluidUnits)
+        {
+            this.tickCreated = tickCreated;
+            this.pos = pos;
+            this.fluidUnits = fluidUnits;
+        }
+        
+        private void addFluid(int fluidUnitsIn)
+        {
+            this.fluidUnits += fluidUnitsIn;
+        }
+        
+        public int getFluidUnits()
+        {
+            return this.fluidUnits;
+        }
+    }
 
 }

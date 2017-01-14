@@ -27,6 +27,8 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
+ * Reduce latency of significant block updates while still throttling overall block update rate
+ * Make cooling smoother, more deterministic, and configurably faster
  * Preserve particle queue
  * Handle lastFlowTick overrun
  * Performance / parallelism
@@ -204,9 +206,12 @@ public class LavaSimulator extends SimulationNode
        //TODO: make configurable
         int capacity =  10 - EntityLavaParticle.getLiveParticleCount();
         
-        while(capacity-- > 0 && this.particles.size() > 0 )
+        EntityLavaParticle particle = this.particles.pollFirstEligible(this);
+        
+        while(capacity-- > 0 && particle != null )
         {
-            world.spawnEntityInWorld(this.particles.pollFirst());
+            world.spawnEntityInWorld(particle);
+            particle = this.particles.pollFirstEligible(this);
         }
       
 //        if(particleCounter-- == 0)

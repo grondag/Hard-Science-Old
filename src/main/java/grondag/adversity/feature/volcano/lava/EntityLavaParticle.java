@@ -202,8 +202,8 @@ public class EntityLavaParticle extends Entity
 
         // If inside lava, release to lava simulator.
         // This can happen somewhat frequently because another particle landed or lava flowed around us.
-        if(!this.worldObj.isRemote) 
-        {
+//        if(!this.worldObj.isRemote) 
+//        {
             Block block = this.worldObj.getBlockState(this.getPosition()).getBlock();
             
             if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK )
@@ -211,7 +211,7 @@ public class EntityLavaParticle extends Entity
                 this.land();
                 return;
             }
-        }
+//        }
         
         super.onUpdate();
 
@@ -234,14 +234,16 @@ public class EntityLavaParticle extends Entity
         this.motionY *= 0.9800000190734863D;
         this.motionZ *= 0.9800000190734863D;
 
-        if (!this.worldObj.isRemote & this.onGround) this.land();
+        if (this.onGround) this.land();
     }
     
     private void land()
     {
-        Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
-
-        Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount(), false);
+        if(!this.worldObj.isRemote )
+        {
+            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
+            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount(), false);
+        }
         //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.shouldDie = true;
         this.setDead();

@@ -329,16 +329,12 @@ public class LavaCell
 
         if(updateRetainedLevel && !this.isBarrier) 
         {
-            int floor = this.floorLevel;
-            if(floor == 0)
-            {
-                floor = this.getNeighbor(sim, EnumFacing.DOWN).getFloor() - FLUID_UNITS_PER_BLOCK;
-            }
+            int effectiveFloor = this.getEffectiveFloor(sim);
             
             //TODO: make this depend on slope
-            if(floor !=  0)
+            if(effectiveFloor !=  0)
             {
-                this.retainedLevel = Math.max(0, floor + FLUID_UNTIS_PER_HALF_BLOCK);
+                this.retainedLevel = Math.max(0, effectiveFloor + FLUID_UNTIS_PER_HALF_BLOCK);
             }
             else if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down())))
             {
@@ -490,9 +486,34 @@ public class LavaCell
         return this.lastFlowTick == NEVER_COOLS;
     }
     
+    // See floorLevel comments - is raw value
     public int getFloor()
     {
         return this.floorLevel;
+    }
+    
+    /**
+     *  Same as getFloor() if this cell has a non-zero floor.
+     *  If this cell doesn't have a floor but cell below does,
+     *  gives a negative value that represents the distance to the floor below.
+     */
+    public int getEffectiveFloor(LavaSimulator sim)
+    {
+        int result = this.floorLevel;
+        if(result == 0)
+        {
+            result = this.getNeighbor(sim, EnumFacing.DOWN).getFloor();
+            if(result > 0)
+            {
+                result -= FLUID_UNITS_PER_BLOCK;
+            }
+            else
+            {
+                // negative values should never happen, but prevent weirdness if they do
+                result = 0;
+            }
+        }
+        return result;
     }
     
     /**
