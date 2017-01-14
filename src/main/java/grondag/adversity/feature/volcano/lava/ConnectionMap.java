@@ -26,7 +26,7 @@ public class ConnectionMap
                     //top down
                     .compare(o2.firstCell.pos.getY(), o1.firstCell.pos.getY())
                     //largest drop first
-                    .compare(o2.geSortDrop(), o1.geSortDrop())
+                    .compare(o2.getSortDrop(), o1.getSortDrop())
                     //random tie breaker -> don't favor any horizontal direction
                     .compare(o1.rand, o2.rand)
                     //ensure match equals behavior in rare case rand doesn't break tie

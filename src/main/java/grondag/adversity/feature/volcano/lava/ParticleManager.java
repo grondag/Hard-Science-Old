@@ -57,6 +57,12 @@ public class ParticleManager
             particle = new EntityLavaParticle(sim.world, fluidAmount, 
                     new Vec3d(pos.getX() + 0.5, pos.getY() + 0.4, pos.getZ() + 0.5), Vec3d.ZERO);
             map.put(pos, particle);
+            if(map.get(particle.getPosition()) != particle)
+            {
+                Adversity.log.warn("key mismatch in particle tracker");
+            }
+            set.add(particle);
+            Adversity.log.info("ParticleManager added new particle @" + particle.getPosition().toString() + " with amount=" + particle.getFluidAmount());
         }
         else
         {
@@ -65,6 +71,7 @@ public class ParticleManager
             set.remove(particle);
             particle.setFluidAmount(particle.getFluidAmount() + fluidAmount);
             set.add(particle);
+            Adversity.log.info("ParticleManager updated particle @" + particle.getPosition().toString() + " with amount=" + particle.getFluidAmount() + " added " + fluidAmount);
         }
         
      
@@ -89,6 +96,8 @@ public class ParticleManager
             {
                 Adversity.log.warn("Connection tracking error: set size does not match map size.");
             }
+            
+            Adversity.log.info("ParticleManager poll particle @" + result.getPosition().toString() + " with amount=" + result.getFluidAmount());
         }
         return result;
     }

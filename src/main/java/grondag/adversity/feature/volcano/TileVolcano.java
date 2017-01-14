@@ -823,7 +823,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             else
             {
 //                Adversity.log.info("Topping off lava @" + clearPos.toString());
-                Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity());
+                Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity(), false);
                 cell.setNeverCools(true);
                 return false;
             }
@@ -834,7 +834,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 //            Adversity.log.info("Clearing and placing lava @" + clearPos.toString());
             this.worldObj.setBlockToAir(clearPos);
             LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, true);
-            Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity());
+            Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity(), true);
             cell.setNeverCools(true);
             // don't build mound if above ground or if melting Basalt
             if(clearPos.getY() < this.groundLevel && 

@@ -21,12 +21,16 @@ public class LavaCellConnection
     private int flowThisTick = 0;
     private int lastFlowTick = 0;
     
-    private int currentFlowRate = 0;
-    
     private int sortDrop;
  
     private final static int PRESSURE_PER_LEVEL = LavaCell.FLUID_UNITS_PER_BLOCK / 20;
-    private final static int MINIMUM_FLOW_UNITS = PRESSURE_PER_LEVEL / 10;
+    
+    /** smallest flow into a block that already contains fluid */
+    private final static int MINIMUM_INTERNAL_FLOW_UNITS = PRESSURE_PER_LEVEL / 10;
+    
+    /** smallest flow into a block that has no fluid already - applies to horizontal flow only */
+    private final static int MINIMUM_EXTERNAL_FLOW_UNITS = PRESSURE_PER_LEVEL;
+    
     private final static int UNITS_PER_ONE_BLOCK_WITH_PRESSURE = LavaCell.FLUID_UNITS_PER_BLOCK + PRESSURE_PER_LEVEL;
     private final static int UNITS_PER_TWO_BLOCKS = LavaCell.FLUID_UNITS_PER_BLOCK * 2 + PRESSURE_PER_LEVEL;
     public final static float INVERSE_PRESSURE_FACTOR = (float)LavaCell.FLUID_UNITS_PER_BLOCK/UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
@@ -274,19 +278,25 @@ public class LavaCellConnection
 
     }
     
-    public void updateFlowRate(LavaSimulator sim)
+    private int getFlowRate(LavaSimulator sim)
     {
-        int flow;
         // barriers don't need processing - TODO: may not be needed because checked in connection processing loop
         if(this.firstCell.isBarrier() || this.secondCell.isBarrier())
         {
-            flow = 0;
+            return 0;
         }
-        else if(this.isVertical)
+        
+        int flow = 0;
+        if(this.isVertical)
         {
-            flow = this.getVerticalFlow(sim);    
-          //Damp tiny oscillations, but always allow downward flow
-            if(flow > 0 && flow < MINIMUM_FLOW_UNITS) flow = 0;
+            // Don't melt a cooled flowblock above us.
+            // Won't be detected as a barrier so have to check floor.
+            if(secondCell.getFloor() == 0)
+            {
+                flow = this.getVerticalFlow(sim);    
+                //Damp tiny oscillations, but always allow downward flow
+                if(flow > 0 && flow < MINIMUM_INTERNAL_FLOW_UNITS) flow = 0;
+            }
             
 //            if(flow < -100)
 //                Adversity.log.info("boop");
@@ -296,15 +306,38 @@ public class LavaCellConnection
             flow = this.getHorizontalFlow(sim);
             
             //Damp tiny oscillations
-            //TODO: make threshold configurable
-            if(Math.abs(flow) < MINIMUM_FLOW_UNITS) flow = 0;
+            //Threshold is higher for flowing into empty blocks.
+            //This prevents remelting neighboring cooling blocks that
+            //just changed level slight as a result of cooling (happens due to rounding).
+            
+            if(flow != 0)
+            {
+                if(flow > 0)
+                {
+                    //flow from 1st to 2nd
+                    if(flow < (this.secondCell.getFluidAmount() == 0 ? MINIMUM_EXTERNAL_FLOW_UNITS : MINIMUM_INTERNAL_FLOW_UNITS)) flow = 0;
+                }
+                else
+                {
+                    //negative flow
+                    //from 2nd to 1st
+                    if(flow > (this.firstCell.getFluidAmount() == 0 ? -MINIMUM_EXTERNAL_FLOW_UNITS : -MINIMUM_INTERNAL_FLOW_UNITS)) flow = 0;
+                }
+            }
+            
         }
-        this.currentFlowRate = flow;
+        return flow;
 
     }
     
     public void doStep(LavaSimulator sim)
     {
+        if(this.lastFlowTick != sim.getTickIndex())
+        {
+            this.flowThisTick = 0;
+            this.lastFlowTick = sim.getTickIndex();
+        }
+        
         // TODO: Particle output
         
         // TODO: remove
@@ -321,25 +354,24 @@ public class LavaCellConnection
 //          Adversity.log.info("boop");
 //        }
             
-        //TODO: make this local again if going to update each time
-        this.updateFlowRate(sim);
+        int flow = this.getFlowRate(sim);
         
-        if (this.currentFlowRate == 0) return;
-        
-        int flow = this.currentFlowRate;
-        
-        //TODO: make bound configurable
-         
+        if(flow == 0) return;
+       
+         //TODO: make bound configurable
         // Positive numbers means 1st cell has higher pressure.
         if(flow > 0)
         {
-            flow = Math.min(flow, MAX_FLOW_PER_TICK - this.getFlowThisTick(sim));
+            
+            flow = Math.max(0, Math.min(flow, MAX_FLOW_PER_TICK - this.flowThisTick));
         }
         else
         {
             // flow is negative in this case, so need to flip handling of bound
-            flow = Math.max(flow, -MAX_FLOW_PER_TICK - this.getFlowThisTick(sim));
+            flow = Math.min(0, Math.max(flow, -MAX_FLOW_PER_TICK - this.flowThisTick));
         }
+        
+        if(flow == 0) return;
         
         this.flowAcross(sim, flow);
     }
@@ -347,18 +379,10 @@ public class LavaCellConnection
     public void flowAcross(LavaSimulator sim, int flow)
     {
         // shouldn't be needed but was getting zeros here - maybe floating-point weirdness?
-        if(flow ==0) return;
+//        if(flow ==0) return;
         
-        if(sim.getTickIndex() != this.lastFlowTick)
-        {
-            lastFlowTick = sim.getTickIndex();
-            this.flowThisTick = flow;
-        }
-        else
-        {
-            this.flowThisTick += flow;
-        }
-        
+
+        this.flowThisTick += flow;
         this.firstCell.changeLevel(sim, -flow);
         this.secondCell.changeLevel(sim, flow);
 
@@ -376,11 +400,6 @@ public class LavaCellConnection
         sim.setSaveDirty(true);
     }
     
-    public int getFlowThisTick(LavaSimulator sim)
-    {
-        return sim.getTickIndex() == this.lastFlowTick ? this.flowThisTick : 0;
-    }
-
     /**
      * Call when removing this connection so that cell references can be removed if appropriate.
      */
@@ -409,7 +428,7 @@ public class LavaCellConnection
      * value until sort can be properly updated.
      * @return
      */
-    public int geSortDrop()
+    public int getSortDrop()
     {
         return this.sortDrop;
     }
@@ -419,8 +438,4 @@ public class LavaCellConnection
         this.sortDrop = this.getDrop();
     }
     
-    public int getCurrentFlowRate()
-    {
-        return this.currentFlowRate;
-    }
 }

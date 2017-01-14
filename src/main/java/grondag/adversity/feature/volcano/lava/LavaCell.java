@@ -113,6 +113,7 @@ public class LavaCell
                 //if this is an empty drop cell, queue a drop particle instead of adding the lava
                 if(this.isDrop(sim))
                 {
+                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
                     sim.queueParticle(this.pos, amount);
                     return;
                 }
@@ -168,14 +169,21 @@ public class LavaCell
 
     /**
      * Returns number between 0 and 12 representing current visible block level.
-     * 0 means block does not contain fluid.
+     * Always rounds up.
+     * 0 means block does not contain any fluid.
      */
     public int getVisibleLevel()
     {
-        if(this.fluidAmount < MINIMUM_CELL_CONTENT) 
-            return 0;
-        else
-            return Math.round(Math.max(1, Math.min(this.fluidAmount, FLUID_UNITS_PER_BLOCK) / FLUID_UNITS_PER_LEVEL));
+//        if(this.fluidAmount < MINIMUM_CELL_CONTENT) 
+//            return 0;
+//        else
+//            return Math.min(FlowHeightState.BLOCK_LEVELS_INT, Float.((float)this.fluidAmount, FLUID_UNITS_PER_LEVEL));
+            
+            //effectively rounds up without FP math
+            int result = 0;
+            if(this.fluidAmount > 0) result = (fluidAmount + FLUID_UNITS_PER_LEVEL - 1) / FLUID_UNITS_PER_LEVEL;
+            if(result > FlowHeightState.BLOCK_LEVELS_INT) result = FlowHeightState.BLOCK_LEVELS_INT;
+            return result;
     }
 
     /**
@@ -199,6 +207,8 @@ public class LavaCell
      * Clears floor value and updates retained level if discovers world lava in a cell thought to be empty.
      * Creates connections if cell was previously a barrier.
      * Updates simulator cellsWithFluid collection if appropriate.
+     * 
+     * Does not call changeLevel() to avoid intended side effects of that procedure.
      */
     public void validate(LavaSimulator sim, boolean updateRetainedLevel)
     {
@@ -229,7 +239,7 @@ public class LavaCell
                 // If we dont' agree on the particulars, world wins.
                 if(worldVisibleLevel != this.getVisibleLevel())
                 {
-                    this.changeLevel(sim, ((worldVisibleLevel - this.getVisibleLevel()) * FLUID_UNITS_PER_LEVEL)); 
+                    this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
                     this.clearBlockUpdate();
                     sim.setSaveDirty(true);
                 }
@@ -255,7 +265,8 @@ public class LavaCell
                     }
     
                     // Make us a fluid cell.
-                    this.changeLevel(sim, (worldVisibleLevel * FLUID_UNITS_PER_LEVEL));
+                    this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
+                    sim.updateFluidStatus(this, true);
                     this.clearBlockUpdate();
                     sim.setSaveDirty(true);
                 }
@@ -268,7 +279,8 @@ public class LavaCell
             // If we have lava, remove it UNLESS world is open space and we just don't have enough lava to be visible
             if(this.fluidAmount > 0 && (isBarrierInWorld || this.getVisibleLevel() > 0))
             {
-                this.changeLevel(sim, (-this.fluidAmount));
+                this.fluidAmount = 0;
+                sim.updateFluidStatus(this, false);
                 this.clearBlockUpdate();
                 sim.setSaveDirty(true);
 
@@ -317,9 +329,16 @@ public class LavaCell
 
         if(updateRetainedLevel && !this.isBarrier) 
         {
-            if(this.floorLevel > 0)
+            int floor = this.floorLevel;
+            if(floor == 0)
             {
-                this.retainedLevel = this.floorLevel + FLUID_UNTIS_PER_HALF_BLOCK;
+                floor = this.getNeighbor(sim, EnumFacing.DOWN).getFloor() - FLUID_UNITS_PER_BLOCK;
+            }
+            
+            //TODO: make this depend on slope
+            if(floor !=  0)
+            {
+                this.retainedLevel = Math.max(0, floor + FLUID_UNTIS_PER_HALF_BLOCK);
             }
             else if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down())))
             {
@@ -362,12 +381,12 @@ public class LavaCell
     }
 
     /**
-     * True if directly above a barrier or if cell below has fluid.
+     * True if directly above a barrier or if cell below is full of fluid.
      */
     public boolean isSupported(LavaSimulator sim)
     {
         LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
-        return bottom.isBarrier || bottom.fluidAmount > 0;
+        return bottom.isBarrier || bottom.fluidAmount >= LavaCell.FLUID_UNITS_PER_BLOCK;
     }
 
     /**

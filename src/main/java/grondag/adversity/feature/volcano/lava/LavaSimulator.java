@@ -27,7 +27,7 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
- * Too many particles
+ * Preserve particle queue
  * Handle lastFlowTick overrun
  * Performance / parallelism
  *  Handle changes to sort keys on connections due to world updates
@@ -141,6 +141,14 @@ public class LavaSimulator extends SimulationNode
             connectionRemovalCount = 0;
             connectionRemovalTime = 0;
             
+            Adversity.log.info("total cell count=" + this.allCells.size() );
+            int totalFluid = 0;
+            for(LavaCell cell : cellsWithFluid.values())
+            {
+                totalFluid += cell.getFluidAmount();
+            }
+            Adversity.log.info("Total fluid in cells = " + (float)totalFluid / LavaCell.FLUID_UNITS_PER_BLOCK + "  Total registered fluid =" + (float)totalFluidRegistered / LavaCell.FLUID_UNITS_PER_BLOCK);
+            
 
         }
 
@@ -180,17 +188,7 @@ public class LavaSimulator extends SimulationNode
     
             //            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
             cleanCellCache();
-            Adversity.log.info("LavaSim doStep cleanCellCache, cell ending count=" + this.allCells.size() );
-
-            //            this.allCells.values().forEach(cell -> {Adversity.log.info("hash=" + cell.hashCode() + "pos=" + cell.pos.toString() + " level=" + cell.getCurrentLevel());});
-            //            this.connections.values().forEach(connection -> {Adversity.log.info("firstHash=" + connection.firstCell.hashCode() + " firstPos=" + connection.firstCell.pos.toString() + " firstLevel=" + connection.firstCell.getCurrentLevel() + "secondHash=" + connection.secondCell.hashCode() + " secondPos=" + connection.secondCell.pos.toString() + " secondLevel=" + connection.secondCell.getCurrentLevel());});
-
-            int totalFluid = 0;
-            for(LavaCell cell : cellsWithFluid.values())
-            {
-                totalFluid += cell.getFluidAmount();
-            }
-            Adversity.log.info("Total fluid in cells = " + totalFluid / LavaCell.FLUID_UNITS_PER_BLOCK + "  Total registered fluid =" + totalFluidRegistered / LavaCell.FLUID_UNITS_PER_BLOCK);
+       
         }
 
         this.cacheCleanTime += (System.nanoTime() - startTime);
@@ -570,14 +568,18 @@ public class LavaSimulator extends SimulationNode
     /**
      * Adds lava in or on top of the given cell.
      * TODO: handle when not all the lava can be used.
+     * Should only force resynch with world when you know you removed a barrier and simulation
+     * needs to know the cell is now open.  Otherwise if this addition is occurs
+     * after an earlier one but before block update resynch will cause earlier addition to be lost.
      */
-    public void addLava(BlockPos pos, int amount)
+    public void addLava(BlockPos pos, int amount, boolean shouldResynchToWorldBeforeAdding)
     {
-        //        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
+        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
 
         int available = amount;
 
-        LavaCell target = this.getCell(pos.down(), true);
+       
+        LavaCell target = this.getCell(pos.down(), shouldResynchToWorldBeforeAdding);
         int capacity = target.getCapacity();
         int flow = Math.min(capacity, available);
         if(flow > 0)
@@ -588,7 +590,7 @@ public class LavaSimulator extends SimulationNode
 
         if(available > 0)
         {
-            target = this.getCell(pos, true);
+            target = this.getCell(pos, shouldResynchToWorldBeforeAdding);
             capacity = target.getCapacity();
             flow = Math.min(capacity, available);
             if(flow > 0)
@@ -599,7 +601,7 @@ public class LavaSimulator extends SimulationNode
 
             if(available > 0)
             {
-                target = this.getCell(pos.up(), true);
+                target = this.getCell(pos.up(), shouldResynchToWorldBeforeAdding);
                 capacity = target.getCapacity();
                 flow = Math.min(capacity, available);
                 if(flow > 0)
@@ -618,7 +620,9 @@ public class LavaSimulator extends SimulationNode
 
     public void queueParticle(BlockPos pos, int amount)
     {
-        
+        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
+
+        this.particles.addLavaForParticle(this, pos, amount);
     }
 
     public void requestNewConnection(BlockPos pos1, BlockPos pos2)

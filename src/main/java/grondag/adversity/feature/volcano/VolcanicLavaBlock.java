@@ -138,12 +138,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                 .text("Floor Level = " + cell.getFloor())
                 .text("Retained Level = " + cell.getRetainedLevel())
                 .text("Visible Level = " + cell.getVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "id=" + up.id + "  curFlow=" + up.getCurrentFlowRate() + "  drop=" + up.getDrop()))
-                .text("Down: " + (down == null ? "null" : "id=" + down.id + "  curFlow=" + down.getCurrentFlowRate() + "  drop=" + down.getDrop()))
-                .text("East: " + (east == null ? "null" : "id=" + east.id + "  curFlow=" + east.getCurrentFlowRate() + "  drop=" + east.getDrop()))
-                .text("West: " + (west == null ? "null" : "id=" + west.id + "  curFlow=" + west.getCurrentFlowRate() + "  drop=" + west.getDrop()))
-                .text("North: " + (north == null ? "null" : "id=" + north.id + "  curFlow=" + north.getCurrentFlowRate() + "  drop=" + north.getDrop()))
-                .text("South: " + (south == null ? "null" : "id=" + south.id + "  curFlow=" + south.getCurrentFlowRate() + "  drop=" + south.getDrop()));
+                .text("Up: " + (up == null ? "null" : "id=" + up.id + "  drop=" + up.getDrop()))
+                .text("Down: " + (down == null ? "null" : "id=" + down.id + "  drop=" + down.getDrop()))
+                .text("East: " + (east == null ? "null" : "id=" + east.id + "  drop=" + east.getDrop()))
+                .text("West: " + (west == null ? "null" : "id=" + west.id + "  drop=" + west.getDrop()))
+                .text("North: " + (north == null ? "null" : "id=" + north.id + "  drop=" + north.getDrop()))
+                .text("South: " + (south == null ? "null" : "id=" + south.id + "  drop=" + south.getDrop()));
         }
         
     }
