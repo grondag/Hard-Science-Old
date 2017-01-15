@@ -255,7 +255,6 @@ public class LavaCell
                 {
                     this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
                     this.clearBlockUpdate();
-                    sim.setSaveDirty(true);
                 }
             }
             else

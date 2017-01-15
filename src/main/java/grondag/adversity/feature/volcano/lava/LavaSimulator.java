@@ -159,13 +159,13 @@ public class LavaSimulator extends SimulationNode
             connectionRemovalCount = 0;
             connectionRemovalTime = 0;
             
-            Adversity.log.info("total cell count=" + this.allCells.size() );
-            int totalFluid = 0;
-            for(LavaCell cell : lavaCells.values())
-            {
-                totalFluid += cell.getFluidAmount();
-            }
-            Adversity.log.info("Total fluid in cells = " + (float)totalFluid / LavaCell.FLUID_UNITS_PER_BLOCK + "  Total registered fluid =" + (float)totalFluidRegistered / LavaCell.FLUID_UNITS_PER_BLOCK);
+            Adversity.log.info("lavaCells=" + this.lavaCells.size() + " totalCells=" + this.allCells.size() 
+                    + " connections=" + this.connections.size() + "  loadFactor=" + this.loadFactor());
+//            int totalFluid = 0;
+//            for(LavaCell cell : lavaCells.values())
+//            {
+//                totalFluid += cell.getFluidAmount();
+//            }
             
 
         }
@@ -208,6 +208,7 @@ public class LavaSimulator extends SimulationNode
        
         }
 
+        this.setSaveDirty(true);
 
     }
 
@@ -1027,6 +1028,15 @@ public class LavaSimulator extends SimulationNode
     public boolean isSaveDirty()
     {
         return super.isSaveDirty();
+    }
+    
+    /**
+     * Signal to let volcano know should switch to cooling mode.
+     * 1 or higher means overloaded.
+     */
+    public float loadFactor()
+    {
+        return Math.max((float)this.connections.size() / 3000F, (float)this.lavaCells.size() / 10000F);
     }
 
 

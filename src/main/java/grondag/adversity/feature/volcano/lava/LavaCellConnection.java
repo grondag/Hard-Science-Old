@@ -390,8 +390,6 @@ public class LavaCellConnection
         this.flowThisTick += flow;
         this.firstCell.changeLevel(sim, -flow);
         this.secondCell.changeLevel(sim, flow);
-
-        sim.setSaveDirty(true);
     }
     
     /**

@@ -244,7 +244,11 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
         
         // if have too many blocks, switch to cooling mode
-        if(Simulator.instance.getFluidTracker().)
+        if(Simulator.instance.getFluidTracker().loadFactor() > 1)
+        {
+            this.clearingLevel = CLEARING_LEVEL_RESTART;
+            return VolcanoStage.COOLING;
+        }
         
         if(offsetIndex >= BORE_OFFSETS.size())
         {
@@ -290,12 +294,13 @@ public class TileVolcano extends TileEntity implements ITickable{
     }
     
     /** 
-     * Waits for the number of active lava blocks in simulator to drop below the configured threshold.
+     * Waits for the lava simulator load to drop below the configured threshold.
      * Return CLEARING if done and can move to next stage. 
      */
     private VolcanoStage doCooling()
     {
-        return VolcanoStage.COOLING;
+        //TODO: make configurable
+        return Simulator.instance.getFluidTracker().loadFactor() > 0.5F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
     }
     
     /** 

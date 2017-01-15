@@ -19,7 +19,9 @@ import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
+import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockFalling;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -98,14 +100,24 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     {
         if(worldIn.isRemote) return;
         
-        
-        Block upBlock = worldIn.getBlockState(pos.up()).getBlock();
-//        if(upBlock == Blocks.FLOWING_WATER)
-//        {
-//            Adversity.log.info("Water");
-//        }
-        if(upBlock instanceof BlockFalling || upBlock == Blocks.FLOWING_WATER || upBlock == Blocks.FLOWING_LAVA)        {
-            worldIn.setBlockToAir(pos.up());
+        final BlockPos upPos = pos.up();
+        final IBlockState upState = worldIn.getBlockState(upPos);
+        final Block upBlock = upState.getBlock();
+
+        if(upBlock instanceof BlockFalling) 
+        {
+            worldIn.setBlockToAir(upPos);
+        }
+        else if(upBlock == Blocks.FLOWING_WATER || upBlock == Blocks.FLOWING_LAVA)
+        {
+            if(upBlock instanceof BlockDynamicLiquid)
+            {
+                int level = upState.getValue(BlockLiquid.LEVEL);
+                if( level < 8)
+                {
+                    worldIn.setBlockToAir(upPos);
+                }
+            }
         }
     }
     
