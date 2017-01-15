@@ -173,19 +173,20 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         if(event.phase == TickEvent.Phase.END && this.isRunning)
         {
 
-            //TODO - quick hack, needs proper integration into sim
-             this.lavaSimulator.doTick();
-            
             int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
 
             // Simulation clock can't move backwards.
             // NB: don't need CAS because only ever changed by game thread in this method
             if(newLastSimTick > lastSimTick)
             {
-               // if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
+
+                // if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
                 this.isDirty = true;
                 this.lastSimTick = newLastSimTick;
+                
             }
+            
+            this.lavaSimulator.doTicks(this.lastSimTick);
             
             // accesses world, so needs to run on server thread
             volcanoManager.updateChunkLoading();

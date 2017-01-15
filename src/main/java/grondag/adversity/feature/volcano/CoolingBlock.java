@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano;
 
 import java.util.Random;
 
+import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -15,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class CoolingBlock extends FlowDynamicBlock
@@ -23,36 +25,70 @@ public class CoolingBlock extends FlowDynamicBlock
     
     protected int heatLevel = 0;
     
+    //TODO: register with simulator on placement
+    
     public CoolingBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller)
     {
         super(dispatcher, material, styleName, isFiller);
-        this.setTickRandomly(true);
     }
 
-    @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    
+    public static enum CoolingResult
     {
-        super.updateTick(worldIn, pos, state, rand);
-        if(state.getBlock() == this && canCool(worldIn, pos, state, rand))
+        /** means no more cooling can take place */
+        COMPLETE,
+        /** means one stage completed - more remain */
+        PARTIAL,
+        /** means block wan't ready to cool */
+        UNREADY,
+        /** means this isn't a cooling block*/
+        INVALID
+    }
+    /**
+     * Cools this block if ready and returns true if successful.
+     */
+    public CoolingResult tryCooling(WorldStateBuffer worldIn, BlockPos pos, IBlockState state)
+    {
+        if(state.getBlock() == this)
         {
-            long modelKey = this.getModelStateKey(state, worldIn, pos);
-            
-            if(this.nextCoolingBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK 
-                    && IFlowBlock.shouldBeFullCube(state, worldIn, pos))
+            if(canCool(worldIn, pos, state))
             {
-                worldIn.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), 3);
+    //            long modelKey = this.getModelStateKey(state, worldIn, pos);
+                
+                if(this.nextCoolingBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+                {
+                    if( IFlowBlock.shouldBeFullCube(state, worldIn, pos))
+                    {
+                        worldIn.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                    }
+                    else
+                    {
+                        worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                    }
+                    return CoolingResult.COMPLETE;
+                }
+                else
+                {
+                    worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                    return CoolingResult.PARTIAL;
+                }
             }
             else
             {
-                worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), 3);
+                return CoolingResult.UNREADY;
             }
+            
+        }
+        else
+        {
+            return CoolingResult.INVALID;
         }
         
     }
     
     /** True if no adjacent blocks are hotter than me and at least four adjacent blocks are cooler.
      * Occasionally can cool if only three are cooler. */
-    private boolean canCool(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public boolean canCool(WorldStateBuffer worldIn, BlockPos pos, IBlockState state)
     {
         int coolerFaceCount = 0;
         for(EnumFacing face : EnumFacing.VALUES)
@@ -69,7 +105,7 @@ public class CoolingBlock extends FlowDynamicBlock
                 if(neighbor instanceof CoolingBlock)
                 {
                     int heat = ((CoolingBlock) neighbor).heatLevel;
-                    if(heat > this.heatLevel) return false;
+                    if(heat > this.heatLevel + 1) return false;
                     if(heat < this.heatLevel) coolerFaceCount++;
                 }
                 else
@@ -78,7 +114,7 @@ public class CoolingBlock extends FlowDynamicBlock
                 }
             }
         }
-        return coolerFaceCount >= 4 || (coolerFaceCount == 3 && rand.nextGaussian() < 0.2);
+        return coolerFaceCount >= 3;
     }
     
     public CoolingBlock setCoolingBlockInfo(FlowDynamicBlock nextCoolingBlock, int heatLevel)

@@ -5,14 +5,21 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class ParticleManager
 {
+    private final static String NBT_SAVE_DATA_TAG = "particleManager";
+    private final static int NBT_SAVE_DATA_WIDTH = 5;
     
     private final HashMap<BlockPos, ParticleInfo> map = new HashMap<BlockPos, ParticleInfo>();
 
@@ -126,4 +133,49 @@ public class ParticleManager
         }
     }
 
+    public void readFromNBT(NBTTagCompound nbt)
+    {
+        this.map.clear();
+        this.set.clear();
+
+        int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
+
+        //confirm correct size
+        if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
+        {
+            Adversity.log.warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
+            return;
+        }
+
+        int i = 0;
+
+        while(i < saveData.length)
+        {
+            ParticleInfo p = new ParticleInfo(saveData[i++], new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]);
+            map.put(p.pos, p);
+            set.add(p);
+        }
+
+        Adversity.log.info("Loaded " + set.size() + " lava entities.");
+    }
+
+    public void writeToNBT(NBTTagCompound nbt)
+    {
+        Adversity.log.info("Saving " + set.size() + " lava entities.");
+        
+        int[] saveData = new int[set.size() * NBT_SAVE_DATA_WIDTH];
+        int i = 0;
+
+        for(ParticleInfo p: set)
+        {
+            saveData[i++] = p.tickCreated;
+            saveData[i++] = p.pos.getX();
+            saveData[i++] = p.pos.getY();
+            saveData[i++] = p.pos.getZ();
+            saveData[i++] = p.fluidUnits;
+        }       
+
+        nbt.setIntArray(NBT_SAVE_DATA_TAG, saveData);
+
+    }
 }

@@ -20,7 +20,8 @@ import net.minecraft.world.biome.Biome;
 
 public class WorldStateBuffer implements IBlockAccess
 {
-    private final static String TAG_SAVE_DATA = "WrldBuff";
+    private final static String NBT_SAVE_DATA_TAG = "WrldBuff";
+    private final static int NBT_SAVE_DATA_WIDTH = 4;
     
     public final World realWorld;
     
@@ -119,15 +120,14 @@ public class WorldStateBuffer implements IBlockAccess
         return this.realWorld.isSideSolid(pos, side, _default);
     }
     
-    private static int SAVE_DATA_WIDTH = 4;
     public void readFromNBT(NBTTagCompound nbt)
     {
         this.pendingUpdates.clear();
 
-        int[] saveData = nbt.getIntArray(TAG_SAVE_DATA);
+        int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
 
         //confirm correct size
-        if(saveData == null || saveData.length % SAVE_DATA_WIDTH != 0)
+        if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
             Adversity.log.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
             return;
@@ -149,7 +149,7 @@ public class WorldStateBuffer implements IBlockAccess
     {
         Adversity.log.info("Saving " + pendingUpdates.size() + " world updates.");
         
-        int[] saveData = new int[pendingUpdates.size() * SAVE_DATA_WIDTH];
+        int[] saveData = new int[pendingUpdates.size() * NBT_SAVE_DATA_WIDTH];
         int i = 0;
 
         for(Pair<BlockPos, IBlockState> pair: pendingUpdates.values())
@@ -161,7 +161,7 @@ public class WorldStateBuffer implements IBlockAccess
 
         }       
 
-        nbt.setIntArray(TAG_SAVE_DATA, saveData);
+        nbt.setIntArray(NBT_SAVE_DATA_TAG, saveData);
 
     }
 }

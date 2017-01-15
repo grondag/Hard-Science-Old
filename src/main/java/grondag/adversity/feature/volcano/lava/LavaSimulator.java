@@ -7,10 +7,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -27,8 +29,6 @@ import net.minecraft.world.World;
 /**
  * FIX/TEST
  * Reduce latency of significant block updates while still throttling overall block update rate
- * Preserve particle queue
- * Handle lastFlowTick overrun (maybe reposition on reload)
  * Performance / parallelism
  *      Handle changes to sort keys on connections due to world updates
  * 
@@ -58,10 +58,15 @@ public class LavaSimulator extends SimulationNode
     private final static String LAVA_CELL_NBT_TAG = "lavacells";
     private static final int LAVA_CELL_NBT_WIDTH = 6;
     
-    /** Filler cells that need to be cooled but aren't involved in the fluid simulation. */
-    private final HashSet<BlockPos> fillerCells = new HashSet<BlockPos>();
-    private final static String FILLER_CELL_NBT_TAG = "fillercells"; 
-    private static final int FILLER_CELL_NBT_WIDTH = 3;
+    /** Filler lava blocks that need to be cooled with lava cells but aren't involved in the fluid simulation. */
+    private final HashSet<BlockPos> lavaFillers = new HashSet<BlockPos>();
+    private final static String LAVA_FILLER_NBT_TAG = "lavafillers"; 
+    private static final int LAVA_FILLER_NBT_WIDTH = 3;
+    
+    /** Basalt blocks that are awaiting cooling */
+    private final LinkedList<AgedBlockPos> basaltBlocks = new LinkedList<AgedBlockPos>();
+    private final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
+    private static final int BASALT_BLOCKS_NBT_WIDTH = 4;
 
     private final ConnectionMap connections = new ConnectionMap();
     
@@ -77,6 +82,7 @@ public class LavaSimulator extends SimulationNode
     protected boolean isLoading = false;
 
     private int tickIndex = 0;
+    private final static String TICK_INDEX_NBT_TAG = "basaltblock"; 
 
     /**
      * Blocks that need to be melted or checked for filler after placement.
@@ -95,13 +101,27 @@ public class LavaSimulator extends SimulationNode
         this.terrainHelper = new LavaTerrainHelper(world);
     }
 
-
-    public void doTick()
+    /**
+     * Does one ticks if my current tick index is less than the new last.
+     * Does two if I am more than one behind.
+     */
+    public void doTicks(int newLastTickIndex)
     {
-        this.tickIndex++;
-
-        this.doCooling();
-
+        if(this.tickIndex < newLastTickIndex)
+        {
+            this.tickIndex++;
+            this.doTick();
+            
+            if(this.tickIndex < newLastTickIndex)
+            {
+                this.tickIndex++;
+                this.doTick();
+            }
+        }
+    }
+    
+    private void doTick()
+    {
         if((this.tickIndex & 0xFF) == 0xFF)
         {
             Adversity.log.info("Particle time this sample = " + particleTime / 1000000);
@@ -149,16 +169,16 @@ public class LavaSimulator extends SimulationNode
             
 
         }
-
-              //        if(cellsWithFluid.size() > 0)
-        //        {
-        //            Adversity.log.info("LavaSim doStep, cell count=" + cellsWithFluid.size() );
-        //        }
+        
+        long startTime = System.nanoTime();
+        this.doCooling();
+        this.doBasaltCooling();
+        this.coolingTime += (System.nanoTime() - startTime);
 
         //Was causing slow propagation and overflow not doing this each step just prior to flow
         //        this.connections.values().parallelStream().forEach((LavaCellConnection c) -> {c.updateFlowRate(this);;});
 
-        long startTime = System.nanoTime();
+        startTime = System.nanoTime();
 
         this.doStep();
         this.doStep();
@@ -240,14 +260,12 @@ public class LavaSimulator extends SimulationNode
     private static final int COOLING_SCANS_PER_TICK = 4;
     private void doCooling()
     {
-        long startTime = System.nanoTime();
-
         if(scanningBlocks.isEmpty())
         {
             if(coolingBlocks.isEmpty())
             {
                 scanningBlocks.addAll(lavaCells.keySet());
-                scanningBlocks.addAll(this.fillerCells);
+                scanningBlocks.addAll(this.lavaFillers);
             }
             else
             {
@@ -283,10 +301,58 @@ public class LavaSimulator extends SimulationNode
                 }
             }
         }
-    
-        this.coolingTime += (System.nanoTime() - startTime);
     }
 
+    private static final int BLOCK_COOLING_ATTEMPTS_PER_TICK = 10;
+    private static final int BLOCK_COOLING_DELAY_TICKS = 20;
+    private void doBasaltCooling()
+    {
+        int lastEligibleTick = this.tickIndex - BLOCK_COOLING_DELAY_TICKS;
+        int count = 0;
+        
+        while(count++ < BLOCK_COOLING_ATTEMPTS_PER_TICK && !this.basaltBlocks.isEmpty())
+        {
+            AgedBlockPos apos = this.basaltBlocks.pollFirst();
+            
+            if(apos.getTick() <= lastEligibleTick)
+            {
+                IBlockState state = this.worldBuffer.getBlockState(apos.pos);
+                Block block = state.getBlock();
+                if(block instanceof CoolingBlock)
+                {
+                    switch(((CoolingBlock)block).tryCooling(this.worldBuffer, apos.pos, state))
+                    {
+                    
+                        case PARTIAL:
+                            // will be ready to cool again after delay
+                            apos.setTick(this.tickIndex);
+                            basaltBlocks.add(apos);
+                            break;
+                            
+                        case UNREADY:
+                            // let it try again, put at the back of the line
+                            basaltBlocks.add(apos);
+                            break;
+                            
+                        case COMPLETE:
+                        case INVALID:
+                        default:
+                            // NOOP - just let these fall out of collection
+                            break;
+                      
+                    }
+                }
+            }
+            else
+            {
+                // not ready yet, so place at back of queue
+                basaltBlocks.add(apos);
+            }
+        }
+        
+        
+    }
+    
     /**
      * Returns true if lava can cool based on world state alone. Does not consider 
      */
@@ -342,6 +408,7 @@ public class LavaSimulator extends SimulationNode
 //            this.itMe = true;
             this.worldBuffer.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
 //            this.itMe = false;
+            this.basaltBlocks.add(new AgedBlockPos(pos, this.tickIndex));
         }
     }
 
@@ -729,16 +796,22 @@ public class LavaSimulator extends SimulationNode
                 {
                     List<Pair<BlockPos, IBlockState>> updates = IFlowBlock.adjustFillIfNeeded(this.worldBuffer, p);
                     
-                    // update set of filler blocks that need cooling
+                    // Update set of lava filler blocks that need cooling if we are adding or removing lava filler
+                    // and update cooling lava if it is any other type of filler.
                     for(Pair<BlockPos, IBlockState> pair : updates)
                     {
                         if(pair.getRight().getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
                         {
-                            this.fillerCells.add(pair.getLeft());
+                            this.lavaFillers.add(pair.getLeft());
                         }
                         else
                         {
-                            this.fillerCells.remove(pair.getLeft());
+                            this.lavaFillers.remove(pair.getLeft());
+                            
+                            if(pair.getRight().getBlock() instanceof CoolingBlock)
+                            {
+                                this.basaltBlocks.add(new AgedBlockPos(pair.getLeft(), this.getTickIndex()));
+                            }
                         }
                     }
                     this.worldBuffer.addUpdates(updates);
@@ -750,14 +823,12 @@ public class LavaSimulator extends SimulationNode
     /**
      * Melts static height blocks if geometry would be different from current.
      * And turns full cube dynamic blocks into static cube blocks.
-     * Returns true if is a height block, even if no adjustement was needed.
+     * Returns true if is a height block, even if no adjustment was needed.
      */
     private boolean adjustHeightBlockIfNeeded(BlockPos targetPos)
     {
 
         if(targetPos == null) return false;
-
-        //        Adversity.log.info("meltExposedBasalt @" + targetPos.toString());        
 
         IBlockState state = this.worldBuffer.getBlockState(targetPos);
         if(!(state.getBlock() instanceof NiceBlock)) return false;
@@ -773,9 +844,6 @@ public class LavaSimulator extends SimulationNode
         {
             if(block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
             {
-                //                Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
-                //                        + this.world.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
-                //                        + NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
                 this.worldBuffer.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
                         .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
             }
@@ -783,17 +851,8 @@ public class LavaSimulator extends SimulationNode
         else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK 
                 || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK )
         {
-
-            //            Adversity.log.info("adjustHeightBlockIfNeeded: set block from " 
-            //                    + worldObj.getBlockState(targetPos).getBlock().getRegistryName() + " to " 
-            //                    + NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getRegistryName() + " @ " + targetPos.toString());
-
-
             this.worldBuffer.setBlockState(targetPos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState()
                     .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
-
-            //TODO: handle cooling
-            //            this.coolingBlocks.add(targetPos, ticksActive + Config.volcano().coolingLagTicks);
         }
 
         return true;
@@ -804,18 +863,21 @@ public class LavaSimulator extends SimulationNode
     {
         allCells.clear();
         lavaCells.clear();
-        fillerCells.clear();
+        lavaFillers.clear();
+        basaltBlocks.clear();
         connections.clear();
         newConnections.clear();
         deadConnections.clear();
         adjustmentList.clear();
         dirtyCells.clear();
         totalFluidRegistered = 0;
-        this.tickIndex = 0;
         
         this.isLoading = true;
         
+        this.tickIndex = nbt.getInteger(TICK_INDEX_NBT_TAG);
+        
         this.worldBuffer.readFromNBT(nbt);
+        this.particles.readFromNBT(nbt);
 
         // LOAD LAVA CELLS
         int[] saveData = nbt.getIntArray(LAVA_CELL_NBT_TAG);
@@ -835,10 +897,6 @@ public class LavaSimulator extends SimulationNode
                 cell.changeLevel(this, saveData[i++] - cell.getFluidAmount());
                 cell.setLastFlowTick(saveData[i++]);
                 cell.setFloor(saveData[i++]);
-                if(!cell.getNeverCools())
-                {
-                    this.tickIndex = Math.max(this.tickIndex, cell.getLastFlowTick());
-                }
                 this.totalFluidRegistered += cell.getFluidAmount();
     
             }
@@ -846,10 +904,10 @@ public class LavaSimulator extends SimulationNode
         }
         
         // LOAD FILLER CELLS
-        saveData = nbt.getIntArray(FILLER_CELL_NBT_TAG);
+        saveData = nbt.getIntArray(LAVA_FILLER_NBT_TAG);
 
         //confirm correct size
-        if(saveData == null || saveData.length % FILLER_CELL_NBT_WIDTH != 0)
+        if(saveData == null || saveData.length % LAVA_FILLER_NBT_WIDTH != 0)
         {
             Adversity.log.warn("Invalid save data loading lava simulator. Filler blocks may not be updated properly.");
         }
@@ -858,9 +916,27 @@ public class LavaSimulator extends SimulationNode
             int i = 0;
             while(i < saveData.length)
             {
-                this.fillerCells.add(new BlockPos(saveData[i++], saveData[i++], saveData[i++]));
+                this.lavaFillers.add(new BlockPos(saveData[i++], saveData[i++], saveData[i++]));
             }
-            Adversity.log.info("Loaded " + fillerCells.size() + " filler cells.");
+            Adversity.log.info("Loaded " + lavaFillers.size() + " filler cells.");
+        }
+        
+        // LOAD BASALT BLOCKS
+        saveData = nbt.getIntArray(BASALT_BLOCKS_NBT_TAG);
+
+        //confirm correct size
+        if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
+        {
+            Adversity.log.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
+        }
+        else
+        {
+            int i = 0;
+            while(i < saveData.length)
+            {
+                this.basaltBlocks.add(new AgedBlockPos(new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]));
+            }
+            Adversity.log.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
 
         this.isLoading = false;
@@ -870,39 +946,58 @@ public class LavaSimulator extends SimulationNode
     @Override
     public void writeToNBT(NBTTagCompound nbt)
     {
-        // SAVE LAVA CELLS
-        Adversity.log.info("Saving " + lavaCells.size() + " lava cells.");
-        int[] saveData = new int[lavaCells.size() * LAVA_CELL_NBT_WIDTH];
-        int i = 0;
-
-        for(LavaCell cell: lavaCells.values())
-        {
-            saveData[i++] = cell.pos.getX();
-            saveData[i++] = cell.pos.getY();
-            saveData[i++] = cell.pos.getZ();
-            saveData[i++] = cell.getFluidAmount();
-            saveData[i++] = cell.getLastFlowTick();
-            saveData[i++] = cell.getFloor();
-        }       
-
-        nbt.setIntArray(LAVA_CELL_NBT_TAG, saveData);
         
+        nbt.setInteger(TICK_INDEX_NBT_TAG, this.tickIndex);
+        
+        // SAVE LAVA CELLS
+        {
+            Adversity.log.info("Saving " + lavaCells.size() + " lava cells.");
+            int[] saveData = new int[lavaCells.size() * LAVA_CELL_NBT_WIDTH];
+            int i = 0;
+    
+            for(LavaCell cell: lavaCells.values())
+            {
+                saveData[i++] = cell.pos.getX();
+                saveData[i++] = cell.pos.getY();
+                saveData[i++] = cell.pos.getZ();
+                saveData[i++] = cell.getFluidAmount();
+                saveData[i++] = cell.getLastFlowTick();
+                saveData[i++] = cell.getFloor();
+            }         
+            nbt.setIntArray(LAVA_CELL_NBT_TAG, saveData);
+        }
         
         // SAVE FILLER CELLS
-        Adversity.log.info("Saving " + lavaCells.size() + " lava cells.");
-        saveData = new int[fillerCells.size() * FILLER_CELL_NBT_WIDTH];
-        i = 0;
-
-        for(BlockPos pos: fillerCells)
         {
-            saveData[i++] = pos.getX();
-            saveData[i++] = pos.getY();
-            saveData[i++] = pos.getZ();
-        }       
-
-        nbt.setIntArray(FILLER_CELL_NBT_TAG, saveData);
+            Adversity.log.info("Saving " + lavaCells.size() + " lava cells.");
+            int[] saveData = new int[lavaFillers.size() * LAVA_FILLER_NBT_WIDTH];
+            int i = 0;
+            for(BlockPos pos: lavaFillers)
+            {
+                saveData[i++] = pos.getX();
+                saveData[i++] = pos.getY();
+                saveData[i++] = pos.getZ();
+            }       
+            nbt.setIntArray(LAVA_FILLER_NBT_TAG, saveData);
+        }
         
-        this.worldBuffer.writeToNBT(nbt);
+        // SAVE BASALT BLOCKS
+        {
+            Adversity.log.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            int[] saveData = new int[basaltBlocks.size() * BASALT_BLOCKS_NBT_WIDTH];
+            int i = 0;
+            for(AgedBlockPos apos: basaltBlocks)
+            {
+                saveData[i++] = apos.pos.getX();
+                saveData[i++] = apos.pos.getY();
+                saveData[i++] = apos.pos.getZ();
+                saveData[i++] = apos.getTick();
+            }       
+            nbt.setIntArray(BASALT_BLOCKS_NBT_TAG, saveData);
+            
+            this.worldBuffer.writeToNBT(nbt);
+            this.particles.writeToNBT(nbt);
+        }
 
     }
 
