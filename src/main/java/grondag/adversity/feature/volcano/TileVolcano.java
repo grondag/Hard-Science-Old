@@ -7,23 +7,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Queue;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
-import grondag.adversity.feature.volcano.BlockManager.BlockPlacement;
-import grondag.adversity.feature.volcano.lava.LavaBlockUpdate;
 import grondag.adversity.feature.volcano.lava.LavaCell;
-import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;

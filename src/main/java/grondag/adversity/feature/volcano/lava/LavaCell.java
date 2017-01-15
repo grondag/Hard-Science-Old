@@ -392,28 +392,7 @@ public class LavaCell
 
     public boolean canCool(LavaSimulator sim)
     {
-        if(this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200)
-        {
-            int hotNeighborCount = 0;
-            
-            for(EnumFacing face : EnumFacing.VALUES)
-            {
-                LavaCell neighbor = sim.getFluidCell(this.pos.add(face.getDirectionVec()));
-                if(neighbor != null && neighbor.getFluidAmount() > 0)
-                {
-                    // don't allow top to cool until bottom does
-                    if(face == EnumFacing.DOWN) return false;
-                    
-                    hotNeighborCount++;
-                }
-            }
-            
-            return hotNeighborCount < 4;
-        }
-        else
-        {
-            return false;
-        }
+        return this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200;
     }
     
     /**
