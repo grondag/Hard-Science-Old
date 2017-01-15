@@ -30,8 +30,7 @@ import net.minecraft.world.World;
  * Preserve particle queue
  * Handle lastFlowTick overrun (maybe reposition on reload)
  * Performance / parallelism
- *  Handle changes to sort keys on connections due to world updates
- * Negative cell levels
+ *      Handle changes to sort keys on connections due to world updates
  * 
  * FEATURES
  * Improve Drop/slope Calculation for flowing terrain

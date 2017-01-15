@@ -233,7 +233,10 @@ public class LavaCellConnection
                 int newLevel1 =  (int) (total * ratioDoubled / (1 + ratioDoubled));
                 newLevel1 = Math.max(newLevel1, Math.max(retention2 / 2, LavaCell.FLUID_UNTIS_PER_HALF_BLOCK));
                 
-                return level1 - newLevel1;
+                // If the second cell is already higher than the ideal level for this formula 
+                // still don't allow flow from lower cell to higher.  
+                // Once case this happens is when the lower has a floor or fluid from an earlier flow.
+                return Math.max(0, level1 - newLevel1);
             }
             else
             {
@@ -259,7 +262,10 @@ public class LavaCellConnection
                 int newLevel2 = (int) (total * ratioDoubled / (1 + ratioDoubled));
                 newLevel2 = Math.max(newLevel2, Math.max(retention2 / 2, LavaCell.FLUID_UNTIS_PER_HALF_BLOCK));
                 
-                return -(level2 - newLevel2);
+                // If the first cell is already higher than the ideal level for this formula 
+                // still don't allow flow from lower cell to higher.  
+                // One case this happens is when the first cell has a floor or fluid from an earlier flow.
+                return Math.min(0, -(level2 - newLevel2));
             }
             else
             {
@@ -380,22 +386,10 @@ public class LavaCellConnection
     {
         // shouldn't be needed but was getting zeros here - maybe floating-point weirdness?
 //        if(flow ==0) return;
-        
-
+ 
         this.flowThisTick += flow;
         this.firstCell.changeLevel(sim, -flow);
         this.secondCell.changeLevel(sim, flow);
-
-        //TODO: remove
-//        if(!this.isVertical && this.firstCell.getCurrentLevel() >= this.firstCell.getRetainedLevel() && this.firstCell.getCurrentLevel() + this.firstCell.getDelta() < this.firstCell.getRetainedLevel())
-//        {
-//            Adversity.log.info("DERP!!");
-//        }
-//        if(!this.isVertical && this.secondCell.getCurrentLevel() >= this.secondCell.getRetainedLevel() && this.secondCell.getCurrentLevel() + this.secondCell.getDelta() < this.secondCell.getRetainedLevel())
-//        {
-//            Adversity.log.info("DERP!!");
-//        }
-        
 
         sim.setSaveDirty(true);
     }
