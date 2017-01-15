@@ -33,6 +33,7 @@ public class ParticleManager
                     .compare(o1.tickCreated, o2.tickCreated)
                     // larger first
                     .compare(o2.fluidUnits, o1.fluidUnits)
+                    .compare(o1.pos, o2.pos)
                     .result();
                 }});
 
@@ -57,25 +58,36 @@ public class ParticleManager
             particle = new ParticleInfo(sim.getTickIndex(), pos, fluidAmount);
             map.put(pos, particle);
             set.add(particle);
-            Adversity.log.info("ParticleManager added new particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits());
+//            Adversity.log.info("ParticleManager added new particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits());
+       
+            //TODO: remove for release
+            if(map.size() != set.size())
+            {
+                Adversity.log.warn("Particle tracking error: set size does not match map size.");
+            }
         }
         else
         {
             //need to remove from tree before changing amount so can be successfully found
             //and then re-add once updated
+            
+//            if(!set.contains(particle))
+//            {
+//                Adversity.log.info("Lerm!");
+//                
+//            }
             set.remove(particle);
             particle.addFluid(fluidAmount);
             set.add(particle);
-            Adversity.log.info("ParticleManager updated particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits() + " added " + fluidAmount);
+//            Adversity.log.info("ParticleManager updated particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits() + " added " + fluidAmount);
+      
+            //TODO: remove for release
+            if(map.size() != set.size())
+            {
+                Adversity.log.warn("Particle tracking error: set size does not match map size.");
+            }
         }
-        
-     
-        //TODO: remove for release
-        if(map.size() != set.size())
-        {
-            Adversity.log.warn("Particle tracking error: set size does not match map size.");
-        }
-        
+    
     }
     
     public EntityLavaParticle pollFirstEligible(LavaSimulator sim)
@@ -88,17 +100,26 @@ public class ParticleManager
         if(result != null && (result.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK || sim.getTickIndex() - result.tickCreated > 4))
         {
             
-            set.pollFirst();
+            ParticleInfo yorpdongle = set.pollFirst();
+//            if(yorpdongle != result)
+//            {
+//                Adversity.log.warn("yorp");
+//            }
+//            
+//            if(!map.containsKey(result.pos))
+//            {
+//                Adversity.log.warn("boop");
+//            }
             
             map.remove(result.pos);
          
             //TODO: remove for release
             if(map.size() != set.size())
             {
-                Adversity.log.warn("Connection tracking error: set size does not match map size.");
+                Adversity.log.warn("Particle tracking error: set size does not match map size.");
             }
             
-            Adversity.log.info("ParticleManager poll particle @" + result.pos.toString() + " with amount=" + result.getFluidUnits());
+//            Adversity.log.info("ParticleManager poll particle @" + result.pos.toString() + " with amount=" + result.getFluidUnits());
             
             return new EntityLavaParticle(sim.worldBuffer.realWorld, result.fluidUnits, new Vec3d(result.pos.getX() + 0.5, result.pos.getY() + 0.4, result.pos.getZ() + 0.5), Vec3d.ZERO);
         }
@@ -152,8 +173,13 @@ public class ParticleManager
         while(i < saveData.length)
         {
             ParticleInfo p = new ParticleInfo(saveData[i++], new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]);
-            map.put(p.pos, p);
-            set.add(p);
+            
+            //protect against duplicate position weirdness in save data
+            if(!map.containsKey(p.pos))
+            {
+                map.put(p.pos, p);
+                set.add(p);
+            }
         }
 
         Adversity.log.info("Loaded " + set.size() + " lava entities.");

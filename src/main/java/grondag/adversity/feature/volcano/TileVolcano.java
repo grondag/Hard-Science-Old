@@ -243,6 +243,9 @@ public class TileVolcano extends TileEntity implements ITickable{
             this.levelAllClear = true;
         }
         
+        // if have too many blocks, switch to cooling mode
+        if(Simulator.instance.getFluidTracker().)
+        
         if(offsetIndex >= BORE_OFFSETS.size())
         {
             if(levelAllClear)

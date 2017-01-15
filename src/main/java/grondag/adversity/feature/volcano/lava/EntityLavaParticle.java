@@ -174,7 +174,7 @@ public class EntityLavaParticle extends Entity
     
     public void setFluidAmount(int amount)
     {
-        Adversity.log.info("particle setFluidAmount id=" + this.id + " amount=" + this.cachedAmount +" @"+ this.getPosition().toString());
+//        Adversity.log.info("particle setFluidAmount id=" + this.id + " amount=" + this.cachedAmount +" @"+ this.getPosition().toString());
 
         this.cachedAmount = amount;
         this.dataManager.set(FLUID_AMOUNT, amount);
@@ -190,7 +190,7 @@ public class EntityLavaParticle extends Entity
         if(this.firstUpdate) 
         {
             liveParticleCount++;
-            Adversity.log.info("particle firstUpdate id=" + this.id + " amount=" + this.cachedAmount +" @"+ this.getPosition().toString());
+//            Adversity.log.info("particle firstUpdate id=" + this.id + " amount=" + this.cachedAmount +" @"+ this.getPosition().toString());
         }
         
         //TODO: remove
@@ -241,7 +241,7 @@ public class EntityLavaParticle extends Entity
     {
         if(!this.worldObj.isRemote )
         {
-            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
+//            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
             Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount(), false);
         }
         //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());

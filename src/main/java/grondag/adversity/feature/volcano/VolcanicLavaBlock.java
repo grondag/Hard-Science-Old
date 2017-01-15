@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano;
 import java.util.ArrayList;
 import java.util.List;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaCell;
 import grondag.adversity.feature.volcano.lava.LavaCellConnection;
 import grondag.adversity.feature.volcano.lava.LavaSimulator;
@@ -22,11 +23,14 @@ import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.BlockFluidClassic;
+import net.minecraftforge.fluids.capability.wrappers.FluidBlockWrapper;
 
 public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAccessor
 {
@@ -94,8 +98,13 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     {
         if(worldIn.isRemote) return;
         
-        if(worldIn.getBlockState(pos.up()).getBlock() instanceof BlockFalling)
-        {
+        
+        Block upBlock = worldIn.getBlockState(pos.up()).getBlock();
+//        if(upBlock == Blocks.FLOWING_WATER)
+//        {
+//            Adversity.log.info("Water");
+//        }
+        if(upBlock instanceof BlockFalling || upBlock == Blocks.FLOWING_WATER || upBlock == Blocks.FLOWING_LAVA)        {
             worldIn.setBlockToAir(pos.up());
         }
     }

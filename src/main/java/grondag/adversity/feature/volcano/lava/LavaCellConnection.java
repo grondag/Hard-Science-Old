@@ -427,6 +427,13 @@ public class LavaCellConnection
         return this.sortDrop;
     }
     
+    /** seems to be needed for perfect consistency between HashMap and TreeSet */
+    @Override
+    public int hashCode()
+    {
+        return this.id;
+    }
+    
     public void updateSortDrop()
     {
         this.sortDrop = this.getDrop();

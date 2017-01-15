@@ -114,7 +114,7 @@ public class LavaCell
                 //if this is an empty drop cell, queue a drop particle instead of adding the lava
                 if(this.isDrop(sim))
                 {
-                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
+//                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
                     sim.queueParticle(this.pos, amount);
                     return;
                 }

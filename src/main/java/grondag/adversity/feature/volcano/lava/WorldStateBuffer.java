@@ -2,10 +2,13 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.adversity.Adversity;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -13,6 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
@@ -25,7 +29,8 @@ public class WorldStateBuffer implements IBlockAccess
     
     public final World realWorld;
     
-    private final HashMap<BlockPos, Pair<BlockPos, IBlockState>> pendingUpdates = new HashMap<BlockPos, Pair<BlockPos, IBlockState>>();
+    private final Long2ObjectOpenHashMap<ChunkBuffer> chunks = new Long2ObjectOpenHashMap<ChunkBuffer>();
+    private final LinkedList<ChunkBuffer> updateQueue = new LinkedList<ChunkBuffer>();
     
     public WorldStateBuffer(World worldIn)
     {
@@ -34,22 +39,34 @@ public class WorldStateBuffer implements IBlockAccess
     
     public IBlockState getBlockState(BlockPos pos)
     {
+        ChunkBuffer chunk = chunks.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
         
-        Pair<BlockPos, IBlockState> entry = pendingUpdates.get(pos);
-        
-        if(entry == null)
+        if(chunk == null) 
         {
             return this.realWorld.getBlockState(pos);
         }
         else
         {
-            return entry.getRight();
+            return chunk.getBlockState(pos);
         }
     }
     
     public void setBlockState(BlockPos pos, IBlockState state)
     {
-        this.pendingUpdates.put(pos, Pair.of(pos, state));
+        getChunkBuffer(pos).setBlockState(pos, state);
+    }
+    
+    private ChunkBuffer getChunkBuffer(BlockPos pos)
+    {
+        ChunkBuffer chunk = chunks.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+        
+        if(chunk == null) 
+        {
+            chunk = new ChunkBuffer(pos);
+            chunks.put(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4), chunk);
+            updateQueue.add(chunk);
+        }
+        return chunk;
     }
     
     /** 
@@ -59,20 +76,23 @@ public class WorldStateBuffer implements IBlockAccess
      */
     public int applyBlockUpdates(int chunkCount)
     {
-        int count = this.pendingUpdates.size();
-        for(Pair<BlockPos, IBlockState> pair : this.pendingUpdates.values())
+        int blockCount = 0;
+        int chunksDone = 0;
+        
+        while(chunksDone++ < chunkCount && !this.updateQueue.isEmpty())
         {
-            this.realWorld.setBlockState(pair.getLeft(), pair.getRight(), 3);
+            ChunkBuffer chunk = this.updateQueue.pollFirst();
+            chunks.remove(ChunkPos.asLong(chunk.chunkpos.chunkXPos, chunk.chunkpos.chunkZPos));
+            blockCount += chunk.applyBlockUpdates();
         }
-        this.pendingUpdates.clear();
-        return count;
+        return blockCount;
     }
     
     public void addUpdates(Collection<Pair<BlockPos, IBlockState>> updates)
     {
         for(Pair<BlockPos, IBlockState> pair : updates)
         {
-            this.pendingUpdates.put(pair.getLeft(), pair);
+            getChunkBuffer(pair.getLeft()).addUpdate(pair);
         }
     }
 
@@ -122,7 +142,8 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void readFromNBT(NBTTagCompound nbt)
     {
-        this.pendingUpdates.clear();
+        this.chunks.clear();
+        this.updateQueue.clear();
 
         int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
 
@@ -138,30 +159,100 @@ public class WorldStateBuffer implements IBlockAccess
         while(i < saveData.length)
         {
             BlockPos pos = new BlockPos(saveData[i++], saveData[i++], saveData[i++]);
-            this.pendingUpdates.put(pos, Pair.of(pos, Block.getStateById(saveData[i++])));
+            this.getChunkBuffer(pos).setBlockState(pos, Block.getStateById(saveData[i++]));
         }
 //        this.isLoading = false;
 
-        Adversity.log.info("Loaded " + pendingUpdates.size() + " world updates.");
+        Adversity.log.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("Saving " + pendingUpdates.size() + " world updates.");
+        int recordCount = 0;
+        for(ChunkBuffer chunk : this.chunks.values())
+        {
+            recordCount+= chunk.size();
+        }
         
-        int[] saveData = new int[pendingUpdates.size() * NBT_SAVE_DATA_WIDTH];
+        Adversity.log.info("Saving " + recordCount + " world updates.");
+        
+        int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;
 
-        for(Pair<BlockPos, IBlockState> pair: pendingUpdates.values())
+        for(ChunkBuffer chunk : this.chunks.values())
         {
-            saveData[i++] = pair.getLeft().getX();
-            saveData[i++] = pair.getLeft().getY();
-            saveData[i++] = pair.getLeft().getZ();
-            saveData[i++] = Block.getStateId(pair.getRight());
-
-        }       
-
+            for(Pair<BlockPos, IBlockState> pair: chunk.values())
+            {
+                saveData[i++] = pair.getLeft().getX();
+                saveData[i++] = pair.getLeft().getY();
+                saveData[i++] = pair.getLeft().getZ();
+                saveData[i++] = Block.getStateId(pair.getRight());
+            }       
+        }
+        
         nbt.setIntArray(NBT_SAVE_DATA_TAG, saveData);
 
+    }
+    
+    private static int getChunkStateKeyFromBlockPos(BlockPos pos)
+    {
+        return ((pos.getX() & 15) << 12) | ((pos.getY() & 255) << 4) | (pos.getZ() & 15);
+    }
+    
+    private class ChunkBuffer
+    {
+        public final ChunkPos chunkpos;
+        
+        private final Int2ObjectOpenHashMap<Pair<BlockPos, IBlockState>> states = new Int2ObjectOpenHashMap<Pair<BlockPos, IBlockState>>(32, 0.6F);
+        
+        private ChunkBuffer(BlockPos posWithinChunk)
+        {
+            this.chunkpos = new ChunkPos(posWithinChunk);
+        }
+        
+        private IBlockState getBlockState(BlockPos pos)
+        {
+            Pair<BlockPos, IBlockState> entry = states.get(getChunkStateKeyFromBlockPos(pos));
+            
+            if(entry == null)
+            {
+                return realWorld.getBlockState(pos);
+            }
+            else
+            {
+                return entry.getRight();
+            }
+        }
+        
+        private void setBlockState(BlockPos pos, IBlockState state)
+        {
+            states.put(getChunkStateKeyFromBlockPos(pos), Pair.of(pos, state));
+        }
+        
+        private void addUpdate(Pair<BlockPos, IBlockState> update)
+        {
+            states.put(getChunkStateKeyFromBlockPos(update.getLeft()), update);
+        }
+        
+        private int applyBlockUpdates()
+        {
+            int count = this.states.size();
+            for(Pair<BlockPos, IBlockState> pair : this.states.values())
+            {
+                realWorld.setBlockState(pair.getLeft(), pair.getRight(), 3);
+            }
+            this.states.clear();
+            return count;
+        }
+        
+        private int size()
+        {
+            return this.states.size();
+        }
+        
+        private Collection<Pair<BlockPos, IBlockState>> values()
+        {
+            return this.states.values();
+        }
     }
 }

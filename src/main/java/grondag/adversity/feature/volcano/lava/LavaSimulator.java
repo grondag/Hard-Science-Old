@@ -199,18 +199,15 @@ public class LavaSimulator extends SimulationNode
         {
             
             startTime = System.nanoTime();
-            //            Adversity.log.info("LavaSim doStep validatingAllCells, cell count=" + this.allCells.size() );
             validateAllCells();
             this.validationTime += (System.nanoTime() - startTime);
 
             startTime = System.nanoTime();
-    
-            //            Adversity.log.info("LavaSim doStep cleanCellCache, cell starting count=" + this.allCells.size() );
             cleanCellCache();
+            this.cacheCleanTime += (System.nanoTime() - startTime);
        
         }
 
-        this.cacheCleanTime += (System.nanoTime() - startTime);
 
     }
 
@@ -655,7 +652,7 @@ public class LavaSimulator extends SimulationNode
      */
     public void addLava(BlockPos pos, int amount, boolean shouldResynchToWorldBeforeAdding)
     {
-        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
+//        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
 
         int available = amount;
 
@@ -690,18 +687,37 @@ public class LavaSimulator extends SimulationNode
                     target.changeLevel(this, flow);
                     available -= flow;
                 }
-            }
-
-            if(available > 0)
-            {
-                Adversity.log.info("LAVA EATING IS A THING! Amount=" + available + " @" + pos.toString());
+            
+                if(available > 0)
+                {
+                    //add lava at pressure if cell contains lava
+                    if(target.getFluidAmount() > 0)
+                    {
+                        target.changeLevel(this, available);
+                        available = 0;
+                    }
+                    else
+                    {
+                        // try to add a pressure in the primary target cell
+                        target = this.getCell(pos, shouldResynchToWorldBeforeAdding);
+                        if(target.getFluidAmount() > 0)
+                        {
+                            target.changeLevel(this, available);
+                            available = 0;
+                        }
+                        else
+                        {
+                            Adversity.log.info("LAVA EATING IS A THING! Amount=" + available + " @" + pos.toString());
+                        }
+                    }             
+                }
             }
         }
     }
 
     public void queueParticle(BlockPos pos, int amount)
     {
-        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
+//        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
 
         this.particles.addLavaForParticle(this, pos, amount);
     }
@@ -969,7 +985,7 @@ public class LavaSimulator extends SimulationNode
         
         // SAVE FILLER CELLS
         {
-            Adversity.log.info("Saving " + lavaCells.size() + " lava cells.");
+            Adversity.log.info("Saving " + lavaFillers.size() + " filler cells.");
             int[] saveData = new int[lavaFillers.size() * LAVA_FILLER_NBT_WIDTH];
             int i = 0;
             for(BlockPos pos: lavaFillers)
