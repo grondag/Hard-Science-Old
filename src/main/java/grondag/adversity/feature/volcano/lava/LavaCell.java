@@ -6,6 +6,7 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -155,14 +156,27 @@ public class LavaCell
     }
 
 
-    public void provideBlockUpdate(LavaSimulator sim, Collection<LavaBlockUpdate> updateList)
+    public void provideBlockUpdate(LavaSimulator sim, Collection<BlockPos> adjustmentList)
     {
         if(this.isBarrier) return;
 
         int currentVisible = this.getVisibleLevel();
         if(this.lastVisibleLevel != currentVisible)
         {
-            updateList.add(new LavaBlockUpdate(pos, currentVisible));
+            if(currentVisible == 0)
+            {
+                if(sim.worldBuffer.getBlockState(pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                {
+                    sim.worldBuffer.setBlockState(pos, Blocks.AIR.getDefaultState());
+                }
+            }
+            else
+            {
+                sim.worldBuffer.setBlockState(pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible));
+            }
+
+            adjustmentList.add(pos);
+            
             this.lastVisibleLevel = currentVisible;
         }
     }
@@ -220,7 +234,7 @@ public class LavaCell
         //        if(pos.getX() == 70 && pos.getY() == 79 && pos.getZ() == 110)
         //            Adversity.log.info("boop");
 
-        IBlockState myState = sim.world.getBlockState(this.pos);
+        IBlockState myState = sim.worldBuffer.getBlockState(this.pos);
 
         int worldVisibleLevel = IFlowBlock.getFlowHeightFromState(myState);
         boolean isLavaInWorld = worldVisibleLevel > 0 && myState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK;
@@ -336,9 +350,9 @@ public class LavaCell
             {
                 this.retainedLevel = Math.max(0, effectiveFloor + FLUID_UNTIS_PER_HALF_BLOCK);
             }
-            else if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down())))
+            else if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(pos.down())))
             {
-                if(sim.terrainHelper.isLavaSpace(sim.world.getBlockState(pos.down().down())))
+                if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(pos.down().down())))
                 {
                     //if two blocks below is also open/lava, then will have no retained level
                     this.retainedLevel = 0;
@@ -376,6 +390,32 @@ public class LavaCell
         return this.isBarrier;
     }
 
+    public boolean canCool(LavaSimulator sim)
+    {
+        if(this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200)
+        {
+            int hotNeighborCount = 0;
+            
+            for(EnumFacing face : EnumFacing.VALUES)
+            {
+                LavaCell neighbor = sim.getFluidCell(this.pos.add(face.getDirectionVec()));
+                if(neighbor != null && neighbor.getFluidAmount() > 0)
+                {
+                    // don't allow top to cool until bottom does
+                    if(face == EnumFacing.DOWN) return false;
+                    
+                    hotNeighborCount++;
+                }
+            }
+            
+            return hotNeighborCount < 4;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
     /**
      * True if directly above a barrier or if cell below is full of fluid.
      */

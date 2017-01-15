@@ -93,7 +93,7 @@ public class ParticleManager
             
             Adversity.log.info("ParticleManager poll particle @" + result.pos.toString() + " with amount=" + result.getFluidUnits());
             
-            return new EntityLavaParticle(sim.world, result.fluidUnits, new Vec3d(result.pos.getX() + 0.5, result.pos.getY() + 0.4, result.pos.getZ() + 0.5), Vec3d.ZERO);
+            return new EntityLavaParticle(sim.worldBuffer.realWorld, result.fluidUnits, new Vec3d(result.pos.getX() + 0.5, result.pos.getY() + 0.4, result.pos.getZ() + 0.5), Vec3d.ZERO);
         }
         else
         {
