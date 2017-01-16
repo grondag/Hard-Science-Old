@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -48,7 +49,7 @@ public class LavaSimulator extends SimulationNode
     protected final WorldStateBuffer worldBuffer;
     protected final LavaTerrainHelper terrainHelper;
 
-    protected final HashMap<BlockPos, LavaCell> allCells = new HashMap<BlockPos, LavaCell>();
+    private final ConcurrentHashMap<BlockPos, LavaCell> allCells = new ConcurrentHashMap<BlockPos, LavaCell>(16000, 0.6F, 8);
 
     private final HashMap<BlockPos, LavaCell> lavaCells = new HashMap<BlockPos, LavaCell>();
     private final static String LAVA_CELL_NBT_TAG = "lavacells";
@@ -70,9 +71,6 @@ public class LavaSimulator extends SimulationNode
   
     /** Set true when doing block placements so we known not to register them as newly placed lava. */
     private boolean itMe = false;
-
-    /** prevent synchoniziation with existing world fluid during loading */
-    protected boolean isLoading = false;
 
     private int tickIndex = 0;
     private final static String TICK_INDEX_NBT_TAG = "tickindex"; 
@@ -259,7 +257,7 @@ public class LavaSimulator extends SimulationNode
                 switch(canLavaCool(target))
                 {
                     case YES:
-                        LavaCell cell = this.getFluidCell(target);
+                        LavaCell cell = this.getFluidCellIfItExists(target);
                         if(cell == null || cell.canCool(this))
                         {
                             coolLava(target);
@@ -463,19 +461,28 @@ public class LavaSimulator extends SimulationNode
 
     private void cleanCellCache()
     {
-
-        //        this.allCells.values().parallelStream().forEach((LavaCell c) -> {if(c.getCurrentLevel() > 0) c.clearNeighborCache();});
-
-        Iterator<Entry<BlockPos, LavaCell>> it = this.allCells.entrySet().iterator();
-
-        while(it.hasNext())
-        {
-            Entry<BlockPos, LavaCell> next = it.next();
-            if(!next.getValue().isRetained())
+        this.allCells.values().parallelStream().forEach((LavaCell c) -> {
+            if(!c.isRetained() && c.getFluidAmount() == 0) 
             {
-                it.remove();
+                // let upper neighbor know to remove reference to me
+                LavaCell upperCell = this.getCellIfItExists(c.pos.up());
+                if(upperCell != null)
+                {
+                    upperCell.clearBottomCache();
+                }
+                this.allCells.remove(c.pos);
             }
-        }
+        });
+//        Iterator<Entry<BlockPos, LavaCell>> it = this.allCells.entrySet().iterator();
+//
+//        while(it.hasNext())
+//        {
+//            Entry<BlockPos, LavaCell> next = it.next();
+//            if(!next.getValue().isRetained())
+//            {
+//                it.remove();
+//            }
+//        }
 
     }
 
@@ -501,7 +508,13 @@ public class LavaSimulator extends SimulationNode
     }
 
     /** returns a cell only if it contains fluid */
-    public LavaCell getFluidCell(BlockPos pos)
+    public LavaCell getCellIfItExists(BlockPos pos)
+    {
+        return this.allCells.get(pos);
+    }
+    
+    /** returns a cell only if it contains fluid */
+    public LavaCell getFluidCellIfItExists(BlockPos pos)
     {
         return this.lavaCells.get(pos);
     }
@@ -575,7 +588,7 @@ public class LavaSimulator extends SimulationNode
                 this.lavaCells.put(cell.pos, cell);
                 for(EnumFacing face : EnumFacing.VALUES)
                 {
-                    LavaCell other = cell.getNeighbor(this, face);
+                    LavaCell other = this.getCell(cell.pos.add(face.getDirectionVec()), false);
                     other.retain("updateFluidStatus " + face.toString() + " from " + this.hashCode());
                     if(!other.isBarrier())
                     {
@@ -597,9 +610,25 @@ public class LavaSimulator extends SimulationNode
                 cell.release("updateFluidStatus self");
                 for(EnumFacing face : EnumFacing.VALUES)
                 {
-                    LavaCell other = cell.getNeighbor(this, face);
-                    other.release("updateFluidStatus " + face.toString() + " from " + this.hashCode());
-                    this.removeConnection(cell.pos, other.pos);
+                    BlockPos otherPos = cell.pos.add(face.getDirectionVec());
+                    
+                    //cell should exist but don't create it if not
+                    LavaCell other = this.getCellIfItExists(otherPos);
+                    if(other != null)
+                    {
+                        other.release("updateFluidStatus " + face.toString() + " from " + this.hashCode());
+                        if(other.getFluidAmount() == 0)
+                        {
+                            // Remove connection if neither has any fluid
+                            this.removeConnection(cell.pos, otherPos);
+                        }
+                    }
+                    else
+                    {
+                        // if cell was somehow missing don't assume connection is
+                        this.removeConnection(cell.pos, otherPos);
+                    }
+
                 }
             }
             else
@@ -830,8 +859,6 @@ public class LavaSimulator extends SimulationNode
         adjustmentList.clear();
         dirtyCells.clear();
         
-        this.isLoading = true;
-        
         this.tickIndex = nbt.getInteger(TICK_INDEX_NBT_TAG);
         
         this.worldBuffer.readFromNBT(nbt);
@@ -850,11 +877,7 @@ public class LavaSimulator extends SimulationNode
             int i = 0;
             while(i < saveData.length)
             {
-                LavaCell cell = this.getCell(new BlockPos(saveData[i++], saveData[i++], saveData[i++]), false);
-    
-                cell.changeLevel(this, saveData[i++] - cell.getFluidAmount());
-                cell.clearBlockUpdate();
-                
+                LavaCell cell = new LavaCell(this, new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]);
                 if(saveData[i] == Integer.MAX_VALUE)
                 {
                     cell.setLastFlowTick(this.tickIndex);
@@ -865,12 +888,17 @@ public class LavaSimulator extends SimulationNode
                     cell.setLastFlowTick(saveData[i]);
                 }
                 i++;
-                
                 cell.setFloor(saveData[i++]);
-    
+                cell.clearBlockUpdate();
+                this.allCells.put(cell.pos, cell);
             }
-            //prevent processing of all the cells we just added for world updates;
-            this.dirtyCells.clear();
+            
+            // wait until all cells are added to collection, otherwise will recreate them all from the world recusively
+            // Careful here: allCells is concurrent, so have to iterate a snapshot of it or will keep adding new non-lava cells as lava cells
+            for(LavaCell cell : this.allCells.values().toArray(new LavaCell[0]))
+            {
+                this.updateFluidStatus(cell, true);
+            }
             
             Adversity.log.info("Loaded " + lavaCells.size() + " lava cells.");
         }
@@ -910,8 +938,6 @@ public class LavaSimulator extends SimulationNode
             }
             Adversity.log.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
-
-        this.isLoading = false;
 
     }
 

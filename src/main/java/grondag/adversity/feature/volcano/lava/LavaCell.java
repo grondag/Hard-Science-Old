@@ -85,15 +85,21 @@ public class LavaCell
         this.lastFlowTick = (fluidAmount == 0 | sim == null) ? 0 : sim.getTickIndex();
     }
 
-
-    protected LavaCell getNeighbor(LavaSimulator sim, EnumFacing face)
+    private LavaCell bottomCell = null;
+    
+    protected LavaCell getBottom(LavaSimulator sim)
     {  
-        //TODO: cache for performance?  
-        //Suspect DOWN and UP are most accessed - could store cells in 256-tall vertical arrays within an x,z hash table
-        //Vertical access would then be very fast without need to cache references
-        return sim.getCell(pos.add(face.getDirectionVec()), false);
+        if(bottomCell == null)
+        {
+            bottomCell = sim.getCell(this.pos.down(), false);
+        }
+        return bottomCell;
     }
 
+    protected void clearBottomCache()
+    {
+        this.bottomCell = null;
+    }
 
     public void changeLevel(LavaSimulator sim, int amount)
     {
@@ -273,23 +279,21 @@ public class LavaCell
                 // so don't need to do that here.
                 this.isBarrier = false;
 
-                //Avoid stack overflow when bulk loading at start - many new cells just created won't match world blocks with fluid then.
-                if(!sim.isLoading)
-                {
-                    // If I had a floor, it's probably not valid now because we don't know what happened.
-                    // And if floor is changing should force update of retained height also.
-                    if(this.floorLevel != 0)
-                    {
-                        this.floorLevel = 0;
-                        updateRetainedLevel = true;
-                    }
 
-                    // Make us a fluid cell.
-                    this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
-                    sim.updateFluidStatus(this, true);
-                    this.clearBlockUpdate();
-                    sim.setSaveDirty(true);
+                // If I had a floor, it's probably not valid now because we don't know what happened.
+                // And if floor is changing should force update of retained height also.
+                if(this.floorLevel != 0)
+                {
+                    this.floorLevel = 0;
+                    updateRetainedLevel = true;
                 }
+
+                // Make us a fluid cell.
+                this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
+                sim.updateFluidStatus(this, true);
+                this.clearBlockUpdate();
+                sim.setSaveDirty(true);
+                
             }
         }
         else
@@ -320,8 +324,8 @@ public class LavaCell
                     this.isBarrier = false;
                     for(EnumFacing face : EnumFacing.VALUES)
                     {
-                        LavaCell other = this.getNeighbor(sim, face);
-                        if(!other.isBarrier() && other.fluidAmount > 0)
+                        LavaCell other = sim.getFluidCellIfItExists(this.pos.add(face.getDirectionVec()));
+                        if(other != null && !other.isBarrier() && other.fluidAmount > 0)
                         {
                             sim.addConnection(this.pos, other.pos);
                         }
@@ -414,7 +418,7 @@ public class LavaCell
      */
     public boolean isSupported(LavaSimulator sim)
     {
-        LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
+        LavaCell bottom = this.getBottom(sim);
         return bottom.isBarrier || bottom.fluidAmount >= LavaCell.FLUID_UNITS_PER_BLOCK;
     }
 
@@ -426,7 +430,7 @@ public class LavaCell
         //My floor doesn't count if it has melted and become fluid.
         if(this.fluidAmount == 0 && this.floorLevel > 0) return false;
 
-        LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
+        LavaCell bottom = this.getBottom(sim);
         return !bottom.isBarrier && bottom.fluidAmount == 0 && bottom.floorLevel == 0;
     }
 
@@ -522,22 +526,33 @@ public class LavaCell
      *  If this cell doesn't have a floor but cell below does,
      *  gives a negative value that represents the distance to the floor below.
      */
-    public int getEffectiveFloor(LavaSimulator sim)
+    private int getEffectiveFloor(LavaSimulator sim)
     {
         if(this.isBarrier) return FLUID_UNITS_PER_BLOCK;
         
         int result = this.floorLevel;
         if(result == 0)
         {
-            result = this.getNeighbor(sim, EnumFacing.DOWN).getFloor();
-            if(result > 0)
+            BlockPos downPos = this.pos.down();
+            LavaCell down = sim.getCellIfItExists(downPos);
+            if(down != null)
             {
-                result -= FLUID_UNITS_PER_BLOCK;
+                if(!down.isBarrier && down.getFloor() > 0)
+                {
+                    result = down.getFloor() - FLUID_UNITS_PER_BLOCK;
+                }
             }
             else
             {
-                // negative values should never happen, but prevent weirdness if they do
-                result = 0;
+                // Simulation hasn't captured state as a cell, so almost certainly does
+                // not contain lava but could contain a height block.
+                // Even so, confirm it isn't an orphaned lava block before using it as a floor.
+                IBlockState state = sim.worldBuffer.getBlockState(downPos);
+                int worldLevel = IFlowBlock.getFlowHeightFromState(state);
+                if(worldLevel > 0 && state.getBlock() != NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                {
+                    result = worldLevel - FLUID_UNITS_PER_BLOCK;
+                }
             }
         }
         return result;

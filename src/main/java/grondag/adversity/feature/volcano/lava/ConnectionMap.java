@@ -81,7 +81,7 @@ public class ConnectionMap
             LavaCellConnection connection = this.map.get(pos);
             if(connection != null)
             {
-                connection.releaseCells();
+//                connection.releaseCells();
                 map.remove(pos);
                 size--;
             }

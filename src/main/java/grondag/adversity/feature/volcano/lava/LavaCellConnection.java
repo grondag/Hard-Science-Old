@@ -56,8 +56,8 @@ public class LavaCellConnection
         this.id = nextConnectionID++;
         
 //        Adversity.log.info("connection create");
-        firstCell.retain("connection");
-        secondCell.retain("connection");
+//        firstCell.retain("connection");
+//        secondCell.retain("connection");
         
         this.isVertical = firstCell.pos.getY() != secondCell.pos.getY();
         
@@ -376,15 +376,15 @@ public class LavaCellConnection
         this.secondCell.changeLevel(sim, flow);
     }
     
-    /**
-     * Call when removing this connection so that cell references can be removed if appropriate.
-     */
-    public void releaseCells()
-    {
-//        Adversity.log.info("connection release");
-        this.firstCell.release("connection");
-        this.secondCell.release("connection");
-    }
+//    /**
+//     * Call when removing this connection so that cell references can be removed if appropriate.
+//     */
+//    public void releaseCells()
+//    {
+////        Adversity.log.info("connection release");
+//        this.firstCell.release("connection");
+//        this.secondCell.release("connection");
+//    }
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
