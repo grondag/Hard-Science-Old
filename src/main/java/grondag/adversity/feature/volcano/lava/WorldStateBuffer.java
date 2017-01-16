@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.simulator.Simulator;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.Block;
@@ -62,7 +63,7 @@ public class WorldStateBuffer implements IBlockAccess
         
         if(chunk == null) 
         {
-            chunk = new ChunkBuffer(pos);
+            chunk = new ChunkBuffer(pos, Simulator.instance.getCurrentSimTick());
             chunks.put(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4), chunk);
             updateQueue.add(chunk);
         }
@@ -78,8 +79,10 @@ public class WorldStateBuffer implements IBlockAccess
     {
         int blockCount = 0;
         int chunksDone = 0;
-        
-        while(chunksDone++ < chunkCount && !this.updateQueue.isEmpty())
+        //TODO: make configurable
+        int firstEligibleTick = Simulator.instance.getCurrentSimTick() - 4;
+                
+        while(chunksDone++ < chunkCount && !this.updateQueue.isEmpty() && this.updateQueue.getFirst().tickCreated >= firstEligibleTick)
         {
             ChunkBuffer chunk = this.updateQueue.pollFirst();
             chunks.remove(ChunkPos.asLong(chunk.chunkpos.chunkXPos, chunk.chunkpos.chunkZPos));
@@ -203,11 +206,14 @@ public class WorldStateBuffer implements IBlockAccess
     {
         public final ChunkPos chunkpos;
         
+        public final int tickCreated;
+        
         private final Int2ObjectOpenHashMap<Pair<BlockPos, IBlockState>> states = new Int2ObjectOpenHashMap<Pair<BlockPos, IBlockState>>(32, 0.6F);
         
-        private ChunkBuffer(BlockPos posWithinChunk)
+        private ChunkBuffer(BlockPos posWithinChunk, int tickCreated)
         {
             this.chunkpos = new ChunkPos(posWithinChunk);
+            this.tickCreated = tickCreated;
         }
         
         private IBlockState getBlockState(BlockPos pos)

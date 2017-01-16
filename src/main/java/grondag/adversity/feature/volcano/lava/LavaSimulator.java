@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -28,7 +27,6 @@ import net.minecraft.world.World;
 
 /**
  * FIX/TEST
- * Reduce latency of significant block updates while still throttling overall block update rate
  * Performance / parallelism
  *      Handle changes to sort keys on connections due to world updates
  * 
@@ -49,8 +47,6 @@ public class LavaSimulator extends SimulationNode
 {
     protected final WorldStateBuffer worldBuffer;
     protected final LavaTerrainHelper terrainHelper;
-
-    private int totalFluidRegistered = 0;
 
     protected final HashMap<BlockPos, LavaCell> allCells = new HashMap<BlockPos, LavaCell>();
 
@@ -623,7 +619,6 @@ public class LavaSimulator extends SimulationNode
         LavaCell target = this.getCell(pos, false);
         if(target.getLastVisibleLevel() != worldLevel)
         {           
-            totalFluidRegistered += worldLevel * LavaCell.FLUID_UNITS_PER_LEVEL;
             target.validate(this, true);
         }
         this.setSaveDirty(true);
@@ -639,7 +634,6 @@ public class LavaSimulator extends SimulationNode
         if(itMe) return;
 
         LavaCell target = this.getCell(pos, false);
-        totalFluidRegistered -= target.getFluidAmount();
         if(target.getFluidAmount() > 0)
         {
             target.validate(this, true);
@@ -940,7 +934,6 @@ public class LavaSimulator extends SimulationNode
         deadConnections.clear();
         adjustmentList.clear();
         dirtyCells.clear();
-        totalFluidRegistered = 0;
         
         this.isLoading = true;
         
@@ -979,7 +972,6 @@ public class LavaSimulator extends SimulationNode
                 i++;
                 
                 cell.setFloor(saveData[i++]);
-                this.totalFluidRegistered += cell.getFluidAmount();
     
             }
             //prevent processing of all the cells we just added for world updates;

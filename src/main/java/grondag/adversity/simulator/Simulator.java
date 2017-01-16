@@ -179,11 +179,9 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
             // NB: don't need CAS because only ever changed by game thread in this method
             if(newLastSimTick > lastSimTick)
             {
-
                 // if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
                 this.isDirty = true;
-                this.lastSimTick = newLastSimTick;
-                
+                this.lastSimTick = newLastSimTick;          
             }
             else
             {
