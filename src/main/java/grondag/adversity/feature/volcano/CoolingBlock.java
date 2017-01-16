@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano;
 import java.util.Random;
 
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -12,6 +13,7 @@ import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -30,6 +32,7 @@ public class CoolingBlock extends FlowDynamicBlock
     public CoolingBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller)
     {
         super(dispatcher, material, styleName, isFiller);
+        this.setTickRandomly(true);
     }
 
     
@@ -90,7 +93,10 @@ public class CoolingBlock extends FlowDynamicBlock
      * Occasionally can cool if only three are cooler. */
     public boolean canCool(WorldStateBuffer worldIn, BlockPos pos, IBlockState state)
     {
-        int coolerFaceCount = 0;
+        if(IFlowBlock.shouldBeFullCube(state, worldIn, pos)) return true;
+        
+        int chances = 0;
+        boolean awayFromLava = true;
         for(EnumFacing face : EnumFacing.VALUES)
         {
             IBlockState testState = worldIn.getBlockState(pos.add(face.getDirectionVec()));
@@ -99,22 +105,27 @@ public class CoolingBlock extends FlowDynamicBlock
                 Block neighbor = testState.getBlock();
                 
                 if(neighbor == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK 
-                        || neighbor == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK) return false;
-                    
-                
-                if(neighbor instanceof CoolingBlock)
+                        || neighbor == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK) 
+                {
+                    awayFromLava = false;
+                }
+                else if(neighbor instanceof CoolingBlock)
                 {
                     int heat = ((CoolingBlock) neighbor).heatLevel;
-                    if(heat > this.heatLevel + 1) return false;
-                    if(heat < this.heatLevel) coolerFaceCount++;
+                    if(heat < this.heatLevel)
+                    chances += (this.heatLevel - heat);
                 }
                 else
                 {
-                    coolerFaceCount++;
+                    chances += 2;
                 }
             }
         }
-        return coolerFaceCount >= 3;
+       
+        return (Useful.SALT_SHAKER.nextInt(1) < chances) && (awayFromLava || Useful.SALT_SHAKER.nextInt(10) == 0);
+        
+            
+        
     }
     
     public CoolingBlock setCoolingBlockInfo(FlowDynamicBlock nextCoolingBlock, int heatLevel)
@@ -123,6 +134,14 @@ public class CoolingBlock extends FlowDynamicBlock
         this.heatLevel = heatLevel;
         return this;
     }
-    
 
+    @Override
+    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
+    {
+        // Gather orphaned blocks
+        Simulator.instance.getFluidTracker().registerCoolingBlock(worldIn, pos);
+    }
+    
+    
+    
 }
