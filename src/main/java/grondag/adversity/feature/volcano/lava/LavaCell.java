@@ -152,6 +152,10 @@ public class LavaCell
         }
     }
 
+    /**
+     * Assumes block updates will be applied to world/worldBuffer before any more world interaction occurs.
+     * Consistent with this expectations, it sets lastVisibleLevel = currentVisibleLevel.
+     */
     public void provideBlockUpdate(LavaSimulator sim, Collection<BlockPos> adjustmentList)
     {
         if(this.isBarrier) return;
@@ -261,7 +265,7 @@ public class LavaCell
                 // yay! We agree with world this is a lava cell.
 
                 // If we dont' agree on the particulars, world wins.
-                if(worldVisibleLevel != this.getCurrentVisibleLevel())
+                if(worldVisibleLevel != this.lastVisibleLevel)
                 {
                     this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
                     this.clearBlockUpdate();
@@ -301,7 +305,7 @@ public class LavaCell
             // world doesn't have lava
 
             // If we have lava, remove it UNLESS world is open space and we just don't have enough lava to be visible
-            if(this.fluidAmount > 0 && (isBarrierInWorld || this.getCurrentVisibleLevel() > 0))
+            if(this.fluidAmount > 0 && (isBarrierInWorld || this.lastVisibleLevel > 0))
             {
                 this.fluidAmount = 0;
                 sim.updateFluidStatus(this, false);

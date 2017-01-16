@@ -185,6 +185,15 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                 this.lastSimTick = newLastSimTick;
                 
             }
+            else
+            {
+                // world clock has gone backwards or paused, so readjust offset
+                this.lastSimTick++;
+                this.worldTickOffset = this.lastSimTick - world.getWorldTime();
+                this.setSaveDirty(true);
+                Adversity.log.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
+                Adversity.log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
+            }
             
             this.lavaSimulator.doTicks(this.lastSimTick);
             

@@ -621,7 +621,7 @@ public class LavaSimulator extends SimulationNode
 
         int worldLevel = IFlowBlock.getFlowHeightFromState(state);
         LavaCell target = this.getCell(pos, false);
-        if(target.getCurrentVisibleLevel() != worldLevel)
+        if(target.getLastVisibleLevel() != worldLevel)
         {           
             totalFluidRegistered += worldLevel * LavaCell.FLUID_UNITS_PER_LEVEL;
             target.validate(this, true);
@@ -965,6 +965,7 @@ public class LavaSimulator extends SimulationNode
                 LavaCell cell = this.getCell(new BlockPos(saveData[i++], saveData[i++], saveData[i++]), false);
     
                 cell.changeLevel(this, saveData[i++] - cell.getFluidAmount());
+                cell.clearBlockUpdate();
                 
                 if(saveData[i] == Integer.MAX_VALUE)
                 {
@@ -981,6 +982,9 @@ public class LavaSimulator extends SimulationNode
                 this.totalFluidRegistered += cell.getFluidAmount();
     
             }
+            //prevent processing of all the cells we just added for world updates;
+            this.dirtyCells.clear();
+            
             Adversity.log.info("Loaded " + lavaCells.size() + " lava cells.");
         }
         
