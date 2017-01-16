@@ -2,20 +2,18 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.google.common.collect.ComparisonChain;
-
-import grondag.adversity.Adversity;
 
 
 public class ConnectionMap
 {
   
-    private final HashMap<CellConnectionPos, LavaCellConnection> map = new HashMap<CellConnectionPos, LavaCellConnection>();
+    private final ConcurrentHashMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentHashMap<CellConnectionPos, LavaCellConnection>();
 
-    private final TreeSet<LavaCellConnection> set = new TreeSet<LavaCellConnection>(
+    private final ConcurrentSkipListSet<LavaCellConnection> set = new ConcurrentSkipListSet<LavaCellConnection>(
             new Comparator<LavaCellConnection>() {
                 @Override
                 public int compare(LavaCellConnection o1, LavaCellConnection o2)
@@ -38,8 +36,11 @@ public class ConnectionMap
             
     public void clear()
     {
-        map.clear();
-        set.clear();
+        synchronized(this)
+        {
+            map.clear();
+            set.clear();
+        }
     }
     
     public int size()
@@ -54,35 +55,41 @@ public class ConnectionMap
     
     public void createConnectionIfNotPresent(LavaSimulator sim, CellConnectionPos pos)
     {
-        if(!map.containsKey(pos))
+        synchronized(this)
         {
-            LavaCell cell1 = sim.getCell(pos.getLowerPos(), false);
-            LavaCell cell2 = sim.getCell(pos.getUpperPos(), false);
-            LavaCellConnection connection = new LavaCellConnection(cell1, cell2);
-            map.put(pos, connection);
-            set.add(connection);
-            
-            //TODO: remove for release
-            if(map.size() != set.size())
+            if(!map.containsKey(pos))
             {
-                Adversity.log.warn("Connection tracking error: set size does not match map size.");
+                LavaCell cell1 = sim.getCell(pos.getLowerPos(), false);
+                LavaCell cell2 = sim.getCell(pos.getUpperPos(), false);
+                LavaCellConnection connection = new LavaCellConnection(cell1, cell2);
+                map.put(pos, connection);
+                set.add(connection);
+                
+                //TODO: remove for release
+    //            if(map.size() != set.size())
+    //            {
+    //                Adversity.log.warn("Connection tracking error: set size does not match map size.");
+    //            }
             }
         }
     }
     
     public void remove(CellConnectionPos pos)
     {
-        LavaCellConnection connection = this.map.get(pos);
-        if(connection != null)
+        synchronized(this)
         {
-            connection.releaseCells();
-            set.remove(connection);
-            map.remove(pos);
-            
-            //TODO: remove for release
-            if(map.size() != set.size())
+            LavaCellConnection connection = this.map.get(pos);
+            if(connection != null)
             {
-                Adversity.log.warn("Connection tracking error: set size does not match map size.");
+                connection.releaseCells();
+                set.remove(connection);
+                map.remove(pos);
+                
+                //TODO: remove for release
+    //            if(map.size() != set.size())
+    //            {
+    //                Adversity.log.warn("Connection tracking error: set size does not match map size.");
+    //            }
             }
         }
     }

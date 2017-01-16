@@ -80,7 +80,6 @@ public class TileVolcano extends TileEntity implements ITickable{
      * Set during ReadNBT so it can be obtained from simulation after ticks have started
      */
     private int nodeId = -1;
-    private static final int NODE_NOT_FOUND = -1;
 
     //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
     

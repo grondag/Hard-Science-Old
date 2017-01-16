@@ -67,10 +67,7 @@ public class LavaSimulator extends SimulationNode
     private final ConnectionMap connections = new ConnectionMap();
     
     private final ParticleManager particles = new ParticleManager();
-
-    private final HashSet<CellConnectionPos> newConnections = new HashSet<CellConnectionPos>();
-    private final HashSet<CellConnectionPos> deadConnections = new HashSet<CellConnectionPos>();
-    
+  
     /** Set true when doing block placements so we known not to register them as newly placed lava. */
     private boolean itMe = false;
 
@@ -140,20 +137,11 @@ public class LavaSimulator extends SimulationNode
             Adversity.log.info("Step time this sample = " + stepTime / 1000000);
             stepTime = 0;
 
-            Adversity.log.info("New connection proccessing time this sample = " + connectionRequestTime / 1000000 
-                    + " for " + connectionRequestCount + "requests @" + ((connectionRequestCount > 0) ? connectionRequestTime / connectionRequestCount : "") + " each");
-            connectionRequestCount = 0;
-            connectionRequestTime = 0;
-
             Adversity.log.info("Connection flow proccessing time this sample = " + connectionProcessTime / 1000000 
                     + " for " + connectionProcessCount + "requests @" + ((connectionProcessCount > 0) ? connectionProcessTime / connectionProcessCount : "") + " each");
             connectionProcessCount = 0;
             connectionProcessTime = 0;
-            
-            Adversity.log.info("Connection removal time this sample = " + connectionRemovalTime / 1000000 
-                    + " for " + connectionRemovalCount + "requests @" + ((connectionRemovalCount > 0) ? connectionRemovalTime / connectionRemovalCount : "") + " each");
-            connectionRemovalCount = 0;
-            connectionRemovalTime = 0;
+
             
             Adversity.log.info("lavaCells=" + this.lavaCells.size() + " totalCells=" + this.allCells.size() 
                     + " connections=" + this.connections.size() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
@@ -205,7 +193,6 @@ public class LavaSimulator extends SimulationNode
         }
 
         this.setSaveDirty(true);
-
     }
 
 //    private int particleCounter = 10;
@@ -449,81 +436,21 @@ public class LavaSimulator extends SimulationNode
     }
 
     private long stepTime;
-    private long connectionRequestTime;
-    private int connectionRequestCount;
     private long connectionProcessTime;
     private int connectionProcessCount;
-    private long connectionRemovalTime;
-    private int connectionRemovalCount;
     
     public void doStep()
     {
-
         long startTime = System.nanoTime();
-        connectionRequestCount += newConnections.size();
-        this.processNewConnectionRequests();
-        this.connectionRequestTime += (System.nanoTime() - startTime);
-
-        if(this.connections.size() > 0)
-        {
-
-            startTime = System.nanoTime();
-
-            connectionProcessCount += this.connections.size();
-
-            for(LavaCellConnection c : this.connections.getSortedValues())
-            {
-                if(c.firstCell.isBarrier() || c.secondCell.isBarrier()
-                        || (c.firstCell.getFluidAmount() == 0 && c.secondCell.getFluidAmount() == 0))
-                {
-                    this.deadConnections.add(new CellConnectionPos(c.firstCell.pos, c.secondCell.pos));
-                }
-                else
-                {
-                    c.doStep(this);
-                }
-            }
-
-            this.connectionProcessTime += (System.nanoTime() - startTime);
-
-
-            startTime = System.nanoTime();
-            connectionRemovalCount += deadConnections.size();
-            this.processDeadConnections();
-            this.connectionRemovalTime += (System.nanoTime() - startTime);
-
-
-            //use iterator and hold changes in other collections
-            //            Iterator<Entry<CellConnectionPos, LavaCellConnection>> it = this.connections.entrySet().iterator();
-            //            while(it.hasNext())
-            //            {
-            //                Entry<CellConnectionPos, LavaCellConnection> next = it.next();
-            //                LavaCellConnection connection = next.getValue();
-            //                //remove connections to barriers or between cells with no fluid
-            //                if(connection.firstCell.isBarrier() || connection.secondCell.isBarrier()
-            //                        || (connection.firstCell.getCurrentLevel() == 0 && connection.secondCell.getCurrentLevel() == 0))
-            //                {
-            //                    connection.releaseCells();
-            //                    it.remove();
-            //                }
-            //                else
-            //                {
-            //                    connection.doStep(this);
-            //                }
-            //            }
-
-        }
-
-        //TODO: handle particles with connection-oriented model
-
+        connectionProcessCount += this.connections.size();
+        this.connections.getSortedValues().stream().forEach((LavaCellConnection c) -> c.doStep(this));
+        this.connectionProcessTime += (System.nanoTime() - startTime);
     }
 
     private long validationTime;
 
     private void validateAllCells()
     {
-
-
         //TODO: make parallel
         for(LavaCell cell : this.allCells.values().toArray(new LavaCell[0]))
         {
@@ -662,7 +589,7 @@ public class LavaSimulator extends SimulationNode
                     other.retain("updateFluidStatus " + face.toString() + " from " + this.hashCode());
                     if(!other.isBarrier())
                     {
-                        this.requestNewConnection(cell.pos, other.pos);
+                        this.addConnection(cell.pos, other.pos);
                     }
                 }
             }
@@ -682,6 +609,7 @@ public class LavaSimulator extends SimulationNode
                 {
                     LavaCell other = cell.getNeighbor(this, face);
                     other.release("updateFluidStatus " + face.toString() + " from " + this.hashCode());
+                    this.removeConnection(cell.pos, other.pos);
                 }
             }
             else
@@ -770,35 +698,14 @@ public class LavaSimulator extends SimulationNode
         this.particles.addLavaForParticle(this, pos, amount);
     }
 
-    public void requestNewConnection(BlockPos pos1, BlockPos pos2)
+    public void addConnection(BlockPos pos1, BlockPos pos2)
     {
-        this.newConnections.add(new CellConnectionPos(pos1, pos2));
+        this.connections.createConnectionIfNotPresent(this, new CellConnectionPos(pos1, pos2));
     }
 
-
-
-    private void processNewConnectionRequests()
+    public void removeConnection(BlockPos pos1, BlockPos pos2)
     {
-        if(!this.newConnections.isEmpty())
-        {
-            for(CellConnectionPos pos : this.newConnections)
-            {
-                this.connections.createConnectionIfNotPresent(this, pos);
-            }
-            this.newConnections.clear();
-        }
-    }
-
-    private void processDeadConnections()
-    {
-        if(!deadConnections.isEmpty())
-        {
-            for(CellConnectionPos pos : this.deadConnections)
-            {
-                this.connections.remove(pos);
-            }
-            this.deadConnections.clear();
-        }
+        this.connections.remove(new CellConnectionPos(pos1, pos2));
     }
 
     private void provideBlockUpdates()
@@ -930,8 +837,6 @@ public class LavaSimulator extends SimulationNode
         lavaFillers.clear();
         basaltBlocks.clear();
         connections.clear();
-        newConnections.clear();
-        deadConnections.clear();
         adjustmentList.clear();
         dirtyCells.clear();
         
@@ -1096,7 +1001,7 @@ public class LavaSimulator extends SimulationNode
      */
     public float loadFactor()
     {
-        return Math.max((float)this.connections.size() / 3000F, (float)this.lavaCells.size() / 10000F);
+        return Math.max((float)this.connections.size() / 15000F, (float)this.lavaCells.size() / 10000F);
     }
 
 

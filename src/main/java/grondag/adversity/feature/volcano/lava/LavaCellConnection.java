@@ -343,22 +343,6 @@ public class LavaCellConnection
             this.flowThisTick = 0;
             this.lastFlowTick = sim.getTickIndex();
         }
-        
-        // TODO: Particle output
-        
-        // TODO: remove
-//        if((this.firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(this.secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
-//            Adversity.log.info("boop");
-      
-//        if(firstCell.hashCode() == 2711 || secondCell.hashCode() == 2711 )
-//        {
-//          Adversity.log.info("boop");
-//        }
-        
-//        if(this.isVertical && firstCell.getFluidAmount() == 0 && IFlowBlock.isFlowHeight(sim.world.getBlockState(firstCell.pos).getBlock()))
-//        {
-//          Adversity.log.info("boop");
-//        }
             
         int flow = this.getFlowRate(sim);
         

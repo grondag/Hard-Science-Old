@@ -32,3 +32,4 @@ run
 logs
 .html
 discarded textures
+*.nps

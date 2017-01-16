@@ -17,14 +17,17 @@ public class LavaCell
     public static final int FLUID_UNITS_PER_BLOCK = FLUID_UNITS_PER_LEVEL * FlowHeightState.BLOCK_LEVELS_INT;
     public static final int FLUID_UNTIS_PER_HALF_BLOCK = FLUID_UNITS_PER_BLOCK / 2;
 
-    
+
     private int fluidAmount = 0; // 1.0 is one full block of fluid at surface pressure
 
     private static int nextCellID = 0;
-    
+
     private boolean neverCools = false;
 
     private byte referenceCount = 0;
+    
+    /** false until first validate - lets us know we don't have to remove connections or do other housekeeping that won't apply */
+    private boolean isFirstValidationComplete = false;
 
     /**
      * If cell was created in a space partially occupied by a solid flow height block, 
@@ -54,7 +57,7 @@ public class LavaCell
      *  Set to NEVER_COOLS (negative value) if should never cool.
      */
     private int lastFlowTick = 0;
-    
+
 
     @Override 
     public int hashCode()
@@ -98,10 +101,10 @@ public class LavaCell
         {
 
             this.lastFlowTick = sim.getTickIndex();
-            
+
             boolean oldFluidState = false;
             final boolean wasDirty = this.getCurrentVisibleLevel() != this.lastVisibleLevel;
-            
+
             if(this.fluidAmount > 0)
             {
                 oldFluidState = true;
@@ -111,7 +114,7 @@ public class LavaCell
                 //if this is an empty drop cell, queue a drop particle instead of adding the lava
                 if(this.isDrop(sim))
                 {
-//                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
+                    //                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
                     sim.queueParticle(this.pos, amount);
                     return;
                 }
@@ -122,9 +125,9 @@ public class LavaCell
                     this.fluidAmount = this.floorLevel;
                 }
             }
-                
+
             this.fluidAmount += amount;
-      
+
             if(this.fluidAmount < 0)
             {
                 Adversity.log.info("Negative cell level detected: " + this.fluidAmount + " cellID=" + this.id + " pos=" + this.pos.toString());
@@ -136,7 +139,7 @@ public class LavaCell
             {
                 sim.updateFluidStatus(this, this.fluidAmount > 0);
             }
-            
+
             if(wasDirty)
             {
                 if(this.getCurrentVisibleLevel() == this.lastVisibleLevel) 
@@ -176,7 +179,7 @@ public class LavaCell
             }
 
             adjustmentList.add(pos);
-            
+
             this.lastVisibleLevel = currentVisible;
         }
     }
@@ -188,30 +191,19 @@ public class LavaCell
      */
     public int getCurrentVisibleLevel()
     {
-//        if(this.fluidAmount < MINIMUM_CELL_CONTENT) 
-//            return 0;
-//        else
-//            return Math.min(FlowHeightState.BLOCK_LEVELS_INT, Float.((float)this.fluidAmount, FLUID_UNITS_PER_LEVEL));
-            
-            //effectively rounds up without FP math
-            int result = 0;
-            if(this.fluidAmount > 0) result = (fluidAmount + FLUID_UNITS_PER_LEVEL - 1) / FLUID_UNITS_PER_LEVEL;
-            if(result > FlowHeightState.BLOCK_LEVELS_INT) result = FlowHeightState.BLOCK_LEVELS_INT;
-            return result;
+        //effectively rounds up without FP math
+        int result = 0;
+        if(this.fluidAmount > 0) result = (fluidAmount + FLUID_UNITS_PER_LEVEL - 1) / FLUID_UNITS_PER_LEVEL;
+        if(result > FlowHeightState.BLOCK_LEVELS_INT) result = FlowHeightState.BLOCK_LEVELS_INT;
+        return result;
     }
-    
+
     /**
      * Value that should be in the world. 
      */
     public int getLastVisibleLevel()
     {
-//        if(this.fluidAmount < MINIMUM_CELL_CONTENT) 
-//            return 0;
-//        else
-//            return Math.min(FlowHeightState.BLOCK_LEVELS_INT, Float.((float)this.fluidAmount, FLUID_UNITS_PER_LEVEL));
-            
-            //effectively rounds up without FP math
-           return this.getLastVisibleLevel();
+        return this.lastVisibleLevel;
     }
 
     /**
@@ -280,7 +272,7 @@ public class LavaCell
                 // Adding fluid below will cause me to form connections,
                 // so don't need to do that here.
                 this.isBarrier = false;
-                
+
                 //Avoid stack overflow when bulk loading at start - many new cells just created won't match world blocks with fluid then.
                 if(!sim.isLoading)
                 {
@@ -291,7 +283,7 @@ public class LavaCell
                         this.floorLevel = 0;
                         updateRetainedLevel = true;
                     }
-    
+
                     // Make us a fluid cell.
                     this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
                     sim.updateFluidStatus(this, true);
@@ -331,7 +323,7 @@ public class LavaCell
                         LavaCell other = this.getNeighbor(sim, face);
                         if(!other.isBarrier() && other.fluidAmount > 0)
                         {
-                            sim.requestNewConnection(this.pos, other.pos);
+                            sim.addConnection(this.pos, other.pos);
                         }
                     }
                 }
@@ -346,19 +338,26 @@ public class LavaCell
             }
             else if(!this.isBarrier)
             {
-                // Make us a barrier.
-                // No other action needed here because we alreadyt remove lava above
-                // and connection will be pruned next time connections are processed.
                 this.isBarrier = true;
                 this.floorLevel = 0;
                 this.retainedLevel = 0;
+                
+                // Make us a barrier.
+                // Remove connections to neighboring cells if there were any.
+                if(this.isFirstValidationComplete)
+                {
+                    for(EnumFacing face : EnumFacing.VALUES)
+                    {
+                        sim.removeConnection(this.pos, pos.add(face.getDirectionVec()));
+                    }
+                }
             }
         }
 
         if(updateRetainedLevel && !this.isBarrier) 
         {
             int effectiveFloor = this.getEffectiveFloor(sim);
-            
+
             //TODO: make this depend on slope
             if(effectiveFloor !=  0)
             {
@@ -383,15 +382,15 @@ public class LavaCell
             {
                 this.retainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(pos) * FLUID_UNITS_PER_BLOCK);
             }
-            
-         
+
+
             if(this.retainedLevel > FLUID_UNITS_PER_BLOCK)
             {
                 // if retained level > full block, want to clamp it at the equilibrium point
                 this.retainedLevel  = this.retainedLevel - (int)((this.retainedLevel - FLUID_UNITS_PER_BLOCK) * LavaCellConnection.INVERSE_PRESSURE_FACTOR);
             }
-            
         }
+        this.isFirstValidationComplete = true;
     }
 
     public int getRetainedLevel()
@@ -409,7 +408,7 @@ public class LavaCell
         //TODO: make ticks to cool configurable
         return !this.neverCools && this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200;
     }
-    
+
     /**
      * True if directly above a barrier or if cell below is full of fluid.
      */
@@ -426,7 +425,7 @@ public class LavaCell
     {
         //My floor doesn't count if it has melted and become fluid.
         if(this.fluidAmount == 0 && this.floorLevel > 0) return false;
-        
+
         LavaCell bottom = this.getNeighbor(sim, EnumFacing.DOWN);
         return !bottom.isBarrier && bottom.fluidAmount == 0 && bottom.floorLevel == 0;
     }
@@ -506,18 +505,18 @@ public class LavaCell
     {
         this.neverCools = neverCools;
     }
-    
+
     public boolean getNeverCools()
     {
         return this.neverCools;
     }
-    
+
     // See floorLevel comments - is raw value
     public int getFloor()
     {
         return this.floorLevel;
     }
-    
+
     /**
      *  Same as getFloor() if this cell has a non-zero floor.
      *  If this cell doesn't have a floor but cell below does,
@@ -525,6 +524,8 @@ public class LavaCell
      */
     public int getEffectiveFloor(LavaSimulator sim)
     {
+        if(this.isBarrier) return FLUID_UNITS_PER_BLOCK;
+        
         int result = this.floorLevel;
         if(result == 0)
         {
@@ -541,7 +542,7 @@ public class LavaCell
         }
         return result;
     }
-    
+
     /**
      * How much lava can this cell accept if being added at top.
      * Used by simulation addLava method.
