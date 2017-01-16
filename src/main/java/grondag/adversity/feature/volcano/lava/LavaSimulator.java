@@ -485,16 +485,6 @@ public class LavaSimulator extends SimulationNode
      */
     public LavaCell getCell(BlockPos pos, boolean validateExisting)
     {
-        //        int arrayX = pos.getX() + xOffset;
-        //        int arrayZ = pos.getZ() + zOffset;
-        //        
-        //        //Will get called by boundary lookups - 
-        //        //just ignore these, effective creates a barrier at boundary
-        //        if(arrayX >= ARRAY_LENGTH || arrayX < 0 || arrayZ >= ARRAY_LENGTH || arrayZ < 0)
-        //        {
-        //            return null;
-        //        }
-
         LavaCell result = allCells.get(pos);
 
         if(result == null)

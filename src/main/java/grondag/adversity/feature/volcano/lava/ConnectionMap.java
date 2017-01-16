@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.google.common.collect.ComparisonChain;
@@ -11,24 +12,26 @@ import com.google.common.collect.ComparisonChain;
 public class ConnectionMap
 {
   
-    private final ConcurrentHashMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentHashMap<CellConnectionPos, LavaCellConnection>();
+//    private final ConcurrentHashMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentHashMap<CellConnectionPos, LavaCellConnection>();
+    
+    private int size = 0;
 
-    private final ConcurrentSkipListSet<LavaCellConnection> set = new ConcurrentSkipListSet<LavaCellConnection>(
-            new Comparator<LavaCellConnection>() {
+    private final ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection>(
+            new Comparator<CellConnectionPos>() {
                 @Override
-                public int compare(LavaCellConnection o1, LavaCellConnection o2)
+                public int compare(CellConnectionPos o1, CellConnectionPos o2)
                 {
                     return ComparisonChain.start()
                     //vertical first
-                    .compare(o1.isVertical, o2.isVertical)
+                    .compare(o1.isVertical(), o2.isVertical())
                     //top down
-                    .compare(o2.firstCell.pos.getY(), o1.firstCell.pos.getY())
-                    //largest drop first
-                    .compare(o2.getSortDrop(), o1.getSortDrop())
-                    //random tie breaker -> don't favor any horizontal direction
-                    .compare(o1.rand, o2.rand)
-                    //ensure match equals behavior in rare case rand doesn't break tie
-                    .compare(o1.id, o2.id)
+                    .compare(o2.lowerPos.getY(), o1.lowerPos.getY())
+                    //tie breaker -> don't favor any horizontal direction
+                    .compare(o1.hashCode(), o2.hashCode())
+                    //remaining ensure unique match
+                    .compare(o1.lowerPos.getX(), o2.lowerPos.getX())
+                    .compare(o1.lowerPos.getZ(), o2.lowerPos.getZ())
+                    .compare(o1.axis, o2.axis)
                     .result();
                   
                 }});
@@ -39,13 +42,16 @@ public class ConnectionMap
         synchronized(this)
         {
             map.clear();
-            set.clear();
+            this.size = 0;
         }
     }
     
     public int size()
     {
-        return map.size();
+        synchronized(this)
+        {
+            return this.size;
+        }
     }
    
     public LavaCellConnection get(CellConnectionPos pos)
@@ -59,17 +65,11 @@ public class ConnectionMap
         {
             if(!map.containsKey(pos))
             {
-                LavaCell cell1 = sim.getCell(pos.getLowerPos(), false);
-                LavaCell cell2 = sim.getCell(pos.getUpperPos(), false);
+                LavaCell cell1 = sim.getCell(pos.lowerPos, false);
+                LavaCell cell2 = sim.getCell(pos.upperPos, false);
                 LavaCellConnection connection = new LavaCellConnection(cell1, cell2);
                 map.put(pos, connection);
-                set.add(connection);
-                
-                //TODO: remove for release
-    //            if(map.size() != set.size())
-    //            {
-    //                Adversity.log.warn("Connection tracking error: set size does not match map size.");
-    //            }
+                size++;
             }
         }
     }
@@ -82,21 +82,15 @@ public class ConnectionMap
             if(connection != null)
             {
                 connection.releaseCells();
-                set.remove(connection);
                 map.remove(pos);
-                
-                //TODO: remove for release
-    //            if(map.size() != set.size())
-    //            {
-    //                Adversity.log.warn("Connection tracking error: set size does not match map size.");
-    //            }
+                size--;
             }
         }
     }
     
     public Collection<LavaCellConnection> getSortedValues()
     {
-        return this.set;
+        return this.map.values();
     }
     
 }

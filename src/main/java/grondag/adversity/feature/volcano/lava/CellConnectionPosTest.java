@@ -28,13 +28,13 @@ public class CellConnectionPosTest
         pos2 = new BlockPos(x + 1,y,z);
                 
         cellPos1 = new CellConnectionPos(pos1, pos2);
-        assert(cellPos1.getLowerPos().equals(pos1));
-        assert(cellPos1.getUpperPos().equals(pos2));
+        assert(cellPos1.lowerPos.equals(pos1));
+        assert(cellPos1.upperPos.equals(pos2));
         assert(cellPos1.getAxis() == EnumFacing.Axis.X);
         
         cellPos2 = new CellConnectionPos(pos2, pos1);
-        assert(cellPos2.getLowerPos().equals(pos1));
-        assert(cellPos2.getUpperPos().equals(pos2));
+        assert(cellPos2.lowerPos.equals(pos1));
+        assert(cellPos2.upperPos.equals(pos2));
         assert(cellPos2.getAxis() == EnumFacing.Axis.X);
         
         assert(cellPos1 != cellPos2);
@@ -56,13 +56,13 @@ public class CellConnectionPosTest
         pos2 = new BlockPos(x,y+1,z);
                 
         cellPos1 = new CellConnectionPos(pos1, pos2);
-        assert(cellPos1.getLowerPos().equals(pos1));
-        assert(cellPos1.getUpperPos().equals(pos2));
+        assert(cellPos1.lowerPos.equals(pos1));
+        assert(cellPos1.upperPos.equals(pos2));
         assert(cellPos1.getAxis() == EnumFacing.Axis.Y);
         
         cellPos2 = new CellConnectionPos(pos2, pos1);
-        assert(cellPos2.getLowerPos().equals(pos1));
-        assert(cellPos2.getUpperPos().equals(pos2));
+        assert(cellPos2.lowerPos.equals(pos1));
+        assert(cellPos2.upperPos.equals(pos2));
         assert(cellPos2.getAxis() == EnumFacing.Axis.Y);
         
         assert(cellPos1 != cellPos2);
@@ -84,13 +84,13 @@ public class CellConnectionPosTest
         pos2 = new BlockPos(x,y,z+1);
                 
         cellPos1 = new CellConnectionPos(pos1, pos2);
-        assert(cellPos1.getLowerPos().equals(pos1));
-        assert(cellPos1.getUpperPos().equals(pos2));
+        assert(cellPos1.lowerPos.equals(pos1));
+        assert(cellPos1.upperPos.equals(pos2));
         assert(cellPos1.getAxis() == EnumFacing.Axis.Z);
         
         cellPos2 = new CellConnectionPos(pos2, pos1);
-        assert(cellPos2.getLowerPos().equals(pos1));
-        assert(cellPos2.getUpperPos().equals(pos2));
+        assert(cellPos2.lowerPos.equals(pos1));
+        assert(cellPos2.upperPos.equals(pos2));
         assert(cellPos2.getAxis() == EnumFacing.Axis.Z);
         
         assert(cellPos1 != cellPos2);

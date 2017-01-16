@@ -16,17 +16,14 @@ import net.minecraft.util.math.Vec3i;
  */
 public class CellConnectionPos implements Comparable<CellConnectionPos>
 {
-    private final BlockPos lowerPos;
+    public final BlockPos lowerPos;
+    public final BlockPos upperPos;
     
     //TODO: is axis really needed here?  
     // Seems mathematically redundant of ordered cell positions - is implied
-    private final EnumFacing.Axis axis;
+    public final EnumFacing.Axis axis;
     
-    public CellConnectionPos(BlockPos lowerPos, EnumFacing.Axis axis)
-    {
-        this.lowerPos = lowerPos;
-        this.axis = axis;
-    }
+    private final int hash;
     
     /**
      * Returns appropriate value given two adjacent cells.
@@ -50,27 +47,57 @@ public class CellConnectionPos implements Comparable<CellConnectionPos>
             {
                 this.axis = EnumFacing.Axis.Z;
                 if(zDiff > 0)
+                {
                     this.lowerPos = pos1;
+                    this.upperPos = pos2;
+                }
                 else
+                {
                     this.lowerPos = pos2;
+                    this.upperPos = pos1;
+                }
+                
             }
             else
             {
                 this.axis = EnumFacing.Axis.Y;
                 if(yDiff > 0)
+                {
                     this.lowerPos = pos1;
+                    this.upperPos = pos2;
+                }
                 else
+                {
                     this.lowerPos = pos2;
+                    this.upperPos = pos1;
+                }
             }
         }
         else
         {
             this.axis = EnumFacing.Axis.X;
             if(xDiff > 0)
+            {
                 this.lowerPos = pos1;
+                this.upperPos = pos2;
+            }
             else
+            {
                 this.lowerPos = pos2;
+                this.upperPos = pos1;
+            }
         }
+        
+        long rawKey = this.lowerPos.getX() & 0xFFFFFF;
+        rawKey |= (this.lowerPos.getY() & 0xFFFFFF) << 24;
+        rawKey |= (this.lowerPos.getY() & 0xFF) << 48;
+        rawKey |= this.axis.ordinal() << 52;
+        this.hash = (int)(Useful.longHash(rawKey) & 0xFFFFFFFF);  
+    }
+    
+    public boolean isVertical()
+    {
+        return this.axis == EnumFacing.Axis.Y;
     }
     
     @Override
@@ -82,27 +109,6 @@ public class CellConnectionPos implements Comparable<CellConnectionPos>
                 .compare(this.lowerPos.getZ(), o.lowerPos.getZ())
                 .compare(this.axis, o.axis)
                 .result();
-    }
-    
-    public BlockPos getLowerPos()
-    {
-        return this.lowerPos;
-    }
-    
-    public BlockPos getUpperPos()
-    {
-        switch(this.axis)
-        {
-        case X:
-            return this.lowerPos.add(1, 0, 0);
-            
-        case Y:
-            return this.lowerPos.add(0, 1, 0);
-
-        case Z:
-        default:
-            return this.lowerPos.add(0, 0, 1);
-        }
     }
     
     public EnumFacing.Axis getAxis()
@@ -131,9 +137,10 @@ public class CellConnectionPos implements Comparable<CellConnectionPos>
         }
     }
 
+    @Override
     public int hashCode()
     {
-        return this.lowerPos.hashCode() << 2 | this.axis.ordinal();
+        return this.hash;
     }
 
 }
