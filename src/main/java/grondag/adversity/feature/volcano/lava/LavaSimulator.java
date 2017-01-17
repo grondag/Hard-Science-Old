@@ -31,6 +31,9 @@ import net.minecraft.world.World;
  * Performance / parallelism
  *      Handle changes to sort keys on connections due to world updates
  * 
+ * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
+ *   may reduce number of block updates
+ * 
  * FEATURES
  * Improve Drop/slope Calculation for flowing terrain
  * Particle damage to entities
@@ -200,7 +203,9 @@ public class LavaSimulator extends SimulationNode
     {
         long startTime = System.nanoTime();
        //TODO: make configurable
-        int capacity =  10 - EntityLavaParticle.getLiveParticleCount();
+        int capacity =  10 - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
+        
+        if(capacity <= 0) return;
         
         EntityLavaParticle particle = this.particles.pollFirstEligible(this);
         
@@ -545,13 +550,20 @@ public class LavaSimulator extends SimulationNode
     {
         if(itMe) return;
 
-        int worldLevel = IFlowBlock.getFlowHeightFromState(state);
-        LavaCell target = this.getCell(pos, false);
-        if(target.getLastVisibleLevel() != worldLevel)
-        {           
-            target.validate(this, true);
+        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        {
+            this.lavaFillers.add(pos);
         }
-        this.setSaveDirty(true);
+        else if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        {
+            int worldLevel = IFlowBlock.getFlowHeightFromState(state);
+            LavaCell target = this.getCell(pos, false);
+            if(target.getLastVisibleLevel() != worldLevel)
+            {           
+                target.validate(this, true);
+                this.setSaveDirty(true);
+            }
+        }
     }
 
     /**
@@ -675,17 +687,17 @@ public class LavaSimulator extends SimulationNode
             if(available > 0)
             {
                 target = this.getCell(pos.up(), shouldResynchToWorldBeforeAdding);
-                capacity = target.getCapacity();
-                flow = Math.min(capacity, available);
-                if(flow > 0)
-                {
-                    target.changeLevel(this, flow);
-                    available -= flow;
-                }
-            
-                if(available > 0)
-                {
-                    //add lava at pressure if cell contains lava
+                
+                //add lava at pressure if necessary
+               if(target.getCapacity() > 0 || target.getFluidAmount() > 0)
+               {
+                   target.changeLevel(this, available);
+                   available = 0;
+               }
+               else
+               {
+                    // try to add a pressure in the primary target cell
+                    target = this.getCell(pos, shouldResynchToWorldBeforeAdding);
                     if(target.getFluidAmount() > 0)
                     {
                         target.changeLevel(this, available);
@@ -693,18 +705,8 @@ public class LavaSimulator extends SimulationNode
                     }
                     else
                     {
-                        // try to add a pressure in the primary target cell
-                        target = this.getCell(pos, shouldResynchToWorldBeforeAdding);
-                        if(target.getFluidAmount() > 0)
-                        {
-                            target.changeLevel(this, available);
-                            available = 0;
-                        }
-                        else
-                        {
-                            Adversity.log.info("LAVA EATING IS A THING! Amount=" + available + " @" + pos.toString());
-                        }
-                    }             
+                        Adversity.log.info("LAVA EATING IS A THING! Amount=" + available + " @" + pos.toString());
+                    }       
                 }
             }
         }
@@ -898,6 +900,7 @@ public class LavaSimulator extends SimulationNode
             for(LavaCell cell : this.allCells.values().toArray(new LavaCell[0]))
             {
                 this.updateFluidStatus(cell, true);
+                cell.updateRetainedLevel(this);
             }
             
             Adversity.log.info("Loaded " + lavaCells.size() + " lava cells.");
@@ -1004,13 +1007,6 @@ public class LavaSimulator extends SimulationNode
         return this.tickIndex;
     }
 
-
-    @Override
-    public boolean isSaveDirty()
-    {
-        return super.isSaveDirty();
-    }
-    
     /**
      * Signal to let volcano know should switch to cooling mode.
      * 1 or higher means overloaded.

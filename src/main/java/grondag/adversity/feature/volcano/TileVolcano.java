@@ -273,20 +273,27 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
         }
         
-        Vec3i offset = BORE_OFFSETS.get(offsetIndex++);
-        BlockPos clearPos = new BlockPos(this.pos.getX() + offset.getX(), this.clearingLevel, this.pos.getZ() + offset.getZ());
+        // Clear # of blocks up to configured limit or until last block of this level
+        // TODO: make the limit actually configurable
         
-        //if lava is somehow leaking, drop down a level
-        if(clearingLevel > this.pos.getY() + 1 && !clearBore(clearPos.down()))
+        int clearCount = 0;
+        while(clearCount++ < 10 && offsetIndex < BORE_OFFSETS.size())
         {
-            clearingLevel--;
-            offsetIndex = 0;
-            this.levelAllClear = true;
-        }
-        else
-        {
-            if(!clearBore(clearPos)) 
-                this.levelAllClear = false;
+            Vec3i offset = BORE_OFFSETS.get(offsetIndex++);
+            BlockPos clearPos = new BlockPos(this.pos.getX() + offset.getX(), this.clearingLevel, this.pos.getZ() + offset.getZ());
+            
+            //if lava is somehow leaking, drop down a level
+            if(clearingLevel > this.pos.getY() + 1 && !clearBore(clearPos.down()))
+            {
+                clearingLevel--;
+                offsetIndex = 0;
+                this.levelAllClear = true;
+            }
+            else
+            {
+                if(!clearBore(clearPos)) 
+                    this.levelAllClear = false;
+            }
         }
         return VolcanoStage.CLEARING;
         
@@ -299,7 +306,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     private VolcanoStage doCooling()
     {
         //TODO: make configurable
-        return Simulator.instance.getFluidTracker().loadFactor() > 0.5F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
+        return Simulator.instance.getFluidTracker().loadFactor() > 0.4F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
     }
     
     /** 

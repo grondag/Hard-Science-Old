@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaCell;
@@ -39,9 +40,14 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     public VolcanicLavaBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller)
     {
         super(dispatcher, material, styleName, isFiller);
-        this.setLightLevel(4F/15F);
+        
+        //TODO: provide config to turn this on - default off, can affect framerate
+        //        this.setLightLevel(4F/15F);
+        
+        //TODO: add configs for these also
 //        this.setBlockUnbreakable();
 //        this.setResistance(2000F);
+        this.setTickRandomly(true);
     }
 
     @Override
@@ -121,10 +127,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
         }
     }
     
+
+
     @Override
-    public int tickRate(World worldIn)
+    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
     {
-        return 2;
+        Simulator.instance.getFluidTracker().registerPlacedLava(worldIn, pos, state);
     }
 
     //TODO: make this work or remove it
@@ -159,12 +167,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                 .text("Floor Level = " + cell.getFloor() + "    Retained Level = " + cell.getRetainedLevel())
                 .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex())
                 .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "id=" + up.id + "  drop=" + up.getDrop()))
-                .text("Down: " + (down == null ? "null" : "id=" + down.id + "  drop=" + down.getDrop()))
-                .text("East: " + (east == null ? "null" : "id=" + east.id + "  drop=" + east.getDrop()))
-                .text("West: " + (west == null ? "null" : "id=" + west.id + "  drop=" + west.getDrop()))
-                .text("North: " + (north == null ? "null" : "id=" + north.id + "  drop=" + north.getDrop()))
-                .text("South: " + (south == null ? "null" : "id=" + south.id + "  drop=" + south.getDrop()));
+                .text("Up: " + (up == null ? "null" : "id=" + up.id + "  drop=" + up.getDrop() + " barrier:" + up.getOther(cell).isBarrier()))
+                .text("Down: " + (down == null ? "null" : "id=" + down.id + "  drop=" + down.getDrop() + " barrier:" + down.getOther(cell).isBarrier()))
+                .text("East: " + (east == null ? "null" : "id=" + east.id + "  drop=" + east.getDrop() + " barrier:" + east.getOther(cell).isBarrier()))
+                .text("West: " + (west == null ? "null" : "id=" + west.id + "  drop=" + west.getDrop() + " barrier:" + west.getOther(cell).isBarrier()))
+                .text("North: " + (north == null ? "null" : "id=" + north.id + "  drop=" + north.getDrop() + " barrier:" + north.getOther(cell).isBarrier()))
+                .text("South: " + (south == null ? "null" : "id=" + south.id + "  drop=" + south.getDrop() + " barrier:" + south.getOther(cell).isBarrier()));
         }
         
     }

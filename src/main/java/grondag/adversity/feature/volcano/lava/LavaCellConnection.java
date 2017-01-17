@@ -41,7 +41,9 @@ public class LavaCellConnection
      * along the surface and higher-velocity flows (down a slope) will also
      * have a smaller cross-section due to retained height calculations.
      */
-    private final static int MAX_FLOW_PER_TICK = LavaCell.FLUID_UNITS_PER_BLOCK / 10;
+    private final static int MAX_HORIZONTAL_FLOW_PER_TICK = LavaCell.FLUID_UNITS_PER_BLOCK / 10;
+    private final static int MAX_UPWARD_FLOW_PER_TICK = MAX_HORIZONTAL_FLOW_PER_TICK / 2;
+    private final static int MAX_DOWNWARD_FLOW_PER_TICK = MAX_HORIZONTAL_FLOW_PER_TICK * 2;
     
     public final boolean isVertical;
     
@@ -125,6 +127,7 @@ public class LavaCellConnection
      */
     private int getVerticalFlow(LavaSimulator sim)
     {
+        
         // Nothing to do if top cell is empty unless have upwards pressure
         if(secondCell.getFluidAmount() == 0 && firstCell.getFluidAmount() <= LavaCell.FLUID_UNITS_PER_BLOCK) return 0;
         
@@ -194,8 +197,8 @@ public class LavaCellConnection
     {
         // For horizontal connection, flow is always towards cell with no bottom
         // and if neither has a bottom, there is no flow.
-        int level1 = this.firstCell.isSupported(sim) ? Math.max(this.firstCell.getFluidAmount(), this.firstCell.getFloor()) : 0;
-        int level2 = this.secondCell.isSupported(sim) ? Math.max(this.secondCell.getFluidAmount(), this.secondCell.getFloor()) : 0;
+        int level1 = this.firstCell.isSupported(sim) ? this.firstCell.getFluidAmount() > 0 ? this.firstCell.getFluidAmount() : this.firstCell.getFloor() : 0;
+        int level2 = this.secondCell.isSupported(sim) ? this.secondCell.getFluidAmount() > 0 ? this.secondCell.getFluidAmount() : this.secondCell.getFloor() : 0;
         
         int difference = level1 - level2;
         
@@ -240,7 +243,7 @@ public class LavaCellConnection
             }
             else
             {
-                //otherwise just donate anything above my retention level
+                //otherwise just donate anything above my retention level, up to my fluid amount
                 int bound = level1 - this.firstCell.getRetainedLevel();
                 if(bound <= 0) return 0;
                 difference = Math.min(difference, bound);
@@ -338,8 +341,13 @@ public class LavaCellConnection
     
     public void doStep(LavaSimulator sim)
     {
+
+        
         if(this.lastFlowTick != sim.getTickIndex())
         {
+//            if(this.firstCell.hashCode() == 1521 || this.secondCell.hashCode() == 1521)
+//                Adversity.log.info("boop");
+            
             this.flowThisTick = 0;
             this.lastFlowTick = sim.getTickIndex();
         }
@@ -352,13 +360,15 @@ public class LavaCellConnection
         // Positive numbers means 1st cell has higher pressure.
         if(flow > 0)
         {
-            
-            flow = Math.max(0, Math.min(flow, MAX_FLOW_PER_TICK - this.flowThisTick));
+            flow = Math.max(0, Math.min(flow, 
+                    (this.isVertical ? MAX_UPWARD_FLOW_PER_TICK : MAX_HORIZONTAL_FLOW_PER_TICK) - this.flowThisTick));
         }
         else
         {
             // flow is negative in this case, so need to flip handling of bound
-            flow = Math.min(0, Math.max(flow, -MAX_FLOW_PER_TICK - this.flowThisTick));
+            flow = Math.min(0, Math.max(flow, 
+                    (this.isVertical ? -MAX_DOWNWARD_FLOW_PER_TICK : -MAX_HORIZONTAL_FLOW_PER_TICK) - this.flowThisTick));
+
         }
         
         if(flow == 0) return;

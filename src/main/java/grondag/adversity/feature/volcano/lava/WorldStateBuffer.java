@@ -82,7 +82,7 @@ public class WorldStateBuffer implements IBlockAccess
         //TODO: make configurable
         int firstEligibleTick = Simulator.instance.getCurrentSimTick() - 4;
                 
-        while(chunksDone++ < chunkCount && !this.updateQueue.isEmpty() && this.updateQueue.getFirst().tickCreated >= firstEligibleTick)
+        while(chunksDone++ < chunkCount && !this.updateQueue.isEmpty() && this.updateQueue.getFirst().tickCreated <= firstEligibleTick)
         {
             ChunkBuffer chunk = this.updateQueue.pollFirst();
             chunks.remove(ChunkPos.asLong(chunk.chunkpos.chunkXPos, chunk.chunkpos.chunkZPos));

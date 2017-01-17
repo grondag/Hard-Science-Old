@@ -19,6 +19,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -40,6 +42,7 @@ public class EntityLavaParticle extends Entity
     
     private int cachedAmount;
     
+    private static int liveParticleLastServerTick = 0;
     private static int liveParticleCount = 0;
 
     private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.<Integer>createKey(EntityLavaParticle.class, DataSerializers.VARINT);
@@ -50,9 +53,13 @@ public class EntityLavaParticle extends Entity
         return this.id;
     }
 
-    public static int getLiveParticleCount()
+    /** 
+     * If particle count has been recently updated, returns it, otherwise returns 0.
+     * Requires server reference because it is static and doesn't have a reference.
+     */
+    public static int getLiveParticleCount(MinecraftServer server)
     {
-        return liveParticleCount;
+        return liveParticleLastServerTick + 2 > server.getTickCounter() ? liveParticleCount: 0;
     }
     
     protected EntityLavaParticle(World world, int amount, Vec3d position, Vec3d velocity)
@@ -182,24 +189,44 @@ public class EntityLavaParticle extends Entity
 
     }
     
+    
+    @Override
+    public void onEntityUpdate()
+    {
+        // None of the normal stuff applies
+    }
+
+    @Override
+    public boolean isEntityInvulnerable(DamageSource source)
+    {
+        // Volcanic lava don't care
+        return true;
+    }
+
+    @Override
+    public boolean isImmuneToExplosions()
+    {
+        return true;
+    }
+
     @Override
     public void onUpdate()
     {
-        //    Adversity.log.info("onUpdate id=" + this.id + " starting x,y,z=" + this.getPositionVector().toString());
-
-        if(this.firstUpdate) 
+        // track the number of active particles - server only
+        if(!this.worldObj.isRemote && liveParticleLastServerTick != this.getServer().getTickCounter()) 
         {
-            liveParticleCount++;
-//            Adversity.log.info("particle firstUpdate id=" + this.id + " amount=" + this.cachedAmount +" @"+ this.getPosition().toString());
+            liveParticleLastServerTick = this.getServer().getTickCounter();
+            liveParticleCount = 0;
         }
+        liveParticleCount++;
         
-        //TODO: remove
-        if(this.isDead) 
+        if(this.ticksExisted > 600)
         {
-            Adversity.log.info("Dead entity derp");
+            Adversity.log.info("Ancient lava particle died of old age.");
+            this.setDead();
             return;
         }
-
+        
         // If inside lava, release to lava simulator.
         // This can happen somewhat frequently because another particle landed or lava flowed around us.
 //        if(!this.worldObj.isRemote) 
@@ -215,13 +242,6 @@ public class EntityLavaParticle extends Entity
         
         super.onUpdate();
 
-        if(this.ticksExisted > 600)
-        {
-            Adversity.log.info("Too long. What's up?");
-        }
-
-
-
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
@@ -235,6 +255,7 @@ public class EntityLavaParticle extends Entity
         this.motionZ *= 0.9800000190734863D;
 
         if (this.onGround) this.land();
+        
     }
     
     private void land()
@@ -420,7 +441,8 @@ public class EntityLavaParticle extends Entity
                 {
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
                     IBlockState state = worldObj.getBlockState(blockpos$pooledmutableblockpos);
-                    if(state.getMaterial() != Material.AIR && !IFlowBlock.isFlowFiller(state.getBlock()) && LavaTerrainHelper.canLavaDisplace(state))
+                    if(!(state.getMaterial() == Material.AIR || state.getMaterial().isLiquid()) 
+                            && !IFlowBlock.isFlowFiller(state.getBlock()) && LavaTerrainHelper.canLavaDisplace(state))
                     {
                         this.worldObj.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }
