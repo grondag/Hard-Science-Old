@@ -129,6 +129,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         }
         else
         {
+            
             VolcanoNode active = nodes[this.activeIndex];
             if(active==null)
             {
@@ -328,6 +329,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                 this.setSaveDirty(true);
             }
             this.keepAlive = Simulator.instance.getWorld().getTotalWorldTime();
+//            Adversity.log.info("keepAlive=" + this.keepAlive);
         }
         
         

@@ -144,6 +144,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     {
         boolean isNodeUpdateNeeded = false;
 
+        
         if(this.worldObj.isRemote) return;
 
         if(this.node == null)
@@ -152,14 +153,23 @@ public class TileVolcano extends TileEntity implements ITickable{
 
             if(this.stage == VolcanoStage.NEW)
             {
-                Adversity.log.info("setting up new Volcano @" + this.pos.toString());
-
-                this.node = Simulator.instance.getVolcanoManager().createNode();
-                this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+                //TODO: Workaround for WTF IDK
+                this.nodeId = 5;
                 this.stage = VolcanoStage.DORMANT;
                 this.level = this.pos.getY();
                 int moundRadius = Config.volcano().moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
+                return;
+                
+//                Adversity.log.info("setting up new Volcano @" + this.pos.toString());
+
+//                this.node = Simulator.instance.getVolcanoManager().createNode();
+//                this.nodeId = node.getID();
+//                this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+//                this.stage = VolcanoStage.DORMANT;
+//                this.level = this.pos.getY();
+//                int moundRadius = Config.volcano().moundRadius;
+//                this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
             else
             {
@@ -253,18 +263,18 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             if(levelAllClear)
             {
-                if(this.worldObj.canBlockSeeSky(this.pos.up(clearingLevel - pos.getY())))
-                {
-                    this.clearingLevel = CLEARING_LEVEL_RESTART;
-                    return VolcanoStage.FLOWING;
-                }
-                else
-                {
+//                if(this.worldObj.canBlockSeeSky(this.pos.up(clearingLevel - pos.getY())))
+//                {
+//                    this.clearingLevel = CLEARING_LEVEL_RESTART;
+//                    return VolcanoStage.FLOWING;
+//                }
+//                else
+//                {
                     this.clearingLevel++;
                     this.levelAllClear = true;
                     this.offsetIndex = 0;
                     this.level = Math.max(this.level, clearingLevel);
-                }
+//                }
             }
             else
             {
@@ -306,7 +316,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     private VolcanoStage doCooling()
     {
         //TODO: make configurable
-        return Simulator.instance.getFluidTracker().loadFactor() > 0.4F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
+        return Simulator.instance.getFluidTracker().loadFactor() > 0.7F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
     }
     
     /** 
@@ -828,7 +838,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             else
             {
 //                Adversity.log.info("Topping off lava @" + clearPos.toString());
-                Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity(), false);
+                // want to add lava with some pressure
+                Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity() + 5 * (255 - clearPos.getY()), false);
                 cell.setNeverCools(true);
                 return false;
             }

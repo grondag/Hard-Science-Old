@@ -1013,7 +1013,7 @@ public class LavaSimulator extends SimulationNode
      */
     public float loadFactor()
     {
-        return Math.max((float)this.connections.size() / 15000F, (float)this.lavaCells.size() / 10000F);
+        return Math.max((float)this.connections.size() / 30000F, (float)this.lavaCells.size() / 10000F);
     }
 
 
