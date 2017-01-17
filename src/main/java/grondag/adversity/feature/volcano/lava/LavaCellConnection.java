@@ -282,7 +282,7 @@ public class LavaCellConnection
         // If going to a drop cell/particle donate full amount 
         // unless would result in very small particle. (Do nothing in that case.)
         // If not drop split the difference to average out the pressure
-        return dropFlag? difference >= LavaCell.FLUID_UNITS_PER_LEVEL ? difference : 0 : difference / 2;
+        return dropFlag? Math.abs(difference) >= LavaCell.FLUID_UNITS_PER_LEVEL ? difference : 0 : difference / 2;
         
 
     }
@@ -368,7 +368,7 @@ public class LavaCellConnection
         
         if(this.lastFlowTick != sim.getTickIndex())
         {
-//            if(this.firstCell.hashCode() == 1521 || this.secondCell.hashCode() == 1521)
+//            if(this.firstCell.hashCode() == 10006 || this.secondCell.hashCode() == 10006)
 //                Adversity.log.info("boop");
             
             this.flowThisTick = 0;

@@ -29,7 +29,6 @@ import net.minecraft.world.World;
 /**
  * TODO
  * 
- * Lava not flowing through hole if covered from above? (Try breaking volcano wall)
  * 
  * Allow some connections to be static and queue connections as blocks are changed and flows propagate
  *      Always propagate connections that had a flow previous step or with cells that changed in any way
