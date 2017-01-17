@@ -27,15 +27,28 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 /**
- * FIX/TEST
- * Performance / parallelism
- *      Handle changes to sort keys on connections due to world updates
+ * TODO
+ * 
+ * Lava not flowing through hole if covered from above? (Try breaking volcano wall)
+ * 
+ * Allow some connections to be static and queue connections as blocks are changed and flows propagate
+ *      Always propagate connections that had a flow previous step or with cells that changed in any way
+ *      Could also do by tracking a dirty bit
+ * 
+ * Tile Entity keeps getting disconnected - may be a CME causing NBT reload on client affected integrated server also     
+ * 
+ * Make chunk buffers pooled to reduce GC
+ * 
+ * Cache isDrop and isSupported directly
+ * 
+ * Replace connection skiplist with hashmap, make iteration unordered
+ * 
+ * Make connection iteration parallel - will require locking mechanism so that cells are read/updated atomically     
  * 
  * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
  *   may reduce number of block updates
  * 
- * FEATURES
- * Improve Drop/slope Calculation for flowing terrain
+ * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
  * Particle damage to entities
  *
  * Handle multiple worlds
@@ -143,6 +156,23 @@ public class LavaSimulator extends SimulationNode
             connectionProcessCount = 0;
             connectionProcessTime = 0;
 
+            Adversity.log.info("getFlowRate time this sample = " + LavaCellConnection.getFlowRateTime / 1000000 
+                    + " for " + LavaCellConnection.getFlowRateCount 
+                    + " runs @" + ((LavaCellConnection.getFlowRateCount > 0) ? LavaCellConnection.getFlowRateTime / LavaCellConnection.getFlowRateCount : "") + " each");
+            LavaCellConnection.getFlowRateTime = 0;
+            LavaCellConnection.getFlowRateCount = 0;
+            
+            Adversity.log.info("getHorizontalFlowRate time this sample = " + LavaCellConnection.getHorizontalFlowRateTime / 1000000 
+                    + " for " + LavaCellConnection.getHorizontalFlowRateCount 
+                    + " runs @" + ((LavaCellConnection.getHorizontalFlowRateCount > 0) ? LavaCellConnection.getHorizontalFlowRateTime / LavaCellConnection.getHorizontalFlowRateCount : "") + " each");
+            LavaCellConnection.getHorizontalFlowRateTime = 0;
+            LavaCellConnection.getHorizontalFlowRateCount = 0;
+            
+            Adversity.log.info("getVerticalFlowRate time this sample = " + LavaCellConnection.getVerticalFlowRateTime / 1000000 
+                    + " for " + LavaCellConnection.getVerticalFlowRateCount 
+                    + " runs @" + ((LavaCellConnection.getVerticalFlowRateCount > 0) ? LavaCellConnection.getVerticalFlowRateTime / LavaCellConnection.getVerticalFlowRateCount : "") + " each");
+            LavaCellConnection.getVerticalFlowRateTime = 0;
+            LavaCellConnection.getVerticalFlowRateCount = 0;
             
             Adversity.log.info("lavaCells=" + this.lavaCells.size() + " totalCells=" + this.allCells.size() 
                     + " connections=" + this.connections.size() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());

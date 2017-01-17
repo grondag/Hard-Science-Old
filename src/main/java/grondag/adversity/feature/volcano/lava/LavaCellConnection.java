@@ -287,8 +287,20 @@ public class LavaCellConnection
 
     }
     
+    public static long getFlowRateTime;
+    public static int getFlowRateCount;
+    
+    public static long getHorizontalFlowRateTime;
+    public static int getHorizontalFlowRateCount;
+    
+    public static long getVerticalFlowRateTime;
+    public static int getVerticalFlowRateCount;
+    
     private int getFlowRate(LavaSimulator sim)
     {
+//        getFlowRateCount++;
+//        long startTime = System.nanoTime();
+        
         // barriers don't need processing - TODO: may not be needed because checked in connection processing loop
         if(this.firstCell.isBarrier() || this.secondCell.isBarrier())
         {
@@ -302,7 +314,12 @@ public class LavaCellConnection
             // Won't be detected as a barrier so have to check floor.
             if(secondCell.getFloor() == 0)
             {
+                
+//                getVerticalFlowRateCount++;
+//                long subStart = System.nanoTime();
                 flow = this.getVerticalFlow(sim);    
+//                getVerticalFlowRateTime += (System.nanoTime() - subStart);
+                
                 //Damp tiny oscillations, but always allow downward flow
                 if(flow > 0 && flow < MINIMUM_INTERNAL_FLOW_UNITS) flow = 0;
             }
@@ -312,7 +329,10 @@ public class LavaCellConnection
         }
         else
         {
+//            getHorizontalFlowRateCount++;
+//            long subStart = System.nanoTime();
             flow = this.getHorizontalFlow(sim);
+//            getHorizontalFlowRateTime += (System.nanoTime() - subStart);
             
             //Damp tiny oscillations
             //Threshold is higher for flowing into empty blocks.
@@ -335,6 +355,9 @@ public class LavaCellConnection
             }
             
         }
+        
+//        getFlowRateTime += (System.nanoTime() - startTime);
+        
         return flow;
 
     }

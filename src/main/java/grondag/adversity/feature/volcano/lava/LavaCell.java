@@ -448,7 +448,7 @@ public class LavaCell
     private static int retainCallCount = 0;
     private static int releaseCallCount = 0;
     private static long lastUpdateNanoTime = System.nanoTime();
-    private StringBuilder builder = new StringBuilder();
+//    private StringBuilder builder = new StringBuilder();
 
     /** 
      * Don't create cells with less than this amount of fluid.
@@ -459,7 +459,7 @@ public class LavaCell
     public void retain(String desc)
     {
 
-        builder.append("retain " + desc + System.lineSeparator());
+//        builder.append("retain " + desc + System.lineSeparator());
 
         //TODO: remove
         if(System.nanoTime() - lastUpdateNanoTime >= 10000000000L)
@@ -478,7 +478,7 @@ public class LavaCell
 
     public void release(String desc)
     {
-        builder.append("release " + desc + System.lineSeparator());
+//        builder.append("release " + desc + System.lineSeparator());
 
         releaseCallCount++;
 
@@ -488,7 +488,7 @@ public class LavaCell
         if (this.referenceCount < 0) 
         {
             Adversity.log.info("negative reference count " + this.referenceCount + " for cell id=" + this.id);
-            Adversity.log.info(builder.toString());
+//            Adversity.log.info(builder.toString());
         }
     }
 
