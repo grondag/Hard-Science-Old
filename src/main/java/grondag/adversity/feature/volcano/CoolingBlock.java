@@ -50,7 +50,7 @@ public class CoolingBlock extends FlowDynamicBlock
     /**
      * Cools this block if ready and returns true if successful.
      */
-    public CoolingResult tryCooling(WorldStateBuffer worldIn, BlockPos pos, IBlockState state)
+    public CoolingResult tryCooling(WorldStateBuffer worldIn, BlockPos pos, final IBlockState state)
     {
         if(state.getBlock() == this)
         {
@@ -62,17 +62,17 @@ public class CoolingBlock extends FlowDynamicBlock
                 {
                     if( IFlowBlock.shouldBeFullCube(state, worldIn, pos))
                     {
-                        worldIn.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                        worldIn.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     }
                     else
                     {
-                        worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                        worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     }
                     return CoolingResult.COMPLETE;
                 }
                 else
                 {
-                    worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                    worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     return CoolingResult.PARTIAL;
                 }
             }

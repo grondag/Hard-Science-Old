@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
+import grondag.adversity.feature.volcano.lava.WorldStateBuffer.BlockStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
@@ -103,19 +104,18 @@ public interface IFlowBlock
     }
     
     /**
-     * Returns a list of block updates to adds or removes filler blocks as needed.
+     * Returns a block updates to add or removes a filler block if needed.
      * Also replaces static filler blocks with dynamic version.
-     * Adds updated block positions to the provided collection if non-null.
      */
-    public static List<Pair<BlockPos, IBlockState>> adjustFillIfNeeded(IBlockAccess worldObj, BlockPos basePos)
+    public static BlockStateBuffer adjustFillIfNeeded(IBlockAccess worldObj, BlockPos basePos)
     {
         final int SHOULD_BE_AIR = -1;
         
-        IBlockState baseState = worldObj.getBlockState(basePos);
-        Block baseBlock = baseState.getBlock();
+        final IBlockState baseState = worldObj.getBlockState(basePos);
+        final Block baseBlock = baseState.getBlock();
         NiceBlock fillBlock = null;
 
-        LinkedList<Pair<BlockPos, IBlockState>> updates = new LinkedList<Pair<BlockPos, IBlockState>>(); 
+        BlockStateBuffer update = null; 
                 
         int targetMeta = SHOULD_BE_AIR;
 
@@ -128,7 +128,7 @@ public interface IFlowBlock
          * two below needs a fill = 2;
          * Otherwise should be air.
          */
-        IBlockState stateBelow = worldObj.getBlockState(basePos.down());
+        final IBlockState stateBelow = worldObj.getBlockState(basePos.down());
         if(IFlowBlock.isFlowHeight(stateBelow.getBlock()) 
                 && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
         {
@@ -137,7 +137,7 @@ public interface IFlowBlock
         }
         else 
         {
-            IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
+            final IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
             if((IFlowBlock.isFlowHeight(stateTwoBelow.getBlock()) 
                     && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
             {
@@ -151,22 +151,22 @@ public interface IFlowBlock
 
             if(targetMeta == SHOULD_BE_AIR)
             {
-                updates.add(Pair.of(basePos, Blocks.AIR.getDefaultState()));
+                update = new BlockStateBuffer(basePos, Blocks.AIR.getDefaultState(), baseState);
             }
             else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
             {
-                updates.add(Pair.of(basePos, fillBlock.getDefaultState()
-                        .withProperty(NiceBlock.META, targetMeta)));
+                update = new BlockStateBuffer(basePos, fillBlock.getDefaultState()
+                        .withProperty(NiceBlock.META, targetMeta), baseState);
             }
             //confirm filler needed and adjust/remove if needed
         }
         else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
         {
-            updates.add(Pair.of(basePos, fillBlock.getDefaultState()
-                    .withProperty(NiceBlock.META, targetMeta)));
+            update = new BlockStateBuffer(basePos, fillBlock.getDefaultState()
+                    .withProperty(NiceBlock.META, targetMeta), baseState);
         }
         
-        return updates;
+        return update;
     }
     
     /** 

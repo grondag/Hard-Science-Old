@@ -170,16 +170,19 @@ public class LavaCell
         int currentVisible = this.getCurrentVisibleLevel();
         if(this.lastVisibleLevel != currentVisible)
         {
+            final IBlockState priorState = sim.worldBuffer.getBlockState(pos);
             if(currentVisible == 0)
             {
-                if(sim.worldBuffer.getBlockState(pos).getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                if(priorState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
                 {
-                    sim.worldBuffer.setBlockState(pos, Blocks.AIR.getDefaultState());
+                    sim.worldBuffer.setBlockState(pos, Blocks.AIR.getDefaultState(), priorState);
                 }
             }
             else
             {
-                sim.worldBuffer.setBlockState(pos, IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible));
+                sim.worldBuffer.setBlockState(pos, 
+                        IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible),
+                        priorState);
             }
 
             adjustmentList.add(pos);

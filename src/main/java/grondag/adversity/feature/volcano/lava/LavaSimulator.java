@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
+import grondag.adversity.feature.volcano.lava.WorldStateBuffer.BlockStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -438,8 +439,8 @@ public class LavaSimulator extends SimulationNode
     
     private void coolLava(BlockPos pos)
     {
-        IBlockState state = this.worldBuffer.getBlockState(pos);
-        Block currentBlock = state.getBlock();
+        final IBlockState priorState = this.worldBuffer.getBlockState(pos);
+        Block currentBlock = priorState.getBlock();
         NiceBlock newBlock = null;
         if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
         {
@@ -455,7 +456,7 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("Cooling lava @" + pos.toString());
             //should not need these any more due to world buffer
 //            this.itMe = true;
-            this.worldBuffer.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+            this.worldBuffer.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
 //            this.itMe = false;
             this.basaltBlocks.add(new AgedBlockPos(pos, this.tickIndex));
         }
@@ -803,27 +804,27 @@ public class LavaSimulator extends SimulationNode
                 BlockPos p = target.add(0, y, 0);
                 if(!adjustHeightBlockIfNeeded(p));
                 {
-                    List<Pair<BlockPos, IBlockState>> updates = IFlowBlock.adjustFillIfNeeded(this.worldBuffer, p);
+                    BlockStateBuffer update = IFlowBlock.adjustFillIfNeeded(this.worldBuffer, p);
                     
                     // Update set of lava filler blocks that need cooling if we are adding or removing lava filler
                     // and update cooling lava if it is any other type of filler.
-                    for(Pair<BlockPos, IBlockState> pair : updates)
+                    if(update != null)
                     {
-                        if(pair.getRight().getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+                        if(update.getNewState().getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
                         {
-                            this.lavaFillers.add(pair.getLeft());
+                            this.lavaFillers.add(update.getBlockPos());
                         }
                         else
                         {
-                            this.lavaFillers.remove(pair.getLeft());
+                            this.lavaFillers.remove(update.getBlockPos());
                             
-                            if(pair.getRight().getBlock() instanceof CoolingBlock)
+                            if(update.getNewState().getBlock() instanceof CoolingBlock)
                             {
-                                this.basaltBlocks.add(new AgedBlockPos(pair.getLeft(), this.getTickIndex()));
+                                this.basaltBlocks.add(new AgedBlockPos(update.getBlockPos(), this.getTickIndex()));
                             }
                         }
+                        this.worldBuffer.addUpdate(update);
                     }
-                    this.worldBuffer.addUpdates(updates);
                 }
             }
         }
@@ -839,14 +840,14 @@ public class LavaSimulator extends SimulationNode
 
         if(targetPos == null) return false;
 
-        IBlockState state = this.worldBuffer.getBlockState(targetPos);
-        if(!(state.getBlock() instanceof NiceBlock)) return false;
+        final IBlockState priorState = this.worldBuffer.getBlockState(targetPos);
+        if(!(priorState.getBlock() instanceof NiceBlock)) return false;
 
-        NiceBlock block = (NiceBlock)state.getBlock();
+        NiceBlock block = (NiceBlock)priorState.getBlock();
 
         if(!IFlowBlock.isFlowHeight(block)) return false;
 
-        boolean isFullCube = IFlowBlock.shouldBeFullCube(state, this.worldBuffer, targetPos);
+        boolean isFullCube = IFlowBlock.shouldBeFullCube(priorState, this.worldBuffer, targetPos);
 
 
         if(isFullCube)
@@ -854,14 +855,14 @@ public class LavaSimulator extends SimulationNode
             if(block == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
             {
                 this.worldBuffer.setBlockState(targetPos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                        .withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
             }
         }
         else if (block == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK 
                 || block == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK )
         {
             this.worldBuffer.setBlockState(targetPos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState()
-                    .withProperty(NiceBlock.META, state.getValue(NiceBlock.META)));
+                    .withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
         }
 
         return true;
