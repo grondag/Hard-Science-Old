@@ -1,6 +1,8 @@
 package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
+import java.util.HashSet;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -17,6 +19,12 @@ public class LavaCell
     public static final int FLUID_UNITS_PER_BLOCK = FLUID_UNITS_PER_LEVEL * FlowHeightState.BLOCK_LEVELS_INT;
     public static final int FLUID_UNTIS_PER_HALF_BLOCK = FLUID_UNITS_PER_BLOCK / 2;
 
+    private LavaCellConnection neighborUp = NowhereConnection.INSTANCE;
+    private LavaCellConnection neighborDown = NowhereConnection.INSTANCE;
+    private LavaCellConnection neighborEast = NowhereConnection.INSTANCE;
+    private LavaCellConnection neighborWest = NowhereConnection.INSTANCE;
+    private LavaCellConnection neighborNorth = NowhereConnection.INSTANCE;
+    private LavaCellConnection neighborSouth = NowhereConnection.INSTANCE;
 
     private int fluidAmount = 0; // 1.0 is one full block of fluid at surface pressure
 
@@ -84,30 +92,16 @@ public class LavaCell
         this.id = nextCellID++;
         this.lastFlowTick = (fluidAmount == 0 | sim == null) ? 0 : sim.getTickIndex();
     }
-
-    private LavaCell bottomCell = null;
     
-    protected LavaCell getBottom(LavaSimulator sim)
-    {  
-        if(bottomCell == null)
-        {
-            bottomCell = sim.getCell(this.pos.down(), false);
-        }
-        return bottomCell;
-    }
-
-    protected void clearBottomCache()
-    {
-        this.bottomCell = null;
-    }
-
     public void changeLevel(LavaSimulator sim, int amount)
     {
-        if(this.hashCode() == 1271)
-            Adversity.log.info("boop");
+//        if(this.hashCode() == 1271)
+//            Adversity.log.info("boop");
         
         if(amount != 0)
         {
+
+            this.makeAllConnectionsDirty();
 
             this.lastFlowTick = sim.getTickIndex();
 
@@ -428,8 +422,7 @@ public class LavaCell
      */
     public boolean isSupported(LavaSimulator sim)
     {
-        LavaCell bottom = this.getBottom(sim);
-        return bottom.isBarrier || (bottom.fluidAmount + bottom.floorLevel) >= LavaCell.FLUID_UNITS_PER_BLOCK;
+        return this.neighborDown.isBottomSupporting();
     }
 
     /**
@@ -440,8 +433,7 @@ public class LavaCell
         //My floor doesn't count if it has melted and become fluid.
         if(this.fluidAmount == 0 && this.floorLevel > 0) return false;
 
-        LavaCell bottom = this.getBottom(sim);
-        return !bottom.isBarrier && bottom.fluidAmount == 0 && bottom.floorLevel == 0;
+        return this.neighborDown.isBottomDrop();
     }
 
     //TODO: remove
@@ -476,6 +468,30 @@ public class LavaCell
         this.referenceCount++;
     }
 
+    public void bindUp(LavaCellConnection connection) { this.neighborUp = connection; }
+    public void bindDown(LavaCellConnection connection) { this.neighborDown = connection; }
+    public void bindEast(LavaCellConnection connection) { this.neighborEast = connection; }
+    public void bindWest(LavaCellConnection connection) { this.neighborWest = connection; }
+    public void bindNorth(LavaCellConnection connection) { this.neighborNorth = connection; }
+    public void bindSouth(LavaCellConnection connection) { this.neighborSouth = connection; }
+    
+    public void unbindUp() { this.neighborUp = NowhereConnection.INSTANCE; }
+    public void unbindDown() { this.neighborDown = NowhereConnection.INSTANCE; }
+    public void unbindEast() { this.neighborEast = NowhereConnection.INSTANCE; }
+    public void unbindWest() { this.neighborWest = NowhereConnection.INSTANCE; }
+    public void unbindNorth() { this.neighborNorth = NowhereConnection.INSTANCE; }
+    public void unbindSouth() { this.neighborSouth = NowhereConnection.INSTANCE; }
+
+    private void makeAllConnectionsDirty()
+    {
+        neighborUp.setDirty();
+        neighborDown.setDirty();
+        neighborEast.setDirty();
+        neighborWest.setDirty();
+        neighborNorth.setDirty();
+        neighborSouth.setDirty();
+    }
+    
     public void release(String desc)
     {
 //        builder.append("release " + desc + System.lineSeparator());

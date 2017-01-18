@@ -30,22 +30,16 @@ import net.minecraft.world.World;
  * TODO
  * 
  * 
- * Allow some connections to be static and queue connections as blocks are changed and flows propagate
- *      Always propagate connections that had a flow previous step or with cells that changed in any way
- *      Could also do by tracking a dirty bit
- * 
  * Tile Entity keeps getting disconnected - may be a CME causing NBT reload on client affected integrated server also     
  * 
  * Make chunk buffers pooled to reduce GC
- * 
- * Cache isDrop and isSupported directly
  * 
  * Replace connection skiplist with hashmap, make iteration unordered
  * 
  * Make connection iteration parallel - will require locking mechanism so that cells are read/updated atomically     
  * 
  * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
- *   may reduce number of block updates
+ *   may reduce number of block updates - use metadata to distinguish the model dispatch
  * 
  * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
  * Particle damage to entities
@@ -194,14 +188,18 @@ public class LavaSimulator extends SimulationNode
 
         startTime = System.nanoTime();
 
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
-        this.doStep();
+        //TODO: consider having more steps?
+        
+     // force processing on non-dirty connection at least once per tick
+        this.doStep(true);
+        
+        this.doStep(false);
+        this.doStep(false);
+        this.doStep(false);
+        this.doStep(false);
+        this.doStep(false);
+        this.doStep(false);
+        this.doStep(false);
 
         this.stepTime += (System.nanoTime() - startTime);
 
@@ -471,11 +469,11 @@ public class LavaSimulator extends SimulationNode
     private long connectionProcessTime;
     private int connectionProcessCount;
     
-    public void doStep()
+    public void doStep(boolean force)
     {
         long startTime = System.nanoTime();
         connectionProcessCount += this.connections.size();
-        this.connections.getSortedValues().stream().forEach((LavaCellConnection c) -> c.doStep(this));
+        this.connections.getSortedValues().stream().forEach((LavaCellConnection c) -> c.doStep(this, force));
         this.connectionProcessTime += (System.nanoTime() - startTime);
     }
 
@@ -498,12 +496,6 @@ public class LavaSimulator extends SimulationNode
         this.allCells.values().parallelStream().forEach((LavaCell c) -> {
             if(!c.isRetained() && c.getFluidAmount() == 0) 
             {
-                // let upper neighbor know to remove reference to me
-                LavaCell upperCell = this.getCellIfItExists(c.pos.up());
-                if(upperCell != null)
-                {
-                    upperCell.clearBottomCache();
-                }
                 this.allCells.remove(c.pos);
             }
         });

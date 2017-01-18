@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.IFlowBlock;
+import net.minecraft.util.EnumFacing;
 
 public class LavaCellConnection
 {
@@ -15,6 +16,10 @@ public class LavaCellConnection
     public final LavaCell secondCell;
     
     public final int id;
+    
+    public final CellConnectionPos pos;
+    
+    private final AbstractCellBinder binder;
     
     public final int rand = Useful.SALT_SHAKER.nextInt();
     
@@ -47,10 +52,14 @@ public class LavaCellConnection
     
     public final boolean isVertical;
     
-    public LavaCellConnection(LavaCell firstCell, LavaCell secondCell)
+    private boolean isDirty = false;
+    
+    public LavaCellConnection(LavaCell firstCell, LavaCell secondCell, CellConnectionPos pos)
     {
 
+        this.pos = pos;
         
+ 
         // TODO: remove
 //        if((firstCell.pos.getX() == 70 && firstCell.pos.getY() == 79 && firstCell.pos.getZ() == 110) ||(secondCell.pos.getX() == 70 && secondCell.pos.getY() == 79 && secondCell.pos.getZ() == 110))
 //            Adversity.log.info("boop");
@@ -58,8 +67,7 @@ public class LavaCellConnection
         this.id = nextConnectionID++;
         
 //        Adversity.log.info("connection create");
-//        firstCell.retain("connection");
-//        secondCell.retain("connection");
+
         
         this.isVertical = firstCell.pos.getY() != secondCell.pos.getY();
         
@@ -102,7 +110,36 @@ public class LavaCellConnection
                 this.firstCell = secondCell;
             }
         }
+        
+        switch(pos.axis)
+        {
+            case X:
+                this.binder = CellBinderX.INSTANCE;
+                break;
+                
+            case Y:
+                this.binder = CellBinderY.INSTANCE;
+                break;
+                
+            case Z:
+            default:
+                this.binder = CellBinderZ.INSTANCE;
+                break;
+        }
+        binder.bind(this);
+        
         this.updateSortDrop();
+    }
+    
+    /** for use by empty version */
+    protected LavaCellConnection()
+    {
+        this.binder = null;
+        this.pos = null;
+        this.firstCell = null;
+        this.secondCell = null;
+        this.isVertical = false;
+        this.id = nextConnectionID++;
     }
     
     public LavaCell getOther(LavaCell cellIAlreadyHave)
@@ -362,41 +399,54 @@ public class LavaCellConnection
 
     }
     
-    public void doStep(LavaSimulator sim)
+    /**
+     * 
+     * @param sim - simulator containing this connection
+     * @param force - run even if not dirty - do this at least once per tick
+     */
+    public void doStep(LavaSimulator sim, boolean force)
     {
-
-        
-        if(this.lastFlowTick != sim.getTickIndex())
+        if(force || this.isDirty)
         {
-//            if(this.firstCell.hashCode() == 10006 || this.secondCell.hashCode() == 10006)
-//                Adversity.log.info("boop");
+            this.isDirty = false;
             
-            this.flowThisTick = 0;
-            this.lastFlowTick = sim.getTickIndex();
-        }
+            if(this.lastFlowTick != sim.getTickIndex())
+            {
+    //            if(this.firstCell.hashCode() == 10006 || this.secondCell.hashCode() == 10006)
+    //                Adversity.log.info("boop");
+                
+                this.flowThisTick = 0;
+                this.lastFlowTick = sim.getTickIndex();
+            }
+                
+            int flow = this.getFlowRate(sim);
             
-        int flow = this.getFlowRate(sim);
-        
-        if(flow == 0) return;
-       
-         //TODO: make bound configurable
-        // Positive numbers means 1st cell has higher pressure.
-        if(flow > 0)
-        {
-            flow = Math.max(0, Math.min(flow, 
-                    (this.isVertical ? MAX_UPWARD_FLOW_PER_TICK : MAX_HORIZONTAL_FLOW_PER_TICK) - this.flowThisTick));
+            if(flow == 0) return;
+           
+             //TODO: make bound configurable
+            // Positive numbers means 1st cell has higher pressure.
+            if(flow > 0)
+            {
+                flow = Math.max(0, Math.min(flow, 
+                        (this.isVertical ? MAX_UPWARD_FLOW_PER_TICK : MAX_HORIZONTAL_FLOW_PER_TICK) - this.flowThisTick));
+            }
+            else
+            {
+                // flow is negative in this case, so need to flip handling of bound
+                flow = Math.min(0, Math.max(flow, 
+                        (this.isVertical ? -MAX_DOWNWARD_FLOW_PER_TICK : -MAX_HORIZONTAL_FLOW_PER_TICK) - this.flowThisTick));
+    
+            }
+            
+            if(flow == 0) return;
+            
+            this.flowAcross(sim, flow);
         }
-        else
-        {
-            // flow is negative in this case, so need to flip handling of bound
-            flow = Math.min(0, Math.max(flow, 
-                    (this.isVertical ? -MAX_DOWNWARD_FLOW_PER_TICK : -MAX_HORIZONTAL_FLOW_PER_TICK) - this.flowThisTick));
-
-        }
-        
-        if(flow == 0) return;
-        
-        this.flowAcross(sim, flow);
+    }
+    
+    public void setDirty()
+    {
+        this.isDirty = true;
     }
     
     public void flowAcross(LavaSimulator sim, int flow)
@@ -409,15 +459,13 @@ public class LavaCellConnection
         this.secondCell.changeLevel(sim, flow);
     }
     
-//    /**
-//     * Call when removing this connection so that cell references can be removed if appropriate.
-//     */
-//    public void releaseCells()
-//    {
-////        Adversity.log.info("connection release");
-//        this.firstCell.release("connection");
-//        this.secondCell.release("connection");
-//    }
+    /**
+     * Call when removing this connection so that cell references can be removed if appropriate.
+     */
+    public void releaseCells()
+    {
+        this.binder.unbind(this);
+    }
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
@@ -454,4 +502,126 @@ public class LavaCellConnection
         this.sortDrop = this.getDrop();
     }
     
+    /**
+     * For vertical connection, true if bottom cell is any empty, non-barrier cell.
+     */
+    public boolean isBottomDrop()
+    {
+        return this.binder.isBottomDrop(this);
+    }
+    
+    /**
+     * For vertical connections, true if bottom cell is full or a barrier.
+     */
+    public boolean isBottomSupporting()
+    {
+        return this.binder.isBottomSupporting(this);
+    }
+    
+    private static abstract class AbstractCellBinder
+    {
+        public abstract void bind(LavaCellConnection con);
+        public abstract void unbind(LavaCellConnection con);
+        public abstract boolean isBottomDrop(LavaCellConnection con);
+        public abstract boolean isBottomSupporting(LavaCellConnection con);
+    }
+    
+    private static class CellBinderX extends AbstractCellBinder
+    {
+
+        private static final CellBinderX INSTANCE = new CellBinderX();
+        
+        @Override
+        public void bind(LavaCellConnection con)
+        {
+            con.firstCell.bindEast(con);
+            con.secondCell.bindWest(con);
+        }
+
+        @Override
+        public void unbind(LavaCellConnection con)
+        {
+            con.firstCell.unbindEast();
+            con.secondCell.unbindWest();            
+        }
+
+        @Override
+        public boolean isBottomDrop(LavaCellConnection con)
+        {
+            //not applicable to non-vertical
+            return false;
+        }
+
+        @Override
+        public boolean isBottomSupporting(LavaCellConnection con)
+        {
+            //not applicable to non-vertical
+            return false;
+        }
+    }
+    
+    private static class CellBinderY extends AbstractCellBinder
+    {
+        private static final CellBinderY INSTANCE = new CellBinderY();
+
+        @Override
+        public void bind(LavaCellConnection con)
+        {
+            con.firstCell.bindUp(con);
+            con.secondCell.bindDown(con);
+        }
+
+        @Override
+        public void unbind(LavaCellConnection con)
+        {
+            con.firstCell.unbindUp();
+            con.secondCell.unbindDown();            
+        }
+
+        @Override
+        public boolean isBottomDrop(LavaCellConnection con)
+        {
+            return con.firstCell.getFluidAmount() == 0 && con.firstCell.getFloor() == 0;
+        }
+
+        @Override
+        public boolean isBottomSupporting(LavaCellConnection con)
+        {
+            // can assume not a barrier because connection would not exist if so
+            return con.firstCell.getFluidAmount() >= LavaCell.FLUID_UNITS_PER_BLOCK;
+        }
+    }
+    
+    private static class CellBinderZ extends AbstractCellBinder
+    {
+        private static final CellBinderZ INSTANCE = new CellBinderZ();
+        
+        @Override
+        public void bind(LavaCellConnection con)
+        {
+            con.firstCell.bindSouth(con);
+            con.secondCell.bindNorth(con);
+        }
+
+        @Override
+        public void unbind(LavaCellConnection con)
+        {
+            con.firstCell.unbindSouth();
+            con.secondCell.unbindNorth();            
+        }
+
+        @Override
+        public boolean isBottomDrop(LavaCellConnection con)
+        {
+            //not applicable to non-vertical
+            return false;
+        }
+
+        @Override
+        public boolean isBottomSupporting(LavaCellConnection con)
+        {
+            //not applicable to non-vertical
+            return false;
+        }
+    }
 }

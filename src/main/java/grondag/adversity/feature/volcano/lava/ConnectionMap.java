@@ -67,7 +67,7 @@ public class ConnectionMap
             {
                 LavaCell cell1 = sim.getCell(pos.lowerPos, false);
                 LavaCell cell2 = sim.getCell(pos.upperPos, false);
-                LavaCellConnection connection = new LavaCellConnection(cell1, cell2);
+                LavaCellConnection connection = new LavaCellConnection(cell1, cell2, pos);
                 map.put(pos, connection);
                 size++;
             }
@@ -81,7 +81,7 @@ public class ConnectionMap
             LavaCellConnection connection = this.map.get(pos);
             if(connection != null)
             {
-//                connection.releaseCells();
+                connection.releaseCells();
                 map.remove(pos);
                 size--;
             }

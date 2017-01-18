@@ -153,23 +153,28 @@ public class TileVolcano extends TileEntity implements ITickable{
 
             if(this.stage == VolcanoStage.NEW)
             {
-                //TODO: Workaround for WTF IDK
-                this.nodeId = 5;
-                this.stage = VolcanoStage.DORMANT;
+                // Try to find a simulation node already at this location
+                
+                this.node = Simulator.instance.getVolcanoManager().findNode(this.pos);
+                
+                if(node == null)
+                {
+                    Adversity.log.info("Setting up new Volcano Node @" + this.pos.toString());
+                    this.node = Simulator.instance.getVolcanoManager().createNode();
+                    this.nodeId = node.getID();
+                    this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+                    this.stage = VolcanoStage.DORMANT;
+                }
+                else
+                {
+                    Adversity.log.info("Recovered Volcano Node @" + this.pos.toString());
+                    this.nodeId = node.getID();
+                    this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
+                }
+
                 this.level = this.pos.getY();
                 int moundRadius = Config.volcano().moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
-                return;
-                
-//                Adversity.log.info("setting up new Volcano @" + this.pos.toString());
-
-//                this.node = Simulator.instance.getVolcanoManager().createNode();
-//                this.nodeId = node.getID();
-//                this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
-//                this.stage = VolcanoStage.DORMANT;
-//                this.level = this.pos.getY();
-//                int moundRadius = Config.volcano().moundRadius;
-//                this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
             else
             {
@@ -287,7 +292,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         // TODO: make the limit actually configurable
         
         int clearCount = 0;
-        while(clearCount++ < 10 && offsetIndex < BORE_OFFSETS.size())
+        while(clearCount++ < 20 && offsetIndex < BORE_OFFSETS.size())
         {
             Vec3i offset = BORE_OFFSETS.get(offsetIndex++);
             BlockPos clearPos = new BlockPos(this.pos.getX() + offset.getX(), this.clearingLevel, this.pos.getZ() + offset.getZ());
@@ -1070,7 +1075,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     public void readFromNBT(NBTTagCompound tagCompound) 
     {
         super.readFromNBT(tagCompound);
-
+      
         Adversity.log.info("readNBT volcanoTile");
 
         this.stage = VolcanoStage.values()[tagCompound.getInteger("stage")];

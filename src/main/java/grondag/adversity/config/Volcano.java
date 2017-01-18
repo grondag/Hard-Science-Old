@@ -58,7 +58,7 @@ public class Volcano
         maxYLevel = config.getInt("maxYLevel", "Volcano", 147, 128, 255, 
                 "Y-axis build limit at which Volcano becomes permanently dormant.");
 
-        moundRadius = config.getInt("moundRadius", "Volcano", 14, 7, 21, 
+        moundRadius = config.getInt("moundRadius", "Volcano", 20, 14, 28, 
                 "Radius of one standard deviation, in blocks, for underground volcano mounding.");
         
         lavaSpreadRadius = config.getInt("lavaSpreadRadius", "Volcano", 12, 5, 24, 

@@ -160,6 +160,25 @@ public class VolcanoManager extends SimulationNodeRunnable
         return nodes[nodeID];
     }
     
+    public VolcanoNode findNode(BlockPos pos)
+    {
+        if(nodes == null)
+        {
+            Adversity.log.warn("Volcano simulation manager not properly initialized."
+                    + " Volcano simulation state will be invalid.");
+            return null;
+        }
+        for(int nodeID = 0; nodeID < this.maxIdInUse.get(); nodeID++)
+        {
+            VolcanoNode node = nodes[nodeID];
+            if(node != null && node.getX() == pos.getX() && node.getY() == pos.getY() && node.getZ() == pos.getZ())
+            {   
+                return node;
+            }
+        }
+        return null;
+    }
+    
     public VolcanoNode createNode()
     {
         // TODO: expand array or switch to a concurrent structure
