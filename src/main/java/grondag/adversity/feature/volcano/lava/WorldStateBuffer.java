@@ -33,6 +33,8 @@ public class WorldStateBuffer implements IBlockAccess
     private final Long2ObjectOpenHashMap<ChunkBuffer> chunks = new Long2ObjectOpenHashMap<ChunkBuffer>();
     private final LinkedList<ChunkBuffer> updateQueue = new LinkedList<ChunkBuffer>();
     
+    private final LinkedList<ChunkBuffer> usedBuffers = new LinkedList<ChunkBuffer>();
+    
     public WorldStateBuffer(World worldIn)
     {
         this.realWorld = worldIn;
@@ -63,7 +65,15 @@ public class WorldStateBuffer implements IBlockAccess
         
         if(chunk == null) 
         {
-            chunk = new ChunkBuffer(pos, Simulator.instance.getCurrentSimTick());
+            chunk = this.usedBuffers.pollFirst();
+            if(chunk == null)
+            {
+                chunk = new ChunkBuffer(pos, Simulator.instance.getCurrentSimTick());
+            }
+            else
+            {
+                chunk.renew(pos, Simulator.instance.getCurrentSimTick());
+            }
             chunks.put(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4), chunk);
             updateQueue.add(chunk);
         }
@@ -85,8 +95,9 @@ public class WorldStateBuffer implements IBlockAccess
         while(chunksDone++ < chunkCount && !this.updateQueue.isEmpty() && this.updateQueue.getFirst().tickCreated <= firstEligibleTick)
         {
             ChunkBuffer chunk = this.updateQueue.pollFirst();
-            chunks.remove(ChunkPos.asLong(chunk.chunkpos.chunkXPos, chunk.chunkpos.chunkZPos));
+            this.chunks.remove(ChunkPos.asLong(chunk.chunkpos.chunkXPos, chunk.chunkpos.chunkZPos));
             blockCount += chunk.applyBlockUpdates();
+            this.usedBuffers.add(chunk);
         }
         return blockCount;
     }
@@ -204,9 +215,9 @@ public class WorldStateBuffer implements IBlockAccess
     
     private class ChunkBuffer
     {
-        public final ChunkPos chunkpos;
+        private ChunkPos chunkpos;
         
-        public final int tickCreated;
+        private int tickCreated;
         
         private final Int2ObjectOpenHashMap<Pair<BlockPos, IBlockState>> states = new Int2ObjectOpenHashMap<Pair<BlockPos, IBlockState>>(32, 0.6F);
         
@@ -214,6 +225,13 @@ public class WorldStateBuffer implements IBlockAccess
         {
             this.chunkpos = new ChunkPos(posWithinChunk);
             this.tickCreated = tickCreated;
+        }
+        
+        private void renew(BlockPos posWithinChunk, int tickCreated)
+        {
+            this.chunkpos = new ChunkPos(posWithinChunk);
+            this.tickCreated = tickCreated;
+            this.states.clear();
         }
         
         private IBlockState getBlockState(BlockPos pos)

@@ -28,11 +28,7 @@ import net.minecraft.world.World;
 
 /**
  * TODO
- * 
- * 
- * Tile Entity keeps getting disconnected - may be a CME causing NBT reload on client affected integrated server also     
- * 
- * Make chunk buffers pooled to reduce GC
+
  * 
  * Replace connection skiplist with hashmap, make iteration unordered
  * 
