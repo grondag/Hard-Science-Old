@@ -32,6 +32,12 @@ public class LavaCell
 
     private boolean neverCools = false;
 
+    /** 
+     * False if it is possible currentVisibleLevel won't match lastVisible 
+     * Saves cost of calculating currentVisible if isn't necessary.
+     */
+    private boolean isBlockUpdateCurrent = true;
+    
     private byte referenceCount = 0;
     
     /** false until first validate - lets us know we don't have to remove connections or do other housekeeping that won't apply */
@@ -101,12 +107,9 @@ public class LavaCell
         if(amount != 0)
         {
 
-            this.makeAllConnectionsDirty();
-
             this.lastFlowTick = sim.getTickIndex();
 
             final boolean oldFluidState = this.fluidAmount > 0;
-            final boolean wasDirty = this.getCurrentVisibleLevel() != this.lastVisibleLevel;
 
             if(amount > 0)
             {
@@ -127,6 +130,10 @@ public class LavaCell
 
             this.fluidAmount += amount;
             
+            // Don't want to do these next two if spawned a particle and exited - because we're still an  empty cell - no change.
+            isBlockUpdateCurrent = false;
+            this.makeAllConnectionsDirty();
+            
             if(this.fluidAmount < 0)
             {
                 Adversity.log.info("Negative cell level detected: " + this.fluidAmount + " cellID=" + this.id + " pos=" + this.pos.toString());
@@ -143,19 +150,6 @@ public class LavaCell
             {
                 sim.updateFluidStatus(this, this.fluidAmount > 0);
             }
-
-            if(wasDirty)
-            {
-                if(this.getCurrentVisibleLevel() == this.lastVisibleLevel) 
-                {
-                    sim.dirtyCells.remove(this);
-                }
-
-            }
-            else if(this.getCurrentVisibleLevel() != this.lastVisibleLevel)
-            {
-                sim.dirtyCells.add(this);
-            }
         }
     }
 
@@ -163,13 +157,15 @@ public class LavaCell
      * Assumes block updates will be applied to world/worldBuffer before any more world interaction occurs.
      * Consistent with this expectations, it sets lastVisibleLevel = currentVisibleLevel.
      */
-    public void provideBlockUpdate(LavaSimulator sim, Collection<BlockPos> adjustmentList)
+    public void provideBlockUpdateIfNeeded(LavaSimulator sim)
     {
-        if(this.isBarrier) return;
+        if(isBlockUpdateCurrent || this.isBarrier) return;
 
         int currentVisible = this.getCurrentVisibleLevel();
         if(this.lastVisibleLevel != currentVisible)
         {
+            sim.blockUpdatesProvisionCounter++;
+            
             final IBlockState priorState = sim.worldBuffer.getBlockState(pos);
             if(currentVisible == 0)
             {
@@ -184,10 +180,8 @@ public class LavaCell
                         IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible),
                         priorState);
             }
-
-            adjustmentList.add(pos);
-
             this.lastVisibleLevel = currentVisible;
+            this.isBlockUpdateCurrent = true;
         }
     }
 
@@ -219,8 +213,8 @@ public class LavaCell
     public void clearBlockUpdate()
     {
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
+        this.isBlockUpdateCurrent = true;
     }
-
 
     public int getFluidAmount()
     {

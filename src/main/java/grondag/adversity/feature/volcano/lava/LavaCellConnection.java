@@ -324,14 +324,14 @@ public class LavaCellConnection
 
     }
     
-    public static long getFlowRateTime;
-    public static int getFlowRateCount;
-    
-    public static long getHorizontalFlowRateTime;
-    public static int getHorizontalFlowRateCount;
-    
-    public static long getVerticalFlowRateTime;
-    public static int getVerticalFlowRateCount;
+//    public static long getFlowRateTime;
+//    public static int getFlowRateCount;
+//    
+//    public static long getHorizontalFlowRateTime;
+//    public static int getHorizontalFlowRateCount;
+//    
+//    public static long getVerticalFlowRateTime;
+//    public static int getVerticalFlowRateCount;
     
     private int getFlowRate(LavaSimulator sim)
     {

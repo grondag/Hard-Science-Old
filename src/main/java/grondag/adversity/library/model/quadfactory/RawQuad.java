@@ -620,6 +620,9 @@ public class RawQuad
 
     public boolean intersectsWithRay(Vec3d origin, Vec3d direction)
     {
+        
+        //TODO: this method is very expensive and gets called frequently by collision box generator
+        
         Vec3d normal = this.getFaceNormal();
 
         double directionDotNormal = normal.dotProduct(direction);

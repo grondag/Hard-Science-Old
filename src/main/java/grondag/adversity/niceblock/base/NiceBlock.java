@@ -471,6 +471,7 @@ public class NiceBlock extends Block implements IWailaProvider
         }
         else
         {
+            //TODO: waaaaay too slow for some blocks to handle it this way
             long collisionKey = collisionHandler.getCollisionKey(state, worldIn, pos);
             return this.modelBounds.get(collisionKey).getCombinedBounds();
         }

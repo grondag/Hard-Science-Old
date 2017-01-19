@@ -87,10 +87,6 @@ public class LavaSimulator extends SimulationNode
      */
     private HashSet<BlockPos> adjustmentList = new HashSet<BlockPos>();
 
-    /** cells that may need a block update */
-    protected final HashSet<LavaCell> dirtyCells = new HashSet<LavaCell>();
-
-
     public LavaSimulator(World world)
     {
         super(NodeRoots.LAVA_SIMULATOR.ordinal());
@@ -129,40 +125,45 @@ public class LavaSimulator extends SimulationNode
             
             Adversity.log.info("Validation time this sample = " + validationTime / 1000000);
             validationTime = 0;
-
-            Adversity.log.info("Block update time this sample = " + blockUpdateTime / 1000000);
-            blockUpdateTime = 0;
-            Adversity.log.info("Block updates this sample = " + blockUpdatesCounter + " or " + blockUpdatesCounter / 0xFF + " per tick");
-            blockUpdatesCounter  = 0;
             
             Adversity.log.info("Cache cleanup time this sample = " + cacheCleanTime / 1000000);
             cacheCleanTime = 0;
 
+            Adversity.log.info("Block update provision time this sample = " + blockUpdateProvisionTime / 1000000 
+                    + " for " + blockUpdatesProvisionCounter + " updates @ " + ((blockUpdatesProvisionCounter > 0) ? (float)blockUpdateProvisionTime / blockUpdatesProvisionCounter : "n/a") + " each");
+            blockUpdateProvisionTime = 0;
+            blockUpdatesProvisionCounter  = 0;
+
+            Adversity.log.info("Block update application time this sample = " + blockUpdateApplicationTime / 1000000 
+                    + " for " + blockUpdatesApplicationCounter + " updates @ " + ((blockUpdatesApplicationCounter > 0) ? (float)blockUpdateApplicationTime / blockUpdatesApplicationCounter : "n/a") + " each");
+            blockUpdateApplicationTime = 0;
+            blockUpdatesApplicationCounter  = 0;
+            
             Adversity.log.info("Step time this sample = " + stepTime / 1000000);
             stepTime = 0;
 
             Adversity.log.info("Connection flow proccessing time this sample = " + connectionProcessTime / 1000000 
-                    + " for " + connectionProcessCount + "requests @" + ((connectionProcessCount > 0) ? connectionProcessTime / connectionProcessCount : "") + " each");
+                    + " for " + connectionProcessCount + " links @ " + ((connectionProcessCount > 0) ? (float)connectionProcessTime / connectionProcessCount : "n/a") + " each");
             connectionProcessCount = 0;
             connectionProcessTime = 0;
 
-            Adversity.log.info("getFlowRate time this sample = " + LavaCellConnection.getFlowRateTime / 1000000 
-                    + " for " + LavaCellConnection.getFlowRateCount 
-                    + " runs @" + ((LavaCellConnection.getFlowRateCount > 0) ? LavaCellConnection.getFlowRateTime / LavaCellConnection.getFlowRateCount : "") + " each");
-            LavaCellConnection.getFlowRateTime = 0;
-            LavaCellConnection.getFlowRateCount = 0;
-            
-            Adversity.log.info("getHorizontalFlowRate time this sample = " + LavaCellConnection.getHorizontalFlowRateTime / 1000000 
-                    + " for " + LavaCellConnection.getHorizontalFlowRateCount 
-                    + " runs @" + ((LavaCellConnection.getHorizontalFlowRateCount > 0) ? LavaCellConnection.getHorizontalFlowRateTime / LavaCellConnection.getHorizontalFlowRateCount : "") + " each");
-            LavaCellConnection.getHorizontalFlowRateTime = 0;
-            LavaCellConnection.getHorizontalFlowRateCount = 0;
-            
-            Adversity.log.info("getVerticalFlowRate time this sample = " + LavaCellConnection.getVerticalFlowRateTime / 1000000 
-                    + " for " + LavaCellConnection.getVerticalFlowRateCount 
-                    + " runs @" + ((LavaCellConnection.getVerticalFlowRateCount > 0) ? LavaCellConnection.getVerticalFlowRateTime / LavaCellConnection.getVerticalFlowRateCount : "") + " each");
-            LavaCellConnection.getVerticalFlowRateTime = 0;
-            LavaCellConnection.getVerticalFlowRateCount = 0;
+//            Adversity.log.info("getFlowRate time this sample = " + LavaCellConnection.getFlowRateTime / 1000000 
+//                    + " for " + LavaCellConnection.getFlowRateCount 
+//                    + " runs @" + ((LavaCellConnection.getFlowRateCount > 0) ? LavaCellConnection.getFlowRateTime / LavaCellConnection.getFlowRateCount : "") + " each");
+//            LavaCellConnection.getFlowRateTime = 0;
+//            LavaCellConnection.getFlowRateCount = 0;
+//            
+//            Adversity.log.info("getHorizontalFlowRate time this sample = " + LavaCellConnection.getHorizontalFlowRateTime / 1000000 
+//                    + " for " + LavaCellConnection.getHorizontalFlowRateCount 
+//                    + " runs @" + ((LavaCellConnection.getHorizontalFlowRateCount > 0) ? LavaCellConnection.getHorizontalFlowRateTime / LavaCellConnection.getHorizontalFlowRateCount : "") + " each");
+//            LavaCellConnection.getHorizontalFlowRateTime = 0;
+//            LavaCellConnection.getHorizontalFlowRateCount = 0;
+//            
+//            Adversity.log.info("getVerticalFlowRate time this sample = " + LavaCellConnection.getVerticalFlowRateTime / 1000000 
+//                    + " for " + LavaCellConnection.getVerticalFlowRateCount 
+//                    + " runs @" + ((LavaCellConnection.getVerticalFlowRateCount > 0) ? LavaCellConnection.getVerticalFlowRateTime / LavaCellConnection.getVerticalFlowRateCount : "") + " each");
+//            LavaCellConnection.getVerticalFlowRateTime = 0;
+//            LavaCellConnection.getVerticalFlowRateCount = 0;
             
             Adversity.log.info("lavaCells=" + this.lavaCells.size() + " totalCells=" + this.allCells.size() 
                     + " connections=" + this.connections.size() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
@@ -747,34 +748,31 @@ public class LavaSimulator extends SimulationNode
         this.connections.remove(new CellConnectionPos(pos1, pos2));
     }
 
-    private void provideBlockUpdates()
-    {
-        for(LavaCell cell : this.dirtyCells)
-        {
-            cell.provideBlockUpdate(this, this.adjustmentList);
-        }
-        dirtyCells.clear();
-
-    }
-
-    private static int blockUpdatesCounter;
-
-    private long blockUpdateTime;
+    public static int blockUpdatesProvisionCounter;
+    private static long blockUpdateProvisionTime;
+    
+    private static int blockUpdatesApplicationCounter;
+    private static long blockUpdateApplicationTime;
+    
     public void doBlockUpdates()
     {
         //        Adversity.log.info("LavaSim doBlockUpdates");
         long startTime = System.nanoTime();
 
-        provideBlockUpdates();
-        doAdjustments();
-
-
+        //TODO: may be faster to simply flag the cells as dirty and then iterate through all the fluid cells
+        //vs maintain a set over many passes.  Could also be parallelized that way.
+        for(LavaCell cell : this.allCells.values())
+        {
+            cell.provideBlockUpdateIfNeeded(this);
+        }
+//        doAdjustments();
+        blockUpdateProvisionTime += (System.nanoTime() - startTime);
         
+        startTime = System.nanoTime();
         this.itMe = true;
-        blockUpdatesCounter += this.worldBuffer.applyBlockUpdates(1);
+        blockUpdatesApplicationCounter += this.worldBuffer.applyBlockUpdates(1);
         this.itMe = false;
-
-        this.blockUpdateTime += (System.nanoTime() - startTime);
+        blockUpdateApplicationTime += (System.nanoTime() - startTime);
     }
 
     private void doAdjustments()
@@ -877,7 +875,6 @@ public class LavaSimulator extends SimulationNode
         basaltBlocks.clear();
         connections.clear();
         adjustmentList.clear();
-        dirtyCells.clear();
         
         this.tickIndex = nbt.getInteger(TICK_INDEX_NBT_TAG);
         

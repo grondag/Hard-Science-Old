@@ -109,17 +109,16 @@ public class WorldStateBuffer implements IBlockAccess
         {
             ChunkBuffer best = null;
             int bestScore = 0;
+            
+            //TODO: maintain a sorted list of the top N chunks (N = chunkCount)
+            //so that we don't have loop through the collection more than once.
 
             for(ChunkBuffer buff : this.chunks.values())
             {
                 int tickDiff = currentTick - buff.tickCreated;
                 if(tickDiff > 3)
                 {
-                    if(buff.requiredUpdateCount == 0 && tickDiff < 20)
-                    {
-                        Adversity.log.info("Successfully deferred " + buff.size() + " minor height updates");
-                    }
-                    else
+                    if(buff.requiredUpdateCount != 0 || tickDiff >= 20)
                     {
                         int scoreCount = tickDiff < 20 ? buff.requiredUpdateCount : buff.size();
                         if(best == null)
