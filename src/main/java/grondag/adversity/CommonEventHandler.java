@@ -1,8 +1,9 @@
 package grondag.adversity;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.VolcanicLavaBlock;
-import grondag.adversity.library.Useful;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
@@ -43,7 +44,7 @@ public class CommonEventHandler
         {
             if(event.getEntityPlayer() != null && event.getWorld().isRemote)
             {
-                event.getEntityPlayer().addChatComponentMessage(new TextComponentString(DENIALS[Useful.SALT_SHAKER.nextInt(DENIALS.length)]));
+                event.getEntityPlayer().addChatComponentMessage(new TextComponentString(DENIALS[ThreadLocalRandom.current().nextInt(DENIALS.length)]));
             }
             event.setCanceled(true);
         }

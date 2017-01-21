@@ -1,24 +1,20 @@
 package grondag.adversity.feature.volcano;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
-import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
-import grondag.adversity.niceblock.block.FlowStaticBlock;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class CoolingBlock extends FlowDynamicBlock
@@ -122,7 +118,7 @@ public class CoolingBlock extends FlowDynamicBlock
             }
         }
        
-        return (Useful.SALT_SHAKER.nextInt(1) < chances) && (awayFromLava || Useful.SALT_SHAKER.nextInt(10) == 0);
+        return (ThreadLocalRandom.current().nextInt(1) < chances) && (awayFromLava || ThreadLocalRandom.current().nextInt(10) == 0);
         
             
         

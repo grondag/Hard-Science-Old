@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CSGShape;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -13,20 +14,21 @@ import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.CollisionBoxGenerator;
-import grondag.adversity.niceblock.support.ICollisionHandler;
-import net.minecraft.block.state.IBlockState;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.niceblock.support.SimpleCollisionHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.IBlockAccess;
 
 public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
+    private static ModelFactory.ModelInputs COLLISION_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private static CSGModelFactory COLLISION_INSTANCE = new CSGModelFactory(COLLISION_INPUTS, ModelStateComponents.COLORS_WHITE,
+            ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
+    private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
     
     public CSGModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
     {
@@ -148,38 +150,14 @@ public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     }
 
     @Override
-    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
-        return new CSGCollisionHandler(dispatcher);
+        return COLLISION_HANDLER;
     }
-    
-    public class CSGCollisionHandler implements ICollisionHandler
+
+    @Override
+    public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        
-        private final ModelDispatcher dispatcher;
-        
-        private CSGCollisionHandler(ModelDispatcher dispatcher)
-        {
-            this.dispatcher = dispatcher;
-        }
-        
-        @Override
-        public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-        {
-            return 0;
-        }
-
-        @Override
-        public List<AxisAlignedBB> getModelBounds(long collisionKey)
-        {
-                return CollisionBoxGenerator.makeCollisionBox(
-                        makeRawQuads(dispatcher.getStateSet().getSetValueFromBits(collisionKey)));
-        }
-
-        @Override
-        public int getKeyBitLength()
-        {
-            return 1;
-        }
+        return COLLISION_INSTANCE.makeRawQuads(state);
     }
 }

@@ -1,9 +1,6 @@
 package grondag.adversity.feature.volcano.lava;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.base.IFlowBlock;
-import net.minecraft.util.EnumFacing;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class LavaCellConnection
 {
@@ -21,7 +18,7 @@ public class LavaCellConnection
     
     private final AbstractCellBinder binder;
     
-    public final int rand = Useful.SALT_SHAKER.nextInt();
+    public final int rand = ThreadLocalRandom.current().nextInt();
     
     private int flowThisTick = 0;
     private int lastFlowTick = 0;

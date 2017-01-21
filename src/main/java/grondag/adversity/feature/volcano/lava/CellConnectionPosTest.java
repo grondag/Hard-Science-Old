@@ -1,7 +1,5 @@
 package grondag.adversity.feature.volcano.lava;
 
-import static org.junit.Assert.*;
-
 import java.util.Random;
 import java.util.TreeSet;
 

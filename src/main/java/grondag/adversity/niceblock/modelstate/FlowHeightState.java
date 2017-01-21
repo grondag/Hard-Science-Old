@@ -33,11 +33,11 @@ public class FlowHeightState
     public final static int FILL_META_UP2 = 4;
     
 
-    /**
-     * Number of possible values for non-center blocks.
-     * Includes negative values, positive values, zero and NO_BLOCK values.
-     */
-    private final static int VALUE_COUNT = -MIN_HEIGHT + MAX_HEIGHT + 1 + 1;
+//    /**
+//     * Number of possible values for non-center blocks.
+//     * Includes negative values, positive values, zero and NO_BLOCK values.
+//     */
+//    private final static int VALUE_COUNT = -MIN_HEIGHT + MAX_HEIGHT + 1 + 1;
 
     /** 
      * Returns values -2 through +2 from a triad (3 bits).

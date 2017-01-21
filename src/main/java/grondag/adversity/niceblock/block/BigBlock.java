@@ -1,11 +1,11 @@
 package grondag.adversity.niceblock.block;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.PlacementValidatorCubic;
-import grondag.adversity.library.Useful;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -90,7 +90,7 @@ public class BigBlock extends NiceBlockPlus
                 
                 // now randomly choose a species 
                 //that will not connect to what is surrounding
-                int salt = Useful.SALT_SHAKER.nextInt(16);
+                int salt = ThreadLocalRandom.current().nextInt(16);
                 for(int i = 0; i < 16; i++)
                 {
                     int species = (i + salt) % 16;

@@ -15,9 +15,10 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import com.google.common.collect.ImmutableList;
@@ -49,7 +50,7 @@ public class ModelDispatcher implements IBakedModel
     private final boolean renderLayerFlags[] = new boolean[BlockRenderLayer.values().length];
     private final boolean shadedFlags[] = new boolean[BlockRenderLayer.values().length];
     private final SparseLayerMapBuilder layerMapBuilder;
-    private final ICollisionHandler collisionHandler;
+    private final AbstractCollisionHandler collisionHandler;
     
     private TextureAtlasSprite particleTexture;
 
@@ -160,12 +161,12 @@ public class ModelDispatcher implements IBakedModel
         }
         this.stateSet = ModelStateSet.find(groups);
 
-        ArrayList<ICollisionHandler> collisionHandlers = new ArrayList<>();
+        HashSet<AbstractCollisionHandler> collisionHandlers = new HashSet<AbstractCollisionHandler>();
 
         for(int i = 0; i < models.length; i++)
         {
             groups[i] = models[i].getStateGroup();
-            ICollisionHandler handler = models[i].getCollisionHandler(this);
+            AbstractCollisionHandler handler = models[i].getCollisionHandler(this);
             if(handler != null)
             {
                 collisionHandlers.add(handler);
@@ -186,9 +187,13 @@ public class ModelDispatcher implements IBakedModel
         {
             this.collisionHandler = null;
         }
+        else if(collisionHandlers.size() == 1)
+        {
+            this.collisionHandler = (AbstractCollisionHandler) collisionHandlers.toArray()[0];
+        }
         else
         {
-            this.collisionHandler = new CompositeCollisionHandler(ImmutableList.copyOf(collisionHandlers));
+            this.collisionHandler = new CompositeCollisionHandler(collisionHandlers);
         }
         
         layerMapBuilder = new SparseLayerMapBuilder(layerList);
@@ -228,7 +233,7 @@ public class ModelDispatcher implements IBakedModel
     /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
-    public ICollisionHandler getCollisionHandler()
+    public AbstractCollisionHandler getCollisionHandler()
     {
         return this.collisionHandler;
     }

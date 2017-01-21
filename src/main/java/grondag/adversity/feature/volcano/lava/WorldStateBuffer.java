@@ -1,11 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -14,7 +10,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -97,7 +92,6 @@ public class WorldStateBuffer implements IBlockAccess
     public int applyBlockUpdates(int chunkCount)
     {
         int blockCount = 0;
-        int chunksDone = 0;
         int currentTick = Simulator.instance.getCurrentSimTick();
         
         boolean maybeSomethingToDo = true;

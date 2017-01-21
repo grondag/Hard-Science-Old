@@ -24,8 +24,6 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     //TODO: use SimpleLoadingCache
     private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
     
-    private final boolean hasMetaVariants;
-    
     public static enum BigTexScale
     {
         /** 16x16 */
@@ -57,7 +55,6 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 	public BigTexModelFactory(ModelInputs modelInputs, BigTexScale scale, ModelStateComponent<?,?>... components)
 	{
 		super(modelInputs, components);
-		this.hasMetaVariants = this.bigTexComponent.useMetaVariants;
 		this.scale = scale;
 	}
 

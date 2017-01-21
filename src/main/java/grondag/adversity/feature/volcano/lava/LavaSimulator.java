@@ -3,13 +3,8 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
@@ -266,7 +261,7 @@ public class LavaSimulator extends SimulationNode
     private long coolingTime;
 
     //TODO make tries per tick configurable
-    private static final int COOLING_SCANS_PER_TICK = 10;
+    private static final int COOLING_SCANS_PER_TICK = 100;
     private void doCooling()
     {
         if(scanningBlocks.isEmpty())

@@ -1,12 +1,13 @@
 package grondag.adversity.niceblock.base;
 
+import java.util.Collections;
 import java.util.List;
 
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
-import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
 import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
 import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
@@ -14,9 +15,14 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.modelstate.ModelTextureComponent;
-import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 
 /**
@@ -53,7 +59,6 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         ModelRotationComponent rotationComponent = null;
         ModelBigTexComponent bigTexComponent = null;
         ModelSpeciesComponent speciesComponent = null;
-        ModelFlowJoinComponent flowJoinComponent = null;
         ModelFlowTexComponent flowTexComponent = null;
         
         for(ModelStateComponent<?,?> c : components)
@@ -88,12 +93,21 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
     public ModelStateGroup getStateGroup() { return stateGroup; }
     
     public abstract QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
-    public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state);
+    public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state);    
+    
+    /** 
+     * Provide fast, simple quads for generating collision boxes. 
+     * Won't be used unless a collision handler is provided by overriding getCollisionHandler.
+     */
+    public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
+    {
+        return Collections.emptyList();
+    }
     
     /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
-    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
         return null;
     }
@@ -147,5 +161,10 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
             this.lightingMode = lightingMode;
             this.renderLayer = renderLayer;
         }
+    }
+    
+    public  AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        return Block.FULL_BLOCK_AABB;
     }
 }

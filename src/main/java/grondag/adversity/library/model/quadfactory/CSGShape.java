@@ -35,10 +35,10 @@ package grondag.adversity.library.model.quadfactory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import grondag.adversity.library.Useful;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public class CSGShape extends LinkedList<RawQuad>
@@ -104,7 +104,7 @@ public class CSGShape extends LinkedList<RawQuad>
             quadStream = this.stream();
         }
 
-        quadStream.forEach((RawQuad quad) -> quad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000));
+        quadStream.forEach((RawQuad quad) -> quad.recolor((ThreadLocalRandom.current().nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000));
     }
     
     

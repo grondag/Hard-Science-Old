@@ -2,14 +2,12 @@ package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.external.IWailaProvider;
-import grondag.adversity.library.cache.ManagedLoadingCache;
-import grondag.adversity.library.cache.SimpleCacheLoader;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
-import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
@@ -102,14 +100,8 @@ public class NiceBlock extends Block implements IWailaProvider
      * CAN BE NULL! If non-null, blocks requires special collision handling, typically because it is not a standard cube shape. Retrieved from model cook book at instantiation and
      * reference saved for simpler coding.
      */
-    public final ICollisionHandler collisionHandler;
+    public final AbstractCollisionHandler collisionHandler;
     
-    /**
-     * Cache for collision box info.
-     * NULL if collisionHandler is NULL.
-     */
-    private final ManagedLoadingCache<ModelBounds> modelBounds;
-
     public final ModelDispatcher dispatcher;
         
     /** non-null if this drops something other than itself */
@@ -138,46 +130,9 @@ public class NiceBlock extends Block implements IWailaProvider
         displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
 
         collisionHandler = dispatcher.getCollisionHandler();
-        modelBounds = collisionHandler == null ? null : new ManagedLoadingCache<ModelBounds>(new BoundsLoader(), 0xF, 0xFFF);
 
         // let registrar know to register us when appropriate
         NiceBlockRegistrar.allBlocks.add(this);
-    }
-    
-    private static class ModelBounds
-    {
-        private final List<AxisAlignedBB> boundsList;
-        private AxisAlignedBB combinedBounds;
-        
-        private ModelBounds(List<AxisAlignedBB> boundsList)
-        {
-            this.boundsList = boundsList;
-        }
-        
-        public List<AxisAlignedBB> getBounds() { return boundsList; }
-        
-        public AxisAlignedBB getCombinedBounds()
-        {
-            if(combinedBounds == null)
-            {
-                for (AxisAlignedBB aabb : this.boundsList) 
-                {
-                    combinedBounds = combinedBounds == null ? aabb : combinedBounds.union(aabb);
-                }
-            }
-            return combinedBounds;
-        }
-    }
-    
-    private class BoundsLoader implements SimpleCacheLoader<ModelBounds>
-    {
-
-        @Override
-        public ModelBounds load(long key)
-        {
-            return new ModelBounds(NiceBlock.this.collisionHandler.getModelBounds(key));
-        }
-        
     }
     
     @Override
@@ -425,21 +380,8 @@ public class NiceBlock extends Block implements IWailaProvider
         return this.collisionHandler != null;
     }
 
-    /**
-     * Gets bounding box list for given state.
-     * Should never be called unless collisionHandler is non-null.
-     */
-    protected List<AxisAlignedBB> getCachedModelBounds(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        if(collisionHandler == null) return java.util.Collections.emptyList();
-        
-        long key = collisionHandler.getCollisionKey(state, worldIn, pos);
-        
-        return modelBounds.get(key).boundsList;
-    
-    }
-    
   
+    @SuppressWarnings("deprecation")
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
     {
@@ -451,7 +393,7 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
             
-            List<AxisAlignedBB> bounds = getCachedModelBounds(state, worldIn, pos);
+            List<AxisAlignedBB> bounds = this.collisionHandler.getCollisionBoxes(state, worldIn, pos);
  
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
@@ -462,6 +404,7 @@ public class NiceBlock extends Block implements IWailaProvider
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, World worldIn, BlockPos pos)
     {
@@ -471,13 +414,12 @@ public class NiceBlock extends Block implements IWailaProvider
         }
         else
         {
-            //TODO: waaaaay too slow for some blocks to handle it this way
-            long collisionKey = collisionHandler.getCollisionKey(state, worldIn, pos);
-            return this.modelBounds.get(collisionKey).getCombinedBounds();
+            return this.collisionHandler.getCollisionBoundingBox(state, worldIn, pos);
         }
     }
     
     /** won't be called unless getCollisionHandler is overriden */
+    @SuppressWarnings("deprecation")
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
@@ -515,6 +457,7 @@ public class NiceBlock extends Block implements IWailaProvider
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. 
      * Won't be called unless custom collision handler is available.
      */
+    @SuppressWarnings("deprecation")
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
 
         if (collisionHandler == null)
@@ -525,7 +468,8 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
     
-            for (AxisAlignedBB aabb : this.getCachedModelBounds(state, worldIn, pos)) {
+            for (AxisAlignedBB aabb : this.collisionHandler.getCollisionBoxes(state, worldIn, pos))
+            {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }
             return builder.build();

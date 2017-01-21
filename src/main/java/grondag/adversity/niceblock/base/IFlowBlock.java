@@ -1,13 +1,5 @@
 package grondag.adversity.niceblock.base;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import grondag.adversity.Adversity;
-import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer.BlockStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;

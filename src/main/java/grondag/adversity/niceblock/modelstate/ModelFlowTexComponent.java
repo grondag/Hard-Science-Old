@@ -10,7 +10,12 @@ import net.minecraft.world.IBlockAccess;
 */
 public class ModelFlowTexComponent extends ModelStateComponent<ModelFlowTexComponent.ModelFlowTex, ModelFlowTexComponent.FlowTexValue>
 {
-    
+    /** 
+     * Use this when want to use the same texture and ignore this component.
+     * Intended for non-visible collision models.
+     */
+    public final FlowTexValue dummyValue = new FlowTexValue(0);
+            
     public ModelFlowTexComponent(int ordinal)
     {
         super(ordinal, WorldRefreshType.CACHED, 8 * 8 * 8);

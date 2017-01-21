@@ -15,9 +15,9 @@ public class ColorPicker
     
     private int colorMapID = 0;
     
-    private double top;
+//    private double top;
     private double left;
-    private double size;
+//    private double size;
     private double centerX;
     private double centerY;
     private double radiusInner;
@@ -44,8 +44,8 @@ public class ColorPicker
     public void resize(double left, double top, double size)
     {
         this.left = left;
-        this.top = top;
-        this.size = size;
+//        this.top = top;
+//        this.size = size;
         
         radiusOuter = size / 4.0;
         centerX = left + radiusOuter;

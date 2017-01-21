@@ -2,7 +2,6 @@ package grondag.adversity.feature.volcano;
 
 import java.util.Map;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;

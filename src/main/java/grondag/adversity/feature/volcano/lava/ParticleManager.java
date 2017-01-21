@@ -1,17 +1,9 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.TreeSet;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.ComparisonChain;
+import java.util.concurrent.ConcurrentHashMap;
 
 import grondag.adversity.Adversity;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -21,27 +13,26 @@ public class ParticleManager
     private final static String NBT_SAVE_DATA_TAG = "particleManager";
     private final static int NBT_SAVE_DATA_WIDTH = 5;
     
-    private final HashMap<BlockPos, ParticleInfo> map = new HashMap<BlockPos, ParticleInfo>();
+    private final ConcurrentHashMap<BlockPos, ParticleInfo> map = new ConcurrentHashMap<BlockPos, ParticleInfo>(512);
 
-    private final TreeSet<ParticleInfo> set = new TreeSet<ParticleInfo>(
-            new Comparator<ParticleInfo>() {
-                @Override
-                public int compare(ParticleInfo o1, ParticleInfo o2)
-                {
-                    return ComparisonChain.start()
-                    // oldest first
-                    .compare(o1.tickCreated, o2.tickCreated)
-                    // larger first
-                    .compare(o2.fluidUnits, o1.fluidUnits)
-                    .compare(o1.pos, o2.pos)
-                    .result();
-                }});
+//    private final TreeSet<ParticleInfo> set = new TreeSet<ParticleInfo>(
+//            new Comparator<ParticleInfo>() {
+//                @Override
+//                public int compare(ParticleInfo o1, ParticleInfo o2)
+//                {
+//                    return ComparisonChain.start()
+//                    // oldest first
+//                    .compare(o1.tickCreated, o2.tickCreated)
+//                    // larger first
+//                    .compare(o2.fluidUnits, o1.fluidUnits)
+//                    .compare(o1.pos, o2.pos)
+//                    .result();
+//                }});
 
             
     public void clear()
     {
         map.clear();
-        set.clear();
     }
     
     public int size()
@@ -57,71 +48,58 @@ public class ParticleManager
         {
             particle = new ParticleInfo(sim.getTickIndex(), pos, fluidAmount);
             map.put(pos, particle);
-            set.add(particle);
 //            Adversity.log.info("ParticleManager added new particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits());
-       
-            //TODO: remove for release
-            if(map.size() != set.size())
-            {
-                Adversity.log.warn("Particle tracking error: set size does not match map size.");
-            }
         }
         else
         {
-            //need to remove from tree before changing amount so can be successfully found
-            //and then re-add once updated
-            
-//            if(!set.contains(particle))
-//            {
-//                Adversity.log.info("Lerm!");
-//                
-//            }
-            set.remove(particle);
             particle.addFluid(fluidAmount);
-            set.add(particle);
 //            Adversity.log.info("ParticleManager updated particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits() + " added " + fluidAmount);
-      
-            //TODO: remove for release
-            if(map.size() != set.size())
-            {
-                Adversity.log.warn("Particle tracking error: set size does not match map size.");
-            }
         }
     
     }
     
+    private ParticleInfo first (ParticleInfo a, ParticleInfo b)
+    {
+        if(a == null)
+        {
+            return b;
+        }
+        else if(b == null)
+        {
+            return a;
+        }
+        else if(a.fluidUnits > b.fluidUnits)
+        {
+            return a;
+        }
+        else if(a.fluidUnits == b.fluidUnits)
+        {
+            if(a.tickCreated <= b.tickCreated)
+            {
+                return a;
+            }
+            else
+            {
+                return b;
+            }
+        }
+        else
+        {
+            return b;
+        }
+    }
+    
     public EntityLavaParticle pollFirstEligible(LavaSimulator sim)
     {
-        if(set.isEmpty()) return null;
+        if(map.isEmpty()) return null;
         
-        ParticleInfo result = this.set.first();
-
-        // wait until full size or at least five ticks old
-        if(result != null && (result.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK || sim.getTickIndex() - result.tickCreated > 4))
+        ParticleInfo first = map.values().parallelStream().reduce(null, (a, b) -> first(a,b));
+        
+         // wait until full size or at least five ticks old
+        if(first != null && (first.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK || sim.getTickIndex() - first.tickCreated > 4))
         {
-            
-            ParticleInfo yorpdongle = set.pollFirst();
-//            if(yorpdongle != result)
-//            {
-//                Adversity.log.warn("yorp");
-//            }
-//            
-//            if(!map.containsKey(result.pos))
-//            {
-//                Adversity.log.warn("boop");
-//            }
-            
-            map.remove(result.pos);
-         
-            //TODO: remove for release
-            if(map.size() != set.size())
-            {
-                Adversity.log.warn("Particle tracking error: set size does not match map size.");
-            }
-            
-//            Adversity.log.info("ParticleManager poll particle @" + result.pos.toString() + " with amount=" + result.getFluidUnits());
-            
-            return new EntityLavaParticle(sim.worldBuffer.realWorld, result.fluidUnits, new Vec3d(result.pos.getX() + 0.5, result.pos.getY() + 0.4, result.pos.getZ() + 0.5), Vec3d.ZERO);
+            map.remove(first.pos);
+            return new EntityLavaParticle(sim.worldBuffer.realWorld, first.fluidUnits, new Vec3d(first.pos.getX() + 0.5, first.pos.getY() + 0.4, first.pos.getZ() + 0.5), Vec3d.ZERO);
         }
         else
         {
@@ -157,8 +135,7 @@ public class ParticleManager
     public void readFromNBT(NBTTagCompound nbt)
     {
         this.map.clear();
-        this.set.clear();
-
+    
         int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
 
         //confirm correct size
@@ -178,21 +155,20 @@ public class ParticleManager
             if(!map.containsKey(p.pos))
             {
                 map.put(p.pos, p);
-                set.add(p);
             }
         }
 
-        Adversity.log.info("Loaded " + set.size() + " lava entities.");
+        Adversity.log.info("Loaded " + map.size() + " lava entities.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("Saving " + set.size() + " lava entities.");
+        Adversity.log.info("Saving " + map.size() + " lava entities.");
         
-        int[] saveData = new int[set.size() * NBT_SAVE_DATA_WIDTH];
+        int[] saveData = new int[map.size() * NBT_SAVE_DATA_WIDTH];
         int i = 0;
 
-        for(ParticleInfo p: set)
+        for(ParticleInfo p: map.values())
         {
             saveData[i++] = p.tickCreated;
             saveData[i++] = p.pos.getX();

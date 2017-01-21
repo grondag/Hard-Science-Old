@@ -2,11 +2,9 @@ package grondag.adversity.feature.volcano.lava;
 
 import com.google.common.collect.ComparisonChain;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.Useful;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 
 /**
  * Identifies location of a cell connection in the world.

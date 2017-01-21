@@ -1,10 +1,12 @@
 package grondag.adversity.niceblock.model;
 
+import java.util.Collections;
 import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.model.QuadContainer;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -13,8 +15,11 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.niceblock.support.SimpleCollisionHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -26,15 +31,47 @@ import net.minecraft.world.IBlockAccess;
 
 public class HeightModelFactory extends ColorModelFactory
 {
+    
+    private static ModelFactory.ModelInputs COLLISION_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    //main diff is lack of species
+    private static HeightModelFactory COLLISION_INSTANCE = new HeightModelFactory(COLLISION_INPUTS, ModelStateComponents.COLORS_WHITE,
+            ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
+    private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
+    
+    private static final AxisAlignedBB[] COLLISION_BOUNDS =
+    {
+        new AxisAlignedBB(0, 0, 0, 1, 1F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 2F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 3F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 4F/16F, 1),
+
+        new AxisAlignedBB(0, 0, 0, 1, 5F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 6F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 7F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 8F/16F, 1),
+    
+        new AxisAlignedBB(0, 0, 0, 1, 9F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 10F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 11F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 12F,16F),
+        
+        new AxisAlignedBB(0, 0, 0, 1, 13F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 14F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 15F/16F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 1, 1)
+            
+    };
+    
     public HeightModelFactory(ModelFactory.ModelInputs modelInputs, ModelStateComponent<?, ?>... components)
     {
         super(modelInputs, components);
     }
 
 
-    protected List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face)
+    // TODO: need to handle lack of species for collision version
+    protected RawQuad makeFaceQuad(ModelStateSetValue state, EnumFacing face)
     {
-        if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
+        if (face == null) return null;
 
         RawQuad result = new RawQuad();
         ColorMap colorMap = state.getValue(colorComponent);
@@ -47,7 +84,6 @@ public class HeightModelFactory extends ColorModelFactory
         result.setFace(face);
         double height = ((state.getValue(speciesComponent) & 15) + 1) / 16.0;
         
-        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         switch(face)
         {
         case UP:
@@ -59,7 +95,6 @@ public class HeightModelFactory extends ColorModelFactory
                     1.0,
                     1-height,
                     EnumFacing.NORTH);
-            builder.add(result.createBakedQuad());
             break;
              
         case EAST:
@@ -73,17 +108,15 @@ public class HeightModelFactory extends ColorModelFactory
                     height,
                     0.0,
                     EnumFacing.UP);
-            builder.add(result.createBakedQuad());
             break;
             
         case DOWN:
         default:
             result.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
-            builder.add(result.createBakedQuad());
             break;
         }
 
-        return builder.build();
+        return result;
 
     }
 
@@ -96,7 +129,7 @@ public class HeightModelFactory extends ColorModelFactory
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
-            builder.setQuads(face, this.makeFaceQuads(state, face));
+            builder.setQuads(face, Collections.singletonList(this.makeFaceQuad(state, face).createBakedQuad()));
         }
         return builder.build();
     }
@@ -107,42 +140,42 @@ public class HeightModelFactory extends ColorModelFactory
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.addAll(this.makeFaceQuads(state, face));
+            general.add(this.makeFaceQuad(state, face).createBakedQuad());
         }        
         return general.build();
     }
     
     @Override
-    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
-        return new HeightCollisionHandler(dispatcher);
+        return COLLISION_HANDLER;
     }
 
-    public class HeightCollisionHandler  implements ICollisionHandler
+    @Override
+    public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        private HeightCollisionHandler(ModelDispatcher dispatcher)
+        ImmutableList.Builder<RawQuad> general = new ImmutableList.Builder<RawQuad>();
+        for(EnumFacing face : EnumFacing.VALUES)
         {
-            //NOOP
+            general.add(COLLISION_INSTANCE.makeFaceQuad(state, face));
+        }        
+        return general.build();
+    }
+
+
+    @Override
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        try
+        {
+            return COLLISION_BOUNDS[state.getValue(NiceBlock.META)];
         }
-        
-        @Override
-        public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+        catch (Exception ex)
         {
-            return (long) state.getValue(NiceBlock.META);
-        }
-    
-        @Override
-        public List<AxisAlignedBB> getModelBounds(long collisionKey)
-        {
-            ImmutableList<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, (collisionKey + 1)/16.0, 1)).build();
-            return retVal;
-        }
-    
-    
-        @Override
-        public int getKeyBitLength()
-        {
-            return 4;
+            Adversity.log.info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
+            return Block.FULL_BLOCK_AABB;
         }
     }
+    
+    
 }

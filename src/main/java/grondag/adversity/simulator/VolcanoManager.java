@@ -2,13 +2,13 @@ package grondag.adversity.simulator;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.TileVolcano.VolcanoStage;
-import grondag.adversity.library.Useful;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.SimulationNodeRunnable;
@@ -113,7 +113,7 @@ public class VolcanoManager extends SimulationNodeRunnable
             
             if(!candidates.isEmpty())
             {
-                long targetWeight = (long) (Useful.SALT_SHAKER.nextFloat() * totalWeight);
+                long targetWeight = (long) (ThreadLocalRandom.current().nextFloat() * totalWeight);
                 
                 for(VolcanoNode candidate : candidates)
                 {
@@ -418,7 +418,7 @@ public class VolcanoManager extends SimulationNodeRunnable
             float chance = (float)dormantTime / Config.volcano().maxDormantTicks;
             chance = chance * chance * chance;
             
-            return Useful.SALT_SHAKER.nextFloat() <= chance;
+            return ThreadLocalRandom.current().nextFloat() <= chance;
 
         }
         

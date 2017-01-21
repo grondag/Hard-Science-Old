@@ -153,7 +153,7 @@ public class NiceGuiScreen extends GuiScreen
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         this.mc.getTextureManager().bindTexture(OPTIONS_BACKGROUND);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        float f = 32.0F;
+//        float f = 32.0F;
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
         vertexbuffer.pos(0.0D, (double)this.height, 0.0D).tex(0.0D, (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
         vertexbuffer.pos((double)this.width, (double)this.height, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();

@@ -2,10 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-
 import com.google.common.collect.ComparisonChain;
 
 

@@ -557,8 +557,6 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                 new FaceVertex.Colored(qb.x1, qb.y1, qb.depth, qi.color),
                 new FaceVertex.Colored(qb.x0, qb.y1, qb.depth, qi.color), 
                 qb.topFace);
-    }    
-    
-
+    }
 }
 

@@ -10,8 +10,8 @@ import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -22,8 +22,8 @@ import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent.FlowTexValue
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.CollisionBoxGenerator;
-import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.niceblock.support.SimpleCollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -38,12 +38,39 @@ import net.minecraft.world.IBlockAccess;
 
 public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
-    private final boolean enableCollision;
+    private static ModelFactory.ModelInputs COLLISION_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    //main diff is lack of species
+    private static FlowModelFactory COLLISION_INSTANCE = new FlowModelFactory(COLLISION_INPUTS, true, ModelStateComponents.FLOW_JOIN,
+           ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
+    private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
 
+    private static final AxisAlignedBB[] COLLISION_BOUNDS =
+    {
+        new AxisAlignedBB(0, 0, 0, 1, 1, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 11F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 10F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 9F/12F, 1),
+        
+        new AxisAlignedBB(0, 0, 0, 1, 8F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 7F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 6F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 5F/12F, 1),
+        
+        new AxisAlignedBB(0, 0, 0, 1, 4F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 3F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 2F/12F, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 1F/12F, 1),
+        
+        // These aren't actually valid meta values, but prevent NPE if we get one somehow
+        new AxisAlignedBB(0, 0, 0, 1, 1, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 1, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 1, 1),
+        new AxisAlignedBB(0, 0, 0, 1, 1, 1)
+    };
+    
     public FlowModelFactory(ModelInputs modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
     {
         super(modelInputs, components);
-        this.enableCollision = enableCollision;
     }
 
     @Override
@@ -102,8 +129,13 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         template.lightingMode = modelInputs.lightingMode;
         // default - need to change for sides and bottom
         template.setFace(EnumFacing.UP);
+        
+       
+        // collision variant never visible & doesn't have flow texture in state
+        ModelFlowTexComponent.FlowTexValue flowTex = this.flowTexComponent == null
+                ? ModelStateComponents.FLOW_TEX.dummyValue
+                : state.getValue(this.flowTexComponent);
 
-        ModelFlowTexComponent.FlowTexValue flowTex = state.getValue(this.flowTexComponent);
         template.minU = flowTex.getX() * 2;
         template.maxU = template.minU + 2;
         template.minV = flowTex.getZ() * 2;
@@ -443,45 +475,30 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     }
     
     @Override
-    public ICollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
     {
-        return enableCollision ? new FlowCollisionHandler(dispatcher) : null;
+        return COLLISION_HANDLER;
     }
 
-    public class FlowCollisionHandler implements ICollisionHandler
+    @Override
+    public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        private final ModelDispatcher dispatcher;
-        
-        private FlowCollisionHandler(ModelDispatcher dispatcher)
+        return COLLISION_INSTANCE.makeRawQuads(state);
+    }
+
+    @Override
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        try
         {
-            this.dispatcher = dispatcher;
+            return COLLISION_BOUNDS[state.getValue(NiceBlock.META)];
         }
-        
-        @Override
-        public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+        catch (Exception ex)
         {
-            Block block = state.getBlock();
-            if(IFlowBlock.isFlowBlock(block))
-            {
-                return ((NiceBlock) block).getModelStateKey(state, worldIn, pos);
-            }
-            else
-            {
-                return 0;
-            }
-        }
-    
-        @Override
-        public List<AxisAlignedBB> getModelBounds(long collisionKey)
-        {
-                return CollisionBoxGenerator.makeCollisionBox(
-                        makeRawQuads(dispatcher.getStateSet().getSetValueFromBits(collisionKey)));
-        }
-    
-        @Override
-        public int getKeyBitLength()
-        {
-            return ModelStateComponents.FLOW_JOIN.getBitLength();
+            Adversity.log.info("FlowModelFactory recevied Collision Bounding Box check for a foreign block.");
+            return Block.FULL_BLOCK_AABB;
         }
     }
+  
+    
 }

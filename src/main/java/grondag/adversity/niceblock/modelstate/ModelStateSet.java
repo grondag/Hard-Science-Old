@@ -30,6 +30,7 @@ public class ModelStateSet
     private final boolean usesWorldState;
     private final boolean noAlwaysRefresh;
     private final long persistenceMask;
+    public final int bitLength;
     private final ModelColorMapComponent firstColorMapComponent;
     private final ModelSpeciesComponent firstSpeciesComponent;
     
@@ -142,6 +143,7 @@ public class ModelStateSet
         this.usesWorldState = canRefresh;
         this.noAlwaysRefresh = noAlwaysRefresh;
         this.persistenceMask = persistenceMask;
+        this.bitLength = shift;
         
         //initialize smaller array to include only types that are part of one or more groups
         typeCount = componentCounter;

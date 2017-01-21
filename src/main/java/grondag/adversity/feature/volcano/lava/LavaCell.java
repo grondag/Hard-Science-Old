@@ -1,15 +1,11 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -164,7 +160,7 @@ public class LavaCell
         int currentVisible = this.getCurrentVisibleLevel();
         if(this.lastVisibleLevel != currentVisible)
         {
-            sim.blockUpdatesProvisionCounter++;
+            LavaSimulator.blockUpdatesProvisionCounter++;
             
             final IBlockState priorState = sim.worldBuffer.getBlockState(pos);
             if(currentVisible == 0)
@@ -439,11 +435,11 @@ public class LavaCell
     private static long lastUpdateNanoTime = System.nanoTime();
 //    private StringBuilder builder = new StringBuilder();
 
-    /** 
-     * Don't create cells with less than this amount of fluid.
-     * Vertical cells with less than this amount will be compressed into the cell below.
-     */
-    private final static int MINIMUM_CELL_CONTENT = FLUID_UNITS_PER_BLOCK/24;
+//    /** 
+//     * Don't create cells with less than this amount of fluid.
+//     * Vertical cells with less than this amount will be compressed into the cell below.
+//     */
+//    private final static int MINIMUM_CELL_CONTENT = FLUID_UNITS_PER_BLOCK/24;
 
     public void retain(String desc)
     {

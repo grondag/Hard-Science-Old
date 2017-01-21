@@ -1,27 +1,30 @@
 package grondag.adversity.niceblock.base;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.support.ICollisionHandler;
+import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class CompositeCollisionHandler implements ICollisionHandler
+public class CompositeCollisionHandler extends AbstractCollisionHandler
 {
-    private final ICollisionHandler[] handlers;
+    private final AbstractCollisionHandler[] handlers;
     
     private final int keyBitLength;
     private final int shiftBits[];
     private final long bitMasks[];
     
-    public CompositeCollisionHandler(List<ICollisionHandler> handlers)
+    public CompositeCollisionHandler(Collection<AbstractCollisionHandler> handlers)
     {
-        this.handlers = handlers.toArray(new ICollisionHandler[1]);
+        this.handlers = handlers.toArray(new AbstractCollisionHandler[1]);
         this.shiftBits = new int[handlers.size()];
         this.bitMasks = new long[handlers.size()];
         
@@ -52,24 +55,41 @@ public class CompositeCollisionHandler implements ICollisionHandler
     }
 
     @Override
-    public List<AxisAlignedBB> getModelBounds(long collisionKey)
+    public int getKeyBitLength()
     {
-        if(handlers.length == 1) return handlers[0].getModelBounds(collisionKey);
+        return this.keyBitLength;
+    }
+
+    @Override
+    public List<RawQuad> getCollisionQuads(long modelKey)
+    {
+        if(handlers.length == 1) return handlers[0].getCollisionQuads(modelKey);
 
         if(handlers.length == 0) return java.util.Collections.emptyList();
         
-        ImmutableList.Builder<AxisAlignedBB> builder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<>();
         for(int i = 0; i < handlers.length; i++)
         {
-            builder.addAll(handlers[i].getModelBounds(collisionKey >> shiftBits[i] & bitMasks[i]));
+            builder.addAll(handlers[i].getCollisionQuads(modelKey >> shiftBits[i] & bitMasks[i]));
         }
         return builder.build();
     }
 
     @Override
-    public int getKeyBitLength()
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        return this.keyBitLength;
+        if(handlers.length == 0) return Block.NULL_AABB;
+
+        AxisAlignedBB result = handlers[0].getCollisionBoundingBox(state, worldIn, pos);
+        
+        if(handlers.length > 1)
+        {
+            for(int i = 1; i < handlers.length; i++)
+            {
+                result = result.union(handlers[i].getCollisionBoundingBox(state, worldIn, pos));
+            }
+        }
+        return result;
     }
 
 }

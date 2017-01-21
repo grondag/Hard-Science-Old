@@ -21,17 +21,17 @@ public class CollisionBoxGenerator
     private final static int STOP_NORTH = 1 << EnumFacing.NORTH.ordinal();
     private final static int STOP_SOUTH = 1 << EnumFacing.SOUTH.ordinal();
 
-    public static List<AxisAlignedBB> makeCollisionBox(List<RawQuad> quads)
+    public static List<AxisAlignedBB> makeCollisionBoxList(List<RawQuad> quads)
     {
-//        if(quads.isEmpty())
-//        {
-//            return new ImmutableList.Builder<AxisAlignedBB>().add(new AxisAlignedBB(0, 0, 0, 1, 1, 1)).build();
-//        }
+        if(quads.isEmpty())
+        {
+            return Collections.emptyList();
+        }
 
         // voxel method
         List<AxisAlignedBB> retVal = makeBoxVoxelMethod(quads);
 
-        List<AxisAlignedBB> simple = makeBoxSimpleMethod(quads);
+        List<AxisAlignedBB> simple = Collections.singletonList(makeBoxSimpleMethod(quads));
 
 //        if(retVal.isEmpty() || getListVolume(simple) <= getListVolume(retVal))
         double simpleVolume = getListVolume(simple);
@@ -155,13 +155,8 @@ public class CollisionBoxGenerator
         return (intersectionCount & 0x1) == 1;
     }
     
-    private static List<AxisAlignedBB> makeBoxSimpleMethod(List<RawQuad> quads)
+    public static AxisAlignedBB makeBoxSimpleMethod(List<RawQuad> quads)
     {
-
-        if(quads.isEmpty()) return Collections.emptyList();
-        
-        ImmutableList.Builder<AxisAlignedBB> retVal = new ImmutableList.Builder<AxisAlignedBB>();
-
         AxisAlignedBB simpleBox = null;
         for(RawQuad quad : quads)
         {
@@ -175,7 +170,6 @@ public class CollisionBoxGenerator
             }
         }
 
-        retVal.add(simpleBox);
-        return retVal.build();
+        return simpleBox;
     }
 }

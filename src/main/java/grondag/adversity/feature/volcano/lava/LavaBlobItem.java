@@ -1,10 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,7 +10,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -42,7 +38,7 @@ public class LavaBlobItem extends Item
             }
 
             playerIn.addStat(StatList.getObjectUseStats(this));
-            return new ActionResult(EnumActionResult.SUCCESS, itemStackIn);
+            return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStackIn);
         }
         
    
