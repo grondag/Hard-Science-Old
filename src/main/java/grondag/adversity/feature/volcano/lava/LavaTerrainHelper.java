@@ -198,16 +198,14 @@ public class LavaTerrainHelper
         
         if (IFlowBlock.isFlowFiller(block)) return true;
 
-        //can only displace core lava at top
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-        {
-            return false;
-        }
+        if (IFlowBlock.isFlowHeight(block)) return false;
         
         //TODO: make material list configurable
    
         Material material = state.getMaterial();
-    
+        
+        if(material.isReplaceable()) return true;
+
         if(material == Material.AIR) return true;
         if (material == Material.GRASS ) return false;
         if (material == Material.GROUND ) return false;

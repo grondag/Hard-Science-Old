@@ -263,7 +263,7 @@ public class EntityLavaParticle extends Entity
         if(!this.worldObj.isRemote )
         {
 //            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
-            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount(), false);
+            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount(), true);
         }
         //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.shouldDie = true;
@@ -442,7 +442,7 @@ public class EntityLavaParticle extends Entity
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
                     IBlockState state = worldObj.getBlockState(blockpos$pooledmutableblockpos);
                     if(!(state.getMaterial() == Material.AIR || state.getMaterial().isLiquid()) 
-                            && !IFlowBlock.isFlowFiller(state.getBlock()) && LavaTerrainHelper.canLavaDisplace(state))
+                             && LavaTerrainHelper.canLavaDisplace(state) && !IFlowBlock.isFlowFiller(state.getBlock()))
                     {
                         this.worldObj.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }

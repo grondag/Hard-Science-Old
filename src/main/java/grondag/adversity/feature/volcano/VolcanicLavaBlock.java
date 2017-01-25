@@ -163,12 +163,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                 .text("Floor Level = " + cell.getFloor() + "    Retained Level = " + cell.getRetainedLevel())
                 .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex())
                 .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "id=" + up.id + "  drop=" + up.getDrop() + " barrier:" + up.getOther(cell).isBarrier()))
-                .text("Down: " + (down == null ? "null" : "id=" + down.id + "  drop=" + down.getDrop() + " barrier:" + down.getOther(cell).isBarrier()))
-                .text("East: " + (east == null ? "null" : "id=" + east.id + "  drop=" + east.getDrop() + " barrier:" + east.getOther(cell).isBarrier()))
-                .text("West: " + (west == null ? "null" : "id=" + west.id + "  drop=" + west.getDrop() + " barrier:" + west.getOther(cell).isBarrier()))
-                .text("North: " + (north == null ? "null" : "id=" + north.id + "  drop=" + north.getDrop() + " barrier:" + north.getOther(cell).isBarrier()))
-                .text("South: " + (south == null ? "null" : "id=" + south.id + "  drop=" + south.getDrop() + " barrier:" + south.getOther(cell).isBarrier()));
+                .text("Up: " + (up == null ? "null" : "id=" + up.id + " barrier:" + up.getOther(cell).isBarrier()))
+                .text("Down: " + (down == null ? "null" : "id=" + down.id  + " barrier:" + down.getOther(cell).isBarrier()))
+                .text("East: " + (east == null ? "null" : "id=" + east.id + " barrier:" + east.getOther(cell).isBarrier()))
+                .text("West: " + (west == null ? "null" : "id=" + west.id + " barrier:" + west.getOther(cell).isBarrier()))
+                .text("North: " + (north == null ? "null" : "id=" + north.id + " barrier:" + north.getOther(cell).isBarrier()))
+                .text("South: " + (south == null ? "null" : "id=" + south.id + " barrier:" + south.getOther(cell).isBarrier()));
         }
         
     }

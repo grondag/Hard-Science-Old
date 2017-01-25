@@ -1,7 +1,12 @@
 package grondag.adversity.feature.volcano.lava;
 
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -14,21 +19,6 @@ public class ParticleManager
     private final static int NBT_SAVE_DATA_WIDTH = 5;
     
     private final ConcurrentHashMap<BlockPos, ParticleInfo> map = new ConcurrentHashMap<BlockPos, ParticleInfo>(512);
-
-//    private final TreeSet<ParticleInfo> set = new TreeSet<ParticleInfo>(
-//            new Comparator<ParticleInfo>() {
-//                @Override
-//                public int compare(ParticleInfo o1, ParticleInfo o2)
-//                {
-//                    return ComparisonChain.start()
-//                    // oldest first
-//                    .compare(o1.tickCreated, o2.tickCreated)
-//                    // larger first
-//                    .compare(o2.fluidUnits, o1.fluidUnits)
-//                    .compare(o1.pos, o2.pos)
-//                    .result();
-//                }});
-
             
     public void clear()
     {
@@ -58,54 +48,31 @@ public class ParticleManager
     
     }
     
-    private ParticleInfo first (ParticleInfo a, ParticleInfo b)
-    {
-        if(a == null)
-        {
-            return b;
-        }
-        else if(b == null)
-        {
-            return a;
-        }
-        else if(a.fluidUnits > b.fluidUnits)
-        {
-            return a;
-        }
-        else if(a.fluidUnits == b.fluidUnits)
-        {
-            if(a.tickCreated <= b.tickCreated)
-            {
-                return a;
-            }
-            else
-            {
-                return b;
-            }
-        }
-        else
-        {
-            return b;
-        }
-    }
-    
-    public EntityLavaParticle pollFirstEligible(LavaSimulator sim)
+    /** returns a collection of eligible particles up the max count given */
+    public Collection<EntityLavaParticle> pollEligible(LavaSimulator sim, int maxCount)
     {
         if(map.isEmpty()) return null;
         
-        ParticleInfo first = map.values().parallelStream().reduce(null, (a, b) -> first(a,b));
+        //TODO: make age limit configurable
+        int firstEligibleTick = sim.getTickIndex() - 4;
         
-         // wait until full size or at least five ticks old
-        if(first != null && (first.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK || sim.getTickIndex() - first.tickCreated > 4))
-        {
-            map.remove(first.pos);
-            return new EntityLavaParticle(sim.worldBuffer.realWorld, first.fluidUnits, new Vec3d(first.pos.getX() + 0.5, first.pos.getY() + 0.4, first.pos.getZ() + 0.5), Vec3d.ZERO);
-        }
-        else
-        {
-            return null;
-        }
-        
+        // wait until full size or at age limit
+        return map.values().parallelStream()
+                .filter(p -> p.tickCreated >= firstEligibleTick || p.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK)
+                .sorted(new Comparator<ParticleInfo>() {
+
+                    @Override
+                    public int compare(ParticleInfo o1, ParticleInfo o2)
+                    {
+                        return ComparisonChain.start()
+                                .compare(o2.fluidUnits, o1.fluidUnits)
+                                .compare(o1.tickCreated, o2.tickCreated)
+                                .result();
+                    }})
+                .sequential()
+                .limit(maxCount)
+                .map(p -> new EntityLavaParticle(sim.worldBuffer.realWorld, p.fluidUnits, new Vec3d(p.pos.getX() + 0.5, p.pos.getY() + 0.4, p.pos.getZ() + 0.5), Vec3d.ZERO))
+                .collect(Collectors.toList());
     }
     
     public static class ParticleInfo

@@ -1,13 +1,18 @@
 package grondag.adversity.feature.volcano.lava;
 
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.CoolingBlock;
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.simulator.Simulator;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,10 +32,15 @@ public class WorldStateBuffer implements IBlockAccess
     
     public final World realWorld;
     
-    private final Long2ObjectOpenHashMap<ChunkBuffer> chunks = new Long2ObjectOpenHashMap<ChunkBuffer>();
-    private final LinkedList<ChunkBuffer> updateQueue = new LinkedList<ChunkBuffer>();
+    /** All chunks with update data. */
+    private final ConcurrentHashMap<ChunkPos, ChunkBuffer> chunks = new ConcurrentHashMap<ChunkPos, ChunkBuffer>();
     
-    private final LinkedList<ChunkBuffer> usedBuffers = new LinkedList<ChunkBuffer>();
+    private final ConcurrentLinkedQueue<ChunkBuffer> usedBuffers = new ConcurrentLinkedQueue<ChunkBuffer>();
+    
+    /**
+     * For use in applyBlockUpdates. That routine is not re-entrant, so can keep and reuse one of these.
+     */
+    private final AdjustmentTracker tracker = new AdjustmentTracker();
     
     public WorldStateBuffer(World worldIn)
     {
@@ -39,7 +49,7 @@ public class WorldStateBuffer implements IBlockAccess
     
     public IBlockState getBlockState(BlockPos pos)
     {
-        ChunkBuffer chunk = chunks.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+        ChunkBuffer chunk = chunks.get(new ChunkPos(pos));
         
         if(chunk == null) 
         {
@@ -57,29 +67,30 @@ public class WorldStateBuffer implements IBlockAccess
         chunk.setBlockState(pos, newState, expectedPriorState);
         if(chunk.size() == 0)
         {
-            this.chunks.remove(ChunkPos.asLong(chunk.chunkpos.chunkXPos, chunk.chunkpos.chunkZPos));
+            this.chunks.remove(chunk.chunkpos);
             this.usedBuffers.add(chunk);
-            Adversity.log.info("Successful unqueud chunk update due to complete state reversion");
+//            Adversity.log.info("Successful unqueud chunk update due to complete state reversion");
         }
     }
     
-    private ChunkBuffer getChunkBuffer(BlockPos pos)
+    private ChunkBuffer getChunkBuffer(BlockPos blockPos)
     {
-        ChunkBuffer chunk = chunks.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+        ChunkPos chunkPos = new ChunkPos(blockPos);
+        
+        ChunkBuffer chunk = chunks.get(chunkPos);
         
         if(chunk == null) 
         {
-            chunk = this.usedBuffers.pollFirst();
+            chunk = this.usedBuffers.poll();
             if(chunk == null)
             {
-                chunk = new ChunkBuffer(pos, Simulator.instance.getCurrentSimTick());
+                chunk = new ChunkBuffer(chunkPos, Simulator.instance.getCurrentSimTick());
             }
             else
             {
-                chunk.renew(pos, Simulator.instance.getCurrentSimTick());
+                chunk.renew(chunkPos, Simulator.instance.getCurrentSimTick());
             }
-            chunks.put(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4), chunk);
-            updateQueue.add(chunk);
+            chunks.put(chunkPos, chunk);
         }
         return chunk;
     }
@@ -89,9 +100,10 @@ public class WorldStateBuffer implements IBlockAccess
      * Returns the number of blocks updated.
      * 
      */
-    public int applyBlockUpdates(int chunkCount)
+    public int applyBlockUpdates(int chunkCount, LavaSimulator sim)
     {
-        int blockCount = 0;
+        int updateCount = 0;
+        
         int currentTick = Simulator.instance.getCurrentSimTick();
         
         boolean maybeSomethingToDo = true;
@@ -112,9 +124,9 @@ public class WorldStateBuffer implements IBlockAccess
                 int tickDiff = currentTick - buff.tickCreated;
                 if(tickDiff > 3)
                 {
-                    if(buff.requiredUpdateCount != 0 || tickDiff >= 20)
+                    if(buff.requiredUpdateCount.get() != 0 || tickDiff >= 20)
                     {
-                        int scoreCount = tickDiff < 20 ? buff.requiredUpdateCount : buff.size();
+                        int scoreCount = tickDiff < 20 ? buff.requiredUpdateCount.get() : buff.size();
                         if(best == null)
                         {
                              best = buff;
@@ -139,17 +151,12 @@ public class WorldStateBuffer implements IBlockAccess
             }
             else
             {
-                this.chunks.remove(ChunkPos.asLong(best.chunkpos.chunkXPos, best.chunkpos.chunkZPos));
-                blockCount += best.applyBlockUpdates();
+                this.chunks.remove(best.chunkpos);
+                updateCount += best.applyBlockUpdates(tracker, sim);
                 this.usedBuffers.add(best);
             }
         }
-        return blockCount;
-    }
-    
-    public void addUpdate(BlockStateBuffer update)
-    {
-        getChunkBuffer(update.pos).addUpdate(update);
+        return updateCount;
     }
 
     @Override
@@ -199,7 +206,7 @@ public class WorldStateBuffer implements IBlockAccess
     public void readFromNBT(NBTTagCompound nbt)
     {
         this.chunks.clear();
-        this.updateQueue.clear();
+        this.usedBuffers.clear();
 
         int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
 
@@ -237,14 +244,10 @@ public class WorldStateBuffer implements IBlockAccess
 
         for(ChunkBuffer chunk : this.chunks.values())
         {
-            for(BlockStateBuffer state: chunk.values())
+            if(chunk.size() > 0)
             {
-                saveData[i++] = state.pos.getX();
-                saveData[i++] = state.pos.getY();
-                saveData[i++] = state.pos.getZ();
-                saveData[i++] = Block.getStateId(state.newState);
-                saveData[i++] = Block.getStateId(state.expectedPriorState);
-            }       
+                i = chunk.writeSaveData(saveData, i);
+            }
         }
         
         nbt.setIntArray(NBT_SAVE_DATA_TAG, saveData);
@@ -253,8 +256,27 @@ public class WorldStateBuffer implements IBlockAccess
     
     private static int getChunkStateKeyFromBlockPos(BlockPos pos)
     {
-        return ((pos.getX() & 15) << 12) | ((pos.getY() & 255) << 4) | (pos.getZ() & 15);
+        return ((pos.getY() & 0xFF) << 8) | ((pos.getX() & 0xF) << 4) | (pos.getZ() & 0xF);
     }
+    
+    /** returns true an update occured */
+    private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
+    {
+        IBlockState newState = IFlowBlock.adjustFillIfNeeded(realWorld, pos);
+        
+        if(newState == null) return false;
+        
+        if(newState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        {
+            sim.trackLavaFiller(pos);
+        }
+        else if(newState.getBlock() instanceof CoolingBlock)
+        {
+            sim.trackCoolingBlock(pos);
+        }
+        return true;
+    }
+    
     
     public static class BlockStateBuffer
     {
@@ -288,8 +310,85 @@ public class WorldStateBuffer implements IBlockAccess
         public BlockPos getBlockPos() { return this.pos; }
     }
     
-    private static int recoveryCount = 0;
-    private static int totalCount = 0;
+    /** 
+     * Tracks an adjustment bit for every block in a chunk, plus a one-block border.
+     * Valid x & z values are -1 to 16
+     */
+    public static class AdjustmentTracker
+    {
+        private BitSet bits = new BitSet( 18 * 18 * 256);
+        
+        private BitSet exclusions = new BitSet( 18 * 18 * 256);
+        
+        /** is only transiently used in getAdjustmentList */
+        private ChunkPos chunkPos;
+        
+        public void clear()
+        {
+            bits.clear();
+            exclusions.clear();
+        }
+        
+        private static int getIndex(int x, int y, int z)
+        {
+            return (((x + 1) * 18 + (z + 1)) << 8) | y;
+        }
+        
+        private BlockPos getBlockPos(int index)
+        {
+            int y = index & 0xFF;
+            index = index >> 8;
+            int z = (index % 18) - 1;
+            int x = (index / 18) - 1;
+            return new BlockPos(chunkPos.getXStart() + x, y, chunkPos.getZStart() + z);
+        }
+        
+        /** 
+         * Sets flag to true for all adjacent spaces that might be affected by a flow height block.
+         * Assumes position is within the chunk being tracked. (Not the border of a neighbor chunk.)
+         */
+        public void setAdjustmentNeededAround(BlockPos pos)
+        {
+            int x = pos.getX() & 0xF;
+            int z = pos.getZ() & 0xF;
+            int minY = Math.max(0, pos.getY() - 2);
+            int maxY = Math.min(255, pos.getY() + 2);
+            
+            for(int y = minY; y <= maxY; y++)
+            {
+                bits.set(getIndex(x - 1, y, z - 1), true);
+                bits.set(getIndex(x - 1, y, z), true);
+                bits.set(getIndex(x - 1, y, z + 1), true);
+                
+                bits.set(getIndex(x, y, z - 1), true);
+                bits.set(getIndex(x, y, z), true);
+                bits.set(getIndex(x, y, z + 1), true);
+                
+                bits.set(getIndex(x + 1, y, z - 1), true);
+                bits.set(getIndex(x + 1, y, z), true);
+                bits.set(getIndex(x + 1, y, z + 1), true);
+            }
+        }
+        
+        /** 
+         * Prevent adjustment attempt when know won't be needed because placing a non-fill block there.
+         * Assumes position is within the chunk being tracked.
+         */
+        public void excludeAdjustmentNeededAt(BlockPos pos)
+        {
+            exclusions.set(getIndex(pos.getX() & 0xF, pos.getY(), pos.getZ() & 0xF), true);
+        }
+        
+        public Collection<BlockPos> getAdjustmentPositions(ChunkPos chunkPos)
+        {
+            this.chunkPos = chunkPos;
+            bits.andNot(exclusions);
+            return bits.stream().mapToObj(i -> getBlockPos(i)).collect(Collectors.toList());
+        }
+    }
+    
+    private static AtomicInteger recoveryCount = new AtomicInteger(0);
+    private static AtomicInteger totalCount = new AtomicInteger(0);
     
     private class ChunkBuffer
     {
@@ -297,27 +396,41 @@ public class WorldStateBuffer implements IBlockAccess
         
         private int tickCreated;
         
-        private int requiredUpdateCount;
+        private AtomicInteger requiredUpdateCount = new AtomicInteger(0);
         
-        private final Int2ObjectOpenHashMap<BlockStateBuffer> states = new Int2ObjectOpenHashMap<BlockStateBuffer>(32, 0.6F);
+        private AtomicInteger dataCount = new AtomicInteger(0);
         
-        private ChunkBuffer(BlockPos posWithinChunk, int tickCreated)
+        /** shows number of updates per level*/
+        private AtomicInteger[] levelCounts = new AtomicInteger[256];
+        
+        private BlockStateBuffer[] states = new BlockStateBuffer[0x10000];
+                
+        private ChunkBuffer(ChunkPos chunkPos, int tickCreated)
         {
-            this.chunkpos = new ChunkPos(posWithinChunk);
+            this.chunkpos = chunkPos;
             this.tickCreated = tickCreated;
+            for(int i = 0; i < 256; i++)
+            {
+                levelCounts[i] = new AtomicInteger(0);
+            }
         }
         
-        private void renew(BlockPos posWithinChunk, int tickCreated)
+        private void renew(ChunkPos chunkPos, int tickCreated)
         {
-            this.chunkpos = new ChunkPos(posWithinChunk);
+            this.chunkpos = chunkPos;
             this.tickCreated = tickCreated;
-            this.requiredUpdateCount = 0;
-            this.states.clear();
+            this.requiredUpdateCount.set(0);
+            this.dataCount.set(0);
+            for(int i = 0; i < 256; i++)
+            {
+                levelCounts[i].set(0);
+            }
+            Arrays.fill(states, null);
         }
         
         private IBlockState getBlockState(BlockPos pos)
         {
-            BlockStateBuffer entry = states.get(getChunkStateKeyFromBlockPos(pos));
+            BlockStateBuffer entry = states[getChunkStateKeyFromBlockPos(pos)];
             
             if(entry == null)
             {
@@ -329,27 +442,35 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
+        /**
+         * No mechanism here to make this threadsafe, however the lava simulator will never
+         * attempt to update the same cell concurrently, so should never be a collision.
+         */
         private void setBlockState(BlockPos pos, IBlockState newState, IBlockState expectedPriorState)
         {
-            totalCount++;
+            totalCount.incrementAndGet();
             
             int key = getChunkStateKeyFromBlockPos(pos);
-            BlockStateBuffer state = states.get(key);
+            BlockStateBuffer state = states[key];
             if(state == null)
             {
                 state = new BlockStateBuffer(pos, newState, expectedPriorState);
-                states.put(key, state);
-                if(state.isRequired()) this.requiredUpdateCount++;
+                this.states[key] = state;
+                this.dataCount.incrementAndGet();
+                this.levelCounts[pos.getY()].incrementAndGet();
+                if(state.isRequired()) this.requiredUpdateCount.incrementAndGet();
             }
             else
             {
                 if(newState == state.expectedPriorState)
                 {
-                    states.remove(key);
-                    if(state.isRequired()) this.requiredUpdateCount--;
-    
-                    if((recoveryCount++ & 0xFFF) == 0xFFF)
-                        Adversity.log.info("BlockStateRecoveries = " + recoveryCount + " of " + totalCount + ", " + recoveryCount * 100 / totalCount + " percent recovery");
+                    this.states[key] = null;
+                    this.dataCount.decrementAndGet();
+                    this.levelCounts[pos.getY()].decrementAndGet();
+                    if(state.isRequired()) this.requiredUpdateCount.decrementAndGet();
+                    
+                    if((recoveryCount.getAndIncrement() & 0xFFF) == 0xFFF)
+                        Adversity.log.info("BlockStateRecoveries = " + recoveryCount.get() + " of " + totalCount.get() + ", " + recoveryCount.get() * 100 / totalCount.get() + " percent recovery");
                 }
                 else
                 {
@@ -357,42 +478,97 @@ public class WorldStateBuffer implements IBlockAccess
                     state.newState = newState;
                     if(state.isRequired())
                     {
-                        if(!wasRequired) this.requiredUpdateCount++;
+                        if(!wasRequired) this.requiredUpdateCount.incrementAndGet();
                     }
                     else
                     {
-                        if(wasRequired) this.requiredUpdateCount--;
+                        if(wasRequired) this.requiredUpdateCount.decrementAndGet();
                     }
                 }
             }
         }
         
-        private void addUpdate(BlockStateBuffer update)
+        /** NOT thread safe */
+        private int applyBlockUpdates(AdjustmentTracker tracker, LavaSimulator sim)
         {
-            states.put(getChunkStateKeyFromBlockPos(update.pos), update);
-        }
-        
-        private int applyBlockUpdates()
-        {
-            int count = this.states.size();
-            for(BlockStateBuffer state : this.states.values())
+            tracker.clear();
+            int count = this.dataCount.get();
+            int allRemaining = count;
+            
+            for(int y = 0; y < 256; y++)
             {
-                realWorld.setBlockState(state.pos, state.newState, 3);
+                if(this.levelCounts[y].get() > 0)
+                {
+                    int yRemaining = this.levelCounts[y].get();
+                    int yMin = y << 8;
+                    int yMax = yMin + 256;
+                    
+                    for(int i = yMin; i < yMax; i++)
+                    {
+                        if(this.states[i] != null)
+                        {
+                            BlockStateBuffer bsb = states[i];
+                            
+                            if(IFlowBlock.isFlowHeight(bsb.newState.getBlock()) || IFlowBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
+                            {
+                                tracker.setAdjustmentNeededAround(bsb.pos);
+                            }
+                            tracker.excludeAdjustmentNeededAt(bsb.pos);
+                            realWorld.setBlockState(bsb.pos, bsb.newState, 3);
+                            this.states[i] = null;
+                            allRemaining--;
+                            if(--yRemaining == 0) break;
+                        }
+                    }
+                    this.levelCounts[y].set(0);
+                }
+                if(allRemaining == 0) break;
             }
-            this.states.clear();
+
+            this.dataCount.set(0);
+            this.requiredUpdateCount.set(0);
+            
+            count += tracker.getAdjustmentPositions(this.chunkpos).stream().mapToInt(p -> adjustFillIfNeeded(p, sim) ? 1 : 0).sum();
+            
             return count;
+
         }
         
         private int size()
         {
-            return this.states.size();
+            return this.dataCount.get();
         }
         
-        private Collection<BlockStateBuffer> values()
+        /** returns the next index that should be used */
+        private int writeSaveData(int[] saveData, int startingIndex)
         {
-            return this.states.values();
+            int allRemaining = this.size();
+            for(int y = 0; y < 256; y++)
+            {
+                if(this.levelCounts[y].get() > 0)
+                {
+                    int yRemaining = this.levelCounts[y].get();
+                    int yMin = y << 8;
+                    int yMax = yMin + 256;
+                    
+                    for(int i = yMin; i < yMax; i++)
+                    {
+                        BlockStateBuffer state = this.states[i];
+                        if(state != null)
+                        {
+                            saveData[startingIndex++] = state.pos.getX();
+                            saveData[startingIndex++] = state.pos.getY();
+                            saveData[startingIndex++] = state.pos.getZ();
+                            saveData[startingIndex++] = Block.getStateId(state.newState);
+                            saveData[startingIndex++] = Block.getStateId(state.expectedPriorState);
+                            allRemaining--;
+                            if(--yRemaining == 0) break;
+                        }
+                    }
+                }
+                if(allRemaining == 0) break;
+            }
+            return startingIndex;
         }
-        
-     
     }
 }

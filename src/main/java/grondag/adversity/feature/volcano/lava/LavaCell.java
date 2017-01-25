@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -27,6 +28,13 @@ public class LavaCell
     private static int nextCellID = 0;
 
     private boolean neverCools = false;
+    
+    /** 
+     * Tracks if self-retain and connection have been set up based on fluid status.
+     * Theoretically unnecessary if updateFluidStatus is never called redundantly but
+     * here to catch any holes in that logic and prevent extra retains, connections.
+     */
+    private boolean hasFluidStatus = false;
 
     /** 
      * False if it is possible currentVisibleLevel won't match lastVisible 
@@ -97,7 +105,7 @@ public class LavaCell
     
     public void changeLevel(LavaSimulator sim, int amount)
     {
-//        if(this.hashCode() == 1271)
+//        if(this.hashCode() == 51943)
 //            Adversity.log.info("boop");
         
         if(amount != 0)
@@ -109,8 +117,9 @@ public class LavaCell
 
             if(amount > 0)
             {
+                //TODO - already checked this earlier in get flow so any way to prevent a recheck?
                 //if this is an empty drop cell, queue a drop particle instead of adding the lava
-                if(this.isDrop(sim))
+                if(this.getBottomType() == BottomType.DROP)
                 {
                     //                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
                     sim.queueParticle(this.pos, amount);
@@ -144,7 +153,7 @@ public class LavaCell
 
             if(oldFluidState != this.fluidAmount > 0)
             {
-                sim.updateFluidStatus(this, this.fluidAmount > 0);
+                this.updateFluidStatus(sim, this.fluidAmount > 0);
             }
         }
     }
@@ -277,10 +286,9 @@ public class LavaCell
 
                 // Make us a fluid cell.
                 this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
-                sim.updateFluidStatus(this, true);
+                this.updateFluidStatus(sim, true);
                 this.clearBlockUpdate();
                 sim.setSaveDirty(true);
-                
             }
         }
         else
@@ -291,7 +299,7 @@ public class LavaCell
             if(this.fluidAmount > 0 && (isBarrierInWorld || this.lastVisibleLevel > 0))
             {
                 this.fluidAmount = 0;
-                sim.updateFluidStatus(this, false);
+                this.updateFluidStatus(sim, false);
                 this.clearBlockUpdate();
                 sim.setSaveDirty(true);
 
@@ -410,23 +418,56 @@ public class LavaCell
         return !this.neverCools && this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200;
     }
 
-    /**
-     * True if directly above a barrier or if cell below is full of fluid.
-     */
-    public boolean isSupported(LavaSimulator sim)
+    static int[] EXITS = new int[6];
+  
+    public BottomType getBottomType()
     {
-        return this.neighborDown.isBottomSupporting();
-    }
-
-    /**
-     * True if this cell has no floor and cell below also cannot stop lava.
-     */
-    public boolean isDrop(LavaSimulator sim)
-    {
-        //My floor doesn't count if it has melted and become fluid.
-        if(this.fluidAmount == 0 && this.floorLevel > 0) return false;
-
-        return this.neighborDown.isBottomDrop();
+        if(this.neighborDown == NowhereConnection.INSTANCE) 
+            {
+                EXITS[0]++;
+                return BottomType.SUPPORTING;
+            }
+        
+        int bottomFluid = neighborDown.firstCell.getFluidAmount();
+        
+        if(bottomFluid > 0)
+        {
+            if(bottomFluid > LavaCell.FLUID_UNITS_PER_BLOCK)
+            {
+                EXITS[1]++;
+                return BottomType.SUPPORTING;
+            }
+            else
+            {
+                EXITS[2]++;
+                return BottomType.PARTIAL;
+            }
+        }
+        else
+        {
+            if(neighborDown.firstCell.getFloor() > 0)
+            {
+                EXITS[3]++;
+                return BottomType.PARTIAL;
+            }
+            else
+            {
+                // barrier should not occur frequently because connection should not exist long if so
+                // but need to handle for transient situations
+                if(neighborDown.firstCell.isBarrier)
+                {
+                    EXITS[4]++;
+                    return BottomType.SUPPORTING;
+                }
+                else
+                {
+                    EXITS[5]++;
+                    return BottomType.DROP;
+                }
+            }
+        }
+        
+//        return this.neighborDown.getBottomType();
     }
 
     //TODO: remove
@@ -459,6 +500,62 @@ public class LavaCell
 
         //        Adversity.log.info("retain id=" + this.id);
         this.referenceCount++;
+    }
+    
+    /**
+     * Call when a cell transitions between having and not having any fluid.
+     * Maintains the list of connections with cells that have fluid.
+     * Also ensures we retain all cells neighboring fluid-containing cells
+     * so that they can be validated against the game world to check for breaks.
+     */
+    protected void updateFluidStatus(LavaSimulator sim, boolean hasFluid)
+    {
+        if(hasFluid)
+        {
+            if(!this.hasFluidStatus)
+            {
+                this.hasFluidStatus = true;
+                this.retain("updateFluidStatus self");
+                for(EnumFacing face : EnumFacing.VALUES)
+                {
+                    LavaCell other = sim.getCell(this.pos.add(face.getDirectionVec()), false);
+                    other.retain("updateFluidStatus " + face.toString() + " from " + this.hashCode());
+                    if(!other.isBarrier())
+                    {
+                        sim.addConnection(this.pos, other.pos);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if(this.hasFluidStatus)
+            {
+                this.hasFluidStatus = false;
+                this.release("updateFluidStatus self");
+                for(EnumFacing face : EnumFacing.VALUES)
+                {
+                    BlockPos otherPos = this.pos.add(face.getDirectionVec());
+                    
+                    //cell should exist but don't create it if not
+                    LavaCell other = sim.getCellIfItExists(otherPos);
+                    if(other != null)
+                    {
+                        other.release("updateFluidStatus " + face.toString() + " from " + this.hashCode());
+                        if(other.getFluidAmount() == 0)
+                        {
+                            // Remove connection if neither has any fluid
+                            sim.removeConnection(this.pos, otherPos);
+                        }
+                    }
+                    else
+                    {
+                        // if cell was somehow missing don't assume connection is
+                        sim.removeConnection(this.pos, otherPos);
+                    }
+                }
+            }
+        }
     }
 
     public void bindUp(LavaCellConnection connection) { this.neighborUp = connection; }
@@ -540,6 +637,36 @@ public class LavaCell
         return this.floorLevel;
     }
 
+    /**
+     * Exploits connection references to avoid a hash lookup when possible.
+     */
+    public LavaCell getDownEfficiently(LavaSimulator sim, boolean shouldRefreshIfExists)
+    {
+        if(this.neighborDown == NowhereConnection.INSTANCE)
+        {
+            return sim.getCell(this.pos.down(), shouldRefreshIfExists);
+        }
+        else
+        {
+            return neighborDown.firstCell;
+        }
+    }
+    
+    /**
+     * Exploits connection references to avoid a hash lookup when possible.
+     */
+    public LavaCell getUpEfficiently(LavaSimulator sim, boolean shouldRefreshIfExists)
+    {
+        if(this.neighborUp == NowhereConnection.INSTANCE)
+        {
+            return sim.getCell(this.pos.up(), shouldRefreshIfExists);
+        }
+        else
+        {
+            return neighborUp.secondCell;
+        }
+    }
+    
     /**
      *  Same as getFloor() if this cell has a non-zero floor.
      *  If this cell doesn't have a floor but cell below does,

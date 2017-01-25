@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.feature.volcano.lava.WorldStateBuffer.BlockStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
@@ -96,18 +95,22 @@ public interface IFlowBlock
     }
     
     /**
-     * Returns a block updates to add or removes a filler block if needed.
+     * Adds or removes a filler block if needed.
      * Also replaces static filler blocks with dynamic version.
+     * Returns the blockstate that was set if it was changed.
      */
-    public static BlockStateBuffer adjustFillIfNeeded(IBlockAccess worldObj, BlockPos basePos)
+    public static IBlockState adjustFillIfNeeded(World worldObj, BlockPos basePos)
     {
-        final int SHOULD_BE_AIR = -1;
-        
         final IBlockState baseState = worldObj.getBlockState(basePos);
         final Block baseBlock = baseState.getBlock();
+        
+        if(IFlowBlock.isFlowHeight(baseBlock) || !LavaTerrainHelper.canLavaDisplace(baseState)) return null;
+        
+        final int SHOULD_BE_AIR = -1;
+        
         NiceBlock fillBlock = null;
 
-        BlockStateBuffer update = null; 
+        IBlockState update = null; 
                 
         int targetMeta = SHOULD_BE_AIR;
 
@@ -143,19 +146,20 @@ public interface IFlowBlock
 
             if(targetMeta == SHOULD_BE_AIR)
             {
-                update = new BlockStateBuffer(basePos, Blocks.AIR.getDefaultState(), baseState);
+                update = Blocks.AIR.getDefaultState();
+                worldObj.setBlockState(basePos, update);
             }
             else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
             {
-                update = new BlockStateBuffer(basePos, fillBlock.getDefaultState()
-                        .withProperty(NiceBlock.META, targetMeta), baseState);
+                update = fillBlock.getDefaultState().withProperty(NiceBlock.META, targetMeta);
+                worldObj.setBlockState(basePos, update);
             }
             //confirm filler needed and adjust/remove if needed
         }
-        else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
+        else if(targetMeta != SHOULD_BE_AIR && fillBlock != null)
         {
-            update = new BlockStateBuffer(basePos, fillBlock.getDefaultState()
-                    .withProperty(NiceBlock.META, targetMeta), baseState);
+            update = fillBlock.getDefaultState().withProperty(NiceBlock.META, targetMeta);
+            worldObj.setBlockState(basePos, update);
         }
         
         return update;

@@ -824,7 +824,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     {
         super.readFromNBT(tagCompound);
       
-        Adversity.log.info("readNBT volcanoTile");
+//        Adversity.log.info("readNBT volcanoTile");
 
         this.stage = VolcanoStage.values()[tagCompound.getInteger("stage")];
         this.level = tagCompound.getInteger("level");

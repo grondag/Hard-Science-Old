@@ -1,9 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.concurrent.ConcurrentSkipListMap;
-import com.google.common.collect.ComparisonChain;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ConnectionMap
@@ -13,25 +11,27 @@ public class ConnectionMap
     
     private int size = 0;
 
-    private final ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection>(
-            new Comparator<CellConnectionPos>() {
-                @Override
-                public int compare(CellConnectionPos o1, CellConnectionPos o2)
-                {
-                    return ComparisonChain.start()
-                    //vertical first
-                    .compare(o1.isVertical(), o2.isVertical())
-                    //top down
-                    .compare(o2.lowerPos.getY(), o1.lowerPos.getY())
-                    //tie breaker -> don't favor any horizontal direction
-                    .compare(o1.hashCode(), o2.hashCode())
-                    //remaining ensure unique match
-                    .compare(o1.lowerPos.getX(), o2.lowerPos.getX())
-                    .compare(o1.lowerPos.getZ(), o2.lowerPos.getZ())
-                    .compare(o1.axis, o2.axis)
-                    .result();
-                  
-                }});
+    private final ConcurrentHashMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentHashMap<CellConnectionPos, LavaCellConnection>();
+    
+//    private final ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection>(
+//            new Comparator<CellConnectionPos>() {
+//                @Override
+//                public int compare(CellConnectionPos o1, CellConnectionPos o2)
+//                {
+//                    return ComparisonChain.start()
+//                    //vertical first
+//                    .compare(o1.isVertical(), o2.isVertical())
+//                    //top down
+//                    .compare(o2.lowerPos.getY(), o1.lowerPos.getY())
+//                    //tie breaker -> don't favor any horizontal direction
+//                    .compare(o1.hashCode(), o2.hashCode())
+//                    //remaining ensure unique match
+//                    .compare(o1.lowerPos.getX(), o2.lowerPos.getX())
+//                    .compare(o1.lowerPos.getZ(), o2.lowerPos.getZ())
+//                    .compare(o1.axis, o2.axis)
+//                    .result();
+//                  
+//                }});
 
             
     public void clear()
@@ -64,7 +64,7 @@ public class ConnectionMap
             {
                 LavaCell cell1 = sim.getCell(pos.lowerPos, false);
                 LavaCell cell2 = sim.getCell(pos.upperPos, false);
-                LavaCellConnection connection = new LavaCellConnection(cell1, cell2, pos);
+                LavaCellConnection connection = LavaCellConnection.create(cell1, cell2, pos);
                 map.put(pos, connection);
                 size++;
             }
@@ -85,7 +85,7 @@ public class ConnectionMap
         }
     }
     
-    public Collection<LavaCellConnection> getSortedValues()
+    public Collection<LavaCellConnection> values()
     {
         return this.map.values();
     }

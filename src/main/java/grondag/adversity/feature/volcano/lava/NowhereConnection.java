@@ -12,7 +12,7 @@ public class NowhereConnection extends LavaCellConnection
     
     public NowhereConnection()
     {
-        super();
+        super(NullCell.INSTANCE, NullCell.INSTANCE);
     }
 
     @Override
@@ -22,11 +22,17 @@ public class NowhereConnection extends LavaCellConnection
     }
 
     @Override
-    public void doStep(LavaSimulator sim, boolean force)
+    public void doStep(LavaSimulator sim)
     {
         //NOOP
     }
 
+    @Override
+    public void doFirstStep(LavaSimulator sim)
+    {
+        //NOOP
+    }
+    
     @Override
     public void setDirty()
     {
@@ -45,41 +51,42 @@ public class NowhereConnection extends LavaCellConnection
         //NOOP
     }
 
+//    @Override
+//    public int getDrop()
+//    {
+//        return 0;
+//    }
+
+//    @Override
+//    public int getSortDrop()
+//    {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void updateSortDrop()
+//    {
+//        //NOOP
+//    }
+
     @Override
-    public int getDrop()
+    protected int getFlowRate(LavaSimulator sim)
     {
         return 0;
     }
 
-    @Override
-    public int getSortDrop()
+    private static class NullCell extends LavaCell
     {
-        return 0;
+        private static final NullCell INSTANCE = new NullCell();
+        
+        private NullCell()
+        {
+            super(null, null, 0);            
+        }
+        
+        @Override public boolean isBarrier()
+        {
+            return true;
+        }
     }
-
-    @Override
-    public void updateSortDrop()
-    {
-        //NOOP
-    }
-
-    @Override
-    public boolean isBottomDrop()
-    {
-        // nowhere connection implies barrier, so cannot be a free drop
-        return false;
-    }
-
-    @Override
-    public boolean isBottomSupporting()
-    {
-        // nowhere connection implies barrier, so must be supporting
-        // (or if non-vertical value doesn't matter)
-        return true;
-    }
-    
-    
-    
-    
-
 }
