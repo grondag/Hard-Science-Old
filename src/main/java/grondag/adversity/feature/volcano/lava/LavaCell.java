@@ -2,12 +2,12 @@ package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
+import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
 public class LavaCell
@@ -64,7 +64,7 @@ public class LavaCell
     /** for tracking block updates */
     private int lastVisibleLevel = 0;
 
-    public final BlockPos pos;
+    public final long packedBlockPos;
 
     private final int id;
 
@@ -86,18 +86,19 @@ public class LavaCell
     /**
      * Creates a lava cell without any notification or addition to collections.
      */
-    public LavaCell(LavaSimulator sim, BlockPos pos)
+    public LavaCell(LavaSimulator sim, long packedBlockPos)
     {
-        this(sim, pos, 0);
+        this(sim, packedBlockPos, 0);
     }
 
+    
     /**
      * Creates a lava cell without any notification or addition to collections.
      * tickindex should be zero if there has never been a flow.
      */
-    public LavaCell(LavaSimulator sim, BlockPos pos, int fluidAmount)
+    public LavaCell(LavaSimulator sim, long packedBlockPos, int fluidAmount)
     {
-        this.pos = pos;
+        this.packedBlockPos = packedBlockPos;
         this.fluidAmount = fluidAmount;
         this.id = nextCellID++;
         this.lastFlowTick = (fluidAmount == 0 | sim == null) ? 0 : sim.getTickIndex();
@@ -122,7 +123,7 @@ public class LavaCell
                 if(this.getBottomType() == BottomType.DROP)
                 {
                     //                    Adversity.log.info("LavaCell id=" + this.id + " with level =" + this.fluidAmount + " changeLevel diverted to particle: amount=" + amount +" @"+ pos.toString());
-                    sim.queueParticle(this.pos, amount);
+                    sim.queueParticle(this.packedBlockPos, amount);
                     return;
                 }
                 else if(!oldFluidState)
@@ -141,7 +142,8 @@ public class LavaCell
             
             if(this.fluidAmount < 0)
             {
-                Adversity.log.info("Negative cell level detected: " + this.fluidAmount + " cellID=" + this.id + " pos=" + this.pos.toString());
+                Adversity.log.info("Negative cell level detected: " + this.fluidAmount + " cellID=" + this.id + " pos=" 
+                        + PackedBlockPos.unpack(this.packedBlockPos).toString());
                 this.fluidAmount = 0;
             }
 
@@ -171,17 +173,17 @@ public class LavaCell
         {
             LavaSimulator.blockUpdatesProvisionCounter++;
             
-            final IBlockState priorState = sim.worldBuffer.getBlockState(pos);
+            final IBlockState priorState = sim.worldBuffer.getBlockState(this.packedBlockPos);
             if(currentVisible == 0)
             {
                 if(priorState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
                 {
-                    sim.worldBuffer.setBlockState(pos, Blocks.AIR.getDefaultState(), priorState);
+                    sim.worldBuffer.setBlockState(this.packedBlockPos, Blocks.AIR.getDefaultState(), priorState);
                 }
             }
             else
             {
-                sim.worldBuffer.setBlockState(pos, 
+                sim.worldBuffer.setBlockState(this.packedBlockPos, 
                         IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible),
                         priorState);
             }
@@ -242,7 +244,7 @@ public class LavaCell
 //        if(this.hashCode() == 3316 || this.hashCode() == 3316)
 //            Adversity.log.info("boop");
         
-        IBlockState myState = sim.worldBuffer.getBlockState(this.pos);
+        IBlockState myState = sim.worldBuffer.getBlockState(this.packedBlockPos);
 
         int worldVisibleLevel = IFlowBlock.getFlowHeightFromState(myState);
         boolean isLavaInWorld = worldVisibleLevel > 0 && myState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK;
@@ -315,16 +317,9 @@ public class LavaCell
 
                     // should force update of retained level in this case
                     updateRetainedLevel = true;
-
                     this.isBarrier = false;
-                    for(EnumFacing face : EnumFacing.VALUES)
-                    {
-                        LavaCell other = sim.getFluidCellIfItExists(this.pos.add(face.getDirectionVec()));
-                        if(other != null && !other.isBarrier() && other.fluidAmount > 0)
-                        {
-                            sim.addConnection(this.pos, other.pos);
-                        }
-                    }
+                    // weakly because we don't have lava
+                    this.addNeighborConnectionsWeakly(sim);
                 }
 
                 int newFloor =  worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
@@ -345,10 +340,7 @@ public class LavaCell
                 // Remove connections to neighboring cells if there were any.
                 if(this.isFirstValidationComplete)
                 {
-                    for(EnumFacing face : EnumFacing.VALUES)
-                    {
-                        sim.removeConnection(this.pos, pos.add(face.getDirectionVec()));
-                    }
+                  this.removeNeighborConnections(sim);
                 }
             }
         }
@@ -373,24 +365,26 @@ public class LavaCell
             {
                 this.retainedLevel = Math.max(0, effectiveFloor + FLUID_UNTIS_PER_HALF_BLOCK);
             }
-            else if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(pos.down())))
+            else if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(PackedBlockPos.down(this.packedBlockPos))))
             {
-                if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(pos.down().down())))
+                if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(PackedBlockPos.down(PackedBlockPos.down(this.packedBlockPos)))))
                 {
                     //if two blocks below is also open/lava, then will have no retained level
                     this.retainedLevel = 0;
                 }
                 else
                 {
+                    BlockPos downPos = PackedBlockPos.unpack(PackedBlockPos.down(this.packedBlockPos));
                     // If two blocks below is a barrier, then will have a retained level
                     // when the retained level below is > 1.
                     //TODO: optimize for integer math
-                    this.retainedLevel = Math.max(0, (int)((sim.terrainHelper.computeIdealBaseFlowHeight(pos.down()) - 1F) * FLUID_UNITS_PER_BLOCK));
+                    //TODO: have terrain helper use packed block coords?
+                    this.retainedLevel = Math.max(0, (int)((sim.terrainHelper.computeIdealBaseFlowHeight(downPos) - 1F) * FLUID_UNITS_PER_BLOCK));
                 }
             }
             else
             {
-                this.retainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(pos) * FLUID_UNITS_PER_BLOCK);
+                this.retainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(PackedBlockPos.unpack(this.packedBlockPos)) * FLUID_UNITS_PER_BLOCK);
             }
 
 
@@ -471,9 +465,9 @@ public class LavaCell
     }
 
     //TODO: remove
-    private static int retainCallCount = 0;
-    private static int releaseCallCount = 0;
-    private static long lastUpdateNanoTime = System.nanoTime();
+//    private static int retainCallCount = 0;
+//    private static int releaseCallCount = 0;
+//    private static long lastUpdateNanoTime = System.nanoTime();
 //    private StringBuilder builder = new StringBuilder();
 
 //    /** 
@@ -488,15 +482,15 @@ public class LavaCell
 //        builder.append("retain " + desc + System.lineSeparator());
 
         //TODO: remove
-        if(System.nanoTime() - lastUpdateNanoTime >= 10000000000L)
-        {
-            Adversity.log.info("cell retains/sec=" + retainCallCount / (lastUpdateNanoTime/1000000000));
-            Adversity.log.info("cell release/sec=" + releaseCallCount / (lastUpdateNanoTime/1000000000));
-            retainCallCount = 0;
-            releaseCallCount = 0;
-            lastUpdateNanoTime = System.nanoTime();
-        }
-        retainCallCount++;
+//        if(System.nanoTime() - lastUpdateNanoTime >= 10000000000L)
+//        {
+//            Adversity.log.info("cell retains/sec=" + retainCallCount / (lastUpdateNanoTime/1000000000));
+//            Adversity.log.info("cell release/sec=" + releaseCallCount / (lastUpdateNanoTime/1000000000));
+//            retainCallCount = 0;
+//            releaseCallCount = 0;
+//            lastUpdateNanoTime = System.nanoTime();
+//        }
+//        retainCallCount++;
 
         //        Adversity.log.info("retain id=" + this.id);
         this.referenceCount++;
@@ -516,15 +510,7 @@ public class LavaCell
             {
                 this.hasFluidStatus = true;
                 this.retain("updateFluidStatus self");
-                for(EnumFacing face : EnumFacing.VALUES)
-                {
-                    LavaCell other = sim.getCell(this.pos.add(face.getDirectionVec()), false);
-                    other.retain("updateFluidStatus " + face.toString() + " from " + this.hashCode());
-                    if(!other.isBarrier())
-                    {
-                        sim.addConnection(this.pos, other.pos);
-                    }
-                }
+                this.addNeighborConnectionsStrongly(sim);
             }
         }
         else
@@ -533,31 +519,79 @@ public class LavaCell
             {
                 this.hasFluidStatus = false;
                 this.release("updateFluidStatus self");
-                for(EnumFacing face : EnumFacing.VALUES)
-                {
-                    BlockPos otherPos = this.pos.add(face.getDirectionVec());
-                    
-                    //cell should exist but don't create it if not
-                    LavaCell other = sim.getCellIfItExists(otherPos);
-                    if(other != null)
-                    {
-                        other.release("updateFluidStatus " + face.toString() + " from " + this.hashCode());
-                        if(other.getFluidAmount() == 0)
-                        {
-                            // Remove connection if neither has any fluid
-                            sim.removeConnection(this.pos, otherPos);
-                        }
-                    }
-                    else
-                    {
-                        // if cell was somehow missing don't assume connection is
-                        sim.removeConnection(this.pos, otherPos);
-                    }
-                }
+                this.removeNeighborConnections(sim);
             }
         }
     }
 
+    /** adds connections to cells that are not barriers */
+    private void addNeighborConnectionsStrongly(LavaSimulator sim)
+    {
+        LavaCell other = sim.getCell(PackedBlockPos.up(this.packedBlockPos), false);
+        if(other != null && !other.isBarrier())
+        {
+            sim.addConnection(ConnectionMap.getUpConnectionFromPackedBlockPos(this.packedBlockPos));
+        }
+        other = sim.getCell(PackedBlockPos.down(this.packedBlockPos), false);
+        if(other != null && !other.isBarrier())
+            sim.addConnection(ConnectionMap.getDownConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCell(PackedBlockPos.east(this.packedBlockPos), false);
+        if(other != null && !other.isBarrier())
+            sim.addConnection(ConnectionMap.getEastConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCell(PackedBlockPos.west(this.packedBlockPos), false);
+        if(other != null && !other.isBarrier())
+            sim.addConnection(ConnectionMap.getWestConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCell(PackedBlockPos.north(this.packedBlockPos), false);
+        if(other != null && !other.isBarrier())
+            sim.addConnection(ConnectionMap.getNorthConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCell(PackedBlockPos.south(this.packedBlockPos), false);
+        if(other != null && !other.isBarrier())
+            sim.addConnection(ConnectionMap.getSouthConnectionFromPackedBlockPos(this.packedBlockPos));
+    }
+        
+    
+    /** adds connections to cells that have fluid */
+    private void addNeighborConnectionsWeakly(LavaSimulator sim)
+    {
+        LavaCell other = sim.getCellIfItExists(PackedBlockPos.up(this.packedBlockPos));
+        if(other != null && other.fluidAmount > 0)
+        {
+            sim.addConnection(ConnectionMap.getUpConnectionFromPackedBlockPos(this.packedBlockPos));
+        }
+        other = sim.getCellIfItExists(PackedBlockPos.down(this.packedBlockPos));
+        if(other != null && other.fluidAmount > 0)
+            sim.addConnection(ConnectionMap.getDownConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCellIfItExists(PackedBlockPos.east(this.packedBlockPos));
+        if(other != null && other.fluidAmount > 0)
+            sim.addConnection(ConnectionMap.getEastConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCellIfItExists(PackedBlockPos.west(this.packedBlockPos));
+        if(other != null && other.fluidAmount > 0)
+            sim.addConnection(ConnectionMap.getWestConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCellIfItExists(PackedBlockPos.north(this.packedBlockPos));
+        if(other != null && other.fluidAmount > 0)
+            sim.addConnection(ConnectionMap.getNorthConnectionFromPackedBlockPos(this.packedBlockPos));
+        
+        other = sim.getCellIfItExists(PackedBlockPos.south(this.packedBlockPos));
+        if(other != null && other.fluidAmount > 0)
+            sim.addConnection(ConnectionMap.getSouthConnectionFromPackedBlockPos(this.packedBlockPos));
+    }
+    
+    private void removeNeighborConnections(LavaSimulator sim)
+    {
+        sim.removeConnection(ConnectionMap.getUpConnectionFromPackedBlockPos(this.packedBlockPos));
+        sim.removeConnection(ConnectionMap.getDownConnectionFromPackedBlockPos(this.packedBlockPos));
+        sim.removeConnection(ConnectionMap.getEastConnectionFromPackedBlockPos(this.packedBlockPos));
+        sim.removeConnection(ConnectionMap.getWestConnectionFromPackedBlockPos(this.packedBlockPos));
+        sim.removeConnection(ConnectionMap.getNorthConnectionFromPackedBlockPos(this.packedBlockPos));
+        sim.removeConnection(ConnectionMap.getSouthConnectionFromPackedBlockPos(this.packedBlockPos));
+    }
     public void bindUp(LavaCellConnection connection) { this.neighborUp = connection; }
     public void bindDown(LavaCellConnection connection) { this.neighborDown = connection; }
     public void bindEast(LavaCellConnection connection) { this.neighborEast = connection; }
@@ -585,8 +619,6 @@ public class LavaCell
     public void release(String desc)
     {
 //        builder.append("release " + desc + System.lineSeparator());
-
-        releaseCallCount++;
 
         //        Adversity.log.info("release id=" + this.id);
         this.referenceCount--;
@@ -644,7 +676,7 @@ public class LavaCell
     {
         if(this.neighborDown == NowhereConnection.INSTANCE)
         {
-            return sim.getCell(this.pos.down(), shouldRefreshIfExists);
+            return sim.getCell(PackedBlockPos.down(this.packedBlockPos), shouldRefreshIfExists);
         }
         else
         {
@@ -659,7 +691,7 @@ public class LavaCell
     {
         if(this.neighborUp == NowhereConnection.INSTANCE)
         {
-            return sim.getCell(this.pos.up(), shouldRefreshIfExists);
+            return sim.getCell(PackedBlockPos.up(this.packedBlockPos), shouldRefreshIfExists);
         }
         else
         {
@@ -680,8 +712,8 @@ public class LavaCell
         int result = this.floorLevel;
         if(result == 0)
         {
-            BlockPos downPos = this.pos.down();
-            LavaCell down = sim.getCellIfItExists(downPos);
+            long packedDown = PackedBlockPos.down(this.packedBlockPos);
+            LavaCell down = sim.getCellIfItExists(packedDown);
             if(down != null)
             {
                 if(!down.isBarrier && down.getFloor() > 0)
@@ -694,7 +726,7 @@ public class LavaCell
                 // Simulation hasn't captured state as a cell, so almost certainly does
                 // not contain lava but could contain a height block.
                 // Even so, confirm it isn't an orphaned lava block before using it as a floor.
-                IBlockState state = sim.worldBuffer.getBlockState(downPos);
+                IBlockState state = sim.worldBuffer.getBlockState(packedDown);
                 int worldLevel = IFlowBlock.getFlowHeightFromState(state);
                 if(worldLevel > 0 && state.getBlock() != NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
                 {

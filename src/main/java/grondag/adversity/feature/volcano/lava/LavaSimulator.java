@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
+import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -26,9 +27,6 @@ import net.minecraft.world.World;
 /**
  * TODO
 
- * 
- * Replace connection skiplist with hashmap, make iteration unordered
- * 
  * Make connection iteration parallel - will require locking mechanism so that cells are read/updated atomically     
  * 
  * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
@@ -53,14 +51,15 @@ public class LavaSimulator extends SimulationNode
     
     public static final ForkJoinPool LAVA_THREAD_POOL = new ForkJoinPool();
 
-    private final ConcurrentHashMap<BlockPos, LavaCell> allCells = new ConcurrentHashMap<BlockPos, LavaCell>(16000, 0.6F, 8);
+    private final ConcurrentHashMap<Long, LavaCell> allCells = new ConcurrentHashMap<Long, LavaCell>(16000, 0.6F, 8);
     private final static String LAVA_CELL_NBT_TAG = "lavacells";
-    private static final int LAVA_CELL_NBT_WIDTH = 6;
+    private static final int LAVA_CELL_NBT_WIDTH = 5;
     
+    //TODO: consider switching back to BlockPos - if going to be going back to world or checks would avoid reinstantiation each time
     /** Filler lava blocks that need to be cooled with lava cells but aren't involved in the fluid simulation. */
-    private final Set<BlockPos> lavaFillers = ConcurrentHashMap.newKeySet();
+    private final Set<Long> lavaFillers = ConcurrentHashMap.newKeySet();
     private final static String LAVA_FILLER_NBT_TAG = "lavafillers"; 
-    private static final int LAVA_FILLER_NBT_WIDTH = 3;
+    private static final int LAVA_FILLER_NBT_WIDTH = 2;
     
     /** Basalt blocks that are awaiting cooling */
     private final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
@@ -249,11 +248,11 @@ public class LavaSimulator extends SimulationNode
     {
        LAVA_THREAD_POOL.submit( () ->
            this.allCells.values().parallelStream()
-                .filter(c -> c.getFluidAmount() > 0 && canLavaCool(c.pos) && c.canCool(this))
+                .filter(c -> c.getFluidAmount() > 0 && canLavaCool(c.packedBlockPos) && c.canCool(this))
                 .collect(Collectors.toList())
                 .parallelStream().forEach(c -> 
                 {
-                    coolLava(c.pos);
+                    coolLava(c.packedBlockPos);
                     c.changeLevel(this, -c.getFluidAmount());
                     c.clearBlockUpdate();
                     c.validate(this, true);
@@ -310,8 +309,10 @@ public class LavaSimulator extends SimulationNode
     /**
      * Returns value to show if lava can cool based on world state alone. Does not consider age.
      */
-    private boolean canLavaCool(BlockPos pos)
+    private boolean canLavaCool(long packedBlockPos)
     {
+        BlockPos pos = PackedBlockPos.unpack(packedBlockPos);
+        
         Block block = worldBuffer.getBlockState(pos).getBlock();
         
         if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
@@ -342,9 +343,9 @@ public class LavaSimulator extends SimulationNode
         }
     }
     
-    private void coolLava(BlockPos pos)
+    private void coolLava(long packedBlockPos)
     {
-        final IBlockState priorState = this.worldBuffer.getBlockState(pos);
+        final IBlockState priorState = this.worldBuffer.getBlockState(packedBlockPos);
         Block currentBlock = priorState.getBlock();
         NiceBlock newBlock = null;
         if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
@@ -361,9 +362,9 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("Cooling lava @" + pos.toString());
             //should not need these any more due to world buffer
 //            this.itMe = true;
-            this.worldBuffer.setBlockState(pos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
+            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
 //            this.itMe = false;
-            this.basaltBlocks.add(new AgedBlockPos(pos, this.tickIndex));
+            this.basaltBlocks.add(new AgedBlockPos(PackedBlockPos.unpack(packedBlockPos), this.tickIndex));
         }
     }
 
@@ -403,7 +404,7 @@ public class LavaSimulator extends SimulationNode
             {
                 if(!c.isRetained() && c.getFluidAmount() == 0) 
                 {
-                    this.allCells.remove(c.pos);
+                    this.allCells.remove(c.packedBlockPos);
                 }
             }
         ));
@@ -415,12 +416,21 @@ public class LavaSimulator extends SimulationNode
      */
     public LavaCell getCell(BlockPos pos, boolean validateExisting)
     {
-        LavaCell result = allCells.get(pos);
+        return this.getCell(PackedBlockPos.pack(pos), validateExisting);
+    }
+    
+    /**
+     * Retrieves existing cell or creates new if not found.
+     * For existing cells, will validate vs. world if validateExisting = true;
+     */
+    public LavaCell getCell(long packedBlockPos, boolean validateExisting)
+    {
+        LavaCell result = allCells.get(packedBlockPos);
 
         if(result == null)
         {
-            result = new LavaCell(this, pos.toImmutable());
-            allCells.put(result.pos, result);
+            result = new LavaCell(this, packedBlockPos);
+            allCells.put(packedBlockPos, result);
             result.validate(this, true);
         }
         else if(validateExisting)
@@ -438,7 +448,7 @@ public class LavaSimulator extends SimulationNode
     public LavaCell getCellForLavaAddition(BlockPos pos, boolean shouldResynchToWorldIfExists)
     {
         LavaCell candidate = this.getCell(pos, shouldResynchToWorldIfExists);
-        if(candidate.isBarrier() && candidate.pos.getY() < 255)
+        if(candidate.isBarrier() && PackedBlockPos.getY(candidate.packedBlockPos) < 255)
         {
             candidate = candidate.getUpEfficiently(this, shouldResynchToWorldIfExists);
         }
@@ -453,30 +463,16 @@ public class LavaSimulator extends SimulationNode
     }
     
     /** returns a cell only if it contains fluid */
-    public LavaCell getCellIfItExists(BlockPos pos)
+    public LavaCell getCellIfItExists(long packedPos)
     {
-        return this.allCells.get(pos);
+        return this.allCells.get(packedPos);
     }
     
-    /** returns a cell only if it contains fluid */
-    public LavaCell getFluidCellIfItExists(BlockPos pos)
+    public LavaCellConnection getConnection(long packedConnectionPos)
     {
-        LavaCell result = this.allCells.get(pos);
-        if(result != null && result.getFluidAmount() > 0)
-        {
-            return result;
-        }
-        else
-        {
-            return null;
-        }
+        return connections.get(packedConnectionPos);
     }
     
-    public LavaCellConnection getConnection(BlockPos pos1, BlockPos pos2)
-    {
-        return connections.get(new CellConnectionPos(pos1, pos2));
-    }
-
     /**
      * Update simulation from world when blocks are placed via creative mode or other methods.
      * Also called by random tick on cooling blocks so that they can't get permanently orphaned
@@ -500,7 +496,7 @@ public class LavaSimulator extends SimulationNode
 
         if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
         {
-            this.lavaFillers.add(pos);
+            this.lavaFillers.add(PackedBlockPos.pack(pos));
         }
         else if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
@@ -517,7 +513,7 @@ public class LavaSimulator extends SimulationNode
     /** used by world update to notify when fillers are placed */
     public void trackLavaFiller(BlockPos pos)
     {
-        this.lavaFillers.add(pos);
+        this.lavaFillers.add(PackedBlockPos.pack(pos));
     }
     
     /** used by world update to notify when fillers are placed */
@@ -566,21 +562,20 @@ public class LavaSimulator extends SimulationNode
         }
     }
 
-    public void queueParticle(BlockPos pos, int amount)
+    public void queueParticle(long packedBlockPos, int amount)
     {
 //        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
-
-        this.particles.addLavaForParticle(this, pos, amount);
+        this.particles.addLavaForParticle(this, packedBlockPos, amount);
     }
 
-    public void addConnection(BlockPos pos1, BlockPos pos2)
+    public void addConnection(long packedConnectionPos)
     {
-        this.connections.createConnectionIfNotPresent(this, new CellConnectionPos(pos1, pos2));
+        this.connections.createConnectionIfNotPresent(this, packedConnectionPos);
     }
 
-    public void removeConnection(BlockPos pos1, BlockPos pos2)
+    public void removeConnection(long packedConnectionPos)
     {
-        this.connections.remove(new CellConnectionPos(pos1, pos2));
+        this.connections.remove(packedConnectionPos);
     }
 
     public static int blockUpdatesProvisionCounter;
@@ -634,7 +629,7 @@ public class LavaSimulator extends SimulationNode
             int i = 0;
             while(i < saveData.length)
             {
-                LavaCell cell = new LavaCell(this, new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]);
+                LavaCell cell = new LavaCell(this, saveData[i++] | (saveData[i++] << 32), saveData[i++]);
                 if(saveData[i] == Integer.MAX_VALUE)
                 {
                     cell.setLastFlowTick(this.tickIndex);
@@ -647,7 +642,7 @@ public class LavaSimulator extends SimulationNode
                 i++;
                 cell.setFloor(saveData[i++]);
                 cell.clearBlockUpdate();
-                this.allCells.put(cell.pos, cell);
+                this.allCells.put(cell.packedBlockPos, cell);
             }
             
             // wait until all cells are added to collection, otherwise will recreate them all from the world recusively
@@ -674,7 +669,7 @@ public class LavaSimulator extends SimulationNode
             int i = 0;
             while(i < saveData.length)
             {
-                this.lavaFillers.add(new BlockPos(saveData[i++], saveData[i++], saveData[i++]));
+                this.lavaFillers.add((long)saveData[i++] | ((long)saveData[i++] >> 32));
             }
             Adversity.log.info("Loaded " + lavaFillers.size() + " filler cells.");
         }
@@ -716,9 +711,8 @@ public class LavaSimulator extends SimulationNode
     
             for(LavaCell cell: saveList)
             {
-                saveData[i++] = cell.pos.getX();
-                saveData[i++] = cell.pos.getY();
-                saveData[i++] = cell.pos.getZ();
+                saveData[i++] = (int)(cell.packedBlockPos & 0xFFFFFFFF);
+                saveData[i++] = (int)((cell.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = cell.getFluidAmount();
                 saveData[i++] = cell.getNeverCools() ? Integer.MAX_VALUE : cell.getLastFlowTick();
                 saveData[i++] = cell.getFloor();
@@ -731,11 +725,10 @@ public class LavaSimulator extends SimulationNode
             Adversity.log.info("Saving " + lavaFillers.size() + " filler cells.");
             int[] saveData = new int[lavaFillers.size() * LAVA_FILLER_NBT_WIDTH];
             int i = 0;
-            for(BlockPos pos: lavaFillers)
+            for(long packedPos: lavaFillers)
             {
-                saveData[i++] = pos.getX();
-                saveData[i++] = pos.getY();
-                saveData[i++] = pos.getZ();
+                saveData[i++] = (int) (packedPos & 0xFFFFFFFF);
+                saveData[i++] = (int) ((packedPos >> 32) & 0xFFFFFFFF);
             }       
             nbt.setIntArray(LAVA_FILLER_NBT_TAG, saveData);
         }

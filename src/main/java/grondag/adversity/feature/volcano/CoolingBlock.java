@@ -43,6 +43,8 @@ public class CoolingBlock extends FlowDynamicBlock
         /** means this isn't a cooling block*/
         INVALID
     }
+    
+    //TODO: convert to packed block coordinates
     /**
      * Cools this block if ready and returns true if successful.
      */
@@ -58,17 +60,17 @@ public class CoolingBlock extends FlowDynamicBlock
                 {
                     if( IFlowBlock.shouldBeFullCube(state, worldIn, pos))
                     {
-                        worldIn.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
+                        worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     }
                     else
                     {
-                        worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
+                        worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     }
                     return CoolingResult.COMPLETE;
                 }
                 else
                 {
-                    worldIn.setBlockState(pos, this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
+                    worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), this.nextCoolingBlock.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     return CoolingResult.PARTIAL;
                 }
             }

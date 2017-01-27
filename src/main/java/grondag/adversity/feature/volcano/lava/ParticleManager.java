@@ -9,16 +9,16 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class ParticleManager
 {
     private final static String NBT_SAVE_DATA_TAG = "particleManager";
-    private final static int NBT_SAVE_DATA_WIDTH = 5;
+    private final static int NBT_SAVE_DATA_WIDTH = 4;
     
-    private final ConcurrentHashMap<BlockPos, ParticleInfo> map = new ConcurrentHashMap<BlockPos, ParticleInfo>(512);
+    private final ConcurrentHashMap<Long, ParticleInfo> map = new ConcurrentHashMap<Long, ParticleInfo>(512);
             
     public void clear()
     {
@@ -30,14 +30,14 @@ public class ParticleManager
         return map.size();
     }
    
-    public void addLavaForParticle(LavaSimulator sim, BlockPos pos, int fluidAmount)
+    public void addLavaForParticle(LavaSimulator sim, long packedBlockPos, int fluidAmount)
     {
-        ParticleInfo particle = map.get(pos);
+        ParticleInfo particle = map.get(packedBlockPos);
         
         if(particle == null)
         {
-            particle = new ParticleInfo(sim.getTickIndex(), pos, fluidAmount);
-            map.put(pos, particle);
+            particle = new ParticleInfo(sim.getTickIndex(), packedBlockPos, fluidAmount);
+            map.put(packedBlockPos, particle);
 //            Adversity.log.info("ParticleManager added new particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits());
         }
         else
@@ -71,7 +71,13 @@ public class ParticleManager
                     }})
                 .sequential()
                 .limit(maxCount)
-                .map(p -> new EntityLavaParticle(sim.worldBuffer.realWorld, p.fluidUnits, new Vec3d(p.pos.getX() + 0.5, p.pos.getY() + 0.4, p.pos.getZ() + 0.5), Vec3d.ZERO))
+                .map(p -> new EntityLavaParticle(sim.worldBuffer.realWorld, p.fluidUnits, 
+                        new Vec3d(
+                                PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
+                                PackedBlockPos.getX(p.packedBlockPos) + 0.4, 
+                                PackedBlockPos.getX(p.packedBlockPos) + 0.5
+                            ),
+                        Vec3d.ZERO))
                 .collect(Collectors.toList());
     }
     
@@ -79,12 +85,12 @@ public class ParticleManager
     {
         public final int tickCreated;
         private int fluidUnits = 0;
-        public final BlockPos pos;
+        public final long packedBlockPos;
         
-        private ParticleInfo(int tickCreated, BlockPos pos, int fluidUnits)
+        private ParticleInfo(int tickCreated, long packedBlockPos, int fluidUnits)
         {
             this.tickCreated = tickCreated;
-            this.pos = pos;
+            this.packedBlockPos = packedBlockPos;
             this.fluidUnits = fluidUnits;
         }
         
@@ -116,12 +122,12 @@ public class ParticleManager
 
         while(i < saveData.length)
         {
-            ParticleInfo p = new ParticleInfo(saveData[i++], new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]);
+            ParticleInfo p = new ParticleInfo(saveData[i++], (long)saveData[i++] << 32 | (long)saveData[i++], saveData[i++]);
             
             //protect against duplicate position weirdness in save data
-            if(!map.containsKey(p.pos))
+            if(!map.containsKey(p.packedBlockPos))
             {
-                map.put(p.pos, p);
+                map.put(p.packedBlockPos, p);
             }
         }
 
@@ -138,9 +144,8 @@ public class ParticleManager
         for(ParticleInfo p: map.values())
         {
             saveData[i++] = p.tickCreated;
-            saveData[i++] = p.pos.getX();
-            saveData[i++] = p.pos.getY();
-            saveData[i++] = p.pos.getZ();
+            saveData[i++] = (int) (p.packedBlockPos & 0xFFFFFFFF);
+            saveData[i++] = (int) ((p.packedBlockPos >> 32) & 0xFFFFFFFF);
             saveData[i++] = p.fluidUnits;
         }       
 

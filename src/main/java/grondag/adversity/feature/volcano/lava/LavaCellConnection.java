@@ -2,6 +2,9 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.adversity.library.PackedBlockPos;
+import net.minecraft.util.EnumFacing;
+
 public abstract class LavaCellConnection
 {
     protected static int nextConnectionID = 0;
@@ -14,7 +17,7 @@ public abstract class LavaCellConnection
     
     public final int id;
     
-    public final CellConnectionPos pos;
+    public final long packedConnectionPos;
     
     protected final AbstractCellBinder binder;
     
@@ -59,22 +62,22 @@ public abstract class LavaCellConnection
         PARTIAL
     }
  
-    public static LavaCellConnection create(LavaCell firstCell, LavaCell secondCell, CellConnectionPos pos)
+    public static LavaCellConnection create(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
-        if(pos.isVertical())
+        if(PackedBlockPos.getExtra(packedConnectionPos) == EnumFacing.Axis.Y.ordinal())
         {
-            return new LavaCellConnectionVertical(firstCell, secondCell, pos);
+            return new LavaCellConnectionVertical(firstCell, secondCell, packedConnectionPos);
         }
         else
         {
-            return new LavaCellConnectionHorizontal(firstCell, secondCell, pos);
+            return new LavaCellConnectionHorizontal(firstCell, secondCell, packedConnectionPos);
         }
     }
     
-    protected LavaCellConnection(LavaCell firstCell, LavaCell secondCell, CellConnectionPos pos)
+    protected LavaCellConnection(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
 
-        this.pos = pos;
+        this.packedConnectionPos = packedConnectionPos;
         
  
         // TODO: remove
@@ -82,48 +85,12 @@ public abstract class LavaCellConnection
 //            Adversity.log.info("boop");
         
         this.id = nextConnectionID++;
+        this.firstCell = firstCell;
+        this.secondCell = secondCell;
+        firstCell.retain("");
+        secondCell.retain("");
                 
-        if(pos.isVertical())
-        {
-            if(firstCell.pos.getY() < secondCell.pos.getY())
-            {
-                this.firstCell = firstCell;
-                this.secondCell = secondCell;
-            }
-            else
-            {
-                this.secondCell = firstCell;
-                this.firstCell = secondCell;
-            }
-        }
-        else if(firstCell.pos.getX() == secondCell.pos.getX())
-        {
-            if(firstCell.pos.getZ() < secondCell.pos.getZ())
-            {
-                this.firstCell = firstCell;
-                this.secondCell = secondCell;
-            }
-            else
-            {
-                this.secondCell = firstCell;
-                this.firstCell = secondCell;
-            }
-        }
-        else 
-        {
-            if(firstCell.pos.getX() < secondCell.pos.getX())
-            {
-                this.firstCell = firstCell;
-                this.secondCell = secondCell;
-            }
-            else
-            {
-                this.secondCell = firstCell;
-                this.firstCell = secondCell;
-            }
-        }
-        
-        switch(pos.axis)
+        switch(EnumFacing.Axis.values()[PackedBlockPos.getExtra(packedConnectionPos)])
         {
             case X:
                 this.binder = CellBinderX.INSTANCE;
@@ -147,7 +114,7 @@ public abstract class LavaCellConnection
     protected LavaCellConnection(LavaCell firstCell, LavaCell secondCell)
     {
         this.binder = null;
-        this.pos = null;
+        this.packedConnectionPos = 0;
         this.firstCell = firstCell;
         this.secondCell = secondCell;
         this.id = nextConnectionID++;
@@ -218,6 +185,8 @@ public abstract class LavaCellConnection
      */
     public void releaseCells()
     {
+        this.firstCell.release("");
+        this.secondCell.release("");
         this.binder.unbind(this);
     }
     

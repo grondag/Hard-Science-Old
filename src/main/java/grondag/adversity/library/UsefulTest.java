@@ -50,7 +50,6 @@ public class UsefulTest
         direction = new Vec3d(-3.0, 0.0, 3.0);
         box = new AxisAlignedBB(608.9, 5.0, 770.9, 610.1, 6.0, 772.1);
         assert(Useful.doesRayIntersectAABB(origin, direction, box));
-        
     }
 
 }

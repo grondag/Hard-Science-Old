@@ -81,7 +81,7 @@ public class NowhereConnection extends LavaCellConnection
         
         private NullCell()
         {
-            super(null, null, 0);            
+            super(null, 0, 0);            
         }
         
         @Override public boolean isBarrier()

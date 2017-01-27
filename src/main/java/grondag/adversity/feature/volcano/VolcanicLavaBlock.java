@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import grondag.adversity.feature.volcano.lava.ConnectionMap;
 import grondag.adversity.feature.volcano.lava.LavaCell;
 import grondag.adversity.feature.volcano.lava.LavaCellConnection;
 import grondag.adversity.feature.volcano.lava.LavaSimulator;
+import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -151,12 +153,13 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
         }
         else
         {
-            LavaCellConnection up = sim.getConnection(data.getPos(), data.getPos().up());
-            LavaCellConnection down = sim.getConnection(data.getPos(), data.getPos().down());
-            LavaCellConnection east = sim.getConnection(data.getPos(), data.getPos().east());
-            LavaCellConnection west = sim.getConnection(data.getPos(), data.getPos().west());
-            LavaCellConnection north = sim.getConnection(data.getPos(), data.getPos().north());
-            LavaCellConnection south = sim.getConnection(data.getPos(), data.getPos().south());
+            long packedPos = PackedBlockPos.pack(data.getPos());
+            LavaCellConnection up = sim.getConnection(ConnectionMap.getUpConnectionFromPackedBlockPos(packedPos));
+            LavaCellConnection down = sim.getConnection(ConnectionMap.getDownConnectionFromPackedBlockPos(packedPos));
+            LavaCellConnection east = sim.getConnection(ConnectionMap.getEastConnectionFromPackedBlockPos(packedPos));
+            LavaCellConnection west = sim.getConnection(ConnectionMap.getWestConnectionFromPackedBlockPos(packedPos));
+            LavaCellConnection north = sim.getConnection(ConnectionMap.getNorthConnectionFromPackedBlockPos(packedPos));
+            LavaCellConnection south = sim.getConnection(ConnectionMap.getSouthConnectionFromPackedBlockPos(packedPos));
             
             probeInfo.text("Cell ID = " + cell.hashCode())
                 .text("Current Level = " + cell.getFluidAmount())
