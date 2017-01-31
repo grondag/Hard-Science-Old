@@ -23,7 +23,7 @@ public class LavaCellConnectionVertical extends LavaCellConnection
         int fluid2 = secondCell.getFluidAmount();
                
         // add floor of an empty first cell that will become melted if we flow down into it
-        int level1 = fluid1 == 0 ? firstCell.getFloor() : fluid1;
+        int level1 = fluid1 == 0 ? firstCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL : fluid1;
         
         int totalAmount = level1 + fluid2;
         
@@ -151,10 +151,10 @@ public class LavaCellConnectionVertical extends LavaCellConnection
     
   
     //TODO: is this even needed?
-//    @Override
-//    public int getDrop()
-//    {
-//        return LavaCell.FLUID_UNITS_PER_BLOCK;
-//    }
-//    
+    @Override
+    public int getDrop()
+    {
+        return LavaCell.LEVELS_PER_BLOCK;
+    }
+    
 }

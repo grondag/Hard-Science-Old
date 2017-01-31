@@ -27,10 +27,11 @@ import net.minecraft.world.World;
 /**
  * TODO
 
- * Make connection iteration parallel - will require locking mechanism so that cells are read/updated atomically     
  * 
  * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
  *   may reduce number of block updates - use metadata to distinguish the model dispatch
+ *   
+ * Avoid creating particles for small drops
  * 
  * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
  * Particle damage to entities
@@ -103,6 +104,8 @@ public class LavaSimulator extends SimulationNode
         }
     }
     
+    private static long fluidUpdateTime = 0;
+    
     private void doTick()
     {
         if((this.tickIndex & 0xFF) == 0xFF)
@@ -137,6 +140,9 @@ public class LavaSimulator extends SimulationNode
                     + " for " + connectionProcessCount + " links @ " + ((connectionProcessCount > 0) ? (float)connectionProcessTime / connectionProcessCount : "n/a") + " each");
             connectionProcessCount = 0;
             connectionProcessTime = 0;
+            
+            Adversity.log.info("Fluid status update time this sample = " + fluidUpdateTime / 1000000);
+            fluidUpdateTime = 0;
 
 //            Adversity.log.info("getFlowRate time this sample = " + LavaCellConnection.getFlowRateTime / 1000000 
 //                    + " for " + LavaCellConnection.getFlowRateCount 
@@ -184,6 +190,10 @@ public class LavaSimulator extends SimulationNode
 
         this.stepTime += (System.nanoTime() - startTime);
 
+        startTime = System.nanoTime();
+        this.allCells.values().parallelStream().forEach(c -> c.updateFluidStatus(this));
+        fluidUpdateTime  += (System.nanoTime() - startTime);
+        
         this.doParticles();
 
         this.doBlockUpdates();
@@ -256,7 +266,7 @@ public class LavaSimulator extends SimulationNode
                     c.changeLevel(this, -c.getFluidAmount());
                     c.clearBlockUpdate();
                     c.validate(this, true);
-                }));
+                })).join();
        
        LAVA_THREAD_POOL.submit( () ->
                this.lavaFillers.parallelStream().forEach( p -> 
@@ -266,7 +276,7 @@ public class LavaSimulator extends SimulationNode
                             coolLava(p);
                             this.lavaFillers.remove(p);
                         }
-                    }));
+                    })).join();
     }
 
     private static final int BLOCK_COOLING_DELAY_TICKS = 20;
@@ -302,8 +312,12 @@ public class LavaSimulator extends SimulationNode
                             basaltBlocks.remove(apos);
                     }
                 }
+                else
+                {
+                    basaltBlocks.remove(apos);
+                }
             };
-        }));       
+        })).join();       
     }
     
     /**
@@ -376,7 +390,14 @@ public class LavaSimulator extends SimulationNode
     {
         long startTime = System.nanoTime();
         connectionProcessCount += this.connections.size();
-        this.connections.values().stream().forEach((LavaCellConnection c) -> c.doFirstStep(this));
+        final int size = this.connections.size();
+        LavaCellConnection[] values = this.connections.values();
+        for(int i = 0; i < size; i++)
+        {
+            values[i].doFirstStep(this);
+        }
+
+//        this.connections.values().stream().forEach((LavaCellConnection c) -> c.doFirstStep(this));
         this.connectionProcessTime += (System.nanoTime() - startTime);
     }
 
@@ -384,7 +405,14 @@ public class LavaSimulator extends SimulationNode
     {
         long startTime = System.nanoTime();
         connectionProcessCount += this.connections.size();
-        this.connections.values().stream().forEach((LavaCellConnection c) -> c.doStep(this));
+        final int size = this.connections.size();
+        LavaCellConnection[] values = this.connections.values();
+        for(int i = 0; i < size; i++)
+        {
+            values[i].doStep(this);
+        }
+        
+//        this.connections.values().stream().forEach((LavaCellConnection c) -> c.doStep(this));
         this.connectionProcessTime += (System.nanoTime() - startTime);
     }
     
@@ -404,10 +432,12 @@ public class LavaSimulator extends SimulationNode
             {
                 if(!c.isRetained() && c.getFluidAmount() == 0) 
                 {
+                    c.setDeleted();
                     this.allCells.remove(c.packedBlockPos);
                 }
             }
-        ));
+        )).join();
+       
     }
 
     /**
@@ -454,7 +484,7 @@ public class LavaSimulator extends SimulationNode
         }
         else
         {
-            while(candidate.getBottomType() == BottomType.DROP)
+            while(candidate.getBottomType(this) == BottomType.DROP)
             {
                 candidate = candidate.getDownEfficiently(this, shouldResynchToWorldIfExists);
             }
@@ -573,9 +603,9 @@ public class LavaSimulator extends SimulationNode
         this.connections.createConnectionIfNotPresent(this, packedConnectionPos);
     }
 
-    public void removeConnection(long packedConnectionPos)
+    public void removeConnectionIfInvalid(long packedConnectionPos)
     {
-        this.connections.remove(packedConnectionPos);
+        this.connections.removeIfInvalid(packedConnectionPos);
     }
 
     public static int blockUpdatesProvisionCounter;
@@ -591,7 +621,7 @@ public class LavaSimulator extends SimulationNode
 
         //TODO: make parallel a config option
         LAVA_THREAD_POOL.submit(() ->
-            this.allCells.values().parallelStream().forEach(c -> c.provideBlockUpdateIfNeeded(this)));
+            this.allCells.values().parallelStream().forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();
 
         blockUpdateProvisionTime += (System.nanoTime() - startTime);
         
@@ -640,17 +670,18 @@ public class LavaSimulator extends SimulationNode
                     cell.setLastFlowTick(saveData[i]);
                 }
                 i++;
-                cell.setFloor(saveData[i++]);
+                cell.setInteriorFloor((byte) saveData[i++]);
                 cell.clearBlockUpdate();
                 this.allCells.put(cell.packedBlockPos, cell);
             }
             
-            // wait until all cells are added to collection, otherwise will recreate them all from the world recusively
-            // Careful here: allCells is concurrent, so have to iterate a snapshot of it or will keep adding new non-lava cells as lava cells
+            // wait until all cells are added to collection, otherwise may recreate them all from the world recusively
+            // Careful here: allCells is concurrent, so have to iterate a snapshot of it or will iterate through 
+            // non-lava cells added by connections and try to make them into lava cells.
             for(LavaCell cell : this.allCells.values().toArray(new LavaCell[0]))
             {
-                cell.updateFluidStatus(this, true);
-                cell.updateRetainedLevel(this);
+                cell.updateFluidStatus(this);
+                cell.validate(this, true);
             }
             
             Adversity.log.info("Loaded " + allCells.size() + " lava cells.");
@@ -715,7 +746,7 @@ public class LavaSimulator extends SimulationNode
                 saveData[i++] = (int)((cell.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = cell.getFluidAmount();
                 saveData[i++] = cell.getNeverCools() ? Integer.MAX_VALUE : cell.getLastFlowTick();
-                saveData[i++] = cell.getFloor();
+                saveData[i++] = cell.getInteriorFloor();
             }         
             nbt.setIntArray(LAVA_CELL_NBT_TAG, saveData);
         }

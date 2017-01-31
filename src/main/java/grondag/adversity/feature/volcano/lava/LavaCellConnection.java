@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.Useful;
 import net.minecraft.util.EnumFacing;
 
 public abstract class LavaCellConnection
@@ -26,7 +27,7 @@ public abstract class LavaCellConnection
     protected int flowThisTick = 0;
     protected int lastFlowTick = 0;
     
-//    protected int sortDrop;
+    protected long sortKey;
     
     protected boolean isDirty = false;
  
@@ -107,7 +108,7 @@ public abstract class LavaCellConnection
         }
         binder.bind(this);
         
-//        this.updateSortDrop();
+        this.updateSortKey();
     }
     
     /** for use by empty version */
@@ -192,12 +193,15 @@ public abstract class LavaCellConnection
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
-     * Zero if there is no difference.
-     * Horizontal cells above the ground have a drop of 0.
-     * Vertical cells have a drop of 1.
-     * Higher drop means higher priority for flowing. 
+     * Measured in block levels (12 per block).
+     * For horizontal connections:
+     *      Zero if there is no difference or if either block is a barrier.
+     *      Higher drop means higher priority for flowing. 
+     * For vertical connections:
+     *      Drop is 12 by convention and not intended to be used.
+     * Nowhere (barrier) connections always have a drop of 0.         
      */
-//    public abstract int getDrop();
+    public abstract int getDrop();
     
     /**
      * Drop can change on validation, but is also used for sorting.
@@ -205,10 +209,10 @@ public abstract class LavaCellConnection
      * value until sort can be properly updated.
      * @return
      */
-//    public int getSortDrop()
-//    {
-//        return this.sortDrop;
-//    }
+    public long getSortKey()
+    {
+        return this.sortKey;
+    }
     
     /** seems to be needed for perfect consistency between HashMap and TreeSet */
     @Override
@@ -217,10 +221,26 @@ public abstract class LavaCellConnection
         return this.id;
     }
     
-//    public void updateSortDrop()
-//    {
-//        this.sortDrop = this.getDrop();
-//    }
+    public void updateSortKey()
+    {
+        // axis - Y or not Y - Y first (lower)  1 bit
+        long key = PackedBlockPos.getExtra(this.packedConnectionPos) == EnumFacing.Axis.Y.ordinal()
+            ? 0 : 0x1L << 62;
+        
+        // elevation - higher first  (lower)    8 bits
+        key |= ((255L - PackedBlockPos.getY(this.packedConnectionPos)) << 54);
+        
+        // drop - higher drops come first       16 bits
+        key |= ((long)(this.getDrop() & 0xFFFF) << 38);
+        
+        // random                               6 bits
+        key |= ((Useful.longHash(this.packedConnectionPos) & 0x3F) << 32);
+        
+        // uniqueness
+        key |= this.id;
+        
+        this.sortKey = key;
+    }
    
     private static abstract class AbstractCellBinder
     {

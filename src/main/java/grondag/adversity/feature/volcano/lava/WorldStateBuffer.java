@@ -59,13 +59,17 @@ public class WorldStateBuffer implements IBlockAccess
     }
     
     public IBlockState getBlockState(int x, int y, int z)
-    {
-        long packedChunkPos = PackedBlockPos.getPackedChunkPos(x, z);
+    {        
+//        if(x==478 && y == 9 && z == -1231)
+//            Adversity.log.info("boop");
         
-        ChunkBuffer chunk = chunks.get(PackedBlockPos.getPackedChunkPos(packedChunkPos));
+        ChunkBuffer chunk = chunks.get(PackedBlockPos.getPackedChunkPos(x, z));
         
         if(chunk == null) 
         {
+//            Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
+//                    this.realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
+            
             return this.realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
         }
         else
@@ -81,6 +85,12 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
+//        Adversity.log.info("blockstate buffer update @" + x + ", " + y + ", " + z + " = " + 
+//                newState.toString() + " from " + expectedPriorState.toString());
+//        
+//        if(x==478 && y == 9 && z == -1231)
+//            Adversity.log.info("boop");
+        
         ChunkBuffer chunk = getChunkBuffer(x, z);
         chunk.setBlockState(x, y, z, newState, expectedPriorState);
         if(chunk.size() == 0)
@@ -409,7 +419,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
     }
     
-    private static AtomicInteger recoveryCount = new AtomicInteger(0);
+//    private static AtomicInteger recoveryCount = new AtomicInteger(0);
     private static AtomicInteger totalCount = new AtomicInteger(0);
     
     private class ChunkBuffer
@@ -456,10 +466,16 @@ public class WorldStateBuffer implements IBlockAccess
             
             if(entry == null)
             {
+//                Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
+//                        realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
+                
                 return realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
             }
             else
             {
+//                Adversity.log.info("blockstate from buffer @" + x + ", " + y + ", " + z + " = " + 
+//                        entry.newState.toString());
+                
                 return entry.newState;
             }
         }
@@ -491,8 +507,8 @@ public class WorldStateBuffer implements IBlockAccess
                     this.levelCounts[y].decrementAndGet();
                     if(state.isRequired()) this.requiredUpdateCount.decrementAndGet();
                     
-                    if((recoveryCount.getAndIncrement() & 0xFFF) == 0xFFF)
-                        Adversity.log.info("BlockStateRecoveries = " + recoveryCount.get() + " of " + totalCount.get() + ", " + recoveryCount.get() * 100 / totalCount.get() + " percent recovery");
+//                    if((recoveryCount.getAndIncrement() & 0xFFF) == 0xFFF)
+//                        Adversity.log.info("BlockStateRecoveries = " + recoveryCount.get() + " of " + totalCount.get() + ", " + recoveryCount.get() * 100 / totalCount.get() + " percent recovery");
                 }
                 else
                 {
@@ -513,12 +529,15 @@ public class WorldStateBuffer implements IBlockAccess
         /** NOT thread safe */
         private int applyBlockUpdates(AdjustmentTracker tracker, LavaSimulator sim)
         {
+
             tracker.clear();
             int count = this.dataCount.get();
             int allRemaining = count;
             
             int chunkStartX = PackedBlockPos.getChunkXStart(this.packedChunkpos);
             int chunkStartZ = PackedBlockPos.getChunkZStart(this.packedChunkpos);
+            
+//            Adversity.log.info("Applying " + count + " block updates for chunk with startX=" + chunkStartX + " and startZ=" + chunkStartZ);
             
             for(int y = 0; y < 256; y++)
             {
@@ -542,7 +561,15 @@ public class WorldStateBuffer implements IBlockAccess
                                 tracker.setAdjustmentNeededAround(x, y, z);
                             }
                             tracker.excludeAdjustmentNeededAt(x, y, z);
+                            
+//                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
+//                                    bsb.newState.toString());
+//                            
+//                            if(x==478 && y == 9 && z == -1231)
+//                                Adversity.log.info("boop");
+                      
                             realWorld.setBlockState(new BlockPos( x, y, z), bsb.newState, 3);
+                            
                             this.states[i] = null;
                             allRemaining--;
                             if(--statesRemainingThisY == 0) break;
@@ -556,8 +583,11 @@ public class WorldStateBuffer implements IBlockAccess
             this.dataCount.set(0);
             this.requiredUpdateCount.set(0);
             
-            count += tracker.getAdjustmentPositions(this.packedChunkpos).stream().mapToInt(p -> adjustFillIfNeeded(p, sim) ? 1 : 0).sum();
-            
+            for(BlockPos p : tracker.getAdjustmentPositions(this.packedChunkpos))
+            {
+                if(adjustFillIfNeeded(p, sim)) count++;
+            }
+              
             return count;
 
         }

@@ -162,16 +162,16 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             LavaCellConnection south = sim.getConnection(ConnectionMap.getSouthConnectionFromPackedBlockPos(packedPos));
             
             probeInfo.text("Cell ID = " + cell.hashCode())
-                .text("Current Level = " + cell.getFluidAmount())
-                .text("Floor Level = " + cell.getFloor() + "    Retained Level = " + cell.getRetainedLevel())
+                .text("Current Level = " + cell.getFluidAmount() + "    Retained Level = " + cell.getRetainedLevel())
+                .text("interiorFloor=" + cell.getInteriorFloor() + "  distanceToFlowFloor=" + cell.getDistanceToFlowFloor() + " isFlowFloor=" + cell.flowFloorIsFlowBlock())
                 .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex())
                 .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "id=" + up.id + " barrier:" + up.getOther(cell).isBarrier()))
-                .text("Down: " + (down == null ? "null" : "id=" + down.id  + " barrier:" + down.getOther(cell).isBarrier()))
-                .text("East: " + (east == null ? "null" : "id=" + east.id + " barrier:" + east.getOther(cell).isBarrier()))
-                .text("West: " + (west == null ? "null" : "id=" + west.id + " barrier:" + west.getOther(cell).isBarrier()))
-                .text("North: " + (north == null ? "null" : "id=" + north.id + " barrier:" + north.getOther(cell).isBarrier()))
-                .text("South: " + (south == null ? "null" : "id=" + south.id + " barrier:" + south.getOther(cell).isBarrier()));
+                .text("Up: " + (up == null ? "null" : "id=" + up.id + " barrier:" + up.getOther(cell).isBarrier() + " drop:" + up.getDrop() + " sortKey:" + up.getSortKey()))
+                .text("Down: " + (down == null ? "null" : "id=" + down.id  + " barrier:" + down.getOther(cell).isBarrier() + " drop:" + down.getDrop() + " sortKey:" + down.getSortKey()))
+                .text("East: " + (east == null ? "null" : "id=" + east.id + " barrier:" + east.getOther(cell).isBarrier() + " drop:" + east.getDrop() + " sortKey:" + east.getSortKey()))
+                .text("West: " + (west == null ? "null" : "id=" + west.id + " barrier:" + west.getOther(cell).isBarrier() + " drop:" + west.getDrop() + " sortKey:" + west.getSortKey()))
+                .text("North: " + (north == null ? "null" : "id=" + north.id + " barrier:" + north.getOther(cell).isBarrier() + " drop:" + north.getDrop() + " sortKey:" + north.getSortKey()))
+                .text("South: " + (south == null ? "null" : "id=" + south.id + " barrier:" + south.getOther(cell).isBarrier() + " drop:" + south.getDrop() + " sortKey:" + south.getSortKey()));
         }
         
     }

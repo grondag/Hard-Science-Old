@@ -75,6 +75,11 @@ public class PackedBlockPos
         return packedValue - Y_INCREMENT;
     }
 
+    public static long down(long packedValue, int howFar)
+    {
+        return packedValue - Y_INCREMENT * howFar;
+    }
+    
     public static long east(long packedValue)
     {
         return packedValue + X_INCREMENT;

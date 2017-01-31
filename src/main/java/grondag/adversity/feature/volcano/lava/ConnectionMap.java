@@ -1,9 +1,12 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.TreeSet;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.PackedBlockPos;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;
 
 
@@ -11,47 +14,52 @@ public class ConnectionMap
 {
   
 //    private final ConcurrentHashMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentHashMap<CellConnectionPos, LavaCellConnection>();
-    
-    private int size = 0;
 
-    private final ConcurrentHashMap<Long, LavaCellConnection> map = new ConcurrentHashMap<Long, LavaCellConnection>();
+//    private final ConcurrentHashMap<Long, LavaCellConnection> map = new ConcurrentHashMap<Long, LavaCellConnection>();
     
-//    private final ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection> map = new ConcurrentSkipListMap<CellConnectionPos, LavaCellConnection>(
-//            new Comparator<CellConnectionPos>() {
+//    private final ConcurrentSkipListMap<Long, LavaCellConnection> map = new ConcurrentSkipListMap<Long, LavaCellConnection>(
+//            new Comparator<Long>() {
 //                @Override
-//                public int compare(CellConnectionPos o1, CellConnectionPos o2)
+//                public int compare(Long o1, Long o2)
 //                {
 //                    return ComparisonChain.start()
 //                    //vertical first
-//                    .compare(o1.isVertical(), o2.isVertical())
+//                    .compare(PackedBlockPos.getExtra(o1) == EnumFacing.Axis.Y.ordinal(), PackedBlockPos.getExtra(o2) == EnumFacing.Axis.Y.ordinal())
 //                    //top down
-//                    .compare(o2.lowerPos.getY(), o1.lowerPos.getY())
+//                    .compare(PackedBlockPos.getY(o2), PackedBlockPos.getY(o2))
 //                    //tie breaker -> don't favor any horizontal direction
-//                    .compare(o1.hashCode(), o2.hashCode())
+//                    .compare(Useful.longHash(o1), Useful.longHash(o2))
 //                    //remaining ensure unique match
-//                    .compare(o1.lowerPos.getX(), o2.lowerPos.getX())
-//                    .compare(o1.lowerPos.getZ(), o2.lowerPos.getZ())
-//                    .compare(o1.axis, o2.axis)
+//                    .compare(o1, o2)
 //                    .result();
 //                  
 //                }});
 
+    private LavaCellConnection sortedArray[] = null;
+    
+    private final Long2ObjectOpenHashMap<LavaCellConnection> map = new Long2ObjectOpenHashMap<LavaCellConnection>();
+    
+    private final TreeSet<LavaCellConnection>sorted = new TreeSet<LavaCellConnection>(
+                        new Comparator<LavaCellConnection>() {
+              @Override
+              public int compare(LavaCellConnection o1, LavaCellConnection o2)
+              {
+                  return Long.compare(o1.getSortKey(), o2.getSortKey());
+              }});
             
     public void clear()
     {
         synchronized(this)
         {
             map.clear();
-            this.size = 0;
+            sortedArray = null;
+            sorted.clear();
         }
     }
     
     public int size()
     {
-        synchronized(this)
-        {
-            return this.size;
-        }
+        return map.size();
     }
    
     public LavaCellConnection get(long packedConnectionPos)
@@ -80,8 +88,11 @@ public class ConnectionMap
                 LavaCell cell2 = sim.getCell(upperCellPackedBlockPos(packedConnectionPos), false);
                 LavaCellConnection connection = LavaCellConnection.create(cell1, cell2, packedConnectionPos);
                 map.put(packedConnectionPos, connection);
-                size++;
+                sortedArray = null;
+                sorted.add(connection);
             }
+            if(map.size() != sorted.size())
+                Adversity.log.info("connection tracking error");
         }
     }
     
@@ -156,23 +167,50 @@ public class ConnectionMap
         return PackedBlockPos.setExtra(PackedBlockPos.north(fromPackedBlockPos), EnumFacing.Axis.Z.ordinal());
     }
     
-    public void remove(long packedConnectionPos)
+    public void removeIfInvalid(long packedConnectionPos)
     {
         synchronized(this)
         {
             LavaCellConnection connection = this.map.get(packedConnectionPos);
-            if(connection != null)
+            if(connection != null && 
+                    (
+                        connection.firstCell.isBarrier() 
+                        || connection.secondCell.isBarrier()
+                        || (connection.firstCell.getFluidAmount() == 0 && connection.secondCell.getFluidAmount() == 0)
+                    )
+            )
             {
                 connection.releaseCells();
                 map.remove(packedConnectionPos);
-                size--;
+                sortedArray = null;
+                sorted.remove(connection);
             }
+            if(map.size() != sorted.size())
+                Adversity.log.info("connection tracking error");
         }
     }
     
-    public Collection<LavaCellConnection> values()
+    private static final LavaCellConnection[] ARRAY_TEMPLATE = new LavaCellConnection[0];
+    public LavaCellConnection[] values()
     {
-        return this.map.values();
+//        if(map.size() > 2)
+//            Adversity.log.info("boop");
+        
+        if(sortedArray == null)
+        {
+            sortedArray = sorted.toArray(ARRAY_TEMPLATE);
+        
+//            Arrays.parallelSort(sortedArray, 
+//                    new Comparator<LavaCellConnection>() {
+//                      @Override
+//                      public int compare(LavaCellConnection o1, LavaCellConnection o2)
+//                      {
+//                          return Long.compare(o1.getSortKey(), o2.getSortKey());
+//                      }});
+        }
+        
+        return sortedArray;
+        
     }
     
 }

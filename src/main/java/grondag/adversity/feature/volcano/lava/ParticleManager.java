@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -38,12 +39,12 @@ public class ParticleManager
         {
             particle = new ParticleInfo(sim.getTickIndex(), packedBlockPos, fluidAmount);
             map.put(packedBlockPos, particle);
-//            Adversity.log.info("ParticleManager added new particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits());
+//            Adversity.log.info("ParticleManager added new particle @" + PackedBlockPos.unpack(particle.packedBlockPos).toString() + " with amount=" + particle.getFluidUnits());
         }
         else
         {
             particle.addFluid(fluidAmount);
-//            Adversity.log.info("ParticleManager updated particle @" + particle.pos.toString() + " with amount=" + particle.getFluidUnits() + " added " + fluidAmount);
+//            Adversity.log.info("ParticleManager updated particle @" + PackedBlockPos.unpack(particle.packedBlockPos).toString() + " with amount=" + particle.getFluidUnits() + " added " + fluidAmount);
         }
     
     }
@@ -57,8 +58,8 @@ public class ParticleManager
         int firstEligibleTick = sim.getTickIndex() - 4;
         
         // wait until full size or at age limit
-        return map.values().parallelStream()
-                .filter(p -> p.tickCreated >= firstEligibleTick || p.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK)
+        List<ParticleInfo> candidates = map.values().parallelStream()
+                .filter(p -> p.tickCreated <= firstEligibleTick || p.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK)
                 .sorted(new Comparator<ParticleInfo>() {
 
                     @Override
@@ -71,11 +72,15 @@ public class ParticleManager
                     }})
                 .sequential()
                 .limit(maxCount)
-                .map(p -> new EntityLavaParticle(sim.worldBuffer.realWorld, p.fluidUnits, 
+                .collect(Collectors.toList());
+        
+        candidates.stream().forEach(p -> map.remove(p.packedBlockPos));
+        
+        return candidates.stream().map(p -> new EntityLavaParticle(sim.worldBuffer.realWorld, p.fluidUnits, 
                         new Vec3d(
                                 PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
-                                PackedBlockPos.getX(p.packedBlockPos) + 0.4, 
-                                PackedBlockPos.getX(p.packedBlockPos) + 0.5
+                                PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
+                                PackedBlockPos.getZ(p.packedBlockPos) + 0.5
                             ),
                         Vec3d.ZERO))
                 .collect(Collectors.toList());

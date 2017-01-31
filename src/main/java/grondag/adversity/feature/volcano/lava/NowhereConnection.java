@@ -51,23 +51,23 @@ public class NowhereConnection extends LavaCellConnection
         //NOOP
     }
 
-//    @Override
-//    public int getDrop()
-//    {
-//        return 0;
-//    }
+    @Override
+    public int getDrop()
+    {
+        return 0;
+    }
 
-//    @Override
-//    public int getSortDrop()
-//    {
-//        return 0;
-//    }
-//
-//    @Override
-//    public void updateSortDrop()
-//    {
-//        //NOOP
-//    }
+    @Override
+    public long getSortKey()
+    {
+        return 0;
+    }
+
+    @Override
+    public void updateSortKey()
+    {
+        //NOOP
+    }
 
     @Override
     protected int getFlowRate(LavaSimulator sim)

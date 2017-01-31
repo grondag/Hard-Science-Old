@@ -28,6 +28,8 @@ public class Adversity {
 	public static final String VERSION = "@VERSION@";
 	public static final String MODNAME = "Adversity";
 
+	public static final boolean DEBUG_MODE = true;
+	
 	public static Logger log;
 
 	public static WorldType adversityWorld;

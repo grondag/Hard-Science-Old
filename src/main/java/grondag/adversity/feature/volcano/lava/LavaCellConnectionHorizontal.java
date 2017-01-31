@@ -1,5 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
+import grondag.adversity.Adversity;
+
 public class LavaCellConnectionHorizontal extends LavaCellConnection
 {
     protected LavaCellConnectionHorizontal(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
@@ -28,8 +30,8 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         // check against the most restrictive case and abort if there can be no flow
         if(absoluteMaxFlow < MINIMUM_INTERNAL_FLOW_UNITS) return 0;
 
-        BottomType type1 = this.firstCell.getBottomType();
-        BottomType type2 = this.secondCell.getBottomType();
+        BottomType type1 = this.firstCell.getBottomType(sim);
+        BottomType type2 = this.secondCell.getBottomType(sim);
 
         switch(type1)
         {
@@ -154,7 +156,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
             minimumFlow = LavaCellConnection.MINIMUM_EXTERNAL_FLOW_UNITS;
             
             // if no fluid, could still have a floor that becomes melted, acts as fluid for our purpose
-            level2 = partiallySupportedCell.getFloor();
+            level2 = partiallySupportedCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL;
         }
         
         // Compute difference.
@@ -228,7 +230,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         if(absoluteMaxFlow < MINIMUM_EXTERNAL_FLOW_UNITS) return 0;
         
         // abort if empty cell has a floor that would prevent 
-        int emptyLevel = emptyCell.getFloor();
+        int emptyLevel = emptyCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL;
         if(emptyLevel >= fluidLevel) return 0;
 
   
@@ -361,10 +363,28 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         }
     }
     
-    //TODO: remove
-//    @Override
-//    public int getDrop()
-//    {
-//        return Math.abs(firstCell.getRetainedLevel() - secondCell.getRetainedLevel());
-//    }
+
+    @Override
+    public int getDrop()
+    {
+        if(Adversity.DEBUG_MODE)
+        {
+            if(this.firstCell.isBarrier() || this.secondCell.isBarrier())
+            {
+                Adversity.log.info("Barrier cell in horizontal connection detected.  Should not normally occur.");
+                return 0;
+            }
+        }
+        
+        int diff = Math.abs(firstCell.getDistanceToFlowFloor() - secondCell.getDistanceToFlowFloor());
+        
+        if(diff == 0)
+        {
+            return Math.abs(firstCell.getRetainedLevel() - secondCell.getRetainedLevel());
+        }
+        else
+        {
+            return diff;
+        }
+    }
 }
