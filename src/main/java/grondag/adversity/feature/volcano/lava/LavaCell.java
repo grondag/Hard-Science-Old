@@ -492,15 +492,23 @@ public class LavaCell
         else if(this.flowFloorIsFlowBlock)
         {
             
-            int maxDrop = Math.max(
-                    Math.max(this.neighborEast.getDrop(), this.neighborWest.getDrop()), 
-                    Math.max(this.neighborNorth.getDrop(), this.neighborSouth.getDrop())
-                );
+            //TODO: BUG - should not use drop here
+            int drop = Math.max(
+                    Math.max(this.neighborEast.getOtherDistanceToFlowFloor(this), this.neighborWest.getOtherDistanceToFlowFloor(this)), 
+                    Math.max(this.neighborNorth.getOtherDistanceToFlowFloor(this), this.neighborSouth.getOtherDistanceToFlowFloor(this))
+                ) - this.getDistanceToFlowFloor();
             
-            if(maxDrop > LEVELS_PER_BLOCK) maxDrop = LEVELS_PER_BLOCK;
+            if(drop > LEVELS_PER_BLOCK) drop = LEVELS_PER_BLOCK;
             
-            // should result in half block retention for steep slopes graduation to full block for flat areas
-            this.retainedLevel = Math.max(0, (LEVELS_PER_BLOCK - this.distanceToFlowFloor - maxDrop / 2)) * FLUID_UNITS_PER_BLOCK;
+            if(drop <= 0)
+            {
+                this.retainedLevel = FLUID_UNITS_PER_BLOCK;
+            }
+            else
+            {
+                // should result in half block retention for steep slopes graduation to full block for flat areas
+                this.retainedLevel = Math.max(0, (LEVELS_PER_BLOCK_AND_A_HALF - this.distanceToFlowFloor - drop / 2)) * FLUID_UNITS_PER_BLOCK;
+            }
         }
         else if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(PackedBlockPos.down(this.packedBlockPos))))
         {

@@ -39,13 +39,13 @@ public class ConnectionMap
     
     private final Long2ObjectOpenHashMap<LavaCellConnection> map = new Long2ObjectOpenHashMap<LavaCellConnection>();
     
-    private final TreeSet<LavaCellConnection>sorted = new TreeSet<LavaCellConnection>(
-                        new Comparator<LavaCellConnection>() {
-              @Override
-              public int compare(LavaCellConnection o1, LavaCellConnection o2)
-              {
-                  return Long.compare(o1.getSortKey(), o2.getSortKey());
-              }});
+//    private final TreeSet<LavaCellConnection>sorted = new TreeSet<LavaCellConnection>(
+//                        new Comparator<LavaCellConnection>() {
+//              @Override
+//              public int compare(LavaCellConnection o1, LavaCellConnection o2)
+//              {
+//                  return Long.compare(o1.getSortKey(), o2.getSortKey());
+//              }});
             
     public void clear()
     {
@@ -53,7 +53,7 @@ public class ConnectionMap
         {
             map.clear();
             sortedArray = null;
-            sorted.clear();
+//            sorted.clear();
         }
     }
     
@@ -89,10 +89,10 @@ public class ConnectionMap
                 LavaCellConnection connection = LavaCellConnection.create(cell1, cell2, packedConnectionPos);
                 map.put(packedConnectionPos, connection);
                 sortedArray = null;
-                sorted.add(connection);
+//                sorted.add(connection);
             }
-            if(map.size() != sorted.size())
-                Adversity.log.info("connection tracking error");
+//            if(map.size() != sorted.size())
+//                Adversity.log.info("connection tracking error");
         }
     }
     
@@ -183,10 +183,10 @@ public class ConnectionMap
                 connection.releaseCells();
                 map.remove(packedConnectionPos);
                 sortedArray = null;
-                sorted.remove(connection);
+//                sorted.remove(connection);
             }
-            if(map.size() != sorted.size())
-                Adversity.log.info("connection tracking error");
+//            if(map.size() != sorted.size())
+//                Adversity.log.info("connection tracking error");
         }
     }
     
@@ -198,15 +198,16 @@ public class ConnectionMap
         
         if(sortedArray == null)
         {
-            sortedArray = sorted.toArray(ARRAY_TEMPLATE);
+//            sortedArray = sorted.toArray(ARRAY_TEMPLATE);
+            sortedArray = map.values().toArray(ARRAY_TEMPLATE);
         
-//            Arrays.parallelSort(sortedArray, 
-//                    new Comparator<LavaCellConnection>() {
-//                      @Override
-//                      public int compare(LavaCellConnection o1, LavaCellConnection o2)
-//                      {
-//                          return Long.compare(o1.getSortKey(), o2.getSortKey());
-//                      }});
+            Arrays.parallelSort(sortedArray, 
+                    new Comparator<LavaCellConnection>() {
+                      @Override
+                      public int compare(LavaCellConnection o1, LavaCellConnection o2)
+                      {
+                          return Long.compare(o1.getSortKey(), o2.getSortKey());
+                      }});
         }
         
         return sortedArray;

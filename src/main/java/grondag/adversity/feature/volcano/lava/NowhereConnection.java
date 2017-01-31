@@ -52,7 +52,7 @@ public class NowhereConnection extends LavaCellConnection
     }
 
     @Override
-    public int getDrop()
+    public int getSortDrop()
     {
         return 0;
     }

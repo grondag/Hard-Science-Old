@@ -365,7 +365,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
     
 
     @Override
-    public int getDrop()
+    public int getSortDrop()
     {
         if(Adversity.DEBUG_MODE)
         {
@@ -376,7 +376,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
             }
         }
         
-        int diff = Math.abs(firstCell.getDistanceToFlowFloor() - secondCell.getDistanceToFlowFloor());
+        int diff = LavaCell.FLUID_UNITS_PER_LEVEL * Math.abs(firstCell.getDistanceToFlowFloor() - secondCell.getDistanceToFlowFloor());
         
         if(diff == 0)
         {
@@ -385,6 +385,19 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         else
         {
             return diff;
+        }
+    }
+    
+    @Override
+    public int getOtherDistanceToFlowFloor(LavaCell cellIAlreadyHave)
+    {
+        if(cellIAlreadyHave == this.firstCell)
+        {
+            return this.secondCell == null ? 0 : this.secondCell.getDistanceToFlowFloor();
+        }
+        else
+        {
+            return this.firstCell == null ? 0 : this.firstCell.getDistanceToFlowFloor();
         }
     }
 }

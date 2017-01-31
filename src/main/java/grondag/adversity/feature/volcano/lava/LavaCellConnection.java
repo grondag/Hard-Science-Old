@@ -133,6 +133,14 @@ public abstract class LavaCellConnection
         }
     }
     
+    /**
+     * For horizontal cells, returns the distanceToFlowFloor of other cell.
+     * For nowhere and vertical connections, always returns zero.
+     */
+    public int getOtherDistanceToFlowFloor(LavaCell cellIAlreadyHave)
+    {
+        return 0;
+    }
     
     abstract protected int getFlowRate(LavaSimulator sim);
   
@@ -193,15 +201,15 @@ public abstract class LavaCellConnection
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
-     * Measured in block levels (12 per block).
+     * Measured in fluid units
      * For horizontal connections:
      *      Zero if there is no difference or if either block is a barrier.
      *      Higher drop means higher priority for flowing. 
      * For vertical connections:
-     *      Drop is 12 by convention and not intended to be used.
+     *      Drop is a full block by convention and not intended to be used.
      * Nowhere (barrier) connections always have a drop of 0.         
      */
-    public abstract int getDrop();
+    public abstract int getSortDrop();
     
     /**
      * Drop can change on validation, but is also used for sorting.
@@ -231,12 +239,12 @@ public abstract class LavaCellConnection
         key |= ((255L - PackedBlockPos.getY(this.packedConnectionPos)) << 54);
         
         // drop - higher drops come first       16 bits
-        key |= ((long)(this.getDrop() & 0xFFFF) << 38);
+        key |= ((long)((0xFFFF - this.getSortDrop()) & 0xFFFF) << 38);
         
         // random                               6 bits
         key |= ((Useful.longHash(this.packedConnectionPos) & 0x3F) << 32);
         
-        // uniqueness
+        // uniqueness  32 bits
         key |= this.id;
         
         this.sortKey = key;

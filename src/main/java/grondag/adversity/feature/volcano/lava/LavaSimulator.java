@@ -27,17 +27,18 @@ import net.minecraft.world.World;
 /**
  * TODO
 
+ * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
+ * Avoid creating particles for small drops
+ * Handle multiple worlds or limit to a single world
+ * Handle unloaded chunks
  * 
  * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
  *   may reduce number of block updates - use metadata to distinguish the model dispatch
  *   
- * Avoid creating particles for small drops
+ * Concurrency / performance
  * 
- * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
  * Particle damage to entities
  *
- * Handle multiple worlds
- * Handle unloaded chunks
  *
  * Code Cleanup
  * Sounds
@@ -179,14 +180,14 @@ public class LavaSimulator extends SimulationNode
         
         // force processing on non-dirty connection at least once per tick
         this.doFirstStep();
-        
         this.doStep();
         this.doStep();
         this.doStep();
         this.doStep();
         this.doStep();
         this.doStep();
-        this.doStep();
+        // update sort keys on last pass for resort next tick
+        this.doLastStep();
 
         this.stepTime += (System.nanoTime() - startTime);
 
@@ -404,12 +405,26 @@ public class LavaSimulator extends SimulationNode
     public void doStep()
     {
         long startTime = System.nanoTime();
-        connectionProcessCount += this.connections.size();
         final int size = this.connections.size();
         LavaCellConnection[] values = this.connections.values();
         for(int i = 0; i < size; i++)
         {
             values[i].doStep(this);
+        }
+        
+//        this.connections.values().stream().forEach((LavaCellConnection c) -> c.doStep(this));
+        this.connectionProcessTime += (System.nanoTime() - startTime);
+    }
+    
+    public void doLastStep()
+    {
+        long startTime = System.nanoTime();
+        final int size = this.connections.size();
+        LavaCellConnection[] values = this.connections.values();
+        for(int i = 0; i < size; i++)
+        {
+            values[i].doStep(this);
+            values[i].updateSortKey();
         }
         
 //        this.connections.values().stream().forEach((LavaCellConnection c) -> c.doStep(this));

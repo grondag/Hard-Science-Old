@@ -166,12 +166,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                 .text("interiorFloor=" + cell.getInteriorFloor() + "  distanceToFlowFloor=" + cell.getDistanceToFlowFloor() + " isFlowFloor=" + cell.flowFloorIsFlowBlock())
                 .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex())
                 .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "id=" + up.id + " barrier:" + up.getOther(cell).isBarrier() + " drop:" + up.getDrop() + " sortKey:" + up.getSortKey()))
-                .text("Down: " + (down == null ? "null" : "id=" + down.id  + " barrier:" + down.getOther(cell).isBarrier() + " drop:" + down.getDrop() + " sortKey:" + down.getSortKey()))
-                .text("East: " + (east == null ? "null" : "id=" + east.id + " barrier:" + east.getOther(cell).isBarrier() + " drop:" + east.getDrop() + " sortKey:" + east.getSortKey()))
-                .text("West: " + (west == null ? "null" : "id=" + west.id + " barrier:" + west.getOther(cell).isBarrier() + " drop:" + west.getDrop() + " sortKey:" + west.getSortKey()))
-                .text("North: " + (north == null ? "null" : "id=" + north.id + " barrier:" + north.getOther(cell).isBarrier() + " drop:" + north.getDrop() + " sortKey:" + north.getSortKey()))
-                .text("South: " + (south == null ? "null" : "id=" + south.id + " barrier:" + south.getOther(cell).isBarrier() + " drop:" + south.getDrop() + " sortKey:" + south.getSortKey()));
+                .text("Up: " + (up == null ? "null" : "id=" + up.id + " barrier:" + up.getOther(cell).isBarrier() + " drop:" + up.getSortDrop() + " sortKey:" + up.getSortKey()))
+                .text("Down: " + (down == null ? "null" : "id=" + down.id  + " barrier:" + down.getOther(cell).isBarrier() + " drop:" + down.getSortDrop() + " sortKey:" + down.getSortKey()))
+                .text("East: " + (east == null ? "null" : "id=" + east.id + " barrier:" + east.getOther(cell).isBarrier() + " drop:" + east.getSortDrop() + " sortKey:" + east.getSortKey()))
+                .text("West: " + (west == null ? "null" : "id=" + west.id + " barrier:" + west.getOther(cell).isBarrier() + " drop:" + west.getSortDrop() + " sortKey:" + west.getSortKey()))
+                .text("North: " + (north == null ? "null" : "id=" + north.id + " barrier:" + north.getOther(cell).isBarrier() + " drop:" + north.getSortDrop() + " sortKey:" + north.getSortKey()))
+                .text("South: " + (south == null ? "null" : "id=" + south.id + " barrier:" + south.getOther(cell).isBarrier() + " drop:" + south.getSortDrop() + " sortKey:" + south.getSortKey()));
         }
         
     }
