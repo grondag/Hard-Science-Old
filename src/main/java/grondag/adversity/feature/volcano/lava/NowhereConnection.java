@@ -12,7 +12,7 @@ public class NowhereConnection extends LavaCellConnection
     
     public NowhereConnection()
     {
-        super(NullCell.INSTANCE, NullCell.INSTANCE);
+        super(null, NullCell.INSTANCE, NullCell.INSTANCE);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class NowhereConnection extends LavaCellConnection
     }
 
     @Override
-    public void releaseCells()
+    public void releaseCells(LavaSimulator sim)
     {
         //NOOP
     }

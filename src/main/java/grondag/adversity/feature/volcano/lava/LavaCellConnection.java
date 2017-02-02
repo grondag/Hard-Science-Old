@@ -63,19 +63,19 @@ public abstract class LavaCellConnection
         PARTIAL
     }
  
-    public static LavaCellConnection create(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    public static LavaCellConnection create(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
         if(PackedBlockPos.getExtra(packedConnectionPos) == EnumFacing.Axis.Y.ordinal())
         {
-            return new LavaCellConnectionVertical(firstCell, secondCell, packedConnectionPos);
+            return new LavaCellConnectionVertical(sim, firstCell, secondCell, packedConnectionPos);
         }
         else
         {
-            return new LavaCellConnectionHorizontal(firstCell, secondCell, packedConnectionPos);
+            return new LavaCellConnectionHorizontal(sim, firstCell, secondCell, packedConnectionPos);
         }
     }
     
-    protected LavaCellConnection(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    protected LavaCellConnection(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
 
         this.packedConnectionPos = packedConnectionPos;
@@ -88,8 +88,8 @@ public abstract class LavaCellConnection
         this.id = nextConnectionID++;
         this.firstCell = firstCell;
         this.secondCell = secondCell;
-        firstCell.retain("");
-        secondCell.retain("");
+        firstCell.retain(sim, "from connection " + this.id);
+        secondCell.retain(sim, "from connection " + this.id);
                 
         switch(EnumFacing.Axis.values()[PackedBlockPos.getExtra(packedConnectionPos)])
         {
@@ -112,7 +112,7 @@ public abstract class LavaCellConnection
     }
     
     /** for use by empty version */
-    protected LavaCellConnection(LavaCell firstCell, LavaCell secondCell)
+    protected LavaCellConnection(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell)
     {
         this.binder = null;
         this.packedConnectionPos = 0;
@@ -192,10 +192,10 @@ public abstract class LavaCellConnection
     /**
      * Call when removing this connection so that cell references can be removed if appropriate.
      */
-    public void releaseCells()
+    public void releaseCells(LavaSimulator sim)
     {
-        this.firstCell.release("");
-        this.secondCell.release("");
+        this.firstCell.release(sim, "from connection " + this.id);
+        this.secondCell.release(sim, "from connection " + this.id);
         this.binder.unbind(this);
     }
     

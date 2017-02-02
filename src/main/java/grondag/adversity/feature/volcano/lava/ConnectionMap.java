@@ -86,7 +86,7 @@ public class ConnectionMap
             {
                 LavaCell cell1 = sim.getCell(lowerCellPackedBlockPos(packedConnectionPos), false);
                 LavaCell cell2 = sim.getCell(upperCellPackedBlockPos(packedConnectionPos), false);
-                LavaCellConnection connection = LavaCellConnection.create(cell1, cell2, packedConnectionPos);
+                LavaCellConnection connection = LavaCellConnection.create(sim, cell1, cell2, packedConnectionPos);
                 map.put(packedConnectionPos, connection);
                 sortedArray = null;
 //                sorted.add(connection);
@@ -167,7 +167,7 @@ public class ConnectionMap
         return PackedBlockPos.setExtra(PackedBlockPos.north(fromPackedBlockPos), EnumFacing.Axis.Z.ordinal());
     }
     
-    public void removeIfInvalid(long packedConnectionPos)
+    public void removeIfInvalid(LavaSimulator sim, long packedConnectionPos)
     {
         synchronized(this)
         {
@@ -180,7 +180,7 @@ public class ConnectionMap
                     )
             )
             {
-                connection.releaseCells();
+                connection.releaseCells(sim);
                 map.remove(packedConnectionPos);
                 sortedArray = null;
 //                sorted.remove(connection);

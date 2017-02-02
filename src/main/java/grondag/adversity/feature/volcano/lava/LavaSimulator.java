@@ -265,7 +265,7 @@ public class LavaSimulator extends SimulationNode
                 {
                     coolLava(c.packedBlockPos);
                     c.changeLevel(this, -c.getFluidAmount());
-                    c.clearBlockUpdate();
+                    c.clearBlockUpdate(this);
                     c.validate(this, true);
                 })).join();
        
@@ -447,7 +447,7 @@ public class LavaSimulator extends SimulationNode
             {
                 if(!c.isRetained() && c.getFluidAmount() == 0) 
                 {
-                    c.setDeleted();
+                    c.setDeleted(this);
                     this.allCells.remove(c.packedBlockPos);
                 }
             }
@@ -620,7 +620,7 @@ public class LavaSimulator extends SimulationNode
 
     public void removeConnectionIfInvalid(long packedConnectionPos)
     {
-        this.connections.removeIfInvalid(packedConnectionPos);
+        this.connections.removeIfInvalid(this, packedConnectionPos);
     }
 
     public static int blockUpdatesProvisionCounter;
@@ -686,7 +686,7 @@ public class LavaSimulator extends SimulationNode
                 }
                 i++;
                 cell.setInteriorFloor((byte) saveData[i++]);
-                cell.clearBlockUpdate();
+                cell.clearBlockUpdate(this);
                 this.allCells.put(cell.packedBlockPos, cell);
             }
             

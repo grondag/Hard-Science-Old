@@ -2,9 +2,9 @@ package grondag.adversity.feature.volcano.lava;
 
 public class LavaCellConnectionVertical extends LavaCellConnection
 {
-    protected LavaCellConnectionVertical(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    protected LavaCellConnectionVertical(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
-        super(firstCell, secondCell, packedConnectionPos);
+        super(sim, firstCell, secondCell, packedConnectionPos);
     }
 
 

@@ -4,9 +4,9 @@ import grondag.adversity.Adversity;
 
 public class LavaCellConnectionHorizontal extends LavaCellConnection
 {
-    protected LavaCellConnectionHorizontal(LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    protected LavaCellConnectionHorizontal(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
-        super(firstCell, secondCell, packedConnectionPos);
+        super(sim, firstCell, secondCell, packedConnectionPos);
     }
     
     /**
