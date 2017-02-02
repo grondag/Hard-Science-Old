@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,20 +92,7 @@ public class WorldStateBuffer implements IBlockAccess
 //        if(x==478 && y == 9 && z == -1231)
 //            Adversity.log.info("boop");
         
-        ChunkBuffer chunk = getChunkBuffer(x, z);
-        synchronized(chunk)
-        {
-            chunk.setBlockState(x, y, z, newState, expectedPriorState);
-            if(chunk.size() == 0)
-            {
-                synchronized(chunks)
-                {
-                    this.chunks.remove(chunk.packedChunkpos);
-                    this.usedBuffers.add(chunk);
-                    Adversity.log.info("Successful unqueud chunk update due to complete state reversion");
-                }
-            }
-        }
+        getChunkBuffer(x, z).setBlockState(x, y, z, newState, expectedPriorState);
     }
     
     private ChunkBuffer getChunkBuffer(int blockX, int blockZ)
@@ -151,6 +139,24 @@ public class WorldStateBuffer implements IBlockAccess
         int foundCount = 0;
         
         //TODO: make tick diff configurable
+        
+        // should not be getting concurrent blockstate calls, so use this
+        // opportunity to clean out empty chunk buffers
+        Iterator<ChunkBuffer> things = chunks.values().iterator();
+        while(things.hasNext())
+        {
+            ChunkBuffer buff = things.next();
+            if(buff.size() == 0)
+            {
+                things.remove();
+                this.usedBuffers.add(buff);
+                
+                if(Adversity.DEBUG_MODE)
+                    Adversity.log.info("Successful unqueud chunk buffer due to complete state reversion");
+            }
+            
+        }
+       
 
         while(maybeSomethingToDo && foundCount++ < chunkCount)
         {

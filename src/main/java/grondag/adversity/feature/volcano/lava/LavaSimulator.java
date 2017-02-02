@@ -29,6 +29,7 @@ import net.minecraft.world.World;
 
  * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
  * Avoid creating particles for small drops
+ * Find way to avoid processing static lava in volcano core
  * Handle multiple worlds or limit to a single world
  * Handle unloaded chunks
  * 
