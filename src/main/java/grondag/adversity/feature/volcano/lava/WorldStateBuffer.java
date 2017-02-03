@@ -86,8 +86,8 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
-        Adversity.log.info("blockstate buffer update @" + x + ", " + y + ", " + z + " = " + 
-                newState.toString() + " from " + expectedPriorState.toString());
+//        Adversity.log.info("blockstate buffer update @" + x + ", " + y + ", " + z + " = " + 
+//                newState.toString() + " from " + expectedPriorState.toString());
 //        
 //        if(x==478 && y == 9 && z == -1231)
 //            Adversity.log.info("boop");
@@ -525,7 +525,7 @@ public class WorldStateBuffer implements IBlockAccess
             {
                 if(newState == state.expectedPriorState)
                 {
-                    Adversity.log.info("Block state removed due to reversion");
+//                    Adversity.log.info("Block state removed due to reversion");
                     this.states[key] = null;
                     this.dataCount.decrementAndGet();
                     this.levelCounts[y].decrementAndGet();
@@ -561,7 +561,7 @@ public class WorldStateBuffer implements IBlockAccess
             int chunkStartX = PackedBlockPos.getChunkXStart(this.packedChunkpos);
             int chunkStartZ = PackedBlockPos.getChunkZStart(this.packedChunkpos);
             
-            Adversity.log.info(sim.getTickIndex() + " Applying " + count + " block updates for chunk with startX=" + chunkStartX + " and startZ=" + chunkStartZ);
+//            Adversity.log.info(sim.getTickIndex() + " Applying " + count + " block updates for chunk with startX=" + chunkStartX + " and startZ=" + chunkStartZ);
             
             for(int y = 0; y < 256; y++)
             {
@@ -586,8 +586,8 @@ public class WorldStateBuffer implements IBlockAccess
                             }
                             tracker.excludeAdjustmentNeededAt(x, y, z);
                             
-                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
-                                    bsb.newState.toString());
+//                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
+//                                    bsb.newState.toString());
 //                            
 //                            if(x==478 && y == 9 && z == -1231)
 //                                Adversity.log.info("boop");

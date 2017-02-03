@@ -30,13 +30,14 @@ import net.minecraft.world.World;
  * TODO
 
  * Emergent surface not smooth enough - Improve Drop/slope Calculation for flowing terrain
- * Avoid creating particles for small drops
- * Find way to avoid processing static lava in volcano core
- * Handle multiple worlds or limit to a single world
- * Handle unloaded chunks
  * 
- * If a lava cell is topped by another lava cell, always give visual state of 12, even if internal fluid state is less
- *   may reduce number of block updates - use metadata to distinguish the model dispatch
+ * Handle block break/neighbor change events for lava and basalt blocks to invalidate sim/worldbuffer state
+ * 
+ * Find way to avoid processing static lava in volcano core
+ * 
+ * Handle multiple worlds or limit to a single world
+ * 
+ * Handle unloaded chunks
  *   
  * Concurrency / performance
  * 

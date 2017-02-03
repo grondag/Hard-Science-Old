@@ -238,6 +238,13 @@ public abstract class LavaCellConnection
         // elevation - higher first  (lower)    8 bits
         key |= ((255L - PackedBlockPos.getY(this.packedConnectionPos)) << 54);
         
+//        // elevation - higher first  (lower)    8 bits
+//        long key = ((255L - PackedBlockPos.getY(this.packedConnectionPos)) << 55);
+//
+//        // axis - Y or not Y - Y first (lower)  1 bit
+//        key |= PackedBlockPos.getExtra(this.packedConnectionPos) == EnumFacing.Axis.Y.ordinal()
+//            ? 0L : 0x1L << 54;
+        
         // drop - higher drops come first       16 bits
         key |= ((long)((0xFFFF - this.getSortDrop()) & 0xFFFF) << 38);
         
