@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
+import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -21,6 +22,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
@@ -243,11 +245,45 @@ public class LavaSimulator extends SimulationNode
         
         if(capacity <= 0) return;
         
-        Collection<EntityLavaParticle> particles = this.particles.pollEligible(this, capacity);
+        Collection<ParticleInfo> particles = this.particles.pollEligible(this, capacity);
         
         if(particles != null && !particles.isEmpty())
         {
-            particles.stream().forEach(p ->  worldBuffer.realWorld.spawnEntityInWorld(p));
+            for(ParticleInfo p : particles)
+            {
+            
+                LavaCell cell = this.getCell(p.packedBlockPos, false);
+                
+                // abort on strangeness
+                if(cell.isBarrier()) continue;
+                
+                // if particle destination somehow has fluid, just put it there
+                if(cell.getFluidAmount() > 0)
+                {
+                    cell.changeLevel(this, p.getFluidUnits());
+                }
+                
+                // go direct to ground if not too far - don't spawn an entity
+                else if(cell.getDistanceToFlowFloor() < LavaCell.FLOW_FLOOR_DISTANCE_REALLY_FAR)
+                {
+                    cell = this.getCellForLavaAddition(p.packedBlockPos, false);
+                    if(cell != null) cell.changeLevel(this, p.getFluidUnits());
+                }
+                
+                // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
+                else if(p.getFluidUnits() >= LavaCell.FLUID_UNITS_PER_LEVEL)
+                {
+                    EntityLavaParticle elp = new EntityLavaParticle(this.worldBuffer.realWorld, p.getFluidUnits(), 
+                          new Vec3d(
+                                  PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
+                                  PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
+                                  PackedBlockPos.getZ(p.packedBlockPos) + 0.5
+                              ),
+                          Vec3d.ZERO);
+                    
+                    worldBuffer.realWorld.spawnEntityInWorld(elp);
+                }
+            }
         }
       
         this.particleTime += (System.nanoTime() - startTime);
@@ -491,21 +527,41 @@ public class LavaSimulator extends SimulationNode
      * If location is a barrier will attempt cell above. If that cell is also a barrier, will return null.
      * If location is a drop, will go down until it finds a non-drop cell.
      */
-    public LavaCell getCellForLavaAddition(BlockPos pos, boolean shouldResynchToWorldIfExists)
+    public LavaCell getCellForLavaAddition(long packedBlockPos, boolean shouldResynchToWorldIfExists)
     {
-        LavaCell candidate = this.getCell(pos, shouldResynchToWorldIfExists);
+        LavaCell candidate = this.getCell(packedBlockPos, shouldResynchToWorldIfExists);
+        LavaCell previousCandidate = null;
         if(candidate.isBarrier() && PackedBlockPos.getY(candidate.packedBlockPos) < 255)
         {
             candidate = candidate.getUpEfficiently(this, shouldResynchToWorldIfExists);
         }
         else
         {
-            while(candidate.getBottomType(this) == BottomType.DROP)
+            
+            while(candidate.getDistanceToFlowFloor() > LavaCell.LEVELS_PER_BLOCK && candidate.getFluidAmount() == 0)
             {
+                previousCandidate = candidate;
                 candidate = candidate.getDownEfficiently(this, shouldResynchToWorldIfExists);
             }
         }
-       return candidate.isBarrier() ? null : candidate;
+        
+        if(candidate.getCapacity() > 0)
+        {
+            return candidate;
+        }
+        else if(previousCandidate != null && previousCandidate.getCapacity() > 0)
+        {
+            return previousCandidate;
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    public LavaCell getCellForLavaAddition(BlockPos pos, boolean shouldResynchToWorldIfExists)
+    {
+        return this.getCellForLavaAddition(PackedBlockPos.pack(pos), shouldResynchToWorldIfExists);
     }
     
     /** returns a cell only if it contains fluid */

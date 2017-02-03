@@ -2,9 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.TreeSet;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.library.PackedBlockPos;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;

@@ -34,12 +34,12 @@ public abstract class LavaCellConnection
     public final static int PRESSURE_PER_LEVEL = LavaCell.FLUID_UNITS_PER_BLOCK / 20;
     
     /** smallest flow into a block that already contains fluid */
-    public final static int MINIMUM_INTERNAL_FLOW_UNITS = PRESSURE_PER_LEVEL / 10;
-    public final static int MINIMUM_INTERNAL_FLOW_UNITS_X2 = MINIMUM_INTERNAL_FLOW_UNITS * 2;
+//    public final static int MINIMUM_INTERNAL_FLOW_UNITS = 1;//PRESSURE_PER_LEVEL / 10;
+//    public final static int MINIMUM_INTERNAL_FLOW_UNITS_X2 = MINIMUM_INTERNAL_FLOW_UNITS * 2;
     
     /** smallest flow into a block that has no fluid already - applies to horizontal flow only */
-    public final static int MINIMUM_EXTERNAL_FLOW_UNITS = PRESSURE_PER_LEVEL;
-    public final static int MINIMUM_EXTERNAL_FLOW_UNITS_X2 = MINIMUM_EXTERNAL_FLOW_UNITS * 2;
+    public final static int MINIMUM_EXTERNAL_FLOW_UNITS = 1;//PRESSURE_PER_LEVEL;
+//    public final static int MINIMUM_EXTERNAL_FLOW_UNITS_X2 = MINIMUM_EXTERNAL_FLOW_UNITS * 2;
     
     public final static int UNITS_PER_ONE_BLOCK_WITH_PRESSURE = LavaCell.FLUID_UNITS_PER_BLOCK + PRESSURE_PER_LEVEL;
     public final static int UNITS_PER_TWO_BLOCKS = LavaCell.FLUID_UNITS_PER_BLOCK * 2 + PRESSURE_PER_LEVEL;

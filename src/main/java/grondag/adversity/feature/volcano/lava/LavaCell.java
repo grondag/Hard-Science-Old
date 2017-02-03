@@ -76,8 +76,7 @@ public class LavaCell
      */
     private boolean isFlowHeightBlock;
     
-    private static final byte FLOW_FLOOR_DISTANCE_REALLY_FAR = Byte.MAX_VALUE;
-    private static final byte FLOW_FLOOR_DISTANCE_UNKNOWN = -1;
+    public static final byte FLOW_FLOOR_DISTANCE_REALLY_FAR = Byte.MAX_VALUE;
     
     /** see {@link #getDistanceToFlowFloor()} */
     private byte distanceToFlowFloor;
@@ -108,8 +107,8 @@ public class LavaCell
      */
     private int lastFlowTick = 0;
 
-    //TODO: remove for release
-    private StringBuffer traceLog = new StringBuffer();
+   
+//    private StringBuffer traceLog = new StringBuffer();
     
     @Override 
     public int hashCode()
@@ -137,7 +136,7 @@ public class LavaCell
         this.id = nextCellID++;
         this.lastFlowTick = (fluidAmount == 0 | sim == null) ? 0 : sim.getTickIndex();
         
-        if(sim != null) traceLog.append(sim.getTickIndex() + " create " + fluidAmount + "\n");
+//        if(sim != null) traceLog.append(sim.getTickIndex() + " create " + fluidAmount + "\n");
     }
     
     public void changeLevel(LavaSimulator sim, int amount)
@@ -145,7 +144,7 @@ public class LavaCell
 //        if(this.id == 1104 || this.id == 8187)
 //            Adversity.log.info("boop");
                
-        traceLog.append(sim.getTickIndex() + " changeLevel " + amount + "\n");
+//        traceLog.append(sim.getTickIndex() + " changeLevel " + amount + "\n");
 
         if(amount != 0)
         {
@@ -236,11 +235,11 @@ public class LavaCell
                 {
                     sim.worldBuffer.setBlockState(this.packedBlockPos, Blocks.AIR.getDefaultState(), priorState);
                     
-                    traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
-                            + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
-                            + " priorState=" + priorState.toString()
-                            + " newState=" +Blocks.AIR.getDefaultState().toString()
-                            + "\n");
+//                    traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
+//                            + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
+//                            + " priorState=" + priorState.toString()
+//                            + " newState=" +Blocks.AIR.getDefaultState().toString()
+//                            + "\n");
                 }
             }
             else
@@ -249,11 +248,11 @@ public class LavaCell
                         IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible),
                         priorState);
                 
-                traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
-                        + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
-                        + " priorState=" + priorState.toString()
-                        + " newState=" + IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible).toString()
-                        + "\n");
+//                traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
+//                        + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
+//                        + " priorState=" + priorState.toString()
+//                        + " newState=" + IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible).toString()
+//                        + "\n");
             }
             this.lastVisibleLevel = currentVisible;
             this.isBlockUpdateCurrent = true;
@@ -287,7 +286,7 @@ public class LavaCell
      */
     public void clearBlockUpdate(LavaSimulator sim)
     {
-        traceLog.append(sim.getTickIndex() + " clearBlockUpdate\n");
+//        traceLog.append(sim.getTickIndex() + " clearBlockUpdate\n");
 
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
         this.isBlockUpdateCurrent = true;
@@ -343,14 +342,14 @@ public class LavaCell
                 // If we dont' agree on the particulars, world wins.
                 if(worldVisibleLevel != this.lastVisibleLevel)
                 {
-                    traceLog.append(sim.getTickIndex() + " validate level mismatch world=" + worldVisibleLevel + " sim=" + this.lastVisibleLevel + "\n");
+//                    traceLog.append(sim.getTickIndex() + " validate level mismatch world=" + worldVisibleLevel + " sim=" + this.lastVisibleLevel + "\n");
                     this.fluidAmount = worldVisibleLevel * FLUID_UNITS_PER_LEVEL;
                     this.clearBlockUpdate(sim);
                 }
             }
             else
             {
-                traceLog.append(sim.getTickIndex() + " validate sim missing lava world=" + worldVisibleLevel + "\n");
+//                traceLog.append(sim.getTickIndex() + " validate sim missing lava world=" + worldVisibleLevel + "\n");
                 // Uh oh! World has lava and we don't!
 
                 // Not a barrier any longer.
@@ -382,7 +381,7 @@ public class LavaCell
             // If we have lava, remove it UNLESS world is open space and we just don't have enough lava to be visible
             if(this.fluidAmount > 0 && (isBarrierInWorld || this.lastVisibleLevel > 0))
             {
-                traceLog.append(sim.getTickIndex() + " validate world missing lava sim=" + this.lastVisibleLevel + "\n");
+//                traceLog.append(sim.getTickIndex() + " validate world missing lava sim=" + this.lastVisibleLevel + "\n");
                 
                 this.fluidAmount = 0;
                 this.clearBlockUpdate(sim);
@@ -671,13 +670,15 @@ public class LavaCell
     public boolean canCool(LavaSimulator sim)
     {
         //TODO: make ticks to cool configurable
-        return !this.neverCools && this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 20000;
+        return !this.neverCools && this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200;
     }
 
 //    static int[] EXITS = new int[6];
   
     public BottomType getBottomType(LavaSimulator sim)
     {
+        if(this.distanceToFlowFloor <= LEVELS_PER_BLOCK) return BottomType.SUPPORTING;
+        
         LavaCell down = this.getDownEfficiently(sim, false);
         
 //        if(this.neighborDown == NowhereConnection.INSTANCE) 
@@ -691,7 +692,7 @@ public class LavaCell
         if(bottomFluid > 0)
         {
             
-            if(bottomFluid > LavaCell.FLUID_UNITS_PER_BLOCK)
+            if(bottomFluid >= LavaCell.FLUID_UNITS_PER_BLOCK)
             {
                 // bottom cell is full of fluid
 //                EXITS[1]++;
@@ -716,7 +717,7 @@ public class LavaCell
 //                    EXITS[4]++;
                 return BottomType.SUPPORTING;
             }
-            else if(downDist < LEVELS_PER_BLOCK)
+            else if(downDist <= LEVELS_PER_BLOCK)
             {
 //                EXITS[3]++;
                 return BottomType.PARTIAL;
@@ -746,7 +747,7 @@ public class LavaCell
     public void retain(LavaSimulator sim, String desc)
     {
 
-        traceLog.append(sim.getTickIndex() + " retain " + desc + System.lineSeparator());
+//        traceLog.append(sim.getTickIndex() + " retain " + desc + System.lineSeparator());
 
         //TODO: remove
 //        if(System.nanoTime() - lastUpdateNanoTime >= 10000000000L)
@@ -896,7 +897,7 @@ public class LavaCell
     
     public void release(LavaSimulator sim, String desc)
     {
-        traceLog.append(sim.getTickIndex() + " release " + desc + System.lineSeparator());
+//        traceLog.append(sim.getTickIndex() + " release " + desc + System.lineSeparator());
 
         //        Adversity.log.info("release id=" + this.id);
         this.referenceCount--;
@@ -941,7 +942,7 @@ public class LavaCell
      */
     public void setDeleted(LavaSimulator sim)
     {
-        traceLog.append(sim.getTickIndex() + " setDeleted\n");
+//        traceLog.append(sim.getTickIndex() + " setDeleted\n");
         this.isDeleted = true;
     }
     

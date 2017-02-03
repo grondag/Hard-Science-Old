@@ -19,6 +19,10 @@ public class ParticleManager
     private final static String NBT_SAVE_DATA_TAG = "particleManager";
     private final static int NBT_SAVE_DATA_WIDTH = 4;
     
+    private final static int MIN_WAIT_TICKS = 4;
+    /** if drop cell doesn't have anough to form a particle by this time the lava is deleted */
+    private final static int MAX_WAIT_TICKS = 200;
+    
     private final ConcurrentHashMap<Long, ParticleInfo> map = new ConcurrentHashMap<Long, ParticleInfo>(512);
             
     public void clear()
@@ -50,16 +54,18 @@ public class ParticleManager
     }
     
     /** returns a collection of eligible particles up the max count given */
-    public Collection<EntityLavaParticle> pollEligible(LavaSimulator sim, int maxCount)
+    public Collection<ParticleInfo> pollEligible(LavaSimulator sim, int maxCount)
     {
         if(map.isEmpty()) return null;
         
-        //TODO: make age limit configurable
-        int firstEligibleTick = sim.getTickIndex() - 4;
+        int firstEligibleTick = sim.getTickIndex() - MIN_WAIT_TICKS;
+        int forceEligibleTick = sim.getTickIndex() - MAX_WAIT_TICKS;
         
-        // wait until full size or at age limit
+        // wait until minimum size * minimum age, full size,  or max age
         List<ParticleInfo> candidates = map.values().parallelStream()
-                .filter(p -> p.tickCreated <= firstEligibleTick || p.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK)
+                .filter(p -> p.tickCreated <= forceEligibleTick 
+                    || p.fluidUnits >= LavaCell.FLUID_UNITS_PER_BLOCK
+                    || (p.tickCreated <= firstEligibleTick && p.fluidUnits >= LavaCell.FLUID_UNITS_PER_LEVEL))
                 .sorted(new Comparator<ParticleInfo>() {
 
                     @Override
@@ -76,14 +82,7 @@ public class ParticleManager
         
         candidates.stream().forEach(p -> map.remove(p.packedBlockPos));
         
-        return candidates.stream().map(p -> new EntityLavaParticle(sim.worldBuffer.realWorld, p.fluidUnits, 
-                        new Vec3d(
-                                PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
-                                PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
-                                PackedBlockPos.getZ(p.packedBlockPos) + 0.5
-                            ),
-                        Vec3d.ZERO))
-                .collect(Collectors.toList());
+        return candidates;
     }
     
     public static class ParticleInfo

@@ -92,12 +92,12 @@ public class LavaCellConnectionVertical extends LavaCellConnection
                 if(flow > max)
                 {
                     // damp small upward oscillations
-                    return max < MINIMUM_INTERNAL_FLOW_UNITS ? 0 : max;
+                    return max < 1 ? 0 : max;
                 }
                 else
                 {
                     // damp small upward oscillations
-                    return flow < MINIMUM_INTERNAL_FLOW_UNITS ? 0 : flow;
+                    return flow < 1 ? 0 : flow;
                 }
             }
         }
@@ -138,12 +138,12 @@ public class LavaCellConnectionVertical extends LavaCellConnection
                 if(flow > max)
                 {
                     // damp small upward oscillations
-                    return max < MINIMUM_INTERNAL_FLOW_UNITS ? 0 : max;
+                    return max < 1 ? 0 : max;
                 }
                 else
                 {
                     // damp small upward oscillations
-                    return flow < MINIMUM_INTERNAL_FLOW_UNITS ? 0 : flow;
+                    return flow < 1 ? 0 : flow;
                 }
             }
         }

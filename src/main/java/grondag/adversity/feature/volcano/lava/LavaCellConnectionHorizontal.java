@@ -28,7 +28,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
                 : MAX_HORIZONTAL_FLOW_PER_TICK - Math.abs(this.flowThisTick);
     
         // check against the most restrictive case and abort if there can be no flow
-        if(absoluteMaxFlow < MINIMUM_INTERNAL_FLOW_UNITS) return 0;
+//        if(absoluteMaxFlow < MINIMUM_INTERNAL_FLOW_UNITS) return 0;
 
         BottomType type1 = this.firstCell.getBottomType(sim);
         BottomType type2 = this.secondCell.getBottomType(sim);
@@ -48,13 +48,15 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
                         // 1st can donate excess to to 2nd if has enough
                         
                         // if connection is maxed out, abort - no point in continuing
-                        if(absoluteMaxFlow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
+//                        if(absoluteMaxFlow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
                         
                         // compute amount able to donate
                         int flow = firstCell.getFluidAmount() - firstCell.getRetainedLevel();
                         
                         // confirm is enough for a particle
-                        if(flow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
+//                        if(flow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
+                        
+                        if(flow < 1) return 0;
                         
                         // limit to per-tick max - guaranteed to be at least LavaCell.FLUID_UNITS_PER_LEVEL or we wouldn't be here
                         if(flow > absoluteMaxFlow) flow = absoluteMaxFlow;
@@ -81,13 +83,15 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
                         // 2nd can donate excess to to 1st if has enough
                         
                         // if connection is maxed out, abort - no point in continuing
-                        if(absoluteMaxFlow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
+//                        if(absoluteMaxFlow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
                         
                         // compute amount able to donate
                         int flow = secondCell.getFluidAmount() - secondCell.getRetainedLevel();
                         
                         // confirm is enough for a particle
-                        if(flow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
+//                        if(flow < LavaCell.FLUID_UNITS_PER_LEVEL) return 0;
+                        
+                        if(flow < 1) return 0;
                         
                         // limit to per-tick max - guaranteed to be at least LavaCell.FLUID_UNITS_PER_LEVEL or we wouldn't be here
                         if(flow > absoluteMaxFlow) flow = absoluteMaxFlow;
@@ -141,43 +145,32 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         // no point if nothing to donate
         if(fluid1 == 0) return 0;
         
-        // Assume 2nd cell already has fluid, making it easier to flow - mimics surface tension/self-adhesion
-        // Assumption is corrected below if determined that 2nd cell has no fluid.
-        int minimumFlow = LavaCellConnection.MINIMUM_INTERNAL_FLOW_UNITS;
+        // Prevent flowing below retention level
+        int available = fluid1 - supportedCell.getRetainedLevel();
+        if(available < 1) return 0;
         
         int level2 = partiallySupportedCell.getFluidAmount();
         if(level2 == 0) 
         {
-            // If the minimum will be ess than our per-tick maximum, we won't be able to flow, so abort.
-            // Check at the very top for internal_min won't catch because external_min > internal_min
-            if(absoluteMaxFlow < MINIMUM_EXTERNAL_FLOW_UNITS) return 0;
-            
-            // 2nd cell has no fluid, so harder to flow - mimics surface tension/self-adhesion
-            minimumFlow = LavaCellConnection.MINIMUM_EXTERNAL_FLOW_UNITS;
-            
             // if no fluid, could still have a floor that becomes melted, acts as fluid for our purpose
             level2 = partiallySupportedCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL;
         }
         
         // Compute difference.
         // Nominal flow is half the difference - even out the levels
-        // If level2 > fluid1 will be negative and thus less than minimum level,
-        // resulting in zero return value below.
+        // If level2 >= fluid1 will be negative or zero and can abort.
         int flow = (fluid1 - level2) / 2;
-    
-        // Prevent flowing below retention level
-        int available = fluid1 - supportedCell.getRetainedLevel();
+        
+        if(flow < 1) return 0;
         
         if(available < flow)
         {
             // Constrained by retention
-            if(available < minimumFlow) return 0;
             return available > absoluteMaxFlow ? absoluteMaxFlow : available;
         }
         else
         {
             // Flow is not constrained by retention
-            if(flow < minimumFlow) return 0;
             return flow > absoluteMaxFlow ? absoluteMaxFlow : flow;
         }
     }
@@ -266,14 +259,12 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
             // Check remaining constraints.
             // Note this block is identical to same block below
             // Duplicated in-line for performance due to frequency of calling
-            {
-                // has to be big enough
-                if(flow < MINIMUM_INTERNAL_FLOW_UNITS) return 0;
-                
-                // can't exceed per-tick max
-                if(flow > absoluteMaxFlow) flow = absoluteMaxFlow;         
-            }
-    
+            
+            // has to be something
+            if(flow < 1) return 0;
+            
+            // can't exceed per-tick max
+            if(flow > absoluteMaxFlow) return absoluteMaxFlow;         
             
             // Result will already be positive, no need to flip sign
             return flow;
@@ -288,14 +279,12 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
             // Check remaining constraints.
             // Note this block is identical to same block above
             // Duplicated in-line for performance due to frequency of calling
-            {
-                // has to be big enough
-                if(flow < MINIMUM_INTERNAL_FLOW_UNITS) return 0;
+            
+            // has to be something
+            if(flow < 1) return 0;
 
-                // can't exceed per-tick max
-                if(flow > absoluteMaxFlow) flow = absoluteMaxFlow;         
-            }
-    
+            // can't exceed per-tick max
+            if(flow > absoluteMaxFlow) return  -absoluteMaxFlow;         
             
             // Need to flip sign because going from 2 to 1
             return -flow;
