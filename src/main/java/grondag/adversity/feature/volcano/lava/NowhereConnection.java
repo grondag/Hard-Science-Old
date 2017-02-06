@@ -52,21 +52,15 @@ public class NowhereConnection extends LavaCellConnection
     }
 
     @Override
-    public int getSortDrop()
-    {
-        return 0;
-    }
-
-    @Override
     public long getSortKey()
     {
         return 0;
     }
 
     @Override
-    public void updateSortKey()
+    public boolean updateSortKey()
     {
-        //NOOP
+        return false;
     }
 
     @Override
@@ -88,5 +82,11 @@ public class NowhereConnection extends LavaCellConnection
         {
             return true;
         }
+    }
+    
+    @Override
+    public boolean goesNowhere()
+    {
+        return true;
     }
 }

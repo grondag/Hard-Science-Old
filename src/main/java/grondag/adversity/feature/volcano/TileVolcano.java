@@ -316,7 +316,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     private VolcanoStage doCooling()
     {
         //TODO: make configurable
-        return Simulator.instance.getFluidTracker().loadFactor() > 0.7F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
+        return Simulator.instance.getFluidTracker().loadFactor() > 0.5F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
     }
     
     /** 

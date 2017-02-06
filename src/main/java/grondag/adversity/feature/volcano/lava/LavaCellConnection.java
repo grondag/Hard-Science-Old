@@ -33,19 +33,11 @@ public abstract class LavaCellConnection
  
     public final static int PRESSURE_PER_LEVEL = LavaCell.FLUID_UNITS_PER_BLOCK / 20;
     
-    /** smallest flow into a block that already contains fluid */
-//    public final static int MINIMUM_INTERNAL_FLOW_UNITS = 1;//PRESSURE_PER_LEVEL / 10;
-//    public final static int MINIMUM_INTERNAL_FLOW_UNITS_X2 = MINIMUM_INTERNAL_FLOW_UNITS * 2;
-    
-    /** smallest flow into a block that has no fluid already - applies to horizontal flow only */
-    public final static int MINIMUM_EXTERNAL_FLOW_UNITS = 1;//PRESSURE_PER_LEVEL;
-//    public final static int MINIMUM_EXTERNAL_FLOW_UNITS_X2 = MINIMUM_EXTERNAL_FLOW_UNITS * 2;
     
     public final static int UNITS_PER_ONE_BLOCK_WITH_PRESSURE = LavaCell.FLUID_UNITS_PER_BLOCK + PRESSURE_PER_LEVEL;
     public final static int UNITS_PER_TWO_BLOCKS = LavaCell.FLUID_UNITS_PER_BLOCK * 2 + PRESSURE_PER_LEVEL;
     public final static float INVERSE_PRESSURE_FACTOR = (float)LavaCell.FLUID_UNITS_PER_BLOCK/UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
     
-    //TODO: make configurable?
     /** Maximum flow through any block connection in a single tick. 
      * Not changing this to vary with pressure because most lava flows are 
      * along the surface and higher-velocity flows (down a slope) will also
@@ -123,23 +115,7 @@ public abstract class LavaCellConnection
     
     public LavaCell getOther(LavaCell cellIAlreadyHave)
     {
-        if(cellIAlreadyHave == this.firstCell)
-        {
-            return this.secondCell;
-        }
-        else
-        {
-            return this.firstCell;
-        }
-    }
-    
-    /**
-     * For horizontal cells, returns the distanceToFlowFloor of other cell.
-     * For nowhere and vertical connections, always returns zero.
-     */
-    public int getOtherDistanceToFlowFloor(LavaCell cellIAlreadyHave)
-    {
-        return 0;
+        return cellIAlreadyHave == this.firstCell ? this.secondCell : this.firstCell;
     }
     
     abstract protected int getFlowRate(LavaSimulator sim);
@@ -201,15 +177,17 @@ public abstract class LavaCellConnection
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
-     * Measured in fluid units
+     * Measured in fluid levels
      * For horizontal connections:
      *      Zero if there is no difference or if either block is a barrier.
      *      Higher drop means higher priority for flowing. 
-     * For vertical connections:
-     *      Drop is a full block by convention and not intended to be used.
-     * Nowhere (barrier) connections always have a drop of 0.         
+     * For all other connections:
+     *      Drop is always zero and not intended to be used.
      */
-    public abstract int getSortDrop();
+    public int getSortDrop()
+    {
+        return 0;
+    }
     
     /**
      * Drop can change on validation, but is also used for sorting.
@@ -229,7 +207,8 @@ public abstract class LavaCellConnection
         return this.id;
     }
     
-    public void updateSortKey()
+    /** return true of sort key was changed */
+    public boolean updateSortKey()
     {
         // axis - Y or not Y - Y first (lower)  1 bit
         long key = PackedBlockPos.getExtra(this.packedConnectionPos) == EnumFacing.Axis.Y.ordinal()
@@ -248,13 +227,21 @@ public abstract class LavaCellConnection
         // drop - higher drops come first       16 bits
         key |= ((long)((0xFFFF - this.getSortDrop()) & 0xFFFF) << 38);
         
-        // random                               6 bits
+        // random                               `16 bits
         key |= ((Useful.longHash(this.packedConnectionPos) & 0x3F) << 32);
         
         // uniqueness  32 bits
         key |= this.id;
         
-        this.sortKey = key;
+        if(key != this.sortKey)
+        {
+            this.sortKey = key;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
    
     private static abstract class AbstractCellBinder
@@ -325,4 +312,11 @@ public abstract class LavaCellConnection
             con.secondCell.unbindNorth();            
         }
     }
+    
+    /** use to ID a dummy connection that can't flow */
+    public boolean goesNowhere()
+    {
+        return false;
+    }
+    
 }

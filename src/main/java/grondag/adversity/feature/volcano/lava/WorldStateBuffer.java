@@ -580,11 +580,18 @@ public class WorldStateBuffer implements IBlockAccess
                             int x = chunkStartX +  ((i >> 4) & 0xF);
                             int z = chunkStartZ + (i & 0xF);
                             
-                            if(IFlowBlock.isFlowHeight(bsb.newState.getBlock()) || IFlowBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
+                            if(IFlowBlock.isFlowHeight(bsb.newState.getBlock()))
                             {
                                 tracker.setAdjustmentNeededAround(x, y, z);
+                                // set to height block so no need to look for filler
+                                tracker.excludeAdjustmentNeededAt(x, y, z);
                             }
-                            tracker.excludeAdjustmentNeededAt(x, y, z);
+                            else if(IFlowBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
+                            {
+                                // difference here is simply that we allow fillers in the block being set
+                                tracker.setAdjustmentNeededAround(x, y, z);
+                            }
+                            
                             
 //                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
 //                                    bsb.newState.toString());

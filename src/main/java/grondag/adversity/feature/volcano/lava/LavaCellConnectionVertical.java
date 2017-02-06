@@ -147,14 +147,5 @@ public class LavaCellConnectionVertical extends LavaCellConnection
                 }
             }
         }
-    }
-    
-  
-    //TODO: is this even needed?
-    @Override
-    public int getSortDrop()
-    {
-        return LavaCell.FLUID_UNITS_PER_BLOCK;
-    }
-    
+    }    
 }

@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 
 import grondag.adversity.library.PackedBlockPos;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -197,6 +198,8 @@ public class ConnectionMap
         if(sortedArray == null)
         {
 //            sortedArray = sorted.toArray(ARRAY_TEMPLATE);
+            map.values().parallelStream().forEach(p -> p.updateSortKey());
+            
             sortedArray = map.values().toArray(ARRAY_TEMPLATE);
         
             Arrays.parallelSort(sortedArray, 
@@ -210,6 +213,22 @@ public class ConnectionMap
         
         return sortedArray;
         
+    }
+    
+    public void validateConnections(LavaSimulator sim)
+    {
+        Iterator<LavaCellConnection> it = map.values().iterator();
+        while(it.hasNext())
+        {
+            LavaCellConnection test = it.next();
+            if(test.firstCell.isBarrier() 
+                    || test.secondCell.isBarrier()
+                    || (test.firstCell.getFluidAmount() == 0 && test.secondCell.getFluidAmount() == 0))
+            {
+                test.releaseCells(sim);
+                it.remove();
+            }
+        }
     }
     
 }

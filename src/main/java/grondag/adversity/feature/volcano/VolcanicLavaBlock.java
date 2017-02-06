@@ -83,6 +83,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     {
         super.neighborChanged(state, worldIn, pos, blockIn);
         handleFallingBlocks(worldIn, pos, state);
+        Simulator.instance.getFluidTracker().notifyLavaNeighborChange(worldIn, pos, state);
     }
 
     @Override
@@ -154,24 +155,33 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
         else
         {
             long packedPos = PackedBlockPos.pack(data.getPos());
-            LavaCellConnection up = sim.getConnection(ConnectionMap.getUpConnectionFromPackedBlockPos(packedPos));
-            LavaCellConnection down = sim.getConnection(ConnectionMap.getDownConnectionFromPackedBlockPos(packedPos));
-            LavaCellConnection east = sim.getConnection(ConnectionMap.getEastConnectionFromPackedBlockPos(packedPos));
-            LavaCellConnection west = sim.getConnection(ConnectionMap.getWestConnectionFromPackedBlockPos(packedPos));
-            LavaCellConnection north = sim.getConnection(ConnectionMap.getNorthConnectionFromPackedBlockPos(packedPos));
-            LavaCellConnection south = sim.getConnection(ConnectionMap.getSouthConnectionFromPackedBlockPos(packedPos));
+            LavaCell up = cell.getUpEfficiently(sim, false);
+            LavaCell down = cell.getDownEfficiently(sim, false);
+            LavaCell east = cell.getEastEfficiently(sim);
+            LavaCell west = cell.getWestEfficiently(sim);
+            LavaCell north = cell.getNorthEfficiently(sim);
+            LavaCell south =cell.getSouthEfficiently(sim);
+            
+            
+            int netDrop = Math.max(
+                    Math.max(east.getDistanceToFlowFloor(), west.getDistanceToFlowFloor()), 
+                    Math.max(north.getDistanceToFlowFloor(), south.getDistanceToFlowFloor())
+                ) - cell.getDistanceToFlowFloor();
+            
+            int netRetention = Math.max(cell.getRetainedLevel(sim), up.getRetainedLevel(sim) + LavaCell.FLUID_UNITS_PER_BLOCK) / LavaCell.FLUID_UNITS_PER_LEVEL - cell.getDistanceToFlowFloor();
             
             probeInfo.text("Cell ID = " + cell.hashCode())
-                .text("Current Level = " + cell.getFluidAmount() + "    Retained Level = " + cell.getRetainedLevel())
+                .text("CurrentLevel=" + cell.getFluidAmount() + "    RetainedLevel=" + cell.getRetainedLevel(sim) + "   MaxLevel=" + cell.maxLevel)
                 .text("interiorFloor=" + cell.getInteriorFloor() + "  distanceToFlowFloor=" + cell.getDistanceToFlowFloor() + " isFlowFloor=" + cell.flowFloorIsFlowBlock())
                 .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex())
-                .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
-                .text("Up: " + (up == null ? "null" : "id=" + up.id + " barrier:" + up.getOther(cell).isBarrier() + " drop:" + up.getSortDrop() + " sortKey:" + up.getSortKey()))
-                .text("Down: " + (down == null ? "null" : "id=" + down.id  + " barrier:" + down.getOther(cell).isBarrier() + " drop:" + down.getSortDrop() + " sortKey:" + down.getSortKey()))
-                .text("East: " + (east == null ? "null" : "id=" + east.id + " barrier:" + east.getOther(cell).isBarrier() + " drop:" + east.getSortDrop() + " sortKey:" + east.getSortKey()))
-                .text("West: " + (west == null ? "null" : "id=" + west.id + " barrier:" + west.getOther(cell).isBarrier() + " drop:" + west.getSortDrop() + " sortKey:" + west.getSortKey()))
-                .text("North: " + (north == null ? "null" : "id=" + north.id + " barrier:" + north.getOther(cell).isBarrier() + " drop:" + north.getSortDrop() + " sortKey:" + north.getSortKey()))
-                .text("South: " + (south == null ? "null" : "id=" + south.id + " barrier:" + south.getOther(cell).isBarrier() + " drop:" + south.getSortDrop() + " sortKey:" + south.getSortKey()));
+                .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel() 
+                        + "  Net Drop = " + netDrop  + "  Net Retention = " + netRetention)
+                .text("Up: " + (up == null ? "null" : "id=" + up.hashCode() + " barrier:" + up.isBarrier() + " drop:" + up.getDistanceToFlowFloor() + " retention:" + up.getRetainedLevel(sim)))
+                .text("Down: " + (down == null ? "null" : "id=" + down.hashCode()  + " barrier:" + down.isBarrier() + " drop:" + down.getDistanceToFlowFloor() + " retention:" + down.getRetainedLevel(sim)))
+                .text("East: " + (east == null ? "null" : "id=" + east.hashCode() + " barrier:" + east.isBarrier() + " drop:" + east.getDistanceToFlowFloor() + " retention:" + east.getRetainedLevel(sim)))
+                .text("West: " + (west == null ? "null" : "id=" + west.hashCode() + " barrier:" + west.isBarrier() + " drop:" + west.getDistanceToFlowFloor() + " retention:" + west.getRetainedLevel(sim)))
+                .text("North: " + (north == null ? "null" : "id=" + north.hashCode() + " barrier:" + north.isBarrier() + " drop:" + north.getDistanceToFlowFloor() + " retention:" + north.getRetainedLevel(sim)))
+                .text("South: " + (south == null ? "null" : "id=" + south.hashCode() + " barrier:" + south.isBarrier() + " drop:" + south.getDistanceToFlowFloor() + " retention:" + south.getRetainedLevel(sim)));
         }
         
     }
