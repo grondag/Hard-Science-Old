@@ -151,8 +151,8 @@ public class WorldStateBuffer implements IBlockAccess
                 things.remove();
                 this.usedBuffers.add(buff);
                 
-                if(Adversity.DEBUG_MODE)
-                    Adversity.log.info("Successful unqueud chunk buffer due to complete state reversion");
+//                if(Adversity.DEBUG_MODE)
+//                    Adversity.log.info("Successful unqueud chunk buffer due to complete state reversion");
             }
             
         }

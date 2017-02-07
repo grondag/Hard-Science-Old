@@ -779,7 +779,7 @@ public class LavaCell
     public boolean canCool(LavaSimulator sim)
     {
         //TODO: make ticks to cool configurable
-        return !this.neverCools && this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 20000;
+        return !this.neverCools && this.fluidAmount > 0 && sim.getTickIndex() - this.getLastFlowTick() > 200;
     }
 
 //    static int[] EXITS = new int[6];

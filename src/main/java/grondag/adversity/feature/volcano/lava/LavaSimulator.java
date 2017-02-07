@@ -28,10 +28,13 @@ import net.minecraft.world.World;
 
 /**
  * TODO
-
- * Defer retention calculation to when lava is first added - not needed before then.  Remove when lava leaves unless was non-zero.
- * Fix probable concurrency problems with distanceToFlowFloor - if is statically calculated then sequence of usage matters. 
- * Need to make sure it is not used during the validation process when it is updated. (Currently IS used by retention.)
+ * 
+ * Cooling from below causes retention level updates.  
+ * Try cooling from the top or cool entire vertical column at once.
+ * 
+ * Cache static portion of connection sort keys.
+ * 
+ * Use previous connection sort order to reduce sort times.
  * 
  * Make LavaCell concurrency more robust
  * 
@@ -449,6 +452,7 @@ public class LavaSimulator extends SimulationNode
     public void doStep()
     {
         long startTime = System.nanoTime();
+        connectionProcessCount += this.connections.size();
         final int size = this.connections.size();
         LavaCellConnection[] values = this.connections.values();
         for(int i = 0; i < size; i++)
@@ -463,6 +467,7 @@ public class LavaSimulator extends SimulationNode
     public void doLastStep()
     {
         long startTime = System.nanoTime();
+        connectionProcessCount += this.connections.size();
         final int size = this.connections.size();
         LavaCellConnection[] values = this.connections.values();
         for(int i = 0; i < size; i++)
