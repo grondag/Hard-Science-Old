@@ -29,7 +29,7 @@ public class CoolingBlockMap
         AgedBlockPos result = list.pollFirst();
         set.remove(result);
         
-        if(set.size() != list.size())
+        if(Adversity.DEBUG_MODE && set.size() != list.size())
         {
             Adversity.log.warn("basalt tracking error in pollfirst");
         }
@@ -42,7 +42,7 @@ public class CoolingBlockMap
         {
             list.add(apos);
         }
-        if(set.size() != list.size())
+        if(Adversity.DEBUG_MODE && set.size() != list.size())
         {
             Adversity.log.warn("basalt tracking error in add");
         }

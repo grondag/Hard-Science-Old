@@ -29,6 +29,11 @@ import net.minecraft.world.World;
 /**
  * TODO
  * 
+ * FIX: Floating flow blocks.  May be due to downward flows skipping over meltable cells because they aren't supported
+ * thus causing the cell with an interior floor to be orphaned.  See updateFloor and changeLevel and possibly getCellForLavaAddition
+ * Easiest fix is probably to ensure that all covered height blocks are full height meta on cooling
+ * Or maybe just scrap the checks for melting and allow vertical flow to handle unsupported melting when it occurs?
+ * 
  * Determine and implement connection processing order
  * Bucket connections into verticals and the horizontals by drop
  * TEST: is it more efficient to sort and process vertically? Top to bottom? Bottom to top?
@@ -275,6 +280,11 @@ public class LavaSimulator extends SimulationNode
                 else if(cell.getDistanceToFlowFloor() < LavaCell.FLOW_FLOOR_DISTANCE_REALLY_FAR)
                 {
                     cell = this.getCellForLavaAddition(p.packedBlockPos, false);
+                    LavaCell down = cell.getDownEfficiently(this, false);
+                    
+//                    if(down != null && !down.isBarrier() && down.getFluidAmount() == 0)
+//                        Adversity.log.info("wut?");
+                    
                     if(cell != null) cell.changeLevel(this, p.getFluidUnits());
                 }
                 

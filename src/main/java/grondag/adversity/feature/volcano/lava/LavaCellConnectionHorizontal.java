@@ -161,40 +161,17 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         
         if(absoluteMaxFlow < 1) return 0;
         
-        //TODO: what it says
-        int tempFlowPleaseDeleteMe;
-        
         switch(this.flowTypeThisTick)
         {
         
         case EQUALIZING:
-            tempFlowPleaseDeleteMe = this.getEqualizedSupportedFlow(sim, absoluteMaxFlow);
-            
-            if(tempFlowPleaseDeleteMe > 0)
-            {
-                if(this.firstCell.getFluidAmount() - tempFlowPleaseDeleteMe < this.secondCell.getFluidAmount() + tempFlowPleaseDeleteMe)
-                    Adversity.log.info("GUILTY! #1");
-            }
-            else if(tempFlowPleaseDeleteMe < 0)
-            {
-                if(this.firstCell.getFluidAmount() - tempFlowPleaseDeleteMe > this.secondCell.getFluidAmount() + tempFlowPleaseDeleteMe)
-                    Adversity.log.info("GUILTY! #2");
-            }
-            
-            return tempFlowPleaseDeleteMe;
-            
+            return this.getEqualizedSupportedFlow(sim, absoluteMaxFlow);
             
         case SPREAD_1_TO_2:
-            tempFlowPleaseDeleteMe = getPartiallySupportedFlow(sim, absoluteMaxFlow, this.firstCell, this.secondCell);
-            if(tempFlowPleaseDeleteMe != 0 && this.firstCell.getFluidAmount() - tempFlowPleaseDeleteMe < this.secondCell.getFluidAmount() + tempFlowPleaseDeleteMe)
-                Adversity.log.info("GUILTY! #3");
-            return tempFlowPleaseDeleteMe;
+            return getPartiallySupportedFlow(sim, absoluteMaxFlow, this.firstCell, this.secondCell);
             
         case SPREAD_2_TO_1:
-            tempFlowPleaseDeleteMe = -getPartiallySupportedFlow(sim, absoluteMaxFlow, this.secondCell, this.firstCell);
-            if(tempFlowPleaseDeleteMe != 0 && this.firstCell.getFluidAmount() - tempFlowPleaseDeleteMe > this.secondCell.getFluidAmount() + tempFlowPleaseDeleteMe)
-                Adversity.log.info("GUILTY! #4");
-            return tempFlowPleaseDeleteMe;
+            return -getPartiallySupportedFlow(sim, absoluteMaxFlow, this.secondCell, this.firstCell);
             
         case DROP_1_TO_2:
         {
