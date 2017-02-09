@@ -318,9 +318,10 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
 
     private int getEqualizedSupportedFlowSingle(LavaSimulator sim, int absoluteMaxFlow, LavaCell fluidCell, int fluidLevel, LavaCell emptyCell)
     {
-        
+        // add a margin to solid flows because fluid gets rounded down on cooling and don't
+        // want lava flowing back into the space that just cooled
+        int emptyLevel = (emptyCell.getInteriorFloor() + 1 ) * LavaCell.FLUID_UNITS_PER_LEVEL - 1;
         // abort if empty cell has a floor that would prevent 
-        int emptyLevel = emptyCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL;
         if(emptyLevel >= fluidLevel) return 0;
 
   

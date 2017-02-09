@@ -311,6 +311,9 @@ public class WorldStateBuffer implements IBlockAccess
     /** returns true an update occured */
     private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
+        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
+            Adversity.log.info("boop");
+        
         IBlockState newState = IFlowBlock.adjustFillIfNeeded(realWorld, pos);
         
         if(newState == null) return false;
@@ -596,8 +599,8 @@ public class WorldStateBuffer implements IBlockAccess
 //                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
 //                                    bsb.newState.toString());
 //                            
-//                            if(x==478 && y == 9 && z == -1231)
-//                                Adversity.log.info("boop");
+                            if(x==59 && (y == 69 || y == 70) && z == 129)
+                                Adversity.log.info("boop");
                       
                             realWorld.setBlockState(new BlockPos( x, y, z), bsb.newState, 3);
                             

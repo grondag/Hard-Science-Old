@@ -32,9 +32,11 @@ import net.minecraft.world.World;
  * Cooling from below causes retention level updates.  
  * Try cooling from the top or cool entire vertical column at once.
  * 
- * Cache static portion of connection sort keys.
- * 
- * Use previous connection sort order to reduce sort times.
+ * Determine and implement connection processing order
+ * Bucket connections into verticals and the horizontals by drop
+ * TEST: is it more efficient to sort and process vertically? Top to bottom? Bottom to top?
+ * If will be sorted, use previous connection sort order to reduce sort times.
+ * If connection processing will be concurrent, add locking mechanism for flowAcross that won't cause deadlocks
  * 
  * Make LavaCell concurrency more robust
  * 
