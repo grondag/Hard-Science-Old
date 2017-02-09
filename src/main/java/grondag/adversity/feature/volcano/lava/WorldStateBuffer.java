@@ -14,6 +14,7 @@ import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -311,8 +312,33 @@ public class WorldStateBuffer implements IBlockAccess
     /** returns true an update occured */
     private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
-        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
-            Adversity.log.info("boop");
+//        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
+//            Adversity.log.info("boop");
+        IBlockState baseState = realWorld.getBlockState(pos);
+        if(baseState.getBlock() == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
+        {
+            if( !IFlowBlock.shouldBeFullCube(baseState, realWorld, pos))
+            {
+                realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if(baseState.getBlock() == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+        {
+            if(IFlowBlock.shouldBeFullCube(baseState, realWorld, pos))
+            {
+                realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         
         IBlockState newState = IFlowBlock.adjustFillIfNeeded(realWorld, pos);
         
@@ -599,8 +625,8 @@ public class WorldStateBuffer implements IBlockAccess
 //                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
 //                                    bsb.newState.toString());
 //                            
-                            if(x==59 && (y == 69 || y == 70) && z == 129)
-                                Adversity.log.info("boop");
+//                            if(x==59 && (y == 69 || y == 70) && z == 129)
+//                                Adversity.log.info("boop");
                       
                             realWorld.setBlockState(new BlockPos( x, y, z), bsb.newState, 3);
                             
