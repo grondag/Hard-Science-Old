@@ -69,9 +69,10 @@ public class LavaCell
     
     /** 
      * Exponential average of current level - used for computing visible level.
+     * Holds 6 bits of integer precision.  Needs >> 6 to get usable value.
      * Maintained by provideBlockUpdate.
      */
-    private int avgFluidAmount = 0;
+    private int avgFluidAmountWithPrecision = 0;
 
     public final long packedBlockPos;
 
@@ -247,20 +248,24 @@ public class LavaCell
 
 //        if(this.id == 1104 || this.id == 8187)
 //            Adversity.log.info("boop");
-        if(this.avgFluidAmount == this.fluidAmount)
+        
+        int avgAmount = this.avgFluidAmountWithPrecision >> 6;
+    
+        // don't average big changes
+        if(Math.abs(avgAmount - this.fluidAmount) > LavaCell.FLUID_UNITS_PER_LEVEL * 4)
         {
-            this.isBlockUpdateCurrent = true;
-        }
-        else if(Math.abs(this.avgFluidAmount - this.fluidAmount) > LavaCell.FLUID_UNITS_PER_LEVEL * 2)
-        {
-            this.avgFluidAmount = this.fluidAmount;
+            this.avgFluidAmountWithPrecision = this.fluidAmount << 6;
             this.isBlockUpdateCurrent = true;
         }
         else
         {
+            this.avgFluidAmountWithPrecision -= avgAmount; 
+            this.avgFluidAmountWithPrecision += this.fluidAmount;
             
-            this.avgFluidAmount = ((this.avgFluidAmount << 6) - this.avgFluidAmount + this.fluidAmount) >> 6;
-            if(this.avgFluidAmount == this.fluidAmount) this.isBlockUpdateCurrent = true;
+            if(this.avgFluidAmountWithPrecision  == this.fluidAmount << 6)
+            {
+                this.isBlockUpdateCurrent = true;
+            }
         }
         
         int currentVisible = this.getCurrentVisibleLevel();
@@ -300,6 +305,7 @@ public class LavaCell
 //                        + "\n");
             }
             this.lastVisibleLevel = currentVisible;
+            this.isBlockUpdateCurrent = true;
         }
     }
 
@@ -310,7 +316,7 @@ public class LavaCell
      */
     public int getCurrentVisibleLevel()
     {
-        int result = this.avgFluidAmount / FLUID_UNITS_PER_LEVEL;
+        int result = (this.avgFluidAmountWithPrecision >> 6) / FLUID_UNITS_PER_LEVEL;
 //        //effectively rounds up without FP math
 //        if(this.fluidAmount > 0) result = (fluidAmount + FLUID_UNITS_PER_LEVEL - 1) / FLUID_UNITS_PER_LEVEL;
         
@@ -333,7 +339,7 @@ public class LavaCell
     {
 //        traceLog.append(sim.getTickIndex() + " clearBlockUpdate\n");
 
-        this.avgFluidAmount = this.fluidAmount;
+        this.avgFluidAmountWithPrecision = this.fluidAmount << 6;
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
         this.isBlockUpdateCurrent = true;
     }
@@ -648,7 +654,7 @@ public class LavaCell
             
             if(drop <= 0)
             {
-                this.retainedLevel = FLUID_UNITS_PER_BLOCK;
+                this.retainedLevel = (LEVELS_PER_BLOCK * 2 - this.distanceToFlowFloor) * FLUID_UNITS_PER_LEVEL;
             }
             else
             {

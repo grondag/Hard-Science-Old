@@ -17,6 +17,7 @@ import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -364,18 +365,44 @@ public class WorldStateBuffer implements IBlockAccess
         
         public boolean isRequired()
         {
-            // should always prioritize if blocks don't match
-            if(this.newState == null || this.expectedPriorState == null 
-                    ||  this.newState.getBlock() != this.expectedPriorState.getBlock()) return true;
+            // deflect strangeness
+            if(this.newState == null || this.expectedPriorState == null) return false;
+
+            if(this.expectedPriorState.getMaterial() == Material.AIR)
+            {
+                // treat transition between small block and air as low priority for world update
+                // helps prevent large number of world block updates due to vertical instability
+                int newHeight = IFlowBlock.getFlowHeightFromState(newState);
+                return newHeight > 2;
+            }
             
             int oldHeight = IFlowBlock.getFlowHeightFromState(expectedPriorState);
             if(oldHeight > 0)
             {
-                int newHeight = IFlowBlock.getFlowHeightFromState(newState);
-                return newHeight > 0 && Math.abs(oldHeight - newHeight) > 2;
+                if(newState.getMaterial() == Material.AIR)
+                {
+                    // treat transition between small block and air as low priority for world update
+                    // helps prevent large number of world block updates due to vertical instability
+                    return oldHeight > 2;
+                }
+                else
+                {
+                    //if old and new are same flow blocks, defer small height changes
+                    if(newState.getBlock() == expectedPriorState.getBlock())
+                    {
+                        int newHeight = IFlowBlock.getFlowHeightFromState(newState);
+                        return Math.abs(oldHeight - newHeight) > 2;
+                    }
+                    else
+                    {
+                        // required if different blocks, even if height is similar
+                        return true;
+                    }
+                }
             }
             else
             {
+                //implies change to block (other than air to/for small flow)
                 return true;
             }
         }

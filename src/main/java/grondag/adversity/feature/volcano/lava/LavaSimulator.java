@@ -29,16 +29,12 @@ import net.minecraft.world.World;
 /**
  * TODO
  * 
- * Cooling from below causes retention level updates.  
- * Try cooling from the top or cool entire vertical column at once.
- * 
  * Determine and implement connection processing order
  * Bucket connections into verticals and the horizontals by drop
  * TEST: is it more efficient to sort and process vertically? Top to bottom? Bottom to top?
  * If will be sorted, use previous connection sort order to reduce sort times.
  * If connection processing will be concurrent, add locking mechanism for flowAcross that won't cause deadlocks
  * 
- * Make LavaCell concurrency more robust
  * 
  * Handle block break/neighbor change events for lava and basalt blocks to invalidate sim/worldbuffer state
  * 
@@ -48,6 +44,7 @@ import net.minecraft.world.World;
  * 
  * Handle unloaded chunks
  *   
+ * Make LavaCell concurrency more robust
  * Concurrency / performance
  * 
  * Particle damage to entities
@@ -525,6 +522,7 @@ public class LavaSimulator extends SimulationNode
 
         if(result == null)
         {
+            boolean needsValidation = false;
             synchronized(allCells)
             {
                 //confirm hasn't been added by another thread
@@ -533,10 +531,12 @@ public class LavaSimulator extends SimulationNode
                 if(result == null)
                 {
                     result = new LavaCell(this, packedBlockPos);
+                    needsValidation = true;
                     allCells.put(packedBlockPos, result);
-                    result.validate(this);
                 }
             }
+            //moving validation outside synch to prevent deadlock with connection collection
+            if(needsValidation) result.validate(this);
         }
         else if(validateExisting)
         {

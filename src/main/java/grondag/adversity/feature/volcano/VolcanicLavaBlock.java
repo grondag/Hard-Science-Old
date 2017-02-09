@@ -168,7 +168,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                     Math.max(north.getDistanceToFlowFloor(), south.getDistanceToFlowFloor())
                 ) - cell.getDistanceToFlowFloor();
             
-            int netRetention = Math.max(cell.getRetainedLevel(sim), up.getRetainedLevel(sim) + LavaCell.FLUID_UNITS_PER_BLOCK) / LavaCell.FLUID_UNITS_PER_LEVEL - cell.getDistanceToFlowFloor();
+            int netRetention = (cell.getRetainedLevel(sim) + down.getRetainedLevel(sim)) / LavaCell.FLUID_UNITS_PER_LEVEL - cell.getDistanceToFlowFloor();
             
             probeInfo.text("Cell ID = " + cell.hashCode())
                 .text("CurrentLevel=" + cell.getFluidAmount() + "    RetainedLevel=" + cell.getRetainedLevel(sim) + "   MaxLevel=" + cell.maxLevel)
