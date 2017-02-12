@@ -21,6 +21,36 @@ import net.minecraft.util.EnumFacing;
  */
 public class Useful {
 	
+    /** clamps the input value to the given range, inclusive */
+    public static int clamp(int input, int min, int max)
+    {
+        if(input < min)
+            return min;
+        else if(input > max)
+            return max;
+        else
+            return input;
+    }
+    
+    public static int min(int... input)
+    {
+        int result = Integer.MAX_VALUE;
+        for(int i : input)
+        {
+            if(i < result) result = i;
+        }
+        return result;
+    }
+    
+    public static int max(int... input)
+    {
+        int result = Integer.MIN_VALUE;
+        for(int i : input)
+        {
+            if(i > result) result = i;
+        }
+        return result;
+    }
     
     public static double linearInterpolate(double value1, double value2, double location)
     {

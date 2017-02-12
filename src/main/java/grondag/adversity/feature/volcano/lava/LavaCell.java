@@ -4,6 +4,7 @@ import grondag.adversity.Adversity;
 import static grondag.adversity.Adversity.DEBUG_MODE;
 import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -72,7 +73,7 @@ public class LavaCell
      * Holds 6 bits of integer precision.  Needs >> 6 to get usable value.
      * Maintained by provideBlockUpdate.
      */
-    private int avgFluidAmountWithPrecision = 0;
+    public int avgFluidAmountWithPrecision = 0;
 
     public final long packedBlockPos;
 
@@ -198,8 +199,20 @@ public class LavaCell
                     {
                         // When fluid is first added to a cell with a floor - we melt the floor and include it in the lava.
                         // Necessary because we don't have any kind of multipart capability yet to retain pre-existing block.
-                        if(this.interiorFloorLevel > 0) this.fluidAmount = FLUID_UNITS_PER_LEVEL * this.interiorFloorLevel;
-                        //                        this.fluidAmount = this.floorLevel;
+                        if(this.interiorFloorLevel > 0) 
+                        {
+                            this.fluidAmount = FLUID_UNITS_PER_LEVEL * this.interiorFloorLevel;
+                            LavaCell down = this.getDownEfficiently(sim, false);
+                            
+                            // if the block below is not solid, then our interior floor "melts" away completely and no longer applies.
+                            if(!down.isBarrier)
+                            {
+                                this.interiorFloorLevel = 0;
+                                
+                                //force recalc of retained level when an unsupported partial flow block melts so that it can drain
+                                this.retainedLevel = -1;
+                            }
+                        }
                     }
                 }
             }
@@ -256,8 +269,16 @@ public class LavaCell
         //        if(this.id == 1104 || this.id == 8187)
         //            Adversity.log.info("boop");
 
-        int avgAmount = this.avgFluidAmountWithPrecision >> 6;
-
+        // if we are empty always reflect that immediately - otherwise have ghosting in world as lava drains from drop cells
+        if(this.fluidAmount == 0)
+        {
+            this.avgFluidAmountWithPrecision = 0;
+            this.isBlockUpdateCurrent = true;
+        }
+        else
+        {
+            int avgAmount = this.avgFluidAmountWithPrecision >> 6;
+    
             // don't average big changes
             if(Math.abs(avgAmount - this.fluidAmount) > LavaCell.FLUID_UNITS_PER_LEVEL * 4)
             {
@@ -268,52 +289,52 @@ public class LavaCell
             {
                 this.avgFluidAmountWithPrecision -= avgAmount; 
                 this.avgFluidAmountWithPrecision += this.fluidAmount;
-
+    
                 if(this.avgFluidAmountWithPrecision  == this.fluidAmount << 6)
                 {
                     this.isBlockUpdateCurrent = true;
                 }
             }
+        }
 
-            int currentVisible = this.getCurrentVisibleLevel();
-            if(this.lastVisibleLevel != currentVisible)
+        int currentVisible = this.getCurrentVisibleLevel();
+        if(this.lastVisibleLevel != currentVisible)
+        {
+            //            Adversity.log.info("Providing block update for cell " + this.id + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
+            //                    + " currentVisibleLevel=" + currentVisible + " lastVisibleLevel=" + this.lastVisibleLevel);
+
+
+
+            LavaSimulator.blockUpdatesProvisionCounter++;
+
+            final IBlockState priorState = sim.worldBuffer.getBlockState(this.packedBlockPos);
+            if(currentVisible == 0)
             {
-                //            Adversity.log.info("Providing block update for cell " + this.id + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
-                //                    + " currentVisibleLevel=" + currentVisible + " lastVisibleLevel=" + this.lastVisibleLevel);
-
-
-
-                LavaSimulator.blockUpdatesProvisionCounter++;
-
-                final IBlockState priorState = sim.worldBuffer.getBlockState(this.packedBlockPos);
-                if(currentVisible == 0)
+                if(priorState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
                 {
-                    if(priorState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
-                    {
-                        sim.worldBuffer.setBlockState(this.packedBlockPos, Blocks.AIR.getDefaultState(), priorState);
+                    sim.worldBuffer.setBlockState(this.packedBlockPos, Blocks.AIR.getDefaultState(), priorState);
 
-                        //                    traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
-                        //                            + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
-                        //                            + " priorState=" + priorState.toString()
-                        //                            + " newState=" +Blocks.AIR.getDefaultState().toString()
-                        //                            + "\n");
-                    }
+                    //                    traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
+                    //                            + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
+                    //                            + " priorState=" + priorState.toString()
+                    //                            + " newState=" +Blocks.AIR.getDefaultState().toString()
+                    //                            + "\n");
                 }
-                else
-                {
-                    sim.worldBuffer.setBlockState(this.packedBlockPos, 
-                            IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible),
-                            priorState);
-
-                    //                traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
-                    //                        + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
-                    //                        + " priorState=" + priorState.toString()
-                    //                        + " newState=" + IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible).toString()
-                    //                        + "\n");
-                }
-                this.lastVisibleLevel = currentVisible;
-                this.isBlockUpdateCurrent = true;
             }
+            else
+            {
+                sim.worldBuffer.setBlockState(this.packedBlockPos, 
+                        IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible),
+                        priorState);
+
+                //                traceLog.append(sim.getTickIndex() + "provideBlockUpdate current=" + currentVisible + " last=" + this.lastVisibleLevel
+                //                        + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
+                //                        + " priorState=" + priorState.toString()
+                //                        + " newState=" + IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible).toString()
+                //                        + "\n");
+            }
+            this.lastVisibleLevel = currentVisible;
+        }
     }
 
     /**
@@ -535,42 +556,62 @@ public class LavaCell
             return;
         }
 
+        if(this.interiorFloorLevel > 0)
+        {
+            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK - interiorFloorLevel);
+            this.flowFloorIsFlowBlock = true;
+            return;
+        }
+        
         //handle special case when at bottom of world somehow
         if(PackedBlockPos.getY(this.packedBlockPos) == 0)
         {
-            this.distanceToFlowFloor = FLOW_FLOOR_DISTANCE_REALLY_FAR;
+            this.distanceToFlowFloor =  LEVELS_PER_BLOCK;
             this.flowFloorIsFlowBlock = false;
+            return;
         }
 
-        int floorDown1 =  getInteriorFloor(sim, PackedBlockPos.down(this.packedBlockPos));
+        // check down 1
+        long pos = PackedBlockPos.down(this.packedBlockPos);
+        int floor =  getInteriorFloor(sim, pos);
 
-        // If we have an internal floor in this block, we can use it if is full height (a barrier)
-        // or if the block below is a barrier, meaning our height is 0 or we are supported by the block below.
-        // Important that we be supported by block below because of melting.
-        if ((floorDown1 & INTERIOR_FLOOR_RESULT_LEVEL_MASK) == LEVELS_PER_BLOCK)
+        if (floor == LEVELS_PER_BLOCK)
         {
-            if(DEBUG_MODE && this.interiorFloorLevel > 0 && !this.isFlowHeightBlock)
-                Adversity.log.info("Inconsistency detected : non-zero interior flow in a non-flow block");
-
-            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK - interiorFloorLevel);
-            this.flowFloorIsFlowBlock = interiorFloorLevel > 0 || (floorDown1 & INTERIOR_FLOOR_RESULT_FLOW_MASK) == INTERIOR_FLOOR_RESULT_FLOW_MASK;
+            this.distanceToFlowFloor =  LEVELS_PER_BLOCK;
+            this.flowFloorIsFlowBlock = isFlowHeightBlock(sim, pos);
+            return;
+        }
+        
+        if(floor > 0)
+        {
+            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 2 - floor);
+            this.flowFloorIsFlowBlock = true;
             return;
         }
 
         //abort if next block down would be below the world
         if(PackedBlockPos.getY(this.packedBlockPos) == 1)
         {
-            this.distanceToFlowFloor = FLOW_FLOOR_DISTANCE_REALLY_FAR;
+            this.distanceToFlowFloor = LEVELS_PER_BLOCK * 2;
             this.flowFloorIsFlowBlock = false;
+            return;
         }
         
-        int floorDown2 =  getInteriorFloor(sim, PackedBlockPos.down(this.packedBlockPos, 2));
-        
-        if ((floorDown2 & INTERIOR_FLOOR_RESULT_LEVEL_MASK) == LEVELS_PER_BLOCK)
+        // check down 2
+        pos = PackedBlockPos.down(this.packedBlockPos, 2);
+        floor =  getInteriorFloor(sim, pos);
+
+        if (floor == LEVELS_PER_BLOCK)
         {
-            int floor = floorDown1 & INTERIOR_FLOOR_RESULT_LEVEL_MASK;
-            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 2 - floor);
-            this.flowFloorIsFlowBlock = floor > 0 || (floorDown2 & INTERIOR_FLOOR_RESULT_FLOW_MASK) == INTERIOR_FLOOR_RESULT_FLOW_MASK;
+            this.distanceToFlowFloor =  LEVELS_PER_BLOCK * 2;
+            this.flowFloorIsFlowBlock = isFlowHeightBlock(sim, pos);
+            return;
+        }
+        
+        if(floor > 0)
+        {
+            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 3 - floor);
+            this.flowFloorIsFlowBlock = true;
             return;
         }
         
@@ -579,15 +620,24 @@ public class LavaCell
         {
             this.distanceToFlowFloor = FLOW_FLOOR_DISTANCE_REALLY_FAR;
             this.flowFloorIsFlowBlock = false;
+            return;
         }
         
-        int floorDown3 =  getInteriorFloor(sim, PackedBlockPos.down(this.packedBlockPos, 3));
-        
-        if ((floorDown3 & INTERIOR_FLOOR_RESULT_LEVEL_MASK) == LEVELS_PER_BLOCK)
+        // check down 3
+        pos = PackedBlockPos.down(this.packedBlockPos, 3);
+        floor =  getInteriorFloor(sim, pos);
+
+        if (floor == LEVELS_PER_BLOCK)
         {
-            int floor = floorDown2 & INTERIOR_FLOOR_RESULT_LEVEL_MASK;
-            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 3 - floor);
-            this.flowFloorIsFlowBlock = floor > 0 || (floorDown3 & INTERIOR_FLOOR_RESULT_FLOW_MASK) == INTERIOR_FLOOR_RESULT_FLOW_MASK;
+            this.distanceToFlowFloor =  LEVELS_PER_BLOCK * 3;
+            this.flowFloorIsFlowBlock = isFlowHeightBlock(sim, pos);
+            return;
+        }
+        
+        if(floor > 0)
+        {
+            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 4 - floor);
+            this.flowFloorIsFlowBlock = true;
             return;
         }
         
@@ -596,18 +646,27 @@ public class LavaCell
         {
             this.distanceToFlowFloor = FLOW_FLOOR_DISTANCE_REALLY_FAR;
             this.flowFloorIsFlowBlock = false;
-        }
-        
-        int floorDown4 =  getInteriorFloor(sim, PackedBlockPos.down(this.packedBlockPos, 4));
-        
-        if ((floorDown4 & INTERIOR_FLOOR_RESULT_LEVEL_MASK) == LEVELS_PER_BLOCK)
-        {
-            int floor = floorDown3 & INTERIOR_FLOOR_RESULT_LEVEL_MASK;
-            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 4 - floor);
-            this.flowFloorIsFlowBlock = floor > 0 || (floorDown4 & INTERIOR_FLOOR_RESULT_FLOW_MASK) == INTERIOR_FLOOR_RESULT_FLOW_MASK;
             return;
         }
-    
+        
+        // check down 4
+        pos = PackedBlockPos.down(this.packedBlockPos, 4);
+        floor =  getInteriorFloor(sim, pos);
+
+        if (floor == LEVELS_PER_BLOCK)
+        {
+            this.distanceToFlowFloor =  LEVELS_PER_BLOCK * 4;
+            this.flowFloorIsFlowBlock = isFlowHeightBlock(sim, pos);
+            return;
+        }
+        
+        if(floor > 0)
+        {
+            this.distanceToFlowFloor = (byte) (LEVELS_PER_BLOCK * 5 - floor);
+            this.flowFloorIsFlowBlock = true;
+            return;
+        }
+        
         // any floor is pretty far down there, and we don't know if it is a flow block
         this.distanceToFlowFloor = FLOW_FLOOR_DISTANCE_REALLY_FAR;
         this.flowFloorIsFlowBlock = false;
@@ -619,29 +678,32 @@ public class LavaCell
         //            Adversity.log.info("yurb");
 
         // if no chance for retention don't bother
-        // Note that >= would not work. Can have retention based on block two below.
+        // Note that >= would not work. Can have retention based on floor two below.
         if(this.isBarrier || this.distanceToFlowFloor > LavaCell.LEVELS_PER_TWO_BLOCKS)
         {
             this.retainedLevel = 0;
         }
         else if(this.flowFloorIsFlowBlock)
         {
-            int drop = Math.max(
-                    Math.max(this.getEastEfficiently(sim).getDistanceToFlowFloor(), this.getWestEfficiently(sim).getDistanceToFlowFloor()), 
-                    Math.max(this.getNorthEfficiently(sim).getDistanceToFlowFloor(), this.getSouthEfficiently(sim).getDistanceToFlowFloor())
-                    ) - this.getDistanceToFlowFloor();
-
-            if(drop > LEVELS_PER_BLOCK) drop = LEVELS_PER_BLOCK;
-
-            if(drop <= 0)
+  
+            // if floor is not in this block have to base on floor below
+            if(this.distanceToFlowFloor > LEVELS_PER_BLOCK)
             {
-                this.retainedLevel = (LEVELS_PER_BLOCK * 2 - this.distanceToFlowFloor) * FLUID_UNITS_PER_LEVEL;
+                int depthBelow = getFlowFloorRetentionDepth(sim, PackedBlockPos.down(this.packedBlockPos));
+                
+                int distanceToRetention = this.distanceToFlowFloor - depthBelow;
+                
+                this.retainedLevel = Math.max(0, LEVELS_PER_BLOCK - distanceToRetention) * FLUID_UNITS_PER_LEVEL;
             }
+            //floor is in this block (or block has no interior floor - IOW floor is the block below)
             else
             {
-                // should result in half block retention for steep slopes graduation to full block for flat areas
-                this.retainedLevel = Math.max(0, (LEVELS_PER_BLOCK * 2 - this.distanceToFlowFloor - drop / 2)) * FLUID_UNITS_PER_LEVEL;
+                int depth = getFlowFloorRetentionDepth(sim, this.packedBlockPos);
+                
+                // note that code at bottom of routine handles case when retention is more than a full block
+                this.retainedLevel = (this.interiorFloorLevel + depth) * FLUID_UNITS_PER_LEVEL;
             }
+
         }
         else if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(PackedBlockPos.down(this.packedBlockPos))))
         {
@@ -658,6 +720,8 @@ public class LavaCell
                 // when the retained level below is > 1.
                 //TODO: optimize for integer math
                 //TODO: have terrain helper use packed block coords?
+                
+                // note that code at bottom of routine handles case when retention is more than a full block
                 this.retainedLevel = Math.max(0, (int)((sim.terrainHelper.computeIdealBaseFlowHeight(downPos) - 1F) * FLUID_UNITS_PER_BLOCK));
             }
         }
@@ -666,25 +730,150 @@ public class LavaCell
             this.retainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(PackedBlockPos.unpack(this.packedBlockPos)) * FLUID_UNITS_PER_BLOCK);
         }
 
-
         if(this.retainedLevel > FLUID_UNITS_PER_BLOCK)
         {
             // if retained level > full block, want to clamp it at an equilibrium point > than normal block max to support stable surface above
             this.retainedLevel  = this.retainedLevel - (int)((this.retainedLevel - FLUID_UNITS_PER_BLOCK) * LavaCellConnection.INVERSE_PRESSURE_FACTOR);
         }
+
     }
 
-    /** bits in the return value from getInteriorFloor that indicate level */
-    private static final byte INTERIOR_FLOOR_RESULT_LEVEL_MASK = 0xF;
-    /** bit in the return value from getInteriorFloor that, if set, indicates it is a flow block. */
-    private static final byte INTERIOR_FLOOR_RESULT_FLOW_MASK = 0x10;
+    /**
+     * Returns retained depth of lava on the given flow block in block levels.
+     * Must give it a surface, non-barrier cell with a flow-type floor - otherwise always returns 0.
+     */
+    private static int getFlowFloorRetentionDepthOld(LavaSimulator sim, long atPackedBlockPosition)
+    {
+        LavaCell centerCell = sim.getCell(atPackedBlockPosition, false);
+        
+        if(centerCell.isBarrier || !centerCell.flowFloorIsFlowBlock || centerCell.distanceToFlowFloor > LEVELS_PER_BLOCK) return 0;
+        
+        int eastDrop = Useful.clamp(centerCell.getEastEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int westDrop = Useful.clamp(centerCell.getWestEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int northDrop = Useful.clamp(centerCell.getNorthEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int southDrop = Useful.clamp(centerCell.getSouthEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int centerDrop = Useful.clamp(centerCell.getDistanceToFlowFloor(), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        
+        int maxDrop = Math.max(Math.max(eastDrop, westDrop), Math.max(northDrop, southDrop));
+        int minDrop = Math.min(Math.min(eastDrop, westDrop), Math.min(northDrop, southDrop));
 
+        /**
+         *  Type            myDrop___maxDrop    myDrop___minDrop      minDrop___maxDrop
+         *  Pit                    >                   > (implied)            <= (doesn't matter)
+         *  Peak                   < (implied)         <                      <= (doesn't matter)
+         *  Slope                  <                   >                      <  (implied)
+         *  Cliff                  <                   =                      <
+         *  Landing                =                   >                      <
+         *  Flat                   =                   =                      =
+         */
+        int depth;
+        
+        if(centerDrop < maxDrop)
+        {
+            if(centerDrop == minDrop)
+            {
+                // Cliff  ⎺⎺\
+                
+                // should give half to full block, depending on steepness of fall
+                depth = LEVELS_PER_BLOCK - Math.min(LEVELS_PER_BLOCK, maxDrop - minDrop) / 2;
+            }
+            else if(centerDrop > minDrop)
+            {
+                // Slope  ⎺\_ 
+                
+                // 1 block slope should give half block, steeper less, down to 1/4.
+                // Almost flat slope should give close to 1.
+                depth = LEVELS_PER_BLOCK - Math.min(LEVELS_PER_BLOCK_AND_A_HALF, maxDrop - minDrop) / 2;
+                
+            }
+            else  // implies centerDrop < minDrop
+            {
+                // Peak /⎺\
+                
+                // should give quarter to half block, depending on steepness of fall
+                depth = LEVELS_PER_BLOCK / 2 - Math.min(LEVELS_PER_BLOCK / 4, maxDrop - centerDrop);
+            }
+        }
+        else if(centerDrop == maxDrop)
+        {
+            if(centerDrop > minDrop)
+            {
+                // Landing \__
+                
+                // Should give one to one and a half blocks, depending on steepness
+                depth = LEVELS_PER_BLOCK + Math.min(LEVELS_PER_BLOCK, (maxDrop - minDrop)) / 2;
+                
+            }
+            else // implies centerDrop == maxDrop == minDrop
+            {
+                // Flat ___
+                depth = LEVELS_PER_BLOCK;
+            }
+        }
+        else // implies centerDrop > maxDrop
+        {
+            //  Pit \_/
+            depth = LEVELS_PER_BLOCK + Math.min(LEVELS_PER_BLOCK, (centerDrop - minDrop)) / 2;
+            
+        }
+        
+        return depth;
+    }
+    
+    /**
+     * Returns retained depth of lava on the given flow block in block levels.
+     * Must give it a surface, non-barrier cell with a flow-type floor - otherwise always returns 0.
+     */
+    private static int getFlowFloorRetentionDepth(LavaSimulator sim, long atPackedBlockPosition)
+    {
+        LavaCell centerCell = sim.getCell(atPackedBlockPosition, false);
+        
+        if(centerCell.isBarrier || !centerCell.flowFloorIsFlowBlock || centerCell.distanceToFlowFloor > LEVELS_PER_BLOCK) return 0;
+        
+        int eastDrop = Useful.clamp(centerCell.getEastEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int westDrop = Useful.clamp(centerCell.getWestEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int northDrop = Useful.clamp(centerCell.getNorthEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int southDrop = Useful.clamp(centerCell.getSouthEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        
+        int northEastDrop = Useful.clamp(centerCell.getNorthEfficiently(sim).getEastEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int southEastDrop = Useful.clamp(centerCell.getSouthEfficiently(sim).getEastEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int northWestDrop = Useful.clamp(centerCell.getNorthEfficiently(sim).getWestEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        int southWestDrop = Useful.clamp(centerCell.getSouthEfficiently(sim).getWestEfficiently(sim).getRelativeDistanceToFlowFloor(sim), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+        
+        int centerDrop = Useful.clamp(centerCell.getDistanceToFlowFloor(), -LEVELS_PER_TWO_BLOCKS, LEVELS_PER_TWO_BLOCKS);
+
+        int avgDrop = (eastDrop + westDrop + northDrop + southDrop + northEastDrop + southEastDrop + northWestDrop + southWestDrop + centerDrop) / 9;
+        
+        // Dividing by LEVELS_PER_TWO_BLOCKS normalizes the resulting slope values to the range 0 to 1. 
+        float deltaNorthSouth = (northDrop + northEastDrop + northWestDrop - southDrop - southEastDrop - southWestDrop) / 6F / LEVELS_PER_TWO_BLOCKS;
+        float deltaEastWest = (eastDrop + northEastDrop + southEastDrop - westDrop - northWestDrop - southWestDrop)  / 6F / LEVELS_PER_TWO_BLOCKS;
+        double slope = Math.sqrt(deltaNorthSouth * deltaNorthSouth + deltaEastWest * deltaEastWest);
+      
+        int depth = (int) (LEVELS_PER_BLOCK * (1.0 - slope));
+        
+        // Abandoned experiment...
+        // this function gives a value of 1 for slope = 0 then drops steeply 
+        // as slope increases and then levels off to 1/4 height as slope approaches 1.
+        // Function is only well-behaved for our purpose within the range 0 to 1.
+        // More concisely, function is (1-sqrt(x)) ^ 2, applied to the top 3/4 of a full block height.
+        // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
+        
+        // Subtract quarter of my distance above the average floor (or add if I'm below)
+        // so that my depth is lower on a peak and higher in a hole
+        // For example, if center drop is 10 below, and average is 12 below, subtract 1
+        
+        depth += (centerDrop - avgDrop) / 4;
+        
+        //clamp to at least 1/4 of a block and no more than 1 block
+        depth = Useful.clamp(depth, LEVELS_PER_BLOCK / 4, LEVELS_PER_BLOCK);
+        
+      
+        return depth;
+    }
     /**
      * Logic to determine if cell/block at the given location contains a solid floor.
      * Returns value 0-12 in the floor result portion.
-     * 0 indicates no floor. 12 indicates a barrier.
-     * For barriers, the value of bit in FLOW_MASK is set to 1 if it is a flow block.
-     * To be consistent, the flow bit is also set for values 1-to-11.
+     * 0 indicates no floor. 12 indicates a barrier, which may also be a flow block.
      */
     private static byte getInteriorFloor(LavaSimulator sim, long packedPosition)
     {
@@ -694,39 +883,16 @@ public class LavaCell
         {
             if(target.isBarrier) 
             {
-                return target.isFlowHeightBlock 
-                        ? LEVELS_PER_BLOCK | INTERIOR_FLOOR_RESULT_FLOW_MASK 
-                                : LEVELS_PER_BLOCK;
-            }
-
-            //handle special case when at bottom of world somehow
-            if(PackedBlockPos.getY(packedPosition) == 0)
-            {
-                return 0;
-            }
-
-            if(target.interiorFloorLevel > 0 && PackedBlockPos.getY(packedPosition) > 0)
-            {
-                //found a flow floor, but need to confirm block below it is a barrier.
-                if((getInteriorFloor(sim, PackedBlockPos.down(packedPosition)) & INTERIOR_FLOOR_RESULT_LEVEL_MASK) == LEVELS_PER_BLOCK)
-                {
-                    //block below is a barrier, so floor is valid
-                    return (byte) (target.interiorFloorLevel | INTERIOR_FLOOR_RESULT_FLOW_MASK);
-                }
-                else
-                {
-                    //block below is not a barrier, so floor doesn't count because it would melt
-                    return 0;
-                }
+                return LEVELS_PER_BLOCK;
             }
             else
             {
-                return 0;
+                return target.interiorFloorLevel;
             }
         }
         else
         {
-            // Simulation hasn't captured bottom state as a cell, so have to check world directly.
+            // Simulation hasn't captured state as a cell, so have to check world directly.
             IBlockState state = sim.worldBuffer.getBlockState(packedPosition);
             if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || LavaTerrainHelper.canLavaDisplace(state))
             {
@@ -736,32 +902,24 @@ public class LavaCell
             }
             else
             {
-                int bottomFloor = IFlowBlock.getFlowHeightFromState(state);
-                if(bottomFloor == 0) 
-                {
-                    // Not a flow block, treat as barrier
-                    return LEVELS_PER_BLOCK;
-                }
-                else if(bottomFloor == FlowHeightState.BLOCK_LEVELS_INT)
-                {
-                    // Flow-type barrier, won't melt, no confirmation needed.
-                    return LEVELS_PER_BLOCK | INTERIOR_FLOOR_RESULT_FLOW_MASK;
-                }
-                else
-                {
-                    // Solid flow block, but confirm block below it is solid before we use as the floor
-                    if((getInteriorFloor(sim, PackedBlockPos.down(packedPosition)) & INTERIOR_FLOOR_RESULT_LEVEL_MASK) == LEVELS_PER_BLOCK)
-                    {
-                        //block below is a barrier, so floor is valid
-                        return (byte) (bottomFloor | INTERIOR_FLOOR_RESULT_FLOW_MASK);
-                    }
-                    else
-                    {
-                        //block below is not a barrier, so floor doesn't count because it would melt
-                        return 0;
-                    }
-                }
+                int floor = IFlowBlock.getFlowHeightFromState(state);
+                return floor == 0 ? LEVELS_PER_BLOCK : (byte) floor; 
             }
+        }
+    }
+    
+    public static boolean isFlowHeightBlock(LavaSimulator sim, long packedPosition)
+    {
+        LavaCell target = sim.getCellIfItExists(packedPosition);
+        if(target != null)
+        {
+            return target.isFlowHeightBlock;
+        }
+        else
+        {
+            // Simulation hasn't captured state as a cell, so have to check world directly.
+            IBlockState state = sim.worldBuffer.getBlockState(packedPosition);
+            return IFlowBlock.isFlowHeight(state.getBlock());
         }
     }
 
@@ -825,8 +983,6 @@ public class LavaCell
         }
         else
         {
-            // Use getDistanceToFlowFloor instead of interior floor bc properly handles melting
-            // IOW - will not show a floor unless it is supported.
             int downDist = down.getDistanceToFlowFloor();
             if(downDist == 0)
             {
@@ -1077,9 +1233,6 @@ public class LavaCell
     /** 
      * Distance from the top of this cell to the bottom surface that should be used
      * for computing a retention level and determine connection drop. 
-     * Solid Flow block floors only count if they are full height (and thus cannot melt)
-     * OR they have a solid block under them. This is because they will melt if filled with lava
-     * and so the floor won't hold unless we want to allow floating lava in the world. (nope)
      * 
      * Represented as fluid levels.  (12 per block.)
      * Sample values:
@@ -1088,12 +1241,42 @@ public class LavaCell
      *  12 - this block does not have a solid floor within it & block below is a barrier.
      *  18 - this block does not have a solid floor within it & block below has/had a solid floor half high
      *  24 - this block and block below do not have a solid floor within them & block 2 below is a barrier
-     *  24 - this block DOES have a solid floor within it but the block below is not a barrier and my floor will melt if filled.
      *  MAX_FLOW_FLOOR_DISTANCE - the surface is pretty far down there, more than 2 blocks.
      */
     public byte getDistanceToFlowFloor()
     {
         return this.distanceToFlowFloor;
+    }
+    
+    /**
+     * Identical to getDistanceToFlowFloor...
+     * EXCEPT:
+     *      If this block is a barrier, returns negative number indicating how high above
+     *      this block the flow floor is located, up to -24 (two blocks above).
+     */
+    public int getRelativeDistanceToFlowFloor(LavaSimulator sim)
+    {
+        if(this.distanceToFlowFloor == 0)
+        {
+            LavaCell up = this.getUpEfficiently(sim, false);
+            if(up.isBarrier)
+            {
+               LavaCell up2 = up.getUpEfficiently(sim, false);
+               if(up2.isBarrier)
+               {
+                   return up.distanceToFlowFloor - LEVELS_PER_BLOCK * 2;
+               }
+            }
+            else
+            {
+                return up.distanceToFlowFloor - LEVELS_PER_BLOCK;
+            }
+            return this.getUpEfficiently(sim, false).getRelativeDistanceToFlowFloor(sim) - LEVELS_PER_BLOCK;
+        }
+        else
+        {
+            return this.distanceToFlowFloor;
+        }
     }
 
     public boolean flowFloorIsFlowBlock()

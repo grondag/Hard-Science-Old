@@ -176,6 +176,16 @@ public interface IFlowBlock
         return ModelFlowJoinComponent.getFlowState((NiceBlock)block, blockState, blockAccess, pos).isFullCube();
     }
     
+    /**
+     * Access to the flow state of the block at the given position.
+     * Returns null if not a flow block.
+     */
+    public static FlowHeightState getFlowState(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+    {
+        Block block = blockState.getBlock();
+        if(!isFlowBlock(block)) return null;
+        return ModelFlowJoinComponent.getFlowState((NiceBlock)block, blockState, blockAccess, pos);
+    }
     
     /** 
      * Returns true if geometry of flow block has nothing in it.

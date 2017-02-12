@@ -29,12 +29,20 @@ import net.minecraft.world.World;
 /**
  * TODO
  * 
- * FIX: Floating flow blocks.  May be due to downward flows skipping over meltable cells because they aren't supported
+ * Base terrain retention calc - ignore flow blocks
+ * Flat flow calc - slope the edges of the spread on a flat surface until one level deep
+ * 
+ * 
+ * VALIDATE FIX: Floating flow blocks.  May be due to downward flows skipping over meltable cells because they aren't supported
  * thus causing the cell with an interior floor to be orphaned.  See updateFloor and changeLevel and possibly getCellForLavaAddition
  * Easiest fix is probably to ensure that all covered height blocks are full height meta on cooling
  * Or maybe just scrap the checks for melting and allow vertical flow to handle unsupported melting when it occurs?
  * 
- * Determine and implement connection processing order
+ * VALIDATE FIX: appears downward flow is not fast enough - getting strangely suspended blocks that eventually go away
+ * 
+ * VALIDATE FIX: melt static basalt when lava flows on/near it
+ * 
+ * VALIDATE: Determine and implement connection processing order
  * Bucket connections into verticals and the horizontals by drop
  * TEST: is it more efficient to sort and process vertically? Top to bottom? Bottom to top?
  * If will be sorted, use previous connection sort order to reduce sort times.

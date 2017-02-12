@@ -15,6 +15,7 @@ import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -341,9 +342,22 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
+        
         IBlockState newState = IFlowBlock.adjustFillIfNeeded(realWorld, pos);
         
-        if(newState == null) return false;
+        if(newState == null)
+        {
+            // replace static flow height blocks with dynamic version
+            if(baseState.getBlock() instanceof FlowStaticBlock)
+            {
+                ((FlowStaticBlock)baseState.getBlock()).makeDynamic(baseState, realWorld, pos);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         
         if(newState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
         {

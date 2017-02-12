@@ -8,6 +8,7 @@ import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -94,7 +95,14 @@ public class TerrainWand extends Item
         
         if(getMode(stack) == TerrainMode.HEIGHT)
         {
-            return handleUseHeightMode(stack, playerIn, worldIn, pos);
+//            if(playerIn.isSneaking())
+//            {
+//                return handleUseSmoothMode(stack, playerIn, worldIn, pos);
+//            }
+//            else
+//            {
+                return handleUseHeightMode(stack, playerIn, worldIn, pos);
+//            }
         }
         else
         {
@@ -134,6 +142,112 @@ public class TerrainWand extends Item
         }
         
         return EnumActionResult.SUCCESS;
+    }
+    
+    /** for testing box filter smoothing on flowing terrain - not for release */
+    public EnumActionResult handleUseSmoothMode(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos)
+    {
+        int height[][] = new int[33][33];
+        
+        for(int x = 0; x < 33; x++)
+        {
+            for(int z = 0; z < 33; z++)
+            {
+                height[x][z] = getHeightAt(worldIn, pos.getX() - 16 + x, pos.getY(), pos.getZ() - 16 + z);
+            }
+        }
+        
+        for(int x = 1; x < 32; x++)
+        {
+            for(int z = 1; z < 32; z++)
+            {
+                int avg = (height[x - 1][z] + height[x - 1][z] + height[x - 1][z + 1]
+                        + height[x][z] + height[x][z] + height[x][z + 1]
+                        + height[x + 1][z] + height[x + 1][z] + height[x + 1][z + 1]) / 9;
+                
+                int currentLevel = height[x][z];
+                
+
+                int currentY = (int) Math.floor((currentLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                BlockPos targetPos = new BlockPos(pos.getX() - 16 + x, currentY, pos.getZ() - 16 + z);
+                IBlockState currentState = worldIn.getBlockState(targetPos);
+                
+                if(IFlowBlock.isFlowHeight(currentState.getBlock()))
+                {
+                    if(avg > currentLevel)
+                    {
+                        int newLevel = Math.min(currentLevel + FlowHeightState.BLOCK_LEVELS_INT, avg);
+                        int newY = (int) Math.floor((newLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                        
+                        if(newY == currentY)
+                        {
+                            worldIn.setBlockState(targetPos, IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                        }
+                        else
+                        {
+                            worldIn.setBlockState(targetPos, IFlowBlock.stateWithDiscreteFlowHeight(currentState, FlowHeightState.BLOCK_LEVELS_INT));
+                            worldIn.setBlockState(targetPos.up(), IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                        }
+                    }
+                    else if(avg < currentLevel)
+                    {
+                        int newLevel = Math.max(currentLevel - FlowHeightState.BLOCK_LEVELS_INT, avg);
+                        int newY = (int) Math.floor((newLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                        
+                        if(newY == currentY)
+                        {
+                            worldIn.setBlockState(targetPos, IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                        }
+                        else
+                        {
+                            worldIn.setBlockToAir(targetPos);
+                            worldIn.setBlockState(targetPos.down(), IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                        }
+                    }
+                }
+            }
+        }
+        return EnumActionResult.SUCCESS;
+    }
+    
+    private static int getHeightAt(World world, int x, int y, int z)
+    {
+        BlockPos pos = new BlockPos(x, y, z);
+        IBlockState state = world.getBlockState(pos);
+        int h = IFlowBlock.getFlowHeightFromState(state);
+        
+        if(h != 0) return y * FlowHeightState.BLOCK_LEVELS_INT + h;
+        
+        if(state.getMaterial().isReplaceable())
+        {
+            //go down
+            int downCount = 1;
+            state = world.getBlockState(pos.down(downCount));
+            
+            while(y - downCount > 0 && (state.getMaterial().isReplaceable() || IFlowBlock.isFlowFiller(state.getBlock())))
+            {
+                downCount++;
+                state = world.getBlockState(pos.down(downCount));
+            }
+            h = IFlowBlock.getFlowHeightFromState(state);
+            return (y - downCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
+        }
+        else
+        {
+            // go up
+            int upCount = 1;
+            state = world.getBlockState(pos.up(upCount));
+            h = IFlowBlock.getFlowHeightFromState(state);
+            
+            while(h == 0 && y + upCount < 255 && !(state.getMaterial().isReplaceable() || IFlowBlock.isFlowFiller(state.getBlock())))
+            {
+                upCount++;
+                state = world.getBlockState(pos.up(upCount));
+                h = IFlowBlock.getFlowHeightFromState(state);
+            }
+            return (y + upCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
+        }
+            
     }
     
     public EnumActionResult handleUseHeightMode(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos)

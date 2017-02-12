@@ -115,6 +115,9 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         switch(this.flowTypeThisTick)
         {
         case DROP_1_TO_2:
+            this.flowMaxThisTick = LavaCellConnection.MAX_UPWARD_FLOW_PER_TICK;
+            break;
+            
         case DROP_2_TO_1:
             this.flowMaxThisTick = LavaCellConnection.MAX_DOWNWARD_FLOW_PER_TICK;
             break;

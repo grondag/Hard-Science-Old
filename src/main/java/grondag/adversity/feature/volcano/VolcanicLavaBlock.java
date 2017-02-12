@@ -173,7 +173,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             probeInfo.text("Cell ID = " + cell.hashCode())
                 .text("CurrentLevel=" + cell.getFluidAmount() + "    RetainedLevel=" + cell.getRetainedLevel(sim) + "   MaxLevel=" + cell.maxLevel)
                 .text("interiorFloor=" + cell.getInteriorFloor() + "  distanceToFlowFloor=" + cell.getDistanceToFlowFloor() + " isFlowFloor=" + cell.flowFloorIsFlowBlock())
-                .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex())
+                .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex() + "  avgLevelWithPrecision=" + cell.avgFluidAmountWithPrecision)
                 .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel() 
                         + "  Net Drop = " + netDrop  + "  Net Retention = " + netRetention)
                 .text("Up: " + (up == null ? "null" : "id=" + up.hashCode() + " barrier:" + up.isBarrier() + " drop:" + up.getDistanceToFlowFloor() + " retention:" + up.getRetainedLevel(sim)))
