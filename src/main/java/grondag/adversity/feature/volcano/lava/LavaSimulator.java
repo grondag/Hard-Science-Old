@@ -64,7 +64,7 @@ import net.minecraft.world.World;
  *
  * Code Cleanup
  * Sounds
- * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
+ * Missing top faces on some flow blocks - probably a hash collision problem - may not be fixable with occlusion on
  * Particle model/rendering polish
  * Lava texture needs more character, more reddish?
  * 

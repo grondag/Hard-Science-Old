@@ -193,7 +193,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                 Adversity.log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
             }
             
-            this.lavaSimulator.doTicks(this.lastSimTick);
+            this.lavaSimulator.doTick(this.lastSimTick);
             
             // accesses world, so needs to run on server thread
             volcanoManager.updateChunkLoading();

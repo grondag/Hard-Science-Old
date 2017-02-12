@@ -853,7 +853,7 @@ public class LavaCell
         float deltaEastWest = (eastDrop + northEastDrop + southEastDrop - westDrop - northWestDrop - southWestDrop)  / 6F / LEVELS_PER_TWO_BLOCKS;
         double slope = Math.sqrt(deltaNorthSouth * deltaNorthSouth + deltaEastWest * deltaEastWest);
       
-        int depth = LEVELS_PER_BLOCK / 4 + (int) (LEVELS_PER_BLOCK * (1.0 - slope));
+        int depth = (int) (LEVELS_PER_BLOCK * (1.0 - slope));
         
         // Abandoned experiment...
         // this function gives a value of 1 for slope = 0 then drops steeply 
