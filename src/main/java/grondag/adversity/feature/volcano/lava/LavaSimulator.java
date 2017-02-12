@@ -48,7 +48,6 @@ import net.minecraft.world.World;
  * If will be sorted, use previous connection sort order to reduce sort times.
  * If connection processing will be concurrent, add locking mechanism for flowAcross that won't cause deadlocks
  * 
- * 
  * Handle block break/neighbor change events for lava and basalt blocks to invalidate sim/worldbuffer state
  * 
  * Find way to avoid processing static lava in volcano core
@@ -68,6 +67,12 @@ import net.minecraft.world.World;
  * Missing top faces on some flow blocks - easier to tackle this after cooling in place - too transient to catch now
  * Particle model/rendering polish
  * Lava texture needs more character, more reddish?
+ * 
+ * Have volcano place lava more quickly when game clock skips ahead.
+ * Smoke
+ * Ash
+ * Haze
+ * 
  */
 public class LavaSimulator extends SimulationNode
 {
@@ -110,27 +115,23 @@ public class LavaSimulator extends SimulationNode
     }
 
     /**
-     * Does one ticks if my current tick index is less than the new last.
-     * Does two if I am more than one behind.
+     * Updates fluid simulation for one game tick, provided the game clock has advanced at least one tick since last call.
+     * Tick index is used internally to track which cells have changed and to control frequency of upkeep tasks.
+     * Due to computationally intensive nature, does not do more work if game clock has advanced more than one tick.
+     * To make lava flow more quickly, place more lava when clock advances.
      */
-    public void doTicks(int newLastTickIndex)
+    public void doTick(int newLastTickIndex)
     {
         if(this.tickIndex < newLastTickIndex)
         {
             this.tickIndex++;
-            this.doTick();
-            
-            if(this.tickIndex < newLastTickIndex)
-            {
-                this.tickIndex++;
-                this.doTick();
-            }
+            this.doTickWork();
         }
     }
     
     private static long fluidUpdateTime = 0;
     
-    private void doTick()
+    private void doTickWork()
     {
         if((this.tickIndex & 0xFF) == 0xFF)
         {
@@ -807,7 +808,7 @@ public class LavaSimulator extends SimulationNode
                 i++;
 
                 cell.setInteriorFloor((byte) (saveData[i] & 0xF));
-                cell.setRetainedLevel(saveData[i] >> 4);
+                cell.setRawRetainedLevel(saveData[i] >> 4);
                 i++;
                 
                 cell.clearBlockUpdate(this);
@@ -894,7 +895,7 @@ public class LavaSimulator extends SimulationNode
                 saveData[i++] = (int)(cell.packedBlockPos >> 32);
                 saveData[i++] = cell.getFluidAmount();
                 saveData[i++] = cell.getNeverCools() ? Integer.MAX_VALUE : cell.getLastFlowTick();
-                saveData[i++] = (cell.getInteriorFloor() & 0xF) | (cell.getRetainedLevel(this) << 4);
+                saveData[i++] = (cell.getInteriorFloor() & 0xF) | (cell.getRawRetainedLevel(this) << 4);
             }         
             nbt.setIntArray(LAVA_CELL_NBT_TAG, saveData);
         }

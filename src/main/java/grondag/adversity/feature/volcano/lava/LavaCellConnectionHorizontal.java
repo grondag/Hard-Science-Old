@@ -179,7 +179,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         case DROP_1_TO_2:
         {
             // compute amount able to donate
-            int flow = firstCell.getFluidAmount() - firstCell.getRetainedLevel(sim);
+            int flow = firstCell.getFluidAmount() - firstCell.getRawRetainedLevel(sim);
             
             if(flow < 1) return 0;
             
@@ -193,7 +193,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         case DROP_2_TO_1:
         {
             // compute amount able to donate
-            int flow = secondCell.getFluidAmount() - secondCell.getRetainedLevel(sim);
+            int flow = secondCell.getFluidAmount() - secondCell.getRawRetainedLevel(sim);
             
             if(flow < 1) return 0;
             
@@ -226,7 +226,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         if(fluid1 == 0) return 0;
         
         // Prevent flowing below retention level
-        int available = fluid1 - supportedCell.getRetainedLevel(sim);
+        int available = fluid1 - supportedCell.getRawRetainedLevel(sim);
         if(available < 1) return 0;
         
         int level2 = partiallySupportedCell.getFluidAmount();
@@ -305,7 +305,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         if(emptyLevel >= fluidLevel) return 0;
 
   
-        int flow = getDifferentialFlow(fluidLevel, emptyLevel, fluidCell.getRetainedLevel(sim), emptyCell.getRetainedLevel(sim));
+        int flow = getDifferentialFlow(fluidLevel, emptyLevel, fluidCell.getRawRetainedLevel(sim), emptyCell.getRawRetainedLevel(sim));
 
         // Check remaining constraints.
       
@@ -329,7 +329,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         if(fluid1 > fluid2)
         {
 
-            int flow = getDifferentialFlow(fluid1, fluid2, this.firstCell.getRetainedLevel(sim), this.secondCell.getRetainedLevel(sim));
+            int flow = getDifferentialFlow(fluid1, fluid2, this.firstCell.getRawRetainedLevel(sim), this.secondCell.getRawRetainedLevel(sim));
 
             // Check remaining constraints.
             
@@ -347,7 +347,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         {
             
             // difference from above is parameter order
-            int flow = getDifferentialFlow(fluid2, fluid1, this.secondCell.getRetainedLevel(sim), this.firstCell.getRetainedLevel(sim));
+            int flow = getDifferentialFlow(fluid2, fluid1, this.secondCell.getRawRetainedLevel(sim), this.firstCell.getRawRetainedLevel(sim));
 
             // Check remaining constraints.
             

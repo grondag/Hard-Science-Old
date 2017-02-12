@@ -15,7 +15,10 @@ import net.minecraft.util.math.BlockPos;
 public class LavaCell
 {
     public static final byte LEVELS_PER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT;
-    public static final byte LEVELS_PER_BLOCK_AND_A_HALF = LEVELS_PER_BLOCK + LEVELS_PER_BLOCK / 2;
+    public static final byte LEVELS_PER_QUARTER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 4;
+    public static final byte LEVELS_PER_HALF_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 2;
+    public static final byte LEVELS_PER_BLOCK_AND_A_QUARTER = LEVELS_PER_BLOCK + LEVELS_PER_QUARTER_BLOCK;
+    public static final byte LEVELS_PER_BLOCK_AND_A_HALF = LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK;
     public static final byte LEVELS_PER_TWO_BLOCKS = LEVELS_PER_BLOCK * 2;
     public static final int FLUID_UNITS_PER_LEVEL = 1000;
     public static final int FLUID_UNITS_PER_BLOCK = FLUID_UNITS_PER_LEVEL * LEVELS_PER_BLOCK;
@@ -63,7 +66,7 @@ public class LavaCell
      * Established when cell is first created.  Does not change until cell solidifies or bottom drops out.
      * Initialized to -1 to indicate has not yet been set.
      */
-    private int retainedLevel = -1;
+    private int rawRetainedLevel = -1;
 
     /** last visible level reported to world */
     private int lastVisibleLevel = 0;
@@ -210,7 +213,7 @@ public class LavaCell
                                 this.interiorFloorLevel = 0;
                                 
                                 //force recalc of retained level when an unsupported partial flow block melts so that it can drain
-                                this.retainedLevel = -1;
+                                this.rawRetainedLevel = -1;
                             }
                         }
                     }
@@ -236,12 +239,12 @@ public class LavaCell
                 this.fluidAmount = 0;
 
                 //force recalc of retained level when a cell becomes empty
-                this.retainedLevel = -1;
+                this.rawRetainedLevel = -1;
             }
             else if(this.fluidAmount == 0)
             {
                 //force recalc of retained level when a cell becomes empty
-                this.retainedLevel = -1;
+                this.rawRetainedLevel = -1;
             }
 
             /**
@@ -477,7 +480,7 @@ public class LavaCell
 
                                     // should force update of retained level now that we aren't a barrier
                                     // note that we don't contain lava - should not effect flow in this cell
-                                    this.retainedLevel = -1;
+                                    this.rawRetainedLevel = -1;
 
                                     this.isBarrier = false;
 
@@ -496,7 +499,7 @@ public class LavaCell
                                 {
                                     // should force update of retained level if floor is new
                                     // note that we don't contain lava - should not effect flow in this cell
-                                    this.retainedLevel = -1;
+                                    this.rawRetainedLevel = -1;
                                     this.interiorFloorLevel = (byte) worldVisibleLevel;
                                 }
                             }
@@ -504,7 +507,7 @@ public class LavaCell
                             {
                                 this.isBarrier = true;
                                 this.interiorFloorLevel = LEVELS_PER_BLOCK;
-                                this.retainedLevel = 0;
+                                this.rawRetainedLevel = 0;
 
                                 // Make us a barrier.
                                 // Remove connections to neighboring cells if there were any.
@@ -530,9 +533,9 @@ public class LavaCell
 
                         if( isFirstValidationComplete 
                                 && previousFloor != this.distanceToFlowFloor 
-                                && (this.fluidAmount == 0 || !this.canCool(sim) || (this.retainedLevel > 0 && this.distanceToFlowFloor > LEVELS_PER_BLOCK)))
+                                && (this.fluidAmount == 0 || !this.canCool(sim) || (this.rawRetainedLevel > 0 && this.distanceToFlowFloor > LEVELS_PER_BLOCK)))
                         {
-                            this.retainedLevel = -1;
+                            this.rawRetainedLevel = -1;
                         }
 
                         this.isFirstValidationComplete = true;
@@ -672,7 +675,8 @@ public class LavaCell
         this.flowFloorIsFlowBlock = false;
     }
 
-    private void updateRetention(LavaSimulator sim)
+    
+    private void updateRawRetention(LavaSimulator sim)
     {
         //        if(this.id == 746)
         //            Adversity.log.info("yurb");
@@ -681,7 +685,7 @@ public class LavaCell
         // Note that >= would not work. Can have retention based on floor two below.
         if(this.isBarrier || this.distanceToFlowFloor > LavaCell.LEVELS_PER_TWO_BLOCKS)
         {
-            this.retainedLevel = 0;
+            this.rawRetainedLevel = 0;
         }
         else if(this.flowFloorIsFlowBlock)
         {
@@ -693,7 +697,7 @@ public class LavaCell
                 
                 int distanceToRetention = this.distanceToFlowFloor - depthBelow;
                 
-                this.retainedLevel = Math.max(0, LEVELS_PER_BLOCK - distanceToRetention) * FLUID_UNITS_PER_LEVEL;
+                this.rawRetainedLevel = Math.max(0, LEVELS_PER_BLOCK - distanceToRetention) * FLUID_UNITS_PER_LEVEL;
             }
             //floor is in this block (or block has no interior floor - IOW floor is the block below)
             else
@@ -701,7 +705,7 @@ public class LavaCell
                 int depth = getFlowFloorRetentionDepth(sim, this.packedBlockPos);
                 
                 // note that code at bottom of routine handles case when retention is more than a full block
-                this.retainedLevel = (this.interiorFloorLevel + depth) * FLUID_UNITS_PER_LEVEL;
+                this.rawRetainedLevel = (this.interiorFloorLevel + depth) * FLUID_UNITS_PER_LEVEL;
             }
 
         }
@@ -710,7 +714,7 @@ public class LavaCell
             if(sim.terrainHelper.isLavaSpace(sim.worldBuffer.getBlockState(PackedBlockPos.down(PackedBlockPos.down(this.packedBlockPos)))))
             {
                 //if two blocks below is also open/lava, then will have no retained level
-                this.retainedLevel = 0;
+                this.rawRetainedLevel = 0;
                 return;
             }
             else
@@ -722,18 +726,18 @@ public class LavaCell
                 //TODO: have terrain helper use packed block coords?
                 
                 // note that code at bottom of routine handles case when retention is more than a full block
-                this.retainedLevel = Math.max(0, (int)((sim.terrainHelper.computeIdealBaseFlowHeight(downPos) - 1F) * FLUID_UNITS_PER_BLOCK));
+                this.rawRetainedLevel = Math.max(0, (int)((sim.terrainHelper.computeIdealBaseFlowHeight(downPos) - 1F) * FLUID_UNITS_PER_BLOCK));
             }
         }
         else
         {
-            this.retainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(PackedBlockPos.unpack(this.packedBlockPos)) * FLUID_UNITS_PER_BLOCK);
+            this.rawRetainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(PackedBlockPos.unpack(this.packedBlockPos)) * FLUID_UNITS_PER_BLOCK);
         }
 
-        if(this.retainedLevel > FLUID_UNITS_PER_BLOCK)
+        if(this.rawRetainedLevel > FLUID_UNITS_PER_BLOCK)
         {
             // if retained level > full block, want to clamp it at an equilibrium point > than normal block max to support stable surface above
-            this.retainedLevel  = this.retainedLevel - (int)((this.retainedLevel - FLUID_UNITS_PER_BLOCK) * LavaCellConnection.INVERSE_PRESSURE_FACTOR);
+            this.rawRetainedLevel  = this.rawRetainedLevel - (int)((this.rawRetainedLevel - FLUID_UNITS_PER_BLOCK) * LavaCellConnection.INVERSE_PRESSURE_FACTOR);
         }
 
     }
@@ -849,7 +853,7 @@ public class LavaCell
         float deltaEastWest = (eastDrop + northEastDrop + southEastDrop - westDrop - northWestDrop - southWestDrop)  / 6F / LEVELS_PER_TWO_BLOCKS;
         double slope = Math.sqrt(deltaNorthSouth * deltaNorthSouth + deltaEastWest * deltaEastWest);
       
-        int depth = (int) (LEVELS_PER_BLOCK * (1.0 - slope));
+        int depth = LEVELS_PER_BLOCK / 4 + (int) (LEVELS_PER_BLOCK * (1.0 - slope));
         
         // Abandoned experiment...
         // this function gives a value of 1 for slope = 0 then drops steeply 
@@ -858,14 +862,13 @@ public class LavaCell
         // More concisely, function is (1-sqrt(x)) ^ 2, applied to the top 3/4 of a full block height.
         // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
         
-        // Subtract quarter of my distance above the average floor (or add if I'm below)
-        // so that my depth is lower on a peak and higher in a hole
-        // For example, if center drop is 10 below, and average is 12 below, subtract 1
+        // Add drop to the average floor instead of my floor, effectively acting as a box filter. 
+        // For example, if center drop is 10 below, and average is 12 below, 
+        // depth should be 2 less than it would be if it were added to center drop.
+        depth += (centerDrop - avgDrop);
         
-        depth += (centerDrop - avgDrop) / 4;
-        
-        //clamp to at least 1/4 of a block and no more than 1 block
-        depth = Useful.clamp(depth, LEVELS_PER_BLOCK / 4, LEVELS_PER_BLOCK);
+        //clamp to at least 1/4 of a block and no more than 1.25 block
+        depth = Useful.clamp(depth, LEVELS_PER_QUARTER_BLOCK, LEVELS_PER_BLOCK_AND_A_QUARTER);
         
       
         return depth;
@@ -923,18 +926,18 @@ public class LavaCell
         }
     }
 
-    public int getRetainedLevel(LavaSimulator sim)
+    public int getRawRetainedLevel(LavaSimulator sim)
     {
-        if(this.retainedLevel == -1)
+        if(this.rawRetainedLevel == -1)
         {
-            this.updateRetention(sim);
+            this.updateRawRetention(sim);
         }
-        return this.retainedLevel;
+        return this.rawRetainedLevel;
     }
 
-    public void setRetainedLevel(int retainedLevel)
+    public void setRawRetainedLevel(int level)
     {
-        this.retainedLevel = retainedLevel;
+        this.rawRetainedLevel = level;
     }
 
     public boolean isBarrier()
@@ -1366,7 +1369,7 @@ public class LavaCell
      */
     public int getCapacity()
     {
-        return this.isBarrier ? 0 : Math.max(0, Math.max(FLUID_UNITS_PER_BLOCK, this.retainedLevel) - Math.max(this.interiorFloorLevel, this.fluidAmount));
+        return this.isBarrier ? 0 : Math.max(0, Math.max(FLUID_UNITS_PER_BLOCK, this.rawRetainedLevel) - Math.max(this.interiorFloorLevel, this.fluidAmount));
     }
 
     /** for use by NBT loader */
