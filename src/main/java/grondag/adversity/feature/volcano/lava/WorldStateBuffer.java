@@ -34,6 +34,12 @@ public class WorldStateBuffer implements IBlockAccess
     private final static String NBT_SAVE_DATA_TAG = "WrldBuff";
     private final static int NBT_SAVE_DATA_WIDTH = 5;
     
+    /** tracks number of calls to setBlockState since last clearStatistics */
+    private int stateSetCount = 0;
+    
+    /** tracks number of world state changes since last clearStatistics */
+    private int stateApplicationCount = 0;        
+    
     public final World realWorld;
     
     /** All chunks with update data. */
@@ -95,6 +101,8 @@ public class WorldStateBuffer implements IBlockAccess
 //        if(x==478 && y == 9 && z == -1231)
 //            Adversity.log.info("boop");
         
+        if(Adversity.DEBUG_MODE) this.stateSetCount++;
+        
         getChunkBuffer(x, z).setBlockState(x, y, z, newState, expectedPriorState);
     }
     
@@ -129,13 +137,10 @@ public class WorldStateBuffer implements IBlockAccess
     
     /** 
      * Makes the updates in the game world for up to chunkCount chunks.
-     * Returns the number of blocks updated.
      * 
      */
-    public int applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
+    public void applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
     {
-        int updateCount = 0;
-        
         int currentTick = Simulator.instance.getCurrentSimTick();
         
         boolean maybeSomethingToDo = true;
@@ -202,12 +207,28 @@ public class WorldStateBuffer implements IBlockAccess
             else
             {
                 this.chunks.remove(best.packedChunkpos);
-                updateCount += best.applyBlockUpdates(tracker, sim);
+                best.applyBlockUpdates(tracker, sim);
                 this.usedBuffers.add(best);
             }
         }
-        return updateCount;
     }
+    
+    public void clearStatistics()
+    {
+        this.stateApplicationCount = 0;
+        this.stateSetCount = 0;
+    }
+    
+    public int getStateSetCount()
+    {
+        return this.stateSetCount;
+    }
+    
+    public int getStateApplicationCount()
+    {
+        return this.stateApplicationCount;
+    }
+    
 
     @Override
     public boolean isAirBlock(BlockPos pos)
@@ -621,7 +642,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
         
         /** NOT thread safe */
-        private int applyBlockUpdates(AdjustmentTracker tracker, AbstractLavaSimulator sim)
+        private void applyBlockUpdates(AdjustmentTracker tracker, AbstractLavaSimulator sim)
         {
 
             tracker.clear();
@@ -688,8 +709,8 @@ public class WorldStateBuffer implements IBlockAccess
             {
                 if(adjustFillIfNeeded(p, sim)) count++;
             }
-              
-            return count;
+            
+            if(Adversity.DEBUG_MODE) stateApplicationCount += count;
 
         }
         

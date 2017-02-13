@@ -252,6 +252,7 @@ public class LavaCell
     /**
      * Assumes block updates will be applied to world/worldBuffer before any more world interaction occurs.
      * Consistent with this expectations, it sets lastVisibleLevel = currentVisibleLevel.
+     * Returns the number of updates provided.
      */
     public void provideBlockUpdateIfNeeded(LavaSimulator sim)
     {
@@ -294,10 +295,6 @@ public class LavaCell
         {
             //            Adversity.log.info("Providing block update for cell " + this.id + " @" + PackedBlockPos.unpack(this.packedBlockPos).toString()
             //                    + " currentVisibleLevel=" + currentVisible + " lastVisibleLevel=" + this.lastVisibleLevel);
-
-
-
-            LavaSimulator.blockUpdatesProvisionCounter++;
 
             final IBlockState priorState = sim.worldBuffer.getBlockState(this.packedBlockPos);
             if(currentVisible == 0)
