@@ -166,7 +166,7 @@ public class ConnectionMap
         return PackedBlockPos.setExtra(PackedBlockPos.north(fromPackedBlockPos), EnumFacing.Axis.Z.ordinal());
     }
     
-    public void removeIfInvalid(LavaSimulator sim, long packedConnectionPos)
+    public void removeIfInvalid(AbstractLavaSimulator sim, long packedConnectionPos)
     {
         synchronized(this)
         {
@@ -215,7 +215,7 @@ public class ConnectionMap
         
     }
     
-    public void validateConnections(LavaSimulator sim)
+    public void validateConnections(AbstractLavaSimulator sim)
     {
         Iterator<LavaCellConnection> it = map.values().iterator();
         while(it.hasNext())

@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.lava.LavaCell;
+import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -571,6 +572,20 @@ public class TileVolcano extends TileEntity implements ITickable{
      */
     private boolean clearBore(BlockPos clearPos)
     {
+        if(Simulator.instance.getFluidTracker() instanceof LavaSimulator)
+        {
+            return doClearingOldType(clearPos);
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    private boolean doClearingOldType(BlockPos clearPos)
+    {      
+        LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();
+        
         IBlockState state = this.worldObj.getBlockState(clearPos);
         Block block = state.getBlock();
         if(block == Blocks.BEDROCK)
@@ -580,7 +595,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         // allow air blocks if sim shows lava in them because simulator may not do block updates immediately
         else if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == Blocks.AIR)
         {
-            LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, false);
+            LavaCell cell = sim.getCell(clearPos, false);
             
             //takes long time to get every cell to perfectly full - just has to be close enough
             if(cell.getFluidAmount() > 10000) 
@@ -602,7 +617,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
 //            Adversity.log.info("Clearing and placing lava @" + clearPos.toString());
             this.worldObj.setBlockToAir(clearPos);
-            LavaCell cell = Simulator.instance.getFluidTracker().getCell(clearPos, true);
+            LavaCell cell = sim.getCell(clearPos, true);
             Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity(), true);
             cell.setNeverCools(true);
             // don't build mound if above ground or if melting Basalt
@@ -614,7 +629,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             return false;
         }
     }
-    
+        
 
 
     private void buildMound()

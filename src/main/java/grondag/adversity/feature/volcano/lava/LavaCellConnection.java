@@ -3,7 +3,6 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.Useful;
 import net.minecraft.util.EnumFacing;
 
 public abstract class LavaCellConnection
@@ -31,19 +30,19 @@ public abstract class LavaCellConnection
     
     protected boolean isDirty = false;
  
-    public final static int PRESSURE_PER_LEVEL = LavaCell.FLUID_UNITS_PER_BLOCK / 20;
+    public final static int PRESSURE_PER_LEVEL = AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK / 20;
     
     
-    public final static int UNITS_PER_ONE_BLOCK_WITH_PRESSURE = LavaCell.FLUID_UNITS_PER_BLOCK + PRESSURE_PER_LEVEL;
-    public final static int UNITS_PER_TWO_BLOCKS = LavaCell.FLUID_UNITS_PER_BLOCK * 2 + PRESSURE_PER_LEVEL;
-    public final static float INVERSE_PRESSURE_FACTOR = (float)LavaCell.FLUID_UNITS_PER_BLOCK/UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
+    public final static int UNITS_PER_ONE_BLOCK_WITH_PRESSURE = AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK + PRESSURE_PER_LEVEL;
+    public final static int UNITS_PER_TWO_BLOCKS = AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK * 2 + PRESSURE_PER_LEVEL;
+    public final static float INVERSE_PRESSURE_FACTOR = (float)AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK/UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
     
     /** Maximum flow through any block connection in a single tick. 
      * Not changing this to vary with pressure because most lava flows are 
      * along the surface and higher-velocity flows (down a slope) will also
      * have a smaller cross-section due to retained height calculations.
      */
-    public final static int MAX_HORIZONTAL_FLOW_PER_TICK = LavaCell.FLUID_UNITS_PER_BLOCK / 10;
+    public final static int MAX_HORIZONTAL_FLOW_PER_TICK = AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK / 10;
     public final static int MAX_UPWARD_FLOW_PER_TICK = MAX_HORIZONTAL_FLOW_PER_TICK / 2;
     public final static int MAX_DOWNWARD_FLOW_PER_TICK = MAX_HORIZONTAL_FLOW_PER_TICK * 2;
     
@@ -55,7 +54,7 @@ public abstract class LavaCellConnection
         PARTIAL
     }
  
-    public static LavaCellConnection create(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    public static LavaCellConnection create(AbstractLavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
         if(PackedBlockPos.getExtra(packedConnectionPos) == EnumFacing.Axis.Y.ordinal())
         {
@@ -67,7 +66,7 @@ public abstract class LavaCellConnection
         }
     }
     
-    protected LavaCellConnection(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    protected LavaCellConnection(AbstractLavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
 
         this.packedConnectionPos = packedConnectionPos;
@@ -104,7 +103,7 @@ public abstract class LavaCellConnection
     }
     
     /** for use by empty version */
-    protected LavaCellConnection(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell)
+    protected LavaCellConnection(AbstractLavaSimulator sim, LavaCell firstCell, LavaCell secondCell)
     {
         this.binder = null;
         this.packedConnectionPos = 0;
@@ -168,7 +167,7 @@ public abstract class LavaCellConnection
     /**
      * Call when removing this connection so that cell references can be removed if appropriate.
      */
-    public void releaseCells(LavaSimulator sim)
+    public void releaseCells(AbstractLavaSimulator sim)
     {
         this.firstCell.release(sim, "from connection " + this.id);
         this.secondCell.release(sim, "from connection " + this.id);

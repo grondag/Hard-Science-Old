@@ -4,7 +4,7 @@ import grondag.adversity.Adversity;
 
 public class LavaCellConnectionHorizontal extends LavaCellConnection
 {
-    protected LavaCellConnectionHorizontal(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    protected LavaCellConnectionHorizontal(AbstractLavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
         super(sim, firstCell, secondCell, packedConnectionPos);
     }
@@ -126,7 +126,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         case SPREAD_1_TO_2:
         case SPREAD_2_TO_1:
             this.flowMaxThisTick = LavaCellConnection.MAX_HORIZONTAL_FLOW_PER_TICK 
-                + (LavaCellConnection.MAX_HORIZONTAL_FLOW_PER_TICK * this.getSortDrop() / LavaCell.LEVELS_PER_BLOCK);
+                + (LavaCellConnection.MAX_HORIZONTAL_FLOW_PER_TICK * this.getSortDrop() / AbstractLavaSimulator.LEVELS_PER_BLOCK);
             break;
             
         case NONE:
@@ -233,7 +233,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
         if(level2 == 0) 
         {
             // if no fluid, could still have a floor that becomes melted, acts as fluid for our purpose
-            level2 = partiallySupportedCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL;
+            level2 = partiallySupportedCell.getInteriorFloor() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL;
         }
         
         // Compute difference.
@@ -300,7 +300,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
     {
         // add a margin to solid flows because fluid gets rounded down on cooling and don't
         // want lava flowing back into the space that just cooled
-        int emptyLevel = (emptyCell.getInteriorFloor() + 1 ) * LavaCell.FLUID_UNITS_PER_LEVEL - 1;
+        int emptyLevel = (emptyCell.getInteriorFloor() + 1 ) * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL - 1;
         // abort if empty cell has a floor that would prevent 
         if(emptyLevel >= fluidLevel) return 0;
 
@@ -446,7 +446,7 @@ public class LavaCellConnectionHorizontal extends LavaCellConnection
 //        }
 //        else
 //        {
-            return Math.min(LavaCell.LEVELS_PER_BLOCK, diff);
+            return Math.min(AbstractLavaSimulator.LEVELS_PER_BLOCK, diff);
 //        }
     }
 }

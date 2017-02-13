@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.collect.Lists;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.NodeRoots;
@@ -258,7 +259,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public int getCurrentSimTick() { return this.currentSimTick.get(); }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
-    public LavaSimulator getFluidTracker() { return this.lavaSimulator; }
+    public AbstractLavaSimulator getFluidTracker() { return this.lavaSimulator; }
 
     // Frame execution logic
 

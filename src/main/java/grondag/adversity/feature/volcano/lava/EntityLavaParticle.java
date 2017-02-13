@@ -77,7 +77,7 @@ public class EntityLavaParticle extends Entity
 
     public EntityLavaParticle(World world)
     {
-        this(world, LavaCell.FLUID_UNITS_PER_BLOCK);
+        this(world, AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
 //        if(!world.isRemote) Adversity.log.info("EntityLavaParticle no params");
     }
 
@@ -97,7 +97,7 @@ public class EntityLavaParticle extends Entity
 
     private void updateAmountDependentData()
     {
-        float unitAmout = (float)this.getFluidAmount() / LavaCell.FLUID_UNITS_PER_BLOCK;
+        float unitAmout = (float)this.getFluidAmount() / AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK;
 
         // Give bounding box same volume as model, but small enough to fit through a one block space and not too small to interact
         float edgeLength = (float) Math.min(0.8, Math.max(0.1, Math.pow(unitAmout, 0.3333333333333)));
@@ -470,7 +470,7 @@ public class EntityLavaParticle extends Entity
     @Override
     protected void entityInit()
     {
-        this.dataManager.register(FLUID_AMOUNT, LavaCell.FLUID_UNITS_PER_BLOCK);
+        this.dataManager.register(FLUID_AMOUNT, AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
     }
     
     @SideOnly(Side.CLIENT)

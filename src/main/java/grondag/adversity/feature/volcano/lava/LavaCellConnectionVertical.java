@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 public class LavaCellConnectionVertical extends LavaCellConnection
 {
-    protected LavaCellConnectionVertical(LavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
+    protected LavaCellConnectionVertical(AbstractLavaSimulator sim, LavaCell firstCell, LavaCell secondCell, long packedConnectionPos)
     {
         super(sim, firstCell, secondCell, packedConnectionPos);
     }
@@ -23,12 +23,12 @@ public class LavaCellConnectionVertical extends LavaCellConnection
         int fluid2 = secondCell.getFluidAmount();
                
         // add floor of an empty first cell that will become melted if we flow down into it
-        int level1 = fluid1 == 0 ? firstCell.getInteriorFloor() * LavaCell.FLUID_UNITS_PER_LEVEL : fluid1;
+        int level1 = fluid1 == 0 ? firstCell.getInteriorFloor() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL : fluid1;
         
         int totalAmount = level1 + fluid2;
         
         // no need to constrain vertical flows if everything can flow into bottom block
-        if(totalAmount <= LavaCell.FLUID_UNITS_PER_BLOCK)
+        if(totalAmount <= AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK)
         {
             if(fluid2 == 0) return 0;
             
@@ -62,7 +62,7 @@ public class LavaCellConnectionVertical extends LavaCellConnection
             // u(p + 1) = t - 1;
             // u = (t-1)/(p + 1)
             
-            int newUpperLevel = (totalAmount - LavaCell.FLUID_UNITS_PER_BLOCK) * LavaCell.FLUID_UNITS_PER_BLOCK / UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
+            int newUpperLevel = (totalAmount - AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK) * AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK / UNITS_PER_ONE_BLOCK_WITH_PRESSURE;
             
             //want downward flow to result in negative value
             int flow = newUpperLevel - fluid2;

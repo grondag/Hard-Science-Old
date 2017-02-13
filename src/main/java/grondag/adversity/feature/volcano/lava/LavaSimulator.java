@@ -9,14 +9,12 @@ import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
-import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
 import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.simulator.base.NodeRoots;
-import grondag.adversity.simulator.base.SimulationNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -74,7 +72,7 @@ import net.minecraft.world.World;
  * Haze
  * 
  */
-public class LavaSimulator extends SimulationNode
+public class LavaSimulator extends AbstractLavaSimulator
 {
     protected final WorldStateBuffer worldBuffer;
     protected final LavaTerrainHelper terrainHelper;
@@ -120,6 +118,7 @@ public class LavaSimulator extends SimulationNode
      * Due to computationally intensive nature, does not do more work if game clock has advanced more than one tick.
      * To make lava flow more quickly, place more lava when clock advances.
      */
+    @Override
     public void doTick(int newLastTickIndex)
     {
         if(this.tickIndex < newLastTickIndex)
@@ -298,7 +297,7 @@ public class LavaSimulator extends SimulationNode
                 }
                 
                 // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
-                else if(p.getFluidUnits() >= LavaCell.FLUID_UNITS_PER_LEVEL)
+                else if(p.getFluidUnits() >= AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL)
                 {
                     EntityLavaParticle elp = new EntityLavaParticle(this.worldBuffer.realWorld, p.getFluidUnits(), 
                           new Vec3d(
@@ -452,7 +451,7 @@ public class LavaSimulator extends SimulationNode
     private long connectionProcessTime;
     private int connectionProcessCount;
     
-    public void doFirstStep()
+    private void doFirstStep()
     {
         long startTime = System.nanoTime();
         connectionProcessCount += this.connections.size();
@@ -467,7 +466,7 @@ public class LavaSimulator extends SimulationNode
         this.connectionProcessTime += (System.nanoTime() - startTime);
     }
 
-    public void doStep()
+    private void doStep()
     {
         long startTime = System.nanoTime();
         connectionProcessCount += this.connections.size();
@@ -482,7 +481,7 @@ public class LavaSimulator extends SimulationNode
         this.connectionProcessTime += (System.nanoTime() - startTime);
     }
     
-    public void doLastStep()
+    private void doLastStep()
     {
         long startTime = System.nanoTime();
         connectionProcessCount += this.connections.size();
@@ -580,7 +579,7 @@ public class LavaSimulator extends SimulationNode
         else
         {
             
-            while(candidate.getDistanceToFlowFloor() > LavaCell.LEVELS_PER_BLOCK && candidate.getFluidAmount() == 0)
+            while(candidate.getDistanceToFlowFloor() > AbstractLavaSimulator.LEVELS_PER_BLOCK && candidate.getFluidAmount() == 0)
             {
                 previousCandidate = candidate;
                 candidate = candidate.getDownEfficiently(this, shouldResynchToWorldIfExists);
@@ -600,7 +599,7 @@ public class LavaSimulator extends SimulationNode
             return null;
         }
     }
-    
+
     public LavaCell getCellForLavaAddition(BlockPos pos, boolean shouldResynchToWorldIfExists)
     {
         return this.getCellForLavaAddition(PackedBlockPos.pack(pos), shouldResynchToWorldIfExists);
@@ -611,7 +610,7 @@ public class LavaSimulator extends SimulationNode
     {
         return this.allCells.get(packedPos);
     }
-    
+
     public LavaCellConnection getConnection(long packedConnectionPos)
     {
         return connections.get(packedConnectionPos);
@@ -621,6 +620,7 @@ public class LavaSimulator extends SimulationNode
      * Update simulation from world when blocks are placed via creative mode or other methods.
      * Also called by random tick on cooling blocks so that they can't get permanently orphaned
      */
+    @Override
     public void registerCoolingBlock(World worldIn, BlockPos pos)
     {
         if(itMe) return;
@@ -634,6 +634,7 @@ public class LavaSimulator extends SimulationNode
      * Unfortunately, this will ALSO be called by our own block updates, 
      * so ignores call if we are currently placing blocks.
      */
+    @Override
     public void registerPlacedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
@@ -655,12 +656,14 @@ public class LavaSimulator extends SimulationNode
     }
 
     /** used by world update to notify when fillers are placed */
+    @Override
     public void trackLavaFiller(BlockPos pos)
     {
         this.lavaFillers.add(PackedBlockPos.pack(pos));
     }
     
     /** used by world update to notify when fillers are placed */
+    @Override
     public void trackCoolingBlock(BlockPos pos)
     {
         this.basaltBlocks.add(new AgedBlockPos(pos, this.tickIndex));
@@ -671,6 +674,7 @@ public class LavaSimulator extends SimulationNode
      * Unfortunately, this will ALSO be called by our own block updates, 
      * so ignores call if visible level already matches.
      */
+    @Override
     public void unregisterDestroyedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
@@ -690,6 +694,7 @@ public class LavaSimulator extends SimulationNode
      * Unfortunately, this will ALSO be called by our own block updates, 
      * so ignores call if visible level already matches.
      */
+    @Override
     public void notifyLavaNeighborChange(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
@@ -714,6 +719,7 @@ public class LavaSimulator extends SimulationNode
      * needs to know the cell is now open.  Otherwise if this addition is occurs
      * after an earlier one but before block update resynch will cause earlier addition to be lost.
      */
+    @Override
     public void addLava(BlockPos pos, int amount, boolean shouldResynchToWorldBeforeAdding)
     {
 //        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
@@ -728,18 +734,19 @@ public class LavaSimulator extends SimulationNode
         }
     }
 
+    @Override
     public void queueParticle(long packedBlockPos, int amount)
     {
 //        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
         this.particles.addLavaForParticle(this, packedBlockPos, amount);
     }
 
-    public void addConnection(long packedConnectionPos)
+    protected void addConnection(long packedConnectionPos)
     {
         this.connections.createConnectionIfNotPresent(this, packedConnectionPos);
     }
 
-    public void removeConnectionIfInvalid(long packedConnectionPos)
+    protected void removeConnectionIfInvalid(long packedConnectionPos)
     {
         this.connections.removeIfInvalid(this, packedConnectionPos);
     }
@@ -750,7 +757,7 @@ public class LavaSimulator extends SimulationNode
     private static int blockUpdatesApplicationCounter;
     private static long blockUpdateApplicationTime;
     
-    public void doBlockUpdates()
+    private void doBlockUpdates()
     {
         //        Adversity.log.info("LavaSim doBlockUpdates");
         long startTime = System.nanoTime();
@@ -933,6 +940,7 @@ public class LavaSimulator extends SimulationNode
 
     }
 
+    @Override
     public int getTickIndex()
     {
         return this.tickIndex;
@@ -942,6 +950,7 @@ public class LavaSimulator extends SimulationNode
      * Signal to let volcano know should switch to cooling mode.
      * 1 or higher means overloaded.
      */
+    @Override
     public float loadFactor()
     {
         return Math.max((float)this.connections.size() / 20000F, (float)this.allCells.size() / 10000F);

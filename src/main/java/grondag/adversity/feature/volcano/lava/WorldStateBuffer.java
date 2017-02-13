@@ -132,7 +132,7 @@ public class WorldStateBuffer implements IBlockAccess
      * Returns the number of blocks updated.
      * 
      */
-    public int applyBlockUpdates(int chunkCount, LavaSimulator sim)
+    public int applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
     {
         int updateCount = 0;
         
@@ -312,7 +312,7 @@ public class WorldStateBuffer implements IBlockAccess
     }
     
     /** returns true an update occured */
-    private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
+    private boolean adjustFillIfNeeded(BlockPos pos, AbstractLavaSimulator sim)
     {
 //        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
 //            Adversity.log.info("boop");
@@ -621,7 +621,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
         
         /** NOT thread safe */
-        private int applyBlockUpdates(AdjustmentTracker tracker, LavaSimulator sim)
+        private int applyBlockUpdates(AdjustmentTracker tracker, AbstractLavaSimulator sim)
         {
 
             tracker.clear();
