@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -10,10 +11,23 @@ import net.minecraft.world.World;
 
 public class LavaSimulatorNew extends AbstractLavaSimulator
 {
-
+    private final ConcurrentHashMap<Long, LavaCell2> allCells = new ConcurrentHashMap<Long, LavaCell2>(16000, 0.6F, 8);
+    private final static String LAVA_CELL_NBT_TAG = "lavacells";
+    private static final int LAVA_CELL_NBT_WIDTH = 5;
+    
+    private final ConnectionMap connections = new ConnectionMap();
+    
+    /** incremented each step, multiple times per tick */
+    private int stepIndex;
+    
     public LavaSimulatorNew(World world)
     {
         super(world);
+    }
+    
+    public int getStepIndex()
+    {
+        return this.stepIndex;
     }
 
     @Override
@@ -82,6 +96,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doFirstStep()
     {
+        this.stepIndex++;
         // TODO Auto-generated method stub
         
     }
@@ -89,6 +104,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doStep()
     {
+        this.stepIndex++;
         // TODO Auto-generated method stub
         
     }
@@ -96,6 +112,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doLastStep()
     {
+        this.stepIndex++;
         // TODO Auto-generated method stub
         
     }

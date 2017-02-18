@@ -39,9 +39,9 @@ public abstract class AbstractLavaSimulator extends SimulationNode
     public static final int FLUID_UNTIS_PER_HALF_BLOCK = FLUID_UNITS_PER_BLOCK / 2;
     protected static final int BLOCK_COOLING_DELAY_TICKS = 20;
 
-    protected final WorldStateBuffer worldBuffer;
-    protected final LavaTerrainHelper terrainHelper;
-    protected final ParticleManager particles = new ParticleManager();
+    public final WorldStateBuffer worldBuffer;
+    public final LavaTerrainHelper terrainHelper;
+    public final ParticleManager particles = new ParticleManager();
     
     /** Basalt blocks that are awaiting cooling */
     protected final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
