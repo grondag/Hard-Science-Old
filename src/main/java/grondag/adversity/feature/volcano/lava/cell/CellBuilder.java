@@ -10,7 +10,7 @@ import scala.actors.threadpool.Arrays;
  * and to validate cells that already exist
  *
  */
-public class CellColumn
+public class CellBuilder
 {
     
     // possible cell content

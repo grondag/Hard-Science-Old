@@ -1,42 +1,67 @@
 package grondag.adversity.feature.volcano.lava.cell;
 
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
+import grondag.adversity.library.PackedBlockPos;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class LavaCells
 {
-    private final Long2ObjectOpenHashMap<LavaCell2> cellLocator = new Long2ObjectOpenHashMap<LavaCell2>();
+    private final Long2ObjectOpenHashMap<CellChunk> cellChunks = new Long2ObjectOpenHashMap<CellChunk>();
     
-    private LavaCell2 cells[] = new LavaCell2[0xFFFF];
-    
-    /** first index that has not been used */
-    private AtomicInteger firstUnusedIndex = new AtomicInteger(0);
-    
-    /** list of indexes below firstUnused that are empty */
-    private ConcurrentLinkedQueue<Integer> unusedIndexes = new ConcurrentLinkedQueue<Integer>();
+    /** contains all extant cells - used to process all cells with simple iteration */
+    private LavaCell2 cells[] = new LavaCell2[0x10000];
     
     private AtomicInteger size = new AtomicInteger(0);
     
     /**
-     * Retrieves cell at the given block position, creating it if it does not exist.
-     * Returns null if the given location cannot contain lava.
+     * Retrieves cell at the given block position.
+     * Returns null if the given location does not contain a cell.
+     * Thread safe.
      */
-    private LavaCell2 getCellIfExists(LavaSimulatorNew sim, int x, int y, int z)
+    public LavaCell2 getCellIfExists(int x, int y, int z)
     {
-        LavaCell2 locator = cellLocator.get(LavaCell2.computeKey(x, z));
-        return locator == null ? null : locator.getCellIfExists(sim, y);
+        CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+        if(chunk == null) return null;
+        LavaCell2 entryCell = chunk.getEntryCell(x, z);
+        return entryCell == null ? null : entryCell.getCellIfExists(y);
+    }   
+    
+    /** 
+     * Returns the starting cell for the stack of cells located at x, z.
+     * Returns null if no cells exist at that location.
+     * Thread safe.
+     */
+    LavaCell2 getEntryCell(int x, int z)
+    {
+        CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+        return chunk == null ? null : chunk.getEntryCell(x, z);
     }
     
-    LavaCell2 newCell(int x, int z)
+    /**
+     * Sets the entry cell for the stack of cells located at x, z.
+     * Probably thread safe for most use cases.
+     */
+    void setEntryCell(int x, int z, LavaCell2 entryCell)
     {
-        LavaCell2 cell = new LavaCell2(x, z);
-        this.addCellToArray(cell);
-        return cell;
+        CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+        if(chunk == null)
+        {
+            synchronized(this)
+            {
+                //confirm not added by another thread
+                chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+                if(chunk == null)
+                {
+                    chunk = new CellChunk(PackedBlockPos.getPackedChunkPos(x, z));
+                    this.cellChunks.put(chunk.packedChunkpos, chunk);
+                }
+            }
+        }
+        chunk.setEntryCell(x, z, entryCell);
     }
     
     /** 
@@ -44,42 +69,51 @@ public class LavaCells
      * Does not add to locator list.
      * Thread-safe.
      */
-    private void addCellToArray(LavaCell2 cell)
+    void addCellToProcessingList(LavaCell2 cell)
     {
-        int i = size.getAndIncrement();
-        cell.index = i;
-        cells[i] = cell;
-//        Integer index = unusedIndexes.poll();
-//        if(index == null)
-//        {
-//            i = firstUnusedIndex.getAndIncrement();
-//        }
-//        else
-//        {
-//            i = index;
-//        }
-//        cell.index = i;
-//        cells[i] = cell;
+        cells[size.getAndIncrement()] = cell;
     }
     
     /** 
-     * Removes cell from the storage array. 
-     * Does not remove from locator.
+     * Removes deleted cells from the storage array. 
+     * Does not remove them from cell stacks in locator.
      * Call after already cell has been unlinked from other 
      * cells in column and removed (and if necessary replaced) in locator.
-     * Thread-safe.
+     * NOT Thread-safe.
      */
-    private void removeCellFromArray(LavaCell2 cell)
+    public void clearDeletedCells()
     {
-        //TODO - don't think this is thread-safe as-is
-        int i = cell.index;
-        cells[i] = cells[size.decrementAndGet()];
-        cells[i].index = i;
-        
-//        cells[cell.index] = null;
-//        unusedIndexes.add(cell.index);
-//        cell.index = -1;
-//        size.decrementAndGet();
+        int i = 0;
+        while(i < this.size.get())
+        {
+            if(cells[i].isDeleted())
+            {
+                cells[i] = cells[this.size.decrementAndGet()];
+                cells[this.size.get()] = null;
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+    
+    /** 
+     * Ensures processing array has sufficient storage.  
+     * Should be called periodically to prevent overflow 
+     * and free unused memory.
+     */
+    public void manageCapacity()
+    {
+        int capacity = this.cells.length - this.size.get();
+        if(capacity < 0x8000)
+        {
+            this.cells = Arrays.copyOf(cells, this.cells.length + 0x10000);
+        }
+        else if(capacity >= 0x20000)
+        {
+            this.cells = Arrays.copyOf(cells, this.cells.length - 0x10000);
+        }
     }
     
     public void writeNBT(NBTTagCompound nbt)
@@ -88,7 +122,7 @@ public class LavaCells
         int[] saveData = new int[size.get() * LavaCell2.LAVA_CELL_NBT_WIDTH];
         int i = 0;
 
-        for(int j = 0; j < this.firstUnusedIndex.get(); j++)
+        for(int j = 0; j < this.size.get(); j++)
         {
             if(cells[j] != null) cells[j].writeNBT(saveData, i);
             
@@ -100,13 +134,11 @@ public class LavaCells
     
     public void readNBT(LavaSimulatorNew sim, NBTTagCompound nbt)
     {
-        Arrays.fill(this.cells, null);
-        this.cellLocator.clear();
-        this.size.set(0);
-
+        this.cellChunks.clear();
+        
         // LOAD LAVA CELLS
         int[] saveData = nbt.getIntArray(LavaCell2.LAVA_CELL_NBT_TAG);
-
+        
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell2.LAVA_CELL_NBT_WIDTH != 0)
         {
@@ -114,7 +146,12 @@ public class LavaCells
         }
         else
         {
+            this.size.set(saveData.length / LavaCell2.LAVA_CELL_NBT_WIDTH);
+            
+            this.cells = new LavaCell2[this.size.get() + 0x10000];
+            
             int i = 0;
+            int c = 0;
             while(i < saveData.length)
             {
                 LavaCell2 cell = new LavaCell2(saveData, i);
@@ -124,13 +161,13 @@ public class LavaCells
                         
                 cell.clearBlockUpdate(sim);
                 
-                this.addCellToArray(cell);
+                this.cells[c++] = cell;
                 
-                LavaCell2 startingCell = cellLocator.get(cell.locationKey());
+                LavaCell2 startingCell = this.getEntryCell(cell.x(), cell.z());
                 
                 if(startingCell == null)
                 {
-                    cellLocator.put(cell.locationKey(), cell);
+                    this.setEntryCell(cell.x(), cell.z(), cell);
                 }
                 else
                 {
@@ -143,5 +180,59 @@ public class LavaCells
         }
     }
     
-    
+    private static class CellChunk
+    {
+        private final long packedChunkpos;
+        
+        private LavaCell2[] entryCells = new LavaCell2[256];
+        
+        private CellChunk(long packedChunkPos)
+        {
+            this.packedChunkpos = packedChunkPos;
+        }
+
+        private AtomicInteger entryCount = new AtomicInteger(0);
+        
+        /** 
+         * Returns the starting cell for the stack of cells located at x, z.
+         * Returns null if no cells exist at that location.
+         * Thread safe.
+         */
+        private LavaCell2 getEntryCell(int x, int z)
+        {
+            return this.entryCells[getIndex(x, z)];
+        }
+        
+        /**
+         * Sets the entry cell for the stack of cells located at x, z.
+         * Should be thread safe if not accessing same x, z.
+         */
+        private void setEntryCell(int x, int z, LavaCell2 entryCell)
+        {
+            int i = getIndex(x, z);
+            boolean wasNull = this.entryCells[i] == null;
+            
+            this.entryCells[i] = entryCell;
+            
+            if(wasNull)
+            {
+                if(entryCell != null) this.entryCount.incrementAndGet();
+            }
+            else
+            {
+                if(entryCell == null) this.entryCount.decrementAndGet();
+            }
+        }
+        
+        /** How many x. z locations in this chunk have at least one cell? */
+        int getEntryCount()
+        {
+            return this.getEntryCount();
+        }
+        
+        private static int getIndex(int x, int z)
+        {
+            return ((x & 15) << 4) | (z & 15);
+        }
+    }
 }

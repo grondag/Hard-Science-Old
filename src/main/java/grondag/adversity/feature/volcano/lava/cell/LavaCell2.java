@@ -42,8 +42,8 @@ public class LavaCell2
      */
     volatile LavaCell2 below;
     
-    /** used by collection for locating in storage array */
-    volatile int index = -1;
+    /** set true when cell should no longer be processed and can be removed from storage */
+    private volatile boolean isDeleted;
     
     private Int2ObjectOpenHashMap<LavaConnection2> connections = new Int2ObjectOpenHashMap<LavaConnection2>();
     
@@ -127,11 +127,21 @@ public class LavaCell2
     // calculate retained level
     // calculate smoothed retained level
     
+    public boolean isDeleted()
+    {
+        return this.isDeleted;
+    }
+    
+    public void setDeleted()
+    {
+        this.isDeleted = true;
+    }
+    
     /** 
      * Returns cell at given y block position if it exists.
      * Thread-safe.
      */
-    LavaCell2 getCellIfExists(LavaSimulatorNew sim, int y)
+    LavaCell2 getCellIfExists(int y)
     {
         synchronized(this.locator)
         {
@@ -302,18 +312,11 @@ public class LavaCell2
         this.fluidUnits = saveData[i++];
         this.rawRetainedLevel = saveData[i++];
         int combinedBounds = saveData[i++];
+
+        boolean isBottomFlow = combinedBounds < 0;
+        if(isBottomFlow) combinedBounds = -combinedBounds;
         
-        if(combinedBounds < 0)
-        {
-            combinedBounds = -combinedBounds;
-            this.isBottomFlow = true;
-        }
-        else
-        {
-            this.isBottomFlow = false;
-        }
-        
-        this.setFloor(combinedBounds & 0xFFF);
+        this.setFloor(combinedBounds & 0xFFF, isBottomFlow);
         this.setCeiling(combinedBounds >> 12);
 
         this.lastTickIndex = saveData[i++];
