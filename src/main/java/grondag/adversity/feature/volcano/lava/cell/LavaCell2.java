@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaConnection2;
+import grondag.adversity.feature.volcano.lava.LavaConnections;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -61,7 +62,15 @@ public class LavaCell2
     
     /** see {@link #isBottomFlow()} */
     private boolean isBottomFlow;
-    private boolean neverCools;
+    
+    
+    private boolean isCoolingDisabled = false;
+    
+    /** 
+     * True if this cell is new or has expanded.
+     * Used to determine if updateConnectionsIfNeeded should do anything.
+     */
+    private boolean isConnectionUpdateNeeded = true;
     
     /**
      * Last level reported to world.
@@ -126,6 +135,52 @@ public class LavaCell2
     // pressure propagation
     // calculate retained level
     // calculate smoothed retained level
+    // make connections
+    
+    public LavaCell2(LavaCell2 existingEntryCell, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
+    {
+        this.locator = existingEntryCell.locator;
+        this.setFloor(floor, isFlowFloor);
+        this.setCeiling(ceiling);
+        this.fluidUnits = Math.max(0, lavaLevel - floor);
+    }
+    
+    public LavaCell2(int x, int z, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
+    {
+        this.locator = new CellLocator(x, z, this);
+        this.setFloor(floor, isFlowFloor);
+        this.setCeiling(ceiling);
+        this.fluidUnits = Math.max(0, lavaLevel - floor);
+    }
+    
+    /** 
+     * Reads data from array starting at location i.
+     */
+    LavaCell2(int[] saveData, int i)
+    {
+        // see writeNBT to understand how data are persisted
+        this.locator = new CellLocator(saveData[i++], saveData[i++], this);
+        this.fluidUnits = saveData[i++];
+        this.rawRetainedLevel = saveData[i++];
+        int combinedBounds = saveData[i++];
+
+        boolean isBottomFlow = combinedBounds < 0;
+        if(isBottomFlow) combinedBounds = -combinedBounds;
+        
+        this.setFloor(combinedBounds & 0xFFF, isBottomFlow);
+        this.setCeiling(combinedBounds >> 12);
+
+        this.lastTickIndex = saveData[i++];
+        if(this.lastTickIndex < 0)
+        {
+            this.lastTickIndex = -this.lastTickIndex;
+            this.isCoolingDisabled = true;
+        }
+        else
+        {
+            this.isCoolingDisabled = false;
+        }
+    }
     
     public boolean isDeleted()
     {
@@ -191,146 +246,7 @@ public class LavaCell2
             }
         }
     }
-    
-//    /** 
-//     * Returns cell at given y block position, creating it 
-//     * or expanding an existing cell if cell does not already exist.
-//     * Returns null if space cannot contain lava.
-//     * 
-//     * NOT INTENDED FOR CONCURRENT ACCESS
-//     * Synchronized to worldBuffer to prevent multiple threads hitting MC world.
-//     */
-//    LavaCell2 getCell(LavaSimulatorNew sim, LavaCells cells, int y)
-//    {
-//        synchronized(sim.worldBuffer)
-//        {
-//            if(y > this.topY())
-//            {
-//                LavaCell2 nextUp = this.above;
-//                LavaCell2 lastUp = this;
-//                while(nextUp != null)
-//                {
-//                    if(y > nextUp.topY())
-//                    {
-//                        // keep going up
-//                        lastUp = nextUp;
-//                        nextUp = nextUp.above;
-//                    }
-//                    else if(y > nextUp.getFloorY())
-//                    {
-//                        // found a match
-//                        return nextUp;
-//                    }
-//                    else
-//                    {
-//                        // next up is too high, so must be between last and next
-//                        return addOrConfirmSpaceAtY(sim, y, lastUp, nextUp );
-//                    }
-//                }
-//                // reached the top cell and still not found
-//                return addOrConfirmSpaceAtY(sim, y, lastUp, null);
-//            }
-//            else if(y > this.getFloorY())
-//            {
-//                return this;
-//            }
-//            else
-//            {
-//                LavaCell2 nextDown = this.below;
-//                LavaCell2 lastDown = this;
-//                while(nextDown != null)
-//                {
-//                    if(y < nextDown.getFloorY())
-//                    {
-//                        // keep going down
-//                        lastDown = nextDown;
-//                        nextDown = nextDown.below;
-//                    }
-//                    else if(y <= nextDown.topY())
-//                    {
-//                        // found a match
-//                        return nextDown;
-//                    }
-//                    else
-//                    {
-//                        // next down is too low, so must between last and next
-//                        return addOrConfirmSpaceAtY(sim, y, nextDown, lastDown );
-//                    }
-//                }
-//                // reached the bottom cell and still not found
-//                return addOrConfirmSpaceAtY(sim, y, null, lastDown);
-//            }
-//        }
-//    }
-    
-    /**
-     * Confirms the space at Y is part of a cell.  Validates and returns if so. 
-     * If it is not a lava space and a cell exists, shrinks and/or splits the cell that was there.
-     * If so, adds space to the cell above or below if they are non-null and adjacent.
-     * If new space is adjacent to both above and below, merges them and returns the merged cell.
-     * In case of merge, new cell inherits links of cells above and below, as appropriate.
-     * If no non-null, adjacent cell is found, creates a new cell, linking it to the others if they are non-null.
-     * Returns null if not.
 
-
-     */
-    private static LavaCell2 getCellFromWorldAtY(LavaSimulatorNew sim, int y, LavaCell2 cellBelow, LavaCell2 cellAbove)
-    {
-        return null;
-    }
-    
-    public LavaCell2(LavaSimulatorNew sim, BlockPos pos)
-    {
-        this(pos.getX(), pos.getZ());
-    }
- 
-    public LavaCell2(LavaSimulatorNew sim, long packedBlockPos)
-    {
-        this(PackedBlockPos.getX(packedBlockPos), PackedBlockPos.getZ(packedBlockPos));
-    }
-    
-    private LavaCell2(CellLocator locator, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
-    {
-        this.locator = locator;
-        this.setFloor(floor, isFlowFloor);
-        this.setCeiling(ceiling);
-        this.fluidUnits = Math.max(0, lavaLevel - floor);
-    }
-    
-    public LavaCell2(int x, int z)
-    {
-        this.locator = new CellLocator(x, z, this);
-    }
-    
-    /** 
-     * Reads data from array starting at location i.
-     */
-    LavaCell2(int[] saveData, int i)
-    {
-        // see writeNBT to understand how data are persisted
-        this.locator = new CellLocator(saveData[i++], saveData[i++], this);
-        this.fluidUnits = saveData[i++];
-        this.rawRetainedLevel = saveData[i++];
-        int combinedBounds = saveData[i++];
-
-        boolean isBottomFlow = combinedBounds < 0;
-        if(isBottomFlow) combinedBounds = -combinedBounds;
-        
-        this.setFloor(combinedBounds & 0xFFF, isBottomFlow);
-        this.setCeiling(combinedBounds >> 12);
-
-        this.lastTickIndex = saveData[i++];
-        if(this.lastTickIndex < 0)
-        {
-            this.lastTickIndex = -this.lastTickIndex;
-            this.neverCools = true;
-        }
-        else
-        {
-            this.neverCools = false;
-        }
-    }
-    
     static final String LAVA_CELL_NBT_TAG = "lavacells";
     static final int LAVA_CELL_NBT_WIDTH = 6;
 
@@ -351,7 +267,7 @@ public class LavaCell2
         saveData[i++] = combinedBounds;
         
         // save never cools as sign bit on last tick index
-        saveData[i++] = this.neverCools ? -this.lastTickIndex : this.lastTickIndex;
+        saveData[i++] = this.isCoolingDisabled ? -this.lastTickIndex : this.lastTickIndex;
     }
     
 //    /** top level that would contain fluid if this column could expand vertically unconstrained */
@@ -463,8 +379,9 @@ public class LavaCell2
      * Returns distance from this cell to the given region. 
      * If this cell intersects with the given region, returns -1 
      */
-    private int distanceOrIntersection(int floor, int ceiling)
+    public int distanceOrIntersection(int floor, int ceiling)
     {
+        //TODO: is this used?
         
         /**
          * Examples:
@@ -492,75 +409,6 @@ public class LavaCell2
        return -1;
     }
     
-    /** 
-     * Adds new cells in this column or expands or merges existing cells as needed.
-     * Ceiling is inclusive, floor is not.
-     * Returns cell that should be used as starting reference for this column.
-     */
-    public LavaCell2 addOrConfirmSpace(int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
-    {
-        synchronized(this.locator)
-        {
-            // find the cell below this space, if there is one
-            LavaCell2 below = this.findNearestCellBelowLeve(floor);
-            
-            if(below == null)
-            {
-                // No existing cell below this space, so result depends 
-                // on where space stands related to the first (lowest) existing cell.
-                LavaCell2 first = this.locator.firstCell;
-                
-                if(first.floor > ceiling)
-                {
-                    // space is below the first cell, and thus the new first (lowest) cell
-                    LavaCell2 newCell = new LavaCell2(this.locator, floor, ceiling, lavaLevel, isFlowFloor);
-                    newCell.above = this.locator.firstCell;
-                    newCell.above.below = newCell;
-                    this.locator.firstCell = newCell;
-                    return this;
-                }
-                else if(first.floor == ceiling)
-                {
-                    // space is below and adjacent to the first cell and thus should expand it
-                    first.setFloor(floor, isFlowFloor);
-                    first.fluidUnits += Math.max(0, lavaLevel - floor);
-                    return this;
-                    
-                }
-                else
-                {
-                    // space intersects with the first cell
-                    // so expand first cell to include entire region
-                    
-                    // if first cell now intersects with cells above it, merge them in also
-                    return first.mergeUpInRegsion()
-                } 
-            }
-        
-        
-            // if intersects or is adjacent to two cells, expand and merge those cells
-            // lower cell wins
-            // confirm lava level in merged cell
-            
-            // if intersects or is adjacent to a single cell, expand that cell
-            // confirm lava level in expanded cell
-            
-            // if no intersection, insert a new cell in the chain
-            
-            
-            if(this.isVerticallyAdjacentTo(floor, ceiling) || this.intersectsWith(floor, ceiling))
-            {
-                this.setCeiling(Math.max(this.getCeiling(), ceiling));
-                this.setFloor(Math.min(this.getFloor(), floor));
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
-    
     /** Returns the lowest cell containing lava or the upper most cell if no cells contain lava */
     public LavaCell2 selectStartingCell()
     {
@@ -575,10 +423,13 @@ public class LavaCell2
     // LOCATION INFO
     
     /** See {@link #getFloor()} */
-    private void  setFloor(int newFloor, boolean isFlowFloor)
+    public void  setFloor(int newFloor, boolean isFlowFloor)
     {
         if(newFloor != this.floor || isFlowFloor != this.isBottomFlow)
         {
+            // check for new connections whenever cell expands
+            if(newFloor < this.floor) this.isConnectionUpdateNeeded = true;
+            
             //force retention recalc
             this.rawRetainedLevel = -1;
             this.floor = newFloor;
@@ -593,7 +444,7 @@ public class LavaCell2
      * Levels in Y=0 for example, are 0 thru 11.
      * ALWAYS USE setFloor() instead of floor to maintain bottomY.
      */
-    int getFloor()
+    public int getFloor()
     {
         return this.floor;
     }
@@ -632,8 +483,11 @@ public class LavaCell2
   
     
     /** See {@link #getCeiling()} */
-    private void  setCeiling(int newCeiling)
+    public void  setCeiling(int newCeiling)
     {
+        // check for new connections whenever cell expands
+        if(newCeiling > this.ceiling) this.isConnectionUpdateNeeded = true;
+        
         this.ceiling = newCeiling;
         this.topY = (byte) getYFromCeiling(this.ceiling);
     }
@@ -644,7 +498,7 @@ public class LavaCell2
      * Levels in Y=0, for example are 1 thru 12.
      * ALWAYS USE setCeiling() to maintain topY.
      */
-    int getCeiling()
+    public int getCeiling()
     {
         return this.ceiling;
     }
@@ -774,6 +628,54 @@ public class LavaCell2
         return this.connections.containsKey(otherCell.id);
     }
     
+    /** 
+     * Forms new connections if necessary.
+     * Does NOT remove invalid connections. Invalid connections are expected to be removed during connection processing.
+     */
+    public void updateConnectionsIfNeeded(LavaCells cells, LavaConnections connections)
+    {
+        if(this.isConnectionUpdateNeeded)
+        {
+            int x = this.x();
+            int z = this.z();
+            this.updateConnectionsWithColumn(cells.getEntryCell(x - 1, z), connections);
+            this.updateConnectionsWithColumn(cells.getEntryCell(x + 1, z), connections);
+            this.updateConnectionsWithColumn(cells.getEntryCell(x, z - 1), connections);
+            this.updateConnectionsWithColumn(cells.getEntryCell(x, z + 1), connections);
+            this.isConnectionUpdateNeeded = false;
+        }
+    }
+    
+    /** 
+     * Forms new connections with cells in the column with the given entry cell.
+     * For use by updateConnectionsIfNeeded;
+     */
+    private void updateConnectionsWithColumn(LavaCell2 entryCell, LavaConnections connections)
+    {
+        if(entryCell == null) return;
+        
+        LavaCell2 candidate = entryCell.firstCell();
+        
+        // lets us know if a connection was found earlier so can stop once out of range for new
+        boolean wasConnectionFound = false;
+        
+        while(candidate != null)
+        {
+            if(this.canConnectWith(candidate))
+            {
+                connections.createConnectionIfNotPresent(this, candidate);
+                wasConnectionFound = true;
+            }
+            else if(wasConnectionFound)
+            {
+                // if connected earlier must be getting cells that are too high up now - stop
+                return;
+            }
+                
+            candidate = candidate.aboveCell();
+        }
+    }
+    
     /** true if can be removed without losing anything */
     public boolean isUseless()
     {
@@ -783,7 +685,8 @@ public class LavaCell2
     public boolean canConnectWith(LavaCell2 other)
     {
         return this.getFloor() < other.getCeiling()
-                && this.getCeiling() > other.getFloor();
+                && this.getCeiling() > other.getFloor()
+                && !this.isDeleted() && !other.isDeleted();
     }
     
     /**
@@ -841,6 +744,22 @@ public class LavaCell2
     public LavaCell2 firstCell()
     {
         return this.locator.firstCell;
+    }
+    
+    public LavaCell2 aboveCell()
+    {
+        return this.above;
+    }
+    
+    public void linkAbove(LavaCell2 cellAbove)
+    {
+        this.above = cellAbove;
+        cellAbove.below = this;
+    }
+    
+    public LavaCell2 belowCell()
+    {
+        return this.below;
     }
     
     /**

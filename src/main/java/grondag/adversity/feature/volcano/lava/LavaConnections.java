@@ -2,30 +2,19 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
-import grondag.adversity.library.PackedBlockPos;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.util.EnumFacing;
-
 
 public class LavaConnections
 {
   
-    private LavaConnection2 connections[] = new LavaConnection2[0xFFFF];
-    
-    /** first index that has not been used */
-    private AtomicInteger firstUnusedIndex = new AtomicInteger(0);
-    
-    /** list of indexes below firstUnused that are empty */
-    private ConcurrentLinkedQueue<Integer> unusedIndexes = new ConcurrentLinkedQueue<Integer>();
+    /** contains all extant connections - used to process all connections with simple iteration */
+    private LavaConnection2 connections[] = new LavaConnection2[0x10000];
     
     private AtomicInteger size = new AtomicInteger(0);
     
-    private LavaConnection2 sortedArray[] = new LavaConnection2[0xFFFF];
+    private LavaConnection2 sortedArray[] = new LavaConnection2[0x10000];
     
     private boolean isSortCurrent = false;
     
@@ -33,14 +22,39 @@ public class LavaConnections
     {
         synchronized(this)
         {
-            Arrays.fill(connections, null);
-            isSortCurrent = false;
+            this.connections = new LavaConnection2[0x10000];
+            this.sortedArray = new LavaConnection2[0x10000];
+            this.isSortCurrent = false;
         }
     }
     
     public int size()
     {
         return size.get();
+    }
+    
+    
+    //TODO: make sure this is called during connection processing after NBT load to prevent overflow on large simulations
+    /** 
+     * Ensures processing array has sufficient storage.  
+     * Should be called periodically to prevent overflow 
+     * and free unused memory.
+     */
+    public void manageCapacity()
+    {
+        int capacity = this.connections.length - this.size.get();
+        if(capacity < 0x8000)
+        {
+            this.connections = Arrays.copyOf(connections, this.connections.length + 0x10000);
+            this.sortedArray = new LavaConnection2[this.connections.length];
+            this.isSortCurrent = false;
+        }
+        else if(capacity >= 0x20000)
+        {
+            this.connections = Arrays.copyOf(connections, this.connections.length - 0x10000);
+            this.sortedArray = new LavaConnection2[this.connections.length];
+            this.isSortCurrent = false;
+        }
     }
     
     public void createConnectionIfNotPresent(LavaCell2 first, LavaCell2 second)
@@ -52,59 +66,50 @@ public class LavaConnections
         }
     }
     
-    public void removeConnection(LavaConnection2 connection)
+    /** 
+     * Validates all connections and removes
+     * deleted or invalid connections from the storage array. 
+     * NOT Thread-safe.
+     */
+    public void validateConnections()
     {
-        if(!connection.isDeleted())
+        int i = 0;
+        while(i < this.size.get())
         {
-            connection.releaseCells();
-            this.removeCellFromArray(connection);
-            connection.setDeleted();
+            if(!connections[i].isValid())
+            {
+                connections[i].releaseCells();
+                connections[i] = connections[this.size.decrementAndGet()];
+                connections[this.size.get()] = null;
+            }
+            else
+            {
+                i++;
+            }
         }
     }
     
     /** 
-     * Adds connection to the storage array. 
-     * Does not do anthing with the cells.
+     * Adds connection to the storage array and marks sort dirty.
+     * Does not do anything else.
      * Thread-safe.
      */
-    private void addConnectionToArray(LavaConnection2 connection)
+    public void addConnectionToArray(LavaConnection2 connection)
     {
-        int i;
-        Integer index = unusedIndexes.poll();
-        if(index == null)
-        {
-            i = firstUnusedIndex.getAndIncrement();
-        }
-        else
-        {
-            i = index;
-        }
-        connection.index = i;
-        connections[i] = connection;
-        size.incrementAndGet();
-    }
-    
-    /** 
-     * Removes connection from the storage array. 
-     * Does not do anything with the cells.
-     * Thread-safe.
-     */
-    private void removeCellFromArray(LavaConnection2 connection)
-    {
-        connections[connection.index] = null;
-        unusedIndexes.add(connection.index);
-        connection.index = -1;
-        size.decrementAndGet();
+        connections[size.getAndIncrement()] = connection;
+        this.isSortCurrent = false;
     }
     
     public LavaConnection2[] values()
     {
         if(!isSortCurrent)
         {
+            //TODO: stop at size
             Arrays.stream(connections).parallel().forEach(p -> {if(p != null) p.updateSortKey();});
             
-            System.arraycopy(connections, 0, sortedArray, 0, 0xFFFF);
+            System.arraycopy(connections, 0, sortedArray, 0, this.size.get());
         
+            //TODO: stop sorting at size
             Arrays.parallelSort(sortedArray, 
                     new Comparator<LavaConnection2>() {
                       @Override
@@ -117,16 +122,4 @@ public class LavaConnections
         return sortedArray;
         
     }
-    
-    public void validateConnections(AbstractLavaSimulator sim)
-    {
-        Arrays.stream(connections).parallel().forEach(p ->
-        {
-            if(p != null && !p.isValid())
-            {
-                this.removeConnection(p);
-            }
-        });
-    }
-    
 }

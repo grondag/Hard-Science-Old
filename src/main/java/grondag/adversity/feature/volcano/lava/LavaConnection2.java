@@ -3,8 +3,6 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
-import grondag.adversity.library.PackedBlockPos;
-import net.minecraft.util.EnumFacing;
 
 public class LavaConnection2
 {
@@ -17,9 +15,6 @@ public class LavaConnection2
     public final LavaCell2 secondCell;
     
     public final int id = nextConnectionID++;
-    
-    /** used by collection for locating in storage array */
-    volatile int index = -1;
     
     public final long key;
     
@@ -115,8 +110,8 @@ public class LavaConnection2
     public void flowAcross(LavaSimulatorNew sim, int flow)
     {
         this.flowThisTick += flow;
-        this.firstCell.changeLevel(sim, -flow);
-        this.secondCell.changeLevel(sim, flow);
+        this.firstCell.changeLevel(sim.getTickIndex(), -flow);
+        this.secondCell.changeLevel(sim.getTickIndex(), flow);
     }
     
     /**

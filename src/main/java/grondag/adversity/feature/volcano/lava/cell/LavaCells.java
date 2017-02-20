@@ -35,7 +35,7 @@ public class LavaCells
      * Returns null if no cells exist at that location.
      * Thread safe.
      */
-    LavaCell2 getEntryCell(int x, int z)
+    public LavaCell2 getEntryCell(int x, int z)
     {
         CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
         return chunk == null ? null : chunk.getEntryCell(x, z);
@@ -69,7 +69,7 @@ public class LavaCells
      * Does not add to locator list.
      * Thread-safe.
      */
-    void addCellToProcessingList(LavaCell2 cell)
+    public void addCellToProcessingList(LavaCell2 cell)
     {
         cells[size.getAndIncrement()] = cell;
     }
@@ -225,9 +225,9 @@ public class LavaCells
         }
         
         /** How many x. z locations in this chunk have at least one cell? */
-        int getEntryCount()
+        public int getEntryCount()
         {
-            return this.getEntryCount();
+            return this.entryCount.get();
         }
         
         private static int getIndex(int x, int z)
