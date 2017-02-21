@@ -14,6 +14,9 @@ class CellSpecList extends ArrayList<CellSpec>
     
     private CellSpec currentSpec = null;
     
+    /** use to prevent updating lava level from suspended lava blocks */
+    private boolean hasEmptySpaceBeenFoundInCurrentCell;
+    
     /** reads an existing collection of cells into cell specs for validation against the world */
     public CellSpecList(LavaCell2 startingCell)
     {
@@ -56,8 +59,19 @@ class CellSpecList extends ArrayList<CellSpec>
                     
                     if(!this.isCellStarted()) this.startCell(blockFloor, lastType == BlockType.SOLID_FLOW);
                     
-                    // update lava level
-                    this.setLavaLevel(blockFloor + currentFlowHeight);
+                    if(hasEmptySpaceBeenFoundInCurrentCell) 
+                    {
+                        // TODO: handle suspended lava
+                        // Do by two steps: 
+                        // 1 register particles in cell
+                        // 2 set clearing level to max lava level - will let cell know to check for lava blocks and set to air
+                      
+                    }
+                    else
+                    {
+                        // update lava level if lava is not suspended
+                        this.setLavaLevel(blockFloor + currentFlowHeight);
+                    }
                     break;
                 }
                 
@@ -70,6 +84,9 @@ class CellSpecList extends ArrayList<CellSpec>
                     if(currentFlowHeight < AbstractLavaSimulator.LEVELS_PER_BLOCK) 
                     {
                         this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK + currentFlowHeight, true);
+                        
+                        // any lava found in this cell must be suspended
+                        hasEmptySpaceBeenFoundInCurrentCell = true;
                     }
                     break;
                 }
@@ -78,6 +95,10 @@ class CellSpecList extends ArrayList<CellSpec>
                 {
                     // start new cell if this is the first open space
                     if(!this.isCellStarted()) this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK, lastType == BlockType.SOLID_FLOW);
+                    
+                    // any lava found in this cell must be suspended
+                    hasEmptySpaceBeenFoundInCurrentCell = true;
+                    
                     break;
                 }
                     
@@ -105,6 +126,7 @@ class CellSpecList extends ArrayList<CellSpec>
         currentSpec = new CellSpec();
         currentSpec.floor = floor;
         currentSpec.isFlowFloor = isFlowFloor;
+        hasEmptySpaceBeenFoundInCurrentCell = false;
     }
     
     void setLavaLevel(int lavaLevel)

@@ -88,6 +88,17 @@ public class LavaCell2
      */
     private int fluidUnits;
     
+    
+    public static final byte SUSPENDED_NONE = -1;
+    /**
+     * Used to signal that upper block levels may contain suspended lava blocks that
+     * need to be set to air. Used when a cell with lava merges with a cell below.
+     * This happens when a thin flow-block floor melts, or if player breaks a block.
+     * Contains max y level in this cell that may contain a lava block.
+     * Is -1 if no suspended blocks are known to exist.
+     */
+    private byte suspendedLevel = SUSPENDED_NONE;
+    
     /** 
      * Fluid level will not drop below this - to emulate surface tension/viscosity.
      * Established when cell is first created.  Does not change until cell solidifies or bottom drops out.
@@ -151,35 +162,6 @@ public class LavaCell2
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
-    }
-    
-    /** 
-     * Reads data from array starting at location i.
-     */
-    LavaCell2(int[] saveData, int i)
-    {
-        // see writeNBT to understand how data are persisted
-        this.locator = new CellLocator(saveData[i++], saveData[i++], this);
-        this.fluidUnits = saveData[i++];
-        this.rawRetainedLevel = saveData[i++];
-        int combinedBounds = saveData[i++];
-
-        boolean isBottomFlow = combinedBounds < 0;
-        if(isBottomFlow) combinedBounds = -combinedBounds;
-        
-        this.setFloor(combinedBounds & 0xFFF, isBottomFlow);
-        this.setCeiling(combinedBounds >> 12);
-
-        this.lastTickIndex = saveData[i++];
-        if(this.lastTickIndex < 0)
-        {
-            this.lastTickIndex = -this.lastTickIndex;
-            this.isCoolingDisabled = true;
-        }
-        else
-        {
-            this.isCoolingDisabled = false;
-        }
     }
     
     public boolean isDeleted()
@@ -251,6 +233,12 @@ public class LavaCell2
     static final int LAVA_CELL_NBT_WIDTH = 6;
 
     /** 
+     * Enough to store 12000 * 256, which would be fluid in an entire world column.  
+     * Fills 22 bits, and leaves enough room to pack in another byte.
+     */
+    private static final int FLUID_UNITS_MASK = 0x3FFFFF;
+    private static final int FLUID_UNITS_BITS = 22;
+    /** 
      * Writes data to array starting at location i.
      */
     void writeNBT(int[] saveData, int i)
@@ -258,7 +246,7 @@ public class LavaCell2
          
         saveData[i++] = this.locator.x;
         saveData[i++] = this.locator.z;
-        saveData[i++] = this.fluidUnits;
+        saveData[i++] = (this.fluidUnits & FLUID_UNITS_MASK) | (this.suspendedLevel << FLUID_UNITS_BITS);
         saveData[i++] = this.rawRetainedLevel;
         
         // to save space, pack bounds into single int and save flow floor as sign bit
@@ -280,6 +268,38 @@ public class LavaCell2
 //        return this.floor + (int) ((-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a));
 //    }
     
+    /** 
+     * Reads data from array starting at location i.
+     */
+    LavaCell2(int[] saveData, int i)
+    {
+        // see writeNBT to understand how data are persisted
+        this.locator = new CellLocator(saveData[i++], saveData[i++], this);
+        
+        int fluidData = saveData[i++];
+        this.fluidUnits = fluidData & FLUID_UNITS_MASK;
+        this.suspendedLevel = (byte) (fluidData >> FLUID_UNITS_BITS);
+        
+        this.rawRetainedLevel = saveData[i++];
+        int combinedBounds = saveData[i++];
+
+        boolean isBottomFlow = combinedBounds < 0;
+        if(isBottomFlow) combinedBounds = -combinedBounds;
+        
+        this.setFloor(combinedBounds & 0xFFF, isBottomFlow);
+        this.setCeiling(combinedBounds >> 12);
+
+        this.lastTickIndex = saveData[i++];
+        if(this.lastTickIndex < 0)
+        {
+            this.lastTickIndex = -this.lastTickIndex;
+            this.isCoolingDisabled = true;
+        }
+        else
+        {
+            this.isCoolingDisabled = false;
+        }
+    }
     public int getFluidUnits()
     {
         return this.fluidUnits;
@@ -567,6 +587,24 @@ public class LavaCell2
         return (y + 1) * AbstractLavaSimulator.LEVELS_PER_BLOCK;
     }
     
+    /** Use this to report when suspended lava blocks exist above lava surface
+     * that need to be set to air on next block update. See {@link #suspendedLevel}. */
+    public void notifySuspendedLava(int y)
+    {
+        if(y > this.suspendedLevel) this.suspendedLevel = (byte) y;
+    }
+    
+    /**
+     * Use to input lava into this cell that is above the fluid surface.
+     * Will add lava to surface after an appropriate falling time and 
+     * render particles as appropriate.
+     * Level is fluid level (12 per block) not world y level.
+     */
+    public void registerFallingParticles(int level, int fluidUnits)
+    {
+        //TODO: implement, including persistence.
+    }
+    
     /**
      * Adds cell at the appropriate place in the linked list of cells.
      * Used in NBT load.  Should only be used when know that cell does not overlap existing cells.
@@ -770,6 +808,12 @@ public class LavaCell2
     public void provideBlockUpdateIfNeeded(LavaSimulatorNew sim)
     {
 
+        if(this.suspendedLevel != SUSPENDED_NONE)
+        {
+            //TODO: implement suspended lava clearing
+            
+        }
+        
         if(isBlockUpdateCurrent) return;
 
         //        if(this.id == 1104 || this.id == 8187)

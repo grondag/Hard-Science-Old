@@ -54,6 +54,10 @@ public class CellBuilder
         CellSpecList worldSpec = new CellSpecList(worldChunk, z, z);
         CellSpecList simSpec = new CellSpecList(startingCell);
         
+        
+        /**
+         * For each cell in world, relate to cells already in sim
+         */
         //TODO - stub
         return null;
     }
