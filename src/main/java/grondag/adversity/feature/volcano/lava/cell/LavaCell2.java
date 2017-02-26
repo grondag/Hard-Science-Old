@@ -192,10 +192,24 @@ public class LavaCell2
         return this.isDeleted;
     }
     
-    /** removes all lava and prevents further processing */
+    /** Removes all lava and prevents further processing.
+     *  Also maintains above/below list references in remaining cells
+     *  and removes references to/from this cell.
+     */
     public void setDeleted()
     {
         this.fluidUnits = 0;
+        if(this.below == null)
+        {
+            if(this.above != null) this.above.below = null;
+        }
+        else
+        {
+            this.below.linkAbove(this.above);
+        }
+
+        this.above = null;
+        this.below = null;
         this.clearBlockUpdate();
         this.isDeleted = true;
     }
@@ -430,6 +444,25 @@ public class LavaCell2
     }
     
     /** 
+     * Distance from this cell to the given space, in block levels.
+     * Space floor is exclusive, space ceiling in inclusive. Inputs are in block levels.
+     * Returns 0 if the space is adjacent or intersecting.
+     */
+    private int distanceToSpace(int spaceFloor, int spaceCeiling)
+    {
+        if(this.getFloor() > spaceCeiling)
+            return this.getFloor() - spaceCeiling;
+        
+        else if(this.getCeiling() < spaceFloor)
+            
+            return spaceFloor - this.getCeiling();
+        else
+            // intersects or adjacent
+            return 0; 
+            
+    }
+    
+    /** 
      * Finds the uppermost cell that is below to the given level.
      * Cells that are below and adjacent (cell ceiling = level) count as below.
      * If the lowest existing cell is above or intersecting with the level, returns null.
@@ -468,40 +501,6 @@ public class LavaCell2
             return candidate;
         }
         
-    }
-    
-    /** 
-     * Returns distance from this cell to the given region. 
-     * If this cell intersects with the given region, returns -1 
-     */
-    public int distanceOrIntersection(int floor, int ceiling)
-    {
-        //TODO: is this used?
-        
-        /**
-         * Examples:
-         * cellFloor    cellCeiling     floor       ceiling     result      f-cc            cf - c
-         * ==================================================================================================
-         * 12           24              0           6           6           0-24 = -24      12-6 = 6
-         * 12           24              0           12          0           0-24 = -24      12-12 = 0
-         * 12           24              0           18          -1          0-24 = -24      12-18 = -6
-         * 12           24              0           32          -1         0-24 = -24      12-32 = -24
-         * 12           24              13          16          -1         13-24 = -11     12-16 = -4
-         * 12           24              13          32          -1         13-24 = -11     12-32 = -20
-         * 12           24              25          48          1           24-24 = 1       12-48 = -36
-         */
-        
-        
-        int topDist = floor - this.getCeiling();
-        // region is above the cell
-        if(topDist >= 0) return topDist;
-        
-        int bottomDist = this.getFloor() - ceiling;
-        // region is below this cell
-        if(bottomDist >= 0) return bottomDist;
-        
-        //if both values negative indicates intersection
-       return -1;
     }
     
     /** Returns the lowest cell containing lava or the upper most cell if no cells contain lava */
@@ -688,12 +687,13 @@ public class LavaCell2
     
     /**
      * Confirms non-solid space exists in this cell stack. 
+     * The space defined is entirely within a single y level.
      * Creates a new cell or expands existing cells if necessary.
      * If new space causes two cells to be connected, merges upper cell into lower.
+     * Can also cause cells to be split if a partial space is set within an existing cell.
      * 
      * Used to validate vs. world and to handle block events.
      * Should call this before placing lava in this space to ensure cell exists.
-     * Does not add or remove lava from cells - just moves lava down if cells expand 
      * down or if an upper cell with lava merges into a lower cell.
      * 
      * @param cells Needed to maintain cell array if cells must be created or merged.
@@ -702,7 +702,7 @@ public class LavaCell2
      * @param floorHeight  If is a partial solid flow block, height of floor within this y block
      * @return Cell to which the space belongs
      */
-    public LavaCell2 addOrConfirmSpace(LavaCells cells, int y, boolean isFlowFloor, int floorHeight)
+    public LavaCell2 addOrConfirmSpace(LavaCells cells, int y, int floorHeight, boolean isFlowFloor)
     {
         /**
          * Here are the possible scenarios:
@@ -750,7 +750,6 @@ public class LavaCell2
         // We don't check this first because validation routine will try to position us
         // to the closest cell most of the time before calling, and thus will usually not be necessary.
         LavaCell2 closest = this.findCellNearestY(y);
-        if(closest != this) return closest.addOrConfirmSpace(cells, y, isFlowFloor, floorHeight);
         
         
         // if we get here, this is the closest cell and Y is not adjacent
@@ -859,10 +858,6 @@ public class LavaCell2
             }
          
         }
-        // link lower cell to cell that was above upper cell, if there was one
-        lowerCell.linkAbove(upperCell.aboveCell());
-
-        // mark upper cell as deleted
         upperCell.setDeleted();
         
         
