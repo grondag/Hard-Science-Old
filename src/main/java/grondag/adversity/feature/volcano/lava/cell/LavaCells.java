@@ -159,7 +159,7 @@ public class LavaCells
              // Java parameters are always pass by value, so have to advance index here
                 i += LavaCell2.LAVA_CELL_NBT_WIDTH;
                         
-                cell.clearBlockUpdate(sim);
+                cell.clearBlockUpdate();
                 
                 this.cells[c++] = cell;
                 

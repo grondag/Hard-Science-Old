@@ -51,8 +51,8 @@ public class LavaCell2
     /** see {@link #getFloor()} */
     private int floor;
     
-    /** see {@link #floorY()} */
-    private byte floorY;
+    /** see {@link #bottomY()} */
+    private byte bottomY;
     
     /** see {@link #getCeiling()} */
     private int ceiling;
@@ -148,20 +148,43 @@ public class LavaCell2
     // calculate smoothed retained level
     // make connections
     
-    public LavaCell2(LavaCell2 existingEntryCell, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
+    /**
+     * Creates new cell and adds to processing array. 
+     * Does NOT create linkages with existing cells in column.
+     * @param cells
+     * @param existingEntryCell
+     * @param floor
+     * @param ceiling
+     * @param lavaLevel
+     * @param isFlowFloor
+     */
+    public LavaCell2(LavaCells cells, LavaCell2 existingEntryCell, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
     {
         this.locator = existingEntryCell.locator;
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
+        cells.addCellToProcessingList(this);
     }
     
-    public LavaCell2(int x, int z, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
+    /**
+     * Creates new cell and adds to processing array. 
+     * Does NOT create linkages with existing cells in column.
+     * @param cells
+     * @param x
+     * @param z
+     * @param floor
+     * @param ceiling
+     * @param lavaLevel
+     * @param isFlowFloor
+     */
+    public LavaCell2(LavaCells cells, int x, int z, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
     {
         this.locator = new CellLocator(x, z, this);
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
+        cells.addCellToProcessingList(this);
     }
     
     public boolean isDeleted()
@@ -169,8 +192,11 @@ public class LavaCell2
         return this.isDeleted;
     }
     
+    /** removes all lava and prevents further processing */
     public void setDeleted()
     {
+        this.fluidUnits = 0;
+        this.clearBlockUpdate();
         this.isDeleted = true;
     }
     
@@ -191,7 +217,7 @@ public class LavaCell2
                     {
                         nextUp = nextUp.above;
                     }
-                    else if(y > nextUp.floorY())
+                    else if(y > nextUp.bottomY())
                     {
                         return nextUp;
                     }
@@ -202,7 +228,7 @@ public class LavaCell2
                 }
                 return null;
             }
-            else if(y > this.floorY())
+            else if(y > this.bottomY())
             {
                 return this;
             }
@@ -211,7 +237,7 @@ public class LavaCell2
                 LavaCell2 nextDown = this.below;
                 while(nextDown != null)
                 {
-                    if(y < nextDown.floorY())
+                    if(y < nextDown.bottomY())
                     {
                         nextDown = nextDown.below;
                     }
@@ -270,6 +296,7 @@ public class LavaCell2
     
     /** 
      * Reads data from array starting at location i.
+     * Does NOT add cell to processing array because intended only for NBT read, which does this directly.
      */
     LavaCell2(int[] saveData, int i)
     {
@@ -313,6 +340,7 @@ public class LavaCell2
     /** 
      * Top level that contains fluid in the world. For columns under pressure
      * may be less than fluid amount would normally indicate. 
+     * Will return cell floor if there is no fluid in the cell.
      */
     public int fluidSurfaceLevel()
     {
@@ -352,6 +380,53 @@ public class LavaCell2
     public int fluidSurfaceUnits()
     {
         return this.getFloor() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL + this.fluidUnits; 
+    }
+    
+    /** 
+    * Finds the cell that intersects with or is closest to given Y level.
+    * When two cells are equidistant, preference is given to the cell above y
+    * because that is useful for inferring properties when y is a flow floor block. 
+    */
+    public LavaCell2 findCellNearestY(int y)
+    {
+        int myDist = this.distanceToY(y);
+        
+        // intersects
+        if(myDist == 0) return this;
+        
+        if(this.aboveCell() != null)
+        {
+            int aboveDist = this.aboveCell().distanceToY(y);
+            if(aboveDist <= myDist) return this.aboveCell().findCellNearestY(y);
+        }
+        
+        if(this.belowCell() != null)
+        {
+            int belowDist = this.belowCell().distanceToY(y);
+            if(belowDist < myDist) return this.belowCell().findCellNearestY(y);
+        }
+        
+        // no adjacent cell is closer than this one
+        return this;
+
+    }
+    
+    /** 
+     * Distance from this cell to the given y level.
+     * Returns 0 if this cell intersects.
+     */
+    private int distanceToY(int y)
+    {
+        if(this.bottomY() > y)
+            return this.bottomY() - y;
+        
+        else if(this.topY() < y)
+            
+            return y - this.topY();
+        else
+            // intersects
+            return 0; 
+            
     }
     
     /** 
@@ -454,7 +529,7 @@ public class LavaCell2
             this.rawRetainedLevel = -1;
             this.floor = newFloor;
             this.isBottomFlow = isFlowFloor;
-            this.floorY = (byte) getYFromFloor(this.floor);
+            this.bottomY = (byte) getYFromFloor(this.floor);
         }
     }
     
@@ -470,12 +545,12 @@ public class LavaCell2
     }
     
     /** Y of first (lowest) block that could contain lava */
-    public int floorY()
+    public int bottomY()
     {
-        return this.floorY; 
+        return this.bottomY; 
     }
    
-    /** Flow height of solid portion of block at {@link #floorY()}
+    /** Flow height of solid portion of block at {@link #bottomY()}
      *  Will be 0 if floor is not a flow block.
      *  Will also be 0 if floor is a full-height flow block at Y-1.
      *  Will be in range 1-11 if floor is within the block at Y.
@@ -587,22 +662,211 @@ public class LavaCell2
         return (y + 1) * AbstractLavaSimulator.LEVELS_PER_BLOCK;
     }
     
+    
+ /**
+     * Use to input lava into this cell (potentially) above the fluid surface.
+     * Will add lava to surface after an appropriate falling time and 
+     * render particles as appropriate.
+     * Level is fluid level (12 per block) not world y level.
+     */
+    public void addLavaAtLevel(int level, int fluidUnits)
+    {
+        this.changeLevel(0, fluidUnits);
+        
+        //TODO: implement something more interesting, including persistence.
+    }
+    
+    
     /** Use this to report when suspended lava blocks exist above lava surface
-     * that need to be set to air on next block update. See {@link #suspendedLevel}. */
+     * that need to be set to air on next block update. See {@link #suspendedLevel}. 
+     * Does not actually add any lava to this cell.
+     */
     public void notifySuspendedLava(int y)
     {
         if(y > this.suspendedLevel) this.suspendedLevel = (byte) y;
     }
     
     /**
-     * Use to input lava into this cell that is above the fluid surface.
-     * Will add lava to surface after an appropriate falling time and 
-     * render particles as appropriate.
-     * Level is fluid level (12 per block) not world y level.
+     * Confirms non-solid space exists in this cell stack. 
+     * Creates a new cell or expands existing cells if necessary.
+     * If new space causes two cells to be connected, merges upper cell into lower.
+     * 
+     * Used to validate vs. world and to handle block events.
+     * Should call this before placing lava in this space to ensure cell exists.
+     * Does not add or remove lava from cells - just moves lava down if cells expand 
+     * down or if an upper cell with lava merges into a lower cell.
+     * 
+     * @param cells Needed to maintain cell array if cells must be created or merged.
+     * @param y  Location of space as world level
+     * @param isFlowFloor  True if floorHeight = 0 and block below is flow block with height=12.  Should also be true of floorHeight > 0.
+     * @param floorHeight  If is a partial solid flow block, height of floor within this y block
+     * @return Cell to which the space belongs
      */
-    public void registerFallingParticles(int level, int fluidUnits)
+    public LavaCell2 addOrConfirmSpace(LavaCells cells, int y, boolean isFlowFloor, int floorHeight)
     {
-        //TODO: implement, including persistence.
+        /**
+         * Here are the possible scenarios:
+         * 1) space is already included in this cell and floor is consistent or y is not at the bottom
+         * 2) space is already included in this cell, but y is at the bottom and floor is different type
+         * 3) space is adjacent to the top of this cell and need to expand up.
+         * 4) space is adjacent to the bottom of this cell and need to expand down.
+         * 5) One of scenarios 1-4 is true for a different cell.
+         * 6) Scenarios 1-4 are not true for any cell, and a new cell needs to be added.
+
+         * In scenarios 2-5, if a newly expanded cell is vertically adjacent to another cell, the cells must be merged.
+         */
+        
+        int myTop = this.topY();
+        int myBottom = this.bottomY();
+        
+        // space is already in this cell
+        if(y > myBottom && y <= myTop) return this;
+        
+        // space is my bottom space, confirm floor
+        if(y == myBottom)
+        {
+            if(this.floorFlowHeight() != floorHeight || this.isBottomFlow() != isFlowFloor)
+            {
+                this.setFloor(y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
+                return this.checkForMergeDown();
+            }
+        }
+        
+        // space is one below, expand down
+        else if(y == myBottom - 1)
+        {
+            this.setFloor(y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
+            return this.checkForMergeDown();
+        }
+        
+        // space is one above, expand up
+        else if(y == myTop + 1)
+        {
+            this.setCeiling((y + 1) * FlowHeightState.BLOCK_LEVELS_INT);
+            return this.checkForMergeUp();
+        }
+        
+        // If this is not the closest cell, try again with the cell that is closest
+        // We don't check this first because validation routine will try to position us
+        // to the closest cell most of the time before calling, and thus will usually not be necessary.
+        LavaCell2 closest = this.findCellNearestY(y);
+        if(closest != this) return closest.addOrConfirmSpace(cells, y, isFlowFloor, floorHeight);
+        
+        
+        // if we get here, this is the closest cell and Y is not adjacent
+        // therefore the space represents a new cell.
+        
+        LavaCell2 newCell = new LavaCell2(cells, this, y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * FlowHeightState.BLOCK_LEVELS_INT, 0, isFlowFloor);
+        
+        if(y > myTop)
+        {
+            // if space is above, insert new cell above this one
+            LavaCell2 existingAbove = this.above;
+            this.linkAbove(newCell);
+            if(existingAbove != null)
+            {
+                newCell.linkAbove(existingAbove);
+                
+            }
+        }
+        else
+        {
+            // space (and new cell) must be below
+            LavaCell2 existingBelow = this.below;
+            newCell.linkAbove(this);
+            if(existingBelow != null)
+            {
+                existingBelow.linkAbove(newCell);
+            }
+        }
+        
+        return newCell;
+        
+    }
+    
+    /** 
+     * If cell above is non-null and vertically adjacent, merges it into this cell and returns this cell.
+     * Lava in cell above transfers to this cell.
+     * Otherwise returns this cell.
+     */
+    private LavaCell2 checkForMergeUp()
+    {
+        return canMergeCells(this, this.above) ? mergeCells(this, this.above) : this;
+    }
+    
+    /** 
+     * If cell below is non-null and vertically adjacent, merges this cell into it and returns lower cell.
+     * Lava in this cell transfers to cell below.
+     * Otherwise returns this cell.
+     */
+    private LavaCell2 checkForMergeDown()
+    {
+        return canMergeCells(this.below, this) ? mergeCells(this.below, this) : this;
+    }
+    
+    /**
+     * Returns true if both cells are non-null and can be merged together.
+     * Cells can be merged if no barrier between them 
+     * and floor of top cell is at bottom of block or has melted.
+     * If upper cell has any lava in it, we assume any flow floor has melted.
+     */
+    private static boolean canMergeCells(LavaCell2 lowerCell, LavaCell2 upperCell)
+    {
+        return lowerCell != null 
+                && upperCell != null
+                && lowerCell.topY() + 1 == upperCell.bottomY()
+                && (upperCell.floorFlowHeight() == 0 || upperCell.getFluidUnits() > 0);
+    }
+    
+    /** 
+     * Merges upper cell into lower cell. 
+     * All lava in upper cell is added to lower cell.
+     * Returns the lower cell. 
+     * Does no checking - call {@link #canMergeCells(LavaCell2, LavaCell2)} before calling this.
+     */
+    private static LavaCell2 mergeCells(LavaCell2 lowerCell, LavaCell2 upperCell)
+    {
+        if(upperCell.getFluidUnits() > 0)
+        {
+            // ensure lava blocks placed in world by upper cell are cleared by block next update
+            lowerCell.notifySuspendedLava(upperCell.fluidSurfaceY());
+            
+            
+            // add lava from upper cell if it has any
+            if(upperCell.getFloor() - lowerCell.fluidSurfaceLevel() < AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS)
+            {
+                lowerCell.changeLevel(0, upperCell.getFluidUnits());
+            }
+            else
+            {
+                // Add at height only if fall distance is significant
+                int topY = upperCell.fluidSurfaceY();
+                int remaining = upperCell.getFluidUnits();
+                for(int y = upperCell.bottomY(); y <= topY; y++)
+                {
+                    //handle strangeness that should never occur
+                    if(remaining <= 0)
+                    {
+                        if(Adversity.DEBUG_MODE) Adversity.log.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
+                        
+                        break;
+                    }
+                    
+                    lowerCell.addLavaAtLevel(y * AbstractLavaSimulator.LEVELS_PER_BLOCK, y == topY ? remaining : AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+                    remaining -=  AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK;
+                }
+                
+            }
+         
+        }
+        // link lower cell to cell that was above upper cell, if there was one
+        lowerCell.linkAbove(upperCell.aboveCell());
+
+        // mark upper cell as deleted
+        upperCell.setDeleted();
+        
+        
+        return lowerCell;
     }
     
     /**
@@ -730,7 +994,7 @@ public class LavaCell2
     /**
      * For use when updating from world and no need to re-update world.
      */
-    public void clearBlockUpdate(LavaSimulatorNew sim)
+    public void clearBlockUpdate()
     {
         this.avgFluidAmountWithPrecision = this.fluidUnits << 6;
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
@@ -789,10 +1053,15 @@ public class LavaCell2
         return this.above;
     }
     
+    /** 
+     * Links cell to the given cell known to be just above it.
+     * Link is both ways if the given cell is non-null. Thus no need for linkBelow method.
+     * @param cellAbove  May be null - in which case simply sets above link to null if it was not already.
+     */
     public void linkAbove(LavaCell2 cellAbove)
     {
         this.above = cellAbove;
-        cellAbove.below = this;
+        if(cellAbove != null) cellAbove.below = this;
     }
     
     public LavaCell2 belowCell()
@@ -922,6 +1191,8 @@ public class LavaCell2
             }
         }
     }
+        
+    // CELL-COLUMN COORDINATION / SYNCHONIZATION CLASS
     
     static private class CellLocator
     {

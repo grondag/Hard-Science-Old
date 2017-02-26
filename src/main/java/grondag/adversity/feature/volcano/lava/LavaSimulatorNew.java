@@ -1,6 +1,5 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;

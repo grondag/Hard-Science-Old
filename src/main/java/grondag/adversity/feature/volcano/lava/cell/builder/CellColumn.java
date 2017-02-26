@@ -1,52 +1,37 @@
 package grondag.adversity.feature.volcano.lava.cell.builder;
 
-import java.util.Arrays;
-
-import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
-import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;
 
 public class CellColumn
 {
     BlockType[] blockType = new BlockType[256];
-    int[] blockLevel = new int[256];
-    LavaCell2[] cells = new LavaCell2[256];
 
-    /** reads an existing collection of cells into the array for validation against the world */
-    void loadFromCells(LavaCell2 startingCell)
-    {
-        Arrays.fill(blockType, BlockType.BARRIER);
-        Arrays.fill(blockLevel, 0);
-        Arrays.fill(cells, null);
-        
-        LavaCell2 nextCell = startingCell.firstCell();
-        while(nextCell != null)
-        {
-            readCell(nextCell);
-            nextCell = nextCell.aboveCell();
-        }
-    }
+//    /** reads an existing collection of cells into the array for validation against the world */
+//    void loadFromCells(LavaCell2 startingCell)
+//    {
+//        Arrays.fill(blockType, BlockType.BARRIER);
+//        
+//        LavaCell2 nextCell = startingCell.firstCell();
+//        while(nextCell != null)
+//        {
+//            readCell(nextCell);
+//            nextCell = nextCell.aboveCell();
+//        }
+//    }
     
     void loadFromChunkBuffer(ColumnChunkBuffer chunk, int x, int z)
     {
-        Arrays.fill(cells, null);
         int start = ColumnChunkBuffer.getIndex(x & 15, 0, z & 15);
-        System.arraycopy(chunk.blockLevel, start, this.blockLevel, 0, 256);
         System.arraycopy(chunk.blockType, start, this.blockType, 0, 256);
     }
     
     void loadFromWorldChunk(Chunk chunk, int x, int z)
     {
-        Arrays.fill(blockLevel, 0);
-        Arrays.fill(cells, null);
-        
         for(int y = 0; y < 256; y++)
         {
             IBlockState state = chunk.getBlockState(x, y, z);
             this.blockType[y] = BlockType.getBlockTypeFromBlockState(state);
-            if(this.blockType[y].isFlow) this.blockLevel[y] = IFlowBlock.getFlowHeightFromState(state);
         }
     }
     
@@ -114,79 +99,78 @@ public class CellColumn
 //        return startingCell == null ? currentCell : startingCell;
 //    }
     
-    private void readCell(LavaCell2 cell)
-    {
-        // handle bottom cell and bottom floor (if needed)
-        int floorY = cell.floorY();
-        int fluidSurfaceY  = cell.fluidSurfaceY();
-        if(cell.isBottomFlow())
-        {
-            // if cell has a flow-type bottom, bottom barrier depends on floor level and presence of lava:
-            int floorHeight = cell.floorFlowHeight();
-            if(floorHeight == 0)
-            {
-                // if cell floor is at a block boundary, then the block *below* the cell should be a full-height flow block
-                if(floorY > 0)
-                {
-                    setBlockInfoAtIndex(floorY - 1, BlockType.SOLID_FLOW, FlowHeightState.BLOCK_LEVELS_INT);
-                }
-            }
-            else
-            {
-                // if cell floor is within a block, then the lowest block in cell depends on presence of lava
-                if(cell.getFluidUnits() == 0)
-                {
-                    // if floor cell has no lava then the lowest block in the cell should be a solid flow block
-                    setBlockInfoAtIndex(floorY, BlockType.SOLID_FLOW, floorHeight);
-                }
-                else
-                {
-                    // cell has lava and thus solid portion has melted
-                    // cell below should already be a barrier (default fill value) 
-                    // later logic will cause the cell to expand downward until it finds a barrier or merges with a lower cell
-                    setBlockInfoAtIndex(floorY, BlockType.LAVA, fluidSurfaceY == floorY ? cell.fluidSurfaceFlowHeight() : FlowHeightState.BLOCK_LEVELS_INT);
-                }
-            }
-        }
-        else
-        {            
-            // if cell does not have a flow-type bottom, world blocks depend only on presence of lava
-            // Default value in array will already show block below as a barrier
-            if(cell.getFluidUnits() == 0)
-            {
-                // if floor cell has no lava then the lowest block in the cell should be a solid flow block
-                setBlockInfoAtIndex(floorY, BlockType.SPACE, 0);
-                this.cells[floorY] = cell;
-            }
-            else
-            {
-                // cell has lava and thus solid portion has melted
-                // cell below should already be a barrier (default fill value) 
-                // later logic will cause the cell to expand downward until it finds a barrier or merges with a lower cell
-                setBlockInfoAtIndex(floorY, BlockType.LAVA, fluidSurfaceY == floorY ? cell.fluidSurfaceFlowHeight() : FlowHeightState.BLOCK_LEVELS_INT);
-                this.cells[floorY] = cell;
-            }
-        }
-        
-        // iterate remaining blocks within cell, setting as lava or space as appropriate
-        for(int y = floorY + 1; y < cell.topY(); y++)
-        {
-            if(y > fluidSurfaceY)
-            {
-                setBlockInfoAtIndex(y, BlockType.SPACE, 0);
-            }
-            else 
-            {
-                setBlockInfoAtIndex(y, BlockType.LAVA, y == fluidSurfaceY ? cell.fluidSurfaceFlowHeight() : FlowHeightState.BLOCK_LEVELS_INT);
-            }
-            this.cells[y] = cell;
-        }
-    }
+//    private void readCell(LavaCell2 cell)
+//    {
+//        // handle bottom cell and bottom floor (if needed)
+//        int floorY = cell.bottomY();
+//        int fluidSurfaceY  = cell.fluidSurfaceY();
+//        if(cell.isBottomFlow())
+//        {
+//            // if cell has a flow-type bottom, bottom barrier depends on floor level and presence of lava:
+//            int floorHeight = cell.floorFlowHeight();
+//            if(floorHeight == 0)
+//            {
+//                // if cell floor is at a block boundary, then the block *below* the cell should be a full-height flow block
+//                if(floorY > 0)
+//                {
+//                    setBlockInfoAtIndex(floorY - 1, BlockType.SOLID_FLOW, FlowHeightState.BLOCK_LEVELS_INT);
+//                }
+//            }
+//            else
+//            {
+//                // if cell floor is within a block, then the lowest block in cell depends on presence of lava
+//                if(cell.getFluidUnits() == 0)
+//                {
+//                    // if floor cell has no lava then the lowest block in the cell should be a solid flow block
+//                    setBlockInfoAtIndex(floorY, BlockType.SOLID_FLOW, floorHeight);
+//                }
+//                else
+//                {
+//                    // cell has lava and thus solid portion has melted
+//                    // cell below should already be a barrier (default fill value) 
+//                    // later logic will cause the cell to expand downward until it finds a barrier or merges with a lower cell
+//                    setBlockInfoAtIndex(floorY, BlockType.LAVA, fluidSurfaceY == floorY ? cell.fluidSurfaceFlowHeight() : FlowHeightState.BLOCK_LEVELS_INT);
+//                }
+//            }
+//        }
+//        else
+//        {            
+//            // if cell does not have a flow-type bottom, world blocks depend only on presence of lava
+//            // Default value in array will already show block below as a barrier
+//            if(cell.getFluidUnits() == 0)
+//            {
+//                // if floor cell has no lava then the lowest block in the cell should be a solid flow block
+//                setBlockInfoAtIndex(floorY, BlockType.SPACE, 0);
+//                this.cells[floorY] = cell;
+//            }
+//            else
+//            {
+//                // cell has lava and thus solid portion has melted
+//                // cell below should already be a barrier (default fill value) 
+//                // later logic will cause the cell to expand downward until it finds a barrier or merges with a lower cell
+//                setBlockInfoAtIndex(floorY, BlockType.LAVA, fluidSurfaceY == floorY ? cell.fluidSurfaceFlowHeight() : FlowHeightState.BLOCK_LEVELS_INT);
+//                this.cells[floorY] = cell;
+//            }
+//        }
+//        
+//        // iterate remaining blocks within cell, setting as lava or space as appropriate
+//        for(int y = floorY + 1; y < cell.topY(); y++)
+//        {
+//            if(y > fluidSurfaceY)
+//            {
+//                setBlockInfoAtIndex(y, BlockType.SPACE, 0);
+//            }
+//            else 
+//            {
+//                setBlockInfoAtIndex(y, BlockType.LAVA, y == fluidSurfaceY ? cell.fluidSurfaceFlowHeight() : FlowHeightState.BLOCK_LEVELS_INT);
+//            }
+//            this.cells[y] = cell;
+//        }
+//    }
 
-    private void setBlockInfoAtIndex(int i, BlockType blockType, int level)
+    public BlockType getBlockType(int y)
     {
-        this.blockType[i] = blockType;
-        this.blockLevel[i] = level;
-        
+        return this.blockType[y];
     }
+    
 }

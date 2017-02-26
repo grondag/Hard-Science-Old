@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Collectors;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;

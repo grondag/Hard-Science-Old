@@ -2,26 +2,16 @@ package grondag.adversity.feature.volcano.lava;
 
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.CoolingBlock;
-import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.simulator.base.NodeRoots;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 /**
