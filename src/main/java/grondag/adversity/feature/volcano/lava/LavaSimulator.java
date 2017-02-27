@@ -6,12 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
@@ -71,7 +73,8 @@ public class LavaSimulator extends AbstractLavaSimulator
     
     private final ConnectionMap connections = new ConnectionMap();
   
-
+    public final ParticleManager particles = new ParticleManager();
+    
     public LavaSimulator(World world)
     {
         super(world);
@@ -113,6 +116,55 @@ public class LavaSimulator extends AbstractLavaSimulator
         {
             values[i].doFirstStep(this);
         }
+    }
+    
+    @Override 
+    protected void doParticles()
+    {
+        //TODO: make particle limit configurable
+        int capacity =  10 - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
+        
+        if(capacity <= 0) return;
+        
+        Collection<ParticleInfo> particles = this.particles.pollEligible(this, capacity);
+        
+        if(particles != null && !particles.isEmpty())
+        {
+            for(ParticleInfo p : particles)
+            {
+            
+                // abort on strangeness
+                if(this.isBlockLavaBarrier(p.packedBlockPos)) continue;
+                
+                if(this.isHighEnoughForParticle(p.packedBlockPos))
+                {
+                    // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
+                    if(p.getFluidUnits() >= AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL)
+                    {
+                        EntityLavaParticle elp = new EntityLavaParticle(this.worldBuffer.realWorld, p.getFluidUnits(), 
+                              new Vec3d(
+                                      PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
+                                      PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
+                                      PackedBlockPos.getZ(p.packedBlockPos) + 0.5
+                                  ),
+                              Vec3d.ZERO);
+                        
+                        worldBuffer.realWorld.spawnEntityInWorld(elp);
+                    }
+                }
+                else 
+                {
+                    this.addLava(p.packedBlockPos, p.getFluidUnits(), false);
+                }
+            }
+        }
+    }
+    
+    
+    public void queueParticle(long packedBlockPos, int amount)
+    {
+//        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
+        this.particles.addLavaForParticle(this, packedBlockPos, amount);
     }
     
     @Override
@@ -163,6 +215,14 @@ public class LavaSimulator extends AbstractLavaSimulator
         //TODO: make parallel a config option
         LAVA_THREAD_POOL.submit(() ->
             this.allCells.values().parallelStream().forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();
+    }
+    
+    @Override
+    protected void doBlockUpdateApplication()
+    {
+        this.itMe = true;
+        this.worldBuffer.applyBlockUpdates(1, this);
+        this.itMe = false;
     }
     
     private void cleanCellCache()
@@ -370,6 +430,8 @@ public class LavaSimulator extends AbstractLavaSimulator
             saveData[i++] = (cell.getInteriorFloor() & 0xF) | (cell.getRawRetainedLevel(this) << 4);
         }         
         nbt.setIntArray(LAVA_CELL_NBT_TAG, saveData);
+        
+        this.particles.writeToNBT(nbt);
     }
     
     @Override
@@ -431,6 +493,8 @@ public class LavaSimulator extends AbstractLavaSimulator
             
             Adversity.log.info("Loaded " + allCells.size() + " lava cells.");
         }
+        
+        this.particles.readFromNBT(nbt);
     }
 
 
@@ -454,14 +518,14 @@ public class LavaSimulator extends AbstractLavaSimulator
         return this.connections.size();
     }
 
-    @Override
+//    @Override
     protected boolean isBlockLavaBarrier(long packedBlockPos)
     {
         LavaCell cell = this.getCell(packedBlockPos, false);
         return cell.isBarrier();
     }
 
-    @Override
+//    @Override
     protected boolean isHighEnoughForParticle(long packedBlockPos)
     {
         LavaCell cell = this.getCell(packedBlockPos, false);

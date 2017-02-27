@@ -1,9 +1,11 @@
 package grondag.adversity.feature.volcano.lava;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +30,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 
 public class WorldStateBuffer implements IBlockAccess
 {
@@ -137,14 +140,17 @@ public class WorldStateBuffer implements IBlockAccess
     
     /** 
      * Makes the updates in the game world for up to chunkCount chunks.
+     * Returns list of chunks that were updated so that they can be used for cell validation.
      * 
      */
-    public void applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
+    public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
     {
         int currentTick = Simulator.instance.getCurrentSimTick();
         
         boolean maybeSomethingToDo = true;
         int foundCount = 0;
+        
+        ArrayList<Chunk> result = new ArrayList<Chunk>();
         
         //TODO: make tick diff configurable
         
@@ -206,11 +212,14 @@ public class WorldStateBuffer implements IBlockAccess
             }
             else
             {
+                result.add(this.realWorld.getChunkFromChunkCoords(PackedBlockPos.getChunkXPos(best.packedChunkpos), PackedBlockPos.getChunkZPos(best.packedChunkpos)));
                 this.chunks.remove(best.packedChunkpos);
                 best.applyBlockUpdates(tracker, sim);
                 this.usedBuffers.add(best);
             }
         }
+        
+        return result;
     }
     
     public void clearStatistics()

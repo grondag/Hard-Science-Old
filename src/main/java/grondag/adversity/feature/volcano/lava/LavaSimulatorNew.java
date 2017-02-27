@@ -1,20 +1,20 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.concurrent.ConcurrentHashMap;
+
+import java.util.List;
 
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
+import grondag.adversity.feature.volcano.lava.cell.LavaCells;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 
 public class LavaSimulatorNew extends AbstractLavaSimulator
 {
-    private final ConcurrentHashMap<Long, LavaCell2> allCells = new ConcurrentHashMap<Long, LavaCell2>(16000, 0.6F, 8);
-    private final static String LAVA_CELL_NBT_TAG = "lavacells";
-    private static final int LAVA_CELL_NBT_WIDTH = 5;
-    
-    private final ConnectionMap connections = new ConnectionMap();
+    private final LavaConnections connections = new LavaConnections();
+    private final LavaCells cells = new LavaCells();
     
     /** incremented each step, multiple times per tick */
     private int stepIndex;
@@ -32,36 +32,31 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     public float loadFactor()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return Math.max((float)this.connections.size() / 10000F, (float)this.cells.size() / 5000F);
     }
 
     @Override
     public int getCellCount()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.cells.size();
     }
 
     @Override
     public int getConnectionCount()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.connections.size();
     }
 
     @Override
     public void saveLavaNBT(NBTTagCompound nbt)
     {
-        // TODO Auto-generated method stub
-        
+        cells.writeNBT(nbt);
     }
 
     @Override
     public void readLavaNBT(NBTTagCompound nbt)
     {
-        // TODO Auto-generated method stub
-        
+        cells.readNBT(this, nbt);
     }
 
     @Override
@@ -96,15 +91,24 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     protected void doFirstStep()
     {
         this.stepIndex++;
-        // TODO Auto-generated method stub
-        
+        final int size = this.connections.size();
+        LavaConnection2[] values = this.connections.values();
+        for(int i = 0; i < size; i++)
+        {
+            values[i].doFirstStep(this);
+        }
     }
 
     @Override
     protected void doStep()
     {
         this.stepIndex++;
-        // TODO Auto-generated method stub
+        final int size = this.connections.size();
+        LavaConnection2[] values = this.connections.values();
+        for(int i = 0; i < size; i++)
+        {
+            values[i].doStep(this);
+        }
         
     }
 
@@ -112,36 +116,40 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     protected void doLastStep()
     {
         this.stepIndex++;
-        // TODO Auto-generated method stub
-        
+        final int size = this.connections.size();
+        LavaConnection2[] values = this.connections.values();
+        for(int i = 0; i < size; i++)
+        {
+            values[i].doStep(this);
+        }
     }
 
     @Override
     protected void doBlockUpdateProvision()
     {
-        // TODO Auto-generated method stub
-        
+        LAVA_THREAD_POOL.submit(() ->
+            this.cells.parallelStream().forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();       
     }
 
+    @Override
+    protected void doBlockUpdateApplication()
+    {
+        this.itMe = true;
+        List<Chunk> updates = this.worldBuffer.applyBlockUpdates(1, this);
+        this.itMe = false;
+
+        //validate cells in chunks that were just written to world
+        for(Chunk chunk : updates)
+        {
+            
+        }
+    }
+    
     @Override
     protected void doLavaCooling()
     {
         // TODO Auto-generated method stub
         
-    }
-
-    @Override
-    protected boolean isBlockLavaBarrier(long packedBlockPos)
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    protected boolean isHighEnoughForParticle(long packedBlockPos)
-    {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     @Override
@@ -154,8 +162,10 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doCellValidation()
     {
-        // TODO Auto-generated method stub
+        // Note that actual cell validation now occurs in doBlockUpdateApplication
+        // Methods should be rearranged once compatibility with prior sim no longer needed
         
+        this.cells.clearDeletedCells();
     }
 
     @Override

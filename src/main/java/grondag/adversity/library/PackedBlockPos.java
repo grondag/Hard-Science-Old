@@ -2,6 +2,7 @@ package grondag.adversity.library;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.chunk.Chunk;
 
 public class PackedBlockPos
 {
@@ -139,6 +140,11 @@ public class PackedBlockPos
     public static long getPackedChunkPos(int blockX, int blockZ)
     {
             return ((long)blockX >> 4) + CHUNK_BOUNDARY | (((long)blockZ >> 4) + CHUNK_BOUNDARY) << 32;
+    }
+    
+    public static long getPackedChunkPos(Chunk chunk)
+    {
+            return ((long)chunk.xPosition) + CHUNK_BOUNDARY | (((long)chunk.zPosition) + CHUNK_BOUNDARY) << 32;
     }
     
     /** analog of Chunk.chunkXPos */

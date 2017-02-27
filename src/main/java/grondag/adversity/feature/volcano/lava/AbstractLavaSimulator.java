@@ -39,7 +39,6 @@ public abstract class AbstractLavaSimulator extends SimulationNode
 
     public final WorldStateBuffer worldBuffer;
     public final LavaTerrainHelper terrainHelper;
-    public final ParticleManager particles = new ParticleManager();
     
     /** Basalt blocks that are awaiting cooling */
     protected final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
@@ -130,13 +129,14 @@ public abstract class AbstractLavaSimulator extends SimulationNode
     protected abstract void doStep();
     protected abstract void doLastStep();
     protected abstract void doBlockUpdateProvision();
+    protected abstract void doBlockUpdateApplication();
     protected abstract void doLavaCooling();
     
-    /** true if the given position cannot contain lava */
-    protected abstract boolean isBlockLavaBarrier(long packedBlockPos);
-    
-    /** true if the given space is high enough above lava surface to be worth spawing a particle */
-    protected abstract boolean isHighEnoughForParticle(long packedBlockPos);
+//    /** true if the given position cannot contain lava */
+//    protected abstract boolean isBlockLavaBarrier(long packedBlockPos);
+//    
+//    /** true if the given space is high enough above lava surface to be worth spawing a particle */
+//    protected abstract boolean isHighEnoughForParticle(long packedBlockPos);
     
     /** use to maintain all the cells each tick after steps have executed */
     protected abstract void updateCells();
@@ -257,43 +257,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
 
     protected void doParticles()
     {
-       //TODO: make particle limit configurable
-        int capacity =  10 - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
-        
-        if(capacity <= 0) return;
-        
-        Collection<ParticleInfo> particles = this.particles.pollEligible(this, capacity);
-        
-        if(particles != null && !particles.isEmpty())
-        {
-            for(ParticleInfo p : particles)
-            {
-            
-                // abort on strangeness
-                if(this.isBlockLavaBarrier(p.packedBlockPos)) continue;
-                
-                if(this.isHighEnoughForParticle(p.packedBlockPos))
-                {
-                    // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
-                    if(p.getFluidUnits() >= AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL)
-                    {
-                        EntityLavaParticle elp = new EntityLavaParticle(this.worldBuffer.realWorld, p.getFluidUnits(), 
-                              new Vec3d(
-                                      PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
-                                      PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
-                                      PackedBlockPos.getZ(p.packedBlockPos) + 0.5
-                                  ),
-                              Vec3d.ZERO);
-                        
-                        worldBuffer.realWorld.spawnEntityInWorld(elp);
-                    }
-                }
-                else 
-                {
-                    this.addLava(p.packedBlockPos, p.getFluidUnits(), false);
-                }
-            }
-        }
+        //reserved
     }
       
     protected void doBasaltCooling()
@@ -334,13 +298,6 @@ public abstract class AbstractLavaSimulator extends SimulationNode
         })).join();     
     }
         
-    protected void doBlockUpdateApplication()
-    {
-        this.itMe = true;
-        this.worldBuffer.applyBlockUpdates(1, this);
-        this.itMe = false;
-    }
-    
     /** used by world update to notify when fillers are placed */
     public void trackLavaFiller(BlockPos pos)
     {
@@ -363,12 +320,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
         this.basaltBlocks.add(new AgedBlockPos(pos, this.tickIndex));
         this.setSaveDirty(true);
     }
-    
-    public void queueParticle(long packedBlockPos, int amount)
-    {
-//        Adversity.log.info("queueParticle amount=" + amount +" @"+ pos.toString());
-        this.particles.addLavaForParticle(this, packedBlockPos, amount);
-    }
+
     
     /**
      * Returns value to show if lava can cool based on world state alone. Does not consider age.
@@ -469,7 +421,6 @@ public abstract class AbstractLavaSimulator extends SimulationNode
             nbt.setIntArray(BASALT_BLOCKS_NBT_TAG, saveData);
             
             this.worldBuffer.writeToNBT(nbt);
-            this.particles.writeToNBT(nbt);
         }
 
     }
@@ -483,7 +434,6 @@ public abstract class AbstractLavaSimulator extends SimulationNode
         this.tickIndex = nbt.getInteger(TICK_INDEX_NBT_TAG);
         
         this.worldBuffer.readFromNBT(nbt);
-        this.particles.readFromNBT(nbt);
         
         this.readLavaNBT(nbt);
         

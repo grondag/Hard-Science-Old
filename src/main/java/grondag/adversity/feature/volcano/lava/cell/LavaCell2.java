@@ -443,24 +443,24 @@ public class LavaCell2
             
     }
     
-    /** 
-     * Distance from this cell to the given space, in block levels.
-     * Space floor is exclusive, space ceiling in inclusive. Inputs are in block levels.
-     * Returns 0 if the space is adjacent or intersecting.
-     */
-    private int distanceToSpace(int spaceFloor, int spaceCeiling)
-    {
-        if(this.getFloor() > spaceCeiling)
-            return this.getFloor() - spaceCeiling;
-        
-        else if(this.getCeiling() < spaceFloor)
-            
-            return spaceFloor - this.getCeiling();
-        else
-            // intersects or adjacent
-            return 0; 
-            
-    }
+//    /** 
+//     * Distance from this cell to the given space, in block levels.
+//     * Space floor is exclusive, space ceiling in inclusive. Inputs are in block levels.
+//     * Returns 0 if the space is adjacent or intersecting.
+//     */
+//    private int distanceToSpace(int spaceFloor, int spaceCeiling)
+//    {
+//        if(this.getFloor() > spaceCeiling)
+//            return this.getFloor() - spaceCeiling;
+//        
+//        else if(this.getCeiling() < spaceFloor)
+//            
+//            return spaceFloor - this.getCeiling();
+//        else
+//            // intersects or adjacent
+//            return 0; 
+//            
+//    }
     
     /** 
      * Finds the uppermost cell that is below to the given level.
@@ -694,6 +694,7 @@ public class LavaCell2
      * 
      * Used to validate vs. world and to handle block events.
      * Should call this before placing lava in this space to ensure cell exists.
+     * Generally does not add or remove lava from cells - moves lava down if cells expand
      * down or if an upper cell with lava merges into a lower cell.
      * 
      * @param cells Needed to maintain cell array if cells must be created or merged.
@@ -712,8 +713,15 @@ public class LavaCell2
          * 4) space is adjacent to the bottom of this cell and need to expand down.
          * 5) One of scenarios 1-4 is true for a different cell.
          * 6) Scenarios 1-4 are not true for any cell, and a new cell needs to be added.
-
+         *
          * In scenarios 2-5, if a newly expanded cell is vertically adjacent to another cell, the cells must be merged.
+         * 
+         * Note that partial spaces within this cell but above the floor will be handled as if they are full 
+         * spaces. So, a less-than-full-height solid flow block in the middle of a cell would be handled
+         * as if it were empty space.  This is because these blocks will melt if lava flows into their space.
+         * If we did not handle it this way, it would be necessary to split the cell when these blocks
+         * exist within a cell, only to have the cells merge back together as soon as lava flows into that block.
+         * This same logic applies if the floor is already a partial floor and a space is added below.
          */
         
         int myTop = this.topY();
@@ -750,6 +758,7 @@ public class LavaCell2
         // We don't check this first because validation routine will try to position us
         // to the closest cell most of the time before calling, and thus will usually not be necessary.
         LavaCell2 closest = this.findCellNearestY(y);
+        if(closest != this) return closest.addOrConfirmSpace(cells, y, floorHeight, isFlowFloor);
         
         
         // if we get here, this is the closest cell and Y is not adjacent
@@ -858,10 +867,143 @@ public class LavaCell2
             }
          
         }
+ 
+        // delete upper cell 
         upperCell.setDeleted();
         
         
         return lowerCell;
+    }
+    
+    /** 
+     * Splits the given cell into two cells and returns the upper cell. 
+     * Cell is split by creating a barrier at Y.  
+     * If flowHeight = 12, this is a full barrier, partial barrier otherwise.
+     * If it is a full boundary, given cell must be at least 3 blocks high, 
+     * for partial, given cell must be at least 2 blocks high.
+     * 
+     * Lava in volume of barrier is destroyed, rest of lava is distributed appropriately.
+     * 
+     * If the barrier is partial and lava would exist above it, the call is ignored
+     * and the original cell returned, because the barrier would immediately melt and turn back into lava.
+     * 
+     * @param cells Needed to maintain cell array when new cell is created.
+     * @param y  Location of space as world level
+     * @param floorHeight  Height of barrier within the y block.  Should be 1-12.  12 indicates a full barrier.
+     * @param isFlowFloor  True full barrier is a flow block with height=12.  Should also be true if floorHeight < 12.
+     * @return Returns the upper cell that results from the split or given cell if split is not possible.
+     */
+    private LavaCell2 splitCell(LavaCells cells, int y, int flowHeight, boolean isFlowFloor)
+    {
+        // validity check: barrier has to be above my floor
+        if(y == this.bottomY()) return this;
+        
+        boolean isFullBarrier = flowHeight == AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        
+        // validity check: barrier has to be below my ceiling OR be a partial barrier
+        if(isFullBarrier && y == this.topY()) return this;
+
+        int newCeilingForThisCell = y * AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        int floorForNewCell = newCeilingForThisCell + flowHeight;
+        // validity check: partial barriers within lava are ignored because they melt immediately
+        if(!isFullBarrier && this.fluidSurfaceLevel() > floorForNewCell) return this;
+        
+        LavaCell2 newCell = new LavaCell2(cells, this, floorForNewCell, this.getCeiling(), this.fluidSurfaceLevel(), isFlowFloor);
+        if(this.fluidSurfaceLevel() > newCeilingForThisCell)
+        {
+            this.changeLevel(0, -(this.fluidSurfaceLevel() - newCeilingForThisCell) * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+        }
+        this.setCeiling(newCeilingForThisCell);
+        newCell.linkAbove(this.above);
+        this.linkAbove(newCell);
+        return newCell;
+    }
+    
+    /**
+     * Confirms solid space within this cell stack. 
+     * Shrinks, splits or removes cells if necessary.
+     * 
+     * Used to validate vs. world and to handle block events.
+     * Does remove lava from cells if barrier is placed where lava should have been.
+     * 
+     * Unlike addOrConfirmSpace does not accept a flow height.  Solid blocks that 
+     * are partially full should be confirmed with addOrConfirmSpace.
+     * 
+     * @param cells Needed to maintain cell array if cells must be split.
+     * @param y  Location of space as world level
+     * @param isFlowBlock  True if this barrier is a full-height flow block.
+     * @return Cell nearest to the barrier location, or cell above it if two are equidistant. Null if no cells remain.
+     */
+    public LavaCell2 addOrConfirmBarrier(LavaCells cells, int y, boolean isFlowBlock)
+    {
+        /**
+         * Here are the possible scenarios:
+         * 1) this cell is closest to the barrier and y does not intersect with this cell- no action needed
+         * 2) this cell is not the closest to the barrier - need to find that cell and retry
+         * 3) barrier location is at the bottom of this cell - cell floor must be moved up
+         * 4) barrier location is at the top of this cell - cell ceiling must be moved down
+         * 5) barrier is in between floor and ceiling - cell must be split
+         * 
+         * Logic here borrows heavily from findCellNearestY.
+         */
+        
+        int myDist = this.distanceToY(y);
+        
+        // intersects
+        if(myDist == 0)
+        {
+            // remove lava if needed
+            int surfaceY = this.fluidSurfaceY();
+            if(y == surfaceY)
+            {
+                this.changeLevel(0, -this.fluidSurfaceFlowHeight() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+            }
+            else if( y < surfaceY)
+            {
+                this.changeLevel(0, -AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+            }
+                
+            if(y == this.topY())
+            {
+                if(y == this.bottomY())
+                {
+                    // removing last space in cell - cell must be deleted
+                    LavaCell2 result = this.aboveCell() == null ? this.belowCell() : this.aboveCell();
+                    this.setDeleted();
+                    return result;
+                }
+                else
+                {
+                    // lower ceiling by one
+                    this.setCeiling(y * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+                }
+            }
+            else if(y == this.bottomY())
+            {
+                // raise floor by one
+                this.setFloor((y + 1) * AbstractLavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
+            }
+            else
+            {
+                // split & return upper cell
+                return this.splitCell(cells, y, AbstractLavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
+            }
+        }
+        
+        if(this.aboveCell() != null)
+        {
+            int aboveDist = this.aboveCell().distanceToY(y);
+            if(aboveDist < myDist) return this.aboveCell().addOrConfirmBarrier(cells, y, isFlowBlock);
+        }
+        
+        if(this.belowCell() != null)
+        {
+            int belowDist = this.belowCell().distanceToY(y);
+            if(belowDist < myDist) return this.belowCell().addOrConfirmBarrier(cells, y, isFlowBlock);
+        }
+        
+        // no adjacent cell is closer than this one - barrier must already be between cells
+        return this;
     }
     
     /**
@@ -1071,7 +1213,8 @@ public class LavaCell2
      */
     public void provideBlockUpdateIfNeeded(LavaSimulatorNew sim)
     {
-
+        if(this.isDeleted) return;
+        
         if(this.suspendedLevel != SUSPENDED_NONE)
         {
             //TODO: implement suspended lava clearing

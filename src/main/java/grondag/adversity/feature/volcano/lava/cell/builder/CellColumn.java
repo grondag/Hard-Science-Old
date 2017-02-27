@@ -20,13 +20,13 @@ public class CellColumn
 //        }
 //    }
     
-    void loadFromChunkBuffer(ColumnChunkBuffer chunk, int x, int z)
+    public void loadFromChunkBuffer(ColumnChunkBuffer chunk, int x, int z)
     {
         int start = ColumnChunkBuffer.getIndex(x & 15, 0, z & 15);
         System.arraycopy(chunk.blockType, start, this.blockType, 0, 256);
     }
     
-    void loadFromWorldChunk(Chunk chunk, int x, int z)
+    public void loadFromWorldChunk(Chunk chunk, int x, int z)
     {
         for(int y = 0; y < 256; y++)
         {

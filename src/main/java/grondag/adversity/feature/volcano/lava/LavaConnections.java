@@ -110,6 +110,12 @@ public class LavaConnections
             System.arraycopy(connections, 0, sortedArray, 0, this.size.get());
         
             //TODO: stop sorting at size
+            
+            //TODO: can sort into four buckets, with first bucket being most urgent outflow (if any) for a given cell
+            // second bucket is second most urgent, etc. Some cells will have no outflows. A few will have four.
+            // can then process each bucket with concurrency before moving on to the next bucket.
+            // "with concurrency" means need to synchronize access both cells involved.
+            
             Arrays.parallelSort(sortedArray, 
                     new Comparator<LavaConnection2>() {
                       @Override
