@@ -5,25 +5,60 @@ import java.util.concurrent.atomic.AtomicInteger;
 import grondag.adversity.feature.volcano.lava.cell.builder.CellColumn;
 import grondag.adversity.feature.volcano.lava.cell.builder.CellStackBuilder;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
-
+import grondag.adversity.library.PackedBlockPos;
+/**
+ * Container for all cells in a world chunk.
+ * When a chunk is loaded (or updated) all cells that can exist in the chunk are created.
+ * 
+ * Lifecycle notes
+ * ---------------------------------------
+ * when a chunk gets lava for the first time
+ *       is created
+ *       becomes active
+ *       retains neighboring chunks
+ *       must be loaded
+ *       
+ * when a chunk gets retained for the first time
+ *      is created
+ *      must be loaded
+ *      
+ * chunks can be unloaded when
+ *      they are not active
+ *      AND they are not retained           
+ */
 class CellChunk
 {
-    final long packedChunkpos;
     
-    private LavaCell2[] entryCells = new LavaCell2[256];
+    public final long packedChunkPos;
     
-    CellChunk(long packedChunkPos)
-    {
-        this.packedChunkpos = packedChunkPos;
-    }
+    private final LavaCell2[] entryCells = new LavaCell2[256];
+    
+    /** number of cells in the chunk */
+    private final AtomicInteger entryCount = new AtomicInteger(0);
+    
+    /** Reference to the cells collection in which this chunk lives. */
+    public final LavaCells cells;
 
-    private AtomicInteger entryCount = new AtomicInteger(0);
+    /** count of cells in this chunk containing lava */
+    private final AtomicInteger activeCount = new AtomicInteger(0);
+    
+    /** count of neighboring active chunks that have requested this chunk to remain loaded*/
+    private final AtomicInteger retainCount = new AtomicInteger(0);
+    
+    /** tracks first time load */
+    private boolean isLoaded = false;
+    
+    CellChunk(long packedChunkPos, LavaCells cells)
+    {
+        this.packedChunkPos = packedChunkPos;
+        this.cells = cells;
+    }
     
     /**
      * Creates cells for the given chunk if it is not already loaded.
      * If chunk is already loaded, validates against the chunk data provided.
      */
-    public void loadOrValidateChunk(LavaCells cells, ColumnChunkBuffer chunkBuffer)
+    public void loadOrValidateChunk(ColumnChunkBuffer chunkBuffer)
     {
         synchronized(this)
         {
@@ -47,7 +82,85 @@ class CellChunk
                     }
                 }
             }
+            this.isLoaded = true;
         }
+    }
+    
+    /**
+     * Call when any cell in this chunk becomes active.
+     * The chunk must already exist at this point but will force it to be and stay loaded.
+     * Will also cause neighboring chunks to be loaded so that lava can flow into them.
+     */
+    public void incrementActiveCount()
+    {
+        if(this.activeCount.incrementAndGet()  == 1)
+        {
+            // force load if hasn't been loaded already due to retention
+            if(this.retainCount.get() == 0)
+            {
+                this.cells.sim.cellChunkLoader.markChunk(this.packedChunkPos);
+            }
+            
+            // create (if needed) and retain all neighbors
+            int myX = PackedBlockPos.getChunkXPos(this.packedChunkPos);
+            int myZ = PackedBlockPos.getChunkZPos(this.packedChunkPos);
+            
+            this.cells.getOrCreateCellChunk(myX + 1, myZ).retain();
+            this.cells.getOrCreateCellChunk(myX - 1, myZ).retain();
+            this.cells.getOrCreateCellChunk(myX, myZ + 1).retain();
+            this.cells.getOrCreateCellChunk(myX, myZ - 1).retain();
+        }
+    }
+    
+    /**
+     * Call when any cell in this chunk becomes inactive.
+     * When no more cells are active will allow this and neighboring chunks to be unloaded.
+     */
+    public void decrementActiveCount()
+    {
+       if(this.activeCount.decrementAndGet() == 0)
+       {
+           // release all neighbors
+           int myX = PackedBlockPos.getChunkXPos(this.packedChunkPos);
+           int myZ = PackedBlockPos.getChunkZPos(this.packedChunkPos);
+           
+           this.cells.getOrCreateCellChunk(myX + 1, myZ).release();
+           this.cells.getOrCreateCellChunk(myX - 1, myZ).release();
+           this.cells.getOrCreateCellChunk(myX, myZ + 1).release();
+           this.cells.getOrCreateCellChunk(myX, myZ - 1).release();
+       }
+    }
+    
+    /**
+     * Call when a neighboring chunk becomes active (has active cells) to force this
+     * chunk to be and stay loaded. (Getting a reference to this chunk to call retain() will cause it to be created.)
+     * This creates connections and enables lava to flow into this chunk if it should.
+     */
+    public void retain()
+    {
+        if(this.retainCount.incrementAndGet() == 1 && this.activeCount.get() == 0)
+        {
+            this.cells.sim.cellChunkLoader.markChunk(this.packedChunkPos);
+        }
+    }
+    
+    /**
+     * Call when a neighboring chunk no longer has active cells. 
+     * Allow this chunk to be unloaded if no other neighbors are retaining it and it has no active cells.
+     */
+    public void release()
+    {
+        this.retainCount.decrementAndGet();
+    }
+    
+    public boolean isLoaded()
+    {
+        return this.isLoaded;
+    }
+    
+    public boolean canUnload()
+    {
+        return this.activeCount.get() == 0 && this.retainCount.get() == 0;
     }
     
     /** 

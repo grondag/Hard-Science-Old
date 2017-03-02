@@ -11,6 +11,7 @@ import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 
 public class LavaCells
@@ -21,6 +22,17 @@ public class LavaCells
     private LavaCell2 cells[] = new LavaCell2[0x10000];
     
     private AtomicInteger size = new AtomicInteger(0);
+    
+    /** 
+     * Reference to the simulation in which this cells collection lives.
+     */
+    public final LavaSimulatorNew sim;
+    
+    
+    public LavaCells(LavaSimulatorNew sim)
+    {
+        this.sim = sim;
+    }
     
     /**
      * Use for parallel operations on all cells.  
@@ -45,32 +57,36 @@ public class LavaCells
             cellChunk = cellChunks.get(chunkBuffer.getPackedChunkPos());
             if(cellChunk == null)
             {
-                cellChunk = new CellChunk(chunkBuffer.getPackedChunkPos());
-                this.cellChunks.put(cellChunk.packedChunkpos, cellChunk);
+                cellChunk = new CellChunk(chunkBuffer.getPackedChunkPos(), this);
+                this.cellChunks.put(cellChunk.packedChunkPos, cellChunk);
             }
         }
     
         // remaining updates within the chunk do not need to be synchronized
-        cellChunk.loadOrValidateChunk(this, chunkBuffer);
+        cellChunk.loadOrValidateChunk(chunkBuffer);
  
     }
     
     
-    /** checks for chunk being loaded using block coordinates */
-    public boolean isChunkLoaded(int blockX, int blockZ)
+    /** checks for chunk being loaded using packed block coordinates */
+    public boolean isChunkLoaded(long packedBlockPos)
     {
-        return cellChunks.containsKey(PackedBlockPos.getPackedChunkPos(blockX, blockZ));
+        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(packedBlockPos));
+        return cellChunk == null ? false : cellChunk.isLoaded();
     }
     
-    /** checks for chunk being loaded using the chunk */
-    public boolean isChunkLoaded(Chunk chunk)
+    /** checks for chunk being loaded using BlockPos coordinates*/
+    public boolean isChunkLoaded(BlockPos pos)
     {
-        return cellChunks.containsKey(PackedBlockPos.getPackedChunkPos(chunk));
+        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(pos));
+        return cellChunk == null ? false : cellChunk.isLoaded();
     }
+
     
     /**
      * Retrieves cell at the given block position.
      * Returns null if the given location does not contain a cell.
+     * Also returns NULL if cell chunk has not yet been loaded.
      * Thread safe.
      */
     public LavaCell2 getCellIfExists(int x, int y, int z)
@@ -84,6 +100,7 @@ public class LavaCells
     /** 
      * Returns the starting cell for the stack of cells located at x, z.
      * Returns null if no cells exist at that location.
+     * Also returns null if chunk has not been loaded.
      * Thread safe.
      */
     public LavaCell2 getEntryCell(int x, int z)
@@ -96,7 +113,16 @@ public class LavaCells
      * Sets the entry cell for the stack of cells located at x, z.
      * Probably thread safe for most use cases.
      */
-    void setEntryCell(int x, int z, LavaCell2 entryCell)
+    private void setEntryCell(int x, int z, LavaCell2 entryCell)
+    {
+        this.getOrCreateCellChunk(x, z).setEntryCell(x, z, entryCell);
+    }
+    
+    /**
+     * Does what is says.
+     * Thread-safe.
+     */
+    public CellChunk getOrCreateCellChunk(int x, int z)
     {
         CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
         if(chunk == null)
@@ -107,15 +133,12 @@ public class LavaCells
                 chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
                 if(chunk == null)
                 {
-                    if(Adversity.DEBUG_MODE)
-                        Adversity.log.debug("Cell chunk dynamically created outside LavaCells.loadChunk() - should not normally happen.");
-                    
-                    chunk = new CellChunk(PackedBlockPos.getPackedChunkPos(x, z));
-                    this.cellChunks.put(chunk.packedChunkpos, chunk);
+                    chunk = new CellChunk(PackedBlockPos.getPackedChunkPos(x, z), this);
+                    this.cellChunks.put(chunk.packedChunkPos, chunk);
                 }
             }
         }
-        chunk.setEntryCell(x, z, entryCell);
+        return chunk;
     }
     
     /** 
@@ -212,29 +235,34 @@ public class LavaCells
             this.cells = new LavaCell2[this.size.get() + 0x10000];
             
             int i = 0;
-            int c = 0;
+            
             while(i < saveData.length)
             {
-                LavaCell2 cell = new LavaCell2(saveData, i);
+                int x = saveData[i++];
+                int z = saveData[i++];
                 
-             // Java parameters are always pass by value, so have to advance index here
-                i += LavaCell2.LAVA_CELL_NBT_WIDTH;
-                        
-                cell.clearBlockUpdate();
+                LavaCell2 newCell;
                 
-                this.cells[c++] = cell;
-                
-                LavaCell2 startingCell = this.getEntryCell(cell.x(), cell.z());
+                LavaCell2 startingCell = this.getEntryCell(x, z);
                 
                 if(startingCell == null)
                 {
-                    this.setEntryCell(cell.x(), cell.z(), cell);
+                    newCell = new LavaCell2(this, x, z, 0, 0, 0, false);
+                    newCell.readNBTArray(saveData, i);
+                    this.setEntryCell(x, z, newCell);
                 }
                 else
                 {
-                    startingCell.addCellToColumn(cell);
+                    newCell = new LavaCell2(this, startingCell,0, 0, 0, false);
+                    newCell.readNBTArray(saveData, i);
+                    startingCell.addCellToColumn(startingCell);
                 }
+
+                newCell.clearBlockUpdate();
                 
+                // Java parameters are always pass by value, so have to advance index here
+                // subtract two because we incremented for x and z values already
+                i += LavaCell2.LAVA_CELL_NBT_WIDTH - 2;
             }
          
             Adversity.log.info("Loaded " + this.size.get() + " lava cells.");

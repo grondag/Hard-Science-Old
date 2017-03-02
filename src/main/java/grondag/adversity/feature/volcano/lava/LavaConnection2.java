@@ -97,6 +97,7 @@ public class LavaConnection2
         this.isDirty = true;
     }
     
+    /** marks connection deleted. Does not release cells */
     public void setDeleted()
     {
         this.isDeleted = true;

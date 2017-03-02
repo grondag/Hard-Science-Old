@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano.lava.cell.builder;
 
+import grondag.adversity.feature.volcano.lava.WorldStateBuffer.ChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;
@@ -12,7 +13,7 @@ public class ColumnChunkBuffer
     
     private long packedChunkPos;
     
-    void readChunk(Chunk chunk)
+    public void readChunk(Chunk chunk)
     {
         this.packedChunkPos = PackedBlockPos.getPackedChunkPos(chunk);
      
@@ -26,6 +27,26 @@ public class ColumnChunkBuffer
                 {
                     int i = getIndex(x, y, z);
                     IBlockState state = chunk.getBlockState(x, y, z);
+                    this.blockType[i] = BlockType.getBlockTypeFromBlockState(state);
+                }
+            }
+        }
+    }
+    
+    public void readChunk(ChunkBuffer chunkBuffer)
+    {
+        this.packedChunkPos = chunkBuffer.getPackedChunkPos();
+        
+        //chunk data is optimized for horizontal plane access
+        //we are optimized for column access
+        for(int y = 0; y < 256; y++)
+        {
+            for(int x = 0; x < 16; x++)
+            {
+                for(int z = 0; z < 16; z++)
+                {
+                    int i = getIndex(x, y, z);
+                    IBlockState state = chunkBuffer.getBlockState(x, y, z);
                     this.blockType[i] = BlockType.getBlockTypeFromBlockState(state);
                 }
             }

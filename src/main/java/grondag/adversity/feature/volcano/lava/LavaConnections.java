@@ -59,10 +59,29 @@ public class LavaConnections
     
     public void createConnectionIfNotPresent(LavaCell2 first, LavaCell2 second)
     {
-        if(!first.isConnectedTo(second))
+        if(first.id < second.id)
         {
-            LavaConnection2 newConnection = new LavaConnection2(first, second);
-            this.addConnectionToArray(newConnection);
+            this.createConnectionIfNotPresentInner(first, second);
+        }
+        else
+        {
+            this.createConnectionIfNotPresentInner(second, first);
+        }
+    }
+    
+    /** relies on caller to order parameters to avoid deadlock */
+    private void createConnectionIfNotPresentInner(LavaCell2 first, LavaCell2 second)
+    {
+        synchronized(first)
+        {
+            synchronized(second)
+            {
+                if(!first.isConnectedTo(second))
+                {
+                    LavaConnection2 newConnection = new LavaConnection2(first, second);
+                    this.addConnectionToArray(newConnection);
+                }
+            }
         }
     }
     

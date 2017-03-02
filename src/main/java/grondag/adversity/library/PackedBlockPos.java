@@ -142,6 +142,11 @@ public class PackedBlockPos
             return ((long)blockX >> 4) + CHUNK_BOUNDARY | (((long)blockZ >> 4) + CHUNK_BOUNDARY) << 32;
     }
     
+    public static long getPackedChunkPos(BlockPos pos)
+    {
+            return getPackedChunkPos(pos.getX(), pos.getZ());
+    }
+    
     public static long getPackedChunkPos(Chunk chunk)
     {
             return ((long)chunk.xPosition) + CHUNK_BOUNDARY | (((long)chunk.zPosition) + CHUNK_BOUNDARY) << 32;

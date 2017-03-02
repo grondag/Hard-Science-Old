@@ -3,8 +3,8 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.List;
 
-import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
 import grondag.adversity.feature.volcano.lava.cell.LavaCells;
+import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +14,8 @@ import net.minecraft.world.chunk.Chunk;
 public class LavaSimulatorNew extends AbstractLavaSimulator
 {
     private final LavaConnections connections = new LavaConnections();
-    private final LavaCells cells = new LavaCells();
+    public final CellChunkLoader cellChunkLoader = new CellChunkLoader();
+    private final LavaCells cells = new LavaCells(this);
     
     /** incremented each step, multiple times per tick */
     private int stepIndex;
@@ -77,6 +78,8 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     public void unregisterDestroyedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         // TODO Auto-generated method stub
+        // should be able to find a loaded chunk and post a pending event to handle during validation
+        // if the chunk is not loaded, is strange, but no reason to load it just to tell it to delete lava
         
     }
 
@@ -84,7 +87,9 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     public void registerPlacedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         // TODO Auto-generated method stub
-        
+        // if chunk is not loaded, simply mark the chunk for load
+        // loading the chunk should cause any placed lava to be recognized
+        // if the chunk is already loaded, queue lava addition to occur before cell validation
     }
 
     @Override
@@ -135,14 +140,8 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     protected void doBlockUpdateApplication()
     {
         this.itMe = true;
-        List<Chunk> updates = this.worldBuffer.applyBlockUpdates(1, this);
+        this.worldBuffer.applyBlockUpdates(1, this);
         this.itMe = false;
-
-        //validate cells in chunks that were just written to world
-        for(Chunk chunk : updates)
-        {
-            
-        }
     }
     
     @Override
@@ -162,9 +161,40 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doCellValidation()
     {
-        // Note that actual cell validation now occurs in doBlockUpdateApplication
-        // Methods should be rearranged once compatibility with prior sim no longer needed
+        // this part needs to be done during tick
+        // -------------------------------
         
+        // Apply pending world events for pre-validation in loaded chunks so that
+        // those chunks will match the world if they are marked for validation
+        // TODO
+
+        // Load and or validate marked chunks.
+        // Chunks that were unloaded and had lava blocks created by world events will generally handle
+        // those events simply by loading the chunk and reading in the world state. 
+        this.cellChunkLoader.queueMarkedChunks(worldBuffer);
+        
+        // rest can be done post tick
+        // -------------------------------
+
+        // Apply world events for post-validation when the event does not imply
+        // that world state will be different from simulation state. (Add lava from particles)
+        // TODO
+        
+        // Add or update cells from world as needed
+        // could be concurrent, but not yet implemented as such
+        ColumnChunkBuffer buffer = this.cellChunkLoader.poll();
+        while(buffer != null)
+        {
+            this.cells.loadOrValidateChunk(buffer);
+            buffer = this.cellChunkLoader.poll();
+        }
+        
+        
+        // update connections as needed
+        this.cells.parallelStream().forEach(c -> c.updateConnectionsIfNeeded(cells, connections));
+        
+        // clear out cells no longer needed
+        // NON-CONCURRENT
         this.cells.clearDeletedCells();
     }
 
@@ -174,5 +204,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         // TODO Auto-generated method stub
         
     }
+    
+ 
  
 }

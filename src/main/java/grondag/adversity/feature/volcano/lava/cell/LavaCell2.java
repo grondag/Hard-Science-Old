@@ -83,6 +83,10 @@ public class LavaCell2
      */
     private boolean isBlockUpdateCurrent = true;
     
+    /** true if this cell should remain loaded */
+    private boolean isActive = false;
+    
+    
     /**
      * Fluid units currently stored in this cell.
      */
@@ -180,7 +184,7 @@ public class LavaCell2
      */
     public LavaCell2(LavaCells cells, int x, int z, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
     {
-        this.locator = new CellLocator(x, z, this);
+        this.locator = new CellLocator(x, z, this, cells.getOrCreateCellChunk(x, z));
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
@@ -193,6 +197,7 @@ public class LavaCell2
     }
     
     /** Removes all lava and prevents further processing.
+     *  Invalidates all connections but does not actually remove them.
      *  Also maintains above/below list references in remaining cells
      *  and removes references to/from this cell.
      */
@@ -212,6 +217,13 @@ public class LavaCell2
         this.below = null;
         this.clearBlockUpdate();
         this.isDeleted = true;
+        
+        for (LavaConnection2 connection : this.connections.values())
+        {
+            connection.setDeleted();
+        }
+        
+        this.updateActiveStatus();
     }
     
     /** 
@@ -310,12 +322,11 @@ public class LavaCell2
     
     /** 
      * Reads data from array starting at location i.
-     * Does NOT add cell to processing array because intended only for NBT read, which does this directly.
      */
-    LavaCell2(int[] saveData, int i)
+    protected void readNBTArray(int[] saveData, int i)
     {
         // see writeNBT to understand how data are persisted
-        this.locator = new CellLocator(saveData[i++], saveData[i++], this);
+        // assumes first two positions (x and z) have already been read.
         
         int fluidData = saveData[i++];
         this.fluidUnits = fluidData & FLUID_UNITS_MASK;
@@ -341,6 +352,7 @@ public class LavaCell2
             this.isCoolingDisabled = false;
         }
     }
+    
     public int getFluidUnits()
     {
         return this.fluidUnits;
@@ -1115,10 +1127,19 @@ public class LavaCell2
         }
     }
     
-    /** true if can be removed without losing anything */
-    public boolean isUseless()
+    /** maintains indication of whether or not this cell must remain loaded */
+    public void updateActiveStatus()
     {
-        return this.fluidUnits == 0 && this.connections.isEmpty();
+        boolean shouldBeActive = !this.isDeleted && (this.fluidUnits > 0 || !this.isBlockUpdateCurrent);
+        
+        if(this.isActive)
+        {
+            if(!shouldBeActive) this.locator.cellChunk.decrementActiveCount();
+        }
+        else
+        {
+            if(shouldBeActive) this.locator.cellChunk.incrementActiveCount();
+        }
     }
 
     public boolean canConnectWith(LavaCell2 other)
@@ -1136,6 +1157,7 @@ public class LavaCell2
         this.avgFluidAmountWithPrecision = this.fluidUnits << 6;
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
         this.isBlockUpdateCurrent = true;
+        this.updateActiveStatus();
     }
     
     /**
@@ -1226,6 +1248,8 @@ public class LavaCell2
         //        if(this.id == 1104 || this.id == 8187)
         //            Adversity.log.info("boop");
 
+        boolean oldBlockUpdateCurrent = this.isBlockUpdateCurrent;
+        
         // if we are empty always reflect that immediately - otherwise have ghosting in world as lava drains from drop cells
         if(this.fluidUnits == 0)
         {
@@ -1254,6 +1278,8 @@ public class LavaCell2
             }
         }
 
+        if(oldBlockUpdateCurrent != this.isBlockUpdateCurrent) this.updateActiveStatus();
+        
         int currentVisible = this.getCurrentVisibleLevel();
         if(this.lastVisibleLevel != currentVisible)
         {
@@ -1327,6 +1353,8 @@ public class LavaCell2
                 //force recalc of retained level when a cell becomes empty
                 this.rawRetainedLevel = -1;
             }
+            
+            this.updateActiveStatus();
         }
     }
         
@@ -1340,10 +1368,16 @@ public class LavaCell2
         
         public final long locationKey;
         
-        private CellLocator(int x, int z, LavaCell2 firstCell)
+        /**
+         * Reference to cell chunk where this cell column lives.
+         */
+        public final CellChunk cellChunk;
+        
+        private CellLocator(int x, int z, LavaCell2 firstCell, CellChunk cellChunk)
         {
             this.x = x;
             this.z = z;
+            this.cellChunk = cellChunk;
             this.locationKey = LavaCell2.computeKey(x, z);
             this.firstCell = firstCell;
         }

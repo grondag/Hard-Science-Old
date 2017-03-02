@@ -138,19 +138,29 @@ public class WorldStateBuffer implements IBlockAccess
         return chunk;
     }
     
+    /**
+     * For use by cell chunk buffer manager.
+     */
+    public ChunkBuffer getChunkBufferIfExists(long packedChunkPos)
+    {
+        return chunks.get(packedChunkPos);
+    }
+    
     /** 
      * Makes the updates in the game world for up to chunkCount chunks.
      * Returns list of chunks that were updated so that they can be used for cell validation.
      * 
      */
-    public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
+    //public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
+    public void applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
     {
         int currentTick = Simulator.instance.getCurrentSimTick();
         
         boolean maybeSomethingToDo = true;
         int foundCount = 0;
         
-        ArrayList<Chunk> result = new ArrayList<Chunk>();
+        
+//        ArrayList<Chunk> result = new ArrayList<Chunk>();
         
         //TODO: make tick diff configurable
         
@@ -212,14 +222,14 @@ public class WorldStateBuffer implements IBlockAccess
             }
             else
             {
-                result.add(this.realWorld.getChunkFromChunkCoords(PackedBlockPos.getChunkXPos(best.packedChunkpos), PackedBlockPos.getChunkZPos(best.packedChunkpos)));
+//                result.add(this.realWorld.getChunkFromChunkCoords(PackedBlockPos.getChunkXPos(best.packedChunkpos), PackedBlockPos.getChunkZPos(best.packedChunkpos)));
                 this.chunks.remove(best.packedChunkpos);
                 best.applyBlockUpdates(tracker, sim);
                 this.usedBuffers.add(best);
             }
         }
         
-        return result;
+//        return result;
     }
     
     public void clearStatistics()
@@ -545,7 +555,7 @@ public class WorldStateBuffer implements IBlockAccess
 //    private static AtomicInteger recoveryCount = new AtomicInteger(0);
     private static AtomicInteger totalCount = new AtomicInteger(0);
     
-    private class ChunkBuffer
+    public class ChunkBuffer
     {
         private long packedChunkpos;
         
@@ -583,7 +593,7 @@ public class WorldStateBuffer implements IBlockAccess
             Arrays.fill(states, null);
         }
         
-        private IBlockState getBlockState(int x, int y, int z)
+        public IBlockState getBlockState(int x, int y, int z)
         {
             BlockStateBuffer entry = states[getChunkStateKeyFromBlockPos(x, y, z)];
             
@@ -762,5 +772,12 @@ public class WorldStateBuffer implements IBlockAccess
             }
             return startingIndex;
         }
+        
+        public long getPackedChunkPos()
+        {
+            return this.packedChunkpos;
+        }
     }
+    
+ 
 }
