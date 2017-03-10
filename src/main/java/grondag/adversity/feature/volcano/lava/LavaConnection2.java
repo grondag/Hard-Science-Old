@@ -92,6 +92,9 @@ public class LavaConnection2
         if(flow != 0) this.flowAcross(sim, flow);
     }
     
+    /**
+     * Marks connection for inclusion in next round of processing.
+     */
     public void setDirty()
     {
         this.isDirty = true;

@@ -59,14 +59,14 @@ public abstract class AbstractLavaSimulator extends SimulationNode
     
     // performance counters
     // TODO: remove for release
-    private long connectionProcessTime;
-    private int connectionProcessCount;
-    private long coolingTime;
-    private long cellUpdateTime = 0;
-    private long particleTime;
-    private long validationTime;
-    private long blockUpdateProvisionTime;
-    private long blockUpdateApplicationTime;
+    protected long connectionProcessTime;
+    protected int connectionProcessCount;
+    protected long coolingTime;
+    protected long cellUpdateTime = 0;
+    protected long particleTime;
+    protected long validationTime;
+    protected long blockUpdateProvisionTime;
+    protected long blockUpdateApplicationTime;
 
     public AbstractLavaSimulator(World world)
     {

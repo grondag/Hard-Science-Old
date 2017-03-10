@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano.lava.cell.builder;
 
+import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;
 
@@ -26,11 +27,11 @@ public class CellColumn
         System.arraycopy(chunk.blockType, start, this.blockType, 0, 256);
     }
     
-    public void loadFromWorldChunk(Chunk chunk, int x, int z)
+    public void loadFromWorldStateBuffer(WorldStateBuffer worldBuffer, int x, int z)
     {
         for(int y = 0; y < 256; y++)
         {
-            IBlockState state = chunk.getBlockState(x, y, z);
+            IBlockState state = worldBuffer.getBlockState(x, y, z);
             this.blockType[y] = BlockType.getBlockTypeFromBlockState(state);
         }
     }

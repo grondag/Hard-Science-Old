@@ -17,77 +17,38 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.chunk.Chunk;
 /**
  * Manages snapshots of chunk data to be used for creating and updating lava cells.
+ * Buffers entire chunk state so can do the actual validation post-tick.
  */
 public class CellChunkLoader
 {
-
-//    private final Long2ObjectMap<ColumnChunkBuffer> chunkBufferQueue = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<ColumnChunkBuffer>());
-   
     private final ConcurrentLinkedQueue<ColumnChunkBuffer> chunkBufferQueue = new ConcurrentLinkedQueue<ColumnChunkBuffer>();
 
-    
-    private final TLongSet markedChunks = new TSynchronizedLongSet( new TLongHashSet());
-    
     private final ConcurrentLinkedQueue<ColumnChunkBuffer> unusedBuffers = new ConcurrentLinkedQueue<ColumnChunkBuffer>();
     
     /**
      * TODO
      * ---------------
      * Persistence
-     * Consider providing a way to refresh a single cell instead of a whole chunk
      * 
      */
     
-//    /**
-//     * Use this for chunks that have just had block updates applied, when we know that the world buffer is empty for that chunk.
-//     * If any chunks have already been queued by earlier calls to this or other methods, will replace those chunks.
-//     */
-//    public void queueUpdatedChunks(List<Chunk> chunks)
-//    {
-//        for(Chunk c : chunks)
-//        {
-//            this.queueChunkBuffer(c);
-//        }
-//    }
-    
     /**
-     * Use this to identify chunks that need to have cells created or updated due to world events.
-     * 1) If a chunk has lava but hasn't been synchronized with the world recently.
-     * 2) When lava is added to the world causing cells for a new chunk to be loaded.
-     * 3) When block update in the world occur to a chunk that has cells, indicating validation would be a good idea.
-     * 
-     * Note that this method does not actually buffer the chunks and put them in the queue. 
-     * To do that, use {@link #queueMarkedChunks(WorldStateBuffer)}. Marking and then loading
-     * separately prevent re-queuing the same chunk when multiple triggering world events occur in the same chunk.
+     * Use this to buffer and queue world chunks for later validation.
      */
-    public void markChunk(long packedChunkPos)
+    public void queueChunks(WorldStateBuffer worldBuffer, long packedChunkPos)
     {
-        this.markedChunks.add(packedChunkPos);
-    }
-
-    /**
-     * Use this to read and queue chunks marked earlier by {@link #markChunk(long)}.
-     * If any chunks have already been queued by earlier calls to this or other methods, 
-     * will replace those chunks with a more recent snapshot.
-     */
-    public void queueMarkedChunks(WorldStateBuffer worldBuffer)
-    {
-        for(long chunkPos : this.markedChunks.toArray())
+        ChunkBuffer chunkBuff = worldBuffer.getChunkBufferIfExists(packedChunkPos);
+        
+        if(chunkBuff == null)
         {
-            ChunkBuffer chunkBuff = worldBuffer.getChunkBufferIfExists(chunkPos);
-            
-            if(chunkBuff == null)
-            {
-                // nothing in world buffer, so can use raw chunk from world
-                this.queueChunkBuffer(worldBuffer.realWorld
-                        .getChunkFromChunkCoords(PackedBlockPos.getChunkXPos(chunkPos), PackedBlockPos.getChunkZPos(chunkPos)));
-            }
-            else
-            {
-                // world buffer has changes, so have to use the chunk buffer
-                this.queueChunkBuffer(chunkBuff);
-            }
-            this.markedChunks.remove(chunkPos);
+            // nothing in world buffer, so can use raw chunk from world
+            this.queueChunkBuffer(worldBuffer.realWorld
+                    .getChunkFromChunkCoords(PackedBlockPos.getChunkXPos(packedChunkPos), PackedBlockPos.getChunkZPos(packedChunkPos)));
+        }
+        else
+        {
+            // world buffer has changes, so have to use the chunk buffer
+            this.queueChunkBuffer(chunkBuff);
         }
     }
     

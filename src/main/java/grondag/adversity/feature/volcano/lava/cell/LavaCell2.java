@@ -6,6 +6,7 @@ import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaConnection2;
 import grondag.adversity.feature.volcano.lava.LavaConnections;
+import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
@@ -146,7 +147,6 @@ public class LavaCell2
     private int lastTickIndex;
     
     //TODO
-    // merge / split / validate
     // pressure propagation
     // calculate retained level
     // calculate smoothed retained level
@@ -190,6 +190,22 @@ public class LavaCell2
         this.fluidUnits = Math.max(0, lavaLevel - floor);
         cells.addCellToProcessingList(this);
     }
+    
+    /**
+     * True if cells in this column have been marked for validation with world state.
+     */
+    public boolean isValidationNeeded()
+    {
+        return this.locator.isValidationNeeded();
+    }
+    
+    /** 
+     * Marks cells in this column for validation with world state.
+     */
+    public void setValidationNeeded(boolean isNeeded)
+    {
+        this.locator.setValidationNeeded(isNeeded);
+    }    
     
     public boolean isDeleted()
     {
@@ -1083,7 +1099,7 @@ public class LavaCell2
      * Forms new connections if necessary.
      * Does NOT remove invalid connections. Invalid connections are expected to be removed during connection processing.
      */
-    public void updateConnectionsIfNeeded(LavaCells cells, LavaConnections connections)
+    private void updateConnectionsIfNeeded(LavaCells cells, LavaConnections connections)
     {
         if(this.isConnectionUpdateNeeded)
         {
@@ -1125,6 +1141,19 @@ public class LavaCell2
                 
             candidate = candidate.aboveCell();
         }
+    }
+    
+    /**
+     * Called once per tick for each cell before simulation steps are run.
+     * Use for housekeeping tasks.
+     */
+    public void update(LavaSimulatorNew sim, LavaCells cells, LavaConnections connections)
+    {
+        this.updateConnectionsIfNeeded(cells, connections);
+        
+        // TODO
+        // Pressure propagation
+        
     }
     
     /** maintains indication of whether or not this cell must remain loaded */
@@ -1357,6 +1386,78 @@ public class LavaCell2
             this.updateActiveStatus();
         }
     }
+    
+    /**
+     * Called when lava is placed via a world event.
+     * If lava does not already exist at level, adds lava to cell in appropriate way.
+     * If lava does already exist, does nothing.
+     * Also does nothing if location is partially occupied - indicates cell should be revalidated vs. world.
+     * 
+     * @param y  World y level of lava block.
+     * @param flowHeight Height (1-12) of placed lava block.
+     * @return true if successful, false if not. If false, chunk should be revalidated.
+     */
+    public boolean notifyPlacedLava(int y, int flowHeight)
+    {
+        
+        /**
+         * Paths
+         * -----
+         * Lava already exists at same or higher level - no action
+         * Lava already exists but at a lower level - increase level
+         * Lava does not exist and is a fully open space close to surface - increase level, adjust visible height
+         * Lava does not exist and is a fully open space above surface - create falling particles
+         * 
+         * Space is outside this cell - super strange - re-validate this chunk
+         * Lava does not exist and space is a partial barrier at floor - super strange - re-validate this chunk
+         */
+        
+        //handle strangeness
+        if(y > this.topY() || y < this.bottomY()) return false;
+        
+        // handle more strangeness - partially solid floors should not normally be replaced by block events
+        // if this happens, best to revalidate this chunk
+        if(y == this.bottomY() && this.floorFlowHeight() != 0) return false;
+        
+        if(y == this.fluidSurfaceY())
+        {
+            int levelDiff = flowHeight - this.fluidSurfaceFlowHeight();
+            if(levelDiff > 0)
+            {
+                this.changeLevel(0, levelDiff * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+            }
+        }
+        else if(y > this.fluidSurfaceY())
+        {
+            this.notifySuspendedLava(y);
+            this.addLavaAtLevel(AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK, flowHeight * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+        }
+        
+        return true;
+   
+    }
+    
+    /**
+     * Called when lava is destroyed via a world event.
+     * If lava does not already exist at level, does nothing.
+     * If lava does already exist, removes an appropriate amount of lava from this cell.
+     * 
+     * @param y  World y level of lava block destroyed.
+     */
+    public void notifyDestroyedLava(int y)
+    {
+        //handle strangeness
+        if(y > this.topY() || y < this.bottomY()) return;
+        
+        if(y == this.fluidSurfaceY())
+        {
+            this.changeLevel(0, -this.fluidSurfaceFlowHeight() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+        }
+        else if(y < this.fluidSurfaceY())
+        {
+            this.changeLevel(0, -AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+        }
+    }
         
     // CELL-COLUMN COORDINATION / SYNCHONIZATION CLASS
     
@@ -1367,6 +1468,9 @@ public class LavaCell2
         public final int z;
         
         public final long locationKey;
+        
+        /** True if cells in this column should be validated with world state */
+        private boolean isValidationNeeded = false;
         
         /**
          * Reference to cell chunk where this cell column lives.
@@ -1380,6 +1484,19 @@ public class LavaCell2
             this.cellChunk = cellChunk;
             this.locationKey = LavaCell2.computeKey(x, z);
             this.firstCell = firstCell;
+        }
+
+        public void setValidationNeeded(boolean isNeeded)
+        {
+            // when first marked for validation, increment validation request count with cell chunk
+            if(isNeeded & !this.isValidationNeeded) this.cellChunk.incrementValidationCount();
+            
+            this.isValidationNeeded = isNeeded;
+        }
+
+        public boolean isValidationNeeded()
+        {
+            return this.isValidationNeeded;
         }
     }
 }

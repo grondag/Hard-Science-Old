@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava.cell;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -9,10 +10,11 @@ import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
+
 
 public class LavaCells
 {
@@ -43,6 +45,57 @@ public class LavaCells
         return StreamSupport.stream(Arrays.spliterator(cells, 0, size.get()), true);
     }
     
+    private static final int MAX_CHUNKS_PER_TICK = 4;
+    
+    public void validateOrBufferChunks()
+    {
+        int doneCount = 0;
+        
+        for(CellChunk chunk : this.cellChunks.values())
+        {
+            if(chunk.needsFullLoadOrValidation())
+            {
+                // completely new chunks don't count against the max loads per tick
+                if(doneCount <= MAX_CHUNKS_PER_TICK || chunk.getEntryCount() != 0) 
+                {
+                    doneCount++;
+                    this.sim.cellChunkLoader.queueChunks(this.sim.worldBuffer, chunk.packedChunkPos);
+                }
+            }
+            else if(doneCount <= MAX_CHUNKS_PER_TICK)
+            {
+                if(chunk.validateMarkedCells()) doneCount++;
+            }
+        };        
+    }
+    
+    /**
+     * Marks cells in x, z column to be validated vs. world state.
+     * If chunk containing x, z is not loaded, causes chunk to be loaded.
+     * Has no effect if chunk is already marked for full validation.
+     * 
+     * @param x
+     * @param z
+     */
+    public void markCellsForValidation(int x, int z)
+    {
+        CellChunk chunk = this.getOrCreateCellChunk(x, z);
+        if(!chunk.needsFullLoadOrValidation())
+        {
+            LavaCell2 cell = chunk.getEntryCell(x, z);
+            if(cell == null)
+            {
+                // really strange to have world column completely full
+                // so re-validate entire chunk
+                chunk.requestFullValidation();
+            }
+            else
+            {
+                cell.setValidationNeeded(true);
+            }
+        }
+    }
+    
     /**
      * Creates cells for the given chunk if it is not already loaded.
      * If chunk is already loaded, validates against the chunk data provided.
@@ -54,7 +107,7 @@ public class LavaCells
         synchronized(this)
         {
             // create new cell chunk if not already loaded
-            cellChunk = cellChunks.get(chunkBuffer.getPackedChunkPos());
+            cellChunk = this.cellChunks.get(chunkBuffer.getPackedChunkPos());
             if(cellChunk == null)
             {
                 cellChunk = new CellChunk(chunkBuffer.getPackedChunkPos(), this);
@@ -68,20 +121,26 @@ public class LavaCells
     }
     
     
-    /** checks for chunk being loaded using packed block coordinates */
-    public boolean isChunkLoaded(long packedBlockPos)
-    {
-        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(packedBlockPos));
-        return cellChunk == null ? false : cellChunk.isLoaded();
-    }
-    
-    /** checks for chunk being loaded using BlockPos coordinates*/
-    public boolean isChunkLoaded(BlockPos pos)
-    {
-        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(pos));
-        return cellChunk == null ? false : cellChunk.isLoaded();
-    }
-
+//    /** checks for chunk being loaded using packed block coordinates */
+//    public boolean isChunkLoaded(long packedBlockPos)
+//    {
+//        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(packedBlockPos));
+//        return cellChunk == null ? false : cellChunk.isLoaded();
+//    }
+//    
+//    /** checks for chunk being loaded using BlockPos coordinates*/
+//    public boolean isChunkLoaded(BlockPos pos)
+//    {
+//        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(pos));
+//        return cellChunk == null ? false : cellChunk.isLoaded();
+//    }
+//
+//    /** checks for chunk being loaded using x, z block coordinates*/
+//    public boolean isChunkLoaded(int x, int z)
+//    {
+//        CellChunk cellChunk = this.cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+//        return cellChunk == null ? false : cellChunk.isLoaded();
+//    }
     
     /**
      * Retrieves cell at the given block position.
@@ -178,6 +237,27 @@ public class LavaCells
         }
     }
     
+    /**
+     * Releases chunks that no longer need to remain loaded.
+     */
+    public void unloadInactiveCellChunks()
+    {
+        synchronized(this)
+        {
+            Iterator<Entry<CellChunk>> chunks = this.cellChunks.long2ObjectEntrySet().fastIterator();
+            
+            while(chunks.hasNext())
+            {
+                Entry<CellChunk> entry = chunks.next();
+                if(entry.getValue().canUnload())
+                {
+                    entry.getValue().unload();
+                    chunks.remove();
+                }
+            }
+        }
+    }
+    
     /** 
      * Ensures processing array has sufficient storage.  
      * Should be called periodically to prevent overflow 
@@ -250,6 +330,8 @@ public class LavaCells
                     newCell = new LavaCell2(this, x, z, 0, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     this.setEntryCell(x, z, newCell);
+                    // if chunk was newly created, mark it as loaded so that 
+//                    this.getOrCreateCellChunk(x, z).setLoaded();
                 }
                 else
                 {
