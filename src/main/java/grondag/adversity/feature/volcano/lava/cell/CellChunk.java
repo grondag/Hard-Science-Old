@@ -2,7 +2,6 @@ package grondag.adversity.feature.volcano.lava.cell;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import grondag.adversity.feature.volcano.lava.cell.builder.CellColumn;
 import grondag.adversity.feature.volcano.lava.cell.builder.CellStackBuilder;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;

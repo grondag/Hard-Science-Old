@@ -1,12 +1,10 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
-import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -18,7 +16,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
@@ -45,7 +42,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
     protected final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
     protected static final int BASALT_BLOCKS_NBT_WIDTH = 4;
     
-    //TODO: consider switching back to BlockPos - if going to be going back to world or checks would avoid reinstantiation each time
+    //TODO: remove when new model is implemented - no longer used/needed
     /** Filler lava blocks that need to be cooled with lava cells but aren't involved in the fluid simulation. */
     protected final Set<Long> lavaFillers = ConcurrentHashMap.newKeySet();
     protected final static String LAVA_FILLER_NBT_TAG = "lavafillers"; 

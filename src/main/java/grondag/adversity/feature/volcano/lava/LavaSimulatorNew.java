@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.LavaConnections.SortBucket;
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
 import grondag.adversity.feature.volcano.lava.cell.LavaCells;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
@@ -258,7 +259,6 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             this.doStep();
             this.doStep();
             this.doStep();
-            // update sort keys on last pass for resort next tick
             this.doLastStep();
             this.connectionProcessTime += (System.nanoTime() - startTime);
 
@@ -304,11 +304,9 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     protected void doFirstStep()
     {
         this.stepIndex++;
-        final int size = this.connections.size();
-        LavaConnection2[] values = this.connections.values();
-        for(int i = 0; i < size; i++)
+        for(SortBucket bucket : SortBucket.values())
         {
-            values[i].doFirstStep(this);
+            this.connections.getSortStream(bucket, true).forEach(c -> c.doFirstStep(this));
         }
     }
 
@@ -316,32 +314,24 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     protected void doStep()
     {
         this.stepIndex++;
-        final int size = this.connections.size();
-        LavaConnection2[] values = this.connections.values();
-        for(int i = 0; i < size; i++)
+        for(SortBucket bucket : SortBucket.values())
         {
-            values[i].doStep(this);
+            this.connections.getSortStream(bucket, true).forEach(c -> c.doStep(this));
         }
-        
     }
 
     @Override
     protected void doLastStep()
     {
         this.stepIndex++;
-        final int size = this.connections.size();
-        LavaConnection2[] values = this.connections.values();
-        for(int i = 0; i < size; i++)
-        {
-            values[i].doStep(this);
-        }
+        this.doStep();
     }
 
     @Override
     protected void doBlockUpdateProvision()
     {
         LAVA_THREAD_POOL.submit(() ->
-            this.cells.parallelStream().forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();       
+            this.cells.stream(true).forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();       
     }
 
     @Override
@@ -355,10 +345,26 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doLavaCooling()
     {
-        // TODO Auto-generated method stub
-        
+        LAVA_THREAD_POOL.submit( () ->
+        this.cells.stream(true).forEach(c -> 
+             {
+                 if(c.canCool(this.tickIndex)) this.coolCell(c);
+             })).join();
     }
 
+    private void coolCell(LavaCell2 cell)
+    {
+        int x = cell.x();
+        int z = cell.z();
+        
+        // check two above cell top to catch filler blocks
+        for(int y = cell.bottomY(); y <= cell.topY() + 2; y++)
+        {
+            this.coolLava(PackedBlockPos.pack(x, y, z));
+        }
+        cell.coolAndShrink();
+    }
+    
     @Override
     protected void updateCells()
     {
@@ -393,7 +399,10 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         this.lavaAddEvents.processAllEvents();
 
         // update connections as needed, handle pressure propagation, or other housekeeping
-        this.cells.parallelStream().forEach(c -> c.update(this, cells, connections));
+        // this is also where connection sorting happens
+        LAVA_THREAD_POOL.submit( () ->
+            this.cells.stream(true).forEach(c -> c.update(this, cells, connections)
+        )).join();
 
     }
 
@@ -414,7 +423,4 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     {
         this.connections.validateConnections();
     }
-    
- 
- 
-}
+ }

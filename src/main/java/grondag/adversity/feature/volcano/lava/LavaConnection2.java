@@ -2,9 +2,11 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.adversity.feature.volcano.lava.LavaConnections.SortBucket;
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
+import grondag.adversity.library.ISimpleListItem;
 
-public class LavaConnection2
+public class LavaConnection2 implements ISimpleListItem
 {
     protected static int nextConnectionID = 0;
     
@@ -106,9 +108,18 @@ public class LavaConnection2
         this.isDeleted = true;
     }
     
+    @Override
     public boolean isDeleted()
     {
-        return this.isDeleted;
+        // cells that can no longer connect should be deleted
+        return this.isDeleted || !this.firstCell.canConnectWith(this.secondCell);
+    }
+    
+    @Override
+    public void onDeletion()
+    {
+        this.firstCell.removeConnection(this);
+        this.secondCell.removeConnection(this);
     }
     
     public void flowAcross(LavaSimulatorNew sim, int flow)
@@ -116,21 +127,6 @@ public class LavaConnection2
         this.flowThisTick += flow;
         this.firstCell.changeLevel(sim.getTickIndex(), -flow);
         this.secondCell.changeLevel(sim.getTickIndex(), flow);
-    }
-    
-    /**
-     * Call when removing this connection so that cell references can be removed if appropriate.
-     */
-    public void releaseCells()
-    {
-        this.firstCell.removeConnection(this);
-        this.secondCell.removeConnection(this);
-    }
-    
-    /** True if cells are still connected */
-    public boolean isValid()
-    {
-        return !this.isDeleted && this.firstCell.canConnectWith(this.secondCell);
     }
     
     /** 
@@ -149,14 +145,17 @@ public class LavaConnection2
     }
     
     /**
+     * TODO: rework
      * Drop can change on validation, but is also used for sorting.
      * To maintain validity of sort index for retrieval, need to preserve drop
      * value until sort can be properly updated.
      * @return
      */
-    public long getSortKey()
+    public SortBucket getSortBucket()
     {
-        return this.sortKey;
+        
+        //TODO rework this
+        return SortBucket.A;
     }
     
     @Override

@@ -1,29 +1,22 @@
 package grondag.adversity.feature.volcano.lava.cell;
 
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.SimpleConcurrentList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 
 
-public class LavaCells
+public class LavaCells extends SimpleConcurrentList<LavaCell2>
 {
     private final Long2ObjectOpenHashMap<CellChunk> cellChunks = new Long2ObjectOpenHashMap<CellChunk>();
     
-    /** contains all extant cells - used to process all cells with simple iteration */
-    private LavaCell2 cells[] = new LavaCell2[0x10000];
-    
-    private AtomicInteger size = new AtomicInteger(0);
+    private final static int CAPACITY_INCREMENT = 0x10000;
     
     /** 
      * Reference to the simulation in which this cells collection lives.
@@ -33,16 +26,18 @@ public class LavaCells
     
     public LavaCells(LavaSimulatorNew sim)
     {
+        super(CAPACITY_INCREMENT);
         this.sim = sim;
     }
     
     /**
-     * Use for parallel operations on all cells.  
+     * Use operations on all cells.  
      * May include deleted cells.
      */
-    public Stream<LavaCell2> parallelStream()
+    @Override
+    public Stream<LavaCell2> stream(boolean isParallel)
     {
-        return StreamSupport.stream(Arrays.spliterator(cells, 0, size.get()), true);
+        return super.stream(isParallel);
     }
     
     private static final int MAX_CHUNKS_PER_TICK = 4;
@@ -203,11 +198,12 @@ public class LavaCells
     /** 
      * Adds cell to the storage array. 
      * Does not add to locator list.
-     * Thread-safe.
+     * Thread-safe if mode = ListMode.ADD. Disallowed otherwise.
      */
-    public void addCellToProcessingList(LavaCell2 cell)
+    @Override
+    public void add(LavaCell2 cell)
     {
-        cells[size.getAndIncrement()] = cell;
+        super.add(cell);
     }
     
     /** 
@@ -221,19 +217,9 @@ public class LavaCells
     {
         synchronized(this)
         {
-            int i = 0;
-            while(i < this.size.get())
-            {
-                if(cells[i].isDeleted())
-                {
-                    cells[i] = cells[this.size.decrementAndGet()];
-                    cells[this.size.get()] = null;
-                }
-                else
-                {
-                    i++;
-                }
-            }
+            this.setMode(ListMode.MAINTAIN);
+            this.removeDeletedItems();
+            this.setMode(ListMode.ADD);
         }
     }
     
@@ -268,31 +254,35 @@ public class LavaCells
     {
         synchronized(this)
         {
-            int capacity = this.cells.length - this.size.get();
-            if(capacity < 0x8000)
+            if(this.availableCapacity() < CAPACITY_INCREMENT / 2)
             {
-                this.cells = Arrays.copyOf(cells, this.cells.length + 0x10000);
+                this.setMode(ListMode.MAINTAIN);
+                this.resize(this.capacity() + CAPACITY_INCREMENT);
+                this.setMode(ListMode.ADD);
             }
-            else if(capacity >= 0x20000)
+            else if(this.availableCapacity() >= CAPACITY_INCREMENT * 2)
             {
-                this.cells = Arrays.copyOf(cells, this.cells.length - 0x10000);
+                this.setMode(ListMode.MAINTAIN);
+                this.resize(this.capacity() - CAPACITY_INCREMENT);
+                this.setMode(ListMode.ADD);
             }
         }
     }
     
     public void writeNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("Saving " + size.get() + " lava cells.");
-        int[] saveData = new int[size.get() * LavaCell2.LAVA_CELL_NBT_WIDTH];
+        Adversity.log.info("Saving " + this.size() + " lava cells.");
+        int[] saveData = new int[this.size() * LavaCell2.LAVA_CELL_NBT_WIDTH];
         int i = 0;
 
-        for(int j = 0; j < this.size.get(); j++)
+        for(LavaCell2 cell : this)
         {
-            if(cells[j] != null) cells[j].writeNBT(saveData, i);
+            cell.writeNBT(saveData, i);
             
             // Java parameters are always pass by value, so have to advance index here
             i += LavaCell2.LAVA_CELL_NBT_WIDTH;
-        }         
+        }
+       
         nbt.setIntArray(LavaCell2.LAVA_CELL_NBT_TAG, saveData);
     }
     
@@ -310,9 +300,12 @@ public class LavaCells
         }
         else
         {
-            this.size.set(saveData.length / LavaCell2.LAVA_CELL_NBT_WIDTH);
+            int count = saveData.length / LavaCell2.LAVA_CELL_NBT_WIDTH;
+            int newCapacity = (count / CAPACITY_INCREMENT + 1) * CAPACITY_INCREMENT;
+            if(newCapacity < CAPACITY_INCREMENT / 2) newCapacity += CAPACITY_INCREMENT;
             
-            this.cells = new LavaCell2[this.size.get() + 0x10000];
+            this.clear();
+            this.resize(newCapacity);
             
             int i = 0;
             
@@ -330,8 +323,6 @@ public class LavaCells
                     newCell = new LavaCell2(this, x, z, 0, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     this.setEntryCell(x, z, newCell);
-                    // if chunk was newly created, mark it as loaded so that 
-//                    this.getOrCreateCellChunk(x, z).setLoaded();
                 }
                 else
                 {
@@ -347,12 +338,7 @@ public class LavaCells
                 i += LavaCell2.LAVA_CELL_NBT_WIDTH - 2;
             }
          
-            Adversity.log.info("Loaded " + this.size.get() + " lava cells.");
+            Adversity.log.info("Loaded " + this.size() + " lava cells.");
         }
-    }
-    
-    public int size()
-    {
-        return this.size.get();
     }
 }

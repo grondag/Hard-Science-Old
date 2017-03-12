@@ -1,13 +1,13 @@
 package grondag.adversity.feature.volcano.lava.cell;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaConnection2;
 import grondag.adversity.feature.volcano.lava.LavaConnections;
-import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
+import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -17,11 +17,17 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 
-public class LavaCell2
+public class LavaCell2 implements ISimpleListItem
 {
     private static AtomicInteger nextCellID = new AtomicInteger(0);
     
     public final int id = nextCellID.getAndIncrement();
+    
+    /**
+     * True if locked for update via {@link #tryLock()}
+     * and {@link #unlock()}.
+     */
+    private final AtomicBoolean isLocked = new AtomicBoolean(false);
     
     /** 
      * Object held in common by all cells at our x, z coordinate.
@@ -63,7 +69,6 @@ public class LavaCell2
     
     /** see {@link #isBottomFlow()} */
     private boolean isBottomFlow;
-    
     
     private boolean isCoolingDisabled = false;
     
@@ -168,7 +173,7 @@ public class LavaCell2
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
-        cells.addCellToProcessingList(this);
+        cells.add(this);
     }
     
     /**
@@ -188,7 +193,30 @@ public class LavaCell2
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
-        cells.addCellToProcessingList(this);
+        cells.add(this);
+    }
+    
+    /** 
+     * Attempts to lock this cell for update.
+     * Returns true if lock was successful.
+     * If AND ONLY IF successful, caller MUST call {@link #unLock()}
+     * @return true if cell was successfully locked. 
+     */
+    public boolean tryLock()
+    {
+        return this.isLocked.compareAndSet(false, true);
+    }
+    
+    /**
+     * Unlocks this cell.  
+     * MUST be called by a thread IF AND ONLY IF earlier call 
+     * to {@link #tryLock()} was successful.
+     * Does not track which thread owned the lock, so could be abused
+     * to break a lock held by another thread. Don't do that. :-)
+     */
+    public void unlock()
+    {
+        this.isLocked.set(false);
     }
     
     /**
@@ -207,6 +235,7 @@ public class LavaCell2
         this.locator.setValidationNeeded(isNeeded);
     }    
     
+    @Override
     public boolean isDeleted()
     {
         return this.isDeleted;
@@ -1154,6 +1183,10 @@ public class LavaCell2
         // TODO
         // Pressure propagation
         
+        // TODO
+        // connection sorting - prioritize all outbound connections
+        // if a connection has no slope, priority is set by the downward cell, and is random
+        
     }
     
     /** maintains indication of whether or not this cell must remain loaded */
@@ -1176,6 +1209,49 @@ public class LavaCell2
         return this.getFloor() < other.getCeiling()
                 && this.getCeiling() > other.getFloor()
                 && !this.isDeleted() && !other.isDeleted();
+    }
+    
+    /**
+     * True if this cell has not had a flow in a configured number of ticks
+     * and it has fewer than four connections to cells that are also lava. (Is on an edge.)
+     */
+    public boolean canCool(int simTickIndex)
+    {
+        //TODO: make ticks to cool configurable
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
+        
+        if(this.connections.size() < 4) return true;
+        
+        int hotCount = 0;
+        for(LavaConnection2 c : this.connections.values())
+        {
+            if(c.getOther(this).getFluidUnits() > 0) hotCount++;
+            if(hotCount >= 4) return false;
+        }
+        
+        return true;
+    }
+    
+    /** 
+     * Removes all lava from this cell and raises the floor as if the lava has cooled.
+     * Does not perform any block updates to change lava to basalt in world. 
+     * Caller is expected to do that after calling canCool and before calling this method.
+     */
+    public void coolAndShrink()
+    {
+        if(this.isDeleted) return;
+        
+        int newFloor = this.fluidSurfaceLevel();
+        if(newFloor >= this.getCeiling())
+        {
+            this.setDeleted();
+        }
+        else
+        {
+            this.changeLevel(0, -this.getFluidUnits());
+            this.clearBlockUpdate();
+            this.setFloor(newFloor, true);
+        }
     }
     
     /**

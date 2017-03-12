@@ -1,19 +1,10 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import gnu.trove.impl.sync.TSynchronizedLongSet;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer.ChunkBuffer;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.chunk.Chunk;
 /**
  * Manages snapshots of chunk data to be used for creating and updating lava cells.

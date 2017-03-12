@@ -1,36 +1,49 @@
 package grondag.adversity.feature.volcano.lava;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
+import grondag.adversity.library.SimpleConcurrentList;
 
-public class LavaConnections
+public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
 {
-  
-    /** contains all extant connections - used to process all connections with simple iteration */
-    private LavaConnection2 connections[] = new LavaConnection2[0x10000];
     
-    private AtomicInteger size = new AtomicInteger(0);
+    @SuppressWarnings("unchecked")
+    private SimpleConcurrentList<LavaConnection2>[] sort = new SimpleConcurrentList[4];
     
-    private LavaConnection2 sortedArray[] = new LavaConnection2[0x10000];
+    private static final int CAPACITY_INCREMENT = 0x10000;
     
+    public static enum SortBucket
+    {
+        A, B, C, D
+    }
+
     private boolean isSortCurrent = false;
     
+    public LavaConnections()
+    {
+        super(CAPACITY_INCREMENT);
+        this.clear();
+    }
+    
+    @Override
     public void clear()
     {
         synchronized(this)
         {
-            this.connections = new LavaConnection2[0x10000];
-            this.sortedArray = new LavaConnection2[0x10000];
-            this.isSortCurrent = false;
+            super.clear();
+            this.resize(CAPACITY_INCREMENT);
+            this.setupSortLists();
         }
     }
     
-    public int size()
+    private void setupSortLists()
     {
-        return size.get();
+        this.sort[SortBucket.A.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity());
+        this.sort[SortBucket.B.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity() / 2);
+        this.sort[SortBucket.C.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity() / 4);
+        this.sort[SortBucket.D.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity() / 4);
+        this.isSortCurrent = false;
     }
     
     
@@ -42,18 +55,21 @@ public class LavaConnections
      */
     public void manageCapacity()
     {
-        int capacity = this.connections.length - this.size.get();
-        if(capacity < 0x8000)
+        if(this.availableCapacity() < CAPACITY_INCREMENT / 2)
         {
-            this.connections = Arrays.copyOf(connections, this.connections.length + 0x10000);
-            this.sortedArray = new LavaConnection2[this.connections.length];
-            this.isSortCurrent = false;
+            this.setMode(ListMode.MAINTAIN);
+            int newCapacity = this.capacity() + CAPACITY_INCREMENT;
+            this.resize(newCapacity);
+            this.setMode(ListMode.ADD);
+            this.setupSortLists();
         }
-        else if(capacity >= 0x20000)
+        else if(this.availableCapacity() >= CAPACITY_INCREMENT * 2)
         {
-            this.connections = Arrays.copyOf(connections, this.connections.length - 0x10000);
-            this.sortedArray = new LavaConnection2[this.connections.length];
-            this.isSortCurrent = false;
+            this.setMode(ListMode.MAINTAIN);
+            int newCapacity = this.capacity() - CAPACITY_INCREMENT;
+            this.setMode(ListMode.ADD);
+            this.resize(newCapacity);
+            this.setupSortLists();
         }
     }
     
@@ -86,26 +102,14 @@ public class LavaConnections
     }
     
     /** 
-     * Validates all connections and removes
-     * deleted or invalid connections from the storage array. 
+     * Removes deleted or invalid connections from the storage array. 
      * NOT Thread-safe.
      */
     public void validateConnections()
     {
-        int i = 0;
-        while(i < this.size.get())
-        {
-            if(!connections[i].isValid())
-            {
-                connections[i].releaseCells();
-                connections[i] = connections[this.size.decrementAndGet()];
-                connections[this.size.get()] = null;
-            }
-            else
-            {
-                i++;
-            }
-        }
+        this.setMode(ListMode.MAINTAIN);
+        this.removeDeletedItems();
+        this.setMode(ListMode.ADD);
     }
     
     /** 
@@ -115,36 +119,38 @@ public class LavaConnections
      */
     public void addConnectionToArray(LavaConnection2 connection)
     {
-        connections[size.getAndIncrement()] = connection;
+        this.add(connection);
         this.isSortCurrent = false;
     }
     
-    public LavaConnection2[] values()
+    private void refreshSortBuckets()
     {
-        if(!isSortCurrent)
+        for(SimpleConcurrentList<LavaConnection2> bucket : this.sort)
         {
-            //TODO: stop at size
-            Arrays.stream(connections).parallel().forEach(p -> {if(p != null) p.updateSortKey();});
-            
-            System.arraycopy(connections, 0, sortedArray, 0, this.size.get());
-        
-            //TODO: stop sorting at size
-            
-            //TODO: can sort into four buckets, with first bucket being most urgent outflow (if any) for a given cell
-            // second bucket is second most urgent, etc. Some cells will have no outflows. A few will have four.
-            // can then process each bucket with concurrency before moving on to the next bucket.
-            // "with concurrency" means need to synchronize access both cells involved.
-            
-            Arrays.parallelSort(sortedArray, 
-                    new Comparator<LavaConnection2>() {
-                      @Override
-                      public int compare(LavaConnection2 o1, LavaConnection2 o2)
-                      {
-                          return Long.compare(o1.getSortKey(), o2.getSortKey());
-                      }});
+            bucket.setMode(ListMode.MAINTAIN);
+            bucket.clear();
+            bucket.setMode(ListMode.ADD);
         }
         
-        return sortedArray;
+        this.setMode(ListMode.INDEX);
+        this.stream(true).forEach(p -> {if(p != null) this.sort[p.getSortBucket().ordinal()].add(p);;});
         
+        for(SortBucket b : SortBucket.values())
+        {
+            this.sort[b.ordinal()].setMode(ListMode.INDEX);
+        }
+        
+        this.setMode(ListMode.ADD);
+        
+        this.isSortCurrent = true;
+    }
+    
+    /**
+     * Returns a stream of LavaConnection instances within the given sort bucket. Stream will be parallel if requested..
+     */
+    public Stream<LavaConnection2> getSortStream(SortBucket bucket, boolean isParallel)
+    {
+        if(!isSortCurrent) refreshSortBuckets();
+        return this.sort[bucket.ordinal()].stream(isParallel);
     }
 }
