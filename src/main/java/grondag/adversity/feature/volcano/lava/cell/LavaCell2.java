@@ -9,6 +9,7 @@ import grondag.adversity.feature.volcano.lava.LavaConnections;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -53,6 +54,7 @@ public class LavaCell2 implements ISimpleListItem
     /** set true when cell should no longer be processed and can be removed from storage */
     private volatile boolean isDeleted;
     
+    /** holds all connections with other cells */
     private Int2ObjectOpenHashMap<LavaConnection2> connections = new Int2ObjectOpenHashMap<LavaConnection2>();
     
     /** see {@link #getFloor()} */
@@ -109,14 +111,23 @@ public class LavaCell2 implements ISimpleListItem
      */
     private byte suspendedLevel = SUSPENDED_NONE;
     
+    private static final int RETENTION_NEEDS_UPDATE = -1;
+    
     /** 
      * Fluid level will not drop below this - to emulate surface tension/viscosity.
-     * Established when cell is first created.  Does not change until cell solidifies or bottom drops out.
+     * Represented as block levels. (Not as fluid units!)
      * Initialized to -1 to indicate has not yet been set or if needs to be recalculated.
-     * The actual level used in world is a smoothed using a box filter.  
-     * The raw value is stored because it should not change as neighbors change.
+     * Computed during first update after cell is first created.  Does not change until cell solidifies or bottom drops out.
+     * The raw value is persisted because it should not change as neighbors change.
      */
-    private int rawRetainedLevel = -1;
+    private int rawRetainedLevel = RETENTION_NEEDS_UPDATE;
+    
+    /** 
+     * As with {@link #rawRetainedLevel} but smoothed with neighbors using a box filter.  
+     * Is not persisted because can be recomputed from neighbors.
+     * Is computed lazily as needed.  Invalidated whenever raw retention in this cell or a neighboring cell changes.
+     */
+    private int smoothedRetainedLevel = RETENTION_NEEDS_UPDATE;
     
     /** 
      * Exponential average of current level - used for computing visible level.
@@ -152,10 +163,8 @@ public class LavaCell2 implements ISimpleListItem
     private int lastTickIndex;
     
     //TODO
-    // pressure propagation
     // calculate retained level
     // calculate smoothed retained level
-    // make connections
     
     /**
      * Creates new cell and adds to processing array. 
@@ -335,6 +344,10 @@ public class LavaCell2 implements ISimpleListItem
      */
     private static final int FLUID_UNITS_MASK = 0x3FFFFF;
     private static final int FLUID_UNITS_BITS = 22;
+    
+    /** max value for ceiling */
+    private static final int MAX_LEVEL = 256 * AbstractLavaSimulator.LEVELS_PER_BLOCK;
+    
     /** 
      * Writes data to array starting at location i.
      */
@@ -520,7 +533,7 @@ public class LavaCell2 implements ISimpleListItem
 //    }
     
     /** 
-     * Finds the uppermost cell that is below to the given level.
+     * Finds the uppermost cell within this column that is below to the given level.
      * Cells that are below and adjacent (cell ceiling = level) count as below.
      * If the lowest existing cell is above or intersecting with the level, returns null.
      */
@@ -581,11 +594,12 @@ public class LavaCell2 implements ISimpleListItem
             // check for new connections whenever cell expands
             if(newFloor < this.floor) this.isConnectionUpdateNeeded = true;
             
-            //force retention recalc
-            this.rawRetainedLevel = -1;
             this.floor = newFloor;
             this.isBottomFlow = isFlowFloor;
             this.bottomY = (byte) getYFromFloor(this.floor);
+            
+            //force retention recalc
+            this.invalidateRawRetention();
         }
     }
     
@@ -598,6 +612,99 @@ public class LavaCell2 implements ISimpleListItem
     public int getFloor()
     {
         return this.floor;
+    }
+    
+    /**
+     * Locates neighboring lava cell that shares a floor surface with this cell.
+     * Cells must connect to share a floor surface.
+     * Diagonal neighbors must connect via one of the directly adjacent neighbors.
+     * Most cells only connect with one other cell at a given offset and thus share the same floor.
+     * But if there are two or more connecting, one must be higher than the other
+     * and the lower cell is considered to be the neighboring floor for purposes of retention smoothing.  
+     * 
+     * @param xOffset must be in range -1 to +1
+     * @param zPositive must be in range -1 to +1
+     * @return LavaCell that was found, null if none was found, self if xOffset == 0 and zOffset == 0
+     */
+    private LavaCell2 getFloorNeighbor(int xOffset, int zOffset)
+    {
+        //handling is different for directly adjacent vs. diagonally adjacent
+        if(xOffset == 0)
+        {
+            if(zOffset == 0)
+            {
+                return this;
+            }
+            else
+            {
+                return getLowestNeighborDirectlyAdjacent(this.locator.cellChunk.cells, xOffset, zOffset);
+            }
+        }
+        else if(zOffset == 0)
+        {
+            return getLowestNeighborDirectlyAdjacent(this.locator.cellChunk.cells, xOffset, zOffset);
+        }
+        else
+        {
+            // diagonally adjacent
+            LavaCells cells = this.locator.cellChunk.cells;
+
+            LavaCell2 nX = getLowestNeighborDirectlyAdjacent(cells, xOffset, 0);
+            if(nX != null)
+            {
+                nX = nX.getLowestNeighborDirectlyAdjacent(cells, xOffset, zOffset);
+            }
+            
+            LavaCell2 nZ = getLowestNeighborDirectlyAdjacent(cells, 0, zOffset);
+            if(nZ != null)
+            {
+                nZ = nZ.getLowestNeighborDirectlyAdjacent(cells, xOffset, zOffset);
+            }
+            
+            if(nX == null) 
+            {
+                return nZ;
+            }
+            else if(nZ == null)
+            {
+                return nX;
+            }
+            else
+            {
+                return(nX.getFloor() < nZ.getFloor() ? nX : nZ);
+            }
+        }
+    }
+    
+    private LavaCell2 getLowestNeighborDirectlyAdjacent(LavaCells cells, int xOffset, int zOffset)
+    {
+        LavaCell2 candidate = cells.getEntryCell(this.x() + xOffset, this.z() + zOffset);
+        if(candidate == null) return null;
+        
+        candidate = candidate.findCellNearestY(this.bottomY());
+        
+        if(!candidate.isConnectedTo(this))
+        {
+            if(candidate.below != null && candidate.below.isConnectedTo(this))
+            {
+                candidate = candidate.below;
+            }
+            else if(candidate.above != null && candidate.above.isConnectedTo(this))
+            {
+                candidate = candidate.above;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        
+        while(candidate != null && candidate.below != null && candidate.below.isConnectedTo(this))
+        {
+            candidate = candidate.below;
+        }
+        
+        return candidate;
     }
     
     /** Y of first (lowest) block that could contain lava */
@@ -1134,6 +1241,7 @@ public class LavaCell2 implements ISimpleListItem
         {
             int x = this.x();
             int z = this.z();
+            
             this.updateConnectionsWithColumn(cells.getEntryCell(x - 1, z), connections);
             this.updateConnectionsWithColumn(cells.getEntryCell(x + 1, z), connections);
             this.updateConnectionsWithColumn(cells.getEntryCell(x, z - 1), connections);
@@ -1144,7 +1252,6 @@ public class LavaCell2 implements ISimpleListItem
     
     /** 
      * Forms new connections with cells in the column with the given entry cell.
-     * For use by updateConnectionsIfNeeded;
      */
     private void updateConnectionsWithColumn(LavaCell2 entryCell, LavaConnections connections)
     {
@@ -1152,7 +1259,9 @@ public class LavaCell2 implements ISimpleListItem
         
         LavaCell2 candidate = entryCell.firstCell();
         
-        // lets us know if a connection was found earlier so can stop once out of range for new
+        /** 
+         * Tracks if connection was found earlier so can stop once out of range for new.
+         */
         boolean wasConnectionFound = false;
         
         while(candidate != null)
@@ -1179,6 +1288,8 @@ public class LavaCell2 implements ISimpleListItem
     public void update(LavaSimulatorNew sim, LavaCells cells, LavaConnections connections)
     {
         this.updateConnectionsIfNeeded(cells, connections);
+        
+        this.updateRawRetentionIfNeeded();
         
         // TODO
         // Pressure propagation
@@ -1279,6 +1390,137 @@ public class LavaCell2 implements ISimpleListItem
     public int getLastVisibleLevel()
     {
         return this.lastVisibleLevel;
+    }
+        
+    private void invalidateRawRetention()
+    {
+        this.rawRetainedLevel = RETENTION_NEEDS_UPDATE;
+        invalidateSmoothedRetention();
+    }
+    
+    /** see {@link #rawRetainedLevel} */
+    public int getRawRetainedLevel()
+    {
+        if(this.rawRetainedLevel == RETENTION_NEEDS_UPDATE)
+        {
+            if(Adversity.DEBUG_MODE) Adversity.log.warn("Raw retention update requested ad-hoc - raw retention update should occur during cell update."
+                    + "This may result in concurrent access to minecraft world objects.");
+            
+            this.updateRawRetention();
+        }
+        return this.rawRetainedLevel;
+    }
+    
+    /** see {@link #rawRetainedLevel} */
+    public void updateRawRetentionIfNeeded()
+    {
+        if(this.rawRetainedLevel == RETENTION_NEEDS_UPDATE)
+        {
+            this.updateRawRetention();
+        }
+    }
+    
+    /** see {@link #rawRetainedLevel} */
+    private void updateRawRetention()
+    {
+        if(this.isBottomFlow())
+        {
+            // note that code at bottom of routine handles case when retention is more than a full block
+            this.rawRetainedLevel = this.getFloor() + this.getFlowFloorRawRetentionDepth();
+        }
+        else
+        {
+            // TODO
+ //           this.rawRetainedLevel = (int)(locator.cellChunk.cells.sim.terrainHelper.computeIdealBaseFlowHeight(this.packedBlockPos) * AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+        }
+    }
+    
+    /**
+     * Returns retained depth of lava on the given flow block in block levels.
+     */
+    private int getFlowFloorRawRetentionDepth()
+    {
+        if(Adversity.DEBUG_MODE && !this.isBottomFlow()) 
+            Adversity.log.warn("Flow floor retention depth computed for non-flow-floor cell.");
+        
+        int myFloor = this.getFloor();
+        
+        int floorMin = Math.max(0, (this.bottomY() - 2) * AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS);
+        int floorMax = Math.min(MAX_LEVEL, (this.bottomY() + 3) * AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS);
+        
+        int x = this.x();
+        int z = this.z();
+        
+        int negX = Useful.clamp(getFloorForNeighbor(x - 1, z, myFloor ), floorMin, floorMax);
+        int posX = Useful.clamp(getFloorForNeighbor(x + 1, z, myFloor ), floorMin, floorMax);
+        int negZ = Useful.clamp(getFloorForNeighbor(x, z - 1, myFloor ), floorMin, floorMax);
+        int posZ = Useful.clamp(getFloorForNeighbor(x, z + 1, myFloor ), floorMin, floorMax);
+        
+        int negXnegZ = Useful.clamp(getFloorForNeighbor(x - 1, z - 1, myFloor ), floorMin, floorMax);
+        int negXposZ = Useful.clamp(getFloorForNeighbor(x - 1, z + 1, myFloor ), floorMin, floorMax);
+        int posXnegZ = Useful.clamp(getFloorForNeighbor(x + 1, z - 1, myFloor ), floorMin, floorMax);
+        int posXposZ = Useful.clamp(getFloorForNeighbor(x + 1, z + 1, myFloor ), floorMin, floorMax);
+
+        // Normalize the resulting delta values to the approximate range -1 to 1
+        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS;
+        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS;
+        double slope = Useful.clamp(Math.sqrt(deltaX * deltaX + deltaZ * deltaZ), 0.0, 1.0);
+      
+        int depth = (int) (AbstractLavaSimulator.LEVELS_PER_BLOCK * (1.0 - slope));
+        
+        // Abandoned experiment...
+        // this function gives a value of 1 for slope = 0 then drops steeply 
+        // as slope increases and then levels off to 1/4 height as slope approaches 1.
+        // Function is only well-behaved for our purpose within the range 0 to 1.
+        // More concisely, function is (1-sqrt(x)) ^ 2, applied to the top 3/4 of a full block height.
+        // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
+        
+        //clamp to at least 1/4 of a block and no more than 1.25 block
+        depth = Useful.clamp(depth, AbstractLavaSimulator.LEVELS_PER_QUARTER_BLOCK, AbstractLavaSimulator.LEVELS_PER_BLOCK_AND_A_QUARTER);
+      
+        return depth;
+    }
+    
+    /** 
+     * For use by getFlowFloorRawRetentionDepth.
+     * Returns default value if neighbor is null.
+     */
+    private int getFloorForNeighbor(int xOffset, int zOffset, int defaultValue)
+    {
+        LavaCell2 neighbor = this.getFloorNeighbor(xOffset, zOffset);
+        return neighbor == null ? defaultValue : neighbor.getFloor();
+    }
+    
+    /** see {@link #smoothedRetainedLevel} */
+    public int getSmoothedRetainedLevel()
+    {
+        if(this.smoothedRetainedLevel == RETENTION_NEEDS_UPDATE)
+        {
+            this.updatedSmoothedRetention();
+        }
+        return this.smoothedRetainedLevel;
+    }
+
+    /** see {@link #smoothedRetainedLevel} */
+    public void invalidateSmoothedRetention()
+    {
+        this.smoothedRetainedLevel = RETENTION_NEEDS_UPDATE;
+    }
+
+    /** see {@link #smoothedRetainedLevel} */
+    public void updatedSmoothedRetentionIfNeeded()
+    {
+        if(this.smoothedRetainedLevel == RETENTION_NEEDS_UPDATE)
+        {
+            this.updatedSmoothedRetention();
+        }
+    }
+
+    /** see {@link #smoothedRetainedLevel} */
+    private void updatedSmoothedRetention()
+    {
+        //TODO
+        this.smoothedRetainedLevel = this.rawRetainedLevel;
     }
     
     public static long computeKey(int x, int z)
@@ -1451,12 +1693,12 @@ public class LavaCell2 implements ISimpleListItem
                 this.fluidUnits = 0;
 
                 //force recalc of retained level when a cell becomes empty
-                this.rawRetainedLevel = -1;
+                this.invalidateRawRetention();
             }
             else if(this.fluidUnits == 0)
             {
                 //force recalc of retained level when a cell becomes empty
-                this.rawRetainedLevel = -1;
+                this.invalidateRawRetention();
             }
             
             this.updateActiveStatus();

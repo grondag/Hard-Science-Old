@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public class LavaSimulatorNew extends AbstractLavaSimulator
 {
     private final LavaCells cells = new LavaCells(this);
-    private final LavaConnections connections = new LavaConnections();
+    private final LavaConnections connections = new LavaConnections(this);
     public final CellChunkLoader cellChunkLoader = new CellChunkLoader();
     
     private final BlockEventList lavaBlockPlacementEvents = new BlockEventList("lavaPlaceEvents")
@@ -306,7 +306,8 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         this.stepIndex++;
         for(SortBucket bucket : SortBucket.values())
         {
-            this.connections.getSortStream(bucket, true).forEach(c -> c.doFirstStep(this));
+            LAVA_THREAD_POOL.submit(() ->
+                this.connections.getSortStream(bucket, true).forEach(c -> c.doFirstStep(this))).join();
         }
     }
 
@@ -316,7 +317,8 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         this.stepIndex++;
         for(SortBucket bucket : SortBucket.values())
         {
-            this.connections.getSortStream(bucket, true).forEach(c -> c.doStep(this));
+            LAVA_THREAD_POOL.submit(() ->
+                this.connections.getSortStream(bucket, true).forEach(c -> c.doStep(this))).join();
         }
     }
 

@@ -338,8 +338,11 @@ public class LavaSimulator extends AbstractLavaSimulator
     @Override
     public void registerPlacedLava(World worldIn, BlockPos pos, IBlockState state)
     {
+        
         if(itMe) return;
 
+        this.worldBuffer.isMCWorldAccessAppropriate = true;
+        
         if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
         {
             this.lavaFillers.add(PackedBlockPos.pack(pos));
@@ -354,12 +357,16 @@ public class LavaSimulator extends AbstractLavaSimulator
                 this.setSaveDirty(true);
             }
         }
+        
+        this.worldBuffer.isMCWorldAccessAppropriate = false;
     }
 
     @Override
     public void unregisterDestroyedLava(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
+        
+        this.worldBuffer.isMCWorldAccessAppropriate = true;
 
         LavaCell target = this.getCell(pos, false);
         if(target.getFluidAmount() > 0)
@@ -367,12 +374,17 @@ public class LavaSimulator extends AbstractLavaSimulator
             target.validate(this);
         }
         this.setSaveDirty(true);
+        
+        this.worldBuffer.isMCWorldAccessAppropriate = false;
+
     }
 
     @Override
     public void notifyLavaNeighborChange(World worldIn, BlockPos pos, IBlockState state)
     {
         if(itMe) return;
+
+        this.worldBuffer.isMCWorldAccessAppropriate = true;
 
         LavaCell center = this.getCell(pos, true);
         if(center != null)
@@ -385,11 +397,16 @@ public class LavaSimulator extends AbstractLavaSimulator
             this.getCell(PackedBlockPos.south(center.packedBlockPos), true);
         }
         this.setSaveDirty(true);
+        
+        this.worldBuffer.isMCWorldAccessAppropriate = false;
+
     }
 
     @Override
     public void addLava(long packedBlockPos, int amount, boolean shouldResynchToWorldBeforeAdding)
     {
+        this.worldBuffer.isMCWorldAccessAppropriate = true;
+
 //        Adversity.log.info("addLava amount=" + amount + " @" + pos.toString());
         LavaCell target = this.getCellForLavaAddition(packedBlockPos, shouldResynchToWorldBeforeAdding);
         if(target == null)
@@ -400,6 +417,9 @@ public class LavaSimulator extends AbstractLavaSimulator
         {
             target.changeLevel(this, amount);
         }
+        
+        this.worldBuffer.isMCWorldAccessAppropriate = false;
+
     }
 
     protected void addConnection(long packedConnectionPos)

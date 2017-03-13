@@ -34,6 +34,12 @@ public class WorldStateBuffer implements IBlockAccess
     private final static String NBT_SAVE_DATA_TAG = "WrldBuff";
     private final static int NBT_SAVE_DATA_WIDTH = 5;
     
+    /** use in debug to detect if calls to world are being made outside of server tick */
+    public volatile boolean isMCWorldAccessAppropriate = false;
+    
+    /** used to synchronize realworld access */
+    private final Object realworldLock = new Object();
+    
     /** tracks number of calls to setBlockState since last clearStatistics */
     private int stateSetCount = 0;
     
@@ -80,10 +86,20 @@ public class WorldStateBuffer implements IBlockAccess
 //            Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
 //                    this.realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
             
-            return this.realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
+            if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
+            {
+                Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+            }
+            
+            // prevent concurrent access to MC world
+            synchronized(realworldLock)
+            {
+                return this.realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
+            }
         }
         else
         {
+            
             return chunk.getBlockState(x, y, z);
         }
     }
@@ -599,7 +615,16 @@ public class WorldStateBuffer implements IBlockAccess
 //                Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
 //                        realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
                 
-                return realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
+                if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
+                {
+                    Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                }
+                
+                // prevent concurrent access to MC world
+                synchronized(realworldLock)
+                {
+                    return realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
+                }
             }
             else
             {

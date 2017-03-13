@@ -2,6 +2,7 @@ package grondag.adversity.library;
 
 import org.junit.Test;
 
+import gnu.trove.list.TLongList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 
@@ -11,6 +12,12 @@ public class UsefulTest
     @Test
     public void test()
     {
+        TLongList result = Useful.line2dInPlaneXZ(PackedBlockPos.pack(12, 0, -13), PackedBlockPos.pack(-16, 0, 4));
+        for(long packedPos : result.toArray())
+        {
+            System.out.println(PackedBlockPos.getX(packedPos) + "        " + PackedBlockPos.getZ(packedPos));
+        }
+        
         Vec3d origin;
         Vec3d direction;
         AxisAlignedBB box;

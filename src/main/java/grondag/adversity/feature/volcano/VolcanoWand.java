@@ -3,8 +3,10 @@ package grondag.adversity.feature.volcano;
 import java.util.Map;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
+import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.simulator.Simulator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -60,10 +62,10 @@ public class VolcanoWand extends Item
             float hitY, float hitZ)
     {
         
-        LavaTerrainHelper terrainThingy = new LavaTerrainHelper(worldIn);
+        LavaTerrainHelper terrainThingy = Simulator.instance.getFluidTracker().terrainHelper;
         
         BlockPos targetPos = pos.up();
-        float h = terrainThingy.computeIdealBaseFlowHeight(targetPos);
+        float h = terrainThingy.computeIdealBaseFlowHeight(PackedBlockPos.pack(targetPos));
         
         if(h > 1)
         {

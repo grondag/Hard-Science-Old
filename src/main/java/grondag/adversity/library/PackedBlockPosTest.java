@@ -1,5 +1,7 @@
 package grondag.adversity.library;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.junit.Test;
 
 import net.minecraft.util.math.BlockPos;
@@ -76,6 +78,30 @@ public class PackedBlockPosTest
         //south
         pos2 = PackedBlockPos.unpack(PackedBlockPos.south(long1));
         assert(pos1.south().equals(pos2));
+        
+        //add
+        for(int n = 0; n < 100; n++)
+        {
+            int x1 = ThreadLocalRandom.current().nextInt(-15000000, 15000000);
+            int x2 = ThreadLocalRandom.current().nextInt(-15000000, 1500000);
+            
+            int z1 = ThreadLocalRandom.current().nextInt(-15000000, 15000000);
+            int z2 = ThreadLocalRandom.current().nextInt(-15000000, 15000000);
+            
+            int y1 = ThreadLocalRandom.current().nextInt(0, 256);
+            int y2 = ThreadLocalRandom.current().nextInt(0, 256);
+
+            y2 = Math.min(y2, 255 - y1); // don't test values that would violate world height - should not occur in practice
+            long1 = PackedBlockPos.pack(x1, y1, z1);
+            long2 = PackedBlockPos.pack(x2, y2, z2);
+            pos1 = PackedBlockPos.unpack(PackedBlockPos.add(long1, long2));
+            
+            assert(pos1.getX() == x1 + x2);
+            assert(pos1.getY() == y1 + y2);
+            assert(pos1.getZ() == z1 + z2);
+            
+            
+        }
         
         //chunk coords
         pos1 = new BlockPos(414, 2, -52234);

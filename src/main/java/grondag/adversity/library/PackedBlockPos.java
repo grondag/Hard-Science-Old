@@ -22,6 +22,9 @@ public class PackedBlockPos
     private static final long EXTRA_MASK = (1L << NUM_EXTRA_BITS) - 1L;
     private static final long POSITION_MASK = (1L << EXTRA_SHIFT) - 1L;
     
+    /** must be subtracted when packed values are added - otherwise boundary offsets get included twice */
+    private static final long ADDITION_OFFSET = ((long)WORLD_BOUNDARY << X_SHIFT) | WORLD_BOUNDARY;
+    
     private static final long X_INCREMENT = 1L << X_SHIFT;
     private static final long Y_INCREMENT = 1L << Y_SHIFT;
     private static final long Z_INCREMENT = 1L;
@@ -64,6 +67,12 @@ public class PackedBlockPos
         int j = (int)((packedValue >> Y_SHIFT) & Y_MASK);
         int k = (int)(packedValue & Z_MASK) - WORLD_BOUNDARY;
         return new BlockPos(i, j, k);
+    }
+    
+    /** adds two packed block positions together */
+    public static long add(long first, long second)
+    {
+        return first + second -ADDITION_OFFSET;
     }
     
     public static long up(long packedValue)

@@ -9,7 +9,6 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.math.BlockPos;
 
 public class LavaCell
 {
@@ -705,7 +704,7 @@ public class LavaCell
             }
             else
             {
-                BlockPos downPos = PackedBlockPos.unpack(PackedBlockPos.down(this.packedBlockPos));
+                long downPos = PackedBlockPos.down(PackedBlockPos.down(this.packedBlockPos));
                 // If two blocks below is a barrier, then will have a retained level
                 // when the retained level below is > 1.
                 //TODO: optimize for integer math
@@ -717,7 +716,7 @@ public class LavaCell
         }
         else
         {
-            this.rawRetainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(PackedBlockPos.unpack(this.packedBlockPos)) * AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+            this.rawRetainedLevel = (int)(sim.terrainHelper.computeIdealBaseFlowHeight(this.packedBlockPos) * AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
         }
 
         if(this.rawRetainedLevel > AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK)

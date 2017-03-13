@@ -69,7 +69,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
     {
         super(NodeRoots.LAVA_SIMULATOR.ordinal());
         this.worldBuffer = new WorldStateBuffer(world);
-        this.terrainHelper = new LavaTerrainHelper(world);
+        this.terrainHelper = new LavaTerrainHelper(worldBuffer);
     }
 
     /**
@@ -157,6 +157,8 @@ public abstract class AbstractLavaSimulator extends SimulationNode
      */
     public void doTick(int newLastTickIndex)
     {
+        this.worldBuffer.isMCWorldAccessAppropriate = true;
+        
         if(this.tickIndex < newLastTickIndex)
         {
             this.tickIndex++;
@@ -250,6 +252,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
             }
              this.setSaveDirty(true);
         }
+        this.worldBuffer.isMCWorldAccessAppropriate = false;
     }
 
     protected void doParticles()

@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava.cell;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
@@ -338,6 +339,16 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
                 i += LavaCell2.LAVA_CELL_NBT_WIDTH - 2;
             }
          
+            // Prevent massive retention update from occurring during first world tick
+            
+            // Raw retention should be mostly current, but compute for any cells
+            // that were awaiting computation at last world save.
+            this.stream(false).forEach(c -> c.updateRawRetentionIfNeeded());
+            
+            // Smoothed retention will need to be computed for all cells, but can be parallel.
+            AbstractLavaSimulator.LAVA_THREAD_POOL.submit(() ->
+                this.stream(true).forEach(c -> c.updatedSmoothedRetentionIfNeeded())).join();
+            
             Adversity.log.info("Loaded " + this.size() + " lava cells.");
         }
     }

@@ -9,6 +9,8 @@ import javax.vecmath.Quat4f;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -23,6 +25,26 @@ public class Useful {
 	
     /** clamps the input value to the given range, inclusive */
     public static int clamp(int input, int min, int max)
+    {
+        if(input < min)
+            return min;
+        else if(input > max)
+            return max;
+        else
+            return input;
+    }
+
+    public static double clamp(double input, double min, double max)
+    {
+        if(input < min)
+            return min;
+        else if(input > max)
+            return max;
+        else
+            return input;
+    }
+    
+    public static float clamp(float input, float min, float max)
     {
         if(input < min)
             return min;
@@ -254,64 +276,156 @@ public class Useful {
    	return retVal;
    }
    
-   public interface CircleFillCallBack
-   {
-       /** return true to cancel remaining fill */
-       public boolean handleCircleFill(BlockPos origin, BlockPos pos);
-   }
    
-   public static void fill2dCircleInPlaneXZ(int x0, int y, int z0, int radius, CircleFillCallBack callback) 
+   /** 
+    * Returns a list of packed block position x & z OFFSETS within the given radius.
+    * Origin will be the first position.
+    */
+   public static TLongList fill2dCircleInPlaneXZ(int radius) 
    {
-       fill2dCircleInPlaneXZ(new BlockPos(x0, y, z0), radius, callback);
-   }
-   
-   public static void fill2dCircleInPlaneXZ(BlockPos origin, int radius, CircleFillCallBack callback) {
-
+     TLongArrayList result = new TLongArrayList( (int) (2 * radius * 3.2));
+       
        // uses midpoint circle algorithm
-
-       if (radius <= 0)
-           return;
+       if (radius > 0)
+       {
        
-       int x0 = origin.getX();
-       int y = origin.getY();
-       int z0 = origin.getZ();
-       
-       if(callback.handleCircleFill(origin, new BlockPos(x0, y, z0))) return;
-
-       for (int r = 1; r <= radius; ++r) {
-
-           int x = r;
+           int x = radius;
            int z = 0;
-           int decisionOver2 = 1 - r;
+           int err = 0;
 
-           while (z <= x) {
+           result.add(PackedBlockPos.pack(0, 0, 0));
+           
+           while (x >= z) 
+           {
                
-               if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, z + z0))) return; // Octant 1
-               if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, x + z0))) return; // Octant 2
-               if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, z + z0))) return; // Octant 3
-               if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, x + z0))) return; // Octant 4
-               if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, -z + z0))) return; // Octant 5
-               if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, -x + z0))) return; // Octant 6
-               if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, -z + z0))) return; // Octant 7
-               if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, -x + z0))) return; // Octant 8
-               z++;
+               if(z > 0)
+               {
+                   result.add(PackedBlockPos.pack(z, 0, z));
+                   result.add(PackedBlockPos.pack(-z, 0, z));
+                   result.add(PackedBlockPos.pack(z, 0, -z));
+                   result.add(PackedBlockPos.pack(-z, 0, -z));
+               }
+               
+               for(int i = x; i > z; i--)
+               {
+                   result.add(PackedBlockPos.pack(i, 0, z));
+                   result.add(PackedBlockPos.pack(z, 0, i));
+                   result.add(PackedBlockPos.pack(-i, 0, z));
+                   result.add(PackedBlockPos.pack(-z, 0, i));
+                   result.add(PackedBlockPos.pack(i, 0, -z));
+                   result.add(PackedBlockPos.pack(z, 0, -i));
+                   result.add(PackedBlockPos.pack(-i, 0, -z));
+                   result.add(PackedBlockPos.pack(-z, 0, -i));
+               }
 
-               if (decisionOver2 <= 0) {
-                   decisionOver2 += 2 * z + 1; // Change in decision criterion for y -> y+1
-               } else {
-                   if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, z + z0))) return; // Octant 1
-                   if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, x + z0))) return; // Octant 2
-                   if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, z + z0))) return; // Octant 3
-                   if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, x + z0))) return; // Octant 4
-                   if(callback.handleCircleFill(origin, new BlockPos(-x + x0, y, -z + z0))) return; // Octant 5
-                   if(callback.handleCircleFill(origin, new BlockPos(-z + x0, y, -x + z0))) return; // Octant 6
-                   if(callback.handleCircleFill(origin, new BlockPos(x + x0, y, -z + z0))) return; // Octant 7
-                   if(callback.handleCircleFill(origin, new BlockPos(z + x0, y, -x + z0))) return; // Octant 8
-                   x--;
-                   decisionOver2 += 2 * (z - x) + 1; // Change for y -> y+1, x -> x-1
+               if(err <= 0)
+               {
+                   z += 1;
+                   err += 2 * z + 1;
+               }
+               if(err > 0)
+               {
+                   x -= 1;
+                   err -= 2*x + 1;
                }
            }
        }
+       
+       return result;
+   }
+   
+   /** returns a list of packed block position x & z OFFSETS with the given radius */
+   public static TLongList outline2dCircleInPlaneXZ(int radius) 
+   {
+       TLongArrayList result = new TLongArrayList( (int) (2 * radius * 3.2));
+       
+       // uses midpoint circle algorithm
+       if (radius > 0)
+       {
+       
+           int x = radius;
+           int z = 0;
+           int err = 0;
+
+           while (x >= z) 
+           {
+               
+               result.add(PackedBlockPos.pack(x, 0, z)); // Octant 1
+               result.add(PackedBlockPos.pack(z, 0, x)); // Octant 2
+               result.add(PackedBlockPos.pack(-x, 0, z)); // Octant 3
+               result.add(PackedBlockPos.pack(-z, 0, x)); // Octant 4
+               result.add(PackedBlockPos.pack(-x, 0, -z)); // Octant 5
+               result.add(PackedBlockPos.pack(-z, 0, -x)); // Octant 6
+               result.add(PackedBlockPos.pack(x, 0, -z)); // Octant 7
+               result.add(PackedBlockPos.pack(z, 0, -x)); // Octant 8
+               
+               if(err <= 0)
+               {
+                   z += 1;
+                   err += 2 * z + 1;
+               }
+               if(err > 0)
+               {
+                   x -= 1;
+                   err -= 2*x + 1;
+               }
+           }
+       }
+       
+       return result;
+   }
+   
+   
+   /** 
+    * Returns a list of points on the line between the two given points, inclusive.
+    * Points start at first position given.
+    * Hat tip to https://github.com/fragkakis/bresenham.
+    */
+   public static TLongList line2dInPlaneXZ(long packedPos1, long packedPos2) 
+   {
+       int x1 = PackedBlockPos.getX(packedPos1);
+       int z1 = PackedBlockPos.getZ(packedPos1);
+       
+       int x2 = PackedBlockPos.getX(packedPos2);
+       int z2 = PackedBlockPos.getZ(packedPos2);
+       
+       int dx = Math.abs(x2 - x1);
+       int dz = Math.abs(z2 - z1);
+       
+       TLongArrayList result = new TLongArrayList((int) (Math.max(dx, dz) * 3 / 2));
+       
+       int sx = x1 < x2 ? 1 : -1; 
+       int sysz = z1 < z2 ? 1 : -1; 
+       
+       int err = dx-dz;
+       int e2;
+       int currentX = x1;
+       int currentZ = z1;
+       
+       while(true) 
+       {
+           result.add(PackedBlockPos.pack(currentX, 0, currentZ));
+           
+           if(currentX == x2 && currentZ == z2) 
+           {
+               break;
+           }
+           
+           e2 = 2*err;
+           if(e2 > -1 * dz) 
+           {
+               err = err - dz;
+               currentX = currentX + sx;
+           }
+           
+           if(e2 < dx) 
+           {
+               err = err + dx;
+               currentZ = currentZ + sysz;
+           }
+       }
+       
+       return result;
    }
    
    /** 
