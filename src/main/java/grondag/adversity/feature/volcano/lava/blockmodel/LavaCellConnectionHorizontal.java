@@ -1,6 +1,7 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.blockmodel;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 
 public class LavaCellConnectionHorizontal extends LavaCellConnection
 {

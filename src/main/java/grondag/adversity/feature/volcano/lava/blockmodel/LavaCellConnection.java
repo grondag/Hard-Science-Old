@@ -1,7 +1,8 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.blockmodel;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.util.EnumFacing;
 

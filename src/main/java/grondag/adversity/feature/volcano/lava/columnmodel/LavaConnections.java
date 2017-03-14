@@ -1,8 +1,8 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.stream.Stream;
 
-import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.library.SimpleConcurrentList;
 
 public class LavaConnections extends SimpleConcurrentList<LavaConnection2>

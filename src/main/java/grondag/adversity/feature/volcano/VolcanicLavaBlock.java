@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.LavaCell;
-import grondag.adversity.feature.volcano.lava.LavaSimulator;
+import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
+import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;

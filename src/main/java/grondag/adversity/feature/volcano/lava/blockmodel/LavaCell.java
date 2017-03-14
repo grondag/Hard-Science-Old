@@ -1,8 +1,11 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.blockmodel;
 
 import grondag.adversity.Adversity;
 import static grondag.adversity.Adversity.DEBUG_MODE;
-import grondag.adversity.feature.volcano.lava.LavaCellConnection.BottomType;
+
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
+import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
+import grondag.adversity.feature.volcano.lava.blockmodel.LavaCellConnection.BottomType;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;

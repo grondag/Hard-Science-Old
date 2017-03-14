@@ -1,8 +1,6 @@
-package grondag.adversity.feature.volcano.lava.cell.builder;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
-import grondag.adversity.feature.volcano.lava.cell.LavaCells;
 
 /** Builds a new cell stack from a CellColumn */
 public class CellStackBuilder
@@ -42,24 +40,20 @@ public class CellStackBuilder
     
     private void completeCell(LavaCells cells, CellColumn column, int x, int z, int ceiling)
     {
-        //TODO: handle matching cell
-        
         if(this.entryCell == null)
         {
             this.entryCell = new LavaCell2(cells, x, z, this.floor, this.ceiling, this.lavaLevel, this.isFlowFloor);
         }
         else
         {
-            this.entryCell.linkAbove(new LavaCell2(cells, this.entryCell, this.floor, this.ceiling, this.lavaLevel, this.isFlowFloor));
+            this.entryCell.linkAbove(new LavaCell2(this.entryCell, this.floor, this.ceiling, this.lavaLevel, this.isFlowFloor));
             this.entryCell = this.entryCell.aboveCell();
         }
         
         if(maxLavaY > minSpaceY)
         {
-            //TODO: check for and handle suspended lava
-            // Do by two steps: 
-            // 1 register particles in cell
-            // 2 set clearing level to max lava level - will let cell know to check for lava blocks and set to air
+            //if we somehow find suspended lava in newly created cells, this will simply delete it
+            this.entryCell.notifySuspendedLava(maxLavaY);
         }
         
         this.isCellStarted = false;
@@ -73,148 +67,82 @@ public class CellStackBuilder
      */
     public LavaCell2 updateCellStack(LavaCells cells, CellColumn worldColumn, LavaCell2 simEntryCell, int x, int z)
     {
-        if(simEntryCell == null) return this.buildNewCellStack(cells, worldColumn, x, z);
+        int y = 0;
         
+        /** used to know when a space has a flow floor */
+        BlockType lastBlockType = null;
         
-        BlockType lastWorldType = BlockType.BARRIER;
-        BlockType lastSimType = BlockType.BARRIER;
-        
-        LavaCell2 lastCell = null;
-        LavaCell2 closestCell = simEntryCell;
-        
-        /**
-         * TODO
-         * 
-         * if at any point we remove or merge cells and there are no more cells left,
-         * need to divert to buildNewCellStack to prevent NPE (plus is simpler logic that way)
-         * Highly unlikely though that this will ever happen: implies solid blocks from 0 to world height...
-         */
-        
-        for(int y = 0; y < 256; y++)
+        do
         {
-            closestCell = closestCell.findCellNearestY(y);
+            // if at any point we remove or merge cells and there are no more cells left,
+            // need to divert to buildNewCellStack to prevent NPE (plus is simpler logic that way)
+            // Highly unlikely though that this will ever happen: implies solid blocks from 0 to world height...
+            if(simEntryCell == null) return this.buildNewCellStack(cells, worldColumn, x, z);
             
-            BlockType currentWorldType = worldColumn.getBlockType(y);
-            BlockType currentSimType = getBlockTypeWithinCell(closestCell, y);
+            BlockType blockType = worldColumn.getBlockType(y);
             
-            switch(currentWorldType)
+            if(blockType.isBarrier)
             {
-                case BARRIER:
-                {
-                    /**
-                     * Four possibilities if we have a cell in the sim
-                     * 
-                     * 1) Cell floor has been raised.
-                     * 
-                     * 2) The cell no longer exists at all and must be deleted.
-                     * Can't know this until we get to the top of the existing cell. 
-                     * 
-                     * 3) Is the upper part of a cell where ceiling has been lowered. Cannot distinguish from 4 until
-                     * or unless we are at the top of the cell.  But we can handle same as 4 and 
-                     * rest of split cell is filled in will be handled by logic for case 2.
-                     * 
-                     * 4) Barrier has been added within the cell and it needs to be split. 
-                     */
-
-                    // Close cell if one is open
-                    // Otherwise no action.
-                    
-                    //TODO: pass matching cell
-                    if(this.isCellStarted) this.completeCell(cells, worldColumn, x, z, y * AbstractLavaSimulator.LEVELS_PER_BLOCK);
-                    
-                    break;
-                }
-                    
-                case LAVA_1:
-                case LAVA_2:
-                case LAVA_3:
-                case LAVA_4:
-                case LAVA_5:
-                case LAVA_6:
-                case LAVA_7:
-                case LAVA_8:
-                case LAVA_9:
-                case LAVA_10:
-                case LAVA_11:
-                case LAVA_12:
-                {
-                
-                    break;
-                }
-                
-                case SOLID_FLOW_1:
-                case SOLID_FLOW_2:
-                case SOLID_FLOW_3:
-                case SOLID_FLOW_4:
-                case SOLID_FLOW_5:
-                case SOLID_FLOW_6:
-                case SOLID_FLOW_7:
-                case SOLID_FLOW_8:
-                case SOLID_FLOW_9:
-                case SOLID_FLOW_10:
-                case SOLID_FLOW_11:
-                case SOLID_FLOW_12:
-                {
-                
-                    
-                    break;
-                }
-                
-                case SPACE:
-                {
-                
-                }
-                    
-                default:
-                    //NOOP - not real
-                    break;
-            
+                simEntryCell = simEntryCell.addOrConfirmBarrier(y, blockType.isFlow);
             }
-            lastWorldType = currentWorldType;
-            lastSimType = currentSimType;
-        }
+            else
+            {
+                int floor = blockType.isSolid ? blockType.flowHeight : 0;
+                
+                boolean isFlowFloor = (blockType.isSolid && blockType.isFlow) 
+                        || ((blockType == BlockType.SPACE || blockType.isLava) && lastBlockType == BlockType.SOLID_FLOW_12);
+                
+                simEntryCell = simEntryCell.addOrConfirmSpace(y, floor, isFlowFloor);
+                
+                /** 
+                 * Inform cell if we have lava - should have no effect if lava should be there according to 
+                 * simulation and will cause sim. to remove the lava if the sim does agree it should be there.
+                 */
+                if(blockType.isLava) simEntryCell.notifySuspendedLava(y);
+            }
+            
+            lastBlockType = blockType;
+            
+        } while(++y < 256);
         
-        // if got all the way to the top of the world with an open cell, close it
-        if(this.isCellStarted) this.completeCell(cells, worldColumn, 256 * AbstractLavaSimulator.LEVELS_PER_BLOCK, z, z);
-        
-        
-        return this.entryCell == null ? null : this.entryCell.selectStartingCell();
+      
+        return simEntryCell;
         
     }
     
-    /**
-     * Returns Block Type if it can be inferred from the given cell at world level Y. 
-     * Otherwise returns barrier.  This logic assumes that the given cell is the closest cell to Y
-     * and caller should ensure this before calling either by checking that y is within the cell
-     * or by calling LavaCell2.findCellNearestY().
-     */
-    private static BlockType getBlockTypeWithinCell(LavaCell2 cell, int y)
-    {
-        if(y > cell.topY()) return BlockType.BARRIER;
-        
-        if(y < cell.bottomY())
-        {
-            return y == cell.bottomY() - 1 && cell.isBottomFlow() 
-                    ? BlockType.SOLID_FLOW_12 : BlockType.BARRIER;
-        }
-        
-        // if get to this point, y is within the cell
-        
-        // detect special case of flow floor within the cell
-        if(y == cell.bottomY() && cell.isBottomFlow() && cell.getFluidUnits() == 0 && cell.floorFlowHeight() < AbstractLavaSimulator.LEVELS_PER_BLOCK )
-        {
-            return BlockType.SOLID_FLOW_STATES[cell.floorFlowHeight()];
-        }
-        
-        // above lava surface, must be space
-        if(y > cell.fluidSurfaceY()) return BlockType.SPACE;
-        
-        // below lava surface, must be lava
-        if(y < cell.fluidSurfaceY()) return BlockType.LAVA_12;
-        
-        // if get here, implies at lava surface
-        return BlockType.LAVA_STATES[cell.fluidSurfaceFlowHeight()];
-    }
+//    /**
+//     * Returns Block Type if it can be inferred from the given cell at world level Y. 
+//     * Otherwise returns barrier.  This logic assumes that the given cell is the closest cell to Y
+//     * and caller should ensure this before calling either by checking that y is within the cell
+//     * or by calling LavaCell2.findCellNearestY().
+//     */
+//    private static BlockType getBlockTypeWithinCell(LavaCell2 cell, int y)
+//    {
+//        if(y > cell.topY()) return BlockType.BARRIER;
+//        
+//        if(y < cell.bottomY())
+//        {
+//            return y == cell.bottomY() - 1 && cell.isBottomFlow() 
+//                    ? BlockType.SOLID_FLOW_12 : BlockType.BARRIER;
+//        }
+//        
+//        // if get to this point, y is within the cell
+//        
+//        // detect special case of flow floor within the cell
+//        if(y == cell.bottomY() && cell.isBottomFlow() && cell.getFluidUnits() == 0 && cell.floorFlowHeight() < AbstractLavaSimulator.LEVELS_PER_BLOCK )
+//        {
+//            return BlockType.SOLID_FLOW_STATES[cell.floorFlowHeight()];
+//        }
+//        
+//        // above lava surface, must be space
+//        if(y > cell.fluidSurfaceY()) return BlockType.SPACE;
+//        
+//        // below lava surface, must be lava
+//        if(y < cell.fluidSurfaceY()) return BlockType.LAVA_12;
+//        
+//        // if get here, implies at lava surface
+//        return BlockType.LAVA_STATES[cell.fluidSurfaceFlowHeight()];
+//    }
     
     /** 
      * Returns the starting cell for a new list of cells at the given location from the provided column data.

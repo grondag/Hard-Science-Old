@@ -1,4 +1,6 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.blockmodel;
+
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 
 /**
  * Version of LavaCellConnection that doesn't do anything.

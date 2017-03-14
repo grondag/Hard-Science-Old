@@ -62,7 +62,7 @@ public class EntityLavaParticle extends Entity
         return liveParticleLastServerTick + 2 > server.getTickCounter() ? liveParticleCount: 0;
     }
     
-    protected EntityLavaParticle(World world, int amount, Vec3d position, Vec3d velocity)
+    public EntityLavaParticle(World world, int amount, Vec3d position, Vec3d velocity)
     {
         this(world, amount);
 //        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());

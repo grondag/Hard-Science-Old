@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.blockmodel;
 
 
 import java.util.Collection;
@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
+import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
+import grondag.adversity.feature.volcano.lava.ParticleManager;
 import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;

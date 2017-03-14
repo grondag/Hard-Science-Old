@@ -234,7 +234,10 @@ public class LavaTerrainHelper
 //    }
 
 
-    
+    /**
+     * Ideal height of flowing lava retained on base (non-flow) terrain at the given location.  
+     * Returned as fraction of 1 block.
+     */
     public float computeIdealBaseFlowHeight(long originPackedPos)
     {               
         final float NOT_FOUND = -1;

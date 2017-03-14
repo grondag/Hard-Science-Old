@@ -1,9 +1,8 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.feature.volcano.lava.LavaConnections.SortBucket;
-import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 
 public class LavaConnection2 implements ISimpleListItem

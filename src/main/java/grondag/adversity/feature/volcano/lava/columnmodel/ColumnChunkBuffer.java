@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava.cell.builder;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer.ChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;

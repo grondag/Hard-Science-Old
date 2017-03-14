@@ -1,12 +1,9 @@
-package grondag.adversity.feature.volcano.lava.cell;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.LavaConnection2;
-import grondag.adversity.feature.volcano.lava.LavaConnections;
-import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
@@ -162,10 +159,6 @@ public class LavaCell2 implements ISimpleListItem
      */
     private int lastTickIndex;
     
-    //TODO
-    // calculate retained level
-    // calculate smoothed retained level
-    
     /**
      * Creates new cell and adds to processing array. 
      * Does NOT create linkages with existing cells in column.
@@ -176,13 +169,13 @@ public class LavaCell2 implements ISimpleListItem
      * @param lavaLevel
      * @param isFlowFloor
      */
-    public LavaCell2(LavaCells cells, LavaCell2 existingEntryCell, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
+    public LavaCell2(LavaCell2 existingEntryCell, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
     {
         this.locator = existingEntryCell.locator;
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.fluidUnits = Math.max(0, lavaLevel - floor);
-        cells.add(this);
+        this.locator.cellChunk.cells.add(this);
     }
     
     /**
@@ -826,7 +819,7 @@ public class LavaCell2 implements ISimpleListItem
     }
     
     
- /**
+    /**
      * Use to input lava into this cell (potentially) above the fluid surface.
      * Will add lava to surface after an appropriate falling time and 
      * render particles as appropriate.
@@ -840,8 +833,9 @@ public class LavaCell2 implements ISimpleListItem
     }
     
     
-    /** Use this to report when suspended lava blocks exist above lava surface
-     * that need to be set to air on next block update. See {@link #suspendedLevel}. 
+    /** Use this to report when lava blocks are detected in the world within this cell.
+     * If the reported lava exists above the cell's surfact, they need to be set to air on next block update. 
+     * See {@link #suspendedLevel}. 
      * Does not actually add any lava to this cell.
      */
     public void notifySuspendedLava(int y)
@@ -861,13 +855,12 @@ public class LavaCell2 implements ISimpleListItem
      * Generally does not add or remove lava from cells - moves lava down if cells expand
      * down or if an upper cell with lava merges into a lower cell.
      * 
-     * @param cells Needed to maintain cell array if cells must be created or merged.
      * @param y  Location of space as world level
      * @param isFlowFloor  True if floorHeight = 0 and block below is flow block with height=12.  Should also be true of floorHeight > 0.
      * @param floorHeight  If is a partial solid flow block, height of floor within this y block
      * @return Cell to which the space belongs
      */
-    public LavaCell2 addOrConfirmSpace(LavaCells cells, int y, int floorHeight, boolean isFlowFloor)
+    public LavaCell2 addOrConfirmSpace(int y, int floorHeight, boolean isFlowFloor)
     {
         /**
          * Here are the possible scenarios:
@@ -922,13 +915,13 @@ public class LavaCell2 implements ISimpleListItem
         // We don't check this first because validation routine will try to position us
         // to the closest cell most of the time before calling, and thus will usually not be necessary.
         LavaCell2 closest = this.findCellNearestY(y);
-        if(closest != this) return closest.addOrConfirmSpace(cells, y, floorHeight, isFlowFloor);
+        if(closest != this) return closest.addOrConfirmSpace(y, floorHeight, isFlowFloor);
         
         
         // if we get here, this is the closest cell and Y is not adjacent
         // therefore the space represents a new cell.
         
-        LavaCell2 newCell = new LavaCell2(cells, this, y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * FlowHeightState.BLOCK_LEVELS_INT, 0, isFlowFloor);
+        LavaCell2 newCell = new LavaCell2(this, y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * FlowHeightState.BLOCK_LEVELS_INT, 0, isFlowFloor);
         
         if(y > myTop)
         {
@@ -1057,7 +1050,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param isFlowFloor  True full barrier is a flow block with height=12.  Should also be true if floorHeight < 12.
      * @return Returns the upper cell that results from the split or given cell if split is not possible.
      */
-    private LavaCell2 splitCell(LavaCells cells, int y, int flowHeight, boolean isFlowFloor)
+    private LavaCell2 splitCell(int y, int flowHeight, boolean isFlowFloor)
     {
         // validity check: barrier has to be above my floor
         if(y == this.bottomY()) return this;
@@ -1072,7 +1065,7 @@ public class LavaCell2 implements ISimpleListItem
         // validity check: partial barriers within lava are ignored because they melt immediately
         if(!isFullBarrier && this.fluidSurfaceLevel() > floorForNewCell) return this;
         
-        LavaCell2 newCell = new LavaCell2(cells, this, floorForNewCell, this.getCeiling(), this.fluidSurfaceLevel(), isFlowFloor);
+        LavaCell2 newCell = new LavaCell2(this, floorForNewCell, this.getCeiling(), this.fluidSurfaceLevel(), isFlowFloor);
         if(this.fluidSurfaceLevel() > newCeilingForThisCell)
         {
             this.changeLevel(0, -(this.fluidSurfaceLevel() - newCeilingForThisCell) * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
@@ -1098,7 +1091,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param isFlowBlock  True if this barrier is a full-height flow block.
      * @return Cell nearest to the barrier location, or cell above it if two are equidistant. Null if no cells remain.
      */
-    public LavaCell2 addOrConfirmBarrier(LavaCells cells, int y, boolean isFlowBlock)
+    public LavaCell2 addOrConfirmBarrier(int y, boolean isFlowBlock)
     {
         /**
          * Here are the possible scenarios:
@@ -1150,20 +1143,20 @@ public class LavaCell2 implements ISimpleListItem
             else
             {
                 // split & return upper cell
-                return this.splitCell(cells, y, AbstractLavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
+                return this.splitCell(y, AbstractLavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
             }
         }
         
         if(this.aboveCell() != null)
         {
             int aboveDist = this.aboveCell().distanceToY(y);
-            if(aboveDist < myDist) return this.aboveCell().addOrConfirmBarrier(cells, y, isFlowBlock);
+            if(aboveDist < myDist) return this.aboveCell().addOrConfirmBarrier(y, isFlowBlock);
         }
         
         if(this.belowCell() != null)
         {
             int belowDist = this.belowCell().distanceToY(y);
-            if(belowDist < myDist) return this.belowCell().addOrConfirmBarrier(cells, y, isFlowBlock);
+            if(belowDist < myDist) return this.belowCell().addOrConfirmBarrier(y, isFlowBlock);
         }
         
         // no adjacent cell is closer than this one - barrier must already be between cells
@@ -1423,16 +1416,13 @@ public class LavaCell2 implements ISimpleListItem
     /** see {@link #rawRetainedLevel} */
     private void updateRawRetention()
     {
-        if(this.isBottomFlow())
-        {
-            // note that code at bottom of routine handles case when retention is more than a full block
-            this.rawRetainedLevel = this.getFloor() + this.getFlowFloorRawRetentionDepth();
-        }
-        else
-        {
-            // TODO
- //           this.rawRetainedLevel = (int)(locator.cellChunk.cells.sim.terrainHelper.computeIdealBaseFlowHeight(this.packedBlockPos) * AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
-        }
+        int depth = this.isBottomFlow() 
+                ? this.getFlowFloorRawRetentionDepth()
+                : (int)(locator.cellChunk.cells.sim.terrainHelper
+                        .computeIdealBaseFlowHeight(PackedBlockPos.pack(this.x(), this.bottomY(), this.z()))
+                        * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+                
+        this.rawRetainedLevel = this.getFloor() + depth;
     }
     
     /**

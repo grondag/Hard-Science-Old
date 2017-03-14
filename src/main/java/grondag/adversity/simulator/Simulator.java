@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.LavaSimulator;
+import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;

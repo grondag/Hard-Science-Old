@@ -1,10 +1,7 @@
-package grondag.adversity.feature.volcano.lava.cell;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.feature.volcano.lava.cell.builder.CellColumn;
-import grondag.adversity.feature.volcano.lava.cell.builder.CellStackBuilder;
-import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
 /**
  * Container for all cells in a world chunk.

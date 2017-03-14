@@ -1,10 +1,9 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.LavaConnections.SortBucket;
-import grondag.adversity.feature.volcano.lava.cell.LavaCell2;
-import grondag.adversity.feature.volcano.lava.cell.LavaCells;
-import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
+import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;

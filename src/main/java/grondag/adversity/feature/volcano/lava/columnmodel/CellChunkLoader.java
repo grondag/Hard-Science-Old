@@ -1,9 +1,9 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer.ChunkBuffer;
-import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.world.chunk.Chunk;
 /**

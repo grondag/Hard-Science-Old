@@ -1,9 +1,10 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.blockmodel;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.EnumFacing;

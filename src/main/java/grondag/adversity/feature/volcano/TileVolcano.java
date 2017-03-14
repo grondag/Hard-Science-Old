@@ -15,9 +15,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
-import grondag.adversity.feature.volcano.lava.LavaCell;
-import grondag.adversity.feature.volcano.lava.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
+import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
+import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.NiceBlock;

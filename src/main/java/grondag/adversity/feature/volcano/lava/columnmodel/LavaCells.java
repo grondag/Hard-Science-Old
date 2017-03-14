@@ -1,11 +1,9 @@
-package grondag.adversity.feature.volcano.lava.cell;
+package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.LavaSimulatorNew;
-import grondag.adversity.feature.volcano.lava.cell.builder.ColumnChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleConcurrentList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
@@ -327,7 +325,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
                 }
                 else
                 {
-                    newCell = new LavaCell2(this, startingCell,0, 0, 0, false);
+                    newCell = new LavaCell2(startingCell, 0, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     startingCell.addCellToColumn(startingCell);
                 }
