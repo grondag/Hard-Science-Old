@@ -95,7 +95,6 @@ public class CellColumn
 //        
 //        // if column already had a starting cell, keep it, otherwise give uppermost cell
 //        
-//        //TODO - which cell to return here?
 //        return startingCell == null ? currentCell : startingCell;
 //    }
     

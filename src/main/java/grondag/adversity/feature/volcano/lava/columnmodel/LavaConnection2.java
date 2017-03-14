@@ -24,7 +24,7 @@ public class LavaConnection2 implements ISimpleListItem
     protected int flowThisTick = 0;
     protected int lastFlowTick = 0;
     
-    protected long sortKey;
+    private SortBucket sortBucket;
     
     protected boolean isDirty = false;
     
@@ -37,7 +37,6 @@ public class LavaConnection2 implements ISimpleListItem
         this.secondCell = secondCell;
         firstCell.addConnection(this);
         secondCell.addConnection(this);
-        this.updateSortKey();
     }
     
     public static long getConnectionKey(LavaCell2 firstCell, LavaCell2 secondCell)
@@ -88,9 +87,24 @@ public class LavaConnection2 implements ISimpleListItem
      */
     private void doStepWork(LavaSimulatorNew sim)
     {
-        int flow = this.getFlowRate(sim);
-        
-        if(flow != 0) this.flowAcross(sim, flow);
+        boolean isIncomplete = true;
+        do
+        {
+            if(this.firstCell.tryLock())
+            {
+                if(this.secondCell.tryLock())
+                {
+                    int flow = this.getFlowRate(sim);
+                    
+                    if(flow != 0) this.flowAcross(sim, flow);
+                    
+                    isIncomplete = false;
+                    
+                    this.secondCell.unlock();
+                }
+                this.firstCell.unlock();
+            }
+        } while(isIncomplete);
     }
     
     /**
@@ -131,62 +145,27 @@ public class LavaConnection2 implements ISimpleListItem
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
      * Measured in fluid levels
-     * For horizontal connections:
-     *      Zero if there is no difference or if either block is a barrier.
-     *      Higher drop means higher priority for flowing. 
-     * For all other connections:
-     *      Drop is always zero and not intended to be used.
+     * Zero if there is no difference or if either block is a barrier.
+     * Higher drop means higher priority for flowing. 
      */
     public int getSortDrop()
     {
-        //TODO
-        return 0;
+        return Math.abs(this.firstCell.getFloor() - this.secondCell.getFloor());
     }
-    
-    /**
-     * TODO: rework
-     * Drop can change on validation, but is also used for sorting.
-     * To maintain validity of sort index for retrieval, need to preserve drop
-     * value until sort can be properly updated.
-     * @return
-     */
+
     public SortBucket getSortBucket()
     {
-        
-        //TODO rework this
-        return SortBucket.A;
+        return this.sortBucket;
+    }
+    
+    public void setSortBucket(SortBucket newBucket)
+    {
+        this.sortBucket = newBucket;
     }
     
     @Override
     public int hashCode()
     {
         return this.id;
-    }
-    
-    /** return true of sort key was changed */
-    public boolean updateSortKey()
-    {
-        
-        // drop - higher drops come first       16 bits
-//        key |= ((long)((0xFFFF - this.getSortDrop()) & 0xFFFF) << 38);
-        long key = ((long)((0xFF - this.getSortDrop()) & 0xFF) << 48);
-        
-        // random                               
-        key |= (ThreadLocalRandom.current().nextInt(0xFFFF) << 32);
-//        key |= ((Useful.longHash(this.packedConnectionPos) & 0x3F) << 32);
-        
-        // uniqueness  32 bits
-        key |= this.id;
-        
-        if(key != this.sortKey)
-        {
-            this.sortKey = key;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    
+    }     
 }

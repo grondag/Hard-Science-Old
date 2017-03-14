@@ -1,9 +1,15 @@
 package grondag.adversity.feature.volcano.lava.columnmodel;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.collect.ComparisonChain;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
@@ -1274,6 +1280,61 @@ public class LavaCell2 implements ISimpleListItem
         }
     }
     
+    /** prevent massive garbage collection each tick */
+    private static ThreadLocal<ArrayList<LavaConnection2>> sorter = new ThreadLocal<ArrayList<LavaConnection2>>() 
+    {
+        @Override
+        protected ArrayList<LavaConnection2> initialValue() 
+        {
+           return new ArrayList<LavaConnection2>();
+        }
+     };
+  
+    
+    /**
+     * Assigns a sort bucket to each outbound connection.
+     */
+    private void prioritizeOutboundConnections()
+    {
+        ArrayList<LavaConnection2> sort = sorter.get();
+        sort.clear();
+        
+        for(LavaConnection2 connection : this.connections.values())
+        {
+            // this cell is responsible for sorting connections that have a lower floor than it
+            // if floors are the same, the cell that is "first" handles sorting
+            LavaCell2 other = connection.getOther(this);
+            if(other.getFloor() < this.getFloor() || (other.getFloor() == this.getFloor() && connection.firstCell == this))
+            {
+                sort.add(connection);
+            }
+        }
+        
+        if(sort.size() > 0)
+        {
+            sort.sort(new Comparator<LavaConnection2>()
+            {
+                @Override
+                public int compare(LavaConnection2 o1, LavaConnection2 o2)
+                {
+                    return ComparisonChain.start()
+                            // larger drops first
+                            .compare(o2.getSortDrop(), o1.getSortDrop())
+                            // random breaks ties
+                            .compare(o1.rand, o2.rand)
+                            .result();
+                }
+            });
+            
+            for(int i = 0; i < sort.size(); i++)
+            {
+                // Don't think it is even possible for a cell to have more than four neighbors with a lower or same floor, but in case I'm wrong...
+                // For cells with more than four outbound connections, all connections beyond the first four get dropped in the last bucket.
+                sort.get(i).setSortBucket(i < 4 ? SortBucket.values()[i] : SortBucket.D);
+            }
+        }
+    }
+    
     /**
      * Called once per tick for each cell before simulation steps are run.
      * Use for housekeeping tasks.
@@ -1284,13 +1345,11 @@ public class LavaCell2 implements ISimpleListItem
         
         this.updateRawRetentionIfNeeded();
         
-        // TODO
-        // Pressure propagation
+        // TODO: Pressure propagation
         
-        // TODO
+
         // connection sorting - prioritize all outbound connections
-        // if a connection has no slope, priority is set by the downward cell, and is random
-        
+        this.prioritizeOutboundConnections();        
     }
     
     /** maintains indication of whether or not this cell must remain loaded */
@@ -1509,7 +1568,7 @@ public class LavaCell2 implements ISimpleListItem
     /** see {@link #smoothedRetainedLevel} */
     private void updatedSmoothedRetention()
     {
-        //TODO
+        //TODO: retention smoothing, this is a stub
         this.smoothedRetainedLevel = this.rawRetainedLevel;
     }
     
