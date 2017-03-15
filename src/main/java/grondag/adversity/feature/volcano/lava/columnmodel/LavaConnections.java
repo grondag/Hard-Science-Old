@@ -7,7 +7,6 @@ import grondag.adversity.library.SimpleConcurrentList;
 
 public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
 {
-    private final LavaSimulatorNew sim;
     
     @SuppressWarnings("unchecked")
     private SimpleConcurrentList<LavaConnection2>[] sort = new SimpleConcurrentList[4];
@@ -21,10 +20,9 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
 
     private boolean isSortCurrent = false;
     
-    public LavaConnections(LavaSimulatorNew sim)
+    public LavaConnections()
     {
         super(CAPACITY_INCREMENT);
-        this.sim = sim;
         this.clear();
     }
     

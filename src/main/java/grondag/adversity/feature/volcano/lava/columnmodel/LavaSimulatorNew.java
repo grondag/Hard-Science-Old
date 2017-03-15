@@ -5,6 +5,7 @@ import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
 import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.SimpleConcurrentList.ListMode;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import net.minecraft.block.state.IBlockState;
@@ -15,7 +16,7 @@ import net.minecraft.world.World;
 public class LavaSimulatorNew extends AbstractLavaSimulator
 {
     private final LavaCells cells = new LavaCells(this);
-    private final LavaConnections connections = new LavaConnections(this);
+    private final LavaConnections connections = new LavaConnections();
     public final CellChunkLoader cellChunkLoader = new CellChunkLoader();
     
     private final BlockEventList lavaBlockPlacementEvents = new BlockEventList("lavaPlaceEvents")
@@ -125,9 +126,15 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     {
         cells.readNBT(this, nbt);
         
+        this.connections.setMode(ListMode.MAINTAIN);
         this.connections.resize(cells.capacity() * 6);
+        
+        this.connections.setMode(ListMode.ADD);
         LAVA_THREAD_POOL.submit(() -> cells.stream(true).forEach(c -> c.updateConnectionsIfNeeded(cells, connections))).join();
+        
+        this.connections.setMode(ListMode.MAINTAIN);
         this.connections.manageCapacity();
+        this.connections.setMode(ListMode.ADD);
         
         this.lavaBlockPlacementEvents.readNBT(nbt);
         this.lavaAddEvents.readNBT(nbt);
@@ -247,25 +254,9 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             this.connectionProcessCount += this.getConnectionCount();
             
             long startTime;
-            
-            startTime = System.nanoTime();
-            startTime = System.nanoTime();
-            this.updateCells();
-            cellUpdateTime  += (System.nanoTime() - startTime);
 
-            
-            startTime = System.nanoTime();
-            // force processing on non-dirty connection at least once per tick
-            this.doFirstStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doLastStep();
-            this.connectionProcessTime += (System.nanoTime() - startTime);
-
+            // Must be within tick
+            this.worldBuffer.isMCWorldAccessAppropriate = true;
             
             startTime = System.nanoTime();
             this.doParticles();
@@ -280,12 +271,11 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             blockUpdateApplicationTime += (System.nanoTime() - startTime);
             
             startTime = System.nanoTime();
-            this.doCellValidation();
-            this.doConnectionValidation();
-            this.validationTime += (System.nanoTime() - startTime);
-            
+            this.updateCells();
+            cellUpdateTime  += (System.nanoTime() - startTime);
+
             int tickSelector = this.tickIndex & 0xF;
-         
+            
             // do these on alternate ticks to help avoid ticks that are too long
             if(tickSelector == 4)
             {
@@ -300,6 +290,26 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 this.coolingTime += (System.nanoTime() - startTime);
             }
 
+            // After this could be post-tick
+            this.worldBuffer.isMCWorldAccessAppropriate = false;
+            
+            startTime = System.nanoTime();
+            // force processing on non-dirty connection at least once per tick
+            this.doFirstStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doLastStep();
+            this.connectionProcessTime += (System.nanoTime() - startTime);
+
+            startTime = System.nanoTime();
+            this.doCellValidation();
+            this.doConnectionValidation();
+            this.validationTime += (System.nanoTime() - startTime);
+        
             this.setSaveDirty(true);
         }
     }
@@ -336,8 +346,10 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doBlockUpdateProvision()
     {
+        this.cells.setMode(ListMode.INDEX);
         LAVA_THREAD_POOL.submit(() ->
-            this.cells.stream(true).forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();       
+            this.cells.stream(true).forEach(c -> c.provideBlockUpdateIfNeeded(this))).join();      
+        this.cells.setMode(ListMode.ADD);
     }
 
     @Override
@@ -351,11 +363,13 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     protected void doLavaCooling()
     {
+        this.cells.setMode(ListMode.INDEX);
         LAVA_THREAD_POOL.submit( () ->
         this.cells.stream(true).forEach(c -> 
              {
                  if(c.canCool(this.tickIndex)) this.coolCell(c);
              })).join();
+        this.cells.setMode(ListMode.ADD);
     }
 
     private void coolCell(LavaCell2 cell)
@@ -387,11 +401,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         // For chunks that require full validation, buffer entire chunk state.
         // Actual load/validation for full chunks can be performed post=tick.
         this.cells.validateOrBufferChunks();
-        
-        
-        // rest can be done post tick
-        // -------------------------------
-             
+         
         // Add or update cells from world as needed
         // could be concurrent, but not yet implemented as such
         ColumnChunkBuffer buffer = this.cellChunkLoader.poll();
@@ -406,9 +416,11 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
 
         // update connections as needed, handle pressure propagation, or other housekeeping
         // this is also where connection sorting happens
+        this.cells.setMode(ListMode.INDEX);
         LAVA_THREAD_POOL.submit( () ->
             this.cells.stream(true).forEach(c -> c.update(this, cells, connections)
         )).join();
+        this.cells.setMode(ListMode.ADD);
 
     }
 

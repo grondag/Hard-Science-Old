@@ -143,20 +143,20 @@ public class LavaCell2 implements ISimpleListItem
      * Maximum pressure level reported by any connected neighbor during the last connection processing pass.
      * Set to nextMaxNeighborPressure whenever propagate pressure sees a new stepIndex.
      */
-    private int lastMaxNeighborPressure;
+//    private int lastMaxNeighborPressure;
     
     /**
      * Maximum pressure level reported by any connected neighbor during the current connection processing pass.
      * Set to 0 whenever propagate pressure sees a new stepIndex.
      */
-    private int nextMaxNeighborPressure;
+//    private int nextMaxNeighborPressure;
     
     /**
      * The stepIndex that was last seen.
      * Step index will increment multiple times per tick.
      * When a new stepIndex is seen, is trigger to reset pressure propagation.
      */
-    private int lastStepIndex;
+//    private int lastStepIndex;
     
     /**
      * The simulation tick that was last seen.
@@ -197,11 +197,16 @@ public class LavaCell2 implements ISimpleListItem
      */
     public LavaCell2(LavaCells cells, int x, int z, int floor, int ceiling, int lavaLevel, boolean isFlowFloor)
     {
+        //TODO: remove
+        if(lavaLevel > 0)
+            Adversity.log.info("boop");
+        
         this.locator = new CellLocator(x, z, this, cells.getOrCreateCellChunk(x, z));
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
-        this.fluidUnits = Math.max(0, lavaLevel - floor);
+        this.fluidUnits = Math.max(0, lavaLevel - floor) * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL;
         cells.add(this);
+        this.updateActiveStatus();
     }
     
     /** 
@@ -1366,6 +1371,8 @@ public class LavaCell2 implements ISimpleListItem
         {
             if(shouldBeActive) this.locator.cellChunk.incrementActiveCount();
         }
+        
+        this.isActive = shouldBeActive;
     }
 
     public boolean canConnectWith(LavaCell2 other)

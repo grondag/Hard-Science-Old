@@ -1,5 +1,6 @@
 package grondag.adversity.library;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -138,6 +139,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
      */
     public void removeDeletedItems()
     {
+        ArrayList l;
         // note - will not prevent add or iteration
         // so does not, by itself, ensure thread safety
         synchronized(this)
@@ -145,17 +147,18 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
             if(Adversity.DEBUG_MODE && this.mode != ListMode.MAINTAIN)
                 Adversity.log.warn("Unsupported removeDeletedItems operation on simple concurrent list while mode = " + this.mode);
 
-            @SuppressWarnings("unchecked")
-            T[] itemAlias = (T[]) this.items;
 
             int i = 0;
             while(i < this.size.get())
             {
-                if(itemAlias[i].isDeleted())
+                @SuppressWarnings("unchecked")
+                T item =  (T) this.items[i];
+
+                if(item.isDeleted())
                 {
-                    itemAlias[i].onDeletion();
-                    itemAlias[i] = itemAlias[this.size.decrementAndGet()];
-                    itemAlias[this.size.get()] = null;
+                    item.onDeletion();
+                    items[i] = items[this.size.decrementAndGet()];
+                    items[this.size.get()] = null;
                 }
                 else
                 {

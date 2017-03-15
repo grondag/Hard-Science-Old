@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;
@@ -57,7 +57,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	
     private VolcanoManager volcanoManager;
     
-    private LavaSimulator lavaSimulator
+    private AbstractLavaSimulator lavaSimulator
     ;
     
 	private static ExecutorService executor;
@@ -101,7 +101,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
-	        this.lavaSimulator = new LavaSimulator(this.world);
+	        this.lavaSimulator = new LavaSimulatorNew(this.world);
 	        
             if(PersistenceManager.loadNode(world, this))
             {

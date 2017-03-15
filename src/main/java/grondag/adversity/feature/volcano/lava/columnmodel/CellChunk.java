@@ -134,6 +134,9 @@ public class CellChunk
             CellStackBuilder builder = new CellStackBuilder();
             CellColumn columnBuffer = new CellColumn();
 
+            int xStart = PackedBlockPos.getChunkXStart(chunkBuffer.getPackedChunkPos());
+            int zStart = PackedBlockPos.getChunkZStart(chunkBuffer.getPackedChunkPos());
+            
             for(int x = 0; x < 16; x++)
             {
                 for(int z = 0; z < 16; z++)
@@ -143,11 +146,11 @@ public class CellChunk
 
                     if(entryCell == null)
                     {
-                        this.setEntryCell(x, z, builder.buildNewCellStack(cells, columnBuffer, x, z));
+                        this.setEntryCell(x, z, builder.buildNewCellStack(cells, columnBuffer, xStart + x, zStart + z));
                     }
                     else
                     {
-                        this.setEntryCell(x, z, builder.updateCellStack(cells, columnBuffer, entryCell, x, z));
+                        this.setEntryCell(x, z, builder.updateCellStack(cells, columnBuffer, entryCell, xStart + x, zStart + z));
                     }
                 }
             }

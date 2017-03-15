@@ -84,7 +84,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
     
-    private int						hazeTimer		= 60;
+//    private int						hazeTimer		= 60;
     
     private static final int BORE_RADIUS = 5;
     private static final int BORE_RADIUS_SQUARED = BORE_RADIUS * BORE_RADIUS;
@@ -120,11 +120,11 @@ public class TileVolcano extends TileEntity implements ITickable{
     }
 
 
-    private void makeHaze() {
-        if (this.hazeTimer > 0) {
-            --this.hazeTimer;
-        } else {
-            this.hazeTimer = 5;
+//    private void makeHaze() {
+//        if (this.hazeTimer > 0) {
+//            --this.hazeTimer;
+//        } else {
+//            this.hazeTimer = 5;
             //this.hazeMaker.update(this.worldObj, this.pos.getX(), this.pos.getZ());
 
             // if(worldObj.rand.nextInt(3)==0){
@@ -132,8 +132,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             // Adversity.blockHazeRising, 0, 2);
             // worldObj.scheduleBlockUpdate(xCoord, level+2, zCoord, Adversity.blockHazeRising, 15);
             // }
-        }
-    }
+//        }
+//    }
 
     @Override
     public void update() 

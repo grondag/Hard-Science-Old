@@ -1,7 +1,5 @@
 package grondag.adversity.library.cache;
 
-import grondag.adversity.Adversity;
-
 public class ManagedLoadingCache<V> implements ILoadingCache<V>
 {
     private final SimpleCacheLoader<V> loader;

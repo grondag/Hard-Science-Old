@@ -274,6 +274,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
         int[] saveData = new int[this.size() * LavaCell2.LAVA_CELL_NBT_WIDTH];
         int i = 0;
 
+        this.setMode(ListMode.INDEX);
         for(LavaCell2 cell : this)
         {
             cell.writeNBT(saveData, i);
@@ -281,7 +282,8 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
             // Java parameters are always pass by value, so have to advance index here
             i += LavaCell2.LAVA_CELL_NBT_WIDTH;
         }
-       
+        this.setMode(ListMode.ADD);
+        
         nbt.setIntArray(LavaCell2.LAVA_CELL_NBT_TAG, saveData);
     }
     
@@ -303,8 +305,10 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
             int newCapacity = (count / CAPACITY_INCREMENT + 1) * CAPACITY_INCREMENT;
             if(newCapacity < CAPACITY_INCREMENT / 2) newCapacity += CAPACITY_INCREMENT;
             
+            this.setMode(ListMode.MAINTAIN);
             this.clear();
             this.resize(newCapacity);
+            this.setMode(ListMode.ADD);
             
             int i = 0;
             

@@ -7,7 +7,6 @@ import java.util.Random;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
-import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -155,7 +154,6 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             }
             else
             {
-                long packedPos = PackedBlockPos.pack(data.getPos());
                 LavaCell up = cell.getUpEfficiently(sim, false);
                 LavaCell down = cell.getDownEfficiently(sim, false);
                 LavaCell east = cell.getEastEfficiently(sim);

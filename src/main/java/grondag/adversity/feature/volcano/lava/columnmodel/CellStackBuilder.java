@@ -151,6 +151,7 @@ public class CellStackBuilder
     public LavaCell2 buildNewCellStack(LavaCells cells, CellColumn column, int x, int z)
     {
         BlockType lastType = BlockType.BARRIER;
+        this.entryCell = null;
         
         for(int y = 0; y < 256; y++)
         {
