@@ -459,6 +459,7 @@ public class LavaCell2 implements ISimpleListItem
     /** 
      * Absolute surface level as measured in fluid units. Solid blocks/levels below count 
      * as if they contained fluid.  Also include any excess fluid for cells under pressure.
+     * If cell has no fluid, is the level of the cell floor, as if it were fluid.
      */
     public int fluidSurfaceUnits()
     {
@@ -1234,7 +1235,7 @@ public class LavaCell2 implements ISimpleListItem
      * Forms new connections if necessary.
      * Does NOT remove invalid connections. Invalid connections are expected to be removed during connection processing.
      */
-    private void updateConnectionsIfNeeded(LavaCells cells, LavaConnections connections)
+    public void updateConnectionsIfNeeded(LavaCells cells, LavaConnections connections)
     {
         if(this.isConnectionUpdateNeeded)
         {

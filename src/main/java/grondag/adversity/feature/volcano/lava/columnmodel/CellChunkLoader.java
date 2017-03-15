@@ -17,9 +17,7 @@ public class CellChunkLoader
     private final ConcurrentLinkedQueue<ColumnChunkBuffer> unusedBuffers = new ConcurrentLinkedQueue<ColumnChunkBuffer>();
     
     /**
-     * TODO
-     * ---------------
-     * Persistence
+     * TODO: Persistence
      * 
      */
     

@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 
@@ -16,12 +17,11 @@ public class LavaConnection2 implements ISimpleListItem
     public final LavaCell2 secondCell;
     
     public final int id = nextConnectionID++;
-    
+        
     public final long key;
     
     public final int rand = ThreadLocalRandom.current().nextInt();
-    
-    protected int flowThisTick = 0;
+        
     protected int lastFlowTick = 0;
     
     private SortBucket sortBucket;
@@ -30,6 +30,9 @@ public class LavaConnection2 implements ISimpleListItem
     
     private boolean isDeleted = false;
  
+    private int flowRemainingThisTick;
+    
+
     public LavaConnection2(LavaCell2 firstCell, LavaCell2 secondCell)
     {
         this.key = getConnectionKey(firstCell, secondCell);
@@ -56,20 +59,85 @@ public class LavaConnection2 implements ISimpleListItem
         return cellIAlreadyHave == this.firstCell ? this.secondCell : this.firstCell;
     }
     
-    private int getFlowRate(LavaSimulatorNew sim)
+    private int getFlowRate()
     {
-        //TODO: stub
-        return 0;
+        if(this.flowRemainingThisTick <= 0) return 0;
+        
+        int surface1 = this.firstCell.fluidSurfaceUnits();
+        int surface2 = this.secondCell.fluidSurfaceUnits();
+        
+        if(surface1 == surface2)
+        {
+            return 0;
+        }
+        else if(surface1 > surface2)
+        {
+            return this.getEqualizingFlow(this.firstCell, surface1, surface2);
+        }
+        else // surface1 < surface2
+        {
+            // flip sign because going from 2 to 1
+            return -this.getEqualizingFlow(this.secondCell, surface2, surface1);
+        }
+   
     }
   
+    private void setupTick(LavaSimulatorNew sim)
+    {
+  
+        if(this.firstCell.getFluidUnits() == 0 && this.secondCell.getFluidUnits() == 0)
+        {
+            this.flowRemainingThisTick = 0;
+        }
+        else
+        {
+            this.flowRemainingThisTick = 
+             (Math.min(this.firstCell.getCeiling(), this.secondCell.getCeiling()) - Math.max(this.firstCell.getFloor(), this.secondCell.getFloor()))
+                * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL / 20;
+        }
+    }
+    
+    /**
+     * Core flow computation for equalizing surface level of adjacent cells.
+     * The "high" cell should have fluid in it.  
+     * "Low" cell may be empty or have fluid, 
+     * but should (per the name) have a lower surface level than the high cell.
+     * 
+     * Constrains flow by the retention level of the high cell but does NOT constrain by the amount available fluid. 
+     * (It doesn't know how many fluid units are in the cell, only the surface and retention level.)
+     * Retention level serves to mimic adhesion of lava to horizontal surfaces.
+     * 
+     * @param surfaceHigh fluid surface of high cell - in fluid units relative to world floor
+     * @param surfaceLow  floor or fluid surface of low cell - in fluid units relative to world floor
+     * @param retentionHigh minimum fluid surface of high cell after any outflow - in fluid units relative to world floor. 
+     *  
+     * @return Number of fluid units that should flow from high to low cell.
+     */
+    private int getEqualizingFlow(LavaCell2 cellHigh, int surfaceHigh, int surfaceLow)
+    {    
+        if(cellHigh.getFluidUnits() == 0) return 0;
+        
+        int availableFluidUnits = surfaceHigh - cellHigh.getSmoothedRetainedLevel();
+        
+        if(availableFluidUnits <= 0) return 0;
+        
+        int flow = (surfaceHigh - surfaceLow) / 2;
+        
+        if(flow > availableFluidUnits) flow = availableFluidUnits;
+        
+        if(flow > this.flowRemainingThisTick) flow = flowRemainingThisTick;
+        
+        return flow;
+        
+    }
     /**
      *  Resets lastFlowTick and forces run at least once a tick.
      */
     public void doFirstStep(LavaSimulatorNew sim)
     {
             this.isDirty = false;
-            this.flowThisTick = 0;
             this.lastFlowTick = sim.getTickIndex();
+            this.setupTick(sim);
             this.doStepWork(sim);
     }
     
@@ -94,7 +162,7 @@ public class LavaConnection2 implements ISimpleListItem
             {
                 if(this.secondCell.tryLock())
                 {
-                    int flow = this.getFlowRate(sim);
+                    int flow = this.getFlowRate();
                     
                     if(flow != 0) this.flowAcross(sim, flow);
                     
@@ -137,7 +205,7 @@ public class LavaConnection2 implements ISimpleListItem
     
     public void flowAcross(LavaSimulatorNew sim, int flow)
     {
-        this.flowThisTick += flow;
+        this.flowRemainingThisTick -= Math.abs(flow);
         this.firstCell.changeLevel(sim.getTickIndex(), -flow);
         this.secondCell.changeLevel(sim.getTickIndex(), flow);
     }

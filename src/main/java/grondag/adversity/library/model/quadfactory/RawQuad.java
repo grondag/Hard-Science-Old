@@ -33,7 +33,7 @@ public class RawQuad
     public LightingMode lightingMode = LightingMode.SHADED;
     public boolean lockUV = false;
     public boolean isItem = false;
-    public String tag = "";
+//    public String tag = "";
     public boolean shouldContractUVs = true;
     
     public float minU = 0;
@@ -109,7 +109,7 @@ public class RawQuad
         this.ancestorQuadID = fromObject.ancestorQuadID;
         this.isInverted = fromObject.isInverted;
         this.faceNormal = fromObject.faceNormal;
-        this.tag = fromObject.tag;
+//        this.tag = fromObject.tag;
         this.shouldContractUVs = fromObject.shouldContractUVs;
         this.useSimpleRotation = fromObject.useSimpleRotation;
         this.minU = fromObject.minU;

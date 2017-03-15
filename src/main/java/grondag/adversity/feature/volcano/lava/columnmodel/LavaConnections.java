@@ -49,7 +49,6 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
     }
     
     
-    //TODO: make sure this is called during connection processing after NBT load to prevent overflow on large simulations
     /** 
      * Ensures processing array has sufficient storage.  
      * Should be called periodically to prevent overflow 
@@ -87,20 +86,25 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         }
     }
     
-    /** relies on caller to order parameters to avoid deadlock */
     private void createConnectionIfNotPresentInner(LavaCell2 first, LavaCell2 second)
     {
-        synchronized(first)
+        boolean isIncomplete = true;
+        do
         {
-            synchronized(second)
+            if(first.tryLock())
             {
-                if(!first.isConnectedTo(second))
+                if(second.tryLock())
                 {
-                    LavaConnection2 newConnection = new LavaConnection2(first, second);
-                    this.addConnectionToArray(newConnection);
+                    if(!first.isConnectedTo(second))
+                    {
+                        LavaConnection2 newConnection = new LavaConnection2(first, second);
+                        this.addConnectionToArray(newConnection);
+                    }
+                    second.unlock();
                 }
+                first.unlock();
             }
-        }
+        } while(isIncomplete);
     }
     
     /** 

@@ -124,6 +124,11 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     public void readLavaNBT(NBTTagCompound nbt)
     {
         cells.readNBT(this, nbt);
+        
+        this.connections.resize(cells.capacity() * 6);
+        LAVA_THREAD_POOL.submit(() -> cells.stream(true).forEach(c -> c.updateConnectionsIfNeeded(cells, connections))).join();
+        this.connections.manageCapacity();
+        
         this.lavaBlockPlacementEvents.readNBT(nbt);
         this.lavaAddEvents.readNBT(nbt);
     }
@@ -417,11 +422,13 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         // clear out cells no longer needed
         // NON-CONCURRENT
         this.cells.clearDeletedCells();
+        this.cells.manageCapacity();
     }
 
     @Override
     protected void doConnectionValidation()
     {
         this.connections.validateConnections();
+        this.connections.manageCapacity();
     }
  }

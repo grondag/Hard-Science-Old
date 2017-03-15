@@ -31,11 +31,6 @@ public class ManagedLoadingCache<V> implements ILoadingCache<V>
         {
             activeCache = new SimpleLoadingCache<V>(new BackupCacheLoader<V>(loader, activeCache.getStaticCache()), maxCapacity);
         }
-        //TODO: remove
-        if(result == null)
-        {
-            Adversity.log.warn("Derp nuggets!");
-        }
         return result;
     }
 
@@ -55,11 +50,6 @@ public class ManagedLoadingCache<V> implements ILoadingCache<V>
         {
             V result = backupCache.get(key);
             if(result == null) result = primaryLoader.load(key);
-            //TODO: remove
-            if(result == null)
-            {
-                Adversity.log.warn("Derp nuggets!");
-            }
             return result;
         }
         
