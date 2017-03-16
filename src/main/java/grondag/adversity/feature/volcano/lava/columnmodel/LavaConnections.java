@@ -98,6 +98,8 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
                         LavaConnection2 newConnection = new LavaConnection2(first, second);
                         this.addConnectionToArray(newConnection);
                     }
+                    
+                    isIncomplete = false;
                     second.unlock();
                 }
                 first.unlock();
@@ -138,7 +140,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         
         this.setMode(ListMode.INDEX);
         AbstractLavaSimulator.LAVA_THREAD_POOL.submit(() ->
-            this.stream(true).forEach(p -> {if(p != null) this.sort[p.getSortBucket().ordinal()].add(p);;})).join();
+            this.stream(true).forEach(c -> {if(c != null && c.isActive()) this.sort[c.getSortBucket().ordinal()].add(c);})).join();
         
         for(SortBucket b : SortBucket.values())
         {

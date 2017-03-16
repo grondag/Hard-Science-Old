@@ -1,5 +1,7 @@
 package grondag.adversity.feature.volcano.lava.columnmodel;
 
+import java.util.Iterator;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
@@ -249,6 +251,8 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
 
                 Adversity.log.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
+                
+                this.cells.logDebugInfo();
             }
          
             this.connectionProcessCount += this.getConnectionCount();
@@ -378,7 +382,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         int z = cell.z();
         
         // check two above cell top to catch filler blocks
-        for(int y = cell.bottomY(); y <= cell.topY() + 2; y++)
+        for(int y = cell.bottomY(); y <= cell.fluidSurfaceY() + 2; y++)
         {
             this.coolLava(PackedBlockPos.pack(x, y, z));
         }
@@ -422,6 +426,19 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         )).join();
         this.cells.setMode(ListMode.ADD);
 
+        
+        //TODO: remove
+        this.connections.setMode(ListMode.INDEX);
+        Iterator<LavaConnection2> it = connections.stream(false).iterator();
+        while(it.hasNext())
+        {
+            LavaConnection2 c = it.next();
+            if(c.isActive() && c.getSortBucket() == null)
+            {
+                Adversity.log.info("derp");
+            }
+        }
+        this.connections.setMode(ListMode.ADD);
     }
 
     @Override

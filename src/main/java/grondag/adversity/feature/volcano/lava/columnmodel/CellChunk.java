@@ -171,6 +171,11 @@ public class CellChunk
         this.validationCount.incrementAndGet();
     }
     
+    public int getActiveCount()
+    {
+        return this.activeCount.get();
+    }
+    
     /**
      * Call when any cell in this chunk becomes active.
      * The chunk must already exist at this point but will force it to be and stay loaded.
@@ -183,13 +188,13 @@ public class CellChunk
         if(this.activeCount.incrementAndGet()  == 1)
         {
             // create (if needed) and retain all neighbors
-            int myX = PackedBlockPos.getChunkXPos(this.packedChunkPos);
-            int myZ = PackedBlockPos.getChunkZPos(this.packedChunkPos);
+            int myX = PackedBlockPos.getChunkXStart(this.packedChunkPos);
+            int myZ = PackedBlockPos.getChunkZStart(this.packedChunkPos);
 
-            this.cells.getOrCreateCellChunk(myX + 1, myZ).retain();
-            this.cells.getOrCreateCellChunk(myX - 1, myZ).retain();
-            this.cells.getOrCreateCellChunk(myX, myZ + 1).retain();
-            this.cells.getOrCreateCellChunk(myX, myZ - 1).retain();
+            this.cells.getOrCreateCellChunk(myX + 16, myZ).retain();
+            this.cells.getOrCreateCellChunk(myX - 16, myZ).retain();
+            this.cells.getOrCreateCellChunk(myX, myZ + 16).retain();
+            this.cells.getOrCreateCellChunk(myX, myZ - 16).retain();
         }
     }
 
@@ -204,13 +209,13 @@ public class CellChunk
         if(this.activeCount.decrementAndGet() == 0)
         {
             // release all neighbors
-            int myX = PackedBlockPos.getChunkXPos(this.packedChunkPos);
-            int myZ = PackedBlockPos.getChunkZPos(this.packedChunkPos);
+            int myX = PackedBlockPos.getChunkXStart(this.packedChunkPos);
+            int myZ = PackedBlockPos.getChunkZStart(this.packedChunkPos);
 
-            this.cells.getOrCreateCellChunk(myX + 1, myZ).release();
-            this.cells.getOrCreateCellChunk(myX - 1, myZ).release();
-            this.cells.getOrCreateCellChunk(myX, myZ + 1).release();
-            this.cells.getOrCreateCellChunk(myX, myZ - 1).release();
+            this.cells.getOrCreateCellChunk(myX + 16, myZ).release();
+            this.cells.getOrCreateCellChunk(myX - 16, myZ).release();
+            this.cells.getOrCreateCellChunk(myX, myZ + 16).release();
+            this.cells.getOrCreateCellChunk(myX, myZ - 16).release();
         }
     }
 

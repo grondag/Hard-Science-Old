@@ -11,7 +11,6 @@ public class CellStackBuilder
     private int floor;
     private int lavaLevel;
     private boolean isFlowFloor;
-    private int ceiling;
     
     private static final int NOT_SET = -1;
     
@@ -27,7 +26,6 @@ public class CellStackBuilder
         this.isCellStarted = true;
         this.maxLavaY = NOT_SET;
         this.minSpaceY = NOT_SET;
-        this.ceiling = NOT_SET;
         this.lavaLevel = NOT_SET;
         this.floor = floor;
         this.isFlowFloor = isFlowFloor;
@@ -42,11 +40,11 @@ public class CellStackBuilder
     {
         if(this.entryCell == null)
         {
-            this.entryCell = new LavaCell2(cells, x, z, this.floor, this.ceiling, this.lavaLevel, this.isFlowFloor);
+            this.entryCell = new LavaCell2(cells, x, z, this.floor, ceiling, this.lavaLevel, this.isFlowFloor);
         }
         else
         {
-            this.entryCell.linkAbove(new LavaCell2(this.entryCell, this.floor, this.ceiling, this.lavaLevel, this.isFlowFloor));
+            this.entryCell.linkAbove(new LavaCell2(this.entryCell, this.floor, ceiling, this.lavaLevel, this.isFlowFloor));
             this.entryCell = this.entryCell.aboveCell();
         }
         

@@ -95,13 +95,13 @@ public class LavaCell2 implements ISimpleListItem
     private boolean isBlockUpdateCurrent = true;
     
     /** true if this cell should remain loaded */
-    private boolean isActive = false;
+    private volatile boolean isActive = false;
     
     
     /**
      * Fluid units currently stored in this cell.
      */
-    private int fluidUnits;
+    private volatile int fluidUnits;
     
     
     public static final byte SUSPENDED_NONE = -1;
@@ -1307,13 +1307,32 @@ public class LavaCell2 implements ISimpleListItem
         
         for(LavaConnection2 connection : this.connections.values())
         {
-            // this cell is responsible for sorting connections that have a lower floor than it
-            // if floors are the same, the cell that is "first" handles sorting
-            LavaCell2 other = connection.getOther(this);
-            if(other.getFloor() < this.getFloor() || (other.getFloor() == this.getFloor() && connection.firstCell == this))
+            if(connection.isActive())
             {
-                sort.add(connection);
+                LavaCell2 other = connection.getOther(this);
+                if(other.getFloor() < this.getFloor())
+                {
+                    // this cell is responsible for sorting active connections that have a lower floor than it
+                    sort.add(connection);
+                }
+                else if(other.getFloor() == this.getFloor())
+                {
+                    // if floors are the same, the cell that is "first" handles sorting
+                    if(connection.firstCell == this)
+                    {
+                        sort.add(connection);
+                        
+                        //TODO remove
+                        Adversity.log.info("connection " + connection.id + " IS   being sorted by first cell " + this.id + "   second cell is " + connection.secondCell.id);
+                    }
+                    else
+                    {
+                      //TODO remove
+                        Adversity.log.info("connection " + connection.id + " WILL be    sorted by first cell " + connection.firstCell.id + "   second cell is " + this.id);
+                    }
+                }
             }
+        
         }
         
         if(sort.size() > 0)
@@ -1352,8 +1371,8 @@ public class LavaCell2 implements ISimpleListItem
         this.updateRawRetentionIfNeeded();
         
         // TODO: Pressure propagation
-        
 
+        
         // connection sorting - prioritize all outbound connections
         this.prioritizeOutboundConnections();        
     }

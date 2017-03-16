@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
@@ -196,6 +197,12 @@ public class LavaConnection2 implements ISimpleListItem
         return this.isDeleted || !this.firstCell.canConnectWith(this.secondCell);
     }
     
+    /** true if either cell has fluid */
+    public boolean isActive()
+    {
+        return this.firstCell.getFluidUnits() > 0 || this.secondCell.getFluidUnits() > 0;
+    }
+    
     @Override
     public void onDeletion()
     {
@@ -223,11 +230,18 @@ public class LavaConnection2 implements ISimpleListItem
 
     public SortBucket getSortBucket()
     {
+        //TODO: remove
+        if(this.sortBucket == null) 
+            Adversity.log.info("derp");
+        
         return this.sortBucket;
     }
     
     public void setSortBucket(SortBucket newBucket)
     {
+        //TODO: remove 
+        Adversity.log.info("sort bucket = " + newBucket + " for connection id = " + this.id);
+        
         this.sortBucket = newBucket;
     }
     

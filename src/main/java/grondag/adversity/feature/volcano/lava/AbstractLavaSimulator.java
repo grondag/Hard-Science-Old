@@ -200,6 +200,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
          
             this.connectionProcessCount += this.getConnectionCount();
             long startTime = System.nanoTime();
+            
             // force processing on non-dirty connection at least once per tick
             this.doFirstStep();
             this.doStep();

@@ -174,19 +174,20 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
     /**
      * Does what is says.
      * Thread-safe.
+     * x and z are BLOCK coordinates, not chunk coordinates
      */
-    public CellChunk getOrCreateCellChunk(int x, int z)
+    public CellChunk getOrCreateCellChunk(int xBlock, int zBlock)
     {
-        CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+        CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(xBlock, zBlock));
         if(chunk == null)
         {
             synchronized(this)
             {
                 //confirm not added by another thread
-                chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
+                chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(xBlock, zBlock));
                 if(chunk == null)
                 {
-                    chunk = new CellChunk(PackedBlockPos.getPackedChunkPos(x, z), this);
+                    chunk = new CellChunk(PackedBlockPos.getPackedChunkPos(xBlock, zBlock), this);
                     this.cellChunks.put(chunk.packedChunkPos, chunk);
                 }
             }
@@ -352,6 +353,19 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
                 this.stream(true).forEach(c -> c.updatedSmoothedRetentionIfNeeded())).join();
             
             Adversity.log.info("Loaded " + this.size() + " lava cells.");
+        }
+    }
+    
+    public void logDebugInfo()
+    {
+        Adversity.log.info(this.cellChunks.size() + " loaded cell chunks");
+        for(CellChunk chunk : this.cellChunks.values())
+        {
+            Adversity.log.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
+                + " zStart=" + PackedBlockPos.getChunkZStart(chunk.packedChunkPos)
+                + " activeCount=" + chunk.getActiveCount() + " entryCount=" + chunk.getEntryCount()
+                    );
+            
         }
     }
 }
