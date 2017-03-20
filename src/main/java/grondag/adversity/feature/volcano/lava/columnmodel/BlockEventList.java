@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 
 public abstract class BlockEventList
 {
-    private static final int CAPACITY_INCREMENT = 0x400;
+    private static final int CAPACITY_INCREMENT = 0x500;
     
     private int capacity = CAPACITY_INCREMENT;
     
@@ -20,11 +20,18 @@ public abstract class BlockEventList
     
     private final String nbtTagName;
     
-    protected abstract void processEvent(int x, int y, int z, int amount);
+    private final int maxRetries;
     
-    protected BlockEventList(String nbtTagName)
+    /** 
+     * Return true if event was processed successfully and can be removed. 
+     * Return false if should retry.
+     */
+    protected abstract boolean processEvent(int x, int y, int z, int amount);
+    
+    protected BlockEventList(String nbtTagName, int maxRetries)
     {
         this.nbtTagName = nbtTagName;
+        this.maxRetries = maxRetries;
     }
     
     public void addEvent(BlockPos pos, int amount)
@@ -47,6 +54,7 @@ public abstract class BlockEventList
             eventData[nextEmptyIndex++] = y;
             eventData[nextEmptyIndex++] = z;
             eventData[nextEmptyIndex++] = amount;
+            eventData[nextEmptyIndex++] = 0; // retry count
         }
     }
     
@@ -54,22 +62,37 @@ public abstract class BlockEventList
     {
         synchronized(this)
         {
+            
             if(this.nextEmptyIndex == 0) return;
             
+            int newEmptyIndex = 0;
             int i = 0;
             
             while(i < this.nextEmptyIndex)
             {
-                this.processEvent(eventData[i++], eventData[i++], eventData[i++], eventData[i++]);
+                int x = eventData[i++];
+                int y = eventData[i++];
+                int z = eventData[i++];
+                int amount = eventData[i++];
+                int retryCount = eventData[i++];
+                
+                if(!this.processEvent(x, y, z, amount) && retryCount < this.maxRetries)
+                {
+                    eventData[newEmptyIndex++] = x;
+                    eventData[newEmptyIndex++] = y;
+                    eventData[newEmptyIndex++] = z;
+                    eventData[newEmptyIndex++] = amount;
+                    eventData[newEmptyIndex++] = retryCount + 1;
+                }
             }
             
-            this.nextEmptyIndex = 0;
+            this.nextEmptyIndex = newEmptyIndex;
         }
     }
     
     public int size()
     {
-        return this.capacity / 4;
+        return this.capacity / 5;
     }
     
     private void increaseCapacity()

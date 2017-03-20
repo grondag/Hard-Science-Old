@@ -9,15 +9,19 @@ public class CellStackBuilder
     /** true if we've identified a space in world column that should be a cell */
     private boolean isCellStarted = false;
     
+    /** floor of cell currently in construction - in fluid levels relative to world floor*/
     private int floor;
-    private int lavaLevel;
+    /** number of lava levels in cell being constructed - relative to cell floor - 0 means no lava in cell */
+    private int lavaLevels;
+    
     private boolean isFlowFloor;
     
     private static final int NOT_SET = -1;
     
-    /** used to check for suspended lava */
+    /** highest y-level of lava in the cell */
     private int maxLavaY;
-    /** used to check for suspended lava */
+    
+    /** lowest y-level of space within the cell */
     private int minSpaceY;
     
     private LavaCell2 entryCell;
@@ -25,34 +29,41 @@ public class CellStackBuilder
     private void startCell(int floor, boolean isFlowFloor)
     {
         this.isCellStarted = true;
-        this.maxLavaY = NOT_SET;
         this.minSpaceY = NOT_SET;
-        this.lavaLevel = NOT_SET;
+        this.maxLavaY = NOT_SET;
+        this.lavaLevels = 0;
         this.floor = floor;
         this.isFlowFloor = isFlowFloor;
     }
     
-    private void setLavaLevel(int lavaLevel)
+    private void addLava(int lava)
     {
-        this.lavaLevel = lavaLevel;
+        this.lavaLevels += lava;
     }
     
     private void completeCell(LavaCells cells, CellColumn column, int x, int z, int ceiling)
     {
+        //TODO: remove
+        if(this.lavaLevels > 0)
+                Adversity.log.info("boop");
+        
         if(this.entryCell == null)
         {
-            this.entryCell = new LavaCell2(cells, x, z, this.floor, ceiling, this.lavaLevel, this.isFlowFloor);
+            this.entryCell = new LavaCell2(cells, x, z, this.floor, ceiling, this.floor + this.lavaLevels, this.isFlowFloor);
         }
         else
         {
-            this.entryCell.linkAbove(new LavaCell2(this.entryCell, this.floor, ceiling, this.lavaLevel, this.isFlowFloor));
+            this.entryCell.linkAbove(new LavaCell2(this.entryCell, this.floor, ceiling, this.floor + this.lavaLevels, this.isFlowFloor));
             this.entryCell = this.entryCell.aboveCell();
         }
         
-        if(maxLavaY > minSpaceY)
+        // necessary to prevent cell from getting confused over world state
+        this.entryCell.clearBlockUpdate();
+        
+        if(maxLavaY != NOT_SET && minSpaceY != NOT_SET && maxLavaY > minSpaceY)
         {
-            //if we somehow find suspended lava in newly created cells, this will simply delete it
-            this.entryCell.notifySuspendedLava(maxLavaY);
+            //let cell know to remove suspended lava cells above it and fill in spaces within it
+            this.entryCell.setRefreshRange(minSpaceY, maxLavaY);
         }
         
         this.isCellStarted = false;
@@ -94,10 +105,12 @@ public class CellStackBuilder
                 simEntryCell = simEntryCell.addOrConfirmSpace(y, floor, isFlowFloor);
                 
                 /** 
-                 * Inform cell if we have lava - should have no effect if lava should be there according to 
-                 * simulation and will cause sim. to remove the lava if the sim does not agree it should be there.
+                 * Add lava to cell if it does not already have lava at this level.
                  */
-                if(blockType.isLava) simEntryCell.notifySuspendedLava(y);
+                if(blockType.isLava) 
+                {
+                    simEntryCell.addOrConfirmLava(y, blockType.flowHeight);
+                }
             }
             
             lastBlockType = blockType;
@@ -204,16 +217,10 @@ public class CellStackBuilder
                 case LAVA_12:
                 {
                     // start new cell if this is the first open space
-                    int blockFloor = y * AbstractLavaSimulator.LEVELS_PER_BLOCK;
-                    
-                    if(!this.isCellStarted) this.startCell(blockFloor, lastType.isFlow);
+                    if(!this.isCellStarted) this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK, lastType.isFlow);
                     this.maxLavaY = y;
                   
-                    if(this.minSpaceY == NOT_SET)
-                    {
-                        // update lava level if lava is not suspended
-                        this.setLavaLevel(blockFloor + currentType.flowHeight);
-                    }
+                    this.addLava(currentType.flowHeight);
                     break;
                 }
                 
@@ -238,8 +245,8 @@ public class CellStackBuilder
                     {
                         this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK + currentType.flowHeight, true);
                         
-                        // counts as open space - any lava subsequently found in this cell must be suspended
-                        this.minSpaceY = y;
+                        // counts as open space
+                        if(this.minSpaceY == NOT_SET) this.minSpaceY = y;
                     }
                     break;
                 }
@@ -249,7 +256,6 @@ public class CellStackBuilder
                     // start new cell if this is the first open space
                     if(!this.isCellStarted) this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK, lastType.isFlow);
                     
-                    // any lava found above this cell must be suspended
                     if(this.minSpaceY == NOT_SET) this.minSpaceY = y;
                     break;
                 }

@@ -11,6 +11,7 @@ import grondag.adversity.library.SimpleConcurrentList.ListMode;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,10 +22,10 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     private final LavaConnections connections = new LavaConnections();
     public final CellChunkLoader cellChunkLoader = new CellChunkLoader();
     
-    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList("lavaPlaceEvents")
+    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList("lavaPlaceEvents", 10)
     {
         @Override
-        protected void processEvent(int x, int y, int z, int amount)
+        protected boolean processEvent(int x, int y, int z, int amount)
         {
             if(amount == 0)
             {
@@ -35,6 +36,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 if(target != null)
                 {
                     target.notifyDestroyedLava(y);
+                    return true;
                 }
             }
             else if(amount > 0 && amount <= AbstractLavaSimulator.LEVELS_PER_BLOCK)
@@ -44,9 +46,9 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 {
                     target = cells.getEntryCell(x, z);
                     
-                    // if chunk has an entry cell for that column, mark it for validation
                     if(target != null)
                     {
+                        // if chunk has an entry cell for that column, mark it for validation
                         target.setValidationNeeded(true);
                     }
                     else
@@ -56,30 +58,41 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                         // case where chunk is already loaded but somehow no cells exist at x, z.
                         cells.getOrCreateCellChunk(x, z).requestFullValidation();
                     }
+                    // event not complete until we can tell cell to 
+                    return false;
                 }
                 else
                 {
                     target.notifyPlacedLava(LavaSimulatorNew.this.getTickIndex(), y, amount);
+                    return true;
                 }
             }
+            
+            // would have to be an unhandled event type
+            if(Adversity.DEBUG_MODE)
+                Adversity.log.warn("Detected unhandled block event type in event processing");
+            
+            return true;
         }
     };
     
     
-    private final BlockEventList lavaAddEvents = new BlockEventList("lavaAddEvents")
+    private final BlockEventList lavaAddEvents = new BlockEventList("lavaAddEvents", 10)
     {
         @Override
-        protected void processEvent(int x, int y, int z, int amount)
+        protected boolean processEvent(int x, int y, int z, int amount)
         {
             LavaCell2 target = cells.getCellIfExists(x, y, z);
             
             if(target == null)
             {
-                if(Adversity.DEBUG_MODE) Adversity.log.debug("Ignored attempt to add lava in non-existent cell");
+                // retry - maybe validation needs to catch up
+                return false;
             }
             else
             {
                 target.addLavaAtLevel(LavaSimulatorNew.this.getTickIndex(), y * LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK, amount);
+                return true;
             }
         }
     };
@@ -208,6 +221,10 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         else if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
             this.lavaBlockPlacementEvents.addEvent(pos, IFlowBlock.getFlowHeightFromState(state));
+            
+            // always remove blocks placed by player from world - otherwise lava will be re-added to sim
+            // by validation until simulation state catches up with world
+            this.worldBuffer.setBlockState(pos.getX(), pos.getY(), pos.getZ(), Blocks.AIR.getDefaultState(), state);
             this.setSaveDirty(true);
         }
     }
