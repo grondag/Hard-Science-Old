@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano.lava.columnmodel;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 
 /** Builds a new cell stack from a CellColumn */
@@ -94,7 +95,7 @@ public class CellStackBuilder
                 
                 /** 
                  * Inform cell if we have lava - should have no effect if lava should be there according to 
-                 * simulation and will cause sim. to remove the lava if the sim does agree it should be there.
+                 * simulation and will cause sim. to remove the lava if the sim does not agree it should be there.
                  */
                 if(blockType.isLava) simEntryCell.notifySuspendedLava(y);
             }
@@ -103,6 +104,30 @@ public class CellStackBuilder
             
         } while(++y < 256);
         
+        if(Adversity.DEBUG_MODE)
+        {
+            // validate no cell overlap
+            LavaCell2 testCell1 = simEntryCell.firstCell();
+            while(testCell1 != null)
+            {
+                LavaCell2 testCell2 = simEntryCell.firstCell();
+                while(testCell2 != null)
+                {
+                    if(testCell1 != testCell2)
+                    {
+                        if(testCell1.intersectsWith(testCell2))
+                            Adversity.log.warn("Found interesecting cells in same column after rebuild. Should never happen. ");
+                        
+                        if(testCell1.isVerticallyAdjacentTo(testCell2))
+                            Adversity.log.warn("Found vertically adjacent cells in same column after rebuild. Should never happen. ");
+                    }
+                    
+                    testCell2 = testCell2.above;
+                }
+                
+                testCell1 = testCell1.above;
+            }
+        }
       
         return simEntryCell;
         

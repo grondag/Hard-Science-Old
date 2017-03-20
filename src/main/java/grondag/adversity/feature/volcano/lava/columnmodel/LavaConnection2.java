@@ -25,7 +25,7 @@ public class LavaConnection2 implements ISimpleListItem
         
     protected int lastFlowTick = 0;
     
-    private SortBucket sortBucket;
+    private volatile SortBucket sortBucket;
     
     protected boolean isDirty = false;
     
@@ -240,7 +240,7 @@ public class LavaConnection2 implements ISimpleListItem
     public void setSortBucket(SortBucket newBucket)
     {
         //TODO: remove 
-        Adversity.log.info("sort bucket = " + newBucket + " for connection id = " + this.id);
+//        Adversity.log.info("sort bucket = " + newBucket + " for connection id = " + this.id);
         
         this.sortBucket = newBucket;
     }

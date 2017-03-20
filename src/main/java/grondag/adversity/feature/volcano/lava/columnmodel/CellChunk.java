@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava.columnmodel;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.SimpleConcurrentList.ListMode;
 /**
  * Container for all cells in a world chunk.
  * When a chunk is loaded (or updated) all cells that can exist in the chunk are created.
@@ -27,6 +28,10 @@ public class CellChunk
 {
 
     public final long packedChunkPos;
+    
+    public final int xStart;
+    public final int zStart;
+
 
     private final LavaCell2[] entryCells = new LavaCell2[256];
 
@@ -57,6 +62,8 @@ public class CellChunk
     CellChunk(long packedChunkPos, LavaCells cells)
     {
         this.packedChunkPos = packedChunkPos;
+        this.xStart = PackedBlockPos.getChunkXStart(packedChunkPos);
+        this.zStart = PackedBlockPos.getChunkZStart(packedChunkPos);
         this.cells = cells;
     }
 
@@ -65,6 +72,11 @@ public class CellChunk
 //    {
 //        this.isLoaded = true;
 //    }
+    
+    public boolean isUnloaded()
+    {
+        return this.isUnloaded;
+    }
     
     /** 
      * Marks this chunk for full validation.  
@@ -101,6 +113,7 @@ public class CellChunk
             CellStackBuilder builder = new CellStackBuilder();
             CellColumn columnBuffer = new CellColumn();
 
+            
             for(int x = 0; x < 16; x++)
             {
                 for(int z = 0; z < 16; z++)
@@ -109,8 +122,8 @@ public class CellChunk
 
                     if(entryCell != null && entryCell.isValidationNeeded())
                     {
-                        columnBuffer.loadFromWorldStateBuffer(this.cells.sim.worldBuffer, x, z);
-                        entryCell = builder.updateCellStack(cells, columnBuffer, entryCell, x, z);
+                        columnBuffer.loadFromWorldStateBuffer(this.cells.sim.worldBuffer, this.xStart + x, this.zStart + z);
+                        entryCell = builder.updateCellStack(cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z);
                         entryCell.setValidationNeeded(false);
                         this.setEntryCell(x, z, entryCell);
                     }
@@ -133,9 +146,6 @@ public class CellChunk
 
             CellStackBuilder builder = new CellStackBuilder();
             CellColumn columnBuffer = new CellColumn();
-
-            int xStart = PackedBlockPos.getChunkXStart(chunkBuffer.getPackedChunkPos());
-            int zStart = PackedBlockPos.getChunkZStart(chunkBuffer.getPackedChunkPos());
             
             for(int x = 0; x < 16; x++)
             {
@@ -146,11 +156,11 @@ public class CellChunk
 
                     if(entryCell == null)
                     {
-                        this.setEntryCell(x, z, builder.buildNewCellStack(cells, columnBuffer, xStart + x, zStart + z));
+                        this.setEntryCell(x, z, builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z));
                     }
                     else
                     {
-                        this.setEntryCell(x, z, builder.updateCellStack(cells, columnBuffer, entryCell, xStart + x, zStart + z));
+                        this.setEntryCell(x, z, builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z));
                     }
                 }
             }
@@ -188,13 +198,10 @@ public class CellChunk
         if(this.activeCount.incrementAndGet()  == 1)
         {
             // create (if needed) and retain all neighbors
-            int myX = PackedBlockPos.getChunkXStart(this.packedChunkPos);
-            int myZ = PackedBlockPos.getChunkZStart(this.packedChunkPos);
-
-            this.cells.getOrCreateCellChunk(myX + 16, myZ).retain();
-            this.cells.getOrCreateCellChunk(myX - 16, myZ).retain();
-            this.cells.getOrCreateCellChunk(myX, myZ + 16).retain();
-            this.cells.getOrCreateCellChunk(myX, myZ - 16).retain();
+            this.cells.getOrCreateCellChunk(this.xStart + 16, this.zStart).retain();
+            this.cells.getOrCreateCellChunk(this.xStart - 16, this.zStart).retain();
+            this.cells.getOrCreateCellChunk(this.xStart, this.zStart + 16).retain();
+            this.cells.getOrCreateCellChunk(this.xStart, this.zStart - 16).retain();
         }
     }
 
@@ -208,14 +215,10 @@ public class CellChunk
         
         if(this.activeCount.decrementAndGet() == 0)
         {
-            // release all neighbors
-            int myX = PackedBlockPos.getChunkXStart(this.packedChunkPos);
-            int myZ = PackedBlockPos.getChunkZStart(this.packedChunkPos);
-
-            this.cells.getOrCreateCellChunk(myX + 16, myZ).release();
-            this.cells.getOrCreateCellChunk(myX - 16, myZ).release();
-            this.cells.getOrCreateCellChunk(myX, myZ + 16).release();
-            this.cells.getOrCreateCellChunk(myX, myZ - 16).release();
+            this.cells.getOrCreateCellChunk(this.xStart + 16, this.zStart).release();
+            this.cells.getOrCreateCellChunk(this.xStart - 16, this.zStart).release();
+            this.cells.getOrCreateCellChunk(this.xStart, this.zStart + 16).release();
+            this.cells.getOrCreateCellChunk(this.xStart, this.zStart - 16).release();
         }
     }
 
@@ -269,6 +272,8 @@ public class CellChunk
             }
         }
         this.isUnloaded = true;
+        
+        
     }
 
     /** 

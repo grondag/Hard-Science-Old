@@ -9,17 +9,22 @@ import net.minecraft.world.chunk.Chunk;
 /**
  * Manages snapshots of chunk data to be used for creating and updating lava cells.
  * Buffers entire chunk state so can do the actual validation post-tick.
+ * 
+ * Note that this queue is not persisted at world save.
+ * This should not be needed because...
+ * 1) A finite number of chunks are queued in each tick.
+ * 2) Those chunks are queued because they are marked as needed new load or full validation.
+ * 3) Those chunks will not be unmarked until the load/validation occurs.
+ * 4) The queue is fully drained each tick.
+ * 
+ * So if a chunk is queued but then game crashes, 
+ * it will be queued again when that chunk is reloaded at world start.
  */
 public class CellChunkLoader
 {
     private final ConcurrentLinkedQueue<ColumnChunkBuffer> chunkBufferQueue = new ConcurrentLinkedQueue<ColumnChunkBuffer>();
 
     private final ConcurrentLinkedQueue<ColumnChunkBuffer> unusedBuffers = new ConcurrentLinkedQueue<ColumnChunkBuffer>();
-    
-    /**
-     * TODO: Persistence
-     * 
-     */
     
     /**
      * Use this to buffer and queue world chunks for later validation.

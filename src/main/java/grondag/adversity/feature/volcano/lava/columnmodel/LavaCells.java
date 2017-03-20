@@ -271,18 +271,23 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
     
     public void writeNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("Saving " + this.size() + " lava cells.");
+      
         int[] saveData = new int[this.size() * LavaCell2.LAVA_CELL_NBT_WIDTH];
         int i = 0;
 
         this.setMode(ListMode.INDEX);
         for(LavaCell2 cell : this)
         {
-            cell.writeNBT(saveData, i);
-            
-            // Java parameters are always pass by value, so have to advance index here
-            i += LavaCell2.LAVA_CELL_NBT_WIDTH;
+            if(cell.getFluidUnits() > 0 && !cell.isDeleted())
+            {
+                cell.writeNBT(saveData, i);
+                
+                // Java parameters are always pass by value, so have to advance index here
+                i += LavaCell2.LAVA_CELL_NBT_WIDTH;
+            }
         }
+        
+        Adversity.log.info("Saving " + i / LavaCell2.LAVA_CELL_NBT_WIDTH + " lava cells.");
         this.setMode(ListMode.ADD);
         
         nbt.setIntArray(LavaCell2.LAVA_CELL_NBT_TAG, saveData);

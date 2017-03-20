@@ -59,7 +59,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 }
                 else
                 {
-                    target.notifyPlacedLava(y, amount);
+                    target.notifyPlacedLava(LavaSimulatorNew.this.getTickIndex(), y, amount);
                 }
             }
         }
@@ -79,7 +79,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             }
             else
             {
-                target.addLavaAtLevel(y * LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK, amount);
+                target.addLavaAtLevel(LavaSimulatorNew.this.getTickIndex(), y * LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK, amount);
             }
         }
     };
@@ -169,6 +169,13 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         this.cells.markCellsForValidation(x - 1, z);
         this.cells.markCellsForValidation(x, z + 1);
         this.cells.markCellsForValidation(x, z - 1);
+    }
+    
+    public void notifyBlockChange(World worldIn, BlockPos pos)
+    {
+        if(itMe) return;
+        LavaCell2 entry = this.cells.getEntryCell(pos.getX(), pos.getZ());
+        if(entry != null) entry.setValidationNeeded(true);      
     }
 
     @Override
@@ -299,14 +306,14 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             
             startTime = System.nanoTime();
             // force processing on non-dirty connection at least once per tick
-            this.doFirstStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doStep();
-            this.doLastStep();
+//            this.doFirstStep();
+//            this.doStep();
+//            this.doStep();
+//            this.doStep();
+//            this.doStep();
+//            this.doStep();
+//            this.doStep();
+//            this.doLastStep();
             this.connectionProcessTime += (System.nanoTime() - startTime);
 
             startTime = System.nanoTime();
@@ -424,6 +431,12 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         LAVA_THREAD_POOL.submit( () ->
             this.cells.stream(true).forEach(c -> c.update(this, cells, connections)
         )).join();
+        
+        // connection sorting - prioritize all outbound connections
+        // Needs to happen in a separate pass from update because new connections are formed there
+        LAVA_THREAD_POOL.submit( () ->
+        this.cells.stream(true).forEach(c -> c.prioritizeOutboundConnections())).join();
+       
         this.cells.setMode(ListMode.ADD);
 
         

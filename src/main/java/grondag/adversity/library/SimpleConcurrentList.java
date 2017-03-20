@@ -1,6 +1,5 @@
 package grondag.adversity.library;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -139,7 +138,6 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
      */
     public void removeDeletedItems()
     {
-        ArrayList l;
         // note - will not prevent add or iteration
         // so does not, by itself, ensure thread safety
         synchronized(this)
