@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano.lava.columnmodel;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import grondag.adversity.Adversity;
@@ -278,7 +279,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
         this.setMode(ListMode.INDEX);
         for(LavaCell2 cell : this)
         {
-            if(cell.getFluidUnits() > 0 && !cell.isDeleted())
+            if(!cell.isDeleted())
             {
                 cell.writeNBT(saveData, i);
                 
@@ -290,7 +291,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
         Adversity.log.info("Saving " + i / LavaCell2.LAVA_CELL_NBT_WIDTH + " lava cells.");
         this.setMode(ListMode.ADD);
         
-        nbt.setIntArray(LavaCell2.LAVA_CELL_NBT_TAG, saveData);
+        nbt.setIntArray(LavaCell2.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }
     
     public void readNBT(LavaSimulatorNew sim, NBTTagCompound nbt)
@@ -329,13 +330,13 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
                 
                 if(startingCell == null)
                 {
-                    newCell = new LavaCell2(this, x, z, 0, 0, 0, false);
+                    newCell = new LavaCell2(this, x, z, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     this.setEntryCell(x, z, newCell);
                 }
                 else
                 {
-                    newCell = new LavaCell2(startingCell, 0, 0, 0, false);
+                    newCell = new LavaCell2(startingCell, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     startingCell.addCellToColumn(startingCell);
                 }
@@ -351,11 +352,17 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
             
             // Raw retention should be mostly current, but compute for any cells
             // that were awaiting computation at last world save.
+            this.sim.worldBuffer.isMCWorldAccessAppropriate = true;
+            this.setMode(ListMode.INDEX);
             this.stream(false).forEach(c -> c.updateRawRetentionIfNeeded());
+            this.setMode(ListMode.ADD);
+            this.sim.worldBuffer.isMCWorldAccessAppropriate = false;
             
             // Smoothed retention will need to be computed for all cells, but can be parallel.
+            this.setMode(ListMode.INDEX);
             AbstractLavaSimulator.LAVA_THREAD_POOL.submit(() ->
                 this.stream(true).forEach(c -> c.updatedSmoothedRetentionIfNeeded())).join();
+            this.setMode(ListMode.ADD);
             
             Adversity.log.info("Loaded " + this.size() + " lava cells.");
         }

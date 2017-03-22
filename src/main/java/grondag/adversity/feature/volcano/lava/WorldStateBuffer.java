@@ -109,6 +109,22 @@ public class WorldStateBuffer implements IBlockAccess
         this.setBlockState(PackedBlockPos.getX(packedPos), PackedBlockPos.getY(packedPos), PackedBlockPos.getZ(packedPos), newState, expectedPriorState);
     }
     
+    /**
+     * Call this when something happens in the world that would invalidate what is in the buffer.
+     * Will remove any pending update at the given location.
+     * @param x
+     * @param y
+     * @param z
+     */
+    public void clearBlockState(BlockPos pos)
+    {
+        ChunkBuffer chunk = this.getChunkBufferIfExists(PackedBlockPos.getPackedChunkPos(pos));
+        if(chunk != null)
+        {
+            chunk.clearBlockState(pos.getX(), pos.getY(), pos.getZ());
+        }
+    }
+    
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
 //        Adversity.log.info("blockstate buffer update @" + x + ", " + y + ", " + z + " = " + 
@@ -633,6 +649,14 @@ public class WorldStateBuffer implements IBlockAccess
                 
                 return entry.newState;
             }
+        }
+        
+        /**
+         * Use this to invalidate buffer when world changes unexpectedly.
+         */
+        public void clearBlockState(int x, int y, int z)
+        {
+            states[getChunkStateKeyFromBlockPos(x, y, z)] = null;
         }
         
         /**

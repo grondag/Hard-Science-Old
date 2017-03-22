@@ -7,6 +7,8 @@ import java.util.Random;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaCell2;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -125,12 +127,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     }
     
 
-
-    @Override
-    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
-    {
-        Simulator.instance.getFluidTracker().registerPlacedLava(worldIn, pos, state);
-    }
+// TODO: this will not work with column-based model, would need a different purpose-specific method to confirm existing lava
+//    @Override
+//    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
+//    {
+//        Simulator.instance.getFluidTracker().registerPlacedLava(worldIn, pos, state);
+//    }
 
     //TODO: make this work or remove it
     @Override
@@ -144,43 +146,24 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        if(Simulator.instance.getFluidTracker() instanceof LavaSimulator)
+        if(Simulator.instance.getFluidTracker() instanceof LavaSimulatorNew)
         {
-            LavaSimulator sim = (LavaSimulator)Simulator.instance.getFluidTracker();
-            LavaCell cell = sim.getCell(data.getPos(), false);
+            LavaSimulatorNew sim = (LavaSimulatorNew)Simulator.instance.getFluidTracker();
+            BlockPos pos = data.getPos();  
+            LavaCell2 cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
             if(cell == null)
             {
                 probeInfo.text("Cell not found.");
             }
             else
             {
-                LavaCell up = cell.getUpEfficiently(sim, false);
-                LavaCell down = cell.getDownEfficiently(sim, false);
-                LavaCell east = cell.getEastEfficiently(sim);
-                LavaCell west = cell.getWestEfficiently(sim);
-                LavaCell north = cell.getNorthEfficiently(sim);
-                LavaCell south =cell.getSouthEfficiently(sim);
-                
-                
-                int netDrop = Math.max(
-                        Math.max(east.getDistanceToFlowFloor(), west.getDistanceToFlowFloor()), 
-                        Math.max(north.getDistanceToFlowFloor(), south.getDistanceToFlowFloor())
-                    ) - cell.getDistanceToFlowFloor();
-                
-                int netRetention = (cell.getRawRetainedLevel(sim) + down.getRawRetainedLevel(sim)) / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL - cell.getDistanceToFlowFloor();
-                
                 probeInfo.text("Cell ID = " + cell.hashCode())
-                    .text("CurrentLevel=" + cell.getFluidAmount() + "    RetainedLevel=" + cell.getRawRetainedLevel(sim) + "   MaxLevel=" + cell.maxLevel)
-                    .text("interiorFloor=" + cell.getInteriorFloor() + "  distanceToFlowFloor=" + cell.getDistanceToFlowFloor() + " isFlowFloor=" + cell.flowFloorIsFlowBlock())
-                    .text("LastFlowTickl = " + cell.getLastFlowTick() + "  currentSimTick=" + sim.getTickIndex() + "  avgLevelWithPrecision=" + cell.avgFluidAmountWithPrecision)
-                    .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel() 
-                            + "  Net Drop = " + netDrop  + "  Net Retention = " + netRetention)
-                    .text("Up: " + (up == null ? "null" : "id=" + up.hashCode() + " barrier:" + up.isBarrier() + " drop:" + up.getDistanceToFlowFloor() + " retention:" + up.getRawRetainedLevel(sim)))
-                    .text("Down: " + (down == null ? "null" : "id=" + down.hashCode()  + " barrier:" + down.isBarrier() + " drop:" + down.getDistanceToFlowFloor() + " retention:" + down.getRawRetainedLevel(sim)))
-                    .text("East: " + (east == null ? "null" : "id=" + east.hashCode() + " barrier:" + east.isBarrier() + " drop:" + east.getDistanceToFlowFloor() + " retention:" + east.getRawRetainedLevel(sim)))
-                    .text("West: " + (west == null ? "null" : "id=" + west.hashCode() + " barrier:" + west.isBarrier() + " drop:" + west.getDistanceToFlowFloor() + " retention:" + west.getRawRetainedLevel(sim)))
-                    .text("North: " + (north == null ? "null" : "id=" + north.hashCode() + " barrier:" + north.isBarrier() + " drop:" + north.getDistanceToFlowFloor() + " retention:" + north.getRawRetainedLevel(sim)))
-                    .text("South: " + (south == null ? "null" : "id=" + south.hashCode() + " barrier:" + south.isBarrier() + " drop:" + south.getDistanceToFlowFloor() + " retention:" + south.getRawRetainedLevel(sim)));
+                    .text("FluidUnits=" + cell.getFluidUnits() + "  Fluid Levels=" + (cell.getFluidUnits() / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("RawRetainedLevel=" + cell.getRawRetainedLevel() + "  RawRetained Depth=" + (cell.getRawRetainedLevel() - cell.getFloor()))
+                    .text("floor=" + cell.getFloor() + "  ceiling=" + cell.getCeiling() + " isFlowFloor=" + cell.isBottomFlow())
+                    .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidAmountWithPrecision >> 6))
+                    .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel());
+//                    .text("Connection Count = " + cell.con);
             }
         }
     }

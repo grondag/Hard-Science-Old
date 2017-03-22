@@ -3,6 +3,8 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.library.PackedBlockPos;
@@ -57,7 +59,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
     // performance counters
     // TODO: remove for release
     protected long connectionProcessTime;
-    protected int connectionProcessCount;
+    public AtomicInteger connectionProcessCount = new AtomicInteger(0);
     protected long coolingTime;
     protected long cellUpdateTime = 0;
     protected long particleTime;
@@ -186,10 +188,10 @@ public abstract class AbstractLavaSimulator extends SimulationNode
                 
                 this.worldBuffer.clearStatistics();
                 
-                Adversity.log.info("Connection flow proccessing time this sample = " + connectionProcessTime / 1000000 
-                        + " for " + connectionProcessCount + " links @ " + ((connectionProcessCount > 0) ? (float)connectionProcessTime / connectionProcessCount : "n/a") + " each");
-                connectionProcessCount = 0;
-                connectionProcessTime = 0;
+//                Adversity.log.info("Connection flow proccessing time this sample = " + connectionProcessTime / 1000000 
+//                        + " for " + connectionProcessCount + " links @ " + ((connectionProcessCount > 0) ? (float)connectionProcessTime / connectionProcessCount : "n/a") + " each");
+//                connectionProcessCount = 0;
+//                connectionProcessTime = 0;
                 
                 Adversity.log.info("Cell update time this sample = " + cellUpdateTime / 1000000);
                 cellUpdateTime = 0;
@@ -198,7 +200,7 @@ public abstract class AbstractLavaSimulator extends SimulationNode
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
             }
          
-            this.connectionProcessCount += this.getConnectionCount();
+//            this.connectionProcessCount += this.getConnectionCount();
             long startTime = System.nanoTime();
             
             // force processing on non-dirty connection at least once per tick

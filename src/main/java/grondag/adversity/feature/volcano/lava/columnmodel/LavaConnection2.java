@@ -9,6 +9,9 @@ import grondag.adversity.library.ISimpleListItem;
 
 public class LavaConnection2 implements ISimpleListItem
 {
+    
+    public final static int MAX_FLOW_PER_TICK = AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK / 10;
+    
     protected static int nextConnectionID = 0;
     
     /** by convention, first cell will have the lower-valued id */
@@ -108,9 +111,6 @@ public class LavaConnection2 implements ISimpleListItem
      * (It doesn't know how many fluid units are in the cell, only the surface and retention level.)
      * Retention level serves to mimic adhesion of lava to horizontal surfaces.
      * 
-     * @param surfaceHigh fluid surface of high cell - in fluid units relative to world floor
-     * @param surfaceLow  floor or fluid surface of low cell - in fluid units relative to world floor
-     * @param retentionHigh minimum fluid surface of high cell after any outflow - in fluid units relative to world floor. 
      *  
      * @return Number of fluid units that should flow from high to low cell.
      */
@@ -118,9 +118,11 @@ public class LavaConnection2 implements ISimpleListItem
     {    
         if(cellHigh.getFluidUnits() == 0) return 0;
         
-        int availableFluidUnits = surfaceHigh - cellHigh.getSmoothedRetainedLevel();
+        int availableFluidUnits = surfaceHigh - cellHigh.getSmoothedRetainedUnits();
         
         if(availableFluidUnits <= 0) return 0;
+
+        if(availableFluidUnits > MAX_FLOW_PER_TICK) availableFluidUnits = MAX_FLOW_PER_TICK;
         
         int flow = (surfaceHigh - surfaceLow) / 2;
         
@@ -129,13 +131,14 @@ public class LavaConnection2 implements ISimpleListItem
         if(flow > this.flowRemainingThisTick) flow = flowRemainingThisTick;
         
         return flow;
-        
     }
+    
     /**
      *  Resets lastFlowTick and forces run at least once a tick.
      */
     public void doFirstStep(LavaSimulatorNew sim)
     {
+            sim.connectionProcessCount.incrementAndGet();
             this.isDirty = false;
             this.lastFlowTick = sim.getTickIndex();
             this.setupTick(sim);
@@ -146,6 +149,7 @@ public class LavaConnection2 implements ISimpleListItem
     {
         if(this.isDirty)
         {
+            sim.connectionProcessCount.incrementAndGet();
             this.isDirty = false;
             this.doStepWork(sim);
         }

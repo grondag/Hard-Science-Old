@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleConcurrentList.ListMode;
 /**
@@ -32,6 +33,11 @@ public class CellChunk
     public final int xStart;
     public final int zStart;
 
+    /**  unload chunks when they have been unloadable this many ticks */
+    private final static int TICK_UNLOAD_THRESHOLD = 20;
+    
+    /** number of ticks this chunk has been unloadable - unload when reaches threshold */
+    private int unloadTickCount = 0;
 
     private final LavaCell2[] entryCells = new LavaCell2[256];
 
@@ -241,8 +247,21 @@ public class CellChunk
         if(!this.isUnloaded) this.retainCount.decrementAndGet();
     }
 
+    /**
+     * Returns true if chunk should be unloaded. Call once per tick 
+     */
     public boolean canUnload()
     {
+        if(this.isUnloaded) return false;
+        
+        if(this.activeCount.get() == 0 && this.retainCount.get() == 0)
+        {
+            return this.unloadTickCount++ >= TICK_UNLOAD_THRESHOLD;
+        }
+        else
+        {
+            this.unloadTickCount = 0;
+        }
         return this.activeCount.get() == 0 && this.retainCount.get() == 0 && !this.isUnloaded;
     }
 
@@ -259,6 +278,10 @@ public class CellChunk
                 if(entryCell != null)
                 {
                     entryCell = entryCell.firstCell();
+                    
+                    if(Adversity.DEBUG_MODE && entryCell.belowCell() != null)
+                        Adversity.log.warn("First cell is not actually the first cell.");
+                    
                     do
                     {
                         LavaCell2 nextCell = entryCell.aboveCell();
@@ -268,6 +291,10 @@ public class CellChunk
                     while(entryCell != null);
 
                     this.setEntryCell(x, z, null);
+                }
+                else if(Adversity.DEBUG_MODE)
+                {
+                    Adversity.log.warn("Null entry cell in chunk being unloaded.");
                 }
             }
         }

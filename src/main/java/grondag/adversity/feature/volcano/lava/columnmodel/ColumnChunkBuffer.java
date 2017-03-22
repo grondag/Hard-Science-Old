@@ -16,26 +16,9 @@ public class ColumnChunkBuffer
     public void readChunk(Chunk chunk)
     {
         this.packedChunkPos = PackedBlockPos.getPackedChunkPos(chunk);
-     
-        //chunk data is optimized for horizontal plane access
-        //we are optimized for column access
-        for(int y = 0; y < 256; y++)
-        {
-            for(int x = 0; x < 16; x++)
-            {
-                for(int z = 0; z < 16; z++)
-                {
-                    int i = getIndex(x, y, z);
-                    IBlockState state = chunk.getBlockState(x, y, z);
-                    this.blockType[i] = BlockType.getBlockTypeFromBlockState(state);
-                }
-            }
-        }
-    }
-    
-    public void readChunk(ChunkBuffer chunkBuffer)
-    {
-        this.packedChunkPos = chunkBuffer.getPackedChunkPos();
+        
+        final int xStart = PackedBlockPos.getChunkXStart(packedChunkPos);
+        final int zStart = PackedBlockPos.getChunkZStart(packedChunkPos);
         
         //chunk data is optimized for horizontal plane access
         //we are optimized for column access
@@ -45,9 +28,30 @@ public class ColumnChunkBuffer
             {
                 for(int z = 0; z < 16; z++)
                 {
-                    int i = getIndex(x, y, z);
-                    IBlockState state = chunkBuffer.getBlockState(x, y, z);
-                    this.blockType[i] = BlockType.getBlockTypeFromBlockState(state);
+                    IBlockState state = chunk.getBlockState(xStart + x, y, zStart + z);
+                    this.blockType[getIndex(x, y, z)] = BlockType.getBlockTypeFromBlockState(state);
+                }
+            }
+        }
+    }
+    
+    public void readChunk(ChunkBuffer chunkBuffer)
+    {
+        this.packedChunkPos = chunkBuffer.getPackedChunkPos();
+        
+        final int xStart = PackedBlockPos.getChunkXStart(packedChunkPos);
+        final int zStart = PackedBlockPos.getChunkZStart(packedChunkPos);
+        
+        //chunk data is optimized for horizontal plane access
+        //we are optimized for column access
+        for(int y = 0; y < 256; y++)
+        {
+            for(int x = 0; x < 16; x++)
+            {
+                for(int z = 0; z < 16; z++)
+                {
+                    IBlockState state = chunkBuffer.getBlockState(xStart + x, y, zStart + z);
+                    this.blockType[getIndex(x, y, z)] = BlockType.getBlockTypeFromBlockState(state);
                 }
             }
         }

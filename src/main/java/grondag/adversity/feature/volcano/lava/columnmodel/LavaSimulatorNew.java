@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 
 public class LavaSimulatorNew extends AbstractLavaSimulator
 {
-    private final LavaCells cells = new LavaCells(this);
+    public final LavaCells cells = new LavaCells(this);
     private final LavaConnections connections = new LavaConnections();
     public final CellChunkLoader cellChunkLoader = new CellChunkLoader();
     
@@ -27,7 +27,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         @Override
         protected boolean processEvent(int x, int y, int z, int amount)
         {
-            if(amount == 0)
+            if(amount < 0 && amount >= -AbstractLavaSimulator.LEVELS_PER_BLOCK)
             {
                 // Lava destroyed
                 // Should be able to find a loaded chunk and post a pending event to handle during validation
@@ -35,9 +35,10 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 LavaCell2 target = cells.getCellIfExists(x, y, z);
                 if(target != null)
                 {
-                    target.notifyDestroyedLava(y);
-                    return true;
+                    target.changeLevel(getTickIndex(), amount * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+                    target.setRefreshRange(y, y);
                 }
+                return true;
             }
             else if(amount > 0 && amount <= AbstractLavaSimulator.LEVELS_PER_BLOCK)
             {
@@ -48,7 +49,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                     
                     if(target != null)
                     {
-                        // if chunk has an entry cell for that column, mark it for validation
+                        // if chunk has an entry cell for that column but not for the given space, mark it for validation
                         target.setValidationNeeded(true);
                     }
                     else
@@ -58,12 +59,13 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                         // case where chunk is already loaded but somehow no cells exist at x, z.
                         cells.getOrCreateCellChunk(x, z).requestFullValidation();
                     }
-                    // event not complete until we can tell cell to 
+                    // event not complete until we can tell cell to add lava
                     return false;
                 }
                 else
                 {
-                    target.notifyPlacedLava(LavaSimulatorNew.this.getTickIndex(), y, amount);
+                    target.addLavaAtLevel(LavaSimulatorNew.this.getTickIndex(), y * AbstractLavaSimulator.LEVELS_PER_BLOCK + 1, amount * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+                    target.setRefreshRange(y, y);
                     return true;
                 }
             }
@@ -196,6 +198,9 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     {
         if(itMe) return;
 
+        // synchronize world buffer with world
+        this.worldBuffer.clearBlockState(pos);
+        
         if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
         {
             this.lavaFillers.remove(PackedBlockPos.pack(pos));
@@ -203,7 +208,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         }
         else if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, 0);
+            this.lavaBlockPlacementEvents.addEvent(pos, -IFlowBlock.getFlowHeightFromState(state));
             this.setSaveDirty(true);
         }
     }
@@ -222,9 +227,14 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
         {
             this.lavaBlockPlacementEvents.addEvent(pos, IFlowBlock.getFlowHeightFromState(state));
             
-            // always remove blocks placed by player from world - otherwise lava will be re-added to sim
-            // by validation until simulation state catches up with world
-            this.worldBuffer.setBlockState(pos.getX(), pos.getY(), pos.getZ(), Blocks.AIR.getDefaultState(), state);
+            // remove blocks placed by player so that simulation can place lava in the appropriate place
+            this.itMe = true;
+            this.worldBuffer.realWorld.setBlockState(pos, Blocks.AIR.getDefaultState());
+            this.itMe = false;
+            
+            // synchronize world buffer with world
+            this.worldBuffer.clearBlockState(pos);
+            
             this.setSaveDirty(true);
         }
     }
@@ -266,8 +276,8 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 this.worldBuffer.clearStatistics();
                 
                 Adversity.log.info("Connection flow proccessing time this sample = " + connectionProcessTime / 1000000 
-                        + " for " + connectionProcessCount + " links @ " + ((connectionProcessCount > 0) ? (float)connectionProcessTime / connectionProcessCount : "n/a") + " each");
-                connectionProcessCount = 0;
+                        + " for " + connectionProcessCount + " links @ " + ((connectionProcessCount.get() > 0) ? (float)connectionProcessTime / connectionProcessCount.get() : "n/a") + " each");
+                connectionProcessCount.set(0);
                 connectionProcessTime = 0;
                 
                 Adversity.log.info("Cell update time this sample = " + cellUpdateTime / 1000000);
@@ -279,7 +289,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 this.cells.logDebugInfo();
             }
          
-            this.connectionProcessCount += this.getConnectionCount();
+//            this.connectionProcessCount += this.getConnectionCount();
             
             long startTime;
 
@@ -323,14 +333,14 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             
             startTime = System.nanoTime();
             // force processing on non-dirty connection at least once per tick
-//            this.doFirstStep();
-//            this.doStep();
-//            this.doStep();
-//            this.doStep();
-//            this.doStep();
-//            this.doStep();
-//            this.doStep();
-//            this.doLastStep();
+            this.doFirstStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doStep();
+            this.doLastStep();
             this.connectionProcessTime += (System.nanoTime() - startTime);
 
             startTime = System.nanoTime();
