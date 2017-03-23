@@ -15,9 +15,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.config.Config;
+import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaCell2;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -572,19 +575,7 @@ public class TileVolcano extends TileEntity implements ITickable{
      */
     private boolean clearBore(BlockPos clearPos)
     {
-        if(Simulator.instance.getFluidTracker() instanceof LavaSimulator)
-        {
-            return doClearingOldType(clearPos);
-        }
-        else
-        {
-            return false;
-        }
-    }
-    
-    private boolean doClearingOldType(BlockPos clearPos)
-    {      
-        LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();
+        LavaSimulatorNew sim = (LavaSimulatorNew) Simulator.instance.getFluidTracker();
         
         IBlockState state = this.worldObj.getBlockState(clearPos);
         Block block = state.getBlock();
@@ -592,24 +583,28 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             return true;
         }
+        
         // allow air blocks if sim shows lava in them because simulator may not do block updates immediately
         else if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == Blocks.AIR)
         {
-            LavaCell cell = sim.getCell(clearPos, false);
+            LavaCell2 cell = sim.cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             
             //takes long time to get every cell to perfectly full - just has to be close enough
-            if(cell.getFluidAmount() > 10000) 
+            if(cell == null) 
             {
-                cell.setNeverCools(true);
-                return true;
+                sim.addLava(clearPos, AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK, false);
+                return false;
+            }
+            else if(cell.fluidSurfaceY() < clearPos.getY() || cell.fluidSurfaceFlowHeight() < AbstractLavaSimulator.LEVELS_PER_BLOCK)
+            {
+                sim.addLava(clearPos, AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK, false);
+                cell.setCoolingDisabled(true);
+                return false;
             }
             else
             {
-//                Adversity.log.info("Topping off lava @" + clearPos.toString());
-                // want to add lava with some pressure
-                Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity() + 5 * (255 - clearPos.getY()), false);
-                cell.setNeverCools(true);
-                return false;
+                cell.setCoolingDisabled(true);
+                return true;
             }
             
         }
@@ -617,9 +612,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
 //            Adversity.log.info("Clearing and placing lava @" + clearPos.toString());
             this.worldObj.setBlockToAir(clearPos);
-            LavaCell cell = sim.getCell(clearPos, true);
-            Simulator.instance.getFluidTracker().addLava(clearPos, cell.getCapacity(), true);
-            cell.setNeverCools(true);
+            Simulator.instance.getFluidTracker().addLava(clearPos, AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK, false);
             // don't build mound if above ground or if melting Basalt
             if(clearPos.getY() < this.groundLevel && 
                     !(block instanceof NiceBlock && ((NiceBlock)block).material == BaseMaterial.BASALT))
@@ -629,9 +622,8 @@ public class TileVolcano extends TileEntity implements ITickable{
             return false;
         }
     }
-        
-
-
+    
+    
     private void buildMound()
     {
         BlockPos top = findMoundSpot();

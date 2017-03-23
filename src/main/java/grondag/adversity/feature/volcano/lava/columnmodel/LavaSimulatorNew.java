@@ -115,7 +115,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
     @Override
     public float loadFactor()
     {
-        return Math.max((float)this.connections.size() / 10000F, (float)this.cells.size() / 5000F);
+        return Math.max((float)this.connections.size() / 100000F, (float)this.cells.size() / 50000F);
     }
 
     @Override
@@ -286,7 +286,7 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
                 Adversity.log.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
                 
-                this.cells.logDebugInfo();
+//                this.cells.logDebugInfo();
             }
          
 //            this.connectionProcessCount += this.getConnectionCount();

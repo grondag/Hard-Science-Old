@@ -50,7 +50,6 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	protected Simulator()
     {
         super(NodeRoots.SIMULATION.ordinal());
-        this.volcanoManager = new VolcanoManager(this.taskCounter);
     }
 
     public static final Simulator instance = new Simulator();
@@ -94,13 +93,14 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 
 
 	// Main control
-	public void start()
+	public void start()  
 	{
         Adversity.log.info("starting sim");
 	    synchronized(this)
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
+	        this.volcanoManager = new VolcanoManager(this.taskCounter);
 	        this.lavaSimulator = new LavaSimulatorNew(this.world);
 	        
             if(PersistenceManager.loadNode(world, this))

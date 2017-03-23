@@ -1711,6 +1711,11 @@ public class LavaCell2 implements ISimpleListItem
         return this.refreshBottomY != REFRESH_NONE && this.refreshTopY != REFRESH_NONE;
     }
     
+    public void setCoolingDisabled(boolean isCoolingDisabled)
+    {
+        this.isCoolingDisabled = isCoolingDisabled;
+    }
+    
     public static long computeKey(int x, int z)
     {
         return PackedBlockPos.pack(x, 0, z);  
