@@ -60,7 +60,7 @@ public class LavaCell2 implements ISimpleListItem
     private volatile boolean isDeleted;
     
     /** holds all connections with other cells */
-    private Int2ObjectOpenHashMap<LavaConnection2> connections = new Int2ObjectOpenHashMap<LavaConnection2>();
+    public final Int2ObjectOpenHashMap<LavaConnection2> connections = new Int2ObjectOpenHashMap<LavaConnection2>();
     
     /** see {@link #getFloor()} */
     private int floor;
@@ -1382,9 +1382,10 @@ public class LavaCell2 implements ISimpleListItem
   
     
     /**
-     * Assigns a sort bucket to each outbound connection.
+     * Assigns a sort bucket to each outbound connection and 
+     * invalidates sort order if any buckets change.
      */
-    public void prioritizeOutboundConnections()
+    public void prioritizeOutboundConnections(LavaConnections connections)
     {
         ArrayList<LavaConnection2> sort = sorter.get();
         sort.clear();
@@ -1404,6 +1405,10 @@ public class LavaCell2 implements ISimpleListItem
                     // if floors are the same, the cell that is "first" handles sorting
                     if(connection.firstCell == this) sort.add(connection);
                 }
+            }
+            else
+            {
+                connection.setSortBucket(connections, null);
             }
         
         }
@@ -1428,7 +1433,7 @@ public class LavaCell2 implements ISimpleListItem
             {
                 // Don't think it is even possible for a cell to have more than four neighbors with a lower or same floor, but in case I'm wrong...
                 // For cells with more than four outbound connections, all connections beyond the first four get dropped in the last bucket.
-                sort.get(i).setSortBucket(i < 4 ? SortBucket.values()[i] : SortBucket.D);
+                sort.get(i).setSortBucket(connections, i < 4 ? SortBucket.values()[i] : SortBucket.D);
             }
         }
     }
@@ -1483,7 +1488,7 @@ public class LavaCell2 implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
         
         if(this.connections.size() < 4) return true;
         
@@ -1491,7 +1496,7 @@ public class LavaCell2 implements ISimpleListItem
         for(LavaConnection2 c : this.connections.values())
         {
             if(c.getOther(this).getFluidUnits() > 0) hotCount++;
-            if(hotCount >= 4) return false;
+            if(hotCount >= 3) return false;
         }
         
         return true;

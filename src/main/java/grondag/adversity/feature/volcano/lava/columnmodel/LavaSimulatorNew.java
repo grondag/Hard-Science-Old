@@ -459,26 +459,25 @@ public class LavaSimulatorNew extends AbstractLavaSimulator
             this.cells.stream(true).forEach(c -> c.update(this, cells, connections)
         )).join();
         
-        // connection sorting - prioritize all outbound connections
+        // connection sorting - prioritize all outbound connections - notify connections collection to update sort order if needed
         // Needs to happen in a separate pass from update because new connections are formed there
         LAVA_THREAD_POOL.submit( () ->
-        this.cells.stream(true).forEach(c -> c.prioritizeOutboundConnections())).join();
+        this.cells.stream(true).forEach(c -> c.prioritizeOutboundConnections(connections))).join();
        
         this.cells.setMode(ListMode.ADD);
-
         
         //TODO: remove
-        this.connections.setMode(ListMode.INDEX);
-        Iterator<LavaConnection2> it = connections.stream(false).iterator();
-        while(it.hasNext())
-        {
-            LavaConnection2 c = it.next();
-            if(c.isActive() && c.getSortBucket() == null)
-            {
-                Adversity.log.info("derp");
-            }
-        }
-        this.connections.setMode(ListMode.ADD);
+//        this.connections.setMode(ListMode.INDEX);
+//        Iterator<LavaConnection2> it = connections.stream(false).iterator();
+//        while(it.hasNext())
+//        {
+//            LavaConnection2 c = it.next();
+//            if(c.isActive() && c.getSortBucket() == null)
+//            {
+//                Adversity.log.info("derp");
+//            }
+//        }
+//        this.connections.setMode(ListMode.ADD);
     }
 
     @Override

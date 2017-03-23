@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava.columnmodel;
 
 import java.util.stream.Stream;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.library.SimpleConcurrentList;
 
@@ -129,6 +130,11 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         this.isSortCurrent = false;
     }
     
+    public void invalidateSortBuckets()
+    {
+        this.isSortCurrent = false;
+    }
+    
     private void refreshSortBuckets()
     {
         for(SimpleConcurrentList<LavaConnection2> bucket : this.sort)
@@ -140,7 +146,14 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         
         this.setMode(ListMode.INDEX);
         AbstractLavaSimulator.LAVA_THREAD_POOL.submit(() ->
-            this.stream(true).forEach(c -> {if(c != null && c.isActive()) this.sort[c.getSortBucket().ordinal()].add(c);})).join();
+            this.stream(true).forEach(c -> {
+                
+//                if(c.firstCell.id == 1229 || c.secondCell.id == 1229)
+//                    Adversity.log.info("boop");
+                
+                if(c != null && c.isActive()) this.sort[c.getSortBucket().ordinal()].add(c);
+                
+            })).join();
         
         for(SortBucket b : SortBucket.values())
         {

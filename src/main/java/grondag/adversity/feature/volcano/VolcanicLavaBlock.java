@@ -8,6 +8,7 @@ import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
 import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.columnmodel.LavaCell2;
+import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnection2;
 import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
@@ -157,13 +158,20 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             }
             else
             {
-                probeInfo.text("Cell ID = " + cell.hashCode())
+                probeInfo.text("Cell ID = " + cell.id)
                     .text("FluidUnits=" + cell.getFluidUnits() + "  Fluid Levels=" + (cell.getFluidUnits() / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL))
                     .text("RawRetainedLevel=" + cell.getRawRetainedLevel() + "  RawRetained Depth=" + (cell.getRawRetainedLevel() - cell.getFloor()))
                     .text("floor=" + cell.getFloor() + "  ceiling=" + cell.getCeiling() + " isFlowFloor=" + cell.isBottomFlow())
                     .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidAmountWithPrecision >> 6))
-                    .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel());
-//                    .text("Connection Count = " + cell.con);
+                    .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
+                    .text("Connection Count = " + cell.connections.size());
+                
+                for(LavaConnection2 conn : cell.connections.values())
+                {
+                    LavaCell2 other = conn.getOther(cell);
+                    probeInfo.text("Conn ID=" + conn.id + "  x=" + other.x() + "  z=" + other.z() + "  bottomY=" + other.bottomY() + "  fluidUnits=" + other.getFluidUnits() 
+                    + " isActive=" + conn.isActive() + "  isDeleted=" +  conn.isDeleted() + "  sortBucket=" + conn.getSortBucket() + "  cellID=" + other.id);
+                }
             }
         }
     }

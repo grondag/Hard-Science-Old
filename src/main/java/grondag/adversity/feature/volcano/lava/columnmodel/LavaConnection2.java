@@ -30,6 +30,8 @@ public class LavaConnection2 implements ISimpleListItem
     
     private volatile SortBucket sortBucket;
     
+    private volatile SortBucket lastSortBucket;
+    
     protected boolean isDirty = false;
     
     private boolean isDeleted = false;
@@ -160,6 +162,9 @@ public class LavaConnection2 implements ISimpleListItem
      */
     private void doStepWork(LavaSimulatorNew sim)
     {
+//        if(this.firstCell.id == 1229 || this.secondCell.id == 1229)
+//            Adversity.log.info("boop");
+        
         boolean isIncomplete = true;
         do
         {
@@ -232,21 +237,32 @@ public class LavaConnection2 implements ISimpleListItem
         return Math.abs(this.firstCell.getFloor() - this.secondCell.getFloor());
     }
 
+    /**
+     * Should be null if non-active
+     */
     public SortBucket getSortBucket()
     {
-        //TODO: remove
-        if(this.sortBucket == null) 
-            Adversity.log.info("derp");
-        
         return this.sortBucket;
     }
     
-    public void setSortBucket(SortBucket newBucket)
+    public void setSortBucket(LavaConnections connections, SortBucket newBucket)
     {
-        //TODO: remove 
-//        Adversity.log.info("sort bucket = " + newBucket + " for connection id = " + this.id);
-        
-        this.sortBucket = newBucket;
+        if(newBucket != this.sortBucket)
+        {
+            connections.invalidateSortBuckets();
+            this.lastSortBucket = this.sortBucket;
+            this.sortBucket = newBucket;
+        }
+    }
+    
+    public SortBucket getLastSortBucket()
+    {
+        return this.lastSortBucket;
+    }
+    
+    public void clearLastSortBucket()
+    {
+        this.lastSortBucket = this.sortBucket;
     }
     
     @Override
