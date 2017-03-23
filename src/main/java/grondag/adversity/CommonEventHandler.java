@@ -4,11 +4,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.VolcanicLavaBlock;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.Simulator;
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -71,7 +68,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
-            LavaSimulatorNew sim = (LavaSimulatorNew) Simulator.instance.getFluidTracker();        
+            LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();        
             sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -84,7 +81,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
-            LavaSimulatorNew sim = (LavaSimulatorNew) Simulator.instance.getFluidTracker();        
+            LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();        
             sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -93,7 +90,7 @@ public class CommonEventHandler
     public void onBlockMultiPlace(BlockEvent.MultiPlaceEvent event)
     {
         //TODO: remove cast when column model is fully implemented
-        LavaSimulatorNew sim = (LavaSimulatorNew) Simulator.instance.getFluidTracker();
+        LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();
         for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
         {
             if(!(snap.getCurrentBlock() instanceof VolcanicLavaBlock))

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ParticleManager
@@ -33,7 +34,7 @@ public class ParticleManager
         return map.size();
     }
    
-    public void addLavaForParticle(AbstractLavaSimulator sim, long packedBlockPos, int fluidAmount)
+    public void addLavaForParticle(LavaSimulator sim, long packedBlockPos, int fluidAmount)
     {
         ParticleInfo particle = map.get(packedBlockPos);
         
@@ -52,7 +53,7 @@ public class ParticleManager
     }
     
     /** returns a collection of eligible particles up the max count given */
-    public Collection<ParticleInfo> pollEligible(AbstractLavaSimulator sim, int maxCount)
+    public Collection<ParticleInfo> pollEligible(LavaSimulator sim, int maxCount)
     {
         if(map.isEmpty()) return null;
         
@@ -62,8 +63,8 @@ public class ParticleManager
         // wait until minimum size * minimum age, full size,  or max age
         List<ParticleInfo> candidates = map.values().parallelStream()
                 .filter(p -> p.tickCreated <= forceEligibleTick 
-                    || p.fluidUnits >= AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK
-                    || (p.tickCreated <= firstEligibleTick && p.fluidUnits >= AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    || p.fluidUnits >= LavaSimulator.FLUID_UNITS_PER_BLOCK
+                    || (p.tickCreated <= firstEligibleTick && p.fluidUnits >= LavaSimulator.FLUID_UNITS_PER_LEVEL))
                 .sorted(new Comparator<ParticleInfo>() {
 
                     @Override

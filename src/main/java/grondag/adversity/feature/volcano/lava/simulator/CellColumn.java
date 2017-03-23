@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import net.minecraft.block.state.IBlockState;

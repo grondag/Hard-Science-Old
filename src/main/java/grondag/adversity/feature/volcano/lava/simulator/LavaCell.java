@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,8 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
+import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
@@ -23,7 +22,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class LavaCell2 implements ISimpleListItem
+public class LavaCell implements ISimpleListItem
 {
     private static AtomicInteger nextCellID = new AtomicInteger(0);
     
@@ -48,19 +47,19 @@ public class LavaCell2 implements ISimpleListItem
      * Used to implement a doubly-linked list of all cells within an x,z coordinate.
      * Maintained by collection.
      */
-    volatile LavaCell2 above;
+    volatile LavaCell above;
     
     /** 
      * Used to implement a doubly-linked list of all cells within an x,z coordinate.
      * Maintained by collection.
      */
-    volatile LavaCell2 below;
+    volatile LavaCell below;
     
     /** set true when cell should no longer be processed and can be removed from storage */
     private volatile boolean isDeleted;
     
     /** holds all connections with other cells */
-    public final Int2ObjectOpenHashMap<LavaConnection2> connections = new Int2ObjectOpenHashMap<LavaConnection2>();
+    public final Int2ObjectOpenHashMap<LavaConnection> connections = new Int2ObjectOpenHashMap<LavaConnection>();
     
     /** see {@link #getFloor()} */
     private int floor;
@@ -85,11 +84,11 @@ public class LavaCell2 implements ISimpleListItem
      */
     private boolean isConnectionUpdateNeeded = true;
     
-    /** value for {@link #lastVisibleLevel} indicating level has never been reported via {@link #provideBlockUpdateIfNeeded(LavaSimulatorNew)} */
+    /** value for {@link #lastVisibleLevel} indicating level has never been reported via {@link #provideBlockUpdateIfNeeded(LavaSimulator)} */
     private static final int NEVER_REPORTED = -1;
 
     /**
-     * Last level reported to world via {@link #provideBlockUpdateIfNeeded(LavaSimulatorNew)}.
+     * Last level reported to world via {@link #provideBlockUpdateIfNeeded(LavaSimulator)}.
      * Will be {@value #NEVER_REPORTED} if that method has not yet been called.
      */
     private int lastVisibleLevel = NEVER_REPORTED; 
@@ -184,7 +183,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param lavaLevel
      * @param isFlowFloor
      */
-    public LavaCell2(LavaCell2 existingEntryCell, int floor, int ceiling, boolean isFlowFloor)
+    public LavaCell(LavaCell existingEntryCell, int floor, int ceiling, boolean isFlowFloor)
     {
 //        if(Adversity.DEBUG_MODE)
 //        {
@@ -209,7 +208,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param ceiling
      * @param isFlowFloor
      */
-    public LavaCell2(LavaCells cells, int x, int z, int floor, int ceiling, boolean isFlowFloor)
+    public LavaCell(LavaCells cells, int x, int z, int floor, int ceiling, boolean isFlowFloor)
     {
 //        if(Adversity.DEBUG_MODE)
 //        {
@@ -295,7 +294,7 @@ public class LavaCell2 implements ISimpleListItem
         this.clearBlockUpdate();
         this.isDeleted = true;
         
-        for (LavaConnection2 connection : this.connections.values())
+        for (LavaConnection connection : this.connections.values())
         {
             connection.setDeleted();
         }
@@ -307,13 +306,13 @@ public class LavaCell2 implements ISimpleListItem
      * Returns cell at given y block position if it exists.
      * Thread-safe.
      */
-    LavaCell2 getCellIfExists(int y)
+    LavaCell getCellIfExists(int y)
     {
         synchronized(this.locator)
         {
             if(y > this.topY())
             {
-                LavaCell2 nextUp = this.above;
+                LavaCell nextUp = this.above;
                 while(nextUp != null)
                 {
                     if(y > nextUp.topY())
@@ -337,7 +336,7 @@ public class LavaCell2 implements ISimpleListItem
             }
             else
             {
-                LavaCell2 nextDown = this.below;
+                LavaCell nextDown = this.below;
                 while(nextDown != null)
                 {
                     if(y < nextDown.bottomY())
@@ -384,7 +383,7 @@ public class LavaCell2 implements ISimpleListItem
 //    private static final int BLOCK_LEVELS_BITS = 9;
     
     /** max value for ceiling */
-    private static final int MAX_LEVEL = 256 * AbstractLavaSimulator.LEVELS_PER_BLOCK;
+    private static final int MAX_LEVEL = 256 * LavaSimulator.LEVELS_PER_BLOCK;
     
     /** 
      * Writes data to array starting at location i.
@@ -470,7 +469,7 @@ public class LavaCell2 implements ISimpleListItem
      */
     public int fluidSurfaceLevel()
     {
-        return Math.min(this.getCeiling(), this.getFloor() + this.fluidUnits / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL); 
+        return Math.min(this.getCeiling(), this.getFloor() + this.fluidUnits / LavaSimulator.FLUID_UNITS_PER_LEVEL); 
     }
     
     /**
@@ -506,7 +505,7 @@ public class LavaCell2 implements ISimpleListItem
      */
     public int fluidSurfaceUnits()
     {
-        return this.getFloor() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL + this.fluidUnits; 
+        return this.getFloor() * LavaSimulator.FLUID_UNITS_PER_LEVEL + this.fluidUnits; 
     }
     
     /** 
@@ -514,7 +513,7 @@ public class LavaCell2 implements ISimpleListItem
     * When two cells are equidistant, preference is given to the cell above y
     * because that is useful for inferring properties when y is a flow floor block. 
     */
-    public LavaCell2 findCellNearestY(int y)
+    public LavaCell findCellNearestY(int y)
     {
         int myDist = this.distanceToY(y);
         
@@ -580,9 +579,9 @@ public class LavaCell2 implements ISimpleListItem
      * Cells that are below and adjacent (cell ceiling = level) count as below.
      * If the lowest existing cell is above or intersecting with the level, returns null.
      */
-    public LavaCell2 findNearestCellBelowLeve(int level)
+    public LavaCell findNearestCellBelowLeve(int level)
     {
-        LavaCell2 candidate = this;
+        LavaCell candidate = this;
 
         if(candidate.getCeiling() > level)
         {
@@ -617,9 +616,9 @@ public class LavaCell2 implements ISimpleListItem
     }
     
     /** Returns the lowest cell containing lava or the upper most cell if no cells contain lava */
-    public LavaCell2 selectStartingCell()
+    public LavaCell selectStartingCell()
     {
-        LavaCell2 candidate = this.locator.firstCell;
+        LavaCell candidate = this.locator.firstCell;
         while(candidate.fluidUnits == 0 && candidate.above != null)
         {
             candidate = candidate.above;
@@ -669,7 +668,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param zPositive must be in range -1 to +1
      * @return LavaCell that was found, null if none was found, self if xOffset == 0 and zOffset == 0
      */
-    private LavaCell2 getFloorNeighbor(int xOffset, int zOffset)
+    private LavaCell getFloorNeighbor(int xOffset, int zOffset)
     {
         //handling is different for directly adjacent vs. diagonally adjacent
         if(xOffset == 0)
@@ -692,13 +691,13 @@ public class LavaCell2 implements ISimpleListItem
             // diagonally adjacent
             LavaCells cells = this.locator.cellChunk.cells;
 
-            LavaCell2 nX = getLowestNeighborDirectlyAdjacent(cells, xOffset, 0);
+            LavaCell nX = getLowestNeighborDirectlyAdjacent(cells, xOffset, 0);
             if(nX != null)
             {
                 nX = nX.getLowestNeighborDirectlyAdjacent(cells, xOffset, zOffset);
             }
             
-            LavaCell2 nZ = getLowestNeighborDirectlyAdjacent(cells, 0, zOffset);
+            LavaCell nZ = getLowestNeighborDirectlyAdjacent(cells, 0, zOffset);
             if(nZ != null)
             {
                 nZ = nZ.getLowestNeighborDirectlyAdjacent(cells, xOffset, zOffset);
@@ -719,9 +718,9 @@ public class LavaCell2 implements ISimpleListItem
         }
     }
     
-    private LavaCell2 getLowestNeighborDirectlyAdjacent(LavaCells cells, int xOffset, int zOffset)
+    private LavaCell getLowestNeighborDirectlyAdjacent(LavaCells cells, int xOffset, int zOffset)
     {
-        LavaCell2 candidate = cells.getEntryCell(this.x() + xOffset, this.z() + zOffset);
+        LavaCell candidate = cells.getEntryCell(this.x() + xOffset, this.z() + zOffset);
         if(candidate == null) return null;
         
         candidate = candidate.findCellNearestY(this.bottomY());
@@ -816,13 +815,13 @@ public class LavaCell2 implements ISimpleListItem
         // examples of input -> output
         // 24 -> 1  top level of block at Y = 1
         // 25 -> 2  first level of block at Y = 2
-        return (ceilingIn - 1) / AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        return (ceilingIn - 1) / LavaSimulator.LEVELS_PER_BLOCK;
     }
     
     /** calculates the block y from a bottom bound (exclusive) given as a fluid level */
     private static int getYFromFloor(int floorIn)
     {
-        return floorIn / AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        return floorIn / LavaSimulator.LEVELS_PER_BLOCK;
     }
    
     /** 
@@ -834,7 +833,7 @@ public class LavaCell2 implements ISimpleListItem
     }
     
     /** cells should not meet - use this to assert */
-    public boolean isVerticallyAdjacentTo(LavaCell2 other)
+    public boolean isVerticallyAdjacentTo(LavaCell other)
     {
         return  this.locator.x == other.locator.x 
                 && this.locator.z == other.locator.z
@@ -857,7 +856,7 @@ public class LavaCell2 implements ISimpleListItem
     }
     
     /** cells should not overlap - use this to assert */
-    public boolean intersectsWith(LavaCell2 other)
+    public boolean intersectsWith(LavaCell other)
     {
         return this.locator.x == other.locator.x 
                 && this.locator.z == other.locator.z
@@ -867,13 +866,13 @@ public class LavaCell2 implements ISimpleListItem
     /** returns floor (exclusive) of the block position at level y */
     private static int blockFloorFromY(int y)
     {
-        return y * AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        return y * LavaSimulator.LEVELS_PER_BLOCK;
     }
     
     /** returns ceiling (inclusive) of the block position at level y */
     private static int blockCeilingFromY(int y)
     {
-        return (y + 1) * AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        return (y + 1) * LavaSimulator.LEVELS_PER_BLOCK;
     }
     
     
@@ -924,7 +923,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param floorHeight  If is a partial solid flow block, height of floor within this y block
      * @return Cell to which the space belongs
      */
-    public LavaCell2 addOrConfirmSpace(int y, int floorHeight, boolean isFlowFloor)
+    public LavaCell addOrConfirmSpace(int y, int floorHeight, boolean isFlowFloor)
     {
         /**
          * Here are the possible scenarios:
@@ -982,19 +981,19 @@ public class LavaCell2 implements ISimpleListItem
         // If space is not related to this cell, try again with the cell that is closest
         // We don't check this first because validation routine will try to position us
         // to the closest cell most of the time before calling, and thus will usually not be necessary.
-        LavaCell2 closest = this.findCellNearestY(y);
+        LavaCell closest = this.findCellNearestY(y);
         if(closest != this) return closest.addOrConfirmSpace(y, floorHeight, isFlowFloor);
         
         
         // if we get here, this is the closest cell and Y is not adjacent
         // therefore the space represents a new cell.
         
-        LavaCell2 newCell = new LavaCell2(this, y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * FlowHeightState.BLOCK_LEVELS_INT, isFlowFloor);
+        LavaCell newCell = new LavaCell(this, y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * FlowHeightState.BLOCK_LEVELS_INT, isFlowFloor);
         
         if(y > myTop)
         {
             // if space is above, insert new cell above this one
-            LavaCell2 existingAbove = this.above;
+            LavaCell existingAbove = this.above;
             this.linkAbove(newCell);
             if(existingAbove != null)
             {
@@ -1005,7 +1004,7 @@ public class LavaCell2 implements ISimpleListItem
         else
         {
             // space (and new cell) must be below
-            LavaCell2 existingBelow = this.below;
+            LavaCell existingBelow = this.below;
             newCell.linkAbove(this);
             if(existingBelow != null)
             {
@@ -1022,7 +1021,7 @@ public class LavaCell2 implements ISimpleListItem
      * Lava in cell above transfers to this cell.
      * Otherwise returns this cell.
      */
-    private LavaCell2 checkForMergeUp()
+    private LavaCell checkForMergeUp()
     {
         return canMergeCells(this, this.above) ? mergeCells(this, this.above) : this;
     }
@@ -1032,7 +1031,7 @@ public class LavaCell2 implements ISimpleListItem
      * Lava in this cell transfers to cell below.
      * Otherwise returns this cell.
      */
-    private LavaCell2 checkForMergeDown()
+    private LavaCell checkForMergeDown()
     {
         return canMergeCells(this.below, this) ? mergeCells(this.below, this) : this;
     }
@@ -1043,7 +1042,7 @@ public class LavaCell2 implements ISimpleListItem
      * and floor of top cell is at bottom of block or has melted.
      * If upper cell has any lava in it, we assume any flow floor has melted.
      */
-    private static boolean canMergeCells(LavaCell2 lowerCell, LavaCell2 upperCell)
+    private static boolean canMergeCells(LavaCell lowerCell, LavaCell upperCell)
     {
         if(lowerCell == null || upperCell == null) return false;
         
@@ -1059,9 +1058,9 @@ public class LavaCell2 implements ISimpleListItem
      * Merges upper cell into lower cell. 
      * All lava in upper cell is added to lower cell.
      * Returns the lower cell. 
-     * Does no checking - call {@link #canMergeCells(LavaCell2, LavaCell2)} before calling this.
+     * Does no checking - call {@link #canMergeCells(LavaCell, LavaCell)} before calling this.
      */
-    private static LavaCell2 mergeCells(LavaCell2 lowerCell, LavaCell2 upperCell)
+    private static LavaCell mergeCells(LavaCell lowerCell, LavaCell upperCell)
     {
         
         //change cell dimensions and fixup references
@@ -1075,7 +1074,7 @@ public class LavaCell2 implements ISimpleListItem
             
             
             // add lava from upper cell if it has any
-            if(upperCell.getFloor() - lowerCell.fluidSurfaceLevel() < AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS)
+            if(upperCell.getFloor() - lowerCell.fluidSurfaceLevel() < LavaSimulator.LEVELS_PER_TWO_BLOCKS)
             {
                 lowerCell.changeLevel(0, upperCell.getFluidUnits());
             }
@@ -1094,8 +1093,8 @@ public class LavaCell2 implements ISimpleListItem
                         break;
                     }
                     
-                    lowerCell.addLavaAtLevel(lowerCell.locator.cellChunk.cells.sim.getTickIndex(), y * AbstractLavaSimulator.LEVELS_PER_BLOCK, y == topY ? remaining : AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
-                    remaining -=  AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK;
+                    lowerCell.addLavaAtLevel(lowerCell.locator.cellChunk.cells.sim.getTickIndex(), y * LavaSimulator.LEVELS_PER_BLOCK, y == topY ? remaining : LavaSimulator.FLUID_UNITS_PER_BLOCK);
+                    remaining -=  LavaSimulator.FLUID_UNITS_PER_BLOCK;
                 }
             }
         }
@@ -1124,31 +1123,31 @@ public class LavaCell2 implements ISimpleListItem
      * @param isFlowFloor  True full barrier is a flow block with height=12.  Should also be true if floorHeight < 12.
      * @return Returns the upper cell that results from the split or given cell if split is not possible.
      */
-    private LavaCell2 splitCell(int y, int flowHeight, boolean isFlowFloor)
+    private LavaCell splitCell(int y, int flowHeight, boolean isFlowFloor)
     {
         // validity check: barrier has to be above my floor
         if(y == this.bottomY()) return this;
         
-        boolean isFullBarrier = flowHeight == AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        boolean isFullBarrier = flowHeight == LavaSimulator.LEVELS_PER_BLOCK;
         
         // validity check: barrier has to be below my ceiling OR be a partial barrier
         if(isFullBarrier && y == this.topY()) return this;
 
-        int newCeilingForThisCell = y * AbstractLavaSimulator.LEVELS_PER_BLOCK;
+        int newCeilingForThisCell = y * LavaSimulator.LEVELS_PER_BLOCK;
         int floorForNewCell = newCeilingForThisCell + flowHeight;
         // validity check: partial barriers within lava are ignored because they melt immediately
         if(!isFullBarrier && this.fluidSurfaceLevel() > floorForNewCell) return this;
         
-        LavaCell2 newCell = new LavaCell2(this, floorForNewCell, this.getCeiling(), isFlowFloor);
+        LavaCell newCell = new LavaCell(this, floorForNewCell, this.getCeiling(), isFlowFloor);
         
         if(this.fluidSurfaceLevel() > floorForNewCell)
         {
-            newCell.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), this.fluidSurfaceUnits() - floorForNewCell * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+            newCell.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), this.fluidSurfaceUnits() - floorForNewCell * LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         
         if(this.fluidSurfaceLevel() > newCeilingForThisCell)
         {
-            this.changeLevel(0, -(this.fluidSurfaceLevel() - newCeilingForThisCell) * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+            this.changeLevel(0, -(this.fluidSurfaceLevel() - newCeilingForThisCell) * LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         this.setCeiling(newCeilingForThisCell);
         newCell.linkAbove(this.above);
@@ -1171,7 +1170,7 @@ public class LavaCell2 implements ISimpleListItem
      * @param isFlowBlock  True if this barrier is a full-height flow block.
      * @return Cell nearest to the barrier location, or cell above it if two are equidistant. Null if no cells remain.
      */
-    public LavaCell2 addOrConfirmBarrier(int y, boolean isFlowBlock)
+    public LavaCell addOrConfirmBarrier(int y, boolean isFlowBlock)
     {
         /**
          * Here are the possible scenarios:
@@ -1198,12 +1197,12 @@ public class LavaCell2 implements ISimpleListItem
                     int flowHeight = this.fluidSurfaceFlowHeight();
                     if(flowHeight > 0)
                     {
-                        this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -flowHeight * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+                        this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -flowHeight * LavaSimulator.FLUID_UNITS_PER_LEVEL);
                     }
                 }
                 else if( y < surfaceY)
                 {
-                    this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+                    this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -LavaSimulator.FLUID_UNITS_PER_BLOCK);
                 }
             }
             
@@ -1212,25 +1211,25 @@ public class LavaCell2 implements ISimpleListItem
                 if(y == this.bottomY())
                 {
                     // removing last space in cell - cell must be deleted
-                    LavaCell2 result = this.aboveCell() == null ? this.belowCell() : this.aboveCell();
+                    LavaCell result = this.aboveCell() == null ? this.belowCell() : this.aboveCell();
                     this.setDeleted();
                     return result;
                 }
                 else
                 {
                     // lower ceiling by one
-                    this.setCeiling(y * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+                    this.setCeiling(y * LavaSimulator.LEVELS_PER_BLOCK);
                 }
             }
             else if(y == this.bottomY())
             {
                 // raise floor by one
-                this.setFloor((y + 1) * AbstractLavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
+                this.setFloor((y + 1) * LavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
             }
             else
             {
                 // split & return upper cell
-                return this.splitCell(y, AbstractLavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
+                return this.splitCell(y, LavaSimulator.LEVELS_PER_BLOCK, isFlowBlock);
             }
         }
         
@@ -1254,7 +1253,7 @@ public class LavaCell2 implements ISimpleListItem
      * Adds cell at the appropriate place in the linked list of cells.
      * Used in NBT load.  Should only be used when know that cell does not overlap existing cells.
      */
-    public void addCellToColumn(LavaCell2 newCell)
+    public void addCellToColumn(LavaCell newCell)
     {
         newCell.locator = this.locator;
         
@@ -1268,8 +1267,8 @@ public class LavaCell2 implements ISimpleListItem
             }
             else
             {
-                LavaCell2 lowerCell = this.locator.firstCell;
-                LavaCell2 upperCell = lowerCell.above;
+                LavaCell lowerCell = this.locator.firstCell;
+                LavaCell upperCell = lowerCell.above;
                 
                 while(upperCell != null)
                 {
@@ -1305,17 +1304,17 @@ public class LavaCell2 implements ISimpleListItem
         
     }
     
-    public void addConnection(LavaConnection2 connection)
+    public void addConnection(LavaConnection connection)
     {
         this.connections.put(connection.getOther(this).id, connection);
     }
     
-    public void removeConnection(LavaConnection2 connection)
+    public void removeConnection(LavaConnection connection)
     {
         this.connections.remove(connection.getOther(this).id);
     }
     
-    public boolean isConnectedTo(LavaCell2 otherCell)
+    public boolean isConnectedTo(LavaCell otherCell)
     {
         return this.connections.containsKey(otherCell.id);
     }
@@ -1342,11 +1341,11 @@ public class LavaCell2 implements ISimpleListItem
     /** 
      * Forms new connections with cells in the column with the given entry cell.
      */
-    private void updateConnectionsWithColumn(LavaCell2 entryCell, LavaConnections connections)
+    private void updateConnectionsWithColumn(LavaCell entryCell, LavaConnections connections)
     {
         if(entryCell == null) return;
         
-        LavaCell2 candidate = entryCell.firstCell();
+        LavaCell candidate = entryCell.firstCell();
         
         /** 
          * Tracks if connection was found earlier so can stop once out of range for new.
@@ -1371,12 +1370,12 @@ public class LavaCell2 implements ISimpleListItem
     }
     
     /** prevent massive garbage collection each tick */
-    private static ThreadLocal<ArrayList<LavaConnection2>> sorter = new ThreadLocal<ArrayList<LavaConnection2>>() 
+    private static ThreadLocal<ArrayList<LavaConnection>> sorter = new ThreadLocal<ArrayList<LavaConnection>>() 
     {
         @Override
-        protected ArrayList<LavaConnection2> initialValue() 
+        protected ArrayList<LavaConnection> initialValue() 
         {
-           return new ArrayList<LavaConnection2>();
+           return new ArrayList<LavaConnection>();
         }
      };
   
@@ -1387,14 +1386,14 @@ public class LavaCell2 implements ISimpleListItem
      */
     public void prioritizeOutboundConnections(LavaConnections connections)
     {
-        ArrayList<LavaConnection2> sort = sorter.get();
+        ArrayList<LavaConnection> sort = sorter.get();
         sort.clear();
         
-        for(LavaConnection2 connection : this.connections.values())
+        for(LavaConnection connection : this.connections.values())
         {
             if(connection.isActive())
             {
-                LavaCell2 other = connection.getOther(this);
+                LavaCell other = connection.getOther(this);
                 if(other.getFloor() < this.getFloor())
                 {
                     // this cell is responsible for sorting active connections that have a lower floor than it
@@ -1415,10 +1414,10 @@ public class LavaCell2 implements ISimpleListItem
         
         if(sort.size() > 0)
         {
-            sort.sort(new Comparator<LavaConnection2>()
+            sort.sort(new Comparator<LavaConnection>()
             {
                 @Override
-                public int compare(LavaConnection2 o1, LavaConnection2 o2)
+                public int compare(LavaConnection o1, LavaConnection o2)
                 {
                     return ComparisonChain.start()
                             // larger drops first
@@ -1442,7 +1441,7 @@ public class LavaCell2 implements ISimpleListItem
      * Called once per tick for each cell before simulation steps are run.
      * Use for housekeeping tasks.
      */
-    public void update(LavaSimulatorNew sim, LavaCells cells, LavaConnections connections)
+    public void update(LavaSimulator sim, LavaCells cells, LavaConnections connections)
     {
         this.updateConnectionsIfNeeded(cells, connections);
         
@@ -1474,7 +1473,7 @@ public class LavaCell2 implements ISimpleListItem
         }
     }
 
-    public boolean canConnectWith(LavaCell2 other)
+    public boolean canConnectWith(LavaCell other)
     {
         return this.getFloor() < other.getCeiling()
                 && this.getCeiling() > other.getFloor()
@@ -1493,7 +1492,7 @@ public class LavaCell2 implements ISimpleListItem
         if(this.connections.size() < 4) return true;
         
         int hotCount = 0;
-        for(LavaConnection2 c : this.connections.values())
+        for(LavaConnection c : this.connections.values())
         {
             if(c.getOther(this).getFluidUnits() > 0) hotCount++;
             if(hotCount >= 3) return false;
@@ -1540,7 +1539,7 @@ public class LavaCell2 implements ISimpleListItem
      */
     public int getCurrentVisibleLevel()
     {
-        return Math.min(this.getCeiling(), this.getFloor() + (this.avgFluidAmountWithPrecision >> 6) / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+        return Math.min(this.getCeiling(), this.getFloor() + (this.avgFluidAmountWithPrecision >> 6) / LavaSimulator.FLUID_UNITS_PER_LEVEL);
     }
 
     /**
@@ -1550,7 +1549,7 @@ public class LavaCell2 implements ISimpleListItem
     {
         if(this.lastVisibleLevel == NEVER_REPORTED)
         {
-//            return Math.min(this.getCeiling(), this.getFloor() + this.fluidUnits / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL); 
+//            return Math.min(this.getCeiling(), this.getFloor() + this.fluidUnits / LavaSimulator.FLUID_UNITS_PER_LEVEL); 
             this.lastVisibleLevel = this.getFloor(); 
 
         }
@@ -1594,7 +1593,7 @@ public class LavaCell2 implements ISimpleListItem
                 ? this.getFlowFloorRawRetentionDepth()
                 : (int)(locator.cellChunk.cells.sim.terrainHelper
                         .computeIdealBaseFlowHeight(PackedBlockPos.pack(this.x(), this.bottomY(), this.z()))
-                        * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+                        * LavaSimulator.LEVELS_PER_BLOCK);
                 
         this.rawRetainedLevel = this.getFloor() + depth;
     }
@@ -1609,8 +1608,8 @@ public class LavaCell2 implements ISimpleListItem
         
         int myFloor = this.getFloor();
         
-        int floorMin = Math.max(0, (this.bottomY() - 2) * AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS);
-        int floorMax = Math.min(MAX_LEVEL, (this.bottomY() + 3) * AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS);
+        int floorMin = Math.max(0, (this.bottomY() - 2) * LavaSimulator.LEVELS_PER_TWO_BLOCKS);
+        int floorMax = Math.min(MAX_LEVEL, (this.bottomY() + 3) * LavaSimulator.LEVELS_PER_TWO_BLOCKS);
         
         int x = this.x();
         int z = this.z();
@@ -1626,11 +1625,11 @@ public class LavaCell2 implements ISimpleListItem
         int posXposZ = Useful.clamp(getFloorForNeighbor(x + 1, z + 1, myFloor ), floorMin, floorMax);
 
         // Normalize the resulting delta values to the approximate range -1 to 1
-        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS;
-        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / AbstractLavaSimulator.LEVELS_PER_TWO_BLOCKS;
+        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / LavaSimulator.LEVELS_PER_TWO_BLOCKS;
+        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / LavaSimulator.LEVELS_PER_TWO_BLOCKS;
         double slope = Useful.clamp(Math.sqrt(deltaX * deltaX + deltaZ * deltaZ), 0.0, 1.0);
       
-        int depth = (int) (AbstractLavaSimulator.LEVELS_PER_BLOCK * (1.0 - slope));
+        int depth = (int) (LavaSimulator.LEVELS_PER_BLOCK * (1.0 - slope));
         
         // Abandoned experiment...
         // this function gives a value of 1 for slope = 0 then drops steeply 
@@ -1640,7 +1639,7 @@ public class LavaCell2 implements ISimpleListItem
         // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
         
         //clamp to at least 1/4 of a block and no more than 1.25 block
-        depth = Useful.clamp(depth, AbstractLavaSimulator.LEVELS_PER_QUARTER_BLOCK, AbstractLavaSimulator.LEVELS_PER_BLOCK_AND_A_QUARTER);
+        depth = Useful.clamp(depth, LavaSimulator.LEVELS_PER_QUARTER_BLOCK, LavaSimulator.LEVELS_PER_BLOCK_AND_A_QUARTER);
       
         return depth;
     }
@@ -1651,7 +1650,7 @@ public class LavaCell2 implements ISimpleListItem
      */
     private int getFloorForNeighbor(int xOffset, int zOffset, int defaultValue)
     {
-        LavaCell2 neighbor = this.getFloorNeighbor(xOffset, zOffset);
+        LavaCell neighbor = this.getFloorNeighbor(xOffset, zOffset);
         return neighbor == null ? defaultValue : neighbor.getFloor();
     }
     
@@ -1684,7 +1683,7 @@ public class LavaCell2 implements ISimpleListItem
     private void updatedSmoothedRetention()
     {
         //TODO: retention smoothing, this is a stub
-        this.smoothedRetainedUnits = this.rawRetainedLevel * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL;
+        this.smoothedRetainedUnits = this.rawRetainedLevel * LavaSimulator.FLUID_UNITS_PER_LEVEL;
     }
     
     public void setRefreshRange(int yLow, int yHigh)
@@ -1742,12 +1741,12 @@ public class LavaCell2 implements ISimpleListItem
         return this.locator.locationKey;
     }
     
-    public LavaCell2 firstCell()
+    public LavaCell firstCell()
     {
         return this.locator.firstCell;
     }
     
-    public LavaCell2 aboveCell()
+    public LavaCell aboveCell()
     {
         return this.above;
     }
@@ -1757,13 +1756,13 @@ public class LavaCell2 implements ISimpleListItem
      * Link is both ways if the given cell is non-null. Thus no need for linkBelow method.
      * @param cellAbove  May be null - in which case simply sets above link to null if it was not already.
      */
-    public void linkAbove(LavaCell2 cellAbove)
+    public void linkAbove(LavaCell cellAbove)
     {
         this.above = cellAbove;
         if(cellAbove != null) cellAbove.below = this;
     }
     
-    public LavaCell2 belowCell()
+    public LavaCell belowCell()
     {
         return this.below;
     }
@@ -1773,7 +1772,7 @@ public class LavaCell2 implements ISimpleListItem
      * Consistent with this expectations, it sets lastVisibleLevel = currentVisibleLevel.
      * Also refreshes world for any blocks reported as suspended or destroyed and calls {@link #clearRefreshRange()}
      */
-    public void provideBlockUpdateIfNeeded(LavaSimulatorNew sim)
+    public void provideBlockUpdateIfNeeded(LavaSimulator sim)
     {
         if(this.isDeleted) return;
         
@@ -1793,7 +1792,7 @@ public class LavaCell2 implements ISimpleListItem
                 final int avgAmount = this.avgFluidAmountWithPrecision >> 6;
         
                 // don't average big changes
-                if(Math.abs(avgAmount - this.fluidUnits) > AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL * 4)
+                if(Math.abs(avgAmount - this.fluidUnits) > LavaSimulator.FLUID_UNITS_PER_LEVEL * 4)
                 {
                     this.avgFluidAmountWithPrecision = this.fluidUnits << 6;
                     this.isBlockUpdateCurrent = true;
@@ -1950,7 +1949,7 @@ public class LavaCell2 implements ISimpleListItem
 //        // should only be able to place lava above surface level unless cell is empty
 //        if(this.getFluidUnits() == 0 || y >= this.fluidSurfaceY() + 1)
 //        {
-//            this.addLavaAtLevel(tickIndex, y * AbstractLavaSimulator.LEVELS_PER_BLOCK, flowHeight * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+//            this.addLavaAtLevel(tickIndex, y * LavaSimulator.LEVELS_PER_BLOCK, flowHeight * LavaSimulator.FLUID_UNITS_PER_LEVEL);
 //            this.setRefreshRange(y, y);
 //        }
 //        
@@ -1972,11 +1971,11 @@ public class LavaCell2 implements ISimpleListItem
 //        
 //        if(y == this.fluidSurfaceY())
 //        {
-//            this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -this.fluidSurfaceFlowHeight() * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL);
+//            this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -this.fluidSurfaceFlowHeight() * LavaSimulator.FLUID_UNITS_PER_LEVEL);
 //        }
 //        else if(y < this.fluidSurfaceY())
 //        {
-//            this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK);
+//            this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -LavaSimulator.FLUID_UNITS_PER_BLOCK);
 //        }
 //    }
         
@@ -1984,7 +1983,7 @@ public class LavaCell2 implements ISimpleListItem
     
     static private class CellLocator
     {
-        LavaCell2 firstCell;
+        LavaCell firstCell;
         public final int x;
         public final int z;
         
@@ -1998,12 +1997,12 @@ public class LavaCell2 implements ISimpleListItem
          */
         public final CellChunk cellChunk;
         
-        private CellLocator(int x, int z, LavaCell2 firstCell, CellChunk cellChunk)
+        private CellLocator(int x, int z, LavaCell firstCell, CellChunk cellChunk)
         {
             this.x = x;
             this.z = z;
             this.cellChunk = cellChunk;
-            this.locationKey = LavaCell2.computeKey(x, z);
+            this.locationKey = LavaCell.computeKey(x, z);
             this.firstCell = firstCell;
         }
 

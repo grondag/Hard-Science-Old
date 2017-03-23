@@ -1,10 +1,9 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.SimpleConcurrentList.ListMode;
 /**
  * Container for all cells in a world chunk.
  * When a chunk is loaded (or updated) all cells that can exist in the chunk are created.
@@ -39,7 +38,7 @@ public class CellChunk
     /** number of ticks this chunk has been unloadable - unload when reaches threshold */
     private int unloadTickCount = 0;
 
-    private final LavaCell2[] entryCells = new LavaCell2[256];
+    private final LavaCell[] entryCells = new LavaCell[256];
 
     /** number of cells in the chunk */
     private final AtomicInteger entryCount = new AtomicInteger(0);
@@ -124,7 +123,7 @@ public class CellChunk
             {
                 for(int z = 0; z < 16; z++)
                 {
-                    LavaCell2 entryCell = this.getEntryCell(x, z);
+                    LavaCell entryCell = this.getEntryCell(x, z);
 
                     if(entryCell != null && entryCell.isValidationNeeded())
                     {
@@ -158,7 +157,7 @@ public class CellChunk
                 for(int z = 0; z < 16; z++)
                 {
                     columnBuffer.loadFromChunkBuffer(chunkBuffer, x, z);
-                    LavaCell2 entryCell = this.getEntryCell(x, z);
+                    LavaCell entryCell = this.getEntryCell(x, z);
 
                     if(entryCell == null)
                     {
@@ -273,7 +272,7 @@ public class CellChunk
         {
             for(int z = 0; z < 16; z++)
             {
-                LavaCell2 entryCell = this.getEntryCell(x, z);
+                LavaCell entryCell = this.getEntryCell(x, z);
 
                 if(entryCell != null)
                 {
@@ -284,7 +283,7 @@ public class CellChunk
                     
                     do
                     {
-                        LavaCell2 nextCell = entryCell.aboveCell();
+                        LavaCell nextCell = entryCell.aboveCell();
                         entryCell.setDeleted();
                         entryCell = nextCell;
                     }
@@ -308,7 +307,7 @@ public class CellChunk
      * Returns null if no cells exist at that location.
      * Thread safe.
      */
-    LavaCell2 getEntryCell(int x, int z)
+    LavaCell getEntryCell(int x, int z)
     {
         return this.entryCells[getIndex(x, z)];
     }
@@ -317,7 +316,7 @@ public class CellChunk
      * Sets the entry cell for the stack of cells located at x, z.
      * Should be thread safe if not accessing same x, z.
      */
-    void setEntryCell(int x, int z, LavaCell2 entryCell)
+    void setEntryCell(int x, int z, LavaCell entryCell)
     {
         if(this.isUnloaded) return;
 

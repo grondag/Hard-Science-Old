@@ -2,14 +2,10 @@ package grondag.adversity.feature.volcano;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.blockmodel.LavaCell;
-import grondag.adversity.feature.volcano.lava.blockmodel.LavaSimulator;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaCell2;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnection2;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
+import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
+import grondag.adversity.feature.volcano.lava.simulator.LavaConnection;
+import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -147,11 +143,11 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        if(Simulator.instance.getFluidTracker() instanceof LavaSimulatorNew)
+        if(Simulator.instance.getFluidTracker() instanceof LavaSimulator)
         {
-            LavaSimulatorNew sim = (LavaSimulatorNew)Simulator.instance.getFluidTracker();
+            LavaSimulator sim = (LavaSimulator)Simulator.instance.getFluidTracker();
             BlockPos pos = data.getPos();  
-            LavaCell2 cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
+            LavaCell cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
             if(cell == null)
             {
                 probeInfo.text("Cell not found.");
@@ -159,16 +155,16 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             else
             {
                 probeInfo.text("Cell ID = " + cell.id)
-                    .text("FluidUnits=" + cell.getFluidUnits() + "  Fluid Levels=" + (cell.getFluidUnits() / AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("FluidUnits=" + cell.getFluidUnits() + "  Fluid Levels=" + (cell.getFluidUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
                     .text("RawRetainedLevel=" + cell.getRawRetainedLevel() + "  RawRetained Depth=" + (cell.getRawRetainedLevel() - cell.getFloor()))
                     .text("floor=" + cell.getFloor() + "  ceiling=" + cell.getCeiling() + " isFlowFloor=" + cell.isBottomFlow())
                     .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidAmountWithPrecision >> 6))
                     .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
                     .text("Connection Count = " + cell.connections.size());
                 
-                for(LavaConnection2 conn : cell.connections.values())
+                for(LavaConnection conn : cell.connections.values())
                 {
-                    LavaCell2 other = conn.getOther(cell);
+                    LavaCell other = conn.getOther(cell);
                     probeInfo.text("Conn ID=" + conn.id + "  x=" + other.x() + "  z=" + other.z() + "  bottomY=" + other.bottomY() + "  fluidUnits=" + other.getFluidUnits() 
                     + " isActive=" + conn.isActive() + "  isDeleted=" +  conn.isDeleted() + "  sortBucket=" + conn.getSortBucket() + "  cellID=" + other.id);
                 }

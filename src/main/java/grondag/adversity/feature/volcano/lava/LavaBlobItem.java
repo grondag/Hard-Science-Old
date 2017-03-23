@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -32,7 +33,7 @@ public class LavaBlobItem extends Item
 
             if (!worldIn.isRemote)
             {
-                EntityLavaParticle blob = new EntityLavaParticle(worldIn, AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK, new Vec3d(playerIn.posX, playerIn.posY + (double)playerIn.getEyeHeight() - 0.10000000149011612D, playerIn.posZ), Vec3d.ZERO);
+                EntityLavaParticle blob = new EntityLavaParticle(worldIn, LavaSimulator.FLUID_UNITS_PER_BLOCK, new Vec3d(playerIn.posX, playerIn.posY + (double)playerIn.getEyeHeight() - 0.10000000149011612D, playerIn.posZ), Vec3d.ZERO);
                 blob.setHeadingFromThrower(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, 1.5F, 0.0F);
                 worldIn.spawnEntityInWorld(blob);
             }

@@ -1,7 +1,6 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 
 /** Builds a new cell stack from a CellColumn */
 public class CellStackBuilder
@@ -14,7 +13,7 @@ public class CellStackBuilder
   
     private boolean isFlowFloor;
     
-    private LavaCell2 entryCell;
+    private LavaCell entryCell;
     
     private void startCell(int floor, boolean isFlowFloor)
     {
@@ -28,11 +27,11 @@ public class CellStackBuilder
         
         if(this.entryCell == null)
         {
-            this.entryCell = new LavaCell2(cells, x, z, this.floor, ceiling, this.isFlowFloor);
+            this.entryCell = new LavaCell(cells, x, z, this.floor, ceiling, this.isFlowFloor);
         }
         else
         {
-            this.entryCell.linkAbove(new LavaCell2(this.entryCell, this.floor, ceiling, this.isFlowFloor));
+            this.entryCell.linkAbove(new LavaCell(this.entryCell, this.floor, ceiling, this.isFlowFloor));
             this.entryCell = this.entryCell.aboveCell();
         }
         
@@ -48,7 +47,7 @@ public class CellStackBuilder
      * Expands, splits, adds, deletes or merges cells as needed to match world data on CellColumn.
      * If entry cell is null, functions identically to buildNewCellStack().
      */
-    public LavaCell2 updateCellStack(LavaCells cells, CellColumn worldColumn, LavaCell2 simEntryCell, int x, int z)
+    public LavaCell updateCellStack(LavaCells cells, CellColumn worldColumn, LavaCell simEntryCell, int x, int z)
     {
         int y = 0;
         
@@ -85,10 +84,10 @@ public class CellStackBuilder
         if(Adversity.DEBUG_MODE)
         {
             // validate no cell overlap
-            LavaCell2 testCell1 = simEntryCell.firstCell();
+            LavaCell testCell1 = simEntryCell.firstCell();
             while(testCell1 != null)
             {
-                LavaCell2 testCell2 = simEntryCell.firstCell();
+                LavaCell testCell2 = simEntryCell.firstCell();
                 while(testCell2 != null)
                 {
                     if(testCell1 != testCell2)
@@ -130,7 +129,7 @@ public class CellStackBuilder
 //        // if get to this point, y is within the cell
 //        
 //        // detect special case of flow floor within the cell
-//        if(y == cell.bottomY() && cell.isBottomFlow() && cell.getFluidUnits() == 0 && cell.floorFlowHeight() < AbstractLavaSimulator.LEVELS_PER_BLOCK )
+//        if(y == cell.bottomY() && cell.isBottomFlow() && cell.getFluidUnits() == 0 && cell.floorFlowHeight() < LavaSimulator.LEVELS_PER_BLOCK )
 //        {
 //            return BlockType.SOLID_FLOW_STATES[cell.floorFlowHeight()];
 //        }
@@ -149,7 +148,7 @@ public class CellStackBuilder
      * Returns the starting cell for a new list of cells at the given location from the provided column data.
      * Retuns null if there are no spaces for cells in the column data provided.
      */
-    public LavaCell2 buildNewCellStack(LavaCells cells, CellColumn column, int x, int z)
+    public LavaCell buildNewCellStack(LavaCells cells, CellColumn column, int x, int z)
     {
         BlockType lastType = BlockType.BARRIER;
         this.entryCell = null;
@@ -164,7 +163,7 @@ public class CellStackBuilder
                 {
                     // Close cell if one is open
                     // Otherwise no action.
-                    if(this.isCellStarted) this.completeCell(cells, column, x, z, y * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+                    if(this.isCellStarted) this.completeCell(cells, column, x, z, y * LavaSimulator.LEVELS_PER_BLOCK);
                     break;
                 }
                     
@@ -182,12 +181,12 @@ public class CellStackBuilder
                 case SOLID_FLOW_12:
                 {
                     // Close cell if one is open
-                    if(this.isCellStarted) this.completeCell(cells, column, x, z, y * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+                    if(this.isCellStarted) this.completeCell(cells, column, x, z, y * LavaSimulator.LEVELS_PER_BLOCK);
                     
                     // start new cell if not full height
-                    if(currentType.flowHeight < AbstractLavaSimulator.LEVELS_PER_BLOCK) 
+                    if(currentType.flowHeight < LavaSimulator.LEVELS_PER_BLOCK) 
                     {
-                        this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK + currentType.flowHeight, true);
+                        this.startCell(y * LavaSimulator.LEVELS_PER_BLOCK + currentType.flowHeight, true);
                     }
                     break;
                 }
@@ -207,7 +206,7 @@ public class CellStackBuilder
                 case LAVA_12:
                 {
                     // start new cell if this is the first open space
-                    if(!this.isCellStarted) this.startCell(y * AbstractLavaSimulator.LEVELS_PER_BLOCK, lastType.isFlow);
+                    if(!this.isCellStarted) this.startCell(y * LavaSimulator.LEVELS_PER_BLOCK, lastType.isFlow);
                     break;
                 }
                     
@@ -220,7 +219,7 @@ public class CellStackBuilder
         }
         
         // if got all the way to the top of the world with an open cell, close it
-        if(this.isCellStarted) this.completeCell(cells, column, x, z, 256 * AbstractLavaSimulator.LEVELS_PER_BLOCK);
+        if(this.isCellStarted) this.completeCell(cells, column, x, z, 256 * LavaSimulator.LEVELS_PER_BLOCK);
         
         
         return this.entryCell == null ? null : this.entryCell.selectStartingCell();

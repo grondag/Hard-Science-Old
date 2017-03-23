@@ -1,10 +1,9 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleConcurrentList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
@@ -12,7 +11,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 
 
-public class LavaCells extends SimpleConcurrentList<LavaCell2>
+public class LavaCells extends SimpleConcurrentList<LavaCell>
 {
     private final Long2ObjectOpenHashMap<CellChunk> cellChunks = new Long2ObjectOpenHashMap<CellChunk>();
     
@@ -21,10 +20,10 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
     /** 
      * Reference to the simulation in which this cells collection lives.
      */
-    public final LavaSimulatorNew sim;
+    public final LavaSimulator sim;
     
     
-    public LavaCells(LavaSimulatorNew sim)
+    public LavaCells(LavaSimulator sim)
     {
         super(CAPACITY_INCREMENT);
         this.sim = sim;
@@ -35,7 +34,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
      * May include deleted cells.
      */
     @Override
-    public Stream<LavaCell2> stream(boolean isParallel)
+    public Stream<LavaCell> stream(boolean isParallel)
     {
         return super.stream(isParallel);
     }
@@ -77,7 +76,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
         CellChunk chunk = this.getOrCreateCellChunk(x, z);
         if(!chunk.needsFullLoadOrValidation())
         {
-            LavaCell2 cell = chunk.getEntryCell(x, z);
+            LavaCell cell = chunk.getEntryCell(x, z);
             if(cell == null)
             {
                 // really strange to have world column completely full
@@ -143,11 +142,11 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
      * Also returns NULL if cell chunk has not yet been loaded.
      * Thread safe.
      */
-    public LavaCell2 getCellIfExists(int x, int y, int z)
+    public LavaCell getCellIfExists(int x, int y, int z)
     {
         CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
         if(chunk == null) return null;
-        LavaCell2 entryCell = chunk.getEntryCell(x, z);
+        LavaCell entryCell = chunk.getEntryCell(x, z);
         return entryCell == null ? null : entryCell.getCellIfExists(y);
     }   
     
@@ -157,7 +156,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
      * Also returns null if chunk has not been loaded.
      * Thread safe.
      */
-    public LavaCell2 getEntryCell(int x, int z)
+    public LavaCell getEntryCell(int x, int z)
     {
         CellChunk chunk = cellChunks.get(PackedBlockPos.getPackedChunkPos(x, z));
         return chunk == null ? null : chunk.getEntryCell(x, z);
@@ -167,7 +166,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
      * Sets the entry cell for the stack of cells located at x, z.
      * Probably thread safe for most use cases.
      */
-    private void setEntryCell(int x, int z, LavaCell2 entryCell)
+    private void setEntryCell(int x, int z, LavaCell entryCell)
     {
         this.getOrCreateCellChunk(x, z).setEntryCell(x, z, entryCell);
     }
@@ -202,7 +201,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
      * Thread-safe if mode = ListMode.ADD. Disallowed otherwise.
      */
     @Override
-    public void add(LavaCell2 cell)
+    public void add(LavaCell cell)
     {
         super.add(cell);
     }
@@ -273,42 +272,42 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
     public void writeNBT(NBTTagCompound nbt)
     {
       
-        int[] saveData = new int[this.size() * LavaCell2.LAVA_CELL_NBT_WIDTH];
+        int[] saveData = new int[this.size() * LavaCell.LAVA_CELL_NBT_WIDTH];
         int i = 0;
 
         this.setMode(ListMode.INDEX);
-        for(LavaCell2 cell : this)
+        for(LavaCell cell : this)
         {
             if(!cell.isDeleted())
             {
                 cell.writeNBT(saveData, i);
                 
                 // Java parameters are always pass by value, so have to advance index here
-                i += LavaCell2.LAVA_CELL_NBT_WIDTH;
+                i += LavaCell.LAVA_CELL_NBT_WIDTH;
             }
         }
         
-        Adversity.log.info("Saving " + i / LavaCell2.LAVA_CELL_NBT_WIDTH + " lava cells.");
+        Adversity.log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         this.setMode(ListMode.ADD);
         
-        nbt.setIntArray(LavaCell2.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
+        nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }
     
-    public void readNBT(LavaSimulatorNew sim, NBTTagCompound nbt)
+    public void readNBT(LavaSimulator sim, NBTTagCompound nbt)
     {
         this.cellChunks.clear();
         
         // LOAD LAVA CELLS
-        int[] saveData = nbt.getIntArray(LavaCell2.LAVA_CELL_NBT_TAG);
+        int[] saveData = nbt.getIntArray(LavaCell.LAVA_CELL_NBT_TAG);
         
         //confirm correct size
-        if(saveData == null || saveData.length % LavaCell2.LAVA_CELL_NBT_WIDTH != 0)
+        if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)
         {
             Adversity.log.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
         }
         else
         {
-            int count = saveData.length / LavaCell2.LAVA_CELL_NBT_WIDTH;
+            int count = saveData.length / LavaCell.LAVA_CELL_NBT_WIDTH;
             int newCapacity = (count / CAPACITY_INCREMENT + 1) * CAPACITY_INCREMENT;
             if(newCapacity < CAPACITY_INCREMENT / 2) newCapacity += CAPACITY_INCREMENT;
             
@@ -324,19 +323,19 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
                 int x = saveData[i++];
                 int z = saveData[i++];
                 
-                LavaCell2 newCell;
+                LavaCell newCell;
                 
-                LavaCell2 startingCell = this.getEntryCell(x, z);
+                LavaCell startingCell = this.getEntryCell(x, z);
                 
                 if(startingCell == null)
                 {
-                    newCell = new LavaCell2(this, x, z, 0, 0, false);
+                    newCell = new LavaCell(this, x, z, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     this.setEntryCell(x, z, newCell);
                 }
                 else
                 {
-                    newCell = new LavaCell2(startingCell, 0, 0, false);
+                    newCell = new LavaCell(startingCell, 0, 0, false);
                     newCell.readNBTArray(saveData, i);
                     startingCell.addCellToColumn(startingCell);
                 }
@@ -345,7 +344,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
                 
                 // Java parameters are always pass by value, so have to advance index here
                 // subtract two because we incremented for x and z values already
-                i += LavaCell2.LAVA_CELL_NBT_WIDTH - 2;
+                i += LavaCell.LAVA_CELL_NBT_WIDTH - 2;
             }
          
             // Prevent massive retention update from occurring during first world tick
@@ -360,7 +359,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell2>
             
             // Smoothed retention will need to be computed for all cells, but can be parallel.
             this.setMode(ListMode.INDEX);
-            AbstractLavaSimulator.LAVA_THREAD_POOL.submit(() ->
+            LavaSimulator.LAVA_THREAD_POOL.submit(() ->
                 this.stream(true).forEach(c -> c.updatedSmoothedRetentionIfNeeded())).join();
             this.setMode(ListMode.ADD);
             

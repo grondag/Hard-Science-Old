@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
+import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -181,7 +182,7 @@ public class WorldStateBuffer implements IBlockAccess
      * 
      */
     //public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
-    public void applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
+    public void applyBlockUpdates(int chunkCount, LavaSimulator sim)
     {
         int currentTick = Simulator.instance.getCurrentSimTick();
         
@@ -381,7 +382,7 @@ public class WorldStateBuffer implements IBlockAccess
     }
     
     /** returns true an update occured */
-    private boolean adjustFillIfNeeded(BlockPos pos, AbstractLavaSimulator sim)
+    private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
 //        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
 //            Adversity.log.info("boop");
@@ -707,7 +708,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
         
         /** NOT thread safe */
-        private void applyBlockUpdates(AdjustmentTracker tracker, AbstractLavaSimulator sim)
+        private void applyBlockUpdates(AdjustmentTracker tracker, LavaSimulator sim)
         {
 
             tracker.clear();

@@ -1,24 +1,22 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaConnections.SortBucket;
+import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 
-public class LavaConnection2 implements ISimpleListItem
+public class LavaConnection implements ISimpleListItem
 {
     
-    public final static int MAX_FLOW_PER_TICK = AbstractLavaSimulator.FLUID_UNITS_PER_BLOCK / 10;
+    public final static int MAX_FLOW_PER_TICK = LavaSimulator.FLUID_UNITS_PER_BLOCK / 10;
     
     protected static int nextConnectionID = 0;
     
     /** by convention, first cell will have the lower-valued id */
-    public final LavaCell2 firstCell;
+    public final LavaCell firstCell;
     
     /** by convention, second cell will have the higher-valued id */
-    public final LavaCell2 secondCell;
+    public final LavaCell secondCell;
     
     public final int id = nextConnectionID++;
         
@@ -39,7 +37,7 @@ public class LavaConnection2 implements ISimpleListItem
     private int flowRemainingThisTick;
     
 
-    public LavaConnection2(LavaCell2 firstCell, LavaCell2 secondCell)
+    public LavaConnection(LavaCell firstCell, LavaCell secondCell)
     {
         this.key = getConnectionKey(firstCell, secondCell);
         this.firstCell = firstCell;
@@ -48,7 +46,7 @@ public class LavaConnection2 implements ISimpleListItem
         secondCell.addConnection(this);
     }
     
-    public static long getConnectionKey(LavaCell2 firstCell, LavaCell2 secondCell)
+    public static long getConnectionKey(LavaCell firstCell, LavaCell secondCell)
     {
         if(firstCell.id < secondCell.id)
         {
@@ -60,7 +58,7 @@ public class LavaConnection2 implements ISimpleListItem
         }
     }
     
-    public LavaCell2 getOther(LavaCell2 cellIAlreadyHave)
+    public LavaCell getOther(LavaCell cellIAlreadyHave)
     {
         return cellIAlreadyHave == this.firstCell ? this.secondCell : this.firstCell;
     }
@@ -88,7 +86,7 @@ public class LavaConnection2 implements ISimpleListItem
    
     }
   
-    private void setupTick(LavaSimulatorNew sim)
+    private void setupTick(LavaSimulator sim)
     {
   
         if(this.firstCell.getFluidUnits() == 0 && this.secondCell.getFluidUnits() == 0)
@@ -99,7 +97,7 @@ public class LavaConnection2 implements ISimpleListItem
         {
             this.flowRemainingThisTick = 
              (Math.min(this.firstCell.getCeiling(), this.secondCell.getCeiling()) - Math.max(this.firstCell.getFloor(), this.secondCell.getFloor()))
-                * AbstractLavaSimulator.FLUID_UNITS_PER_LEVEL / 20;
+                * LavaSimulator.FLUID_UNITS_PER_LEVEL / 20;
         }
     }
     
@@ -116,7 +114,7 @@ public class LavaConnection2 implements ISimpleListItem
      *  
      * @return Number of fluid units that should flow from high to low cell.
      */
-    private int getEqualizingFlow(LavaCell2 cellHigh, int surfaceHigh, int surfaceLow)
+    private int getEqualizingFlow(LavaCell cellHigh, int surfaceHigh, int surfaceLow)
     {    
         if(cellHigh.getFluidUnits() == 0) return 0;
         
@@ -138,7 +136,7 @@ public class LavaConnection2 implements ISimpleListItem
     /**
      *  Resets lastFlowTick and forces run at least once a tick.
      */
-    public void doFirstStep(LavaSimulatorNew sim)
+    public void doFirstStep(LavaSimulator sim)
     {
             sim.connectionProcessCount.incrementAndGet();
             this.isDirty = false;
@@ -147,7 +145,7 @@ public class LavaConnection2 implements ISimpleListItem
             this.doStepWork(sim);
     }
     
-    public void doStep(LavaSimulatorNew sim)
+    public void doStep(LavaSimulator sim)
     {
         if(this.isDirty)
         {
@@ -160,7 +158,7 @@ public class LavaConnection2 implements ISimpleListItem
     /**
      * Guts of doStep.
      */
-    private void doStepWork(LavaSimulatorNew sim)
+    private void doStepWork(LavaSimulator sim)
     {
 //        if(this.firstCell.id == 1229 || this.secondCell.id == 1229)
 //            Adversity.log.info("boop");
@@ -219,7 +217,7 @@ public class LavaConnection2 implements ISimpleListItem
         this.secondCell.removeConnection(this);
     }
     
-    public void flowAcross(LavaSimulatorNew sim, int flow)
+    public void flowAcross(LavaSimulator sim, int flow)
     {
         this.flowRemainingThisTick -= Math.abs(flow);
         this.firstCell.changeLevel(sim.getTickIndex(), -flow);

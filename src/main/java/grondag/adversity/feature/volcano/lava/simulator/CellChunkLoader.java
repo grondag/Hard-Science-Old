@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.niceblock.NiceBlockRegistrar;

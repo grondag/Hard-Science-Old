@@ -1,16 +1,14 @@
-package grondag.adversity.feature.volcano.lava.columnmodel;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.stream.Stream;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
 import grondag.adversity.library.SimpleConcurrentList;
 
-public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
+public class LavaConnections extends SimpleConcurrentList<LavaConnection>
 {
     
     @SuppressWarnings("unchecked")
-    private SimpleConcurrentList<LavaConnection2>[] sort = new SimpleConcurrentList[4];
+    private SimpleConcurrentList<LavaConnection>[] sort = new SimpleConcurrentList[4];
     
     private static final int CAPACITY_INCREMENT = 0x10000;
     
@@ -40,10 +38,10 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
     
     private void setupSortLists()
     {
-        this.sort[SortBucket.A.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity());
-        this.sort[SortBucket.B.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity() / 2);
-        this.sort[SortBucket.C.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity() / 4);
-        this.sort[SortBucket.D.ordinal()] = new SimpleConcurrentList<LavaConnection2>(this.capacity() / 4);
+        this.sort[SortBucket.A.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity());
+        this.sort[SortBucket.B.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity() / 2);
+        this.sort[SortBucket.C.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity() / 4);
+        this.sort[SortBucket.D.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity() / 4);
         this.isSortCurrent = false;
     }
     
@@ -73,7 +71,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         }
     }
     
-    public void createConnectionIfNotPresent(LavaCell2 first, LavaCell2 second)
+    public void createConnectionIfNotPresent(LavaCell first, LavaCell second)
     {
         if(first.id < second.id)
         {
@@ -85,7 +83,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         }
     }
     
-    private void createConnectionIfNotPresentInner(LavaCell2 first, LavaCell2 second)
+    private void createConnectionIfNotPresentInner(LavaCell first, LavaCell second)
     {
         boolean isIncomplete = true;
         do
@@ -96,7 +94,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
                 {
                     if(!first.isConnectedTo(second))
                     {
-                        LavaConnection2 newConnection = new LavaConnection2(first, second);
+                        LavaConnection newConnection = new LavaConnection(first, second);
                         this.addConnectionToArray(newConnection);
                     }
                     
@@ -124,7 +122,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
      * Does not do anything else.
      * Thread-safe.
      */
-    public void addConnectionToArray(LavaConnection2 connection)
+    public void addConnectionToArray(LavaConnection connection)
     {
         this.add(connection);
         this.isSortCurrent = false;
@@ -137,7 +135,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
     
     private void refreshSortBuckets()
     {
-        for(SimpleConcurrentList<LavaConnection2> bucket : this.sort)
+        for(SimpleConcurrentList<LavaConnection> bucket : this.sort)
         {
             bucket.setMode(ListMode.MAINTAIN);
             bucket.clear();
@@ -145,7 +143,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
         }
         
         this.setMode(ListMode.INDEX);
-        AbstractLavaSimulator.LAVA_THREAD_POOL.submit(() ->
+        LavaSimulator.LAVA_THREAD_POOL.submit(() ->
             this.stream(true).forEach(c -> {
                 
 //                if(c.firstCell.id == 1229 || c.secondCell.id == 1229)
@@ -168,7 +166,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection2>
     /**
      * Returns a stream of LavaConnection instances within the given sort bucket. Stream will be parallel if requested..
      */
-    public Stream<LavaConnection2> getSortStream(SortBucket bucket, boolean isParallel)
+    public Stream<LavaConnection> getSortStream(SortBucket bucket, boolean isParallel)
     {
         if(!isSortCurrent) refreshSortBuckets();
         return this.sort[bucket.ordinal()].stream(isParallel);

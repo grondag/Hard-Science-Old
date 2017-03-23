@@ -8,8 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.collect.Lists;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.AbstractLavaSimulator;
-import grondag.adversity.feature.volcano.lava.columnmodel.LavaSimulatorNew;
+import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.NodeRoots;
 import net.minecraft.nbt.NBTTagCompound;
@@ -56,7 +55,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	
     private VolcanoManager volcanoManager;
     
-    private AbstractLavaSimulator lavaSimulator
+    private LavaSimulator lavaSimulator
     ;
     
 	private static ExecutorService executor;
@@ -101,7 +100,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
 	        this.volcanoManager = new VolcanoManager(this.taskCounter);
-	        this.lavaSimulator = new LavaSimulatorNew(this.world);
+	        this.lavaSimulator = new LavaSimulator(this.world);
 	        
             if(PersistenceManager.loadNode(world, this))
             {
@@ -259,7 +258,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public int getCurrentSimTick() { return this.currentSimTick.get(); }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
-    public AbstractLavaSimulator getFluidTracker() { return this.lavaSimulator; }
+    public LavaSimulator getFluidTracker() { return this.lavaSimulator; }
 
     // Frame execution logic
 
