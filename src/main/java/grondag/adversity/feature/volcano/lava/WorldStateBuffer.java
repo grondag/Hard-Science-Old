@@ -47,6 +47,9 @@ public class WorldStateBuffer implements IBlockAccess
     /** tracks number of world state changes since last clearStatistics */
     private int stateApplicationCount = 0;        
     
+    /** tracks duration of state application time since last clearStatistics */
+    private long stateApplicationTime = 0; 
+    
     public final World realWorld;
     
     /** All chunks with update data. */
@@ -184,6 +187,12 @@ public class WorldStateBuffer implements IBlockAccess
     //public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
     public void applyBlockUpdates(int chunkCount, LavaSimulator sim)
     {
+        long startTime;
+        if(Adversity.DEBUG_MODE)
+        {
+            startTime = System.nanoTime();
+        }
+        
         int currentTick = Simulator.instance.getCurrentSimTick();
         
         boolean maybeSomethingToDo = true;
@@ -259,14 +268,25 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-//        return result;
+        if(Adversity.DEBUG_MODE)
+        {
+            this.stateApplicationTime += (System.nanoTime() - startTime);
+        }
     }
     
     public void clearStatistics()
     {
+        this.stateApplicationTime = 0;
         this.stateApplicationCount = 0;
         this.stateSetCount = 0;
     }
+    
+    public int stateSetCount() { return this.stateSetCount; }
+    public long stateApplicationCount() { return this.stateApplicationCount; }
+    public long stateApplicationTime() { return this.stateApplicationTime; }
+    public long timePerStateApplication() { return this.stateApplicationCount == 0 ? 0 : this.stateApplicationTime / this.stateApplicationCount; }
+    public String stats() { return String.format("State application time this sample = %1$.3fs for %2$,d applications @ %3$dns each."
+            , ((double)stateApplicationTime() / 1000000000), stateApplicationCount(),  timePerStateApplication()); }
     
     public int getStateSetCount()
     {
@@ -429,11 +449,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        if(newState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
-        {
-            sim.trackLavaFiller(pos);
-        }
-        else if(newState.getBlock() instanceof CoolingBlock)
+        if(newState.getBlock() instanceof CoolingBlock)
         {
             sim.trackCoolingBlock(pos);
         }

@@ -3,10 +3,12 @@ package grondag.adversity.library;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Job.JobProvider;
 
 /**
  * Provides functionality similar to an array list, but with low overhead and high concurrency 
@@ -29,40 +31,29 @@ import grondag.adversity.Adversity;
  *
  */
 
-public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable<T>
+public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable<T>, JobProvider
 {
-    private Object[]  items; 
-    private int capacity;
+    protected Object[]  items; 
+    private volatile int capacity;
     private AtomicInteger size = new AtomicInteger(0);
+    private volatile boolean isMaintaining = false;
     
-    public static enum ListMode
+    private AtomicLong maintenanceTime = new AtomicLong(0);
+    
+    public SimpleConcurrentList()
     {
-        /** ok to add items to the list 0 - fully concurrent with other additions. No other operations expected. */
-        ADD,
-        /** ok to iterate and index the array - fully concurrent for indexing operations. No other operations expected.*/
-        INDEX,
-        /** ok to call housekeeping methods (clear, removeDeleted). These operations are synchronized.  No other operations expected */
-        MAINTAIN
-    }
-    
-    private volatile ListMode mode = ListMode.ADD;
-    
-    public SimpleConcurrentList(int capacity)
-    {
-        this.capacity = capacity;
+        this.capacity = 16;
         this.items = new Object[capacity];
     }
-    
-    /**
-     * Set mode of expected operation. Allows detection of improper use.
-     */
-    public void setMode(ListMode newMode)
+   
+    public void clearStats()
     {
-        synchronized(this)
-        {
-            this.mode = newMode;
-        }
+        this.maintenanceTime.set(0);
     }
+    
+    public long maintenanceTime() { return this.maintenanceTime.get(); }
+    public String stats() { return String.format("maintanence time this sample = %1$.3fs."
+            , ((double)maintenanceTime() / 1000000000)); }
     
     /**
      * @return Current number of items in the list.
@@ -97,38 +88,34 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
      */
     public void add(T item)
     {
-        if(Adversity.DEBUG_MODE && this.mode != ListMode.ADD)
-            Adversity.log.warn("Unsupported add operation on simple concurrent list while mode = " + this.mode);
+        if(Adversity.DEBUG_MODE && this.isMaintaining)
+            Adversity.log.warn("Unsupported add operation on simple concurrent list during maintenance operation");
         
-        items[size.getAndIncrement()] = item;
-    }
-    
-    /**
-     * Change capacity to given size, or current number of items, whichever is more.
-     * NOT THREAD SAFE
-     * Caller must ensure no other methods are called while this method is ongoing.
-     * @param newCapacity
-     */
-    public void resize(int newCapacity)
-    {
-        
-        // note - will not prevent add or iteration
-        // so does not, by itself, ensure thread safety
-        synchronized(this)
+        int index = this.size.getAndIncrement();
+        if(index < this.capacity)
         {
-            if(Adversity.DEBUG_MODE && this.mode != ListMode.MAINTAIN)
-                Adversity.log.warn("Unsupported resize operation on simple concurrent list while mode = " + this.mode);
-
-            int c = Math.max(newCapacity, this.size.get());
-            if(c != this.capacity)
+            items[index] = item;
+        }
+        else
+        {
+            synchronized(this)
             {
-                this.capacity = c;
-                this.items = Arrays.copyOf(this.items, c);
+                if(index >= this.capacity)
+                {
+                    int newCapacity = this.capacity * 2;
+                    this.items = Arrays.copyOf(this.items, newCapacity);
+                    this.capacity = newCapacity;
+                }
+                items[index] = item;
             }
         }
     }
     
-
+    @SuppressWarnings("unchecked")
+    public T getItem(int index)
+    {
+        return (T) items[index];
+    }
     
     /**
      * Removes deleted items in the list and compacts storage.
@@ -142,9 +129,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
         // so does not, by itself, ensure thread safety
         synchronized(this)
         {
-            if(Adversity.DEBUG_MODE && this.mode != ListMode.MAINTAIN)
-                Adversity.log.warn("Unsupported removeDeletedItems operation on simple concurrent list while mode = " + this.mode);
-
+            this.isMaintaining = true;
 
             int i = 0;
             while(i < this.size.get())
@@ -163,6 +148,9 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
                     i++;
                 }
             }
+            
+            this.isMaintaining = false;
+
         }
     }
     
@@ -177,22 +165,23 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
         // so does not, by itself, ensure thread safety
         synchronized(this)
         {
-            if(Adversity.DEBUG_MODE && this.mode != ListMode.MAINTAIN)
-                Adversity.log.warn("Unsupported clear operation on simple concurrent list while mode = " + this.mode);
+            this.isMaintaining = true;
 
             if(this.size.get() != 0)
             {
                 Arrays.fill(items, null);
                 this.size.set(0);
             }
+            
+            this.isMaintaining = false;
         }
     }
     
     @SuppressWarnings("unchecked")
     public Stream<T> stream(boolean isParallel)
     {
-        if(Adversity.DEBUG_MODE && this.mode != ListMode.INDEX)
-            Adversity.log.warn("Unsupported stream operation on simple concurrent list while mode = " + this.mode);
+        if(Adversity.DEBUG_MODE && this.isMaintaining)
+            Adversity.log.warn("Unsupported stream operation on simple concurrent list while maintenance operation ongoing");
         
         return (Stream<T>) StreamSupport.stream(Arrays.spliterator(items, 0, this.size.get()), isParallel);
     }
@@ -202,4 +191,5 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     {
         return this.stream(false).iterator();
     }
+
 }

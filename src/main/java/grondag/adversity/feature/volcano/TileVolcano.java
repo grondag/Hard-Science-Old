@@ -592,9 +592,15 @@ public class TileVolcano extends TileEntity implements ITickable{
                 sim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_BLOCK, false);
                 return false;
             }
-            else if(cell.fluidSurfaceY() < clearPos.getY() || cell.fluidSurfaceFlowHeight() < LavaSimulator.LEVELS_PER_BLOCK)
+            else if(cell.fluidSurfaceY() < clearPos.getY())
             {
                 sim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_BLOCK, false);
+                cell.setCoolingDisabled(true);
+                return false;
+            }
+            else if(cell.fluidSurfaceFlowHeight() < LavaSimulator.LEVELS_PER_BLOCK)
+            {
+                sim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL * (LavaSimulator.LEVELS_PER_BLOCK - cell.fluidSurfaceFlowHeight()), false);
                 cell.setCoolingDisabled(true);
                 return false;
             }

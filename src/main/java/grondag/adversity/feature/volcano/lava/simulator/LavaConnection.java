@@ -2,13 +2,15 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
+import grondag.adversity.library.Useful;
 
 public class LavaConnection implements ISimpleListItem
 {
     
-    public final static int MAX_FLOW_PER_TICK = LavaSimulator.FLUID_UNITS_PER_BLOCK / 10;
+//    public final static int MAX_FLOW_PER_TICK = LavaSimulator.FLUID_UNITS_PER_BLOCK / 10;
     
     protected static int nextConnectionID = 0;
     
@@ -35,6 +37,7 @@ public class LavaConnection implements ISimpleListItem
     private boolean isDeleted = false;
  
     private int flowRemainingThisTick;
+    private int maxFlowPerStep;
     
 
     public LavaConnection(LavaCell firstCell, LavaCell secondCell)
@@ -88,16 +91,21 @@ public class LavaConnection implements ISimpleListItem
   
     private void setupTick(LavaSimulator sim)
     {
-  
         if(this.firstCell.getFluidUnits() == 0 && this.secondCell.getFluidUnits() == 0)
         {
             this.flowRemainingThisTick = 0;
+            this.maxFlowPerStep = 0;
         }
         else
         {
+            int fluidTop = Math.max(this.firstCell.fluidSurfaceLevel(), this.secondCell.fluidSurfaceLevel());
+            int spaceTop = Math.min(this.firstCell.getCeiling(), this.secondCell.getCeiling());
+            
             this.flowRemainingThisTick = 
-             (Math.min(this.firstCell.getCeiling(), this.secondCell.getCeiling()) - Math.max(this.firstCell.getFloor(), this.secondCell.getFloor()))
-                * LavaSimulator.FLUID_UNITS_PER_LEVEL / 20;
+             (Math.min(fluidTop, spaceTop) - Math.max(this.firstCell.getFloor(), this.secondCell.getFloor()))
+                * LavaSimulator.FLUID_UNITS_PER_LEVEL / 4;
+            this.maxFlowPerStep = this.flowRemainingThisTick / 4;
+            if(this.maxFlowPerStep == 0) this.maxFlowPerStep = 1;
         }
     }
     
@@ -119,18 +127,15 @@ public class LavaConnection implements ISimpleListItem
         if(cellHigh.getFluidUnits() == 0) return 0;
         
         int availableFluidUnits = surfaceHigh - cellHigh.getSmoothedRetainedUnits();
-        
         if(availableFluidUnits <= 0) return 0;
-
-        if(availableFluidUnits > MAX_FLOW_PER_TICK) availableFluidUnits = MAX_FLOW_PER_TICK;
+        
+        if(availableFluidUnits > this.maxFlowPerStep) availableFluidUnits = maxFlowPerStep;
+        if(availableFluidUnits > this.flowRemainingThisTick) availableFluidUnits = flowRemainingThisTick;
         
         int flow = (surfaceHigh - surfaceLow) / 2;
-        
-        if(flow > availableFluidUnits) flow = availableFluidUnits;
-        
-        if(flow > this.flowRemainingThisTick) flow = flowRemainingThisTick;
-        
-        return flow;
+
+        return flow < availableFluidUnits ? flow : availableFluidUnits;
+   
     }
     
     /**
@@ -138,18 +143,16 @@ public class LavaConnection implements ISimpleListItem
      */
     public void doFirstStep(LavaSimulator sim)
     {
-            sim.connectionProcessCount.incrementAndGet();
-            this.isDirty = false;
-            this.lastFlowTick = sim.getTickIndex();
-            this.setupTick(sim);
-            this.doStepWork(sim);
+        this.isDirty = false;
+        this.lastFlowTick = sim.getTickIndex();
+        this.setupTick(sim);
+        this.doStepWork(sim);
     }
     
     public void doStep(LavaSimulator sim)
     {
         if(this.isDirty)
         {
-            sim.connectionProcessCount.incrementAndGet();
             this.isDirty = false;
             this.doStepWork(sim);
         }
@@ -171,6 +174,15 @@ public class LavaConnection implements ISimpleListItem
                 if(this.secondCell.tryLock())
                 {
                     int flow = this.getFlowRate();
+                    
+                    int saveForDebug1 = firstCell.getFluidUnits();
+                    int saveForDebug2 = secondCell.getFluidUnits();
+                    
+                    if(this.firstCell.getFluidUnits() -flow < 0) 
+                        Adversity.log.info("derp1 " + saveForDebug1);
+                    
+                    if(this.secondCell.getFluidUnits() + flow < 0) 
+                        Adversity.log.info("derp2 " + saveForDebug2);
                     
                     if(flow != 0) this.flowAcross(sim, flow);
                     

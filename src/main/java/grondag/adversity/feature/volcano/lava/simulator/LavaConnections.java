@@ -1,5 +1,6 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
+
 import java.util.stream.Stream;
 
 import grondag.adversity.library.SimpleConcurrentList;
@@ -10,19 +11,24 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
     @SuppressWarnings("unchecked")
     private SimpleConcurrentList<LavaConnection>[] sort = new SimpleConcurrentList[4];
     
-    private static final int CAPACITY_INCREMENT = 0x10000;
     
     public static enum SortBucket
     {
         A, B, C, D
     }
 
+   
+    
     private boolean isSortCurrent = false;
     
     public LavaConnections()
     {
-        super(CAPACITY_INCREMENT);
-        this.clear();
+        super();
+        this.sort[SortBucket.A.ordinal()] = new SimpleConcurrentList<LavaConnection>();
+        this.sort[SortBucket.B.ordinal()] = new SimpleConcurrentList<LavaConnection>();
+        this.sort[SortBucket.C.ordinal()] = new SimpleConcurrentList<LavaConnection>();
+        this.sort[SortBucket.D.ordinal()] = new SimpleConcurrentList<LavaConnection>();
+        this.isSortCurrent = false;
     }
     
     @Override
@@ -31,43 +37,10 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
         synchronized(this)
         {
             super.clear();
-            this.resize(CAPACITY_INCREMENT);
-            this.setupSortLists();
-        }
-    }
-    
-    private void setupSortLists()
-    {
-        this.sort[SortBucket.A.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity());
-        this.sort[SortBucket.B.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity() / 2);
-        this.sort[SortBucket.C.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity() / 4);
-        this.sort[SortBucket.D.ordinal()] = new SimpleConcurrentList<LavaConnection>(this.capacity() / 4);
-        this.isSortCurrent = false;
-    }
-    
-    
-    /** 
-     * Ensures processing array has sufficient storage.  
-     * Should be called periodically to prevent overflow 
-     * and free unused memory.
-     */
-    public void manageCapacity()
-    {
-        if(this.availableCapacity() < CAPACITY_INCREMENT / 2)
-        {
-            this.setMode(ListMode.MAINTAIN);
-            int newCapacity = this.capacity() + CAPACITY_INCREMENT;
-            this.resize(newCapacity);
-            this.setMode(ListMode.ADD);
-            this.setupSortLists();
-        }
-        else if(this.availableCapacity() >= CAPACITY_INCREMENT * 2)
-        {
-            this.setMode(ListMode.MAINTAIN);
-            int newCapacity = this.capacity() - CAPACITY_INCREMENT;
-            this.setMode(ListMode.ADD);
-            this.resize(newCapacity);
-            this.setupSortLists();
+            this.sort[SortBucket.A.ordinal()].clear();
+            this.sort[SortBucket.B.ordinal()].clear();
+            this.sort[SortBucket.C.ordinal()].clear();
+            this.sort[SortBucket.D.ordinal()].clear();
         }
     }
     
@@ -112,9 +85,7 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
      */
     public void validateConnections()
     {
-        this.setMode(ListMode.MAINTAIN);
         this.removeDeletedItems();
-        this.setMode(ListMode.ADD);
     }
     
     /** 
@@ -137,12 +108,9 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
     {
         for(SimpleConcurrentList<LavaConnection> bucket : this.sort)
         {
-            bucket.setMode(ListMode.MAINTAIN);
             bucket.clear();
-            bucket.setMode(ListMode.ADD);
         }
         
-        this.setMode(ListMode.INDEX);
         LavaSimulator.LAVA_THREAD_POOL.submit(() ->
             this.stream(true).forEach(c -> {
                 
@@ -152,13 +120,6 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
                 if(c != null && c.isActive()) this.sort[c.getSortBucket().ordinal()].add(c);
                 
             })).join();
-        
-        for(SortBucket b : SortBucket.values())
-        {
-            this.sort[b.ordinal()].setMode(ListMode.INDEX);
-        }
-        
-        this.setMode(ListMode.ADD);
         
         this.isSortCurrent = true;
     }

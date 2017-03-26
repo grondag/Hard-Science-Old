@@ -58,7 +58,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     private LavaSimulator lavaSimulator
     ;
     
-	private static ExecutorService executor;
+	public static ExecutorService executor;
     
     /** used for world time */
     private World world;

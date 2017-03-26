@@ -18,9 +18,7 @@ import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class LavaCell implements ISimpleListItem
 {
@@ -889,22 +887,22 @@ public class LavaCell implements ISimpleListItem
         //TODO: implement something more interesting, including persistence.
     }
     
-    private void doFallingParticles(int y, World world)
-    {
-        {
-            double motionX = 0;
-            double motionY = 0;
-            double motionZ = 0;
-            world.spawnParticle(
-                  EnumParticleTypes.DRIP_LAVA, 
-                  this.x() + 0.5, 
-                  y + 0.5, 
-                  this.z(), 
-                  motionX, 
-                  motionY, 
-                  motionZ);
-        }
-    }
+//    private void doFallingParticles(int y, World world)
+//    {
+//        {
+//            double motionX = 0;
+//            double motionY = 0;
+//            double motionZ = 0;
+//            world.spawnParticle(
+//                  EnumParticleTypes.DRIP_LAVA, 
+//                  this.x() + 0.5, 
+//                  y + 0.5, 
+//                  this.z(), 
+//                  motionX, 
+//                  motionY, 
+//                  motionZ);
+//        }
+//    }
     
     /**
      * Confirms non-solid space exists in this cell stack. 
@@ -1293,6 +1291,9 @@ public class LavaCell implements ISimpleListItem
                     }
                     lowerCell = upperCell;
                     upperCell = lowerCell.above;
+                    
+                    if(Adversity.DEBUG_MODE && lowerCell == upperCell)
+                        Adversity.log.info("Strangeness in lava cell NBT load.");
                 }
                 
                 // if we get to here, new cell is the uppermost
@@ -1323,12 +1324,16 @@ public class LavaCell implements ISimpleListItem
      * Forms new connections if necessary.
      * Does NOT remove invalid connections. Invalid connections are expected to be removed during connection processing.
      */
-    public void updateConnectionsIfNeeded(LavaCells cells, LavaConnections connections)
+    public void updateConnectionsIfNeeded(LavaSimulator sim)
     {
+        if(this.isDeleted) return;
+        
         if(this.isConnectionUpdateNeeded)
         {
             int x = this.x();
             int z = this.z();
+            LavaCells cells = sim.cells;
+            LavaConnections connections = sim.connections;
             
             this.updateConnectionsWithColumn(cells.getEntryCell(x - 1, z), connections);
             this.updateConnectionsWithColumn(cells.getEntryCell(x + 1, z), connections);
@@ -1386,6 +1391,8 @@ public class LavaCell implements ISimpleListItem
      */
     public void prioritizeOutboundConnections(LavaConnections connections)
     {
+        if(this.isDeleted) return;
+        
         ArrayList<LavaConnection> sort = sorter.get();
         sort.clear();
         
@@ -1437,18 +1444,20 @@ public class LavaCell implements ISimpleListItem
         }
     }
     
-    /**
-     * Called once per tick for each cell before simulation steps are run.
-     * Use for housekeeping tasks.
-     */
-    public void update(LavaSimulator sim, LavaCells cells, LavaConnections connections)
-    {
-        this.updateConnectionsIfNeeded(cells, connections);
-        
-        this.updateRawRetentionIfNeeded();
-        
-        // TODO: Pressure propagation
-    }
+//    /**
+//     * Called once per tick for each cell before simulation steps are run.
+//     * Use for housekeeping tasks.
+//     */
+//    public void update(LavaSimulator sim)
+//    {
+//        if(this.isDeleted) return;
+//        
+//        this.updateConnectionsIfNeeded(sim);
+//        
+//        this.updateRawRetentionIfNeeded();
+//        
+//        // TODO: Pressure propagation
+//    }
     
     /** maintains indication of whether or not this cell must remain loaded */
     public void updateActiveStatus()
@@ -1487,7 +1496,7 @@ public class LavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
         
         if(this.connections.size() < 4) return true;
         
@@ -1580,6 +1589,8 @@ public class LavaCell implements ISimpleListItem
     /** see {@link #rawRetainedLevel} */
     public void updateRawRetentionIfNeeded()
     {
+        if(this.isDeleted) return;
+        
         if(this.rawRetainedLevel == RETENTION_NEEDS_UPDATE)
         {
             this.updateRawRetention();
