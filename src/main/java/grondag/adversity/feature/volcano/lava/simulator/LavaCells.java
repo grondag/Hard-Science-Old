@@ -1,11 +1,14 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 import grondag.adversity.Adversity;
+import grondag.adversity.library.CountedJob;
+import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.library.Job;
-import grondag.adversity.library.Job.JobTask;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleConcurrentList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
@@ -27,69 +30,66 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
     // TODO: consider combining on-tick/off-tick jobs once optimization is complete
   
     // on-tick tasks
-    private final JobTask provideBlockUpdateTask = new JobTask() 
+    private final CountedJobTask<LavaCell> provideBlockUpdateTask =  new CountedJobTask<LavaCell>() 
     {
         @Override
-        public void doJobTask(int index)
+        public void doJobTask(LavaCell operand)
         {
-            ((LavaCell)items[index]).provideBlockUpdateIfNeeded(sim);
+            operand.provideBlockUpdateIfNeeded(sim);
         }
     };
-    
             
-    private final JobTask updateRetentionTask = new JobTask()
+    private final CountedJobTask<LavaCell> updateRetentionTask = new CountedJobTask<LavaCell>()
     {
 
         @Override
-        public void doJobTask(int index)
+        public void doJobTask(LavaCell operand)
         {
-            ((LavaCell)items[index]).updateRawRetentionIfNeeded();
+            operand.updateRawRetentionIfNeeded();
         }
     };
     
-    
-    private final JobTask doCoolingTask = new JobTask()
+    private final CountedJobTask<LavaCell> doCoolingTask = new CountedJobTask<LavaCell>()
     {
         @Override
-        public void doJobTask(int index)
+        public void doJobTask(LavaCell operand)
         {
-            LavaCell cell = getItem(index);
-            
-            if(cell.canCool(sim.getTickIndex())) sim.coolCell(cell);
+            if(operand.canCool(sim.getTickIndex())) sim.coolCell(operand);
         }    
     };
             
     // off-tick tasks
-    private final JobTask updateConnectionTask = new JobTask()
+    private final CountedJobTask<LavaCell> updateStuffTask = new CountedJobTask<LavaCell>()
     {
         @Override
-        public void doJobTask(int index)
+        public void doJobTask(LavaCell operand)
         {
-            ((LavaCell)items[index]).updateConnectionsIfNeeded(sim);
+            operand.updateActiveStatus();
+            operand.updateConnectionsIfNeeded(sim);
         }
     };
     
-    private final JobTask prioritizeConnectionsTask = new JobTask() 
+    private final CountedJobTask<LavaCell> prioritizeConnectionsTask = new CountedJobTask<LavaCell>() 
     {
 
         @Override
-        public void doJobTask(int index)
+        public void doJobTask(LavaCell operand)
         {
-            ((LavaCell)items[index]).prioritizeOutboundConnections(sim.connections);
+            operand.prioritizeOutboundConnections(sim.connections);
         }
     };
     
     // TODO: add pressure propagation task
     
     //TODO: make configurable
-    private final static int BATCH_SIZE = 400;
+    private final static int BATCH_SIZE = 4096;
     
-    public final Job<LavaCell> provideBlockUpdateJob = new Job<LavaCell>(provideBlockUpdateTask, this, BATCH_SIZE);    
-    public final Job<LavaCell> updateRetentionJob = new Job<LavaCell>(updateRetentionTask, this, BATCH_SIZE);   
-    public final Job<LavaCell> doCoolingJob = new Job<LavaCell>(doCoolingTask, this, BATCH_SIZE);   
+    public final Job provideBlockUpdateJob = new CountedJob<LavaCell>(this, provideBlockUpdateTask, BATCH_SIZE);    
+    public final Job updateRetentionJob = new CountedJob<LavaCell>(this, updateRetentionTask, BATCH_SIZE);   
+    public final Job doCoolingJob = new CountedJob<LavaCell>(this, doCoolingTask, BATCH_SIZE);   
     
-    public final Job<LavaCell> updateConnectionJob = new Job<LavaCell>(updateConnectionTask, this, BATCH_SIZE);
-    public final Job<LavaCell> prioritizeConnectionsJob = new Job<LavaCell>(prioritizeConnectionsTask, this, BATCH_SIZE);
+    public final Job updateStuffJob = new CountedJob<LavaCell>(this, updateStuffTask, BATCH_SIZE);
+    public final Job prioritizeConnectionsJob = new CountedJob<LavaCell>(this, prioritizeConnectionsTask, BATCH_SIZE);
     
     public LavaCells(LavaSimulator sim)
     {
@@ -107,29 +107,67 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
         return super.stream(isParallel);
     }
     
-    private static final int MAX_CHUNKS_PER_TICK = 4;
+   private static final int MAX_CHUNKS_PER_TICK = 4;
     
-    public void validateOrBufferChunks()
+   private SimpleConcurrentList<CellChunk> processChunks = new SimpleConcurrentList<CellChunk>();
+
+   private final CountedJobTask<CellChunk> doChunkValidationTask = new CountedJobTask<CellChunk>()
     {
-        int doneCount = 0;
-        
-        for(CellChunk chunk : this.cellChunks.values())
+        @Override
+        public void doJobTask(CellChunk operand)
         {
-            if(chunk.needsFullLoadOrValidation())
+            if(operand.needsFullLoadOrValidation())
             {
-                // completely new chunks don't count against the max loads per tick
-                if(doneCount <= MAX_CHUNKS_PER_TICK || chunk.getEntryCount() != 0) 
-                {
-                    doneCount++;
-                    this.sim.cellChunkLoader.queueChunks(this.sim.worldBuffer, chunk.packedChunkPos);
-                }
+                sim.cellChunkLoader.queueChunks(sim.worldBuffer, operand.packedChunkPos);
             }
-            else if(doneCount <= MAX_CHUNKS_PER_TICK)
+            else 
             {
-                if(chunk.validateMarkedCells()) doneCount++;
+                operand.validateMarkedCells();
             }
-        };        
+        }    
+    };
+
+    public final Job validateChunksJob = new CountedJob<CellChunk>(processChunks, doChunkValidationTask, 1);
+
+    
+    public void validateOrBufferChunks(Executor executor)
+    {
+        this.validateChunksJob.perfCounter.startRun();
+        
+        int size = this.cellChunks.size();
+        
+        if(size== 0) return;
+        
+        this.processChunks.clear();
+        
+        final Object[] candidates = this.cellChunks.values().toArray();
+        
+        Arrays.sort(candidates, new Comparator<Object>()
+        {
+            @Override
+            public int compare(Object o1, Object o2)
+            {
+                return Integer.compare(((CellChunk)o1).validationPriority(), ((CellChunk)o2).validationPriority());
+            }
+        });
+        
+        for(Object chunk : candidates)
+        {
+            if(((CellChunk)chunk).isNew() || this.processChunks.size() < MAX_CHUNKS_PER_TICK)
+            {
+                this.processChunks.add((CellChunk)chunk);
+            }
+        }
+       
+       this.validateChunksJob.perfCounter.endRun();
+       
+       if(this.processChunks.size() > 0)
+       {
+            validateChunksJob.runOn(executor);
+       }
     }
+    
+ 
     
     /**
      * Marks cells in x, z column to be validated vs. world state.
@@ -281,9 +319,10 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
      * cells in column and removed (and if necessary replaced) in locator.
      * NOT Thread-safe and not intended for concurrency.
      */
-    public void clearDeletedCells()
+    @Override
+    public void removeDeletedItems()
     {
-        this.removeDeletedItems();
+        super.removeDeletedItems();
     }
     
     /**

@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
+import scala.actors.threadpool.Arrays;
 
 public class LavaCell implements ISimpleListItem
 {
@@ -59,8 +60,20 @@ public class LavaCell implements ISimpleListItem
     /** holds all connections with other cells */
     public final Int2ObjectOpenHashMap<LavaConnection> connections = new Int2ObjectOpenHashMap<LavaConnection>();
     
+    /** 
+     * Contents of connections as an array - for fast iteration, which happens very frequently.
+     * May contain null elements, so use connections.size() to determine how deep to iterate.
+     */
+    private LavaConnection[] fastConnections = new LavaConnection[0];
+    
     /** see {@link #getFloor()} */
     private int floor;
+    
+    /** 
+     * Floor as fluid units instead of levels - derived from floor each time floor is set.
+     * Here to avoid multiplying floor each connection pass.
+     */
+    private int floorUnits;
     
     /** see {@link #bottomY()} */
     private short bottomY;
@@ -91,11 +104,7 @@ public class LavaCell implements ISimpleListItem
      */
     private int lastVisibleLevel = NEVER_REPORTED; 
     
-    /** 
-     * False if it is possible currentVisibleLevel won't match lastVisible 
-     * Saves cost of calculating currentVisible if isn't necessary.
-     */
-    private boolean isBlockUpdateCurrent = true;
+
     
     /** true if this cell should remain loaded */
     private volatile boolean isActive = false;
@@ -106,6 +115,12 @@ public class LavaCell implements ISimpleListItem
      */
     private volatile int fluidUnits;
     
+    /** 
+     * Value of fluidUnits that was last used for block update.
+     * If different from fluidUnits indicates a block update may now be needed. 
+     * Saves cost of calculating currentVisible if isn't necessary.
+     */
+    private int lastFluidUnits;
     
     public static final short REFRESH_NONE = -1;
     /**
@@ -265,7 +280,7 @@ public class LavaCell implements ISimpleListItem
     {
         if(Adversity.DEBUG_MODE && !this.isDeleted && this.locator.cellChunk.isUnloaded())
         {
-            Adversity.log.warn("Orphaned lava cell - cell not deleted but chunk is unloaded.");
+             Adversity.log.warn("Orphaned lava cell - cell not deleted but chunk is unloaded.");
         }
         return this.isDeleted;
     }
@@ -292,9 +307,9 @@ public class LavaCell implements ISimpleListItem
         this.clearBlockUpdate();
         this.isDeleted = true;
         
-        for (LavaConnection connection : this.connections.values())
+        for(int i = this.connections.size() - 1; i >= 0; i--)
         {
-            connection.setDeleted();
+            this.fastConnections[i].setDeleted();
         }
         
         this.updateActiveStatus();
@@ -317,7 +332,7 @@ public class LavaCell implements ISimpleListItem
                     {
                         nextUp = nextUp.above;
                     }
-                    else if(y > nextUp.bottomY())
+                    else if(y >= nextUp.bottomY())
                     {
                         return nextUp;
                     }
@@ -503,7 +518,7 @@ public class LavaCell implements ISimpleListItem
      */
     public int fluidSurfaceUnits()
     {
-        return this.getFloor() * LavaSimulator.FLUID_UNITS_PER_LEVEL + this.fluidUnits; 
+        return this.floorUnits + this.fluidUnits; 
     }
     
     /** 
@@ -635,6 +650,7 @@ public class LavaCell implements ISimpleListItem
             if(newFloor < this.floor) this.isConnectionUpdateNeeded = true;
             
             this.floor = newFloor;
+            this.floorUnits = newFloor * LavaSimulator.FLUID_UNITS_PER_LEVEL;
             this.isBottomFlow = isFlowFloor;
             this.bottomY = (short) getYFromFloor(this.floor);
             
@@ -882,7 +898,9 @@ public class LavaCell implements ISimpleListItem
      */
     public void addLavaAtLevel(int tickIndex, int level, int fluidUnits)
     {
-        this.changeLevel(tickIndex, fluidUnits);
+        if(fluidUnits == 0) return;
+        this.changeLevel(fluidUnits);
+        this.updateTickIndex(tickIndex);
         
         //TODO: implement something more interesting, including persistence.
     }
@@ -1074,7 +1092,8 @@ public class LavaCell implements ISimpleListItem
             // add lava from upper cell if it has any
             if(upperCell.getFloor() - lowerCell.fluidSurfaceLevel() < LavaSimulator.LEVELS_PER_TWO_BLOCKS)
             {
-                lowerCell.changeLevel(0, upperCell.getFluidUnits());
+                lowerCell.changeLevel(upperCell.getFluidUnits());
+                lowerCell.updateTickIndex(lowerCell.locator.cellChunk.cells.sim.getTickIndex());
             }
             else
             {
@@ -1140,12 +1159,13 @@ public class LavaCell implements ISimpleListItem
         
         if(this.fluidSurfaceLevel() > floorForNewCell)
         {
-            newCell.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), this.fluidSurfaceUnits() - floorForNewCell * LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            newCell.changeLevel(this.fluidSurfaceUnits() - floorForNewCell * LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            newCell.updateTickIndex(this.locator.cellChunk.cells.sim.getTickIndex());
         }
         
         if(this.fluidSurfaceLevel() > newCeilingForThisCell)
         {
-            this.changeLevel(0, -(this.fluidSurfaceLevel() - newCeilingForThisCell) * LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            this.changeLevel(-(this.fluidSurfaceLevel() - newCeilingForThisCell) * LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         this.setCeiling(newCeilingForThisCell);
         newCell.linkAbove(this.above);
@@ -1195,12 +1215,14 @@ public class LavaCell implements ISimpleListItem
                     int flowHeight = this.fluidSurfaceFlowHeight();
                     if(flowHeight > 0)
                     {
-                        this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -flowHeight * LavaSimulator.FLUID_UNITS_PER_LEVEL);
+                        this.changeLevel(-flowHeight * LavaSimulator.FLUID_UNITS_PER_LEVEL);
+                        this.updateTickIndex(this.locator.cellChunk.cells.sim.getTickIndex());
                     }
                 }
                 else if( y < surfaceY)
                 {
-                    this.changeLevel(this.locator.cellChunk.cells.sim.getTickIndex(), -LavaSimulator.FLUID_UNITS_PER_BLOCK);
+                    this.changeLevel(-LavaSimulator.FLUID_UNITS_PER_BLOCK);
+                    this.updateTickIndex(this.locator.cellChunk.cells.sim.getTickIndex());
                 }
             }
             
@@ -1308,11 +1330,15 @@ public class LavaCell implements ISimpleListItem
     public void addConnection(LavaConnection connection)
     {
         this.connections.put(connection.getOther(this).id, connection);
+        Arrays.fill(fastConnections, null);
+        this.fastConnections = this.connections.values().toArray(fastConnections);
     }
     
     public void removeConnection(LavaConnection connection)
     {
         this.connections.remove(connection.getOther(this).id);
+        Arrays.fill(fastConnections, null);
+        this.fastConnections = this.connections.values().toArray(fastConnections);
     }
     
     public boolean isConnectedTo(LavaCell otherCell)
@@ -1396,8 +1422,10 @@ public class LavaCell implements ISimpleListItem
         ArrayList<LavaConnection> sort = sorter.get();
         sort.clear();
         
-        for(LavaConnection connection : this.connections.values())
+        for(int i = this.connections.size() - 1; i >= 0; i--)
         {
+            LavaConnection connection = this.fastConnections[i];
+            
             if(connection.isActive())
             {
                 LavaCell other = connection.getOther(this);
@@ -1462,7 +1490,7 @@ public class LavaCell implements ISimpleListItem
     /** maintains indication of whether or not this cell must remain loaded */
     public void updateActiveStatus()
     {
-        boolean shouldBeActive = !this.isDeleted && (this.fluidUnits > 0 || !this.isBlockUpdateCurrent);
+        boolean shouldBeActive = !this.isDeleted && (this.fluidUnits > 0 || !this.isBlockUpdateCurrent());
         
         if(this.isActive)
         {
@@ -1496,14 +1524,14 @@ public class LavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
         
         if(this.connections.size() < 4) return true;
         
         int hotCount = 0;
-        for(LavaConnection c : this.connections.values())
+        for(int i = this.connections.size() - 1; i >= 0; i--)
         {
-            if(c.getOther(this).getFluidUnits() > 0) hotCount++;
+            if(fastConnections[i].getOther(this).getFluidUnits() > 0) hotCount++;
             if(hotCount >= 3) return false;
         }
         
@@ -1517,7 +1545,7 @@ public class LavaCell implements ISimpleListItem
      */
     public void coolAndShrink()
     {
-        if(this.isDeleted) return;
+        if(this.isDeleted || this.getFluidUnits() == 0) return;
         
         int newFloor = this.fluidSurfaceLevel();
         if(newFloor >= this.getCeiling())
@@ -1526,10 +1554,20 @@ public class LavaCell implements ISimpleListItem
         }
         else
         {
-            this.changeLevel(0, -this.getFluidUnits());
+            this.changeLevel(-this.getFluidUnits());
             this.clearBlockUpdate();
             this.setFloor(newFloor, true);
         }
+    }
+    
+    private boolean isBlockUpdateCurrent()
+    {
+        return this.fluidUnits == this.lastFluidUnits;
+    }
+    
+    private void makeBlockUpdateCurrent()
+    {
+        this.lastFluidUnits = this.fluidUnits;
     }
     
     /**
@@ -1538,9 +1576,9 @@ public class LavaCell implements ISimpleListItem
     public void clearBlockUpdate()
     {
         this.avgFluidAmountWithPrecision = this.fluidUnits << 6;
+        this.makeBlockUpdateCurrent();
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
-        this.isBlockUpdateCurrent = true;
-        this.updateActiveStatus();
+//        this.updateActiveStatus();
     }
     
     /**
@@ -1790,13 +1828,13 @@ public class LavaCell implements ISimpleListItem
         // has to be captured here before it is possibly changed by routine below
         final int lastVisible = this.getLastVisibleLevel();
         
-        if(!isBlockUpdateCurrent) 
+        if(!isBlockUpdateCurrent()) 
         {
             // if we are empty always reflect that immediately - otherwise have ghosting in world as lava drains from drop cells
             if(this.fluidUnits == 0)
             {
                 this.avgFluidAmountWithPrecision = 0;
-                this.isBlockUpdateCurrent = true;
+                this.makeBlockUpdateCurrent();
             }
             else
             {
@@ -1806,7 +1844,7 @@ public class LavaCell implements ISimpleListItem
                 if(Math.abs(avgAmount - this.fluidUnits) > LavaSimulator.FLUID_UNITS_PER_LEVEL * 4)
                 {
                     this.avgFluidAmountWithPrecision = this.fluidUnits << 6;
-                    this.isBlockUpdateCurrent = true;
+                    this.makeBlockUpdateCurrent();
                     
                     // doing it this way means we won't detect a change from current
                 }
@@ -1817,13 +1855,13 @@ public class LavaCell implements ISimpleListItem
         
                     if(this.avgFluidAmountWithPrecision  == this.fluidUnits << 6)
                     {
-                        this.isBlockUpdateCurrent = true;
+                        this.makeBlockUpdateCurrent();
                     }
                 }
             }
     
             // needed because block update status is a factor for active status
-            if(this.isBlockUpdateCurrent) this.updateActiveStatus();
+//            if(this.isBlockUpdateCurrent) this.updateActiveStatus();
         }
    
         final int currentVisible = this.getCurrentVisibleLevel();
@@ -1886,43 +1924,40 @@ public class LavaCell implements ISimpleListItem
         }
     }
     
-    /** pass tickIndex == 0 if calling outside of connection processing */
-    public void changeLevel(int tickIndex, int amount)
+    public void updateTickIndex(int newTickIndex)
     {
-        if(amount != 0)
+        this.lastTickIndex = newTickIndex;
+    }
+    
+    public void changeLevel(int amount)
+    {
+        // should not be needed - all current callers are ensuring not happens
+        // and if did, shouldn't have a negative effect, is just wasteful of time.
+//        if(amount == 0) return;
+        
+//        if(amount > 0 && this.fluidUnits == 0)
+//        {
+//            //TODO: check for melting causing floor to merge with a non-barrier block below
+//            // should cause cell to merge will cell below if happens.
+//            // otherwise floor remains intact
+//        }
+        
+        this.fluidUnits += amount;
+
+        if(this.fluidUnits <= 0)
         {
-
-            if(tickIndex != 0) this.lastTickIndex = tickIndex;
-
-            if(amount > 0 && this.fluidUnits == 0)
-            {
-                //TODO: check for melting causing floor to merge with a non-barrier block below
-                // should cause cell to merge will cell below if happens.
-                // otherwise floor remains intact
-            }
-            
-            this.fluidUnits += amount;
-
-            isBlockUpdateCurrent = false;
-            this.connections.values().forEach(c -> c.setDirty());
-
+            //force recalc of retained level when a cell becomes empty
+            this.invalidateRawRetention();
 
             if(this.fluidUnits < 0)
             {
                 Adversity.log.info("Negative cell level detected: " + this.fluidUnits + " cellID=" + this.id);
                 this.fluidUnits = 0;
-
-                //force recalc of retained level when a cell becomes empty
-                this.invalidateRawRetention();
             }
-            else if(this.fluidUnits == 0)
-            {
-                //force recalc of retained level when a cell becomes empty
-                this.invalidateRawRetention();
-            }
-            
-            this.updateActiveStatus();
         }
+        
+//        this.updateActiveStatus();
+        
     }
     
 //    /**

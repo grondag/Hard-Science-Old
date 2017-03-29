@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.library.Job.JobProvider;
+import grondag.adversity.library.CountedJob.CountedJobProviderBacker;
 
 /**
  * Provides functionality similar to an array list, but with low overhead and high concurrency 
@@ -31,7 +31,7 @@ import grondag.adversity.library.Job.JobProvider;
  *
  */
 
-public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable<T>, JobProvider
+public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable<T>, CountedJobProviderBacker<T>
 {
     protected Object[]  items; 
     private volatile int capacity;
@@ -115,6 +115,12 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     public T getItem(int index)
     {
         return (T) items[index];
+    }
+    
+    @Override
+    public Object[] getOperands()
+    {
+        return this.items;
     }
     
     /**

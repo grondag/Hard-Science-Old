@@ -1,11 +1,13 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
+import grondag.adversity.library.ConcurrentPerformanceCounter;
 import grondag.adversity.library.ISimpleListItem;
-import grondag.adversity.library.Useful;
 
 public class LavaConnection implements ISimpleListItem
 {
@@ -32,13 +34,18 @@ public class LavaConnection implements ISimpleListItem
     
     private volatile SortBucket lastSortBucket;
     
-    protected boolean isDirty = false;
+//    protected boolean isDirty = false;
+    
+    private boolean flowedLastStep = false;
     
     private boolean isDeleted = false;
  
     private int flowRemainingThisTick;
     private int maxFlowPerStep;
     
+//    public static ConcurrentPerformanceCounter perfFocus = new ConcurrentPerformanceCounter();
+    
+//    public static AtomicInteger totalFlow = new AtomicInteger(0);
 
     public LavaConnection(LavaCell firstCell, LavaCell secondCell)
     {
@@ -66,30 +73,7 @@ public class LavaConnection implements ISimpleListItem
         return cellIAlreadyHave == this.firstCell ? this.secondCell : this.firstCell;
     }
     
-    private int getFlowRate()
-    {
-        if(this.flowRemainingThisTick <= 0) return 0;
-        
-        int surface1 = this.firstCell.fluidSurfaceUnits();
-        int surface2 = this.secondCell.fluidSurfaceUnits();
-        
-        if(surface1 == surface2)
-        {
-            return 0;
-        }
-        else if(surface1 > surface2)
-        {
-            return this.getEqualizingFlow(this.firstCell, surface1, surface2);
-        }
-        else // surface1 < surface2
-        {
-            // flip sign because going from 2 to 1
-            return -this.getEqualizingFlow(this.secondCell, surface2, surface1);
-        }
-   
-    }
-  
-    private void setupTick(LavaSimulator sim)
+    private void setupTick()
     {
         if(this.firstCell.getFluidUnits() == 0 && this.secondCell.getFluidUnits() == 0)
         {
@@ -141,30 +125,42 @@ public class LavaConnection implements ISimpleListItem
     /**
      *  Resets lastFlowTick and forces run at least once a tick.
      */
-    public void doFirstStep(LavaSimulator sim)
+    public void doFirstStep(int newTickIndex)
     {
-        this.isDirty = false;
-        this.lastFlowTick = sim.getTickIndex();
-        this.setupTick(sim);
-        this.doStepWork(sim);
-    }
-    
-    public void doStep(LavaSimulator sim)
-    {
-        if(this.isDirty)
+        this.lastFlowTick = newTickIndex;
+        this.setupTick();
+        this.doStepWork();
+        if(this.flowedLastStep)
         {
-            this.isDirty = false;
-            this.doStepWork(sim);
+            this.firstCell.updateTickIndex(newTickIndex);
+            this.secondCell.updateTickIndex(newTickIndex);
         }
     }
+    
+    public void doStep()
+    {
+        if(this.flowedLastStep)
+        {
+            this.doStepWork();
+        }
+    }
+    
+//    public static AtomicInteger tryCount = new AtomicInteger(0);
+//    public static AtomicInteger successCount = new AtomicInteger(0);
+    
+//    public static AtomicLong innerTime = new AtomicLong(0);
+//    public static AtomicLong outerTime = new AtomicLong(0);
+    
+//    public static ConcurrentPerformanceCounter perfFlowRate = new ConcurrentPerformanceCounter();
+//    public static ConcurrentPerformanceCounter perfFlowAcross = new ConcurrentPerformanceCounter();
     
     /**
      * Guts of doStep.
      */
-    private void doStepWork(LavaSimulator sim)
+    private void doStepWork()
     {
-//        if(this.firstCell.id == 1229 || this.secondCell.id == 1229)
-//            Adversity.log.info("boop");
+
+        if(this.flowRemainingThisTick <= 0) return;
         
         boolean isIncomplete = true;
         do
@@ -173,35 +169,78 @@ public class LavaConnection implements ISimpleListItem
             {
                 if(this.secondCell.tryLock())
                 {
-                    int flow = this.getFlowRate();
-                    
-                    int saveForDebug1 = firstCell.getFluidUnits();
-                    int saveForDebug2 = secondCell.getFluidUnits();
-                    
-                    if(this.firstCell.getFluidUnits() -flow < 0) 
-                        Adversity.log.info("derp1 " + saveForDebug1);
-                    
-                    if(this.secondCell.getFluidUnits() + flow < 0) 
-                        Adversity.log.info("derp2 " + saveForDebug2);
-                    
-                    if(flow != 0) this.flowAcross(sim, flow);
-                    
                     isIncomplete = false;
+                    
+                    int surface1 = this.firstCell.fluidSurfaceUnits();
+                    int surface2 = this.secondCell.fluidSurfaceUnits();
+                    
+                    if(surface1 == surface2)
+                    {
+                        //NOOP;
+                    }
+                    else 
+                    {
+                        int flow;
+                        
+                        // very high-frequency loop here - so repeating some code to reduce comparisons for performance
+                        if(surface1 > surface2)
+                        {
+                            flow = this.getEqualizingFlow(this.firstCell, surface1, surface2);
+                            if(flow <= 1)
+                            {
+                                if(this.flowedLastStep) this.flowedLastStep = false;
+                            }
+                            else 
+                            {
+//                                totalFlow.addAndGet(flow);
+                                
+                                if(!this.flowedLastStep) this.flowedLastStep = true;
+                                this.flowRemainingThisTick -= flow;
+                                
+                                this.firstCell.changeLevel(-flow);
+                                this.secondCell.changeLevel(flow);
+                            }
+                        }
+                        else // surface1 < surface2
+                        {
+                            flow = this.getEqualizingFlow(this.secondCell, surface2, surface1);
+                            if(flow <= 1)
+                            {
+                                if(this.flowedLastStep) this.flowedLastStep = false;
+                            }
+                            else 
+                            {
+//                                totalFlow.addAndGet(flow);
+                                
+                                if(!this.flowedLastStep) this.flowedLastStep = true;
+                                this.flowRemainingThisTick -= flow;
+                                
+                                // flip sign vs above because going from 2 to 1
+                                this.firstCell.changeLevel(flow);
+                                this.secondCell.changeLevel(-flow);
+                            }
+
+                        }
+
+                        
+                    }
                     
                     this.secondCell.unlock();
                 }
                 this.firstCell.unlock();
             }
         } while(isIncomplete);
+        
+//        outerTime.addAndGet(System.nanoTime() - outerStart);
     }
     
-    /**
-     * Marks connection for inclusion in next round of processing.
-     */
-    public void setDirty()
-    {
-        this.isDirty = true;
-    }
+//    /**
+//     * Marks connection for inclusion in next round of processing.
+//     */
+//    public void setDirty()
+//    {
+//        this.isDirty = true;
+//    }
     
     /** marks connection deleted. Does not release cells */
     public void setDeleted()
@@ -229,12 +268,6 @@ public class LavaConnection implements ISimpleListItem
         this.secondCell.removeConnection(this);
     }
     
-    public void flowAcross(LavaSimulator sim, int flow)
-    {
-        this.flowRemainingThisTick -= Math.abs(flow);
-        this.firstCell.changeLevel(sim.getTickIndex(), -flow);
-        this.secondCell.changeLevel(sim.getTickIndex(), flow);
-    }
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.

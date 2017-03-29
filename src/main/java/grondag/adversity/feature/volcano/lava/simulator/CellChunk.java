@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 /**
  * Container for all cells in a world chunk.
@@ -24,7 +25,7 @@ import grondag.adversity.library.PackedBlockPos;
  *      they are not active
  *      AND they are not retained           
  */
-public class CellChunk
+public class CellChunk implements ISimpleListItem
 {
 
     public final long packedChunkPos;
@@ -99,6 +100,22 @@ public class CellChunk
     public boolean needsFullLoadOrValidation()
     {
         return (this.needsFullValidation || this.validationCount.get() > 64) && !this.isUnloaded;
+    }
+    
+    public int validationPriority()
+    {
+        if(this.isUnloaded) return -1;
+        
+        if(this.isNew()) return Integer.MAX_VALUE;
+        
+        if(this.needsFullValidation) return 256;
+        
+        return this.validationCount.get();
+    }
+    
+    public boolean isNew()
+    {
+        return this.getEntryCount() == 0;
     }
     
     /**
@@ -344,6 +361,12 @@ public class CellChunk
     private static int getIndex(int x, int z)
     {
         return ((x & 15) << 4) | (z & 15);
+    }
+
+    @Override
+    public boolean isDeleted()
+    {
+        return this.isUnloaded;
     }
 
 }

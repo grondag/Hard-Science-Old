@@ -4,33 +4,34 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.CountedJob;
+import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.SimpleConcurrentList;
-import grondag.adversity.library.Job.JobTask;
 import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
-public class BlockEventList2 extends SimpleConcurrentList<BlockEventList2.BlockEvent>
+public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEvent>
 {
     
     private final int maxRetries;
     private final String nbtTagName;
     private final BlockEventHandler eventHandler;
     
-    private final JobTask processTask = new JobTask() {
+    private final CountedJobTask<BlockEventList.BlockEvent> processTask = new CountedJobTask<BlockEventList.BlockEvent>() {
 
         @Override
-        public void doJobTask(int index)
+        public void doJobTask(BlockEventList.BlockEvent operand)
         {
-            ((BlockEvent)items[index]).process(maxRetries);
+            operand.process(maxRetries);
         }
     };
     
-    private final Job<BlockEvent> processJob = new Job<BlockEvent>(processTask, this, 64);
+    private final Job processJob = new CountedJob<BlockEventList.BlockEvent>(this, processTask, 64);
     
-    public BlockEventList2(int maxRetries, String nbtTagName, BlockEventHandler eventHandler)
+    public BlockEventList(int maxRetries, String nbtTagName, BlockEventHandler eventHandler)
     {
         super();
         this.maxRetries = maxRetries;
@@ -134,6 +135,13 @@ public class BlockEventList2 extends SimpleConcurrentList<BlockEventList2.BlockE
             if(retryCount++ < maxRetries)
             {
                 if(eventHandler.handleEvent(this)) retryCount = IS_COMPLETE;
+            }
+            else
+            {
+                //exceeded max retries - give up
+                if(Adversity.DEBUG_MODE)
+                    Adversity.log.info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
+                retryCount = IS_COMPLETE;
             }
         }
         
