@@ -12,7 +12,7 @@ public abstract class Job
 {
     public abstract boolean canRun();
     
-    public boolean PERFORMANCE_COUNTING_ENABLED = true;  
+    public boolean PERFORMANCE_COUNTING_ENABLED = false;  
   
     /** if false, should just call run instead of executeOn() */
     public abstract boolean worthRunningParallel();

@@ -622,6 +622,8 @@ public class LavaSimulator extends SimulationNode
         // connection sorting must happen AFTER all connections are updated/formed
         this.cells.prioritizeConnectionsJob.runOn(LAVA_THREAD_POOL);
 
+        this.connections.setupTickJob.runOn(LAVA_THREAD_POOL);
+        
         perfFocus.startRun();
         this.connections.refreshSortBucketsIfNeeded(LAVA_THREAD_POOL);
         perfFocus.endRun();

@@ -1,12 +1,9 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.FlowDirection;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
-import grondag.adversity.library.ConcurrentPerformanceCounter;
 import grondag.adversity.library.ISimpleListItem;
 
 public class LavaConnection implements ISimpleListItem
@@ -28,11 +25,15 @@ public class LavaConnection implements ISimpleListItem
     
     public final int rand = ThreadLocalRandom.current().nextInt();
         
-    protected int lastFlowTick = 0;
+//    protected int lastFlowTick = 0;
     
-    private volatile SortBucket sortBucket;
+    private SortBucket sortBucket;
     
-    private volatile SortBucket lastSortBucket;
+    private SortBucket lastSortBucket;
+    
+    private FlowDirection flowDirection = FlowDirection.NONE;
+    
+    private FlowDirection lastFlowDirection = FlowDirection.NONE;
     
 //    protected boolean isDirty = false;
     
@@ -73,7 +74,7 @@ public class LavaConnection implements ISimpleListItem
         return cellIAlreadyHave == this.firstCell ? this.secondCell : this.firstCell;
     }
     
-    private void setupTick()
+    public void setupTick()
     {
         if(this.firstCell.getFluidUnits() == 0 && this.secondCell.getFluidUnits() == 0)
         {
@@ -127,8 +128,7 @@ public class LavaConnection implements ISimpleListItem
      */
     public void doFirstStep(int newTickIndex)
     {
-        this.lastFlowTick = newTickIndex;
-        this.setupTick();
+//        this.lastFlowTick = newTickIndex;
         this.doStepWork();
         if(this.flowedLastStep)
         {
@@ -298,6 +298,7 @@ public class LavaConnection implements ISimpleListItem
         }
     }
     
+    //TODO: use this to reduce sorting overhead or eliminate it and next method
     public SortBucket getLastSortBucket()
     {
         return this.lastSortBucket;

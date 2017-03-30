@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.SimpleConcurrentList;
-import grondag.adversity.library.SimplePerformanceCounter;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 
 public class LavaConnections extends SimpleConcurrentList<LavaConnection>
@@ -47,18 +46,34 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
         }
     };
     
+    private final CountedJobTask<LavaConnection> setupTickTask = new CountedJobTask<LavaConnection>()
+    {
+        @Override
+        public void doJobTask(LavaConnection operand)
+        {
+            operand.setupTick();
+        }
+    };
+    
 //    public final SimplePerformanceCounter sortRefreshPerf = new SimplePerformanceCounter();
     
     public static enum SortBucket
     {
         A, B, C, D
     }
+    
+    public static enum FlowDirection
+    {
+        ONE_TO_TWO, TWO_TO_ONE, NONE
+    }
 
     // TODO: make configurable?
     private static final int BATCH_SIZE = 4096;
     
-    private final Job sortJob = new CountedJob(this, sortTask, BATCH_SIZE);
+    private final Job sortJob = new CountedJob<LavaConnection>(this, sortTask, BATCH_SIZE);
 
+    public final Job setupTickJob = new CountedJob<LavaConnection>(this, setupTickTask, BATCH_SIZE);
+    
     private boolean isSortCurrent = false;
     
     public LavaConnections(LavaSimulator sim)
