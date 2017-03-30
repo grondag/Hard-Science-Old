@@ -506,6 +506,8 @@ public class LavaSimulator extends SimulationNode
      */
     public void doTick(int newLastTickIndex)
     {
+        long startTime = System.nanoTime();
+        
         if(this.tickIndex < newLastTickIndex)
         {
             this.tickIndex++;
@@ -518,6 +520,10 @@ public class LavaSimulator extends SimulationNode
 
             this.setSaveDirty(true);
         }
+        
+        long duration = System.nanoTime() - startTime;
+        if(duration > 100000000)
+            Adversity.log.info("tick duration =" + duration);
     }
     
     private SimplePerformanceCounter perfOnTick = new SimplePerformanceCounter();
@@ -592,6 +598,7 @@ public class LavaSimulator extends SimulationNode
         while(buffer != null)
         {
             this.cells.loadOrValidateChunk(buffer);
+            this.cellChunkLoader.returnUsedBuffer(buffer);
             buffer = this.cellChunkLoader.poll();
         }
      

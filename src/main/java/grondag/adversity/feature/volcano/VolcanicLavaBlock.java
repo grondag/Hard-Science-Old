@@ -158,7 +158,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                     .text("FluidUnits=" + cell.getFluidUnits() + "  Fluid Levels=" + (cell.getFluidUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
                     .text("RawRetainedLevel=" + cell.getRawRetainedLevel() + "  RawRetained Depth=" + (cell.getRawRetainedLevel() - cell.getFloor()))
                     .text("floor=" + cell.getFloor() + "  ceiling=" + cell.getCeiling() + " isFlowFloor=" + cell.isBottomFlow())
-                    .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidAmountWithPrecision >> 6))
+                    .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidSurfaceUnitsWithPrecision >> 6))
                     .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
                     .text("Connection Count = " + cell.connections.size());
                 

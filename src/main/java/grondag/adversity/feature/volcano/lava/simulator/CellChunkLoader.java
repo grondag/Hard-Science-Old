@@ -111,5 +111,9 @@ public class CellChunkLoader
         return this.chunkBufferQueue.poll();
     }
     
+    public void returnUsedBuffer(ColumnChunkBuffer emptyBuffer)
+    {
+        if(emptyBuffer != null) this.unusedBuffers.offer(emptyBuffer);
+    }
   
 }

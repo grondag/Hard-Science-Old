@@ -54,7 +54,17 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
         @Override
         public void doJobTask(LavaCell operand)
         {
-            if(operand.canCool(sim.getTickIndex())) sim.coolCell(operand);
+            if(operand.canCool(sim.getTickIndex()))
+            {
+                sim.coolCell(operand);
+                if(operand.isDeleted())
+                {
+                    int x = operand.x();
+                    int z = operand.z();
+                    
+                    getOrCreateCellChunk(x, z).setEntryCell(x, z, operand.selectStartingCell());
+                }
+            }
         }    
     };
             

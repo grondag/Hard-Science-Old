@@ -326,7 +326,18 @@ public class CellChunk implements ISimpleListItem
      */
     LavaCell getEntryCell(int x, int z)
     {
-        return this.entryCells[getIndex(x, z)];
+        if(Adversity.DEBUG_MODE && this.isUnloaded)
+            Adversity.log.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
+        
+        if(Adversity.DEBUG_MODE)
+        {
+            LavaCell result = this.entryCells[getIndex(x, z)];
+            if(result != null && result.isDeleted())
+                Adversity.log.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
+            return result;
+        }
+        else
+            return this.entryCells[getIndex(x, z)];
     }
 
     /**
