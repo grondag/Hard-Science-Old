@@ -13,6 +13,8 @@ import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.PerformanceCollector;
+import grondag.adversity.library.PerformanceCounter;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -44,12 +46,6 @@ public class WorldStateBuffer implements IBlockAccess
     /** tracks number of calls to setBlockState since last clearStatistics */
     private int stateSetCount = 0;
     
-    /** tracks number of world state changes since last clearStatistics */
-    private int stateApplicationCount = 0;        
-    
-    /** tracks duration of state application time since last clearStatistics */
-    private long stateApplicationTime = 0; 
-    
     public final World realWorld;
     
     /** All chunks with update data. */
@@ -62,9 +58,12 @@ public class WorldStateBuffer implements IBlockAccess
      */
     private final AdjustmentTracker tracker = new AdjustmentTracker();
     
-    public WorldStateBuffer(World worldIn)
+    public final PerformanceCounter perfStateApplication;
+    
+    public WorldStateBuffer(World worldIn, boolean enablePerfCounting, PerformanceCollector perfCollector)
     {
         this.realWorld = worldIn;
+        this.perfStateApplication = PerformanceCounter.create(enablePerfCounting, "Word State Application", perfCollector);
     }
     //TODO - avoid BlockPos and call Chunk version after getChunkByChunkCoord
     
@@ -187,11 +186,7 @@ public class WorldStateBuffer implements IBlockAccess
     //public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
     public void applyBlockUpdates(int chunkCount, LavaSimulator sim)
     {
-        long startTime;
-        if(Adversity.DEBUG_MODE)
-        {
-            startTime = System.nanoTime();
-        }
+        this.perfStateApplication.startRun();
         
         int currentTick = Simulator.instance.getCurrentSimTick();
         
@@ -268,37 +263,16 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        if(Adversity.DEBUG_MODE)
-        {
-            this.stateApplicationTime += (System.nanoTime() - startTime);
-        }
+        this.perfStateApplication.endRun();
     }
     
     public void clearStatistics()
     {
-        this.stateApplicationTime = 0;
-        this.stateApplicationCount = 0;
         this.stateSetCount = 0;
     }
     
     public int stateSetCount() { return this.stateSetCount; }
-    public long stateApplicationCount() { return this.stateApplicationCount; }
-    public long stateApplicationTime() { return this.stateApplicationTime; }
-    public long timePerStateApplication() { return this.stateApplicationCount == 0 ? 0 : this.stateApplicationTime / this.stateApplicationCount; }
-    public String stats() { return String.format("State application time this sample = %1$.3fs for %2$,d applications @ %3$dns each."
-            , ((double)stateApplicationTime() / 1000000000), stateApplicationCount(),  timePerStateApplication()); }
     
-    public int getStateSetCount()
-    {
-        return this.stateSetCount;
-    }
-    
-    public int getStateApplicationCount()
-    {
-        return this.stateApplicationCount;
-    }
-    
-
     @Override
     public boolean isAirBlock(BlockPos pos)
     {
@@ -792,7 +766,7 @@ public class WorldStateBuffer implements IBlockAccess
                 if(adjustFillIfNeeded(p, sim)) count++;
             }
             
-            if(Adversity.DEBUG_MODE) stateApplicationCount += count;
+            WorldStateBuffer.this.perfStateApplication.addCount(count);
 
         }
         

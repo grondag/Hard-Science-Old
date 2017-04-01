@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
-import java.util.stream.Stream;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
@@ -16,8 +15,10 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 
 
-public class LavaCells extends SimpleConcurrentList<LavaCell>
+public class LavaCells
 {
+    private final SimpleConcurrentList<LavaCell> cellList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cells", LavaSimulator.perfCollectorOffTick);
+    
     private final Long2ObjectOpenHashMap<CellChunk> cellChunks = new Long2ObjectOpenHashMap<CellChunk>();
     
     private final static int CAPACITY_INCREMENT = 0x10000;
@@ -46,6 +47,16 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
         public void doJobTask(LavaCell operand)
         {
             operand.updateRawRetentionIfNeeded();
+        }
+    };
+    
+    private final CountedJobTask<LavaCell> updateSmoothedRetentionTask = new CountedJobTask<LavaCell>()
+    {
+
+        @Override
+        public void doJobTask(LavaCell operand)
+        {
+            operand.updatedSmoothedRetentionIfNeeded();
         }
     };
     
@@ -89,39 +100,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
         }
     };
     
-    // TODO: add pressure propagation task
-    
-    //TODO: make configurable
-    private final static int BATCH_SIZE = 4096;
-    
-    public final Job provideBlockUpdateJob = new CountedJob<LavaCell>(this, provideBlockUpdateTask, BATCH_SIZE);    
-    public final Job updateRetentionJob = new CountedJob<LavaCell>(this, updateRetentionTask, BATCH_SIZE);   
-    public final Job doCoolingJob = new CountedJob<LavaCell>(this, doCoolingTask, BATCH_SIZE);   
-    
-    public final Job updateStuffJob = new CountedJob<LavaCell>(this, updateStuffTask, BATCH_SIZE);
-    public final Job prioritizeConnectionsJob = new CountedJob<LavaCell>(this, prioritizeConnectionsTask, BATCH_SIZE);
-    
-    public LavaCells(LavaSimulator sim)
-    {
-        super();
-        this.sim = sim;
-    }
-    
-    /**
-     * Use operations on all cells.  
-     * May include deleted cells.
-     */
-    @Override
-    public Stream<LavaCell> stream(boolean isParallel)
-    {
-        return super.stream(isParallel);
-    }
-    
-   private static final int MAX_CHUNKS_PER_TICK = 4;
-    
-   private SimpleConcurrentList<CellChunk> processChunks = new SimpleConcurrentList<CellChunk>();
-
-   private final CountedJobTask<CellChunk> doChunkValidationTask = new CountedJobTask<CellChunk>()
+    private final CountedJobTask<CellChunk> doChunkValidationTask = new CountedJobTask<CellChunk>()
     {
         @Override
         public void doJobTask(CellChunk operand)
@@ -137,11 +116,56 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
         }    
     };
 
-    public final Job validateChunksJob = new CountedJob<CellChunk>(processChunks, doChunkValidationTask, 1);
-
+    // TODO: add pressure propagation task
     
-    public void validateOrBufferChunks(Executor executor)
+    //TODO: make configurable
+    private final static int BATCH_SIZE = 4096;
+    
+    public final Job provideBlockUpdateJob;   
+    public final Job updateRetentionJob;   
+    public final Job doCoolingJob;   
+    public final Job validateChunksJob;
+    
+    public final Job updateSmoothedRetentionJob;  
+    public final Job updateStuffJob;
+    public final Job prioritizeConnectionsJob;
+    
+    
+   private static final int MAX_CHUNKS_PER_TICK = 4;
+    
+   // performance counting for removal disabled because list is cleared each passed
+   private SimpleConcurrentList<CellChunk> processChunks = SimpleConcurrentList.create(false, "", null);
+   
+    public LavaCells(LavaSimulator sim)
     {
+        this.sim = sim;
+        
+        // on-tick jobs
+        provideBlockUpdateJob = new CountedJob<LavaCell>(this.cellList, provideBlockUpdateTask, BATCH_SIZE, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Block Update Provision", LavaSimulator.perfCollectorOnTick);    
+        
+        updateRetentionJob = new CountedJob<LavaCell>(this.cellList, updateRetentionTask, BATCH_SIZE, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Raw Retention Update", LavaSimulator.perfCollectorOnTick);   
+        
+        doCoolingJob = new CountedJob<LavaCell>(this.cellList, doCoolingTask, BATCH_SIZE, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cell Cooling", LavaSimulator.perfCollectorOnTick);  
+        
+       validateChunksJob = new CountedJob<CellChunk>(processChunks, doChunkValidationTask, 1, 
+               LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Chunk Validation", LavaSimulator.perfCollectorOnTick); 
+        
+        // off-tick jobs
+        updateSmoothedRetentionJob = new CountedJob<LavaCell>(this.cellList, updateSmoothedRetentionTask, BATCH_SIZE, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Smoothed Retention Update", LavaSimulator.perfCollectorOffTick);   
+        
+        updateStuffJob = new CountedJob<LavaCell>(this.cellList, updateStuffTask, BATCH_SIZE, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Cell Upkeep", LavaSimulator.perfCollectorOffTick);
+        
+        prioritizeConnectionsJob = new CountedJob<LavaCell>(this.cellList, prioritizeConnectionsTask, BATCH_SIZE, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Prioritization", LavaSimulator.perfCollectorOffTick);
+   }
+
+   public void validateOrBufferChunks(Executor executor)
+   {
         this.validateChunksJob.perfCounter.startRun();
         
         int size = this.cellChunks.size();
@@ -316,10 +340,14 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
      * Does not add to locator list.
      * Thread-safe if mode = ListMode.ADD. Disallowed otherwise.
      */
-    @Override
     public void add(LavaCell cell)
     {
-        super.add(cell);
+        this.cellList.add(cell);
+    }
+    
+    public int size()
+    {
+        return this.cellList.size();
     }
     
     /** 
@@ -329,10 +357,9 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
      * cells in column and removed (and if necessary replaced) in locator.
      * NOT Thread-safe and not intended for concurrency.
      */
-    @Override
     public void removeDeletedItems()
     {
-        super.removeDeletedItems();
+        this.cellList.removeDeletedItems();
     }
     
     /**
@@ -361,10 +388,10 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
     public void writeNBT(NBTTagCompound nbt)
     {
       
-        int[] saveData = new int[this.size() * LavaCell.LAVA_CELL_NBT_WIDTH];
+        int[] saveData = new int[this.cellList.size() * LavaCell.LAVA_CELL_NBT_WIDTH];
         int i = 0;
 
-        for(LavaCell cell : this)
+        for(LavaCell cell : this.cellList)
         {
             if(!cell.isDeleted())
             {
@@ -398,7 +425,7 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
             int newCapacity = (count / CAPACITY_INCREMENT + 1) * CAPACITY_INCREMENT;
             if(newCapacity < CAPACITY_INCREMENT / 2) newCapacity += CAPACITY_INCREMENT;
             
-            this.clear();
+            this.cellList.clear();
             
             int i = 0;
             
@@ -436,14 +463,16 @@ public class LavaCells extends SimpleConcurrentList<LavaCell>
             // Raw retention should be mostly current, but compute for any cells
             // that were awaiting computation at last world save.
             this.sim.worldBuffer.isMCWorldAccessAppropriate = true;
-            this.stream(false).forEach(c -> c.updateRawRetentionIfNeeded());
+            this.updateRetentionJob.runOn(LavaSimulator.LAVA_THREAD_POOL);
             this.sim.worldBuffer.isMCWorldAccessAppropriate = false;
             
             // Smoothed retention will need to be computed for all cells, but can be parallel.
-            LavaSimulator.LAVA_THREAD_POOL.submit(() ->
-                this.stream(true).forEach(c -> c.updatedSmoothedRetentionIfNeeded())).join();
+            this.updateSmoothedRetentionJob.runOn(LavaSimulator.LAVA_THREAD_POOL);
             
-            Adversity.log.info("Loaded " + this.size() + " lava cells.");
+            // Make sure other stuff is up to date
+            this.updateStuffJob.runOn(LavaSimulator.LAVA_THREAD_POOL);
+            
+            Adversity.log.info("Loaded " + this.cellList.size() + " lava cells.");
         }
     }
     

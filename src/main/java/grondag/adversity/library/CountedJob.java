@@ -1,7 +1,6 @@
 package grondag.adversity.library;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
@@ -19,28 +18,28 @@ public class CountedJob<V> extends Job
         
     }
     
-    private static class MapBackerWrapper<V> implements CountedJobProviderBacker<V>
-    {
-        private final Map<?, V> map;
-        
-        private MapBackerWrapper(Map<?, V> map)
-        {
-            this.map = map;
-        }
-
-        @Override
-        public Object[] getOperands()
-        {
-            return map.values().toArray();
-        }
-
-        @Override
-        public int size()
-        {
-            return map.size();
-        }
-        
-    }
+//    private static class MapBackerWrapper<V> implements CountedJobProviderBacker<V>
+//    {
+//        private final Map<?, V> map;
+//        
+//        private MapBackerWrapper(Map<?, V> map)
+//        {
+//            this.map = map;
+//        }
+//
+//        @Override
+//        public Object[] getOperands()
+//        {
+//            return map.values().toArray();
+//        }
+//
+//        @Override
+//        public int size()
+//        {
+//            return map.size();
+//        }
+//        
+//    }
     
     public interface CountedJobTask<V>
     {
@@ -52,18 +51,25 @@ public class CountedJob<V> extends Job
     private final int batchSize;
     private final CountedJobTask<V> task;
 
-    public CountedJob(CountedJobProviderBacker<V> backer, CountedJobTask<V> task, int batchSize)
+    public CountedJob(CountedJobProviderBacker<V> backer, CountedJobTask<V> task, int batchSize, boolean enablePerfCounting, String jobTitle, PerformanceCollector perfCollector)
     {
-        super();
+        super(enablePerfCounting, jobTitle, perfCollector);
         this.backer = backer;
         this.task = task;
         this.batchSize = batchSize;
     }
     
-    public CountedJob(Map<?, V> backingMap, CountedJobTask<V> task, int batchSize)
+    public CountedJob(CountedJobProviderBacker<V> backer, CountedJobTask<V> task, int batchSize, PerformanceCounter perfCounter)
     {
-        this(new MapBackerWrapper<V>(backingMap), task, batchSize);
+        super(perfCounter);
+        this.backer = backer;
+        this.task = task;
+        this.batchSize = batchSize;
     }
+//    public CountedJob(Map<?, V> backingMap, CountedJobTask<V> task, int batchSize)
+//    {
+//        this(new MapBackerWrapper<V>(backingMap), task, batchSize);
+//    }
     
     @Override
     public boolean canRun()

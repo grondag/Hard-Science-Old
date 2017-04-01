@@ -11,9 +11,7 @@ import java.util.concurrent.RunnableFuture;
 public abstract class Job
 {
     public abstract boolean canRun();
-    
-    public boolean PERFORMANCE_COUNTING_ENABLED = false;  
-  
+
     /** if false, should just call run instead of executeOn() */
     public abstract boolean worthRunningParallel();
     
@@ -32,12 +30,21 @@ public abstract class Job
     private final ArrayList<RunnableFuture<Void>> futures = new ArrayList<RunnableFuture<Void>>();
     
     // not final so that we can share counters among same job
-    public SimplePerformanceCounter perfCounter = new SimplePerformanceCounter();
+    public final PerformanceCounter perfCounter;
+    
+    public Job(boolean enablePerfCounting, String jobTitle, PerformanceCollector perfCollector)
+    {
+        perfCounter = PerformanceCounter.create(enablePerfCounting, jobTitle, perfCollector);
+    }
+    
+    public Job(PerformanceCounter perfCounter)
+    {
+        this.perfCounter = perfCounter;
+    }
     
     public void runOn(Executor executor)
     {
-
-        if(PERFORMANCE_COUNTING_ENABLED) this.perfCounter.startRun();
+        this.perfCounter.startRun();
         
         if(this.canRun())
         {
@@ -47,10 +54,8 @@ public abstract class Job
                 try 
                 {
                     futures.clear();
-                    if(PERFORMANCE_COUNTING_ENABLED) 
-                        this.perfCounter.addCount(this.executeOn(executor, futures));
-                    else
-                        this.executeOn(executor, futures);
+
+                    this.perfCounter.addCount(this.executeOn(executor, futures));
                     
                     for (RunnableFuture<Void> f : futures)
                     {
@@ -80,13 +85,10 @@ public abstract class Job
             }
             else
             {
-                if(this.PERFORMANCE_COUNTING_ENABLED) 
-                    this.perfCounter.addCount(this.run());
-                else
-                    this.run();
+                this.perfCounter.addCount(this.run());
             }
       
-            if(this.PERFORMANCE_COUNTING_ENABLED) this.perfCounter.endRun();
+            this.perfCounter.endRun();
         }
     
     }

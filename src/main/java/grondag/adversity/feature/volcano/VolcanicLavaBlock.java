@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
-import grondag.adversity.feature.volcano.lava.simulator.LavaConnection;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
@@ -162,12 +161,12 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                     .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
                     .text("Connection Count = " + cell.connections.size());
                 
-                for(LavaConnection conn : cell.connections.values())
-                {
-                    LavaCell other = conn.getOther(cell);
-                    probeInfo.text("Conn ID=" + conn.id + "  x=" + other.x() + "  z=" + other.z() + "  bottomY=" + other.bottomY() + "  fluidUnits=" + other.getFluidUnits() 
-                    + " isActive=" + conn.isActive() + "  isDeleted=" +  conn.isDeleted() + "  sortBucket=" + conn.getSortBucket() + "  cellID=" + other.id);
-                }
+//                for(LavaConnection conn : cell.connections.values())
+//                {
+//                    LavaCell other = conn.getOther(cell);
+//                    probeInfo.text("Conn ID=" + conn.id + "  x=" + other.x() + "  z=" + other.z() + "  bottomY=" + other.bottomY() + "  fluidUnits=" + other.getFluidUnits() 
+//                    + " isActive=" + conn.isActive() + "  isDeleted=" +  conn.isDeleted() + "  sortBucket=" + conn.getSortBucket() + "  cellID=" + other.id);
+//                }
             }
         }
     }

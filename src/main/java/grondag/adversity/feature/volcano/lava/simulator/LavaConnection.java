@@ -1,6 +1,7 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.FlowDirection;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
@@ -33,8 +34,6 @@ public class LavaConnection implements ISimpleListItem
     
     private FlowDirection flowDirection = FlowDirection.NONE;
     
-    private FlowDirection lastFlowDirection = FlowDirection.NONE;
-    
 //    protected boolean isDirty = false;
     
     private boolean flowedLastStep = false;
@@ -46,7 +45,8 @@ public class LavaConnection implements ISimpleListItem
     
 //    public static ConcurrentPerformanceCounter perfFocus = new ConcurrentPerformanceCounter();
     
-//    public static AtomicInteger totalFlow = new AtomicInteger(0);
+    public static final boolean ENABLE_FLOW_TRACKING = true;
+    public static AtomicInteger totalFlow = new AtomicInteger(0);
 
     public LavaConnection(LavaCell firstCell, LavaCell secondCell)
     {
@@ -74,23 +74,69 @@ public class LavaConnection implements ISimpleListItem
         return cellIAlreadyHave == this.firstCell ? this.secondCell : this.firstCell;
     }
     
+    /**
+     * Determine if connection can flow, and if so, in which direction.
+     * If flowed last tick, then direction cannot reverse - must first go to none and then to opposite direction.
+     */
     public void setupTick()
     {
-        if(this.firstCell.getFluidUnits() == 0 && this.secondCell.getFluidUnits() == 0)
+        int surface1 = this.firstCell.fluidSurfaceUnits();
+        int surface2 = this.secondCell.fluidSurfaceUnits();
+        
+        //TODO: make cells not flow if they haven't flowed for several ticks?
+        // and allow cells to continue flowing without much diff if they flowed last tick?
+        // consider retention level?
+        
+        if(surface1 == surface2)
         {
-            this.flowRemainingThisTick = 0;
-            this.maxFlowPerStep = 0;
+            //should not flow
+            if(this.flowDirection != FlowDirection.NONE)
+            {
+                this.flowDirection = FlowDirection.NONE;
+            }
+        } 
+        else if(surface1 > surface2)
+        {
+            this.setupTickInner(this.firstCell, this.secondCell, surface1, surface2, FlowDirection.ONE_TO_TWO, FlowDirection.TWO_TO_ONE);
         }
         else
         {
-            int fluidTop = Math.max(this.firstCell.fluidSurfaceLevel(), this.secondCell.fluidSurfaceLevel());
-            int spaceTop = Math.min(this.firstCell.getCeiling(), this.secondCell.getCeiling());
+            this.setupTickInner(this.secondCell, this.firstCell, surface2, surface1, FlowDirection.TWO_TO_ONE, FlowDirection.ONE_TO_TWO);
+        }
+    }
+    
+    private void setupTickInner(LavaCell cellHigh, LavaCell cellLow, int surfaceHigh, int surfaceLow, FlowDirection highToLow, FlowDirection lowToHigh)
+    {
+        int diff = surfaceHigh - surfaceLow;
+        if(diff < 10 || cellHigh.isEmpty())
+        {
+            //should not flow
+            if(this.flowDirection != FlowDirection.NONE)
+            {
+                this.flowDirection = FlowDirection.NONE;
+            }
+        }
+        else
+        {
+            int flowWindow = (Math.min(surfaceHigh, cellLow.getCeilingUnits()) - Math.max(cellHigh.getFloorUnits(), cellLow.getFloorUnits()));
             
-            this.flowRemainingThisTick = 
-             (Math.min(fluidTop, spaceTop) - Math.max(this.firstCell.getFloor(), this.secondCell.getFloor()))
-                * LavaSimulator.FLUID_UNITS_PER_LEVEL / 4;
-            this.maxFlowPerStep = this.flowRemainingThisTick / 4;
-            if(this.maxFlowPerStep == 0) this.maxFlowPerStep = 1;
+            if(flowWindow < LavaSimulator.FLUID_UNITS_PER_LEVEL || this.flowDirection == lowToHigh)
+            {
+                //should not flow
+                if(this.flowDirection != FlowDirection.NONE)
+                {
+                    this.flowDirection = FlowDirection.NONE;
+                }
+            }
+            else 
+            {
+                if(this.flowDirection != highToLow)
+                {
+                    this.flowDirection = highToLow;
+                }
+                this.flowRemainingThisTick =  flowWindow / 4;
+                this.maxFlowPerStep = flowWindow / 16;
+            }
         }
     }
     
@@ -183,46 +229,49 @@ public class LavaConnection implements ISimpleListItem
                         int flow;
                         
                         // very high-frequency loop here - so repeating some code to reduce comparisons for performance
-                        if(surface1 > surface2)
+                        if(this.flowDirection == FlowDirection.ONE_TO_TWO)
                         {
-                            flow = this.getEqualizingFlow(this.firstCell, surface1, surface2);
-                            if(flow <= 1)
+                            if(surface1 > surface2)
                             {
-                                if(this.flowedLastStep) this.flowedLastStep = false;
-                            }
-                            else 
-                            {
-//                                totalFlow.addAndGet(flow);
-                                
-                                if(!this.flowedLastStep) this.flowedLastStep = true;
-                                this.flowRemainingThisTick -= flow;
-                                
-                                this.firstCell.changeLevel(-flow);
-                                this.secondCell.changeLevel(flow);
+                                flow = this.getEqualizingFlow(this.firstCell, surface1, surface2);
+                                if(flow <= 1)
+                                {
+                                    if(this.flowedLastStep) this.flowedLastStep = false;
+                                }
+                                else 
+                                {
+                                    if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
+                                    
+                                    if(!this.flowedLastStep) this.flowedLastStep = true;
+                                    this.flowRemainingThisTick -= flow;
+                                    
+                                    this.firstCell.changeLevel(-flow);
+                                    this.secondCell.changeLevel(flow);
+                                }
                             }
                         }
-                        else // surface1 < surface2
+                        else // this.flowDirection == FlowDirection.TWO_TO_ONE
                         {
-                            flow = this.getEqualizingFlow(this.secondCell, surface2, surface1);
-                            if(flow <= 1)
+                            if(surface1 < surface2)
                             {
-                                if(this.flowedLastStep) this.flowedLastStep = false;
+                                flow = this.getEqualizingFlow(this.secondCell, surface2, surface1);
+                                if(flow <= 1)
+                                {
+                                    if(this.flowedLastStep) this.flowedLastStep = false;
+                                }
+                                else 
+                                {
+                                    if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
+                                    
+                                    if(!this.flowedLastStep) this.flowedLastStep = true;
+                                    this.flowRemainingThisTick -= flow;
+                                    
+                                    // flip sign vs above because going from 2 to 1
+                                    this.firstCell.changeLevel(flow);
+                                    this.secondCell.changeLevel(-flow);
+                                }
                             }
-                            else 
-                            {
-//                                totalFlow.addAndGet(flow);
-                                
-                                if(!this.flowedLastStep) this.flowedLastStep = true;
-                                this.flowRemainingThisTick -= flow;
-                                
-                                // flip sign vs above because going from 2 to 1
-                                this.firstCell.changeLevel(flow);
-                                this.secondCell.changeLevel(-flow);
-                            }
-
                         }
-
-                        
                     }
                     
                     this.secondCell.unlock();
@@ -251,8 +300,12 @@ public class LavaConnection implements ISimpleListItem
     @Override
     public boolean isDeleted()
     {
-        // cells that can no longer connect should be deleted
-        return this.isDeleted || !this.firstCell.canConnectWith(this.secondCell);
+        return this.isDeleted;
+    }
+    
+    public boolean isValid()
+    {
+        return !this.isDeleted && this.firstCell.canConnectWith(this.secondCell);
     }
     
     /** true if either cell has fluid */
@@ -260,14 +313,6 @@ public class LavaConnection implements ISimpleListItem
     {
         return this.firstCell.getFluidUnits() > 0 || this.secondCell.getFluidUnits() > 0;
     }
-    
-    @Override
-    public void onDeletion()
-    {
-        this.firstCell.removeConnection(this);
-        this.secondCell.removeConnection(this);
-    }
-    
     
     /** 
      * Absolute difference in base elevation, or if base is same, in retained level.
@@ -280,6 +325,11 @@ public class LavaConnection implements ISimpleListItem
         return Math.abs(this.firstCell.getFloor() - this.secondCell.getFloor());
     }
 
+    public FlowDirection flowDirection()
+    {
+        return this.flowDirection;
+    }
+    
     /**
      * Should be null if non-active
      */

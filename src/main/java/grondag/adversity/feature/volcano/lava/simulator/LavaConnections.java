@@ -8,9 +8,11 @@ import grondag.adversity.library.Job;
 import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 
-public class LavaConnections extends SimpleConcurrentList<LavaConnection>
+public class LavaConnections
 {
     private final LavaSimulator sim;
+    
+    private final SimpleConcurrentList<LavaConnection> connectionList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Connections", LavaSimulator.perfCollectorOffTick);
     
     @SuppressWarnings("unchecked")
     private final SimpleConcurrentList<LavaConnection>[] sort = new SimpleConcurrentList[4];
@@ -70,9 +72,11 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
     // TODO: make configurable?
     private static final int BATCH_SIZE = 4096;
     
-    private final Job sortJob = new CountedJob<LavaConnection>(this, sortTask, BATCH_SIZE);
+    private final Job sortJob = new CountedJob<LavaConnection>(this.connectionList, sortTask, BATCH_SIZE,
+            LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Sorting", LavaSimulator.perfCollectorOffTick);    
 
-    public final Job setupTickJob = new CountedJob<LavaConnection>(this, setupTickTask, BATCH_SIZE);
+    public final Job setupTickJob = new CountedJob<LavaConnection>(this.connectionList, setupTickTask, BATCH_SIZE,
+            LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Sorting", LavaSimulator.perfCollectorOffTick);    
     
     private boolean isSortCurrent = false;
     
@@ -80,41 +84,38 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
     {
         super();
         this.sim = sim;
-        this.sort[SortBucket.A.ordinal()] = new SimpleConcurrentList<LavaConnection>();
-        this.sort[SortBucket.B.ordinal()] = new SimpleConcurrentList<LavaConnection>();
-        this.sort[SortBucket.C.ordinal()] = new SimpleConcurrentList<LavaConnection>();
-        this.sort[SortBucket.D.ordinal()] = new SimpleConcurrentList<LavaConnection>();
+        this.sort[SortBucket.A.ordinal()] = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Sort Bucket", LavaSimulator.perfCollectorOffTick);
+        this.sort[SortBucket.B.ordinal()] = SimpleConcurrentList.create(this.sort[SortBucket.A.ordinal()].removalPerfCounter());
+        this.sort[SortBucket.C.ordinal()] = SimpleConcurrentList.create(this.sort[SortBucket.A.ordinal()].removalPerfCounter());
+        this.sort[SortBucket.D.ordinal()] = SimpleConcurrentList.create(this.sort[SortBucket.A.ordinal()].removalPerfCounter());
         
-        this.firstStepJob[SortBucket.A.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.A.ordinal()] , firstStepTask, BATCH_SIZE);  
-        this.firstStepJob[SortBucket.B.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.B.ordinal()] , firstStepTask, BATCH_SIZE); 
-        this.firstStepJob[SortBucket.C.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.C.ordinal()] , firstStepTask, BATCH_SIZE); 
-        this.firstStepJob[SortBucket.D.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.D.ordinal()] , firstStepTask, BATCH_SIZE); 
+        this.firstStepJob[SortBucket.A.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.A.ordinal()] , firstStepTask, BATCH_SIZE,
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "First Flow Step", LavaSimulator.perfCollectorOffTick);  
+        this.firstStepJob[SortBucket.B.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.B.ordinal()] , firstStepTask, BATCH_SIZE,
+                this.firstStepJob[SortBucket.A.ordinal()].perfCounter); 
+        this.firstStepJob[SortBucket.C.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.C.ordinal()] , firstStepTask, BATCH_SIZE,
+                this.firstStepJob[SortBucket.A.ordinal()].perfCounter); 
+        this.firstStepJob[SortBucket.D.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.D.ordinal()] , firstStepTask, BATCH_SIZE,
+                this.firstStepJob[SortBucket.A.ordinal()].perfCounter); 
         
-        // share same perf counter
-        this.firstStepJob[SortBucket.B.ordinal()].perfCounter = this.firstStepJob[SortBucket.A.ordinal()].perfCounter;
-        this.firstStepJob[SortBucket.C.ordinal()].perfCounter = this.firstStepJob[SortBucket.A.ordinal()].perfCounter;
-        this.firstStepJob[SortBucket.D.ordinal()].perfCounter = this.firstStepJob[SortBucket.A.ordinal()].perfCounter;
-        
-        this.stepJob[SortBucket.A.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.A.ordinal()] , stepTask, BATCH_SIZE);  
-        this.stepJob[SortBucket.B.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.B.ordinal()] , stepTask, BATCH_SIZE); 
-        this.stepJob[SortBucket.C.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.C.ordinal()] , stepTask, BATCH_SIZE); 
-        this.stepJob[SortBucket.D.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.D.ordinal()] , stepTask, BATCH_SIZE); 
-        
-        // share same perf counter
-        this.stepJob[SortBucket.B.ordinal()].perfCounter = this.stepJob[SortBucket.A.ordinal()].perfCounter;
-        this.stepJob[SortBucket.C.ordinal()].perfCounter = this.stepJob[SortBucket.A.ordinal()].perfCounter;
-        this.stepJob[SortBucket.D.ordinal()].perfCounter = this.stepJob[SortBucket.A.ordinal()].perfCounter;
+        this.stepJob[SortBucket.A.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.A.ordinal()] , stepTask, BATCH_SIZE,
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Flow Step", LavaSimulator.perfCollectorOffTick);  
+        this.stepJob[SortBucket.B.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.B.ordinal()] , stepTask, BATCH_SIZE,
+                this.stepJob[SortBucket.A.ordinal()].perfCounter); 
+        this.stepJob[SortBucket.C.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.C.ordinal()] , stepTask, BATCH_SIZE,
+                this.stepJob[SortBucket.A.ordinal()].perfCounter); 
+        this.stepJob[SortBucket.D.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.D.ordinal()] , stepTask, BATCH_SIZE,
+                this.stepJob[SortBucket.A.ordinal()].perfCounter); 
         
         this.isSortCurrent = false;
         
     }
     
-    @Override
     public void clear()
     {
         synchronized(this)
         {
-            super.clear();
+            this.connectionList.clear();
             this.sort[SortBucket.A.ordinal()].clear();
             this.sort[SortBucket.B.ordinal()].clear();
             this.sort[SortBucket.C.ordinal()].clear();
@@ -164,8 +165,18 @@ public class LavaConnections extends SimpleConcurrentList<LavaConnection>
      */
     public void addConnectionToArray(LavaConnection connection)
     {
-        this.add(connection);
+        this.connectionList.add(connection);
         this.isSortCurrent = false;
+    }
+    
+    public void removeDeletedItems()
+    {
+        this.connectionList.removeDeletedItems();
+    }
+    
+    public int size()
+    {
+        return this.connectionList.size();
     }
     
     public void invalidateSortBuckets()

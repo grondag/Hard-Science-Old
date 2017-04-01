@@ -3,7 +3,6 @@ package grondag.adversity.library;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -37,23 +36,27 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     private volatile int capacity;
     private AtomicInteger size = new AtomicInteger(0);
     private volatile boolean isMaintaining = false;
+    private int nextDeletionStartIndex = 0;
     
-    private AtomicLong maintenanceTime = new AtomicLong(0);
+    private static final int DELETION_BATCH_SIZE = 1024;
     
-    public SimpleConcurrentList()
+    public static <V extends ISimpleListItem> SimpleConcurrentList<V> create(boolean enablePerformanceCounting, String listName, PerformanceCollector perfCollector)
+    {
+        return enablePerformanceCounting ? new Instrumented<V>(listName, perfCollector) : new SimpleConcurrentList<V>();
+    }
+    
+    public static <V extends ISimpleListItem> SimpleConcurrentList<V> create(PerformanceCounter perfCounter)
+    {
+        return perfCounter == null ? new SimpleConcurrentList<V>() : new Instrumented<V>(perfCounter);
+    }
+    
+    private SimpleConcurrentList()
     {
         this.capacity = 16;
         this.items = new Object[capacity];
     }
    
-    public void clearStats()
-    {
-        this.maintenanceTime.set(0);
-    }
-    
-    public long maintenanceTime() { return this.maintenanceTime.get(); }
-    public String stats() { return String.format("maintanence time this sample = %1$.3fs."
-            , ((double)maintenanceTime() / 1000000000)); }
+    public PerformanceCounter removalPerfCounter() { return null; }
     
     /**
      * @return Current number of items in the list.
@@ -61,6 +64,11 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     public int size()
     {
         return this.size.get();
+    }
+    
+    public boolean isEmpty()
+    {
+        return this.size.get() == 0;
     }
     
     /**
@@ -124,36 +132,67 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     }
     
     /**
-     * Removes deleted items in the list and compacts storage.
+     * Removes *some* deleted items in the list and compacts storage.
+     * Call periodically to keep list clean.
      * ORDER OF ITEMS MAY CHANGE.
      * NOT THREAD SAFE
      * Caller must ensure no other methods are called while this method is ongoing.
      */
     public void removeDeletedItems()
     {
+        if(this.size.get() == 0) return;
+        
         // note - will not prevent add or iteration
         // so does not, by itself, ensure thread safety
         synchronized(this)
         {
             this.isMaintaining = true;
-
-            int i = 0;
-            while(i < this.size.get())
+            
+            int newSize = this.size.get();
+            int start;
+            int end;
+            
+            if(newSize > DELETION_BATCH_SIZE)
             {
-                @SuppressWarnings("unchecked")
-                T item =  (T) this.items[i];
-
-                if(item.isDeleted())
+                start = this.nextDeletionStartIndex;
+                if(start >= newSize) start = 0;
+                
+                end = start + DELETION_BATCH_SIZE;
+                if(end >= newSize)
                 {
-                    item.onDeletion();
-                    items[i] = items[this.size.decrementAndGet()];
-                    items[this.size.get()] = null;
+                    end = newSize;
+                    this.nextDeletionStartIndex = 0;
                 }
                 else
                 {
-                    i++;
+                    this.nextDeletionStartIndex = end;
                 }
             }
+            else
+            {
+                start = 0;
+                end = newSize;
+            }
+
+            for(int i = start; i < end; i++)
+            {
+                if(i >= newSize) break;
+
+                @SuppressWarnings("unchecked")
+                T item =  (T) this.items[i];
+                
+                //TODO: remove
+                if(item == null)
+                    Adversity.log.warn("Derp!");
+
+                if(item.isDeleted())
+                {
+                    items[i] = items[--newSize];
+                    items[newSize] = null;
+                }
+            }
+            
+            this.size.set(newSize);
             
             this.isMaintaining = false;
 
@@ -198,4 +237,32 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
         return this.stream(false).iterator();
     }
 
+    
+    private static class Instrumented<T extends ISimpleListItem> extends SimpleConcurrentList<T>
+    {
+        private final PerformanceCounter removalPerfCounter;
+        
+        private Instrumented(String listName, PerformanceCollector perfCollector)
+        {
+            this.removalPerfCounter = PerformanceCounter.create(true, listName + " list item removal", perfCollector);
+        }
+        
+        private Instrumented(PerformanceCounter perfCounter)
+        {
+            this.removalPerfCounter = perfCounter;
+        }
+        
+        @Override
+        public PerformanceCounter removalPerfCounter() { return this.removalPerfCounter; }
+        
+        @Override 
+        public void removeDeletedItems()
+        {
+            int startCount = this.size();
+            this.removalPerfCounter.startRun();
+            super.removeDeletedItems();
+            this.removalPerfCounter.endRun();
+            this.removalPerfCounter.addCount(startCount - this.size());
+        }
+    }
 }

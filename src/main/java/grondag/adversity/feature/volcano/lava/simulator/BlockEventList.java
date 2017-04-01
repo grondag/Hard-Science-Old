@@ -13,9 +13,10 @@ import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
-public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEvent>
+public class BlockEventList
 {
-    
+    private final SimpleConcurrentList<BlockEventList.BlockEvent> eventList;
+
     private final int maxRetries;
     private final String nbtTagName;
     private final BlockEventHandler eventHandler;
@@ -29,11 +30,15 @@ public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEve
         }
     };
     
-    private final Job processJob = new CountedJob<BlockEventList.BlockEvent>(this, processTask, 64);
+    private final Job processJob;
     
     public BlockEventList(int maxRetries, String nbtTagName, BlockEventHandler eventHandler)
     {
-        super();
+        eventList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Block Events", LavaSimulator.perfCollectorOffTick);
+        
+        processJob = new CountedJob<BlockEventList.BlockEvent>(this.eventList, processTask, 64, 
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Event Processing", LavaSimulator.perfCollectorOffTick);
+        
         this.maxRetries = maxRetries;
         this.nbtTagName = nbtTagName;
         this.eventHandler = eventHandler;
@@ -41,7 +46,7 @@ public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEve
 
     public void addEvent(int x, int y, int z, int amount)
     {
-        this.add(new BlockEvent(x, y, z, amount));
+        this.eventList.add(new BlockEvent(x, y, z, amount));
         
     }
     
@@ -60,17 +65,17 @@ public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEve
         synchronized(this)
         {
             processJob.runOn(executor);
-            this.removeDeletedItems();
+            this.eventList.removeDeletedItems();
         }
     }
     
     public void writeNBT(NBTTagCompound nbt)
     {
       
-        int[] saveData = new int[this.size() * BlockEvent.NBT_WIDTH];
+        int[] saveData = new int[this.eventList.size() * BlockEvent.NBT_WIDTH];
         int i = 0;
 
-        for(BlockEvent event : this)
+        for(BlockEvent event : this.eventList)
         {
             if(!event.isDeleted())
             {
@@ -88,7 +93,7 @@ public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEve
     
     public void readNBT(NBTTagCompound nbt)
     {
-        this.clear();
+        this.eventList.clear();
         
         int[] saveData = nbt.getIntArray(this.nbtTagName);
         
@@ -99,16 +104,16 @@ public class BlockEventList extends SimpleConcurrentList<BlockEventList.BlockEve
         }
         else
         {
-            this.clear();
+            this.eventList.clear();
             int i = 0;
             
             while(i < saveData.length)
             {
-                this.add(new BlockEvent(saveData, i));
+                this.eventList.add(new BlockEvent(saveData, i));
                 i += BlockEvent.NBT_WIDTH;
             }
           
-            Adversity.log.info("Loaded " + this.size() + " block events with NBT Tag " + nbtTagName);
+            Adversity.log.info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
         }
     }
     

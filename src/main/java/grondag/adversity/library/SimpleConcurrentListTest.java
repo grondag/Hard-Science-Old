@@ -34,7 +34,7 @@ public class SimpleConcurrentListTest
     @Test
     public void test()
     {
-        SimpleConcurrentList<TestItem> list = new SimpleConcurrentList<TestItem>();
+        SimpleConcurrentList<TestItem> list = SimpleConcurrentList.create(false, "", null);
         ArrayList<Integer> inputs = new ArrayList<Integer>();
         
         for(int i = 0; i < 10000000; i++)

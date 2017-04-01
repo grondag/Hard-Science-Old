@@ -11,15 +11,14 @@ import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.SimpleUnorderedArrayList;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import scala.actors.threadpool.Arrays;
 
 public class LavaCell implements ISimpleListItem
 {
@@ -58,14 +57,8 @@ public class LavaCell implements ISimpleListItem
     private volatile boolean isDeleted;
     
     /** holds all connections with other cells */
-    public final Int2ObjectOpenHashMap<LavaConnection> connections = new Int2ObjectOpenHashMap<LavaConnection>();
-    
-    /** 
-     * Contents of connections as an array - for fast iteration, which happens very frequently.
-     * May contain null elements, so use connections.size() to determine how deep to iterate.
-     */
-    private LavaConnection[] fastConnections = new LavaConnection[0];
-    
+    public final SimpleUnorderedArrayList<LavaConnection> connections = new SimpleUnorderedArrayList<LavaConnection>();
+   
     /** see {@link #getFloor()} */
     private int floor;
     
@@ -284,10 +277,10 @@ public class LavaCell implements ISimpleListItem
     @Override
     public boolean isDeleted()
     {
-        if(Adversity.DEBUG_MODE && !this.isDeleted && this.locator.cellChunk.isUnloaded())
-        {
-             Adversity.log.warn("Orphaned lava cell - cell not deleted but chunk is unloaded.");
-        }
+//        if(Adversity.DEBUG_MODE && !this.isDeleted && this.locator.cellChunk.isUnloaded())
+//        {
+//             Adversity.log.warn("Orphaned lava cell - cell not deleted but chunk is unloaded.");
+//        }
         return this.isDeleted;
     }
     
@@ -320,8 +313,9 @@ public class LavaCell implements ISimpleListItem
         
         for(int i = this.connections.size() - 1; i >= 0; i--)
         {
-            this.fastConnections[i].setDeleted();
+            this.connections.get(i).setDeleted();
         }
+        this.connections.clear();
         
         this.updateActiveStatus();
     }
@@ -700,6 +694,10 @@ public class LavaCell implements ISimpleListItem
         return this.floor;
     }
     
+    public int getFloorUnits()
+    {
+        return this.floorUnits;
+    }
     /**
      * Locates neighboring lava cell that shares a floor surface with this cell.
      * Cells must connect to share a floor surface.
@@ -845,6 +843,11 @@ public class LavaCell implements ISimpleListItem
     public int getCeiling()
     {
         return this.ceiling;
+    }
+    
+    public int getCeilingUnits()
+    {
+        return this.ceiling * LavaSimulator.FLUID_UNITS_PER_LEVEL;
     }
     
     /** Y of last (top) block that could contain lava */
@@ -1359,26 +1362,31 @@ public class LavaCell implements ISimpleListItem
     
     public void addConnection(LavaConnection connection)
     {
-        this.connections.put(connection.getOther(this).id, connection);
-        Arrays.fill(fastConnections, null);
-        this.fastConnections = this.connections.values().toArray(fastConnections);
+        synchronized(this.connections)
+        {
+            this.connections.addIfNotPresent(connection);
+        }
     }
     
     public void removeConnection(LavaConnection connection)
     {
-        this.connections.remove(connection.getOther(this).id);
-        Arrays.fill(fastConnections, null);
-        this.fastConnections = this.connections.values().toArray(fastConnections);
+        synchronized(this.connections)
+        {
+            this.connections.removeIfPresent(connection);
+        }
     }
     
     public boolean isConnectedTo(LavaCell otherCell)
     {
-        return this.connections.containsKey(otherCell.id);
+        for(int i = this.connections.size() -1; i >= 0; i--)
+        {
+            if(this.connections.get(i).getOther(this) == otherCell) return true;
+        }
+        return false;
     }
     
     /** 
-     * Forms new connections if necessary.
-     * Does NOT remove invalid connections. Invalid connections are expected to be removed during connection processing.
+     * Forms new connections and removes invalid connections if necessary.
      */
     public void updateConnectionsIfNeeded(LavaSimulator sim)
     {
@@ -1386,6 +1394,17 @@ public class LavaCell implements ISimpleListItem
         
         if(this.isConnectionUpdateNeeded)
         {
+            for(Object o : this.connections.toArray())
+            {
+                LavaConnection c = (LavaConnection)o;
+                if(!c.isValid())
+                {
+                    c.setDeleted();
+                    this.removeConnection(c);
+                    c.getOther(this).removeConnection(c);
+                }
+            }
+            
             int x = this.x();
             int z = this.z();
             LavaCells cells = sim.cells;
@@ -1454,27 +1473,29 @@ public class LavaCell implements ISimpleListItem
         
         for(int i = this.connections.size() - 1; i >= 0; i--)
         {
-            LavaConnection connection = this.fastConnections[i];
+            LavaConnection connection = this.connections.get(i);
             
-            if(connection.isActive())
+            switch(connection.flowDirection())
             {
-                LavaCell other = connection.getOther(this);
-                if(other.getFloor() < this.getFloor())
+            case ONE_TO_TWO:
+                if(connection.firstCell == this)
                 {
-                    // this cell is responsible for sorting active connections that have a lower floor than it
                     sort.add(connection);
                 }
-                else if(other.getFloor() == this.getFloor())
+                break;
+                
+            case TWO_TO_ONE:
+                if(connection.secondCell == this)
                 {
-                    // if floors are the same, the cell that is "first" handles sorting
-                    if(connection.firstCell == this) sort.add(connection);
+                    sort.add(connection);
                 }
-            }
-            else
-            {
+                break;
+                
+            case NONE:
+            default:
                 connection.setSortBucket(connections, null);
+                break;
             }
-        
         }
         
         if(sort.size() > 0)
@@ -1561,7 +1582,7 @@ public class LavaCell implements ISimpleListItem
         int hotCount = 0;
         for(int i = this.connections.size() - 1; i >= 0; i--)
         {
-            if(fastConnections[i].getOther(this).getFluidUnits() > 0) hotCount++;
+            if(this.connections.get(i).getOther(this).getFluidUnits() > 0) hotCount++;
             if(hotCount >= 3) return false;
         }
         
@@ -1738,7 +1759,7 @@ public class LavaCell implements ISimpleListItem
     {
         if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE)
         {
-            this.updatedSmoothedRetention();
+            this.updateSmoothedRetention();
         }
         return this.smoothedRetainedUnits;
     }
@@ -1754,15 +1775,15 @@ public class LavaCell implements ISimpleListItem
     {
         if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE)
         {
-            this.updatedSmoothedRetention();
+            this.updateSmoothedRetention();
         }
     }
 
     /** see {@link #smoothedRetainedUnits} */
-    private void updatedSmoothedRetention()
+    private void updateSmoothedRetention()
     {
         //TODO: retention smoothing, this is a stub
-        this.smoothedRetainedUnits = this.rawRetainedLevel * LavaSimulator.FLUID_UNITS_PER_LEVEL;
+        this.smoothedRetainedUnits = this.getRawRetainedLevel() * LavaSimulator.FLUID_UNITS_PER_LEVEL;
     }
     
     public void setRefreshRange(int yLow, int yHigh)
@@ -1974,17 +1995,18 @@ public class LavaCell implements ISimpleListItem
         
         this.fluidSurfaceUnits += amount;
 
-        if(this.isEmpty())
-        {
+//        if(this.isEmpty())
+//        {
             //force recalc of retained level when a cell becomes empty
-            this.invalidateRawRetention();
+            //update: why? was causing retention updates during connection processing
+//            this.invalidateRawRetention();
 
             if(this.fluidSurfaceUnits < this.floorUnits)
             {
                 Adversity.log.info(String.format("Fluid surface units below floor units.  Surface=%1$d Floor=%2$d cellID=%3$d", this.fluidSurfaceUnits, this.floorUnits, this.id));
                 this.fluidSurfaceUnits = this.floorUnits;
             }
-        }
+//        }
         
 //        this.updateActiveStatus();
         

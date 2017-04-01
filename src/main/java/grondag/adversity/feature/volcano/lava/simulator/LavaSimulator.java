@@ -12,8 +12,13 @@ import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEventHandler;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
+import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.SimplePerformanceCounter;
+import grondag.adversity.library.PerformanceCollector;
+import grondag.adversity.library.PerformanceCounter;
+import grondag.adversity.library.SimpleConcurrentList;
+import grondag.adversity.library.CountedJob.CountedJobTask;
+import grondag.adversity.library.Job;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -33,6 +38,13 @@ public class LavaSimulator extends SimulationNode
 {
     public static final ForkJoinPool LAVA_THREAD_POOL = new ForkJoinPool();
     
+    public static final boolean ENABLE_PERFORMANCE_COUNTING = true;
+    public static final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
+    public static final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");
+    public static final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Lava Simulator Off tick");
+    private PerformanceCounter perfOnTick = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "On-Tick", perfCollectorAllTick);
+    private PerformanceCounter perfOffTick = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "Off-Tick", perfCollectorAllTick);
+    
     public static final byte LEVELS_PER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT;
     public static final byte LEVELS_PER_QUARTER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 4;
     public static final byte LEVELS_PER_HALF_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 2;
@@ -48,10 +60,52 @@ public class LavaSimulator extends SimulationNode
     public final LavaTerrainHelper terrainHelper;
     
     /** Basalt blocks that are awaiting cooling */
-    private final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
-    private final SimplePerformanceCounter basaltPerf = new SimplePerformanceCounter();
+//    private final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
+    private final SimpleConcurrentList<AgedBlockPos> basaltBlocks = SimpleConcurrentList.create(ENABLE_PERFORMANCE_COUNTING, "Basalt Blocks", perfCollectorOnTick);
+    private int lastEligibleBasaltCoolingTick;
+    
     private final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
     private static final int BASALT_BLOCKS_NBT_WIDTH = 4;
+    
+    private final CountedJobTask<AgedBlockPos> basaltCoolingTask =  new CountedJobTask<AgedBlockPos>() 
+    {
+        @Override
+        public void doJobTask(AgedBlockPos operand)
+        {
+            if(operand.getTick() <= lastEligibleBasaltCoolingTick)
+            {
+                IBlockState state = worldBuffer.getBlockState(operand.pos);
+                Block block = state.getBlock();
+                if(block instanceof CoolingBlock)
+                {
+                    switch(((CoolingBlock)block).tryCooling(worldBuffer, operand.pos, state))
+                    {
+                        case PARTIAL:
+                            // will be ready to cool again after delay
+                            operand.setTick(tickIndex);
+                            break;
+                            
+                        case UNREADY:
+                            // do nothing and try again later
+                            break;
+                            
+                        case COMPLETE:
+                        case INVALID:
+                        default:
+                            //notify to remove from collection
+                            operand.setDeleted();
+                    }
+                }
+                else
+                {
+                    operand.setDeleted();;
+                }
+            };
+        }
+    };
+    
+    private final Job basaltCoolingJob = new CountedJob<AgedBlockPos>(this.basaltBlocks, this.basaltCoolingTask, 1024, 
+            ENABLE_PERFORMANCE_COUNTING, "Basalt Cooling", perfCollectorOnTick);    
     
     /** used to schedule intermittent cooling jobs */
     private int nextCoolTick = 0;
@@ -158,7 +212,7 @@ public class LavaSimulator extends SimulationNode
     public LavaSimulator(World world)
     {
         super(NodeRoots.LAVA_SIMULATOR.ordinal());
-        this.worldBuffer = new WorldStateBuffer(world);
+        this.worldBuffer = new WorldStateBuffer(world, ENABLE_PERFORMANCE_COUNTING, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
     }
  
@@ -274,45 +328,11 @@ public class LavaSimulator extends SimulationNode
     {
         if(this.basaltBlocks.isEmpty()) return;
         
-        this.basaltPerf.startRun();
-        this.basaltPerf.addCount(this.basaltBlocks.size());
-        
-        final int lastEligibleTick = this.tickIndex - BLOCK_COOLING_DELAY_TICKS;
+        this.lastEligibleBasaltCoolingTick = this.tickIndex - BLOCK_COOLING_DELAY_TICKS;
 
-        LAVA_THREAD_POOL.submit( () -> this.basaltBlocks.parallelStream().forEach(apos ->
-        {
-            if(apos.getTick() <= lastEligibleTick)
-            {
-                IBlockState state = this.worldBuffer.getBlockState(apos.pos);
-                Block block = state.getBlock();
-                if(block instanceof CoolingBlock)
-                {
-                    switch(((CoolingBlock)block).tryCooling(this.worldBuffer, apos.pos, state))
-                    {
-                        case PARTIAL:
-                            // will be ready to cool again after delay
-                            apos.setTick(this.tickIndex);
-                            break;
-                            
-                        case UNREADY:
-                            // do nothing and try again later
-                            break;
-                            
-                        case COMPLETE:
-                        case INVALID:
-                        default:
-                            //notify to remove from collection
-                            basaltBlocks.remove(apos);
-                    }
-                }
-                else
-                {
-                    basaltBlocks.remove(apos);
-                }
-            };
-        })).join();  
-        
-        this.basaltPerf.endRun();
+        this.basaltCoolingJob.runOn(LAVA_THREAD_POOL);
+        this.basaltBlocks.removeDeletedItems();
+      
     }
 
     
@@ -480,7 +500,6 @@ public class LavaSimulator extends SimulationNode
     public void readLavaNBT(NBTTagCompound nbt)
     {
         cells.readNBT(this, nbt);
-        LAVA_THREAD_POOL.submit(() -> cells.stream(true).forEach(c -> c.updateConnectionsIfNeeded(this))).join();
         this.lavaBlockPlacementEvents.readNBT(nbt);
         this.lavaAddEvents.readNBT(nbt);
     }
@@ -526,10 +545,6 @@ public class LavaSimulator extends SimulationNode
             Adversity.log.info("tick duration =" + duration);
     }
     
-    private SimplePerformanceCounter perfOnTick = new SimplePerformanceCounter();
-    
-    private SimplePerformanceCounter perfFocus = new SimplePerformanceCounter();
-    
     /**
      * Tasks that should occur during the server tick.
      * All tasks the require direct MC world access go here.
@@ -537,7 +552,7 @@ public class LavaSimulator extends SimulationNode
      */
     public void doOnTick()
     {
-        perfOnTick.startRun();
+        if(ENABLE_PERFORMANCE_COUNTING) perfOnTick.startRun();
         
         // Enable detection of improper world access 
         this.worldBuffer.isMCWorldAccessAppropriate = true;
@@ -558,10 +573,7 @@ public class LavaSimulator extends SimulationNode
         // For chunks that require full validation, buffer entire chunk state.
         // Actual load/validation for full chunks can be performed post=tick.
         this.cells.validateOrBufferChunks(LAVA_THREAD_POOL);
-         
-        this.cells.updateRetentionJob.runOn(LAVA_THREAD_POOL);
-   
-        
+              
         // do these on alternate ticks to help avoid ticks that are too long
         if(this.tickIndex >= this.nextCoolTick)
         {
@@ -577,57 +589,38 @@ public class LavaSimulator extends SimulationNode
                 this.doBasaltCooling();
             }
         }
+        
+        // needs to happen after lava cooling because cooled cell have new floors
+        this.cells.updateRetentionJob.runOn(LAVA_THREAD_POOL);
+
         // After this could be post-tick
         this.worldBuffer.isMCWorldAccessAppropriate = false;
         
-        perfOnTick.endRun();
-        perfOnTick.addCount(1);
+        if(ENABLE_PERFORMANCE_COUNTING)
+        {
+            perfOnTick.endRun();
+            perfOnTick.addCount(1);
+        }
     }
     
-    private SimplePerformanceCounter perfOffTick = new SimplePerformanceCounter();
-    
-//    private int[] flowTotals = new int[8];
+    private int[] flowTotals = new int[8];
+    private int[] flowCounts = new int[8];
     
     public void doOffTick()
     {
-        perfOffTick.startRun();
-        
-        // Add or update cells from world as needed
-        // could be concurrent, but not yet implemented as such
-        ColumnChunkBuffer buffer = this.cellChunkLoader.poll();
-        while(buffer != null)
-        {
-            this.cells.loadOrValidateChunk(buffer);
-            this.cellChunkLoader.returnUsedBuffer(buffer);
-            buffer = this.cellChunkLoader.poll();
-        }
+       if(ENABLE_PERFORMANCE_COUNTING) perfOffTick.startRun();
+       
+       this.cells.updateSmoothedRetentionJob.runOn(LAVA_THREAD_POOL);
      
-        // Apply world events that may depend on new chunks that were just loaded
-        this.lavaAddEvents.processAllEventsOn(LAVA_THREAD_POOL);
-
         // update connections as needed, handle pressure propagation, or other housekeeping
         this.cells.updateStuffJob.runOn(LAVA_THREAD_POOL);
        
-        // unload cell chunks that are no longer necessary
-        // important that this run right after cell update so that
-        // chunk active/inactive accounting is accurate and we don't have improper unloading
-        this.cells.unloadInactiveCellChunks();
-        
-        // clear out cells no longer needed
-        // validates that chunk cell is in has been unloaded, so should happen after chunk unload
-        this.cells.removeDeletedItems();
-        
-        this.connections.removeDeletedItems();
-
-        // connection sorting must happen AFTER all connections are updated/formed
+            // connection sorting must happen AFTER all connections are updated/formed
         this.cells.prioritizeConnectionsJob.runOn(LAVA_THREAD_POOL);
 
         this.connections.setupTickJob.runOn(LAVA_THREAD_POOL);
         
-        perfFocus.startRun();
         this.connections.refreshSortBucketsIfNeeded(LAVA_THREAD_POOL);
-        perfFocus.endRun();
-        perfFocus.addCount(1);
         
         this.doFirstStep();
         
@@ -639,6 +632,23 @@ public class LavaSimulator extends SimulationNode
         this.doStep();
         this.doLastStep();
         
+        // Add or update cells from world as needed
+        // could be concurrent, but not yet implemented as such
+        // This is done after connection processing because new cells just created 
+        // will not have a retention level until the next tick
+        ColumnChunkBuffer buffer = this.cellChunkLoader.poll();
+        while(buffer != null)
+        {
+            this.cells.loadOrValidateChunk(buffer);
+            this.cellChunkLoader.returnUsedBuffer(buffer);
+            buffer = this.cellChunkLoader.poll();
+        }
+     
+
+        // Apply world events that may depend on new chunks that were just loaded
+        this.lavaAddEvents.processAllEventsOn(LAVA_THREAD_POOL);
+
+
         // Apply pending lava block placements
         // These will either cause chunks to be loaded (and the lava thus discovered)
         // or if the chunk is loaded will try to update the loaded cell directly.
@@ -649,19 +659,40 @@ public class LavaSimulator extends SimulationNode
         // which does not rely on world events for that purpose.
         this.lavaBlockPlacementEvents.processAllEventsOn(LAVA_THREAD_POOL);
         
-        perfOffTick.endRun();
-        perfOffTick.addCount(1);
+        // unload cell chunks that are no longer necessary
+        // important that this run right after cell update so that
+        // chunk active/inactive accounting is accurate and we don't have improper unloading
+        this.cells.unloadInactiveCellChunks();
+
+        
+        // clear out cells no longer needed
+        // validates that chunk cell is in has been unloaded, so should happen after chunk unload
+        this.cells.removeDeletedItems();
+        
+        this.connections.removeDeletedItems();
+        
+        if(ENABLE_PERFORMANCE_COUNTING)
+        {
+            perfOffTick.endRun();
+            perfOffTick.addCount(1);
+        }
     }
     
     public void doStats()
     {
-        if((this.tickIndex >= this.nextStatTick))
+        if(ENABLE_PERFORMANCE_COUNTING && this.tickIndex >= this.nextStatTick)
         {
             this.nextStatTick = this.tickIndex + 200;
 
-            Adversity.log.info("WorldBuffer state sets this sample = " + this.worldBuffer.getStateSetCount());
-            Adversity.log.info(this.worldBuffer.stats());
-            this.worldBuffer.clearStatistics();
+            Adversity.log.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+            
+            perfCollectorOnTick.outputStats();
+            perfCollectorOffTick.outputStats();
+            perfCollectorAllTick.outputStats();
+            
+            perfCollectorOnTick.clearStats();
+            perfCollectorOffTick.clearStats();
+            perfCollectorAllTick.clearStats();
             
 //            Adversity.log.info("Cell chunk validation " + cells.validateChunksJob.perfCounter.stats());
 //            cells.validateChunksJob.perfCounter.clearStats();
@@ -684,8 +715,8 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("Connection prioritization " + cells.prioritizeConnectionsJob.perfCounter.stats());
 //            cells.prioritizeConnectionsJob.perfCounter.clearStats();
 //            
-//            Adversity.log.info("Connection sort refresh " + connections.sortRefreshPerf.stats());
-//            connections.sortRefreshPerf.clearStats();
+//            Adversity.log.info("Connection tick setup " + connections.setupTickJob.perfCounter.stats());
+//            connections.setupTickJob.perfCounter.clearStats();
 //            
 //            Adversity.log.info("Connection first step " + connections.firstStepJob[0].perfCounter.stats());
 //            connections.firstStepJob[0].perfCounter.clearStats();
@@ -698,24 +729,25 @@ public class LavaSimulator extends SimulationNode
 //       
 //            Adversity.log.info("Connection flowAcross " + LavaConnection.perfFlowAcross.stats());
 //            LavaConnection.perfFlowAcross.clearStats();
-
+//
 //            Adversity.log.info("Connection focus " + LavaConnection.perfFocus.stats());
 //            LavaConnection.perfFocus.clearStats();
 
-//          for(int i = 0; i < 8; i++)
-//          {
-//              Adversity.log.info(String.format("Flow total for step %1$d = %2$d ", i, this.flowTotals[i]));
-//              this.flowTotals[i] = 0;
-//          }
+        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        {
+            for(int i = 0; i < 8; i++)
+            {
+                Adversity.log.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
+                this.flowTotals[i] = 0;
+                this.flowCounts[i] = 0;
+            }
+        }
           
-          Adversity.log.info("On-Tick time " + this.perfOnTick.stats());
-          this.perfOnTick.clearStats();
-            
-          Adversity.log.info("Off-Tick time " + this.perfOffTick.stats());
-          this.perfOffTick.clearStats();
-            
-          Adversity.log.info("Focus time " + this.perfFocus.stats());
-          this.perfFocus.clearStats();
+//          Adversity.log.info("On-Tick time " + this.perfOnTick.stats());
+//          this.perfOnTick.clearStats();
+//            
+//          Adversity.log.info("Off-Tick time " + this.perfOffTick.stats());
+//          this.perfOffTick.clearStats();
           
 //            Adversity.log.info("Connection try success rate = " + LavaConnection.successCount.get() * 100 / (LavaConnection.tryCount.get() + 1) + "%");
 //            LavaConnection.successCount.set(0);
@@ -734,26 +766,48 @@ public class LavaSimulator extends SimulationNode
     {
         this.stepIndex = 0;
         
-
+        int startingCount;
+        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        {  
+            // all bucket jobs share the same perf counter, so simply use the first reference
+            startingCount = this.connections.firstStepJob[0].perfCounter.runCount();
+        }
+        
         for(SortBucket bucket : SortBucket.values())
         {
             this.connections.firstStepJob[bucket.ordinal()].runOn(LAVA_THREAD_POOL);
         }
         
-//        this.flowTotals[0] += LavaConnection.totalFlow.get();
-//        LavaConnection.totalFlow.set(0);
-        
+        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        { 
+            this.flowCounts[0] += (this.connections.firstStepJob[0].perfCounter.runCount() - startingCount);
+            this.flowTotals[0] += LavaConnection.totalFlow.get();
+            LavaConnection.totalFlow.set(0);
+        }
     }
 
     protected void doStep()
     {
         this.stepIndex++;
+        
+        int startingCount;
+        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        {    
+            // all bucket jobs share the same perf counter, so simply use the first reference
+            startingCount = this.connections.stepJob[0].perfCounter.runCount();
+        }
+        
         for(SortBucket bucket : SortBucket.values())
         {
             this.connections.stepJob[bucket.ordinal()].runOn(LAVA_THREAD_POOL);
         }
-//        this.flowTotals[stepIndex] += LavaConnection.totalFlow.get();
-//        LavaConnection.totalFlow.set(0);
+        
+        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        { 
+            this.flowCounts[stepIndex] += (this.connections.stepJob[0].perfCounter.runCount() - startingCount);
+            this.flowTotals[stepIndex] += LavaConnection.totalFlow.get();
+            LavaConnection.totalFlow.set(0);
+        }
     }
 
     protected void doLastStep()
