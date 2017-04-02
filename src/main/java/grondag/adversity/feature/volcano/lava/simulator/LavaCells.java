@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import grondag.adversity.Adversity;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
+import grondag.adversity.simulator.Simulator;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleConcurrentList;
@@ -17,7 +18,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class LavaCells
 {
-    private final SimpleConcurrentList<LavaCell> cellList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cells", LavaSimulator.perfCollectorOffTick);
+    private final SimpleConcurrentList<LavaCell> cellList;
     
     private final Long2ObjectOpenHashMap<CellChunk> cellChunks = new Long2ObjectOpenHashMap<CellChunk>();
     
@@ -65,7 +66,7 @@ public class LavaCells
         @Override
         public void doJobTask(LavaCell operand)
         {
-            if(operand.canCool(sim.getTickIndex()))
+            if(operand.canCool(Simulator.instance.getTick()))
             {
                 sim.coolCell(operand);
                 if(operand.isDeleted())
@@ -79,12 +80,16 @@ public class LavaCells
         }    
     };
             
-    // off-tick tasks
+    // off-tick tasksan
     private final CountedJobTask<LavaCell> updateStuffTask = new CountedJobTask<LavaCell>()
     {
         @Override
         public void doJobTask(LavaCell operand)
         {
+            if(operand.isBoreCell())
+            {
+                operand.addLava(LavaSimulator.FLUID_UNITS_PER_TICK);
+            }
             operand.updateActiveStatus();
             operand.updateConnectionsIfNeeded(sim);
         }
@@ -139,29 +144,30 @@ public class LavaCells
     public LavaCells(LavaSimulator sim)
     {
         this.sim = sim;
-        
+        cellList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cells", sim.perfCollectorOffTick);
+
         // on-tick jobs
         provideBlockUpdateJob = new CountedJob<LavaCell>(this.cellList, provideBlockUpdateTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Block Update Provision", LavaSimulator.perfCollectorOnTick);    
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Block Update Provision", sim.perfCollectorOnTick);    
         
         updateRetentionJob = new CountedJob<LavaCell>(this.cellList, updateRetentionTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Raw Retention Update", LavaSimulator.perfCollectorOnTick);   
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Raw Retention Update", sim.perfCollectorOnTick);   
         
         doCoolingJob = new CountedJob<LavaCell>(this.cellList, doCoolingTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cell Cooling", LavaSimulator.perfCollectorOnTick);  
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cell Cooling", sim.perfCollectorOnTick);  
         
        validateChunksJob = new CountedJob<CellChunk>(processChunks, doChunkValidationTask, 1, 
-               LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Chunk Validation", LavaSimulator.perfCollectorOnTick); 
+               LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Chunk Validation", sim.perfCollectorOnTick); 
         
         // off-tick jobs
         updateSmoothedRetentionJob = new CountedJob<LavaCell>(this.cellList, updateSmoothedRetentionTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Smoothed Retention Update", LavaSimulator.perfCollectorOffTick);   
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Smoothed Retention Update", sim.perfCollectorOffTick);   
         
         updateStuffJob = new CountedJob<LavaCell>(this.cellList, updateStuffTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Cell Upkeep", LavaSimulator.perfCollectorOffTick);
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Cell Upkeep", sim.perfCollectorOffTick);
         
         prioritizeConnectionsJob = new CountedJob<LavaCell>(this.cellList, prioritizeConnectionsTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Prioritization", LavaSimulator.perfCollectorOffTick);
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Prioritization", sim.perfCollectorOffTick);
    }
 
    public void validateOrBufferChunks(Executor executor)
@@ -463,14 +469,14 @@ public class LavaCells
             // Raw retention should be mostly current, but compute for any cells
             // that were awaiting computation at last world save.
             this.sim.worldBuffer.isMCWorldAccessAppropriate = true;
-            this.updateRetentionJob.runOn(LavaSimulator.LAVA_THREAD_POOL);
+            this.updateRetentionJob.runOn(this.sim.LAVA_THREAD_POOL);
             this.sim.worldBuffer.isMCWorldAccessAppropriate = false;
             
             // Smoothed retention will need to be computed for all cells, but can be parallel.
-            this.updateSmoothedRetentionJob.runOn(LavaSimulator.LAVA_THREAD_POOL);
+            this.updateSmoothedRetentionJob.runOn(this.sim.LAVA_THREAD_POOL);
             
             // Make sure other stuff is up to date
-            this.updateStuffJob.runOn(LavaSimulator.LAVA_THREAD_POOL);
+            this.updateStuffJob.runOn(this.sim.LAVA_THREAD_POOL);
             
             Adversity.log.info("Loaded " + this.cellList.size() + " lava cells.");
         }

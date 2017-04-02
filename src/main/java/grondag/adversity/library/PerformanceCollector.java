@@ -21,6 +21,11 @@ public class PerformanceCollector
         this.counters.add(counter);
     }
     
+    public void clear()
+    {
+        this.counters.clear();
+    }
+    
     public void outputStats()
     {
         this.counters.sort(new Comparator<PerformanceCounter> () 
@@ -38,6 +43,8 @@ public class PerformanceCollector
         {
             total += counter.runTime();
         }
+        if(total == 0) total = 1;  // prevent div by zero below
+        
         Adversity.log.info("======================================================================================");
         Adversity.log.info("Performance Measurement for " + this.title );
         Adversity.log.info("--------------------------------------------------------------------------------------");

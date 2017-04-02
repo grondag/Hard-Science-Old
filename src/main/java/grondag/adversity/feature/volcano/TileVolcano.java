@@ -18,6 +18,7 @@ import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
+import grondag.adversity.feature.volcano.lava.simulator.LavaCells;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -66,9 +67,6 @@ public class TileVolcano extends TileEntity implements ITickable{
     /** position within BORE_OFFSET list for array clearing.  Not persisited */
     private int  offsetIndex;
     
-    /** True if have made if all blocks in bore at current clearing level had lava */
-    private boolean levelAllClear;
-
     private int ticksActive = 0;
     private int lavaCounter = 0;
     private int lavaCooldownTicks = 0;
@@ -82,6 +80,8 @@ public class TileVolcano extends TileEntity implements ITickable{
      */
     private int nodeId = -1;
 
+    private boolean wasBoreFlowEnabled = false;
+    
     //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
     
 //    private int						hazeTimer		= 60;
@@ -168,7 +168,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
                 }
 
-                this.level = this.pos.getY();
+                this.level = this.pos.getY() + 10;
                 int moundRadius = Config.volcano().moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
@@ -248,9 +248,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         if(clearingLevel == CLEARING_LEVEL_RESTART)
         {
             this.clearingLevel = this.pos.getY() + 1;
-            this.level = Math.max(this.level, clearingLevel);
             this.offsetIndex = 0;
-            this.levelAllClear = true;
         }
         
         // if have too many blocks, switch to cooling mode
@@ -262,24 +260,14 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(offsetIndex >= BORE_OFFSETS.size())
         {
-            if(levelAllClear)
+            if(this.clearingLevel >= this.level) 
             {
-//                if(this.worldObj.canBlockSeeSky(this.pos.up(clearingLevel - pos.getY())))
-//                {
-//                    this.clearingLevel = CLEARING_LEVEL_RESTART;
-//                    return VolcanoStage.FLOWING;
-//                }
-//                else
-//                {
-                    this.clearingLevel++;
-                    this.levelAllClear = true;
-                    this.offsetIndex = 0;
-                    this.level = Math.max(this.level, clearingLevel);
-//                }
+                this.clearingLevel = CLEARING_LEVEL_RESTART;
+                return VolcanoStage.FLOWING;
             }
             else
             {
-                this.levelAllClear = true;
+                this.clearingLevel++;
                 this.offsetIndex = 0;
             }
         }
@@ -293,18 +281,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             Vec3i offset = BORE_OFFSETS.get(offsetIndex++);
             BlockPos clearPos = new BlockPos(this.pos.getX() + offset.getX(), this.clearingLevel, this.pos.getZ() + offset.getZ());
             
-            //if lava is somehow leaking, drop down a level
-            if(clearingLevel > this.pos.getY() + 1 && !clearBore(clearPos.down()))
-            {
-                clearingLevel--;
-                offsetIndex = 0;
-                this.levelAllClear = true;
-            }
-            else
-            {
-                if(!clearBore(clearPos)) 
-                    this.levelAllClear = false;
-            }
+            clearBore(clearPos);
         }
         return VolcanoStage.CLEARING;
         
@@ -326,12 +303,39 @@ public class TileVolcano extends TileEntity implements ITickable{
      */
     private VolcanoStage doFlowing()
     {
-        return VolcanoStage.FLOWING;
+        
+        if(Simulator.instance.getFluidTracker().loadFactor() > 1)
+        {
+            this.wasBoreFlowEnabled = false;
+            setBoreFlowEnabled(false);
+            return VolcanoStage.COOLING;
+        }
+        else
+        {
+            if(!this.wasBoreFlowEnabled)
+            {
+                this.wasBoreFlowEnabled = true;
+                setBoreFlowEnabled(true);
+            }
+            return VolcanoStage.FLOWING;
+        }
     }
     
   
 
-
+    private void setBoreFlowEnabled(boolean enabled)
+    {
+        LavaCells cells = Simulator.instance.getFluidTracker().cells;
+        for(int i = 0; i < BORE_OFFSETS.size(); i++)
+        {
+            Vec3i offset = BORE_OFFSETS.get(i);
+            LavaCell c = cells.getEntryCell(this.pos.getX() + offset.getX(), this.pos.getZ() + offset.getZ());
+            if(c != null)
+            {
+                c.firstCell().setBoreCell(enabled);
+            }
+        }
+    }
    
 
 
@@ -568,61 +572,43 @@ public class TileVolcano extends TileEntity implements ITickable{
     
     /**
      * Sets to non-cooling lava if can be.
-     * Returns true if was already bedrock or mostly full of lava.
+     * Returns true if was already bedrock or clear.
      */
-    private boolean clearBore(BlockPos clearPos)
+    private void clearBore(BlockPos clearPos)
     {
-        LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();
-        
         IBlockState state = this.worldObj.getBlockState(clearPos);
         Block block = state.getBlock();
         if(block == Blocks.BEDROCK)
         {
-            return true;
+            // nothing to do
+            return;
         }
         
-        // allow air blocks if sim shows lava in them because simulator may not do block updates immediately
-        else if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == Blocks.AIR)
+        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
-            LavaCell cell = sim.cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
-            
-            //takes long time to get every cell to perfectly full - just has to be close enough
-            if(cell == null) 
-            {
-                sim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_BLOCK, false);
-                return false;
-            }
-            else if(cell.fluidSurfaceY() < clearPos.getY())
-            {
-                sim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_BLOCK, false);
-                cell.setCoolingDisabled(true);
-                return false;
-            }
-            else if(cell.fluidSurfaceFlowHeight() < LavaSimulator.LEVELS_PER_BLOCK)
-            {
-                sim.addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL * (LavaSimulator.LEVELS_PER_BLOCK - cell.fluidSurfaceFlowHeight()), false);
-                cell.setCoolingDisabled(true);
-                return false;
-            }
-            else
-            {
-                cell.setCoolingDisabled(true);
-                return true;
-            }
-            
+            LavaCell cell = Simulator.instance.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+            if(cell != null) cell.setCoolingDisabled(true);
+            return;
         }
-        else
+        
+        if(block != Blocks.AIR)
         {
-//            Adversity.log.info("Clearing and placing lava @" + clearPos.toString());
             this.worldObj.setBlockToAir(clearPos);
-            Simulator.instance.getFluidTracker().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_BLOCK, false);
-            // don't build mound if above ground or if melting Basalt
             if(clearPos.getY() < this.groundLevel && 
                     !(block instanceof NiceBlock && ((NiceBlock)block).material == BaseMaterial.BASALT))
             {
                 buildMound();
             }
-            return false;
+        }
+        LavaCell cell = Simulator.instance.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+        if(cell == null) 
+        {
+            // force cell creation
+            Simulator.instance.getFluidTracker().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
+        }
+        else
+        {
+            cell.setCoolingDisabled(true);
         }
     }
     

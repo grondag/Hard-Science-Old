@@ -94,7 +94,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         super.breakBlock(worldIn, pos, state);
-        Simulator.instance.getFluidTracker().unregisterDestroyedLava(worldIn, pos, state);
+        if(this.isFlowHeight()) Simulator.instance.getFluidTracker().unregisterDestroyedLava(worldIn, pos, state);
     }
     
     private void handleFallingBlocks(World worldIn, BlockPos pos, IBlockState state)

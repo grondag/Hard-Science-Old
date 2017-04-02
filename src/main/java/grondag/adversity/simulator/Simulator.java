@@ -3,8 +3,8 @@ package grondag.adversity.simulator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import com.google.common.collect.Lists;
 
 import grondag.adversity.Adversity;
@@ -55,10 +55,12 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	
     private VolcanoManager volcanoManager;
     
-    private LavaSimulator lavaSimulator
-    ;
+    private LavaSimulator lavaSimulator;
     
 	public static ExecutorService executor;
+	private static ExecutorService controlThread;
+	
+	private Future<?> lastTickFuture = null;
     
     /** used for world time */
     private World world;
@@ -66,16 +68,9 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     private volatile boolean isRunning = false;
     public boolean isRunning() { return isRunning; }
     
-    private final TaskCounter taskCounter = new TaskCounter();
-
  //   private AtomicInteger nextNodeID = new AtomicInteger(NodeRoots.FIRST_NORMAL_NODE_ID);
 //    private static final String TAG_NEXT_NODE_ID = "nxid";
 	
-    /** Last tick that is executing or has completed.
-     * If = lastSimTick, means simulation is caught up or catching up with most recent activity.
-     */
-	private AtomicInteger currentSimTick = new AtomicInteger(0);
-    private static final String TAG_CURRENT_SIM_TICK = "cstk";
 	
     /** 
      * Set to worldTickOffset + lastWorldTick at end of server tick.
@@ -90,6 +85,13 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	private volatile long worldTickOffset = 0; 
     private static final String TAG_WORLD_TICK_OFFSET= "wtos";
 
+    static
+    {
+        // would a bounded backing queue be faster due to cache coherence
+        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        controlThread = Executors.newSingleThreadExecutor();
+
+    }
 
 	// Main control
 	public void start()  
@@ -99,7 +101,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
-	        this.volcanoManager = new VolcanoManager(this.taskCounter);
+	        this.volcanoManager = new VolcanoManager();
 	        this.lavaSimulator = new LavaSimulator(this.world);
 	        
             if(PersistenceManager.loadNode(world, this))
@@ -121,7 +123,6 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                 Adversity.log.info("creating sim");
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
-    	        this.currentSimTick.set(0);
     	        this.lastSimTick = 0;
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
@@ -129,10 +130,10 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     	        PersistenceManager.registerNode(world, this.lavaSimulator);
 
     	    }
-    		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
     		this.isRunning = true;
             Adversity.log.info("starting first frame");
-    		executor.execute(new FrameStarter());
+//    		executor.execute(new FrameStarter());
 	    }
 	}
 	
@@ -146,75 +147,61 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 		this.isRunning = false;
         
 		// wait for simulation to catch up
-		while(this.currentSimTick.get() < this.lastSimTick)
+		if(this.lastTickFuture != null && !this.lastTickFuture.isDone())
 		{
+		    Adversity.log.info("waiting for last frame task completion");
 		    try
             {
-	            Adversity.log.info("waiting for catch up");
-                this.wait();
+                this.lastTickFuture.get(5, TimeUnit.SECONDS);
             }
-            catch (InterruptedException e)
+            catch (Exception e)
             {
+                Adversity.log.warn("Timeout waiting for simulation shutdown");
                 e.printStackTrace();
             }
 		}
-        Adversity.log.info("waiting for last frame task completion");
-		this.taskCounter.waitUntilAllTasksComplete();
-        Adversity.log.info("shutting down thread pool");
-	    executor.shutdown();
+		
 	    this.world = null;
+	    this.lastTickFuture = null;
 	}
 	
     @SubscribeEvent
     public void onServerTick(ServerTickEvent event) {
-
         
         // thought it might offer more determinism if we run after block/entity ticks
         if(event.phase == TickEvent.Phase.END && this.isRunning)
         {
-
-            int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
-
-            // Simulation clock can't move backwards.
-            // NB: don't need CAS because only ever changed by game thread in this method
-            if(newLastSimTick > lastSimTick)
+            if(lastTickFuture == null || lastTickFuture.isDone())
             {
-                // if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
-                this.isDirty = true;
-                this.lastSimTick = newLastSimTick;          
-            }
-            else
-            {
-                // world clock has gone backwards or paused, so readjust offset
-                this.lastSimTick++;
-                this.worldTickOffset = this.lastSimTick - world.getWorldTime();
-                this.setSaveDirty(true);
-                Adversity.log.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
-                Adversity.log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
-            }
-            
-            this.lavaSimulator.doTick(this.lastSimTick);
-            
-            // accesses world, so needs to run on server thread
-            volcanoManager.updateChunkLoading();
-        }
-        
 
-    }
-
-    /**
-     * Increments active task count.
-     * Call whenever adding another task to the queue.
-     * Notify is for stop method, which may be waiting for count to catch up.
-     */
-    private void incrementSimTick() {
-        setSaveDirty(true);
-        currentSimTick.incrementAndGet();
-        synchronized(this)
-        {
-            this.notifyAll();
+                int newLastSimTick = (int) (world.getWorldTime() + this.worldTickOffset);
+    
+                // Simulation clock can't move backwards.
+                // NB: don't need CAS because only ever changed by game thread in this method
+                if(newLastSimTick > lastSimTick)
+                {
+                    // if((newLastSimTick & 31) == 31) Adversity.log.info("changing lastSimTick, old=" + lastSimTick + ", new=" + newLastSimTick);
+                    this.isDirty = true;
+                    this.lastSimTick = newLastSimTick;          
+                }
+                else
+                {
+                    // world clock has gone backwards or paused, so readjust offset
+                    this.lastSimTick++;
+                    this.worldTickOffset = this.lastSimTick - world.getWorldTime();
+                    this.setSaveDirty(true);
+                    Adversity.log.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
+                    Adversity.log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
+                }
+                
+                this.volcanoManager.doOnTick();
+                this.lavaSimulator.doOnTick();
+                
+                lastTickFuture = controlThread.submit(this.offTickFrame);
+            }
         }
     }
+
     
 //    /**
 //     * Call to claim a new ID for all created nodes.
@@ -234,7 +221,6 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public void readFromNBT(NBTTagCompound nbt)
     {
         Adversity.log.info("Simulator read from NBT");
-        this.currentSimTick.set(nbt.getInteger(TAG_CURRENT_SIM_TICK));
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
     }
@@ -249,107 +235,26 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public void writeToNBT(NBTTagCompound nbt)
     {
         Adversity.log.info("saving simulation state");
-        nbt.setInteger(TAG_CURRENT_SIM_TICK, currentSimTick.get());
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
     }
     
     public World getWorld() { return this.world; }
-    public int getCurrentSimTick() { return this.currentSimTick.get(); }
+    public int getTick() { return this.lastSimTick; }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
     public LavaSimulator getFluidTracker() { return this.lavaSimulator; }
 
     // Frame execution logic
-
-    private class FrameStarter implements Runnable
+    Runnable offTickFrame = new Runnable()
     {
-        /** 
-         * Sets up a new simulation frame.  This includes:
-         * 
-         * 1) Wait for all tasks from previous simulation frame to finish.
-         * Known by checking active activeTaskCount
-         * 
-         * 2) Check for world ticks to process.
-         * Known by comparing current sim tick with last sim tick.
-         * If no ticks are available, wait for world clock to advance,
-         * unless the simulation is shutting down.  In that case, exit.
-         * 
-         * 3) Generate and execute node tasks for all nodes that activate in this tick.
-         * Increment activeTaskCount for each one.
-         * 
-         * 4) Advance the frame.
-         * 
-         * 5) Create and execute a new FrameStarter for the frame after this.
-         * Do NOT increment activeTaskCount.  
-         * The new FrameStarter will wait for tasks from this frame to complete.
-         * It cannot wait for itself to complete.
-         */
         @Override
         public void run()
         {
-            //if((currentSimTick.get() & 31) == 31) Adversity.log.info("starting frame with currentSimTick=" + currentSimTick.get());
-            // wait for any previous frames to finish
-            taskCounter.waitUntilAllTasksComplete();
-            
-            // wait for world tick to advance or for the server to stop
-            while(isRunning)
-            {
-                if((currentSimTick.get() == lastSimTick))
-                {
-                    try
-                    {
-                        Thread.sleep(10);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                else
-                {
-                    // do all the things!
-                    this.startNodeTasks();
-                    
-                    // advance the frame counter
-                    incrementSimTick();
-                    
-                    // start the next frame
-                    executor.execute(this);
-                    
-                    return;
-                }
-            }
-        }
-        
-        private void startNodeTasks()
-        {
-            /**
-             * Things to add:
-             * Adversary thinking
-             * Mining manager
-             * Power transfer manager
-             * Material/fluid transfer manager
-             * Inventory manager/monitor
-             * Redstone manager
-             * Crafting manager
-             * Material processing
-             * Meteor manager
-             * Storm manager
-             * Computer processing
-             * Plant growth
-             * Plant production
-             * 
-             * Hypermaterial Manager? - probably best to leave this world-side
-             */
-            if((currentSimTick.get() & 0xF) == 0xF)
-            {
-                executor.execute(volcanoManager);
-            }
-        }
- 
-        
-    }
+            Simulator.this.volcanoManager.doOffTick();
+            Simulator.this.lavaSimulator.doOffTick();
+        }    
+     };
     
     // CHUNK LOADING START UP HANDLERS
     

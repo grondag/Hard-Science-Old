@@ -1,24 +1,12 @@
 package grondag.adversity.simulator.base;
 
-import grondag.adversity.simulator.TaskCounter;
 
-public abstract class SimulationNodeRunnable extends SimulationNode implements Runnable
+public abstract class SimulationNodeRunnable extends SimulationNode
 {
-    private final TaskCounter taskCounter;
-    
-    protected SimulationNodeRunnable(int nodeID, TaskCounter taskCounter)
+    protected SimulationNodeRunnable(int nodeID)
     {
         super(nodeID);
-        this.taskCounter = taskCounter;
     }
-    
-    @Override
-    public final void run()
-    {
-        taskCounter.incrementActiveTasks();
-        this.doStuff();
-        taskCounter.decrementActiveTasks();
-    }
-    
-    protected abstract void doStuff();
-}
+    protected void doOnTick() {};
+    protected void doOffTick() {};
+ }

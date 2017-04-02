@@ -10,6 +10,7 @@ import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.PerformanceCollector;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
@@ -26,18 +27,18 @@ public class BlockEventList
         @Override
         public void doJobTask(BlockEventList.BlockEvent operand)
         {
-            operand.process(maxRetries);
+            if(!operand.isDeleted()) operand.process(maxRetries);
         }
     };
     
     private final Job processJob;
     
-    public BlockEventList(int maxRetries, String nbtTagName, BlockEventHandler eventHandler)
+    public BlockEventList(int maxRetries, String nbtTagName, BlockEventHandler eventHandler, PerformanceCollector perfCollector)
     {
-        eventList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Block Events", LavaSimulator.perfCollectorOffTick);
+        eventList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Block Events", perfCollector);
         
         processJob = new CountedJob<BlockEventList.BlockEvent>(this.eventList, processTask, 64, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Event Processing", LavaSimulator.perfCollectorOffTick);
+                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Event Processing", perfCollector);
         
         this.maxRetries = maxRetries;
         this.nbtTagName = nbtTagName;
@@ -129,7 +130,7 @@ public class BlockEventList
         public final int y;
         public final int z;
         public final int amount;
-        private int retryCount = 0;
+        private volatile int retryCount = 0;
         
         public static final int NBT_WIDTH = 5;
         
@@ -137,13 +138,14 @@ public class BlockEventList
         
         private void process(int maxRetries)
         {
-            if(retryCount++ < maxRetries)
+            if(eventHandler.handleEvent(this)) 
             {
-                if(eventHandler.handleEvent(this)) retryCount = IS_COMPLETE;
+                retryCount = IS_COMPLETE;
             }
-            else
+            else if(retryCount++ > maxRetries)
             {
                 //exceeded max retries - give up
+                //TODO: remove
                 if(Adversity.DEBUG_MODE)
                     Adversity.log.info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
                 retryCount = IS_COMPLETE;
@@ -162,6 +164,11 @@ public class BlockEventList
         public boolean isDeleted()
         {
             return retryCount == IS_COMPLETE;
+        }
+        
+        public int retryCount()
+        {
+            return this.retryCount;
         }
         
         /** 

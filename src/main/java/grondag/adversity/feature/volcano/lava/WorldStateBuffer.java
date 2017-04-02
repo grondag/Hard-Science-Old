@@ -157,11 +157,11 @@ public class WorldStateBuffer implements IBlockAccess
                     chunk = this.usedBuffers.poll();
                     if(chunk == null)
                     {
-                        chunk = new ChunkBuffer(packedChunkPos, Simulator.instance.getCurrentSimTick());
+                        chunk = new ChunkBuffer(packedChunkPos, Simulator.instance.getTick());
                     }
                     else
                     {
-                        chunk.renew(packedChunkPos, Simulator.instance.getCurrentSimTick());
+                        chunk.renew(packedChunkPos, Simulator.instance.getTick());
                     }
                     chunks.put(packedChunkPos, chunk);
                 }
@@ -188,7 +188,7 @@ public class WorldStateBuffer implements IBlockAccess
     {
         this.perfStateApplication.startRun();
         
-        int currentTick = Simulator.instance.getCurrentSimTick();
+        int currentTick = Simulator.instance.getTick();
         
         boolean maybeSomethingToDo = true;
         int foundCount = 0;

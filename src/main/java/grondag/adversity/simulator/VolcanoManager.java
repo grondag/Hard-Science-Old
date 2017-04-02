@@ -35,15 +35,16 @@ public class VolcanoManager extends SimulationNodeRunnable
     private LinkedList<Ticket> tickets = new LinkedList<Ticket>();
     private  AtomicBoolean isChunkloadingDirty = new AtomicBoolean(true);
     
-    protected VolcanoManager(TaskCounter taskCounter)
+    protected VolcanoManager()
     {
-        super(NodeRoots.VOLCANO_MANAGER.ordinal(), taskCounter);
+        super(NodeRoots.VOLCANO_MANAGER.ordinal());
     }
 
     private NBTTagCompound nbtVolcanoManager = new NBTTagCompound();
         
     /** not thread-safe - to be called on world sever thread */
-    public void updateChunkLoading()
+    @Override
+    public void doOnTick()
     {
 
             if(!this.isChunkloadingDirty.compareAndSet(true, false)) return;
@@ -92,7 +93,7 @@ public class VolcanoManager extends SimulationNodeRunnable
      * or updates the active volcano is there is one.
      */
     @Override
-    public void doStuff()
+    public void doOffTick()
     {
         
         if(this.activeIndex == NO_ACTIVE_INDEX)
@@ -411,7 +412,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         {
             if(this.isActive || this.height >= Config.volcano().maxYLevel) return false;
             
-            int dormantTime = Simulator.instance.getCurrentSimTick() - this.lastActivationTick;
+            int dormantTime = Simulator.instance.getTick() - this.lastActivationTick;
             
             if(dormantTime < Config.volcano().minDormantTicks) return false;
             
@@ -439,7 +440,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                 if(!this.isActive)
                 {
                     this.isActive = true;
-                    this.lastActivationTick = Simulator.instance.getCurrentSimTick();
+                    this.lastActivationTick = Simulator.instance.getTick();
                     this.setSaveDirty(true);
                     VolcanoManager.this.activeIndex = this.nodeID;
                     VolcanoManager.this.isChunkloadingDirty.set(true);
