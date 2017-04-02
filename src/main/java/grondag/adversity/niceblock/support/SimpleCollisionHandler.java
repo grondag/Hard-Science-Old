@@ -4,8 +4,8 @@ import java.util.List;
 
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -24,9 +24,9 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
 
  
     @Override
-    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelStateSetValue modelState)
     {
-        return modelStateSet.getRefreshedKeyFromWorld(0, true, (NiceBlock)state.getBlock(), state, worldIn, pos);
+        return modelState.getKey();
     }
 
     @Override

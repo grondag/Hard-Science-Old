@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.model.quadfactory.Vertex;
 import grondag.adversity.niceblock.support.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -30,14 +31,12 @@ public class CollisionBoxGenerator
 
         // voxel method
         List<AxisAlignedBB> retVal = makeBoxVoxelMethod(quads);
-
         List<AxisAlignedBB> simple = Collections.singletonList(makeBoxSimpleMethod(quads));
 
-//        if(retVal.isEmpty() || getListVolume(simple) <= getListVolume(retVal))
         double simpleVolume = getListVolume(simple);
         double voxelVolume = getListVolume(retVal);
-        //use simple volume if voxel gives no box, simple is smaller, or if simple is not much bigger
-        if(voxelVolume == 0 || simpleVolume < voxelVolume || ((simpleVolume - voxelVolume) / voxelVolume) < 0.1)
+        //use simple volume if voxel gives empty box, or if simple is not much bigger
+        if(voxelVolume == 0.0 || ((simpleVolume - voxelVolume) / voxelVolume) < 0.1)
         {
             retVal = simple;
         }
@@ -157,19 +156,22 @@ public class CollisionBoxGenerator
     
     public static AxisAlignedBB makeBoxSimpleMethod(List<RawQuad> quads)
     {
-        AxisAlignedBB simpleBox = null;
+        double minX = 1.0, minY = 1.0, minZ = 1.0, maxX = 0, maxY = 0, maxZ = 0;
+
         for(RawQuad quad : quads)
         {
-            if(simpleBox == null)
+            for(int i = 0; i < quad.getVertexCount(); i++)
             {
-                simpleBox = quad.getAABB();
-            }
-            else
-            {
-                simpleBox = simpleBox.union(quad.getAABB());
+                Vertex v = quad.getVertex(i);
+                if(v.xCoord > maxX) maxX = v.xCoord;
+                if(v.yCoord > maxY) maxY = v.yCoord;
+                if(v.zCoord > maxZ) maxZ = v.zCoord;
+                if(v.xCoord < minX) minX = v.xCoord;
+                if(v.yCoord < minY) minY = v.yCoord;
+                if(v.zCoord < minZ) minZ = v.zCoord;
             }
         }
 
-        return simpleBox;
+        return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 }

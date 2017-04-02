@@ -393,7 +393,7 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
             
-            List<AxisAlignedBB> bounds = this.collisionHandler.getCollisionBoxes(state, worldIn, pos);
+            List<AxisAlignedBB> bounds = this.collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos));
  
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
@@ -468,7 +468,7 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
     
-            for (AxisAlignedBB aabb : this.collisionHandler.getCollisionBoxes(state, worldIn, pos))
+            for (AxisAlignedBB aabb : this.collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
             {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }

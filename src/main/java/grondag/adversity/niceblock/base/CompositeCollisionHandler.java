@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -44,12 +45,12 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
     }
     
     @Override
-    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelStateSetValue modelState)
     {
         long key = 0;
         for(int i = 0; i < handlers.length; i++)
         {
-            key |= (handlers[i].getCollisionKey(state, worldIn, pos) << shiftBits[i]);
+            key |= (handlers[i].getCollisionKey(state, worldIn, pos, modelState) << shiftBits[i]);
         }
         return key;
     }

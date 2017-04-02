@@ -154,7 +154,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
         double volume = 0;
-        for(AxisAlignedBB box : this.collisionHandler.getCollisionBoxes(state, world, pos))
+        for(AxisAlignedBB box : this.collisionHandler.getCollisionBoxes(state, world, pos, this.getModelState(state, world, pos)))
         {
             volume += Useful.AABBVolume(box);
         }

@@ -12,7 +12,6 @@ import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBuck
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleUnorderedArrayList;
-import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -402,16 +401,12 @@ public class LavaCell implements ISimpleListItem
      */
     private static final int BLOCK_LEVELS_MASK = 0x1FF;
 //    private static final int BLOCK_LEVELS_BITS = 9;
-    
-    /** max value for ceiling */
-    private static final int MAX_UNITS = 256 * LavaSimulator.FLUID_UNITS_PER_BLOCK;
-    
+        
     /** 
      * Writes data to array starting at location i.
      */
     void writeNBT(int[] saveData, int i)
     {
-         
         saveData[i++] = this.locator.x;
         saveData[i++] = this.locator.z;
         saveData[i++] = (this.getFluidUnits() & FLUID_UNITS_MASK) | (((this.refreshTopY + 1) & BLOCK_LEVELS_MASK) << FLUID_UNITS_BITS);
@@ -1582,7 +1577,7 @@ public class LavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
         
         if(this.connections.size() < 4) return true;
         
@@ -1737,40 +1732,54 @@ public class LavaCell implements ISimpleListItem
         
         int myFloor = this.getFloorUnits();
         
-        int floorMin = Math.max(0, (this.bottomY() - 2) * LavaSimulator.FLUID_UNITS_PER_BLOCK);
-        int floorMax = Math.min(MAX_UNITS, (this.bottomY() + 3) * LavaSimulator.FLUID_UNITS_PER_BLOCK);
+        int lowestFloor = myFloor;
         
-        int x = this.x();
-        int z = this.z();
+        int neighborFloor = getFloorUnitsForNeighbor(-1,  0, myFloor);
+        if(neighborFloor < lowestFloor) lowestFloor = neighborFloor;
         
-        int negX = Useful.clamp(getFloorUnitsForNeighbor(-1,  0, myFloor ), floorMin, floorMax);
-        int posX = Useful.clamp(getFloorUnitsForNeighbor( 1,  0, myFloor ), floorMin, floorMax);
-        int negZ = Useful.clamp(getFloorUnitsForNeighbor( 0, -1, myFloor ), floorMin, floorMax);
-        int posZ = Useful.clamp(getFloorUnitsForNeighbor( 0,  1, myFloor ), floorMin, floorMax);
+        neighborFloor = getFloorUnitsForNeighbor( 1,  0, myFloor);
+        if(neighborFloor < lowestFloor) lowestFloor = neighborFloor;
+        neighborFloor = getFloorUnitsForNeighbor( 0, -1, myFloor);
+        if(neighborFloor < lowestFloor) lowestFloor = neighborFloor;
+        neighborFloor = getFloorUnitsForNeighbor( 0,  1, myFloor);
+        if(neighborFloor < lowestFloor) lowestFloor = neighborFloor;
         
-        int negXnegZ = Useful.clamp(getFloorUnitsForNeighbor(-1, -1, myFloor ), floorMin, floorMax);
-        int negXposZ = Useful.clamp(getFloorUnitsForNeighbor(-1,  1, myFloor ), floorMin, floorMax);
-        int posXnegZ = Useful.clamp(getFloorUnitsForNeighbor( 1, -1, myFloor ), floorMin, floorMax);
-        int posXposZ = Useful.clamp(getFloorUnitsForNeighbor( 1,  1, myFloor ), floorMin, floorMax);
+        return Math.max(LavaSimulator.FLUID_UNITS_PER_QUARTER_BLOCK, 
+                LavaSimulator.FLUID_UNITS_PER_BLOCK - (myFloor - lowestFloor) / 2);
+        
+//        int floorMin = Math.max(0, (this.bottomY() - 2) * LavaSimulator.FLUID_UNITS_PER_BLOCK);
+//        int floorMax = Math.min(MAX_UNITS, (this.bottomY() + 3) * LavaSimulator.FLUID_UNITS_PER_BLOCK);
+        
 
-        // Normalize the resulting delta values to the approximate range -1 to 1
-        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / LavaSimulator.FLUID_UNITS_PER_TWO_BLOCKS;
-        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / LavaSimulator.FLUID_UNITS_PER_TWO_BLOCKS;
-        double slope = Useful.clamp(Math.sqrt(deltaX * deltaX + deltaZ * deltaZ), 0.0, 1.0);
-      
-        int depth = (int) (LavaSimulator.FLUID_UNITS_PER_BLOCK * (1.0 - slope));
         
-        // Abandoned experiment...
-        // this function gives a value of 1 for slope = 0 then drops steeply 
-        // as slope increases and then levels off to 1/4 height as slope approaches 1.
-        // Function is only well-behaved for our purpose within the range 0 to 1.
-        // More concisely, function is (1-sqrt(x)) ^ 2, applied to the top 3/4 of a full block height.
-        // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
-        
-        //clamp to at least 1/4 of a block and no more than 1.25 block
-        depth = Useful.clamp(depth, LavaSimulator.FLUID_UNITS_PER_QUARTER_BLOCK, LavaSimulator.FLUID_UNITS_PER_BLOCK_AND_A_QUARTER);
+//        int negX = Useful.clamp(getFloorUnitsForNeighbor(-1,  0, myFloor ), floorMin, floorMax);
+//        int posX = Useful.clamp(getFloorUnitsForNeighbor( 1,  0, myFloor ), floorMin, floorMax);
+//        int negZ = Useful.clamp(getFloorUnitsForNeighbor( 0, -1, myFloor ), floorMin, floorMax);
+//        int posZ = Useful.clamp(getFloorUnitsForNeighbor( 0,  1, myFloor ), floorMin, floorMax);
+//        
+//        int negXnegZ = Useful.clamp(getFloorUnitsForNeighbor(-1, -1, myFloor ), floorMin, floorMax);
+//        int negXposZ = Useful.clamp(getFloorUnitsForNeighbor(-1,  1, myFloor ), floorMin, floorMax);
+//        int posXnegZ = Useful.clamp(getFloorUnitsForNeighbor( 1, -1, myFloor ), floorMin, floorMax);
+//        int posXposZ = Useful.clamp(getFloorUnitsForNeighbor( 1,  1, myFloor ), floorMin, floorMax);
+//
+//        // Normalize the resulting delta values to the approximate range -1 to 1
+//        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / LavaSimulator.FLUID_UNITS_PER_TWO_BLOCKS;
+//        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / LavaSimulator.FLUID_UNITS_PER_TWO_BLOCKS;
+//        double slope = Useful.clamp(Math.sqrt(deltaX * deltaX + deltaZ * deltaZ), 0.0, 1.0);
+//      
+//        int depth = (int) (LavaSimulator.FLUID_UNITS_PER_BLOCK * (1.0 - slope));
+//        
+//        // Abandoned experiment...
+//        // this function gives a value of 1 for slope = 0 then drops steeply 
+//        // as slope increases and then levels off to 1/4 height as slope approaches 1.
+//        // Function is only well-behaved for our purpose within the range 0 to 1.
+//        // More concisely, function is (1-sqrt(x)) ^ 2, applied to the top 3/4 of a full block height.
+//        // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
+//        
+//        //clamp to at least 1/4 of a block and no more than 1.25 block
+//        depth = Useful.clamp(depth, LavaSimulator.FLUID_UNITS_PER_QUARTER_BLOCK, LavaSimulator.FLUID_UNITS_PER_BLOCK_AND_A_QUARTER);
       
-        return depth;
+//        return depth;
     }
     
     /** 
