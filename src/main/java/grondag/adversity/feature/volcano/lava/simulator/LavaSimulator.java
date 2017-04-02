@@ -50,9 +50,14 @@ public class LavaSimulator extends SimulationNode
     public static final byte LEVELS_PER_BLOCK_AND_A_QUARTER = LEVELS_PER_BLOCK + LEVELS_PER_QUARTER_BLOCK;
     public static final byte LEVELS_PER_BLOCK_AND_A_HALF = LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK;
     public static final byte LEVELS_PER_TWO_BLOCKS = LEVELS_PER_BLOCK * 2;
+    
     public static final int FLUID_UNITS_PER_LEVEL = 1000;
     public static final int FLUID_UNITS_PER_BLOCK = FLUID_UNITS_PER_LEVEL * LEVELS_PER_BLOCK;
-    public static final int FLUID_UNTIS_PER_HALF_BLOCK = FLUID_UNITS_PER_BLOCK / 2;
+    public static final int FLUID_UNITS_PER_QUARTER_BLOCK = FLUID_UNITS_PER_LEVEL * LEVELS_PER_QUARTER_BLOCK;
+    public static final int FLUID_UNITS_PER_HALF_BLOCK = FLUID_UNITS_PER_BLOCK / 2;
+    public static final int FLUID_UNITS_PER_BLOCK_AND_A_QUARTER = FLUID_UNITS_PER_LEVEL * LEVELS_PER_BLOCK_AND_A_QUARTER;
+    public static final int FLUID_UNITS_PER_TWO_BLOCKS = FLUID_UNITS_PER_BLOCK * 2;
+    
     public static final int FLUID_UNITS_PER_TICK = FLUID_UNITS_PER_BLOCK / 20;
     public static final int MIN_FLOW_UNITS = 10;
     public static final int MIN_FLOW_UNITS_X2 = 10;

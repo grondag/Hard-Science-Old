@@ -154,12 +154,15 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             else
             {
                 probeInfo.text("Cell ID = " + cell.id)
-                    .text("FluidUnits=" + cell.getFluidUnits() + "  Fluid Levels=" + (cell.getFluidUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
-                    .text("RawRetainedLevel=" + cell.getRawRetainedLevel() + "  RawRetained Depth=" + (cell.getRawRetainedLevel() - cell.getFloor()))
-                    .text("floor=" + cell.getFloor() + "  ceiling=" + cell.getCeiling() + " isFlowFloor=" + cell.isBottomFlow())
+                    .text("FluidUnits=" + cell.getFluidUnits() + "  FluidSurfaceLevel=" + cell.fluidSurfaceLevel() + "  Fluid Levels=" + (cell.getFluidUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("RawRetainedUnits=" + cell.getRawRetainedUnits() + "  RawRetained Depth=" + ((cell.getRawRetainedUnits() - cell.getFloorUnits()) / LavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("SmoothRetainedUnits=" + cell.getSmoothedRetainedUnits() + "  SmoothRetained Depth=" + ((cell.getSmoothedRetainedUnits() - cell.getFloorUnits()) / LavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("floor=" + cell.getFloor() + "  ceiling=" + cell.getCeiling() + " isFlowFloor=" + cell.isBottomFlow() + " floorFlowHeight=" + cell.floorFlowHeight())
                     .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidSurfaceUnitsWithPrecision >> 6))
                     .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
                     .text("Connection Count = " + cell.connections.size());
+                
+           
                 
 //                for(LavaConnection conn : cell.connections.values())
 //                {

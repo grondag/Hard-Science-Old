@@ -139,12 +139,11 @@ public class LavaCell implements ISimpleListItem
     
     /** 
      * Fluid level will not drop below this - to emulate surface tension/viscosity.
-     * Represented as block levels. (Not as fluid units!)
      * Initialized to -1 to indicate has not yet been set or if needs to be recalculated.
      * Computed during first update after cell is first created.  Does not change until cell solidifies or bottom drops out.
      * The raw value is persisted because it should not change as neighbors change.
      */
-    private int rawRetainedLevel = RETENTION_NEEDS_UPDATE;
+    private int rawRetainedUnits = RETENTION_NEEDS_UPDATE;
     
     /** 
      * As with {@link #rawRetainedLevel} but smoothed with neighbors using a box filter.  
@@ -405,7 +404,7 @@ public class LavaCell implements ISimpleListItem
 //    private static final int BLOCK_LEVELS_BITS = 9;
     
     /** max value for ceiling */
-    private static final int MAX_LEVEL = 256 * LavaSimulator.LEVELS_PER_BLOCK;
+    private static final int MAX_UNITS = 256 * LavaSimulator.FLUID_UNITS_PER_BLOCK;
     
     /** 
      * Writes data to array starting at location i.
@@ -416,7 +415,7 @@ public class LavaCell implements ISimpleListItem
         saveData[i++] = this.locator.x;
         saveData[i++] = this.locator.z;
         saveData[i++] = (this.getFluidUnits() & FLUID_UNITS_MASK) | (((this.refreshTopY + 1) & BLOCK_LEVELS_MASK) << FLUID_UNITS_BITS);
-        saveData[i++] = ((this.rawRetainedLevel + 1) & FLUID_LEVELS_MASK) | (((this.refreshBottomY + 1) & BLOCK_LEVELS_MASK) << FLUID_LEVELS_BITS);
+        saveData[i++] = ((this.rawRetainedUnits + 1) & FLUID_LEVELS_MASK) | (((this.refreshBottomY + 1) & BLOCK_LEVELS_MASK) << FLUID_LEVELS_BITS);
         
         //TODO: need to persist lastVisibleLevel or will not refresh world properly in some scenarios on restart
         
@@ -452,7 +451,7 @@ public class LavaCell implements ISimpleListItem
         this.refreshTopY = (short) ((word >> FLUID_UNITS_BITS) - 1);
         
         word = saveData[i++];
-        this.rawRetainedLevel = (word & FLUID_LEVELS_MASK) - 1;
+        this.rawRetainedUnits = (word & FLUID_LEVELS_MASK) - 1;
         this.refreshBottomY = (short) ((word >> FLUID_LEVELS_BITS) - 1);
         
         int combinedBounds = saveData[i++];
@@ -1583,7 +1582,7 @@ public class LavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
         
         if(this.connections.size() < 4) return true;
         
@@ -1671,21 +1670,37 @@ public class LavaCell implements ISimpleListItem
         
     private void invalidateRawRetention()
     {
-        this.rawRetainedLevel = RETENTION_NEEDS_UPDATE;
-        invalidateSmoothedRetention();
+        this.rawRetainedUnits = RETENTION_NEEDS_UPDATE;
+        this.invalidateSmoothedRetention();
+        
+        int x = this.x();
+        int z = this.z();
+        
+        LavaCell neighbor = this.getFloorNeighbor(x - 1, z);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        
+        neighbor = this.getFloorNeighbor(x + 1, z);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        neighbor = this.getFloorNeighbor(x, z - 1);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        neighbor = this.getFloorNeighbor(x, z + 1);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        
+        neighbor = this.getFloorNeighbor(x - 1, z - 1);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        neighbor = this.getFloorNeighbor(x - 1, z + 1);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        neighbor = this.getFloorNeighbor(x + 1, z - 1);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
+        neighbor = this.getFloorNeighbor(x + 1, z + 1);
+        if(neighbor != null) neighbor.invalidateSmoothedRetention();
     }
     
     /** see {@link #rawRetainedLevel} */
-    public int getRawRetainedLevel()
+    public int getRawRetainedUnits()
     {
-        if(this.rawRetainedLevel == RETENTION_NEEDS_UPDATE)
-        {
-            if(Adversity.DEBUG_MODE) Adversity.log.warn("Raw retention update requested ad-hoc - raw retention update should occur during cell update."
-                    + "This may result in concurrent access to minecraft world objects.");
-            
-            this.updateRawRetention();
-        }
-        return this.rawRetainedLevel;
+        // provide default value until retention can be updated
+        return this.rawRetainedUnits == RETENTION_NEEDS_UPDATE ? this.fluidSurfaceUnits() : this.rawRetainedUnits;
     }
     
     /** see {@link #rawRetainedLevel} */
@@ -1693,7 +1708,8 @@ public class LavaCell implements ISimpleListItem
     {
         if(this.isDeleted) return;
         
-        if(this.rawRetainedLevel == RETENTION_NEEDS_UPDATE)
+     // calculation relies on having current connections
+        if(this.rawRetainedUnits == RETENTION_NEEDS_UPDATE && !this.isConnectionUpdateNeeded)
         {
             this.updateRawRetention();
         }
@@ -1706,43 +1722,43 @@ public class LavaCell implements ISimpleListItem
                 ? this.getFlowFloorRawRetentionDepth()
                 : (int)(locator.cellChunk.cells.sim.terrainHelper
                         .computeIdealBaseFlowHeight(PackedBlockPos.pack(this.x(), this.bottomY(), this.z()))
-                        * LavaSimulator.LEVELS_PER_BLOCK);
+                        * LavaSimulator.FLUID_UNITS_PER_BLOCK);
                 
-        this.rawRetainedLevel = this.getFloor() + depth;
+        this.rawRetainedUnits = this.getFloorUnits() + depth;
     }
     
     /**
-     * Returns retained depth of lava on the given flow block in block levels.
+     * Returns retained depth of lava on the given flow block in fluid units.
      */
     private int getFlowFloorRawRetentionDepth()
     {
         if(Adversity.DEBUG_MODE && !this.isBottomFlow()) 
             Adversity.log.warn("Flow floor retention depth computed for non-flow-floor cell.");
         
-        int myFloor = this.getFloor();
+        int myFloor = this.getFloorUnits();
         
-        int floorMin = Math.max(0, (this.bottomY() - 2) * LavaSimulator.LEVELS_PER_TWO_BLOCKS);
-        int floorMax = Math.min(MAX_LEVEL, (this.bottomY() + 3) * LavaSimulator.LEVELS_PER_TWO_BLOCKS);
+        int floorMin = Math.max(0, (this.bottomY() - 2) * LavaSimulator.FLUID_UNITS_PER_BLOCK);
+        int floorMax = Math.min(MAX_UNITS, (this.bottomY() + 3) * LavaSimulator.FLUID_UNITS_PER_BLOCK);
         
         int x = this.x();
         int z = this.z();
         
-        int negX = Useful.clamp(getFloorForNeighbor(x - 1, z, myFloor ), floorMin, floorMax);
-        int posX = Useful.clamp(getFloorForNeighbor(x + 1, z, myFloor ), floorMin, floorMax);
-        int negZ = Useful.clamp(getFloorForNeighbor(x, z - 1, myFloor ), floorMin, floorMax);
-        int posZ = Useful.clamp(getFloorForNeighbor(x, z + 1, myFloor ), floorMin, floorMax);
+        int negX = Useful.clamp(getFloorUnitsForNeighbor(-1,  0, myFloor ), floorMin, floorMax);
+        int posX = Useful.clamp(getFloorUnitsForNeighbor( 1,  0, myFloor ), floorMin, floorMax);
+        int negZ = Useful.clamp(getFloorUnitsForNeighbor( 0, -1, myFloor ), floorMin, floorMax);
+        int posZ = Useful.clamp(getFloorUnitsForNeighbor( 0,  1, myFloor ), floorMin, floorMax);
         
-        int negXnegZ = Useful.clamp(getFloorForNeighbor(x - 1, z - 1, myFloor ), floorMin, floorMax);
-        int negXposZ = Useful.clamp(getFloorForNeighbor(x - 1, z + 1, myFloor ), floorMin, floorMax);
-        int posXnegZ = Useful.clamp(getFloorForNeighbor(x + 1, z - 1, myFloor ), floorMin, floorMax);
-        int posXposZ = Useful.clamp(getFloorForNeighbor(x + 1, z + 1, myFloor ), floorMin, floorMax);
+        int negXnegZ = Useful.clamp(getFloorUnitsForNeighbor(-1, -1, myFloor ), floorMin, floorMax);
+        int negXposZ = Useful.clamp(getFloorUnitsForNeighbor(-1,  1, myFloor ), floorMin, floorMax);
+        int posXnegZ = Useful.clamp(getFloorUnitsForNeighbor( 1, -1, myFloor ), floorMin, floorMax);
+        int posXposZ = Useful.clamp(getFloorUnitsForNeighbor( 1,  1, myFloor ), floorMin, floorMax);
 
         // Normalize the resulting delta values to the approximate range -1 to 1
-        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / LavaSimulator.LEVELS_PER_TWO_BLOCKS;
-        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / LavaSimulator.LEVELS_PER_TWO_BLOCKS;
+        float deltaX = (posXnegZ + posX + posXposZ - negXnegZ - negX - negXposZ) / 6F / LavaSimulator.FLUID_UNITS_PER_TWO_BLOCKS;
+        float deltaZ = (negXposZ + posZ + posXposZ - negXnegZ - negZ - negXnegZ) / 6F / LavaSimulator.FLUID_UNITS_PER_TWO_BLOCKS;
         double slope = Useful.clamp(Math.sqrt(deltaX * deltaX + deltaZ * deltaZ), 0.0, 1.0);
       
-        int depth = (int) (LavaSimulator.LEVELS_PER_BLOCK * (1.0 - slope));
+        int depth = (int) (LavaSimulator.FLUID_UNITS_PER_BLOCK * (1.0 - slope));
         
         // Abandoned experiment...
         // this function gives a value of 1 for slope = 0 then drops steeply 
@@ -1752,7 +1768,7 @@ public class LavaCell implements ISimpleListItem
         // int depth = (int) (0.25 + 0.75 * Math.pow(1 - Math.sqrt(slope), 2));
         
         //clamp to at least 1/4 of a block and no more than 1.25 block
-        depth = Useful.clamp(depth, LavaSimulator.LEVELS_PER_QUARTER_BLOCK, LavaSimulator.LEVELS_PER_BLOCK_AND_A_QUARTER);
+        depth = Useful.clamp(depth, LavaSimulator.FLUID_UNITS_PER_QUARTER_BLOCK, LavaSimulator.FLUID_UNITS_PER_BLOCK_AND_A_QUARTER);
       
         return depth;
     }
@@ -1761,32 +1777,32 @@ public class LavaCell implements ISimpleListItem
      * For use by getFlowFloorRawRetentionDepth.
      * Returns default value if neighbor is null.
      */
-    private int getFloorForNeighbor(int xOffset, int zOffset, int defaultValue)
+    private int getFloorUnitsForNeighbor(int xOffset, int zOffset, int defaultValue)
     {
         LavaCell neighbor = this.getFloorNeighbor(xOffset, zOffset);
-        return neighbor == null ? defaultValue : neighbor.getFloor();
+        return neighbor == null ? defaultValue : neighbor.getFloorUnits();
     }
     
     /** see {@link #smoothedRetainedUnits} */
     public int getSmoothedRetainedUnits()
     {
-        if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE)
-        {
-            this.updateSmoothedRetention();
-        }
-        return this.smoothedRetainedUnits;
+        // provide default value until retention can be updated
+        return this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE ? this.fluidSurfaceUnits() : this.smoothedRetainedUnits;
     }
 
     /** see {@link #smoothedRetainedUnits} */
     public void invalidateSmoothedRetention()
     {
-        this.smoothedRetainedUnits = RETENTION_NEEDS_UPDATE;
+        if(this.smoothedRetainedUnits != RETENTION_NEEDS_UPDATE) this.smoothedRetainedUnits = RETENTION_NEEDS_UPDATE;
     }
 
     /** see {@link #smoothedRetainedUnits} */
     public void updatedSmoothedRetentionIfNeeded()
     {
-        if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE)
+        if(this.isDeleted) return;
+        
+        // calculation relies on having current connections
+        if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE && !this.isConnectionUpdateNeeded)
         {
             this.updateSmoothedRetention();
         }
@@ -1795,8 +1811,29 @@ public class LavaCell implements ISimpleListItem
     /** see {@link #smoothedRetainedUnits} */
     private void updateSmoothedRetention()
     {
-        //TODO: retention smoothing, this is a stub
-        this.smoothedRetainedUnits = this.getRawRetainedLevel() * LavaSimulator.FLUID_UNITS_PER_LEVEL;
+        int count = 1;
+        int total = this.getRawRetainedUnits();
+        
+        LavaCell neighbor = this.getFloorNeighbor(-1, 0);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        
+        neighbor = this.getFloorNeighbor( 1,  0);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        neighbor = this.getFloorNeighbor( 0, -1);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        neighbor = this.getFloorNeighbor( 0,  1);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        
+        neighbor = this.getFloorNeighbor(-1, -1);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        neighbor = this.getFloorNeighbor(-1,  1);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        neighbor = this.getFloorNeighbor( 1, -1);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }
+        neighbor = this.getFloorNeighbor( 1,  1);
+        if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }        
+        
+        this.smoothedRetainedUnits = total / count;
     }
     
     public void setRefreshRange(int yLow, int yHigh)
