@@ -126,7 +126,7 @@ public class NiceBlock extends Block implements IWailaProvider
 
         
         String makeName = I18n.translateToLocal(getStyleName());
-        if(makeName == null || makeName == "") makeName = getStyleName();
+        if(makeName == null || makeName.equals("")) makeName = getStyleName();
         displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
 
         collisionHandler = dispatcher.getCollisionHandler();

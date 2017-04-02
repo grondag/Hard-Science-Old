@@ -51,6 +51,9 @@ public class WorldStateBuffer implements IBlockAccess
     /** All chunks with update data. */
     private final ConcurrentHashMap<Long, ChunkBuffer> chunks = new ConcurrentHashMap<Long, ChunkBuffer>();
     
+    /** Used to synchronize chunk provisioning */
+    private Object chunkSynch = new Object();
+    
     private final ConcurrentLinkedQueue<ChunkBuffer> usedBuffers = new ConcurrentLinkedQueue<ChunkBuffer>();
     
     /**
@@ -149,7 +152,7 @@ public class WorldStateBuffer implements IBlockAccess
         
         if(chunk == null) 
         {
-            synchronized(chunks)
+            synchronized(chunkSynch)
             {
                 chunk = chunks.get(packedChunkPos);
                 if(chunk == null) 

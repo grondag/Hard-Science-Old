@@ -181,11 +181,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
                 @SuppressWarnings("unchecked")
                 T item =  (T) this.items[i];
                 
-                //TODO: remove
-                if(item == null)
-                    Adversity.log.warn("Derp!");
-
-                if(item.isDeleted())
+                if(item != null && item.isDeleted())
                 {
                     items[i] = items[--newSize];
                     items[newSize] = null;

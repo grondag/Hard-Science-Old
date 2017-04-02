@@ -9,6 +9,7 @@ import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.simulator.Simulator;
 
+@SuppressWarnings("unused")
 public class LavaConnections
 {
     private final SimpleConcurrentList<LavaConnection> connectionList;

@@ -92,16 +92,22 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
     {
         long oldKey = 0;
         NiceTileEntity myTE = (NiceTileEntity) world.getTileEntity(pos);
-        if(myTE != null) oldKey = myTE.getModelKey();
-        boolean needsRefresh = myTE.isModelKeyCacheDirty;
-        myTE.isModelKeyCacheDirty = false;
-        long newKey = dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, needsRefresh, this, state, world, pos);
-        if(newKey != oldKey) 
+        if(myTE != null) 
         {
-//            Adversity.log.info("calling setModelKey from NiceBlockPlus.getModelStateKey");
-            myTE.setModelKey(newKey);
+            oldKey = myTE.getModelKey();
+            boolean needsRefresh = myTE.isModelKeyCacheDirty;
+            myTE.isModelKeyCacheDirty = false;
+            long newKey = dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, needsRefresh, this, state, world, pos);
+            if(newKey != oldKey) 
+            {
+                myTE.setModelKey(newKey);
+            }
+            return newKey;
         }
-        return newKey;
+        else
+        {
+            return dispatcher.getStateSet().getRefreshedKeyFromWorld(oldKey, true, this, state, world, pos);
+        }
     }
     
     public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, NiceTileEntity niceTE)

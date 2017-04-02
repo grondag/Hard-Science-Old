@@ -120,6 +120,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         if(state == null || this.colorComponent == null)
         {
             Adversity.log.warn("derp!");
+            return rawQuads;
         }
         template.color = state.getValue(this.colorComponent).getColor(EnumColorMap.BASE);
         template.lockUV = true;

@@ -18,6 +18,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
@@ -52,7 +53,7 @@ public class TerrainWand extends Item
             if(itemStackIn.hasTagCompound())
             {
                 tag = itemStackIn.getTagCompound();
-                if(tag.getString(MODE_TAG) == TerrainMode.STATE.name())
+                if(tag.getString(MODE_TAG).equals(TerrainMode.STATE.name()))
                 {
                     newMode = TerrainMode.HEIGHT;
                 }
@@ -75,7 +76,7 @@ public class TerrainWand extends Item
 
     public TerrainMode getMode(ItemStack itemStackIn)
     {
-        if(itemStackIn.hasTagCompound() && itemStackIn.getTagCompound().getString(MODE_TAG) == TerrainMode.STATE.name())
+        if(itemStackIn.hasTagCompound() && itemStackIn.getTagCompound().getString(MODE_TAG).equals(TerrainMode.STATE.name()))
         {
             return TerrainMode.STATE;
         }
@@ -333,7 +334,7 @@ public class TerrainWand extends Item
         worldIn.playSound((double)((float)targetPos.getX() + 0.5F), 
                 (double)((float)targetPos.getY() + 0.5F), 
                 (double)((float)targetPos.getZ() + 0.5F), 
-                blockIn.getSoundType().getPlaceSound(), null, 
+                blockIn.getSoundType().getPlaceSound(), SoundCategory.BLOCKS, 
                 (blockIn.getSoundType().getVolume() + 1.0F) / 2.0F, blockIn.getSoundType().getPitch() * 0.8F, true);
 
         return EnumActionResult.SUCCESS;

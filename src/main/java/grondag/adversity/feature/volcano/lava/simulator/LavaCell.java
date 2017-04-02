@@ -2021,7 +2021,7 @@ public class LavaCell implements ISimpleListItem
         int newLevel = expectedPreviousLevel + amount;
         if(newLevel < this.floorUnits)
         {
-            Adversity.log.info(String.format("Fluid surface units below floor units.  Surface=%1$d Floor=%2$d cellID=%3$d", this.fluidSurfaceUnits, this.floorUnits, this.id));
+            Adversity.log.info(String.format("Fluid surface units below floor units.  Surface=%1$d Floor=%2$d cellID=%3$d", this.fluidSurfaceUnits.get(), this.floorUnits, this.id));
             newLevel = this.floorUnits;
         }
         
