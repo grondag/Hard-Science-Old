@@ -1577,7 +1577,7 @@ public class LavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
         
         if(this.connections.size() < 4) return true;
         
@@ -1820,6 +1820,7 @@ public class LavaCell implements ISimpleListItem
     /** see {@link #smoothedRetainedUnits} */
     private void updateSmoothedRetention()
     {
+
         int count = 1;
         int total = this.getRawRetainedUnits();
         
@@ -1842,7 +1843,15 @@ public class LavaCell implements ISimpleListItem
         neighbor = this.getFloorNeighbor( 1,  1);
         if(neighbor != null) { count++; total += neighbor.getRawRetainedUnits(); }        
         
-        this.smoothedRetainedUnits = total / count;
+        if(this.isBottomFlow())
+        {
+            this.smoothedRetainedUnits = total / count;
+        }
+        else
+        {
+            this.smoothedRetainedUnits = Math.max(this.getFloorUnits() + LavaSimulator.FLUID_UNITS_PER_HALF_BLOCK, total / count);
+        }
+       
     }
     
     public void setRefreshRange(int yLow, int yHigh)

@@ -187,15 +187,20 @@ public class LavaCells
             @Override
             public int compare(Object o1, Object o2)
             {
-                return Integer.compare(((CellChunk)o1).validationPriority(), ((CellChunk)o2).validationPriority());
+                return Integer.compare(((CellChunk)o2).validationPriority(), ((CellChunk)o1).validationPriority());
             }
         });
         
         for(Object chunk : candidates)
         {
-            if(((CellChunk)chunk).isNew() || this.processChunks.size() < MAX_CHUNKS_PER_TICK)
+            CellChunk c = (CellChunk)chunk;
+            if(c.isNew() || (this.processChunks.size() < MAX_CHUNKS_PER_TICK && c.validationPriority() > 0))
             {
-                this.processChunks.add((CellChunk)chunk);
+                this.processChunks.add(c);
+            }
+            else
+            {
+                break;
             }
         }
        

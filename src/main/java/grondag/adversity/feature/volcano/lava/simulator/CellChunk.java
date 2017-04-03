@@ -151,6 +151,7 @@ public class CellChunk implements ISimpleListItem
                     }
                 }
             }
+            this.validationCount.set(0);
         }
         
         return true;
@@ -189,6 +190,7 @@ public class CellChunk implements ISimpleListItem
 
             //  this.isLoaded = true;
             this.needsFullValidation = false;
+            this.validationCount.set(0);
         }
     }
 

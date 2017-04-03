@@ -25,7 +25,6 @@ public class CommonEventHandler
 {
     public static final CommonEventHandler INSTANCE = new CommonEventHandler();
     //TODO: localize
-    //TODO: localize
     private static final String[] DENIALS = 
     {
         "Absolutely not.",
@@ -33,9 +32,10 @@ public class CommonEventHandler
         "Not happening",
         "Doctor No sends his regards.",
         "You must be joking.",
-        "I made a list of things that aren't going to happen, and what you just tried is near the top.",
+        "I made a list of things that aren't going to happen, and what you just tried is on it.",
         "Nice try.",
-        "That's not going to work."
+        "That's not going to work.",
+        "DENIED!"
     };
     
     @SubscribeEvent(priority = EventPriority.HIGH) 
@@ -63,34 +63,27 @@ public class CommonEventHandler
     @SubscribeEvent
     public void onBlockBreak(BlockEvent.BreakEvent event) 
     {
-        //TODO: remove cast when column model is fully implemented
-        
         // Lava blocks have their own handling
         if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
-            LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();        
-            sim.notifyBlockChange(event.getWorld(), event.getPos());
+            Simulator.instance.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
     @SubscribeEvent
     public void onBlockPlaced(BlockEvent.PlaceEvent event)
     {
-        //TODO: remove cast when column model is fully implemented
-        
         // Lava blocks have their own handling
         if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
-            LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();        
-            sim.notifyBlockChange(event.getWorld(), event.getPos());
+            Simulator.instance.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
     @SubscribeEvent
     public void onBlockMultiPlace(BlockEvent.MultiPlaceEvent event)
     {
-        //TODO: remove cast when column model is fully implemented
-        LavaSimulator sim = (LavaSimulator) Simulator.instance.getFluidTracker();
+        LavaSimulator sim = Simulator.instance.getFluidTracker();
         for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
         {
             if(!(snap.getCurrentBlock() instanceof VolcanicLavaBlock))
