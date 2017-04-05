@@ -1,11 +1,15 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
+import java.util.Collection;
 import java.util.concurrent.Executor;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
+import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
+import grondag.adversity.feature.volcano.lava.ParticleManager;
+import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEventHandler;
@@ -30,6 +34,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
@@ -43,6 +48,7 @@ public class LavaSimulator extends SimulationNode
     public final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Lava Simulator Off tick");
     private PerformanceCounter perfOnTick = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "On-Tick", perfCollectorAllTick);
     private PerformanceCounter perfOffTick = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "Off-Tick", perfCollectorAllTick);
+    private PerformanceCounter perfParticles = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "Particle Spawning", perfCollectorOnTick);
     
     public static final byte LEVELS_PER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT;
     public static final byte LEVELS_PER_QUARTER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 4;
@@ -65,6 +71,7 @@ public class LavaSimulator extends SimulationNode
 
     public final WorldStateBuffer worldBuffer;
     public final LavaTerrainHelper terrainHelper;
+    public final ParticleManager particleManager;
     
     /** Basalt blocks that are awaiting cooling */
 //    private final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
@@ -72,7 +79,7 @@ public class LavaSimulator extends SimulationNode
     private int lastEligibleBasaltCoolingTick;
     
     private final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
-    private static final int BASALT_BLOCKS_NBT_WIDTH = 4;
+    private static final int BASALT_BLOCKS_NBT_WIDTH = 3;
     
     private final CountedJobTask<AgedBlockPos> basaltCoolingTask =  new CountedJobTask<AgedBlockPos>() 
     {
@@ -81,11 +88,11 @@ public class LavaSimulator extends SimulationNode
         {
             if(operand.getTick() <= lastEligibleBasaltCoolingTick)
             {
-                IBlockState state = worldBuffer.getBlockState(operand.pos);
+                IBlockState state = worldBuffer.getBlockState(operand.packedBlockPos);
                 Block block = state.getBlock();
                 if(block instanceof CoolingBlock)
                 {
-                    switch(((CoolingBlock)block).tryCooling(worldBuffer, operand.pos, state))
+                    switch(((CoolingBlock)block).tryCooling(worldBuffer, PackedBlockPos.unpack(operand.packedBlockPos), state))
                     {
                         case PARTIAL:
                             // will be ready to cool again after delay
@@ -173,7 +180,7 @@ public class LavaSimulator extends SimulationNode
                 }
                 else
                 {
-                    target.addLavaAtLevel(event.y * LEVELS_PER_BLOCK + 1, event.amount * FLUID_UNITS_PER_LEVEL);
+                    target.addLavaAtY(event.y, event.amount * FLUID_UNITS_PER_LEVEL);
                     target.setRefreshRange(event.y, event.y);
                     return true;
                 }
@@ -205,7 +212,7 @@ public class LavaSimulator extends SimulationNode
             }
             else
             {
-                target.addLavaAtLevel(event.y * LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK, event.amount);
+                target.addLavaAtY(event.y, event.amount);
                 return true;
             }
         }
@@ -222,6 +229,7 @@ public class LavaSimulator extends SimulationNode
         super(NodeRoots.LAVA_SIMULATOR.ordinal());
         this.worldBuffer = new WorldStateBuffer(world, ENABLE_PERFORMANCE_COUNTING, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
+        this.particleManager = new ParticleManager();
         this.LAVA_THREAD_POOL = Simulator.executor;
         this.basaltCoolingJob = new CountedJob<AgedBlockPos>(this.basaltBlocks, this.basaltCoolingTask, 1024, 
                 ENABLE_PERFORMANCE_COUNTING, "Basalt Cooling", perfCollectorOnTick);    
@@ -417,16 +425,17 @@ public class LavaSimulator extends SimulationNode
 //            this.itMe = true;
             this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
 //            this.itMe = false;
-            this.basaltBlocks.add(new AgedBlockPos(PackedBlockPos.unpack(packedBlockPos), Simulator.instance.getTick()));
+            this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.instance.getTick()));
         }
     }
     
     @Override
     public void writeToNBT(NBTTagCompound nbt)
     {
-        
         this.saveLavaNBT(nbt);
-        
+        this.worldBuffer.writeToNBT(nbt);
+        this.particleManager.writeToNBT(nbt);
+
         // SAVE BASALT BLOCKS
         {
             Adversity.log.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
@@ -434,16 +443,12 @@ public class LavaSimulator extends SimulationNode
             int i = 0;
             for(AgedBlockPos apos: basaltBlocks)
             {
-                saveData[i++] = apos.pos.getX();
-                saveData[i++] = apos.pos.getY();
-                saveData[i++] = apos.pos.getZ();
+                saveData[i++] = (int) (apos.packedBlockPos & 0xFFFFFFFF);
+                saveData[i++] = (int) ((apos.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = apos.getTick();
             }       
             nbt.setIntArray(BASALT_BLOCKS_NBT_TAG, saveData);
-            
-            this.worldBuffer.writeToNBT(nbt);
         }
-
     }
     
     public void readFromNBT(NBTTagCompound nbt)
@@ -452,6 +457,8 @@ public class LavaSimulator extends SimulationNode
         basaltBlocks.clear();
         
         this.worldBuffer.readFromNBT(nbt);
+        
+        this.particleManager.readFromNBT(nbt);
         
         this.readLavaNBT(nbt);
         
@@ -469,7 +476,7 @@ public class LavaSimulator extends SimulationNode
             int i = 0;
             while(i < saveData.length)
             {
-                this.basaltBlocks.add(new AgedBlockPos(new BlockPos(saveData[i++], saveData[i++], saveData[i++]), saveData[i++]));
+                this.basaltBlocks.add(new AgedBlockPos(((long)saveData[i++] << 32) | (long)saveData[i++], saveData[i++]));
             }
             Adversity.log.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
@@ -539,7 +546,8 @@ public class LavaSimulator extends SimulationNode
         // Enable detection of improper world access 
         this.worldBuffer.isMCWorldAccessAppropriate = true;
         
-        //TODO: particle processing goes here
+        // Particle processing
+        this.doParticles();
         
         // This job can access world objects concurrently, however all access is 
         // read only and is synchronized by the worldBuffer.
@@ -662,6 +670,51 @@ public class LavaSimulator extends SimulationNode
             perfOffTick.endRun();
             perfOffTick.addCount(1);
         }
+    }
+    
+    private void doParticles()
+    {
+        perfParticles.startRun();
+        
+        //TODO: make particle limit configurable
+        int capacity =  10 - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
+        
+        if(capacity <= 0) return;
+        
+        Collection<ParticleInfo> particles = this.particleManager.pollEligible(this, capacity);
+        
+        if(particles != null && !particles.isEmpty())
+        {
+            for(ParticleInfo p : particles)
+            {
+                LavaCell cell = this.cells.getCellIfExists(p.x(), p.y(), p.z());
+                
+                // abort on strangeness
+                if(cell == null) continue;
+                
+                if(p.y() - cell.fluidSurfaceY() > 3)
+                {
+                    // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
+                    if(p.getFluidUnits() >= FLUID_UNITS_PER_LEVEL)
+                    {
+                        EntityLavaParticle elp = new EntityLavaParticle(this.worldBuffer.realWorld, p.getFluidUnits(), 
+                              new Vec3d(
+                                      PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
+                                      PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
+                                      PackedBlockPos.getZ(p.packedBlockPos) + 0.5
+                                  ),
+                              Vec3d.ZERO);
+                        
+                        worldBuffer.realWorld.spawnEntityInWorld(elp);
+                    }
+                }
+                else 
+                {
+                    cell.addLava(p.getFluidUnits());
+                }
+            }
+        }
+        perfParticles.endRun();
     }
     
     public void doStats()

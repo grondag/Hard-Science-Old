@@ -2,6 +2,8 @@ package grondag.adversity.feature.volcano.lava;
 
 
 import grondag.adversity.library.ISimpleListItem;
+import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.Useful;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -12,12 +14,17 @@ import net.minecraft.util.math.BlockPos;
 public class AgedBlockPos implements ISimpleListItem
 {
     private int tick;
-    public final BlockPos pos;
+    public final long packedBlockPos;
     private boolean isDeleted = false;
     
     public AgedBlockPos(BlockPos pos, int tick)
     {
-        this.pos = pos;
+        this(PackedBlockPos.pack(pos), tick);
+    }
+    
+    public AgedBlockPos(long packedBlockPos, int tick)
+    {
+        this.packedBlockPos = packedBlockPos;
         this.tick = tick;
     }
     
@@ -39,7 +46,7 @@ public class AgedBlockPos implements ISimpleListItem
     @Override
     public int hashCode()
     {
-        return this.pos.hashCode();
+        return (int) (Useful.longHash(this.packedBlockPos) & 0xFFFFFFFF);
     }
 
     @Override
@@ -51,7 +58,7 @@ public class AgedBlockPos implements ISimpleListItem
         }
         else if(obj instanceof AgedBlockPos)
         {
-            return this.pos.equals(((AgedBlockPos)obj).pos);
+            return this.packedBlockPos == ((AgedBlockPos)obj).packedBlockPos;
         }
         else
         {
@@ -64,15 +71,5 @@ public class AgedBlockPos implements ISimpleListItem
     {
          return this.isDeleted;
     }
-    
-
-    
-//    @Override
-//    public int compareTo(AgedBlockPos other)
-//    {
-//        return ComparisonChain.start()
-//                .compare(this.tick, other.tick)
-//                .compare(this.sequenceID, other.sequenceID)
-//                .result();
-//    }
+ 
 }

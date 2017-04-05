@@ -20,11 +20,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 
-public class LavaCell implements ISimpleListItem
+public class LavaCell extends AbstractLavaCell implements ISimpleListItem
 {
-    private static AtomicInteger nextCellID = new AtomicInteger(0);
-    
-    public final int id = nextCellID.getAndIncrement();
     
     /**
      * True if locked for update via {@link #tryLock()}
@@ -59,37 +56,11 @@ public class LavaCell implements ISimpleListItem
     /** holds all connections with other cells */
     public final SimpleUnorderedArrayList<LavaConnection> connections = new SimpleUnorderedArrayList<LavaConnection>();
    
-    /** see {@link #getFloor()} */
-    private int floor;
-    
-    /** 
-     * Floor as fluid units instead of levels - derived from floor each time floor is set.
-     * Here to avoid multiplying floor each connection pass.
-     */
-    private int floorUnits;
-    
-    /** see {@link #bottomY()} */
-    private short bottomY;
-    
-    /** see {@link #getCeiling()} */
-    private int ceiling;
-    
-    /** see {@link #topY()} */
-    private short topY;
-    
-    /** see {@link #isBottomFlow()} */
-    private boolean isBottomFlow;
-    
     private boolean isCoolingDisabled = false;
     
     /** true if is in an active flowing volcano bore and should generate lava */
     private boolean isBoreCell = false;
-    
-    /** 
-     * True if this cell is new or has expanded.
-     * Used to determine if updateConnectionsIfNeeded should do anything.
-     */
-    private boolean isConnectionUpdateNeeded = true;
+
     
     /** value for {@link #lastVisibleLevel} indicating level has never been reported via {@link #provideBlockUpdateIfNeeded(LavaSimulator)} */
     private static final int NEVER_REPORTED = -1;
@@ -105,21 +76,6 @@ public class LavaCell implements ISimpleListItem
     /** true if this cell should remain loaded */
     private volatile boolean isActive = false;
     
-    
-    /**
-     * Surface of the cell as measured in fluid units.  If equal to floorUnits, cell has no fluid.
-     * Stored in this way instead of as the depth of fluid because most references / calculations 
-     * need the surface instead of the depth.
-     */
-    private AtomicInteger fluidSurfaceUnits = new AtomicInteger(0);
-    
-    
-    /** 
-     * Value of fluidSurfaceUnits that was last used for block update.
-     * If different from fluidSurfaceUnits indicates a block update may now be needed. 
-     * Saves cost of calculating currentVisible if isn't necessary.
-     */
-    private int lastFluidSurfaceUnits;
     
     public static final short REFRESH_NONE = -1;
     /**
@@ -159,30 +115,17 @@ public class LavaCell implements ISimpleListItem
     public int avgFluidSurfaceUnitsWithPrecision = 0;
     
     /**
-     * Maximum pressure level reported by any connected neighbor during the last connection processing pass.
-     * Set to nextMaxNeighborPressure whenever propagate pressure sees a new stepIndex.
-     */
-//    private int lastMaxNeighborPressure;
-    
-    /**
-     * Maximum pressure level reported by any connected neighbor during the current connection processing pass.
-     * Set to 0 whenever propagate pressure sees a new stepIndex.
-     */
-//    private int nextMaxNeighborPressure;
-    
-    /**
-     * The stepIndex that was last seen.
-     * Step index will increment multiple times per tick.
-     * When a new stepIndex is seen, is trigger to reset pressure propagation.
-     */
-//    private int lastStepIndex;
-    
-    /**
      * The simulation tick that was last seen.
-     * Flow index will increment multiple times per tick.
-     * When a new flowIndex is seen, is trigger to reset pressure propagation.
+     * Used to know when a cell can be cooled.
      */
     private int lastTickIndex;
+    
+    /** 
+     * Value of fluidSurfaceUnits that was last used for block update.
+     * If different from fluidSurfaceUnits indicates a block update may now be needed. 
+     * Saves cost of calculating currentVisible if isn't necessary.
+     */
+    private int lastFluidSurfaceUnits;
     
     /**
      * Creates new cell and adds to processing array. 
@@ -206,7 +149,7 @@ public class LavaCell implements ISimpleListItem
         this.setFloor(floor, isFlowFloor);
         this.setCeiling(ceiling);
         this.emptyCell();
-        this.makeBlockUpdateCurrent();
+        this.clearHasFluidChanged();
         this.locator.cellChunk.cells.add(this);
     }
     
@@ -231,10 +174,21 @@ public class LavaCell implements ISimpleListItem
         this.locator = new CellLocator(x, z, this, cells.getOrCreateCellChunk(x, z));
         this.setFloor(floor, isFlowFloor);
         this.emptyCell();
-        this.makeBlockUpdateCurrent();
+        this.clearHasFluidChanged();
         this.setCeiling(ceiling);
         cells.add(this);
         this.updateActiveStatus();
+    }
+    
+    protected boolean hasFluidChanged()
+    {
+        return this.fluidSurfaceUnits.get() == this.lastFluidSurfaceUnits;
+    }
+    
+    @Override
+    protected void clearHasFluidChanged()
+    {
+        this.lastFluidSurfaceUnits = this.fluidSurfaceUnits.get();
     }
     
     /** 
@@ -378,7 +332,7 @@ public class LavaCell implements ISimpleListItem
     }
 
     static final String LAVA_CELL_NBT_TAG = "lavacells";
-    static final int LAVA_CELL_NBT_WIDTH = 6;
+    static final int LAVA_CELL_NBT_WIDTH = 8;
 
     /** 
      * Enough to store 12000 * 256, which would be fluid in an entire world column.  
@@ -412,8 +366,7 @@ public class LavaCell implements ISimpleListItem
         saveData[i++] = (this.getFluidUnits() & FLUID_UNITS_MASK) | (((this.refreshTopY + 1) & BLOCK_LEVELS_MASK) << FLUID_UNITS_BITS);
         saveData[i++] = ((this.rawRetainedUnits + 1) & FLUID_LEVELS_MASK) | (((this.refreshBottomY + 1) & BLOCK_LEVELS_MASK) << FLUID_LEVELS_BITS);
         
-        //TODO: need to persist lastVisibleLevel or will not refresh world properly in some scenarios on restart
-        
+
         // to save space, pack bounds into single int and save flow floor as sign bit
         int combinedBounds = this.getCeiling() << 12 | this.getFloor();
         if(this.isBottomFlow) combinedBounds = -combinedBounds;
@@ -421,6 +374,12 @@ public class LavaCell implements ISimpleListItem
         
         // save never cools as sign bit on last tick index
         saveData[i++] = this.isCoolingDisabled ? -this.lastTickIndex : this.lastTickIndex;
+        
+        // need to persist lastVisibleLevel or will not refresh world properly in some scenarios on restart
+        saveData[i++] = this.lastVisibleLevel;
+        
+        // also persist lastFluidSurfaceUnits to avoid block updates for every cell on reload
+        saveData[i++] = this.lastFluidSurfaceUnits;
     }
     
 //    /** top level that would contain fluid if this column could expand vertically unconstrained */
@@ -458,7 +417,6 @@ public class LavaCell implements ISimpleListItem
         
         this.fluidSurfaceUnits.set(this.floorUnits + fluidUnits);
 
-        // TODO: should we persist lastFluidSurfaceUnits to avoid block updates for every cell on reload?
         
         this.lastTickIndex = saveData[i++];
         if(this.lastTickIndex < 0)
@@ -470,67 +428,10 @@ public class LavaCell implements ISimpleListItem
         {
             this.isCoolingDisabled = false;
         }
-    }
-    
-    public int getFluidUnits()
-    {
-        return this.fluidSurfaceUnits.get() - this.floorUnits;
-    }
-    
-    public boolean isEmpty()
-    {
-        return this.fluidSurfaceUnits.get() <= this.floorUnits;
-    }
-    
-    public int getVolume()
-    {
-        return this.getCeiling() - this.getFloor();
-    }
-    
-    /** 
-     * Top level that contains fluid in the world. For columns under pressure
-     * may be less than fluid amount would normally indicate. 
-     * Will return cell floor if there is no fluid in the cell.
-     */
-    public int fluidSurfaceLevel()
-    {
-        return Math.min(this.getCeiling(), this.fluidSurfaceUnits.get() / LavaSimulator.FLUID_UNITS_PER_LEVEL); 
-    }
-    
-    /**
-     * Returns the world Y-level of the uppermost block containing lava.
-     * Returns {@link #bottomY()} if the cell does not contain fluid.
-     */
-    public int fluidSurfaceY()
-    {
-        if(this.fluidSurfaceUnits.get() == this.floorUnits) return this.bottomY();
         
-        return getYFromCeiling(this.fluidSurfaceLevel());
-    }
-
-    /**
-     * Returns the flow height (1 - 12) of lava in the lava block at fluidSurfaceY 
-     * Returns 0 if this cell does not contain lava.
-     */
-    public int fluidSurfaceFlowHeight()
-    {
-        if(this.fluidSurfaceUnits.get() == this.floorUnits) return 0;
+        this.lastVisibleLevel = saveData[i++];
         
-        // examples of fluidSurfaceLevel -> output
-        // 23 -> 11
-        // 24 -> 12
-        // 25 -> 1
-        return this.fluidSurfaceLevel() - this.fluidSurfaceY() * FlowHeightState.BLOCK_LEVELS_INT;
-    }
-    
-    /** 
-     * Absolute surface level as measured in fluid units. Solid blocks/levels below count 
-     * as if they contained fluid.  Also include any excess fluid for cells under pressure.
-     * If cell has no fluid, is the level of the cell floor, as if it were fluid.
-     */
-    public int fluidSurfaceUnits()
-    {
-        return this.fluidSurfaceUnits.get(); 
+        this.lastFluidSurfaceUnits = saveData[i++];
     }
     
     /** 
@@ -657,45 +558,6 @@ public class LavaCell implements ISimpleListItem
      
     // LOCATION INFO
     
-    /** See {@link #getFloor()} */
-    public void  setFloor(int newFloor, boolean isFlowFloor)
-    {
-        if(newFloor != this.floor || isFlowFloor != this.isBottomFlow)
-        {
-            // check for new connections whenever cell expands
-            if(newFloor < this.floor) this.isConnectionUpdateNeeded = true;
-            
-            this.floor = newFloor;
-            this.floorUnits = newFloor * LavaSimulator.FLUID_UNITS_PER_LEVEL;
-            this.isBottomFlow = isFlowFloor;
-            this.bottomY = (short) getYFromFloor(this.floor);
-            
-            if(this.fluidSurfaceUnits.get() <= this.floorUnits)
-            {
-                this.emptyCell();
-                this.makeBlockUpdateCurrent();
-            }
-            
-            //force retention recalc
-            this.invalidateRawRetention();
-        }
-    }
-    
-    /** 
-     * First (lowest) fluid level that can contain fluid, EXCLUSIVE.
-     * Values range from 0 to (256 * LEVELS_PER_BLOCK) - 1 
-     * Levels in Y=0 for example, are 0 thru 11.
-     * ALWAYS USE setFloor() instead of floor to maintain bottomY.
-     */
-    public int getFloor()
-    {
-        return this.floor;
-    }
-    
-    public int getFloorUnits()
-    {
-        return this.floorUnits;
-    }
     /**
      * Locates neighboring lava cell that shares a floor surface with this cell.
      * Cells must connect to share a floor surface.
@@ -789,86 +651,6 @@ public class LavaCell implements ISimpleListItem
         return candidate;
     }
     
-    /** Y of first (lowest) block that could contain lava */
-    public int bottomY()
-    {
-        return this.bottomY; 
-    }
-   
-    /** Flow height of solid portion of block at {@link #bottomY()}
-     *  Will be 0 if floor is not a flow block.
-     *  Will also be 0 if floor is a full-height flow block at Y-1.
-     *  Will be in range 1-11 if floor is within the block at Y.
-     *  Note that 12 is not a valid result because that would mean 
-     *  block at Y is not the floor because it could not contain lava.
-     */
-    public int floorFlowHeight()
-    {
-        //Examples of this.floor -> output
-        // 12 -> 0
-        // 13 -> 1
-        // 23 -> 11
-        // 24 -> 0
-        return this.floor % FlowHeightState.BLOCK_LEVELS_INT;
-    }
-    
-    /** 
-     * True if the solid block under this columns is a flow block.
-     * Note that it must be true if bottomFlowHeight > 0;
-     */
-    public boolean isBottomFlow()
-    {
-        return this.isBottomFlow;
-    }
-  
-    
-    /** See {@link #getCeiling()} */
-    public void  setCeiling(int newCeiling)
-    {
-        // check for new connections whenever cell expands
-        if(newCeiling > this.ceiling) this.isConnectionUpdateNeeded = true;
-        
-        this.ceiling = newCeiling;
-        this.topY = (short) getYFromCeiling(this.ceiling);
-    }
-    
-    /** 
-     * Last (highest) block level that can contain fluid, INCLUSIVE.
-     * Values range from 1 to (256 * LEVELS_PER_BLOCK)
-     * Levels in Y=0, for example are 1 thru 12.
-     * ALWAYS USE setCeiling() to maintain topY.
-     */
-    public int getCeiling()
-    {
-        return this.ceiling;
-    }
-    
-    public int getCeilingUnits()
-    {
-        return this.ceiling * LavaSimulator.FLUID_UNITS_PER_LEVEL;
-    }
-    
-    /** Y of last (top) block that could contain lava */
-    public int topY()
-    {
-        return this.topY;
-    }
-    
-    /** calculates the block y from a top bound (inclusive) given as a fluid level */
-    private static int getYFromCeiling(int ceilingIn)
-    {
-        // examples of input -> output
-        // 24 -> 1  top level of block at Y = 1
-        // 25 -> 2  first level of block at Y = 2
-        return (ceilingIn - 1) / LavaSimulator.LEVELS_PER_BLOCK;
-    }
-    
-    /** calculates the block y from a bottom bound (exclusive) given as a fluid level */
-    private static int getYFromFloor(int floorIn)
-    {
-        return floorIn / LavaSimulator.LEVELS_PER_BLOCK;
-    }
-   
     /** 
      * Ceiling is inclusive, floor is not. 
      */
@@ -908,29 +690,22 @@ public class LavaCell implements ISimpleListItem
                 && this.intersectsWith(other.getFloor(), other.getCeiling());
     }
     
-    /** returns floor (exclusive) of the block position at level y */
-    private static int blockFloorFromY(int y)
-    {
-        return y * LavaSimulator.LEVELS_PER_BLOCK;
-    }
-    
-    /** returns ceiling (inclusive) of the block position at level y */
-    private static int blockCeilingFromY(int y)
-    {
-        return (y + 1) * LavaSimulator.LEVELS_PER_BLOCK;
-    }
-    
-    
     /**
      * Use to input lava into this cell (potentially) above the fluid surface.
      * Will add lava to surface after an appropriate falling time and 
      * render particles as appropriate.
-     * Level is fluid level (12 per block) not world y level.
      */
-    public void addLavaAtLevel(int level, int fluidUnits)
+    public void addLavaAtY(int y, int fluidUnits)
     {
         //TODO: implement something more interesting, including persistence.
-        this.addLava(fluidUnits);
+        if(y - this.fluidSurfaceY() < 4)
+        {
+            this.addLava(fluidUnits);
+        }
+        else
+        {
+            this.locator.cellChunk.cells.sim.particleManager.addLavaForParticle(PackedBlockPos.pack(this.x(), y, this.z()), fluidUnits);
+        }
     }
     
     public void addLava(int fluidUnits)
@@ -1144,7 +919,7 @@ public class LavaCell implements ISimpleListItem
                         break;
                     }
                     
-                    lowerCell.addLavaAtLevel(y * LavaSimulator.LEVELS_PER_BLOCK, y == topY ? remaining : LavaSimulator.FLUID_UNITS_PER_BLOCK);
+                    lowerCell.addLavaAtY(y, y == topY ? remaining : LavaSimulator.FLUID_UNITS_PER_BLOCK);
                     remaining -=  LavaSimulator.FLUID_UNITS_PER_BLOCK;
                 }
             }
@@ -1394,7 +1169,7 @@ public class LavaCell implements ISimpleListItem
     {
         if(this.isDeleted) return;
         
-        if(this.isConnectionUpdateNeeded)
+        if(this.isConnectionUpdateNeeded())
         {
             for(Object o : this.connections.toArray())
             {
@@ -1416,7 +1191,7 @@ public class LavaCell implements ISimpleListItem
             this.updateConnectionsWithColumn(cells.getEntryCell(x + 1, z), connections);
             this.updateConnectionsWithColumn(cells.getEntryCell(x, z - 1), connections);
             this.updateConnectionsWithColumn(cells.getEntryCell(x, z + 1), connections);
-            this.isConnectionUpdateNeeded = false;
+            this.clearConnectionUpdate();
         }
     }
     
@@ -1543,7 +1318,7 @@ public class LavaCell implements ISimpleListItem
     /** maintains indication of whether or not this cell must remain loaded */
     public void updateActiveStatus()
     {
-        boolean shouldBeActive = !this.isDeleted && (!this.isEmpty() || !this.isBlockUpdateCurrent());
+        boolean shouldBeActive = !this.isDeleted && (!this.isEmpty() || !this.hasFluidChanged());
         
         if(this.isActive)
         {
@@ -1577,7 +1352,7 @@ public class LavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.getFluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
         
         if(this.connections.size() < 4) return true;
         
@@ -1612,21 +1387,7 @@ public class LavaCell implements ISimpleListItem
             this.clearBlockUpdate();
         }
     }
-    
-    private void emptyCell()
-    {
-        this.fluidSurfaceUnits.set(this.floorUnits);
-    }
-    
-    private boolean isBlockUpdateCurrent()
-    {
-        return this.fluidSurfaceUnits.get() == this.lastFluidSurfaceUnits;
-    }
-    
-    private void makeBlockUpdateCurrent()
-    {
-        this.lastFluidSurfaceUnits = this.fluidSurfaceUnits.get();
-    }
+
     
     /**
      * For use when updating from world and no need to re-update world.
@@ -1634,7 +1395,7 @@ public class LavaCell implements ISimpleListItem
     public void clearBlockUpdate()
     {
         this.avgFluidSurfaceUnitsWithPrecision = this.fluidSurfaceUnits.get() << 6;
-        this.makeBlockUpdateCurrent();
+        this.clearHasFluidChanged();
         this.lastVisibleLevel = this.getCurrentVisibleLevel();
 //        this.updateActiveStatus();
     }
@@ -1662,8 +1423,9 @@ public class LavaCell implements ISimpleListItem
         return this.lastVisibleLevel;
         
     }
-        
-    private void invalidateRawRetention()
+    
+    @Override
+    protected void invalidateRawRetention()
     {
         this.rawRetainedUnits = RETENTION_NEEDS_UPDATE;
         this.invalidateSmoothedRetention();
@@ -1704,7 +1466,7 @@ public class LavaCell implements ISimpleListItem
         if(this.isDeleted) return;
         
      // calculation relies on having current connections
-        if(this.rawRetainedUnits == RETENTION_NEEDS_UPDATE && !this.isConnectionUpdateNeeded)
+        if(this.rawRetainedUnits == RETENTION_NEEDS_UPDATE && !this.isConnectionUpdateNeeded())
         {
             this.updateRawRetention();
         }
@@ -1811,7 +1573,7 @@ public class LavaCell implements ISimpleListItem
         if(this.isDeleted) return;
         
         // calculation relies on having current connections
-        if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE && !this.isConnectionUpdateNeeded)
+        if(this.smoothedRetainedUnits == RETENTION_NEEDS_UPDATE && !this.isConnectionUpdateNeeded())
         {
             this.updateSmoothedRetention();
         }
@@ -1962,13 +1724,13 @@ public class LavaCell implements ISimpleListItem
         // has to be captured here before it is possibly changed by routine below
         final int lastVisible = this.getLastVisibleLevel();
         
-        if(!isBlockUpdateCurrent()) 
+        if(!hasFluidChanged()) 
         {
             // if we are empty always reflect that immediately - otherwise have ghosting in world as lava drains from drop cells
             if(this.isEmpty())
             {
                 this.avgFluidSurfaceUnitsWithPrecision = this.fluidSurfaceUnits.get() << 6;
-                this.makeBlockUpdateCurrent();
+                this.clearHasFluidChanged();
             }
             else
             {
@@ -1979,7 +1741,7 @@ public class LavaCell implements ISimpleListItem
                 if(Math.abs(avgAmount - surfaceUnits) > LavaSimulator.FLUID_UNITS_PER_LEVEL * 4)
                 {
                     this.avgFluidSurfaceUnitsWithPrecision = surfaceUnits << 6;
-                    this.makeBlockUpdateCurrent();
+                    this.clearHasFluidChanged();
                     
                     // doing it this way means we won't detect a change from current
                 }
@@ -1990,7 +1752,7 @@ public class LavaCell implements ISimpleListItem
         
                     if(this.avgFluidSurfaceUnitsWithPrecision  == surfaceUnits << 6)
                     {
-                        this.makeBlockUpdateCurrent();
+                        this.clearHasFluidChanged();
                     }
                 }
             }
@@ -2064,24 +1826,7 @@ public class LavaCell implements ISimpleListItem
         this.lastTickIndex = newTickIndex;
     }
     
-    public boolean changeLevel(final int amount, final int expectedPreviousLevel)
-    {
-//        if(amount > 0 && this.fluidUnits == 0)
-//        {
-//            //TODO: check for melting causing floor to merge with a non-barrier block below
-//            // should cause cell to merge will cell below if happens.
-//            // otherwise floor remains intact
-//        }
-
-        int newLevel = expectedPreviousLevel + amount;
-        if(newLevel < this.floorUnits)
-        {
-            Adversity.log.info(String.format("Fluid surface units below floor units.  Surface=%1$d Floor=%2$d cellID=%3$d", this.fluidSurfaceUnits.get(), this.floorUnits, this.id));
-            newLevel = this.floorUnits;
-        }
-        
-        return this.fluidSurfaceUnits.compareAndSet(expectedPreviousLevel, newLevel);
-    }
+    
     
 //    /**
 //     * Called when lava is placed via a world event.

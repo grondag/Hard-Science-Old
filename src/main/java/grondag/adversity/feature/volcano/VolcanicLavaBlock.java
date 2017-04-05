@@ -1,8 +1,5 @@
 package grondag.adversity.feature.volcano;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -13,8 +10,6 @@ import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockFalling;
@@ -23,7 +18,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
@@ -123,22 +117,6 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     }
     
 
-// TODO: this will not work with column-based model, would need a different purpose-specific method to confirm existing lava
-//    @Override
-//    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
-//    {
-//        Simulator.instance.getFluidTracker().registerPlacedLava(worldIn, pos, state);
-//    }
-
-    //TODO: make this work or remove it
-    @Override
-    public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
-    {
-        ArrayList<String> lines = new ArrayList<String>(2);
-        lines.add("Testing!");
-        return lines;
-    }
-
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
@@ -161,15 +139,6 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
                     .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidSurfaceUnitsWithPrecision >> 6))
                     .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())
                     .text("Connection Count = " + cell.connections.size());
-                
-           
-                
-//                for(LavaConnection conn : cell.connections.values())
-//                {
-//                    LavaCell other = conn.getOther(cell);
-//                    probeInfo.text("Conn ID=" + conn.id + "  x=" + other.x() + "  z=" + other.z() + "  bottomY=" + other.bottomY() + "  fluidUnits=" + other.getFluidUnits() 
-//                    + " isActive=" + conn.isActive() + "  isDeleted=" +  conn.isDeleted() + "  sortBucket=" + conn.getSortBucket() + "  cellID=" + other.id);
-//                }
             }
         }
     }

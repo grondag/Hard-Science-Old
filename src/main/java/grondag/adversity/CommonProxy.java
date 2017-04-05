@@ -47,11 +47,10 @@ public class CommonProxy {
         NiceBlockRegistrar.init(event);
 	}
 
-	public void postInit(FMLPostInitializationEvent event) {
-		Volcano.postInit(event);
-
+	public void postInit(FMLPostInitializationEvent event) 
+	{
+	    //NOOP
 	}
-
 
     public void serverStarted(FMLServerStartedEvent event) {
         Simulator.instance.start();

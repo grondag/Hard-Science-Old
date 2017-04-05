@@ -6,7 +6,6 @@ import grondag.adversity.feature.volcano.lava.LavaBlobItem;
 import grondag.adversity.feature.volcano.lava.RenderFluidParticle;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -14,7 +13,6 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.BiomeManager.BiomeType;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -150,13 +148,4 @@ public class Volcano {
         GameRegistry.addSmelting(NiceBlockRegistrar.BASALT_COBBLE_BLOCK, new ItemStack(NiceBlockRegistrar.COOL_SQUARE_BASALT_ITEM, 1, 0), 0.1F);
 
     }
-
-    public static void postInit(FMLPostInitializationEvent event) {
-
-        // in vanilla worlds, plants shouldn't stop volcanic lava from spreading
-        // TODO: probably need to add some more blocks here
-        Blocks.FIRE.setFireInfo(Blocks.CACTUS, 5, 5);
-        Blocks.FIRE.setFireInfo(Blocks.DEADBUSH, 30, 100);
-    }
-
 }

@@ -68,7 +68,6 @@ public class WorldStateBuffer implements IBlockAccess
         this.realWorld = worldIn;
         this.perfStateApplication = PerformanceCounter.create(enablePerfCounting, "Word State Application", perfCollector);
     }
-    //TODO - avoid BlockPos and call Chunk version after getChunkByChunkCoord
     
     public IBlockState getBlockState(BlockPos pos)
     {
@@ -81,17 +80,11 @@ public class WorldStateBuffer implements IBlockAccess
     }
     
     public IBlockState getBlockState(int x, int y, int z)
-    {        
-//        if(x==478 && y == 9 && z == -1231)
-//            Adversity.log.info("boop");
-        
+    {                
         ChunkBuffer chunk = chunks.get(PackedBlockPos.getPackedChunkPos(x, z));
         
         if(chunk == null) 
-        {
-//            Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
-//                    this.realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
-            
+        {            
             if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
             {
                 Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");

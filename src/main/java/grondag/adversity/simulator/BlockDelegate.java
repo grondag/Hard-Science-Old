@@ -21,14 +21,13 @@ public class BlockDelegate extends Delegate{
     @Override
     public void postEvent(NodeEvent event)
     {
-        // TODO Auto-generated method stub
-        
+        //NOOP
     }
 
     @Override
     public NodeEvent[] pullEvents()
     {
-        // TODO Auto-generated method stub
+        // NOOP
         return null;
     }
 }

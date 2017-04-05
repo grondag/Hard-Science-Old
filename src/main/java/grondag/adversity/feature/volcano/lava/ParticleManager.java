@@ -11,6 +11,7 @@ import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -35,7 +36,7 @@ public class ParticleManager
         return map.size();
     }
    
-    public void addLavaForParticle(LavaSimulator sim, long packedBlockPos, int fluidAmount)
+    public void addLavaForParticle(long packedBlockPos, int fluidAmount)
     {
         ParticleInfo particle = map.get(packedBlockPos);
         
@@ -107,6 +108,11 @@ public class ParticleManager
         {
             return this.fluidUnits;
         }
+        
+        public int x() { return PackedBlockPos.getX(this.packedBlockPos); }
+        public int y() { return PackedBlockPos.getY(this.packedBlockPos); }
+        public int z() { return PackedBlockPos.getZ(this.packedBlockPos); }
+        
     }
 
     public void readFromNBT(NBTTagCompound nbt)

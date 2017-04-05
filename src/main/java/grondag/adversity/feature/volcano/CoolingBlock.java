@@ -44,7 +44,6 @@ public class CoolingBlock extends FlowDynamicBlock
         INVALID
     }
     
-    //TODO: convert to packed block coordinates
     /**
      * Cools this block if ready and returns true if successful.
      */
