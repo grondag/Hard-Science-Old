@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.FlowDirection;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
@@ -119,7 +120,7 @@ public class LavaConnection implements ISimpleListItem
         }
         else
         {
-            int flowWindow = (Math.min(surfaceHigh, cellLow.getCeilingUnits()) - Math.max(cellHigh.getFloorUnits(), cellLow.getFloorUnits()));
+            int flowWindow = (Math.min(surfaceHigh, cellLow.ceilingUnits()) - Math.max(cellHigh.floorUnits(), cellLow.floorUnits()));
             
             if(flowWindow < LavaSimulator.FLUID_UNITS_PER_LEVEL || this.flowDirection == lowToHigh)
             {
@@ -221,120 +222,144 @@ public class LavaConnection implements ISimpleListItem
      */
     private void doStepWork()
     {
-    if(this.flowRemainingThisTick < LavaSimulator.MIN_FLOW_UNITS)
-    {
-        if(this.flowedLastStep) this.flowedLastStep = false;
-        return;
-    }
-        
-//        long outerStart = System.nanoTime();
-        
-        do
+        if(this.flowRemainingThisTick < LavaSimulator.MIN_FLOW_UNITS)
         {
-//            tryCount.incrementAndGet();
-            
-            // very high-frequency loop here - so repeating some code to reduce comparisons for performance
-            if(this.flowDirection == FlowDirection.ONE_TO_TWO)
+            if(this.flowedLastStep) this.flowedLastStep = false;
+            return;
+        }
+
+        //        long outerStart = System.nanoTime();
+        //            tryCount.incrementAndGet();
+
+        // very high-frequency loop here - so repeating some code to reduce comparisons for performance
+        switch(this.flowDirection)
+        {
+        case ONE_TO_TWO:
+            this.doStepOneToTwo();
+            break;
+
+        case TWO_TO_ONE:
+            this.doStepTwoToOne();
+            break;
+
+        case NONE:
+        default:
+            if(Adversity.DEBUG_MODE)
+                Adversity.log.debug("Unexpected flow type in connection flow processing");
+        }
+
+        return;
+        //        successCount.incrementAndGet();
+        //        outerTime.addAndGet(System.nanoTime() - outerStart);
+    }
+    
+    private void doStepOneToTwo()
+    {
+        for(int i = 0; i < 10; i++)
+        {
+            int surface1 = this.firstCell.fluidSurfaceUnits();
+
+            int availableFluidUnits = surface1 - this.firstCell.getSmoothedRetainedUnits();
+            if(availableFluidUnits < LavaSimulator.MIN_FLOW_UNITS)
             {
-                int surface1 = this.firstCell.fluidSurfaceUnits();
-
-                int availableFluidUnits = surface1 - this.firstCell.getSmoothedRetainedUnits();
-                if(availableFluidUnits < LavaSimulator.MIN_FLOW_UNITS)
-                {
-                    if(this.flowedLastStep) this.flowedLastStep = false;
-                    break;
-                }
-                else
-                {
-                    int surface2 = this.secondCell.fluidSurfaceUnits();
-
-                    if(surface1 > surface2)
-                    {
-                        int flow = this.getEqualizingFlow(availableFluidUnits, surface1, surface2);
-                        if(flow < LavaSimulator.MIN_FLOW_UNITS)
-                        {
-                            if(this.flowedLastStep) this.flowedLastStep = false;
-                            break;
-                        }
-                        else 
-                        {
-//                            long innerStart = System.nanoTime();
-                            
-                            if(this.firstCell.changeLevel(-flow, surface1) && this.secondCell.changeLevel(flow, surface2))
-                            {
-                                if(!this.flowedLastStep) this.flowedLastStep = true;
-                                this.flowRemainingThisTick -= flow;
-                                if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
-                                
-//                                innerTime.addAndGet(System.nanoTime() - innerStart);
-                                break;
-                            }
-                            
-//                            innerTime.addAndGet(System.nanoTime() - innerStart);
-                        }
-                    }
-                    else
-                    {
-                        if(this.flowedLastStep) this.flowedLastStep = false;
-                        break;
-                    }
-                }
+                if(this.flowedLastStep) this.flowedLastStep = false;
+                break;
             }
-            else // this.flowDirection == FlowDirection.TWO_TO_ONE
+            else
             {
                 int surface2 = this.secondCell.fluidSurfaceUnits();
 
-                int availableFluidUnits = surface2 - this.secondCell.getSmoothedRetainedUnits();
-                if(availableFluidUnits < LavaSimulator.MIN_FLOW_UNITS)
+                if(surface1 > surface2)
                 {
-                    if(this.flowedLastStep) this.flowedLastStep = false;
-                    break;
-                }
-                else
-                {
-                    int surface1 = this.firstCell.fluidSurfaceUnits();
-
-                    if(surface2 > surface1)
-                    {
-                        int flow = this.getEqualizingFlow(availableFluidUnits, surface2, surface1);
-                        if(flow < LavaSimulator.MIN_FLOW_UNITS)
-                        {
-                            if(this.flowedLastStep) this.flowedLastStep = false;
-                            break;
-                        }
-                        else 
-                        {
-//                            long innerStart = System.nanoTime();
-                            
-                            // flip sign vs above because going from 2 to 1
-                            if(this.firstCell.changeLevel(flow, surface1) && this.secondCell.changeLevel(-flow, surface2))
-                            {
-                                if(!this.flowedLastStep) this.flowedLastStep = true;
-                                this.flowRemainingThisTick -= flow;
-                                if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
-                                
-//                                innerTime.addAndGet(System.nanoTime() - innerStart);
-                                break;
-                            }
-                            
-//                            innerTime.addAndGet(System.nanoTime() - innerStart);
-                        }
-                    }
-                    else
+                    int flow = this.getEqualizingFlow(availableFluidUnits, surface1, surface2);
+                    if(flow < LavaSimulator.MIN_FLOW_UNITS)
                     {
                         if(this.flowedLastStep) this.flowedLastStep = false;
                         break;
                     }
+                    else 
+                    {
+                        //                            long innerStart = System.nanoTime();
+                        int expected1 = surface1 - this.firstCell.floorUnits();
+                        int expected2 = surface2 - this.secondCell.floorUnits();
+
+                        if(this.firstCell.changeFluidUnitsSafely(-flow, expected1) && this.secondCell.changeFluidUnitsSafely(flow, expected2))
+                        {
+                            if(!this.flowedLastStep) this.flowedLastStep = true;
+                            this.flowRemainingThisTick -= flow;
+                            if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
+
+                            //                                innerTime.addAndGet(System.nanoTime() - innerStart);
+                            break;
+                        }
+
+                        if(Adversity.DEBUG_MODE && i == 9)
+                            Adversity.log.debug("Connection flow abort after 10 attempts");
+                        //                            innerTime.addAndGet(System.nanoTime() - innerStart);
+                    }
+                }
+                else
+                {
+                    if(this.flowedLastStep) this.flowedLastStep = false;
+                    break;
                 }
             }
+        }
+    }
+    
+    private void doStepTwoToOne()
+    {
+        for(int i = 0; i < 10; i++)
+        {
+            int surface2 = this.secondCell.fluidSurfaceUnits();
 
+            int availableFluidUnits = surface2 - this.secondCell.getSmoothedRetainedUnits();
+            if(availableFluidUnits < LavaSimulator.MIN_FLOW_UNITS)
+            {
+                if(this.flowedLastStep) this.flowedLastStep = false;
+                break;
+            }
+            else
+            {
+                int surface1 = this.firstCell.fluidSurfaceUnits();
 
-            return;
-            
-        } while(true);
-        
-//        successCount.incrementAndGet();
-//        outerTime.addAndGet(System.nanoTime() - outerStart);
+                if(surface2 > surface1)
+                {
+                    int flow = this.getEqualizingFlow(availableFluidUnits, surface2, surface1);
+                    if(flow < LavaSimulator.MIN_FLOW_UNITS)
+                    {
+                        if(this.flowedLastStep) this.flowedLastStep = false;
+                        break;
+                    }
+                    else 
+                    {
+                        //                            long innerStart = System.nanoTime();
+                        int expected1 = surface1 - this.firstCell.floorUnits();
+                        int expected2 = surface2 - this.secondCell.floorUnits();
+
+                        // flip sign vs above because going from 2 to 1
+                        if(this.firstCell.changeFluidUnitsSafely(flow, expected1) && this.secondCell.changeFluidUnitsSafely(-flow, expected2))
+                        {
+                            if(!this.flowedLastStep) this.flowedLastStep = true;
+                            this.flowRemainingThisTick -= flow;
+                            if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
+
+                            //                                innerTime.addAndGet(System.nanoTime() - innerStart);
+                            break;
+                        }
+
+                        if(Adversity.DEBUG_MODE && i == 9)
+                            Adversity.log.debug("Connection flow abort after 10 attempts");
+                        //                            innerTime.addAndGet(System.nanoTime() - innerStart);
+                    }
+                }
+                else
+                {
+                    if(this.flowedLastStep) this.flowedLastStep = false;
+                    break;
+                }
+            }
+        }
     }
     
 //    /**
@@ -365,7 +390,7 @@ public class LavaConnection implements ISimpleListItem
     /** true if either cell has fluid */
     public boolean isActive()
     {
-        return this.firstCell.getFluidUnits() > 0 || this.secondCell.getFluidUnits() > 0;
+        return this.firstCell.fluidUnits() > 0 || this.secondCell.fluidUnits() > 0;
     }
     
     /** 
@@ -376,7 +401,7 @@ public class LavaConnection implements ISimpleListItem
      */
     public int getSortDrop()
     {
-        return Math.abs(this.firstCell.getFloor() - this.secondCell.getFloor());
+        return Math.abs(this.firstCell.floorLevel() - this.secondCell.floorLevel());
     }
 
     public FlowDirection flowDirection()

@@ -147,7 +147,7 @@ public class LavaSimulator extends SimulationNode
                 LavaCell target = cells.getCellIfExists(event.x, event.y, event.z);
                 if(target != null)
                 {
-                    target.changeLevel(event.amount * FLUID_UNITS_PER_LEVEL, target.fluidSurfaceUnits());
+                    target.changeFluidUnitsUnsafely(event.amount * FLUID_UNITS_PER_LEVEL);
                     target.updateTickIndex(Simulator.instance.getTick());
                     target.setRefreshRange(event.y, event.y);
                 }
@@ -205,9 +205,11 @@ public class LavaSimulator extends SimulationNode
             
             if(target == null)
             {
-                // retry - maybe validation needs to catch up
+                //TODO: remove
                 if(event.retryCount() >= 7)
                     Adversity.log.info("wut?");
+
+                // retry - maybe validation needs to catch up
                 return false;
             }
             else
@@ -607,10 +609,15 @@ public class LavaSimulator extends SimulationNode
         // update connections as needed, handle pressure propagation, or other housekeeping
         this.cells.updateStuffJob.runOn(LAVA_THREAD_POOL);
        
-            // connection sorting must happen AFTER all connections are updated/formed
-        this.cells.prioritizeConnectionsJob.runOn(LAVA_THREAD_POOL);
-
+        // determines which connections can flow
+        // MUST happen BEFORE connection sorting
         this.connections.setupTickJob.runOn(LAVA_THREAD_POOL);
+
+        // connection sorting 
+        // MUST happen AFTER all connections are updated/formed and flow direction is determined
+        // If not, will include connections with a flow type of NONE and may try to output from empty cells
+        // Could add a check for this, but is wasteful/impactful in hot inner loop - simply should not be there
+        this.cells.prioritizeConnectionsJob.runOn(LAVA_THREAD_POOL);
         
         this.connections.refreshSortBucketsIfNeeded(LAVA_THREAD_POOL);
         
@@ -753,6 +760,7 @@ public class LavaSimulator extends SimulationNode
             this.nextStatTime = now + 10000;
 
             Adversity.log.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+            this.worldBuffer.clearStatistics();
             
 //                this.cells.logDebugInfo();
         }
@@ -817,7 +825,7 @@ public class LavaSimulator extends SimulationNode
         int z = cell.z();
         
         // check two above cell top to catch filler blocks
-        for(int y = cell.bottomY(); y <= cell.fluidSurfaceY() + 2; y++)
+        for(int y = cell.floorY(); y <= cell.fluidSurfaceY() + 2; y++)
         {
             this.coolLava(PackedBlockPos.pack(x, y, z));
         }
