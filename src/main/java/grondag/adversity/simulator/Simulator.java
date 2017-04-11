@@ -251,8 +251,15 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         @Override
         public void run()
         {
-            Simulator.this.volcanoManager.doOffTick();
-            Simulator.this.lavaSimulator.doOffTick();
+            try
+            {
+                Simulator.this.volcanoManager.doOffTick();
+                Simulator.this.lavaSimulator.doOffTick();
+            }
+            catch(Exception e)
+            {
+                Adversity.log.error("Exception during simulator off-tick processing", e);
+            }
         }    
      };
     

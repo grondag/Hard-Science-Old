@@ -380,6 +380,7 @@ public class LavaCells
     {
         synchronized(this)
         {
+//            Adversity.log.info("CHUNK UNLOAD REPORT");
             Iterator<Entry<CellChunk>> chunks = this.cellChunks.long2ObjectEntrySet().fastIterator();
             
             while(chunks.hasNext())

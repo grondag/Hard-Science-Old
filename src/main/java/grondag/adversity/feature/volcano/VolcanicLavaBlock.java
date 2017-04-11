@@ -132,9 +132,9 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             else
             {
                 probeInfo.text("Cell ID = " + cell.id)
-                    .text("FluidUnits=" + cell.fluidUnits() + "  FluidSurfaceLevel=" + cell.fluidSurfaceLevel() + "  Fluid Levels=" + (cell.fluidUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
-                    .text("RawRetainedUnits=" + cell.getRawRetainedUnits() + "  RawRetained Depth=" + ((cell.getRawRetainedUnits() - cell.floorUnits()) / LavaSimulator.FLUID_UNITS_PER_LEVEL))
-                    .text("SmoothRetainedUnits=" + cell.getSmoothedRetainedUnits() + "  SmoothRetained Depth=" + ((cell.getSmoothedRetainedUnits() - cell.floorUnits()) / LavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("FluidUnits=" + cell.fluidUnits() + "  FluidSurfaceLevel=" + cell.worldSurfaceLevel() + "  Fluid Levels=" + (cell.fluidUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("RawRetainedUnits=" + cell.getRawRetainedUnits() + "  RawRetained Depth=" + (cell.getRawRetainedUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
+                    .text("SmoothRetainedUnits=" + cell.getSmoothedRetainedUnits() + "  SmoothRetained Depth=" + (cell.getSmoothedRetainedUnits() / LavaSimulator.FLUID_UNITS_PER_LEVEL))
                     .text("floor=" + cell.floorLevel() + "  ceiling=" + cell.ceilingLevel() + " isFlowFloor=" + cell.isBottomFlow() + " floorFlowHeight=" + cell.floorFlowHeight())
                     .text(" avgLevelWithPrecisionShifted=" + (cell.avgFluidSurfaceUnitsWithPrecision >> 6))
                     .text("Visible Level = " + cell.getCurrentVisibleLevel() + "  Last Visible Level = " + cell.getLastVisibleLevel())

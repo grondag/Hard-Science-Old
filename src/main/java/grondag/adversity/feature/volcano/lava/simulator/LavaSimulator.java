@@ -147,7 +147,7 @@ public class LavaSimulator extends SimulationNode
                 LavaCell target = cells.getCellIfExists(event.x, event.y, event.z);
                 if(target != null)
                 {
-                    target.changeFluidUnitsUnsafely(event.amount * FLUID_UNITS_PER_LEVEL);
+                    target.changeFluidUnits(event.amount * FLUID_UNITS_PER_LEVEL);
                     target.updateTickIndex(Simulator.instance.getTick());
                     target.setRefreshRange(event.y, event.y);
                 }
@@ -699,7 +699,7 @@ public class LavaSimulator extends SimulationNode
                 // abort on strangeness
                 if(cell == null) continue;
                 
-                if(p.y() - cell.fluidSurfaceY() > 3)
+                if(p.y() - cell.worldSurfaceY() > 3)
                 {
                     // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
                     if(p.getFluidUnits() >= FLUID_UNITS_PER_LEVEL)
@@ -825,7 +825,7 @@ public class LavaSimulator extends SimulationNode
         int z = cell.z();
         
         // check two above cell top to catch filler blocks
-        for(int y = cell.floorY(); y <= cell.fluidSurfaceY() + 2; y++)
+        for(int y = cell.floorY(); y <= cell.worldSurfaceY() + 2; y++)
         {
             this.coolLava(PackedBlockPos.pack(x, y, z));
         }

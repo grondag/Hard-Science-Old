@@ -179,11 +179,26 @@ public class CellChunk implements ISimpleListItem
 
                     if(entryCell == null)
                     {
-                        this.setEntryCell(x, z, builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z));
+                        //TODO remove
+                        LavaCell temp = builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z);
+                        if(temp == null)
+                            Adversity.log.info("null cell detected.");
+                        
+                        this.setEntryCell(x, z, temp);
+                        
+                        
+//                        this.setEntryCell(x, z, builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z));
                     }
                     else
                     {
-                        this.setEntryCell(x, z, builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z));
+                        //TODO: remove
+                        LavaCell temp = builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z);
+                        if(temp == null)
+                            Adversity.log.info("null cell detected.");
+                        
+                        this.setEntryCell(x, z, temp);
+                        
+//                        this.setEntryCell(x, z, builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z));
                     }
                 }
             }
@@ -270,6 +285,9 @@ public class CellChunk implements ISimpleListItem
      */
     public boolean canUnload()
     {
+//        Adversity.log.info("chunk " + this.xStart + ", " + this.zStart + " activeCount=" + this.activeCount.get() 
+//        + "  retainCount=" + this.retainCount.get() + " unloadTickCount=" + this.unloadTickCount);
+        
         if(this.isUnloaded) return false;
         
         if(this.activeCount.get() == 0 && this.retainCount.get() == 0)
@@ -279,8 +297,8 @@ public class CellChunk implements ISimpleListItem
         else
         {
             this.unloadTickCount = 0;
+            return false;
         }
-        return this.activeCount.get() == 0 && this.retainCount.get() == 0 && !this.isUnloaded;
     }
 
     public void unload()
@@ -293,29 +311,41 @@ public class CellChunk implements ISimpleListItem
             {
                 LavaCell entryCell = this.getEntryCell(x, z);
 
-                if(entryCell != null)
+                if(entryCell == null)
                 {
-                    entryCell = entryCell.firstCell();
+                    if(Adversity.DEBUG_MODE)
+                        Adversity.log.warn("Null entry cell in chunk being unloaded.");
+                    continue;
+                }
+                
+                LavaCell firstCell = entryCell.firstCell();
+                if(firstCell == null)
+                {
+                    if(Adversity.DEBUG_MODE)
+                        Adversity.log.warn("First cell in entry cell is null in chunk being unloaded.");
                     
-                    if(Adversity.DEBUG_MODE && entryCell.belowCell() != null)
-                        Adversity.log.warn("First cell is not actually the first cell.");
-                    
-                    do
-                    {
-                        LavaCell nextCell = entryCell.aboveCell();
-                        entryCell.setDeleted();
-                        entryCell = nextCell;
-                    }
-                    while(entryCell != null);
-
+                    // strange case - do our best
+                    entryCell.setDeleted();
                     this.setEntryCell(x, z, null);
+                    continue;
                 }
-                else if(Adversity.DEBUG_MODE)
+                entryCell = firstCell;
+                
+                if(Adversity.DEBUG_MODE && entryCell.belowCell() != null)
+                    Adversity.log.warn("First cell is not actually the first cell.");
+                    
+                do
                 {
-                    Adversity.log.warn("Null entry cell in chunk being unloaded.");
+                    LavaCell nextCell = entryCell.aboveCell();
+                    entryCell.setDeleted();
+                    entryCell = nextCell;
                 }
+                while(entryCell != null);
+
+                this.setEntryCell(x, z, null);
             }
         }
+        
         this.isUnloaded = true;
         
         
