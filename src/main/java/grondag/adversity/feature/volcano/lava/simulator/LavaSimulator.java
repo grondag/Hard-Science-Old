@@ -134,6 +134,8 @@ public class LavaSimulator extends SimulationNode
     public final LavaConnections connections = new LavaConnections(this);
     public final CellChunkLoader cellChunkLoader = new CellChunkLoader();
     
+    private float loadFactor = 0;
+    
     private final BlockEventHandler placementHandler = new BlockEventHandler()
     {
         @Override
@@ -244,7 +246,7 @@ public class LavaSimulator extends SimulationNode
     */
     public float loadFactor()
     {
-        return Math.max((float)this.connections.size() / 30000F, (float)this.cells.size() / 20000F);
+        return this.loadFactor;
     }
     
        /** adds lava to the surface of the cell containing the given block position */
@@ -539,11 +541,8 @@ public class LavaSimulator extends SimulationNode
      */
     public void doOnTick()
     {
-        if(ENABLE_PERFORMANCE_COUNTING) 
-        {
-            this.doStats();
-            perfOnTick.startRun();
-        }
+        this.doStats();
+        perfOnTick.startRun();
         
         // Enable detection of improper world access 
         this.worldBuffer.isMCWorldAccessAppropriate = true;
@@ -590,11 +589,9 @@ public class LavaSimulator extends SimulationNode
         
         this.setSaveDirty(true);
         
-        if(ENABLE_PERFORMANCE_COUNTING)
-        {
-            perfOnTick.endRun();
-            perfOnTick.addCount(1);
-        }
+
+        perfOnTick.endRun();
+        perfOnTick.addCount(1);
     }
     
     private int[] flowTotals = new int[8];
@@ -724,19 +721,34 @@ public class LavaSimulator extends SimulationNode
         perfParticles.endRun();
     }
     
+    private static final int PERFORMANCE_INTERVAL_MILLIS = 10000;
+    private static final long PERFORMANCE_INTERVAL_NANOS = (long)PERFORMANCE_INTERVAL_MILLIS * 1000000;
+    //TODO: make configurable, put in reasonable defaults
+    private static final long PERF_ON_TICK_BUDGET_NANOS =  PERFORMANCE_INTERVAL_NANOS / 10;
+    private static final long PERF_TOTAL_TICK_BUDGET_NANOS =  PERFORMANCE_INTERVAL_NANOS / 5;
+    
     public void doStats()
     {
         long now = System.currentTimeMillis();
+
         if(now >= this.nextStatTime)
         {
-            perfCollectorOnTick.outputStats();
-            perfCollectorOffTick.outputStats();
-            perfCollectorAllTick.outputStats();
+
+            float onTickLoad = (float)this.perfOnTick.runTime() / PERF_ON_TICK_BUDGET_NANOS;
+            float totalTickLoad = ((float)this.perfOnTick.runTime() + this.perfOffTick.runTime()) / PERF_TOTAL_TICK_BUDGET_NANOS;
+            this.loadFactor = Math.max(onTickLoad, totalTickLoad);
             
-            perfCollectorOnTick.clearStats();
-            perfCollectorOffTick.clearStats();
+            if(ENABLE_PERFORMANCE_COUNTING) 
+            {
+                perfCollectorOnTick.outputStats();
+                perfCollectorOffTick.outputStats();
+                perfCollectorAllTick.outputStats();
+                
+                perfCollectorOnTick.clearStats();
+                perfCollectorOffTick.clearStats();
+            }
+            // this one is always maintained in order to compute load factor
             perfCollectorAllTick.clearStats();
-            
 
             if(LavaConnection.ENABLE_FLOW_TRACKING)
             {
@@ -748,19 +760,20 @@ public class LavaSimulator extends SimulationNode
                 }
             }
 
-//            Adversity.log.info("Connection try success rate = " + LavaConnection.successCount.get() * 100 / (LavaConnection.tryCount.get() + 1) + "%");
-//            LavaConnection.successCount.set(0);
-//            LavaConnection.tryCount.set(0);
-//            Adversity.log.info("Connection locking overhead = " + (LavaConnection.outerTime.get() - LavaConnection.innerTime.get()) * 100 / (LavaConnection.outerTime.get() + 1) + "%");
-            
-            Adversity.log.info("totalCells=" + this.getCellCount() 
-                    + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
-            
-            Adversity.log.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / 10000)));
-            this.nextStatTime = now + 10000;
+            if(ENABLE_PERFORMANCE_COUNTING) 
+            {
+                Adversity.log.info("totalCells=" + this.getCellCount() 
+                        + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
+                
+                Adversity.log.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
 
-            Adversity.log.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
-            this.worldBuffer.clearStatistics();
+                Adversity.log.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+                this.worldBuffer.clearStatistics();
+            }
+               
+            
+            this.nextStatTime = now + PERFORMANCE_INTERVAL_MILLIS;
+
             
 //                this.cells.logDebugInfo();
         }

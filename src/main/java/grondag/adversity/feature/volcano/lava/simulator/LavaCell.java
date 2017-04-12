@@ -757,6 +757,11 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
          *
          * In scenarios 2-5, if a newly expanded cell is vertically adjacent to another cell, the cells must be merged.
          * 
+         * In scenarios 1-2, if the cell contains lava the floor in the world may not be consistent with the floor
+         * in this simulation because basalt in partial cells is temporarily melted when lava enters the cell.
+         * In these cases, we want to preserve the floor stored in the sim so that we don't lose the desired topology of the retention surface.
+         * 
+         * 
          * Note that partial spaces within this cell but above the floor will be handled as if they are full 
          * spaces. So, a less-than-full-height solid flow block in the middle of a cell would be handled
          * as if it were empty space.  This is because these blocks will melt if lava flows into their space.
@@ -774,7 +779,8 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
         // space is my bottom space, confirm floor
         if(y == myBottom)
         {
-            if(this.floorFlowHeight() != floorHeight || this.isBottomFlow() != isFlowFloor)
+            // check for empty because when cell has lava we don't want to lose our floor information due to melting
+            if(this.isEmpty() && this.floorFlowHeight() != floorHeight || this.isBottomFlow() != isFlowFloor)
             {
                 this.setFloorLevel(y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
                 return this.checkForMergeDown();

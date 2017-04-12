@@ -23,6 +23,7 @@ import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -31,6 +32,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 
 public class WorldStateBuffer implements IBlockAccess
 {
@@ -577,6 +579,8 @@ public class WorldStateBuffer implements IBlockAccess
         
         private int tickCreated;
         
+        private Chunk worldChunk = null;
+        
         private AtomicInteger requiredUpdateCount = new AtomicInteger(0);
         
         private AtomicInteger dataCount = new AtomicInteger(0);
@@ -602,6 +606,7 @@ public class WorldStateBuffer implements IBlockAccess
             this.tickCreated = tickCreated;
             this.requiredUpdateCount.set(0);
             this.dataCount.set(0);
+            this.worldChunk = null;
             for(int i = 0; i < 256; i++)
             {
                 levelCounts[i].set(0);
@@ -623,11 +628,16 @@ public class WorldStateBuffer implements IBlockAccess
                     Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
-                // prevent concurrent access to MC world
-                synchronized(realworldLock)
+                if(this.worldChunk == null || this.worldChunk.unloaded)
                 {
-                    return realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z);
+                    // prevent concurrent access to MC world
+                    synchronized(realworldLock)
+                    {
+                        this.worldChunk = realWorld.getChunkFromChunkCoords(x >> 4, z >> 4);
+                    }
                 }
+                
+                return this.worldChunk.getBlockState(x, y, z);
             }
             else
             {

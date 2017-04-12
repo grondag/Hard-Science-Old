@@ -10,6 +10,7 @@ import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.PerformanceCounter;
 import grondag.adversity.library.SimpleConcurrentList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -141,11 +142,15 @@ public class LavaCells
    // performance counting for removal disabled because list is cleared each passed
    private SimpleConcurrentList<CellChunk> processChunks = SimpleConcurrentList.create(false, "", null);
    
+   PerformanceCounter perfCounterValidationPrep;
+   
     public LavaCells(LavaSimulator sim)
     {
         this.sim = sim;
         cellList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cells", sim.perfCollectorOffTick);
 
+        perfCounterValidationPrep = PerformanceCounter.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Chunk validation prep", sim.perfCollectorOnTick);
+        
         // on-tick jobs
         provideBlockUpdateJob = new CountedJob<LavaCell>(this.cellList, provideBlockUpdateTask, BATCH_SIZE, 
                 LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Block Update Provision", sim.perfCollectorOnTick);    
@@ -172,7 +177,7 @@ public class LavaCells
 
    public void validateOrBufferChunks(Executor executor)
    {
-        this.validateChunksJob.perfCounter.startRun();
+        this.perfCounterValidationPrep.startRun();
         
         int size = this.cellChunks.size();
         
@@ -204,7 +209,7 @@ public class LavaCells
             }
         }
        
-       this.validateChunksJob.perfCounter.endRun();
+       this.perfCounterValidationPrep.endRun();
        
        if(this.processChunks.size() > 0)
        {
