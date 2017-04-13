@@ -125,12 +125,12 @@ public class TileVolcano extends TileEntity implements ITickable{
 //            --this.hazeTimer;
 //        } else {
 //            this.hazeTimer = 5;
-            //this.hazeMaker.update(this.worldObj, this.pos.getX(), this.pos.getZ());
+            //this.hazeMaker.update(this.world, this.pos.getX(), this.pos.getZ());
 
-            // if(worldObj.rand.nextInt(3)==0){
-            // worldObj.setBlock(xCoord+2-worldObj.rand.nextInt(5), level+2, zCoord+2-worldObj.rand.nextInt(5),
+            // if(this.world.rand.nextInt(3)==0){
+            // this.world.setBlock(xCoord+2-this.world.rand.nextInt(5), level+2, zCoord+2-this.world.rand.nextInt(5),
             // Adversity.blockHazeRising, 0, 2);
-            // worldObj.scheduleBlockUpdate(xCoord, level+2, zCoord, Adversity.blockHazeRising, 15);
+            // this.world.scheduleBlockUpdate(xCoord, level+2, zCoord, Adversity.blockHazeRising, 15);
             // }
 //        }
 //    }
@@ -141,7 +141,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         boolean isNodeUpdateNeeded = false;
 
         
-        if(this.worldObj.isRemote) return;
+        if(this.world.isRemote) return;
 
         if(this.node == null)
         {
@@ -158,7 +158,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     Adversity.log.info("Setting up new Volcano Node @" + this.pos.toString());
                     this.node = Simulator.instance.getVolcanoManager().createNode();
                     this.nodeId = node.getID();
-                    this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+                    this.node.setLocation(this.pos,this.world.provider.getDimension());
                     this.stage = VolcanoStage.DORMANT;
                 }
                 else
@@ -170,7 +170,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
                 this.level = this.pos.getY() + 10;
                 int moundRadius = Config.volcano().moundRadius;
-                this.groundLevel = Useful.getAvgHeight(this.worldObj, this.pos, moundRadius, moundRadius * moundRadius / 10);
+                this.groundLevel = Useful.getAvgHeight(this.world, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
             else
             {
@@ -182,7 +182,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                     Adversity.log.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
                     + ". Created new simulation node.  Simulation state was lost.");
                     this.node = Simulator.instance.getVolcanoManager().createNode();
-                    this.node.setLocation(this.pos,this.worldObj.provider.getDimension());
+                    this.node.setLocation(this.pos,this.world.provider.getDimension());
                 }
             }
             // no need to markDirty here - will be prompted by isNodeUpdateNeeded
@@ -344,7 +344,7 @@ public class TileVolcano extends TileEntity implements ITickable{
      */
     private void clearBore(BlockPos clearPos)
     {
-        IBlockState state = this.worldObj.getBlockState(clearPos);
+        IBlockState state = this.world.getBlockState(clearPos);
         Block block = state.getBlock();
         if(block == Blocks.BEDROCK)
         {
@@ -361,7 +361,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(block != Blocks.AIR)
         {
-            this.worldObj.setBlockToAir(clearPos);
+            this.world.setBlockToAir(clearPos);
             if(clearPos.getY() < this.groundLevel && 
                     !(block instanceof NiceBlock && ((NiceBlock)block).material == BaseMaterial.BASALT))
             {
@@ -387,28 +387,28 @@ public class TileVolcano extends TileEntity implements ITickable{
         if(top == null) return;
 
         //allow drops of trees and such
-        this.worldObj.destroyBlock(top.up(), true); 
+        this.world.destroyBlock(top.up(), true); 
 
-        IBlockState state = worldObj.getBlockState(top);
+        IBlockState state = this.world.getBlockState(top);
 
         while(!LavaTerrainHelper.canLavaDisplace(state) && state.getBlock() != Blocks.BEDROCK
                 && top.getY() >= 0)
         {
             //            Adversity.log.info("buildMound: set block from " 
-            //                    + worldObj.getBlockState(top.up()).getBlock().getRegistryName() + " to " 
+            //                    + this.world.getBlockState(top.up()).getBlock().getRegistryName() + " to " 
             //                    + state.getBlock().getRegistryName() + " @ " + top.up().toString());
 
-            this.worldObj.setBlockState(top.up(), state);
+            this.world.setBlockState(top.up(), state);
             top = top.down();
-            state = this.worldObj.getBlockState(top);
+            state = this.world.getBlockState(top);
         }
 
         //        Adversity.log.info("buildMound: set block from " 
-        //                + worldObj.getBlockState(top.up()).getBlock().getRegistryName() + " to " 
+        //                + this.world.getBlockState(top.up()).getBlock().getRegistryName() + " to " 
         //                + state.getBlock().getRegistryName() + " @ " + top.up().toString());
 
         //avoid duplication of valuable blocks by clever nerds
-        this.worldObj.setBlockState(top.up(), worldObj.getBiome(top).fillerBlock);
+        this.world.setBlockState(top.up(), this.world.getBiome(top).fillerBlock);
     }
 
     private BlockPos findMoundSpot()
@@ -422,13 +422,13 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             dx = (int) (ThreadLocalRandom.current().nextGaussian() * Config.volcano().moundRadius);
             dz = (int) (ThreadLocalRandom.current().nextGaussian() * Config.volcano().moundRadius);
-            BlockPos candidate = this.worldObj.getHeight(this.pos.east(dx).north(dz));
-            while(candidate.getY() > 0 && !isVolcanoBlock(worldObj.getBlockState(candidate).getBlock()) 
-                    && LavaTerrainHelper.canLavaDisplace(worldObj.getBlockState(candidate)))
+            BlockPos candidate = this.world.getHeight(this.pos.east(dx).north(dz));
+            while(candidate.getY() > 0 && !isVolcanoBlock(this.world.getBlockState(candidate).getBlock()) 
+                    && LavaTerrainHelper.canLavaDisplace(this.world.getBlockState(candidate)))
             {
                 candidate = candidate.down();
             }
-            if(!isVolcanoBlock(worldObj.getBlockState(candidate).getBlock()))
+            if(!isVolcanoBlock(this.world.getBlockState(candidate).getBlock()))
             {
                 if(best == null)
                 {
@@ -463,16 +463,16 @@ public class TileVolcano extends TileEntity implements ITickable{
     @Override
     public void markDirty()
     {
-        if (this.worldObj != null)
+        if (this.world != null)
         {
-            this.worldObj.markChunkDirty(this.pos, this);
+            this.world.markChunkDirty(this.pos, this);
         }
     }
   
 
     //	@Override
     //	public void updateOld() {
-    //	    if(this.worldObj.isRemote) return;
+    //	    if(this.world.isRemote) return;
     //	    
     //	    
     //	    // dead volcanoes don't do anything
@@ -481,7 +481,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     //        if(weight < Integer.MAX_VALUE) weight++;
     //	    
     //        // everything after this point only happens 1x every 16 ticks.
-    //        if ((this.worldObj.getTotalWorldTime() & 15) != 15) return;
+    //        if ((this.world.getTotalWorldTime() & 15) != 15) return;
     //
     //        this.markDirty();
     //
@@ -489,7 +489,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     //
     //            this.markDirty();
     //
-    //			if ((this.worldObj.getTotalWorldTime() & 255) == 255) {
+    //			if ((this.world.getTotalWorldTime() & 255) == 255) {
     //				Adversity.log.info("Volcanot State @" + this.pos.toString() + " = " + this.stage);
     //			}
     //
@@ -524,10 +524,10 @@ public class TileVolcano extends TileEntity implements ITickable{
     //                // plus 0 to 36% with a total average around 28%
     //				this.levelsTilDormant = Math.min(window,
     //				        interval
-    //				        + this.worldObj.rand.nextInt(interval)
-    //				        + this.worldObj.rand.nextInt(interval)
-    //				        + this.worldObj.rand.nextInt(interval)
-    //				        + this.worldObj.rand.nextInt(interval));
+    //				        + this.world.rand.nextInt(interval)
+    //				        + this.world.rand.nextInt(interval)
+    //				        + this.world.rand.nextInt(interval)
+    //				        + this.world.rand.nextInt(interval));
     //
     //				if (this.level >= 70) {
     //					this.blowOut(4, 5);
@@ -537,7 +537,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     //			else if (this.stage == VolcanoStage.NEW_LEVEL) 
     //			{
     //				if (!this.areInnerBlocksOpen(this.level)) {
-    //				    this.worldObj.createExplosion(null, this.pos.getX(), this.level - 1, this.pos.getZ(), 5, true);
+    //				    this.world.createExplosion(null, this.pos.getX(), this.level - 1, this.pos.getZ(), 5, true);
     //				}
     //				this.stage = VolcanoStage.BUILDING_INNER;
     //			} 
@@ -546,7 +546,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     //				if (this.buildLevel <= this.pos.getY() || this.buildLevel > this.level) {
     //					this.buildLevel = this.pos.getY() + 1;
     //				}
-    //				Useful.fill2dCircleInPlaneXZ(this.worldObj, this.pos.getX(), this.buildLevel, this.pos.getZ(), 3,
+    //				Useful.fill2dCircleInPlaneXZ(this.world, this.pos.getX(), this.buildLevel, this.pos.getZ(), 3,
     //						Volcano.blockVolcanicLava.getDefaultState());
     //				if (this.buildLevel < this.level) {
     //					++this.buildLevel;

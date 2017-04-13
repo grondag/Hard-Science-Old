@@ -30,7 +30,7 @@ public class NiceBlockHighlighter {
         BlockPos pos = event.getTarget().getBlockPos();
         if(pos != null && event.getPlayer() != null)
         {
-    		IBlockState bs = event.getPlayer().worldObj.getBlockState(pos);
+    		IBlockState bs = event.getPlayer().world.getBlockState(pos);
     		if (bs != null && bs.getBlock() instanceof NiceBlock) {
     			NiceBlock nb = (NiceBlock) bs.getBlock();
     			if (nb.needsCustomHighlight()) {
@@ -47,7 +47,7 @@ public class NiceBlockHighlighter {
     				double d2 = event.getPlayer().lastTickPosZ + (event.getPlayer().posZ - event.getPlayer().lastTickPosZ) * event.getPartialTicks();
     
     				// Draw collision boxes
-    				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.getPlayer().worldObj, pos, bs)) {
+    				for (AxisAlignedBB aabb : nb.getSelectionBoundingBoxes(event.getPlayer().world, pos, bs)) {
     					RenderGlobal.drawSelectionBoundingBox(aabb.expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2), 0.0F, 0.0F, 0.0F, 0.4F);
     				}
     

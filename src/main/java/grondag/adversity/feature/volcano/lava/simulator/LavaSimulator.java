@@ -709,7 +709,7 @@ public class LavaSimulator extends SimulationNode
                                   ),
                               Vec3d.ZERO);
                         
-                        worldBuffer.realWorld.spawnEntityInWorld(elp);
+                        worldBuffer.realWorld.spawnEntity(elp);
                     }
                 }
                 else 

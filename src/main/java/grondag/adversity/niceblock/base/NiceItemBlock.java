@@ -8,6 +8,7 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent.ModelColorMap;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent.ModelFlowJoin;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -140,7 +141,7 @@ public class NiceItemBlock extends ItemBlock
     }
     
     @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World world, EntityPlayer player, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
         if (world.isRemote) 
         {
@@ -149,22 +150,24 @@ public class NiceItemBlock extends ItemBlock
             //so only display if clicking on air
             if (blockpos != null && world.getBlockState(blockpos).getMaterial() == Material.AIR && ((NiceBlock)this.block).hasAppearanceGui())
             {
-                player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
-                return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+                player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+                return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }
-        return new ActionResult<>(EnumActionResult.PASS, stack);
+        return new ActionResult<>(EnumActionResult.PASS, player.getHeldItem(hand));
     }
     
     @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
+        ItemStack stack = playerIn.getHeldItem(hand);
+
         boolean isAdditive = false;
-        
         BlockPos placedPos = worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) || (isAdditive = ((NiceBlock)block).isItemUsageAdditive(worldIn, pos, stack))
                 ? pos : pos.offset(facing);
         
-        if (stack.stackSize == 0)
+        
+        if (stack.isEmpty())
         {
             return EnumActionResult.FAIL;
         }        
@@ -179,28 +182,37 @@ public class NiceItemBlock extends ItemBlock
             AxisAlignedBB axisalignedbb = state.getSelectedBoundingBox(worldIn, placedPos);
             if(!worldIn.checkNoEntityCollision(axisalignedbb.offset(pos), playerIn)) return EnumActionResult.FAIL;
             int meta = ((NiceBlock) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
-            IBlockState placedState = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn);
+            IBlockState placedState = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn, hand);
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, placedState))
             {
-                worldIn.playSound((double)((float)placedPos.getX() + 0.5F), (double)((float)placedPos.getY() + 0.5F), (double)((float)placedPos.getZ() + 0.5F), this.block.getSoundType().getPlaceSound(), SoundCategory.BLOCKS, (this.block.getSoundType().getVolume() + 1.0F) / 2.0F, this.block.getSoundType().getPitch() * 0.8F, true);
-                --stack.stackSize;
+                SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, playerIn);
+                worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                stack.shrink(1);
             }
 
             return EnumActionResult.SUCCESS;
         }
         
-        else if (worldIn.canBlockBePlaced(this.block, placedPos, false, facing, (Entity)null, stack))            
+        else if (worldIn.mayPlace(this.block, placedPos, false, facing, (Entity)null))            
         {
             int meta = ((NiceBlock) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn);
+            IBlockState iblockstate1 = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn, hand);
 
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
             {
-                worldIn.playSound((double)((float)placedPos.getX() + 0.5F), (double)((float)placedPos.getY() + 0.5F), (double)((float)placedPos.getZ() + 0.5F), this.block.getSoundType().getPlaceSound(), SoundCategory.BLOCKS, (this.block.getSoundType().getVolume() + 1.0F) / 2.0F, this.block.getSoundType().getPitch() * 0.8F, true);
-                --stack.stackSize;
+                SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, playerIn);
+                worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+  
+                stack.shrink(1);
+                
+                return EnumActionResult.SUCCESS;
+            }
+            else
+            {
+                return EnumActionResult.FAIL;
             }
 
-            return EnumActionResult.SUCCESS;
+
         }
         else
         {

@@ -34,6 +34,7 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
+@SuppressWarnings("unused")
 public class WorldStateBuffer implements IBlockAccess
 {
     private final static String NBT_SAVE_DATA_TAG = "WrldBuff";
@@ -628,9 +629,9 @@ public class WorldStateBuffer implements IBlockAccess
                     Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
-                if(this.worldChunk == null || this.worldChunk.unloaded)
+                if(this.worldChunk == null || !this.worldChunk.isLoaded())
                 {
-                    // prevent concurrent access to MC world
+                    // prevent concurrent access to MC world chunk loading
                     synchronized(realworldLock)
                     {
                         this.worldChunk = realWorld.getChunkFromChunkCoords(x >> 4, z >> 4);

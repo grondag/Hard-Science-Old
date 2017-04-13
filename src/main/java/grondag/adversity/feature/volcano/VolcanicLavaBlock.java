@@ -67,13 +67,14 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     {
         return false;
     }
-
+    
+    @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
-        super.neighborChanged(state, worldIn, pos, blockIn);
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.instance.getFluidTracker().notifyLavaNeighborChange(worldIn, pos, state);
+        Simulator.instance.getFluidTracker().notifyBlockChange(worldIn, fromPos);
     }
 
     @Override

@@ -1,8 +1,7 @@
 package grondag.adversity;
 
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -19,6 +18,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.logging.log4j.Logger;
+
+import grondag.adversity.niceblock.NiceBlockRegistrar;
 
 
 @Mod(modid = Adversity.MODID, name = Adversity.MODNAME, version = Adversity.VERSION
@@ -40,10 +41,10 @@ public class Adversity {
 	{
 		@Override
 		@SideOnly(Side.CLIENT)
-		public Item getTabIconItem() 
+		public ItemStack getTabIconItem() 
 		{
 			//TODO need a real Icon
-			return Items.BAKED_POTATO;
+			return NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_ITEM.getDefaultInstance();
 		}
 	};
 

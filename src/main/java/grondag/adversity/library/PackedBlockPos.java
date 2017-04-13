@@ -8,7 +8,7 @@ public class PackedBlockPos
 {
     private static final int WORLD_BOUNDARY = 30000000;
     private static final int CHUNK_BOUNDARY = WORLD_BOUNDARY >> 4;
-    private static final int NUM_X_BITS = 1 + MathHelper.calculateLogBaseTwo(MathHelper.roundUpToPowerOfTwo(WORLD_BOUNDARY));
+    private static final int NUM_X_BITS = 1 + MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(WORLD_BOUNDARY));
     private static final int NUM_Z_BITS = NUM_X_BITS;
     private static final int NUM_Y_BITS = 8;
     private static final int NUM_EXTRA_BITS = 3;

@@ -15,8 +15,7 @@ buildscript {
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'maven'
-
+apply plugin: 'maven-publish'
 
 version = "0.1"
 group= "grondag.adversity" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -26,17 +25,10 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "1.10.2-12.18.2.2105"
+    version = "1.11.2-13.20.0.2282"
     runDir = "run"
+    mappings = "snapshot_20170411"
     useDepAts = true
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not allways work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-   	mappings = "snapshot_20160916"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
 task deobfJar(type: Jar) {
@@ -47,26 +39,28 @@ task deobfJar(type: Jar) {
 repositories {
     maven { // The repo from which to get waila
         name "Mobius Repo"
-        url "http://mobiusstrip.eu/maven"
+        url "http://tehnut.info/maven"
+        //url "http://mobiusstrip.eu/maven"
     }
     maven { // JEI
         url "http://dvs1.progwml6.com/files/maven"
-    }
-    maven {
-        name 'OC Repo'
-        url "http://maven.cil.li/"
     }
     maven { // TOP
         name 'tterrag maven'
         url "http://maven.tterrag.com/"
     }
-    maven { // McJtyLib
+    maven { // CompatLayer
         url "http://maven.k-4u.nl"
     }
     maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
     }
+}
+
+artifacts {
+    archives sourceJar
+    archives deobfJar
 }
 
 dependencies {
@@ -87,10 +81,11 @@ dependencies {
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
-    deobfCompile "mcp.mobius.waila:Waila:1.7.0-B3_1.9.4"
-    deobfCompile "mezz.jei:jei_1.10.2:3.12.7.318"
-    deobfCompile "mcjty.theoneprobe:TheOneProbe:1.10-1.1.5-37"
-    deobfCompile "com.github.mcjty:mcjtylib:1.10-2.1.4-SNAPSHOT"
+    deobfCompile "mcp.mobius.waila:Hwyla:1.8.10-B23_1.11:api"
+    deobfCompile "mezz.jei:jei_1.11.2:4.2.5.234"
+    deobfCompile "mcjty.theoneprobe:TheOneProbe:1.1x-1.4.1-51"
+    deobfCompile "com.github.mcjty:compatlayer:1.11.2-0.2.6"
+    deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.4"
     
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

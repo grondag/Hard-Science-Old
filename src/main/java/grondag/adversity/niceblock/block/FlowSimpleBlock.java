@@ -17,7 +17,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -90,14 +89,22 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
 
+    
+    
+    @Override
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        // TODO Auto-generated method stub
+        super.onBlockAdded(worldIn, pos, state);
+    }
+
     /**
      * Prevent neighboring dynamic blocks from updating geometry by making them static.
      */
     @Override
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        IBlockState result = super.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
-        IFlowBlock.freezeNeighbors(worldIn, pos, result);
-        return result;
+        IFlowBlock.freezeNeighbors(worldIn, pos, state);
     }
+
 }

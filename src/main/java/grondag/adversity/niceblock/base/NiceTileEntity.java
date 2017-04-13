@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.base;
 
 
-import mcjty.lib.entity.GenericTileEntity;
+//import mcjty.lib.entity.GenericTileEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class NiceTileEntity extends GenericTileEntity{
+public class NiceTileEntity extends TileEntity{
 
     public static final String PLACEMENT_SHAPE_TAG = "APS";
     public static final String DAMAGE_TAG = "ADT";
@@ -121,7 +121,7 @@ public class NiceTileEntity extends GenericTileEntity{
         invalidateClientCache(pos.down().north().west());
         invalidateClientCache(pos.down().south().west());
 
-        worldObj.markBlockRangeForRenderUpdate(pos.up().north().east(), pos.down().south().west());
+        this.world.markBlockRangeForRenderUpdate(pos.up().north().east(), pos.down().south().west());
 
     }
 
@@ -129,7 +129,7 @@ public class NiceTileEntity extends GenericTileEntity{
     private void invalidateClientCache(BlockPos updatePos)
     {
 //        Adversity.log.info("invalidateClientCache thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
-        TileEntity target = worldObj.getTileEntity(updatePos);
+        TileEntity target = this.world.getTileEntity(updatePos);
         if(target != null && target instanceof NiceTileEntity)
         {
             //			Adversity.log.info("updatify success @ " + updatePos.toString());
@@ -163,7 +163,7 @@ public class NiceTileEntity extends GenericTileEntity{
         super.handleUpdateTag(tag);
         long oldModelKey = modelKey;
         doReadFromNBT(tag);
-        if(oldModelKey != modelKey && this.worldObj.isRemote)
+        if(oldModelKey != modelKey && this.world.isRemote)
         {
             this.updateClientRenderState();
         }
@@ -191,7 +191,7 @@ public class NiceTileEntity extends GenericTileEntity{
 //        Adversity.log.info("OnDataPacket pos=" + pos.toString());
         long oldModelKey = modelKey;
         doReadFromNBT(pkt.getNbtCompound());
-        if(oldModelKey != modelKey && this.worldObj.isRemote)
+        if(oldModelKey != modelKey && this.world.isRemote)
         {
             this.updateClientRenderState();
         }
@@ -209,7 +209,7 @@ public class NiceTileEntity extends GenericTileEntity{
 
     private void doReadFromNBT(NBTTagCompound compound)
     {
-        if(this.worldObj == null || ((NiceBlockPlus)this.getBlockType()).getModelRefreshMode() == ModelRefreshMode.ALWAYS)
+        if(this.world == null || ((NiceBlockPlus)this.getBlockType()).getModelRefreshMode() == ModelRefreshMode.ALWAYS)
         {
             //Block will be unknown if no world reference yet.
             //In that case, no reason to update only the persistent bits.
@@ -258,7 +258,7 @@ public class NiceTileEntity extends GenericTileEntity{
         if(this.modelKey != modelKey)
         {
             this.modelKey = modelKey; 
-            if(!this.worldObj.isRemote)
+            if(!this.world.isRemote)
             {
                 this.markDirty();
             }

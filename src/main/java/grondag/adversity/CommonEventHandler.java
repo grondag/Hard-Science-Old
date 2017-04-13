@@ -48,7 +48,7 @@ public class CommonEventHandler
         {
             if(event.getEntityPlayer() != null && event.getWorld().isRemote)
             {
-                event.getEntityPlayer().addChatComponentMessage(new TextComponentString(DENIALS[ThreadLocalRandom.current().nextInt(DENIALS.length)]));
+                event.getEntityPlayer().sendMessage(new TextComponentString(DENIALS[ThreadLocalRandom.current().nextInt(DENIALS.length)]));
             }
             event.setCanceled(true);
         }

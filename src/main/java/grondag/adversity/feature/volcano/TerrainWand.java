@@ -42,17 +42,21 @@ public class TerrainWand extends Item
         STATE;
     }
 
+    
+    
     @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
     {
+        ItemStack stack = playerIn.getHeldItem(hand);
+        
         if(!worldIn.isRemote)
         {
             TerrainMode newMode = TerrainMode.STATE;
             NBTTagCompound tag;
 
-            if(itemStackIn.hasTagCompound())
+            if(stack.hasTagCompound())
             {
-                tag = itemStackIn.getTagCompound();
+                tag = stack.getTagCompound();
                 if(tag.getString(MODE_TAG).equals(TerrainMode.STATE.name()))
                 {
                     newMode = TerrainMode.HEIGHT;
@@ -65,13 +69,13 @@ public class TerrainWand extends Item
             }
 
             tag.setString(MODE_TAG, newMode.name());
-            itemStackIn.setTagCompound(tag);
+            stack.setTagCompound(tag);
 
             //TODO: localize
-            playerIn.addChatComponentMessage(new TextComponentString("Mode targetPos to " + newMode.toString()));
+            playerIn.sendMessage(new TextComponentString("Mode targetPos to " + newMode.toString()));
 
         }
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStackIn);
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
     }    
 
     public TerrainMode getMode(ItemStack itemStackIn)
@@ -89,9 +93,11 @@ public class TerrainWand extends Item
 
 
     @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
         if(worldIn.isRemote) return EnumActionResult.SUCCESS;
+        
+        ItemStack stack = playerIn.getHeldItem(hand);
         
         if(getMode(stack) == TerrainMode.HEIGHT)
         {
@@ -273,14 +279,14 @@ public class TerrainWand extends Item
                 {	
                     targetPos = pos;
                     targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, level - 1);
-                    playerIn.addChatComponentMessage(new TextComponentString("Level " + (level - 1)));
+                    playerIn.sendMessage(new TextComponentString("Level " + (level - 1)));
 
                 }
                 else if(IFlowBlock.isFlowHeight(worldIn.getBlockState(pos.down()).getBlock()))
                 {
                     targetPos = pos;
                     targetState = Blocks.AIR.getDefaultState();
-                    playerIn.addChatComponentMessage(new TextComponentString("Level 0 (removed a block)"));
+                    playerIn.sendMessage(new TextComponentString("Level 0 (removed a block)"));
                 }
                 else
                 {
@@ -294,14 +300,14 @@ public class TerrainWand extends Item
                 {
                     targetPos = pos;
                     targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, level + 1);
-                    playerIn.addChatComponentMessage(new TextComponentString("Level " + (level + 1)));
+                    playerIn.sendMessage(new TextComponentString("Level " + (level + 1)));
                 }
                 else if(worldIn.getBlockState(pos.up()).getBlock().isReplaceable(worldIn, pos.up())
                         || IFlowBlock.isFlowFiller(worldIn.getBlockState(pos.up()).getBlock()))
                 {
                     targetPos = pos.up();
                     targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, 1);
-                    playerIn.addChatComponentMessage(new TextComponentString("Level 1 (added new block)"));
+                    playerIn.sendMessage(new TextComponentString("Level 1 (added new block)"));
                 }
                 else
                 {

@@ -85,7 +85,7 @@ public class NiceGuiScreen extends GuiScreen
         
         if(colorPicker == null)
         {
-            ItemStack heldItem = mc.thePlayer.getHeldItem(EnumHand.MAIN_HAND);
+            ItemStack heldItem = mc.player.getHeldItem(EnumHand.MAIN_HAND);
             if (heldItem == null || !(heldItem.getItem() instanceof NiceItemBlock)) 
             {
                 // Cannot happen!
@@ -111,7 +111,7 @@ public class NiceGuiScreen extends GuiScreen
         this.drawGradientRect(this.xStart, this.yStart, this.xStart + this.xSize, this.yStart + this.ySize, -1072689136, -804253680);
 
         this.colorPicker.drawControl(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRendererObj, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
+        this.drawCenteredString(this.fontRenderer, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
         
         int left = this.xStart + this.xSize / 2;
         int top = this.yStart + this.ySize / 4;

@@ -16,6 +16,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -118,7 +119,7 @@ public class EntityLavaParticle extends Entity
         super.notifyDataManagerChange(key);
 
         //resize once we have our amount
-        if (FLUID_AMOUNT.equals(key) && this.worldObj.isRemote)
+        if (FLUID_AMOUNT.equals(key) && this.world.isRemote)
         {
             this.cachedAmount = this.dataManager.get(FLUID_AMOUNT).intValue();
             this.updateAmountDependentData();
@@ -150,7 +151,7 @@ public class EntityLavaParticle extends Entity
      */
     public void setThrowableHeading(double x, double y, double z, float velocity, float inaccuracy)
     {
-        float f = MathHelper.sqrt_double(x * x + y * y + z * z);
+        float f = MathHelper.sqrt(x * x + y * y + z * z);
         x = x / (double)f;
         y = y / (double)f;
         z = z / (double)f;
@@ -163,7 +164,7 @@ public class EntityLavaParticle extends Entity
         this.motionX = x;
         this.motionY = y;
         this.motionZ = z;
-        float f1 = MathHelper.sqrt_double(x * x + z * z);
+        float f1 = MathHelper.sqrt(x * x + z * z);
         this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
         this.rotationPitch = (float)(MathHelper.atan2(y, (double)f1) * (180D / Math.PI));
         this.prevRotationYaw = this.rotationYaw;
@@ -214,7 +215,7 @@ public class EntityLavaParticle extends Entity
     public void onUpdate()
     {
         // track the number of active particles - server only
-        if(!this.worldObj.isRemote && liveParticleLastServerTick != this.getServer().getTickCounter()) 
+        if(!this.world.isRemote && liveParticleLastServerTick != this.getServer().getTickCounter()) 
         {
             liveParticleLastServerTick = this.getServer().getTickCounter();
             liveParticleCount = 0;
@@ -230,9 +231,9 @@ public class EntityLavaParticle extends Entity
         
         // If inside lava, release to lava simulator.
         // This can happen somewhat frequently because another particle landed or lava flowed around us.
-//        if(!this.worldObj.isRemote) 
+//        if(!this.world.isRemote) 
 //        {
-            Block block = this.worldObj.getBlockState(this.getPosition()).getBlock();
+            Block block = this.world.getBlockState(this.getPosition()).getBlock();
             
             if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK )
             {
@@ -249,7 +250,7 @@ public class EntityLavaParticle extends Entity
 
         this.motionY -= 0.03999999910593033D;
 
-        this.moveEntity(this.motionX, this.motionY, this.motionZ);
+        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
         this.motionX *= 0.9800000190734863D;
         this.motionY *= 0.9800000190734863D;
@@ -261,12 +262,12 @@ public class EntityLavaParticle extends Entity
     
     private void land()
     {
-        if(!this.worldObj.isRemote )
+        if(!this.world.isRemote )
         {
 //            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
             Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount());
         }
-        //            this.worldObj.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
+        //            this.world.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.shouldDie = true;
         this.setDead();
     }
@@ -277,7 +278,7 @@ public class EntityLavaParticle extends Entity
     @Override
     public void setDead()
     {
-        if(!this.worldObj.isRemote & !this.shouldDie)
+        if(!this.world.isRemote & !this.shouldDie)
         {
             Adversity.log.info("unintended particle death");
         }
@@ -294,13 +295,14 @@ public class EntityLavaParticle extends Entity
         //Lava doesn't care about webs
     }
 
+    
     /**
      * Tries to move the entity towards the specified location.
      */
     @Override
-    public void moveEntity(double x, double y, double z)
+    public void move(MoverType type, double x, double y, double z)
     {
-        this.worldObj.theProfiler.startSection("move");
+        this.world.profiler.startSection("move");
 
         AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
 
@@ -310,7 +312,7 @@ public class EntityLavaParticle extends Entity
         double startingY = y;
         double startingZ = z;
 
-        List<AxisAlignedBB> blockCollisions = this.worldObj.getCollisionBoxes(targetBox);
+        List<AxisAlignedBB> blockCollisions = this.world.getCollisionBoxes(null, targetBox);
 
         //TODO: entity collisions and damage
         //            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
@@ -340,8 +342,8 @@ public class EntityLavaParticle extends Entity
 
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
 
-        this.worldObj.theProfiler.endSection();
-        this.worldObj.theProfiler.startSection("rest");
+        this.world.profiler.endSection();
+        this.world.profiler.startSection("rest");
         this.resetPositionToBB();
         this.isCollidedHorizontally = startingX != x || startingZ != z;
         this.isCollidedVertically = startingY != y;
@@ -349,11 +351,11 @@ public class EntityLavaParticle extends Entity
         //having negative Y offset is not determinative because tops of blocks can
         //force us up even if we aren't really fully on top of them.
         this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
-        j4 = MathHelper.floor_double(this.posX);
-        int l4 = MathHelper.floor_double(this.posY - 0.20000000298023224D);
-        int i5 = MathHelper.floor_double(this.posZ);
+        j4 = MathHelper.floor(this.posX);
+        int l4 = MathHelper.floor(this.posY - 0.20000000298023224D);
+        int i5 = MathHelper.floor(this.posZ);
         BlockPos blockpos = new BlockPos(j4, l4, i5);
-        IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+        IBlockState iblockstate = this.world.getBlockState(blockpos);
         this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || IFlowBlock.isFlowFiller(iblockstate.getBlock());
 
         //this is very crude, but if we are vertically collided but not resting on top of the ground
@@ -367,7 +369,7 @@ public class EntityLavaParticle extends Entity
         if (iblockstate.getMaterial() == Material.AIR)
         {
             BlockPos blockpos1 = blockpos.down();
-            IBlockState iblockstate1 = this.worldObj.getBlockState(blockpos1);
+            IBlockState iblockstate1 = this.world.getBlockState(blockpos1);
             Block block1 = iblockstate1.getBlock();
 
             if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate)
@@ -403,7 +405,7 @@ public class EntityLavaParticle extends Entity
 
         if (startingY != y)
         {
-            block.onLanded(this.worldObj, this);
+            block.onLanded(this.world, this);
         }
 
         //TODO: is needed?
@@ -420,18 +422,18 @@ public class EntityLavaParticle extends Entity
         }
 
 
-        this.worldObj.theProfiler.endSection();
+        this.world.profiler.endSection();
 
     }
 
     private void destroyCollidingDisplaceableBlocks(AxisAlignedBB bb)
     {
-        int i = MathHelper.floor_double(bb.minX);
-        int j = MathHelper.ceiling_double_int(bb.maxX);
-        int k = MathHelper.floor_double(bb.minY);
-        int l = MathHelper.ceiling_double_int(bb.maxY);
-        int i1 = MathHelper.floor_double(bb.minZ);
-        int j1 = MathHelper.ceiling_double_int(bb.maxZ);
+        int i = MathHelper.floor(bb.minX);
+        int j = MathHelper.ceil(bb.maxX);
+        int k = MathHelper.floor(bb.minY);
+        int l = MathHelper.ceil(bb.maxY);
+        int i1 = MathHelper.floor(bb.minZ);
+        int j1 = MathHelper.ceil(bb.maxZ);
         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
         for (int k1 = i; k1 < j; ++k1)
@@ -441,11 +443,11 @@ public class EntityLavaParticle extends Entity
                 for (int i2 = i1; i2 < j1; ++i2)
                 {
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
-                    IBlockState state = worldObj.getBlockState(blockpos$pooledmutableblockpos);
+                    IBlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos);
                     if(!(state.getMaterial() == Material.AIR || state.getMaterial().isLiquid()) 
                              && LavaTerrainHelper.canLavaDisplace(state) && !IFlowBlock.isFlowFiller(state.getBlock()))
                     {
-                        this.worldObj.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
+                        this.world.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }
                 }
             }

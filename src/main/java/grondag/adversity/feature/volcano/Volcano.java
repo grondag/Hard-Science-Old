@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.BiomeManager.BiomeType;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -58,7 +59,7 @@ public class Volcano {
         GameRegistry.register(lavaBlob);
         
       
-        EntityRegistry.registerModEntity(EntityLavaParticle.class, "adversity:lava_blob", 1, Adversity.instance, 64, 10, true);
+        EntityRegistry.registerModEntity(new ResourceLocation("adversity:lava_blob"), EntityLavaParticle.class, "adversity:lava_blob", 1, Adversity.instance, 64, 10, true);
         
         
         GameRegistry.register(basaltRubble);

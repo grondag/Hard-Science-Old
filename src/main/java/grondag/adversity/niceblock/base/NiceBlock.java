@@ -40,6 +40,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -146,11 +147,12 @@ public class NiceBlock extends Block implements IWailaProvider
     //only display one item meta variant for item search
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
     {
         list.add(getSubItems().get(0));
     }
     
+
     public List<ItemStack> getSubItems()
     {
         ModelColorMapComponent colorMap = dispatcher.getStateSet().getFirstColorMapComponent();
@@ -339,7 +341,7 @@ public class NiceBlock extends Block implements IWailaProvider
     }
 
     @Override
-    public boolean canRenderInLayer(BlockRenderLayer layer)
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
         return dispatcher.canRenderInLayer(layer);
     }
@@ -347,7 +349,8 @@ public class NiceBlock extends Block implements IWailaProvider
 //  private long elapsedTime;
 //  private int timerCount = 0;
 
-	/**
+
+    /**
      * Determines which model should be displayed via MODEL_KEY. 
      */
     @Override
@@ -379,26 +382,26 @@ public class NiceBlock extends Block implements IWailaProvider
     {
         return this.collisionHandler != null;
     }
-
-  
+    
     @SuppressWarnings("deprecation")
     @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
+            Entity entityIn, boolean p_185477_7_)
     {
         if (collisionHandler == null)
         {
-        	super.addCollisionBoxToList(state, worldIn, pos, mask, list, collidingEntity);
+            super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185477_7_);
         }
         else
         {
-            AxisAlignedBB localMask = mask.offset(-pos.getX(), -pos.getY(), -pos.getZ());
+            AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
             
             List<AxisAlignedBB> bounds = this.collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos));
  
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
                 {
-                    list.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
+                    collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
                 }
             }        
         }
@@ -406,7 +409,7 @@ public class NiceBlock extends Block implements IWailaProvider
 
     @SuppressWarnings("deprecation")
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, World worldIn, BlockPos pos)
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         if (collisionHandler == null)
         {
@@ -431,9 +434,9 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
         
-            addCollisionBoxToList(blockState, worldIn, pos, 
+            this.addCollisionBoxToList(blockState, worldIn, pos, 
                     new AxisAlignedBB(start.xCoord, start.yCoord, start.zCoord, end.xCoord, end.yCoord, end.zCoord),
-                    bounds, null);
+                    bounds, null, false);
     
             RayTraceResult retval = null;
             double distance = 1;

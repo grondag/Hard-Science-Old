@@ -29,8 +29,10 @@ public class VolcanoWand extends Item
         this.setMaxStackSize(1);
     }
 
-    @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand)
+    
+    
+       @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand)
     {
         if(!worldIn.isRemote)
         {
@@ -46,19 +48,19 @@ public class VolcanoWand extends Item
             }
             if(targetPos == null)
             {
-                playerIn.addChatComponentMessage(new TextComponentString("No volcano in this chunk."));
+                playerIn.sendMessage(new TextComponentString("No volcano in this chunk."));
             }
             else
             {
-                playerIn.addChatComponentMessage(new TextComponentString("Found volcano at " + targetPos.toString()));
+                playerIn.sendMessage(new TextComponentString("Found volcano at " + targetPos.toString()));
             }
             
         }
-        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStackIn);
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, playerIn.getHeldItem(hand));
     }
 
     @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX,
+    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX,
             float hitY, float hitZ)
     {
         

@@ -19,6 +19,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -47,7 +48,7 @@ public class ColumnSquareBlock extends NiceBlockPlus
 
     }
 
-    //always drop Y-axis varient
+    //always drop Y-axis variant
     @Override
     public int damageDropped(IBlockState state)
     {
@@ -55,13 +56,13 @@ public class ColumnSquareBlock extends NiceBlockPlus
     }
     
     //only display vertical variant in item search
-    @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    @Override
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
     {
         list.add(getSubItems().get(Axis.Y.ordinal()));
     }
-    
+
     //including all variants here for benefit of WAILA model lookup
     @Override
     public List<ItemStack> getSubItems()

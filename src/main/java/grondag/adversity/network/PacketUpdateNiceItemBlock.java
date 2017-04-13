@@ -52,7 +52,7 @@ public class PacketUpdateNiceItemBlock implements IMessage
 
         private void handle(PacketUpdateNiceItemBlock message, MessageContext ctx) 
         {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().playerEntity;
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             ItemStack heldItem = playerEntity.getHeldItem(EnumHand.MAIN_HAND);
             if (heldItem == null || !(heldItem.getItem() instanceof NiceItemBlock) ) 
             {

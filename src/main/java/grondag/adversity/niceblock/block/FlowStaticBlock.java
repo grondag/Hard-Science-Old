@@ -199,17 +199,17 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
     
+    
+    
     /**
      * Prevent neighboring dynamic blocks from updating geometry by making them static.
      */
     @Override
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        IBlockState result = super.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
-        IFlowBlock.freezeNeighbors(worldIn, pos, result);
-        return result;
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        IFlowBlock.freezeNeighbors(worldIn, pos, state);
     }
-    
 
     /**
      * Convert this block to a dynamic version of itself if a static version was given.
