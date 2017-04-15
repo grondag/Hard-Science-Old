@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import grondag.adversity.config.Config;
+import grondag.adversity.Configurator;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -789,8 +789,8 @@ public class RawQuad
                     if(this.lightingMode == LightingMode.SHADED)
                     {
                         Vec3d surfaceNormal = getVertex(v).hasNormal() ? getVertex(v).getNormal() : this.getFaceNormal();
-                        shade = Config.render().minAmbientLight + 
-                                (float) ((surfaceNormal.dotProduct(Config.render().lightingNormal) + 1) * Config.render().normalLightFactor);
+                        shade = Configurator.RENDER.minAmbientLight + 
+                                (float) ((surfaceNormal.dotProduct(Configurator.Render.lightingNormal) + 1) * Configurator.Render.normalLightFactor);
                     }
                     else
                     {
@@ -841,7 +841,7 @@ public class RawQuad
         //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
         return new BakedQuad(vertexData, color, this.face, textureSprite, 
-                lightingMode == LightingMode.SHADED && !Config.render().enableCustomShading, format);
+                lightingMode == LightingMode.SHADED && !Configurator.RENDER.enableCustomShading, format);
 
     }
 

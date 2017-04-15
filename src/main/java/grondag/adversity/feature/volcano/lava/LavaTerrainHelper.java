@@ -3,6 +3,8 @@ package grondag.adversity.feature.volcano.lava;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Comparator;
+import java.util.Iterator;
+
 import gnu.trove.list.TLongList;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
@@ -361,5 +363,25 @@ public class LavaTerrainHelper
     
         // Volcanic lava don't give no shits about your stuff.
         return true;        
+    }
+    
+    public static String[] generateDefaultDisplaceableList()
+    {
+        ArrayList<String> results = new ArrayList<String>();
+        
+        Iterator<Block> blocks = Block.REGISTRY.iterator();
+        while(blocks.hasNext())
+        {
+            Block b = blocks.next();
+            @SuppressWarnings("deprecation")
+            Material m = b.getMaterial(b.getDefaultState());
+            if(m.isLiquid() || m.isReplaceable())
+            {
+                results.add(b.getRegistryName().toString());
+            }
+        }
+        
+        return results.toArray(new String[results.size()]);
+        
     }
 }

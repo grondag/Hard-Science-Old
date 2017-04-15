@@ -179,26 +179,11 @@ public class CellChunk implements ISimpleListItem
 
                     if(entryCell == null)
                     {
-                        //TODO remove
-                        LavaCell temp = builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z);
-                        if(temp == null)
-                            Adversity.log.info("null cell detected.");
-                        
-                        this.setEntryCell(x, z, temp);
-                        
-                        
-//                        this.setEntryCell(x, z, builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z));
+                        this.setEntryCell(x, z, builder.buildNewCellStack(this.cells, columnBuffer, this.xStart + x, this.zStart + z));
                     }
                     else
                     {
-                        //TODO: remove
-                        LavaCell temp = builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z);
-                        if(temp == null)
-                            Adversity.log.info("null cell detected.");
-                        
-                        this.setEntryCell(x, z, temp);
-                        
-//                        this.setEntryCell(x, z, builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z));
+                        this.setEntryCell(x, z, builder.updateCellStack(this.cells, columnBuffer, entryCell, this.xStart + x, this.zStart + z));
                     }
                 }
             }

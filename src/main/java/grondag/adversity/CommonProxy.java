@@ -1,7 +1,6 @@
 package grondag.adversity;
 
 
-import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.Volcano;
 import grondag.adversity.gui.AdversityGuiHandler;
 import grondag.adversity.network.AdversityMessages;
@@ -22,7 +21,6 @@ public class CommonProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 
 		Adversity.log = event.getModLog();
-		Config.init(event.getSuggestedConfigurationFile());
 		
         AdversityMessages.registerNetworkMessages();
 		
@@ -42,6 +40,7 @@ public class CommonProxy {
 
 	public void init(FMLInitializationEvent event) {
       //  Simulator.instance.init(event);
+	    Configurator.recalcDervied();
 	    NetworkRegistry.INSTANCE.registerGuiHandler(Adversity.instance, new AdversityGuiHandler());
 		Volcano.init(event);
         NiceBlockRegistrar.init(event);

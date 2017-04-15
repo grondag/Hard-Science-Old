@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.config.Config;
+import grondag.adversity.Configurator;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
@@ -169,7 +169,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 }
 
                 this.level = this.pos.getY() + 10;
-                int moundRadius = Config.volcano().moundRadius;
+                int moundRadius = Configurator.VOLCANO.moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.world, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
             else
@@ -413,15 +413,15 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private BlockPos findMoundSpot()
     {
-        int dx = (int) (ThreadLocalRandom.current().nextGaussian() * Config.volcano().moundRadius);
-        int dz = (int) (ThreadLocalRandom.current().nextGaussian() * Config.volcano().moundRadius);
+        int dx = (int) (ThreadLocalRandom.current().nextGaussian() * Configurator.VOLCANO.moundRadius);
+        int dz = (int) (ThreadLocalRandom.current().nextGaussian() * Configurator.VOLCANO.moundRadius);
         double lastDistance = 0;
         BlockPos center = new BlockPos(this.pos.getX(), this.level, this.pos.getZ());
         BlockPos best = null;
         for(int i = 0; i < 20; i++)
         {
-            dx = (int) (ThreadLocalRandom.current().nextGaussian() * Config.volcano().moundRadius);
-            dz = (int) (ThreadLocalRandom.current().nextGaussian() * Config.volcano().moundRadius);
+            dx = (int) (ThreadLocalRandom.current().nextGaussian() * Configurator.VOLCANO.moundRadius);
+            dz = (int) (ThreadLocalRandom.current().nextGaussian() * Configurator.VOLCANO.moundRadius);
             BlockPos candidate = this.world.getHeight(this.pos.east(dx).north(dz));
             while(candidate.getY() > 0 && !isVolcanoBlock(this.world.getBlockState(candidate).getBlock()) 
                     && LavaTerrainHelper.canLavaDisplace(this.world.getBlockState(candidate)))

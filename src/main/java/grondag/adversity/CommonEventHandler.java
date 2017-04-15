@@ -2,12 +2,13 @@ package grondag.adversity;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.config.Config;
 import grondag.adversity.feature.volcano.VolcanicLavaBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.common.config.Config.Type;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -57,7 +58,11 @@ public class CommonEventHandler
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) 
     {
-        Config.reload();
+        if (event.getModID().equals(Adversity.MODID))
+        {
+            ConfigManager.sync(Adversity.MODID, Type.INSTANCE);
+            Configurator.recalcDervied();
+        }
     }
     
     @SubscribeEvent

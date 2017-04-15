@@ -122,8 +122,6 @@ public class LavaCells
         }    
     };
 
-    // TODO: add pressure propagation task
-    
     //TODO: make configurable
     private final static int BATCH_SIZE = 4096;
     

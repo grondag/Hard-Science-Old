@@ -22,11 +22,9 @@ import org.apache.logging.log4j.Logger;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 
 
-@Mod(modid = Adversity.MODID, name = Adversity.MODNAME, version = Adversity.VERSION
-        , guiFactory = "grondag.adversity.config.AdversityModGuiFactory")
+@Mod(modid = Adversity.MODID, name = Adversity.MODNAME, acceptedMinecraftVersions = "[1.11.2]")
 public class Adversity {
 	public static final String MODID = "adversity";
-	public static final String VERSION = "@VERSION@";
 	public static final String MODNAME = "Adversity";
 
 	public static final boolean DEBUG_MODE = true;

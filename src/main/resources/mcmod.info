@@ -2,13 +2,13 @@
 {
   "modid": "adversity",
   "name": "Adversity",
-  "description": "This mod wants you to hate it.",
-  "version": "${version}",
+  "description": "New looks and new challenges with a hard science-fiction flavor.",
+  "version": "1.11.2-0.0.1.0",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
   "authorList": ["Grondag (aka Zaerudath)"],
-  "credits": "The Forge and FML guys, and all the other modders who went before.",
+  "credits": "The Forge team and all the other mod authors who went before.",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

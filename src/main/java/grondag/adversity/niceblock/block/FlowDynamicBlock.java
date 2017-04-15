@@ -3,7 +3,7 @@ package grondag.adversity.niceblock.block;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.config.Config;
+import grondag.adversity.Configurator;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
@@ -84,7 +84,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
 //        boolean result;
 //        long start = System.nanoTime();
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
-        if(Config.render().enableFaceCullingOnFlowBlocks && IFlowBlock.isFlowBlock(neighborState.getBlock()))
+        if(Configurator.RENDER.enableFaceCullingOnFlowBlocks && IFlowBlock.isFlowBlock(neighborState.getBlock()))
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());

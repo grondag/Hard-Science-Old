@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.config.Config;
+import grondag.adversity.Configurator;
 import grondag.adversity.feature.volcano.TileVolcano.VolcanoStage;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
@@ -410,13 +410,13 @@ public class VolcanoManager extends SimulationNodeRunnable
         
         public boolean wantsToActivate()
         {
-            if(this.isActive || this.height >= Config.volcano().maxYLevel) return false;
+            if(this.isActive || this.height >= Configurator.VOLCANO.maxYLevel) return false;
             
             int dormantTime = Simulator.instance.getTick() - this.lastActivationTick;
             
-            if(dormantTime < Config.volcano().minDormantTicks) return false;
+            if(dormantTime < Configurator.VOLCANO.minDormantTicks) return false;
             
-            float chance = (float)dormantTime / Config.volcano().maxDormantTicks;
+            float chance = (float)dormantTime / Configurator.VOLCANO.maxDormantTicks;
             chance = chance * chance * chance;
             
             return ThreadLocalRandom.current().nextFloat() <= chance;
