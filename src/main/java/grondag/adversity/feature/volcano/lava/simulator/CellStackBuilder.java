@@ -93,10 +93,10 @@ public class CellStackBuilder
                     if(testCell1 != testCell2)
                     {
                         if(testCell1.intersectsWith(testCell2))
-                            Adversity.log.warn("Found interesecting cells in same column after rebuild. Should never happen. ");
+                            Adversity.LOG.warn("Found interesecting cells in same column after rebuild. Should never happen. ");
                         
                         if(testCell1.isVerticallyAdjacentTo(testCell2))
-                            Adversity.log.warn("Found vertically adjacent cells in same column after rebuild. Should never happen. ");
+                            Adversity.LOG.warn("Found vertically adjacent cells in same column after rebuild. Should never happen. ");
                     }
                     
                     testCell2 = testCell2.above;

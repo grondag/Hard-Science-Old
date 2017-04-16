@@ -41,11 +41,13 @@ public enum BaseMaterial {
 	public final String harvestTool;
 	public final int harvestLevel;
 	public final int defaultColorMapID;
-
+	public final boolean isHyperMaterial;
+	
 	BaseMaterial(String name, Substance substance, Material material, SoundType sound, int defaultColorMapID) 
 	{
 		this.materialName = name;
 		this.material = material;
+		this.isHyperMaterial = substance == Configurator.SUBSTANCES.hyperstone;
 		stepSound = sound;
 		this.defaultColorMapID = defaultColorMapID;
 

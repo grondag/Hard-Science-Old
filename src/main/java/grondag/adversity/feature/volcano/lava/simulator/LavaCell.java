@@ -707,7 +707,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
     {
         if(fluidUnits == 0) return;
         this.changeFluidUnits(fluidUnits);
-        this.updateTickIndex(Simulator.instance.getTick());
+        this.updateTickIndex(Simulator.INSTANCE.getTick());
     }
     
 //    private void doFallingParticles(int y, World world)
@@ -915,7 +915,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     //handle strangeness that should never occur
                     if(remaining <= 0)
                     {
-                        if(Adversity.DEBUG_MODE) Adversity.log.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
+                        if(Adversity.DEBUG_MODE) Adversity.LOG.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
                         
                         break;
                     }
@@ -971,7 +971,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
         {
             int surfaceUnits = this.worldSurfaceUnits();
             newCell.changeFluidUnits(surfaceUnits - floorForNewCell * LavaSimulator.FLUID_UNITS_PER_LEVEL);
-            newCell.updateTickIndex(Simulator.instance.getTick());
+            newCell.updateTickIndex(Simulator.INSTANCE.getTick());
         }
         
         if(this.worldSurfaceLevel() > newCeilingForThisCell)
@@ -1027,13 +1027,13 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     if(flowHeight > 0)
                     {
                         this.changeFluidUnits(-Math.min(this.fluidUnits(), flowHeight * LavaSimulator.FLUID_UNITS_PER_LEVEL));
-                        this.updateTickIndex(Simulator.instance.getTick());
+                        this.updateTickIndex(Simulator.INSTANCE.getTick());
                     }
                 }
                 else if( y < surfaceY)
                 {
                     this.changeFluidUnits(-LavaSimulator.FLUID_UNITS_PER_BLOCK);
-                    this.updateTickIndex(Simulator.instance.getTick());
+                    this.updateTickIndex(Simulator.INSTANCE.getTick());
                 }
             }
             
@@ -1115,10 +1115,10 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                         if(Adversity.DEBUG_MODE)
                         {
                             if(newCell.intersectsWith(newCell.above) || newCell.isVerticallyAdjacentTo(newCell.above))
-                                Adversity.log.warn("Added cell intersects with cell above. Should never happen.");
+                                Adversity.LOG.warn("Added cell intersects with cell above. Should never happen.");
                             
                             if(newCell.intersectsWith(newCell.below) || newCell.isVerticallyAdjacentTo(newCell.below))
-                                Adversity.log.warn("Added cell intersects with cell below. Should never happen.");
+                                Adversity.LOG.warn("Added cell intersects with cell below. Should never happen.");
                         }
                         
                         return;
@@ -1127,7 +1127,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     upperCell = lowerCell.above;
                     
                     if(Adversity.DEBUG_MODE && lowerCell == upperCell)
-                        Adversity.log.info("Strangeness in lava cell NBT load.");
+                        Adversity.LOG.info("Strangeness in lava cell NBT load.");
                 }
                 
                 // if we get to here, new cell is the uppermost
@@ -1295,21 +1295,6 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
             }
         }
     }
-    
-//    /**
-//     * Called once per tick for each cell before simulation steps are run.
-//     * Use for housekeeping tasks.
-//     */
-//    public void update(LavaSimulator sim)
-//    {
-//        if(this.isDeleted) return;
-//        
-//        this.updateConnectionsIfNeeded(sim);
-//        
-//        this.updateRawRetentionIfNeeded();
-//        
-//        // TODO: Pressure propagation
-//    }
     
     /** maintains indication of whether or not this cell must remain loaded */
     public void updateActiveStatus()
@@ -1487,7 +1472,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
     private int getFlowFloorRawRetentionDepth()
     {
         if(Adversity.DEBUG_MODE && !this.isBottomFlow()) 
-            Adversity.log.warn("Flow floor retention depth computed for non-flow-floor cell.");
+            Adversity.LOG.warn("Flow floor retention depth computed for non-flow-floor cell.");
         
         int myFloor = this.floorUnits();
         
@@ -1688,7 +1673,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
         if(this.locator == null)
         {
             if(Adversity.DEBUG_MODE)
-                Adversity.log.warn("Missing cell locator object.");
+                Adversity.LOG.warn("Missing cell locator object.");
             return this;
         }
         

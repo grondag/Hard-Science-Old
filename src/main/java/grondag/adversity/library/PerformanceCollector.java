@@ -45,15 +45,15 @@ public class PerformanceCollector
         }
         if(total == 0) total = 1;  // prevent div by zero below
         
-        Adversity.log.info("======================================================================================");
-        Adversity.log.info("Performance Measurement for " + this.title );
-        Adversity.log.info("--------------------------------------------------------------------------------------");
+        Adversity.LOG.info("======================================================================================");
+        Adversity.LOG.info("Performance Measurement for " + this.title );
+        Adversity.LOG.info("--------------------------------------------------------------------------------------");
         for(PerformanceCounter counter : this.counters)
         {
-            Adversity.log.info((counter.runTime() * 100 / total) + "% " + counter.stats());
+            Adversity.LOG.info((counter.runTime() * 100 / total) + "% " + counter.stats());
         }
-        Adversity.log.info("--------------------------------------------------------------------------------------");
-        Adversity.log.info(String.format("TOTAL TIME = %1$.3fs (%2$,dns)", (double)total/1000000000L, total));
+        Adversity.LOG.info("--------------------------------------------------------------------------------------");
+        Adversity.LOG.info(String.format("TOTAL TIME = %1$.3fs (%2$,dns)", (double)total/1000000000L, total));
     }
     
     public void clearStats()

@@ -157,9 +157,6 @@ public class Configurator
     
     public static class HyperStone
     {
-        @Comment("Enable special behaviors for hyper-dimensional building materials")
-        public boolean enabled = true;
-        
         @Comment("If false, mobs cannot spawn on hyper-dimensional blocks in darkness; similar to slabs.")
         public boolean allowMobSpawning = false;
         
@@ -172,42 +169,7 @@ public class Configurator
         @Comment("If true, hyper-dimensional blocks can be harvested intact with silk touch. Only matters if allowHarvest is true.")
         public boolean allowSilkTouch = true;
         
-        @Comment("If > 0, hyper-dimensional blocks will slow repair themselves at random intervals.")
-        @RangeDouble(min = 0, max = 1)
-        public float selfRepairChance = 0.2F;
-        
-        @Comment("If true, hyper-dimensional blocks that are fully failed can still self repair. (But only if selfRepairChance > 0.)")
-        public boolean selfRepairFailedBlocks = false;
-        
-        @Comment("If true, hyper-dimensional blacks have a chance to lose durability due to damage from entities or explosions.")
+        @Comment("If true, hyper-dimensional blocks have a chance to lose durability due to damage from entities or explosions.")
         public boolean canBeDamaged;
-        
-        @Comment("Hardnesss (mining speed) of undamaged hyper-dimensional blocks.")
-        @RangeDouble(min = 0, max = 50)
-        public float startingHardness = 25F;
-        
-        @Comment("If canBeDamaged=true, the remaining hardness each time a hyper-dimensional block is damaged.  1 will disable any loss.")
-        @RangeDouble(min = 0.5, max = 1.0)
-        public float hardnessDamageFactor = 0.8F;
-        
-        @Comment("The blast resistance of a hyper-dimensional block up until it is fully damaged.")
-        @RangeInt(min = 1, max = 18000000)
-        public int intactBlastResistance = 6000000;
-        
-        @Comment("If canBeDamaged=true, the blast resistance of a hyper-dimensional block when it is fully damaged.")
-        @RangeInt(min = 1, max = 18000000)
-        public int failedBlastResistance = 30;
-        
-        @Comment("If canBeDamaged=true, the chance that an entity will damage a hyper-dimensional block when attempting to destroy it.")
-        @RangeDouble(min = 0.0, max = 1.0)
-        public float destroyedFailureChance = 0.25F;
-        
-        @Comment("If canBeDamaged=true, the chance that an explosion that overrides blast resistance will damage a hyper-dimensional block.")
-        @RangeDouble(min = 0.0, max = 1.0)
-        public float explodedFailureChance = 0.25F;
-        
-        @Comment("If canBeDamaged=true, the chance that a blast resistance test (usually an explosion) will damage a hyper-dimensional block.")
-        @RangeDouble(min = 0.0, max = 1.0)
-        public float resistanceFailureChance = 0.001F;
      }
 }

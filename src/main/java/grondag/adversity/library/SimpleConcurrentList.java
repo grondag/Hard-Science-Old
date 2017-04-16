@@ -97,7 +97,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     public void add(T item)
     {
         if(Adversity.DEBUG_MODE && this.isMaintaining)
-            Adversity.log.warn("Unsupported add operation on simple concurrent list during maintenance operation");
+            Adversity.LOG.warn("Unsupported add operation on simple concurrent list during maintenance operation");
         
         int index = this.size.getAndIncrement();
         if(index < this.capacity)
@@ -222,7 +222,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     public Stream<T> stream(boolean isParallel)
     {
         if(Adversity.DEBUG_MODE && this.isMaintaining)
-            Adversity.log.warn("Unsupported stream operation on simple concurrent list while maintenance operation ongoing");
+            Adversity.LOG.warn("Unsupported stream operation on simple concurrent list while maintenance operation ongoing");
         
         return (Stream<T>) StreamSupport.stream(Arrays.spliterator(items, 0, this.size.get()), isParallel);
     }

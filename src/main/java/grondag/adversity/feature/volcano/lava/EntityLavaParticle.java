@@ -224,7 +224,7 @@ public class EntityLavaParticle extends Entity
         
         if(this.ticksExisted > 600)
         {
-            Adversity.log.info("Ancient lava particle died of old age.");
+            Adversity.LOG.info("Ancient lava particle died of old age.");
             this.setDead();
             return;
         }
@@ -265,7 +265,7 @@ public class EntityLavaParticle extends Entity
         if(!this.world.isRemote )
         {
 //            Adversity.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
-            Simulator.instance.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount());
+            Simulator.INSTANCE.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount());
         }
         //            this.world.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.shouldDie = true;
@@ -280,7 +280,7 @@ public class EntityLavaParticle extends Entity
     {
         if(!this.world.isRemote & !this.shouldDie)
         {
-            Adversity.log.info("unintended particle death");
+            Adversity.LOG.info("unintended particle death");
         }
         liveParticleCount--;
         super.setDead();

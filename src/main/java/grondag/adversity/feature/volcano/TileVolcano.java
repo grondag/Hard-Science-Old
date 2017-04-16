@@ -145,25 +145,25 @@ public class TileVolcano extends TileEntity implements ITickable{
 
         if(this.node == null)
         {
-            if(!Simulator.instance.isRunning()) return;
+            if(!Simulator.INSTANCE.isRunning()) return;
 
             if(this.stage == VolcanoStage.NEW)
             {
                 // Try to find a simulation node already at this location
                 
-                this.node = Simulator.instance.getVolcanoManager().findNode(this.pos);
+                this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.pos);
                 
                 if(node == null)
                 {
-                    Adversity.log.info("Setting up new Volcano Node @" + this.pos.toString());
-                    this.node = Simulator.instance.getVolcanoManager().createNode();
+                    Adversity.LOG.info("Setting up new Volcano Node @" + this.pos.toString());
+                    this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
                     this.nodeId = node.getID();
                     this.node.setLocation(this.pos,this.world.provider.getDimension());
                     this.stage = VolcanoStage.DORMANT;
                 }
                 else
                 {
-                    Adversity.log.info("Recovered Volcano Node @" + this.pos.toString());
+                    Adversity.LOG.info("Recovered Volcano Node @" + this.pos.toString());
                     this.nodeId = node.getID();
                     this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
                 }
@@ -174,14 +174,14 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
             else
             {
-                Adversity.log.info("retrieving Volcano node @" + this.pos.toString());
+                Adversity.LOG.info("retrieving Volcano node @" + this.pos.toString());
 
-                this.node = Simulator.instance.getVolcanoManager().findNode(this.nodeId);
+                this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.nodeId);
                 if(this.node == null)
                 {
-                    Adversity.log.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
+                    Adversity.LOG.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
                     + ". Created new simulation node.  Simulation state was lost.");
-                    this.node = Simulator.instance.getVolcanoManager().createNode();
+                    this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
                     this.node.setLocation(this.pos,this.world.provider.getDimension());
                 }
             }
@@ -252,7 +252,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
         
         // if have too many blocks, switch to cooling mode
-        if(Simulator.instance.getFluidTracker().loadFactor() > 1)
+        if(Simulator.INSTANCE.getFluidTracker().loadFactor() > 1)
         {
             this.clearingLevel = CLEARING_LEVEL_RESTART;
             return VolcanoStage.COOLING;
@@ -294,7 +294,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     private VolcanoStage doCooling()
     {
         //TODO: make configurable
-        return Simulator.instance.getFluidTracker().loadFactor() > 0.5F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
+        return Simulator.INSTANCE.getFluidTracker().loadFactor() > 0.5F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
     }
     
     /** 
@@ -304,7 +304,7 @@ public class TileVolcano extends TileEntity implements ITickable{
     private VolcanoStage doFlowing()
     {
         
-        if(Simulator.instance.getFluidTracker().loadFactor() > 1)
+        if(Simulator.INSTANCE.getFluidTracker().loadFactor() > 1)
         {
             this.wasBoreFlowEnabled = false;
             setBoreFlowEnabled(false);
@@ -325,7 +325,7 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private void setBoreFlowEnabled(boolean enabled)
     {
-        LavaCells cells = Simulator.instance.getFluidTracker().cells;
+        LavaCells cells = Simulator.INSTANCE.getFluidTracker().cells;
         for(int i = 0; i < BORE_OFFSETS.size(); i++)
         {
             Vec3i offset = BORE_OFFSETS.get(i);
@@ -354,7 +354,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         
         if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
-            LavaCell cell = Simulator.instance.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+            LavaCell cell = Simulator.INSTANCE.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             if(cell != null) cell.setCoolingDisabled(true);
             return;
         }
@@ -368,11 +368,11 @@ public class TileVolcano extends TileEntity implements ITickable{
                 buildMound();
             }
         }
-        LavaCell cell = Simulator.instance.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+        LavaCell cell = Simulator.INSTANCE.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
         if(cell == null) 
         {
             // force cell creation
-            Simulator.instance.getFluidTracker().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            Simulator.INSTANCE.getFluidTracker().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         else
         {

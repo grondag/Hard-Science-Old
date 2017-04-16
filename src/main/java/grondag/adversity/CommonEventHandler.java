@@ -71,7 +71,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
-            Simulator.instance.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
+            Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
@@ -81,14 +81,14 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
-            Simulator.instance.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
+            Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
     @SubscribeEvent
     public void onBlockMultiPlace(BlockEvent.MultiPlaceEvent event)
     {
-        LavaSimulator sim = Simulator.instance.getFluidTracker();
+        LavaSimulator sim = Simulator.INSTANCE.getFluidTracker();
         for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
         {
             if(!(snap.getCurrentBlock() instanceof VolcanicLavaBlock))

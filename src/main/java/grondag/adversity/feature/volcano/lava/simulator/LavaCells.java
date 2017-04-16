@@ -67,7 +67,7 @@ public class LavaCells
         @Override
         public void doJobTask(LavaCell operand)
         {
-            if(operand.canCool(Simulator.instance.getTick()))
+            if(operand.canCool(Simulator.INSTANCE.getTick()))
             {
                 sim.coolCell(operand);
                 if(operand.isDeleted())
@@ -417,7 +417,7 @@ public class LavaCells
             }
         }
         
-        Adversity.log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
+        Adversity.LOG.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
         nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -432,7 +432,7 @@ public class LavaCells
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)
         {
-            Adversity.log.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
+            Adversity.LOG.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
         }
         else
         {
@@ -487,16 +487,16 @@ public class LavaCells
             // Make sure other stuff is up to date
             this.updateStuffJob.runOn(this.sim.LAVA_THREAD_POOL);
             
-            Adversity.log.info("Loaded " + this.cellList.size() + " lava cells.");
+            Adversity.LOG.info("Loaded " + this.cellList.size() + " lava cells.");
         }
     }
     
     public void logDebugInfo()
     {
-        Adversity.log.info(this.cellChunks.size() + " loaded cell chunks");
+        Adversity.LOG.info(this.cellChunks.size() + " loaded cell chunks");
         for(CellChunk chunk : this.cellChunks.values())
         {
-            Adversity.log.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
+            Adversity.LOG.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
                 + " zStart=" + PackedBlockPos.getChunkZStart(chunk.packedChunkPos)
                 + " activeCount=" + chunk.getActiveCount() + " entryCount=" + chunk.getEntryCount()
                     );

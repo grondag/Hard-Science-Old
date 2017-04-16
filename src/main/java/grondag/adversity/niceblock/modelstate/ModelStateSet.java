@@ -252,7 +252,7 @@ public class ModelStateSet
         //TODO: remove
         if(result == null)
         {
-            Adversity.log.info("unable to retrieve model state set value");
+            Adversity.LOG.info("unable to retrieve model state set value");
         }
         return result;
     }

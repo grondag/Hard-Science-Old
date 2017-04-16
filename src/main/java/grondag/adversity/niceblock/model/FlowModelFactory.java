@@ -491,7 +491,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         }
         catch (Exception ex)
         {
-            Adversity.log.info("FlowModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Adversity.LOG.info("FlowModelFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }

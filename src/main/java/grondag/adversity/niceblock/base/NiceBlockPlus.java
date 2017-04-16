@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.base;
 import java.util.List;
 import javax.annotation.Nullable;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
@@ -10,11 +11,13 @@ import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -131,6 +134,24 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
                     tooltip.add("Color: " + colorMap.colorMapName);
                 }
             }
+        }
+    }
+    
+    // BLOCK PROPERTIES
+    
+
+    @Override
+    public boolean canEntitySpawn(IBlockState state, Entity entityIn)
+    {
+        // hyperstone blocks can be configured to prevent mob spawning
+        
+        if(this.material.isHyperMaterial && !Configurator.HYPERSTONE.allowMobSpawning)
+        {
+            return false;
+        }
+        else
+        {
+            return super.canEntitySpawn(state, entityIn);
         }
     }
 }

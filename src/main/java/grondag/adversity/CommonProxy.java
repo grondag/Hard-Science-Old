@@ -1,8 +1,13 @@
 package grondag.adversity;
 
 
-import grondag.adversity.feature.volcano.Volcano;
+import grondag.adversity.external.WailaDataProvider;
 import grondag.adversity.gui.AdversityGuiHandler;
+import grondag.adversity.init.ModBlocks;
+import grondag.adversity.init.ModEntities;
+import grondag.adversity.init.ModItems;
+import grondag.adversity.init.ModRecipes;
+import grondag.adversity.init.ModTileEntities;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.simulator.Simulator;
@@ -16,33 +21,35 @@ import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-public class CommonProxy {
-
-	public void preInit(FMLPreInitializationEvent event) {
-
-		Adversity.log = event.getModLog();
+public class CommonProxy 
+{
+	public void preInit(FMLPreInitializationEvent event) 
+	{
+		Adversity.LOG = event.getModLog();
 		
         AdversityMessages.registerNetworkMessages();
-		
-		Volcano.preInit(event);
+
         NiceBlockRegistrar.preInit(event);
+        ModBlocks.preInit(event);
+		ModItems.preInit(event);
+		ModTileEntities.preInit(event);
+		ModEntities.preInit(event);
 		
-		// TODO: reenable Waila when it is ported
-        if (Loader.isModLoaded("Waila")){
-       //     WailaDataProvider.register();
+        if (Loader.isModLoaded("Waila"))
+        {
+            WailaDataProvider.register();
         }
         
-        ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.instance, Simulator.instance);
-        MinecraftForge.EVENT_BUS.register(Simulator.instance);
+        ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.INSTANCE, Simulator.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(Simulator.INSTANCE);
         MinecraftForge.EVENT_BUS.register(CommonEventHandler.INSTANCE);
-        
 	}
 
-	public void init(FMLInitializationEvent event) {
-      //  Simulator.instance.init(event);
+	public void init(FMLInitializationEvent event) 
+	{
 	    Configurator.recalcDervied();
-	    NetworkRegistry.INSTANCE.registerGuiHandler(Adversity.instance, new AdversityGuiHandler());
-		Volcano.init(event);
+	    NetworkRegistry.INSTANCE.registerGuiHandler(Adversity.INSTANCE, new AdversityGuiHandler());
+		ModRecipes.init(event);
         NiceBlockRegistrar.init(event);
 	}
 
@@ -51,12 +58,14 @@ public class CommonProxy {
 	    //NOOP
 	}
 
-    public void serverStarted(FMLServerStartedEvent event) {
-        Simulator.instance.start();
+    public void serverStarted(FMLServerStartedEvent event)
+    {
+        Simulator.INSTANCE.start();
     }
 
-    public void serverStopping(FMLServerStoppingEvent event) {
-        Simulator.instance.stop();
+    public void serverStopping(FMLServerStoppingEvent event)
+    {
+        Simulator.INSTANCE.stop();
     }
 
 

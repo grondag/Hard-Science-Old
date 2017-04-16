@@ -72,7 +72,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                 {
                     if(chunkTicket == null || (chunksUsedThisTicket == chunkTicket.getChunkListDepth()))
                     {
-                        chunkTicket = ForgeChunkManager.requestTicket(Adversity.instance, worldObj, ForgeChunkManager.Type.NORMAL);
+                        chunkTicket = ForgeChunkManager.requestTicket(Adversity.INSTANCE, worldObj, ForgeChunkManager.Type.NORMAL);
                         chunkTicket.getModData().setInteger("TYPE", this.getID());
                         tickets.add(chunkTicket);
                         chunksUsedThisTicket = 0;
@@ -148,13 +148,13 @@ public class VolcanoManager extends SimulationNodeRunnable
     {
         if(nodes == null)
         {
-            Adversity.log.warn("Volcano simulation manager not properly initialized."
+            Adversity.LOG.warn("Volcano simulation manager not properly initialized."
                     + " Volcano simulation state will be invalid.");
             return null;
         }
         if(nodeID < 0 || nodeID >= nodes.length)
         {
-            Adversity.log.warn("Invalid volcano node id: " + nodeID
+            Adversity.LOG.warn("Invalid volcano node id: " + nodeID
                     + ". Volcano simulation state will be invalid.");
             return null;
         }
@@ -165,7 +165,7 @@ public class VolcanoManager extends SimulationNodeRunnable
     {
         if(nodes == null)
         {
-            Adversity.log.warn("Volcano simulation manager not properly initialized."
+            Adversity.LOG.warn("Volcano simulation manager not properly initialized."
                     + " Volcano simulation state will be invalid.");
             return null;
         }
@@ -348,7 +348,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                 this.stage = newStage;
                 this.setSaveDirty(true);
             }
-            this.keepAlive = Simulator.instance.getWorld().getTotalWorldTime();
+            this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
 //            Adversity.log.info("keepAlive=" + this.keepAlive);
         }
         
@@ -356,9 +356,9 @@ public class VolcanoManager extends SimulationNodeRunnable
         /** called periodically on server tick thread by volcano manager when this is the active node */
         public void update()
         {
-            if(this.isActive && this.keepAlive + 2048L < Simulator.instance.getWorld().getTotalWorldTime())
+            if(this.isActive && this.keepAlive + 2048L < Simulator.INSTANCE.getWorld().getTotalWorldTime())
             {
-                Adversity.log.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
+                Adversity.LOG.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
                 + " has not reported in. Deactivating volcano simulation node.");
                 this.deActivate();
             }
@@ -412,7 +412,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         {
             if(this.isActive || this.height >= Configurator.VOLCANO.maxYLevel) return false;
             
-            int dormantTime = Simulator.instance.getTick() - this.lastActivationTick;
+            int dormantTime = Simulator.INSTANCE.getTick() - this.lastActivationTick;
             
             if(dormantTime < Configurator.VOLCANO.minDormantTicks) return false;
             
@@ -440,11 +440,11 @@ public class VolcanoManager extends SimulationNodeRunnable
                 if(!this.isActive)
                 {
                     this.isActive = true;
-                    this.lastActivationTick = Simulator.instance.getTick();
+                    this.lastActivationTick = Simulator.INSTANCE.getTick();
                     this.setSaveDirty(true);
                     VolcanoManager.this.activeIndex = this.nodeID;
                     VolcanoManager.this.isChunkloadingDirty.set(true);
-                    this.keepAlive = Simulator.instance.getWorld().getTotalWorldTime();
+                    this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
                 }
             }
         }

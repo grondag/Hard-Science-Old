@@ -51,7 +51,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         super(NodeRoots.SIMULATION.ordinal());
     }
 
-    public static final Simulator instance = new Simulator();
+    public static final Simulator INSTANCE = new Simulator();
 	
     private VolcanoManager volcanoManager;
     
@@ -96,7 +96,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	// Main control
 	public void start()  
 	{
-        Adversity.log.info("starting sim");
+        Adversity.LOG.info("starting sim");
 	    synchronized(this)
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
@@ -108,19 +108,19 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
             {
                 if(!PersistenceManager.loadNode(world, this.volcanoManager))
                 {
-                    Adversity.log.info("Volcano manager data not found - recreating.  Some world state may be lost.");
+                    Adversity.LOG.info("Volcano manager data not found - recreating.  Some world state may be lost.");
                     PersistenceManager.registerNode(world, this.volcanoManager);
                 }
                 
                 if(!PersistenceManager.loadNode(world, this.lavaSimulator))
                 {
-                    Adversity.log.info("Lava simulator data not found - recreating.  Some world state may be lost.");
+                    Adversity.LOG.info("Lava simulator data not found - recreating.  Some world state may be lost.");
                     PersistenceManager.registerNode(world, this.lavaSimulator);
                 }
             }
             else
     	    {
-                Adversity.log.info("creating sim");
+                Adversity.LOG.info("creating sim");
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
     	        this.lastSimTick = 0;
@@ -132,7 +132,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     	    }
 
     		this.isRunning = true;
-            Adversity.log.info("starting first frame");
+            Adversity.LOG.info("starting first frame");
 //    		executor.execute(new FrameStarter());
 	    }
 	}
@@ -143,20 +143,20 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
      */
 	public synchronized void stop()
 	{
-        Adversity.log.info("stopping server");
+        Adversity.LOG.info("stopping server");
 		this.isRunning = false;
         
 		// wait for simulation to catch up
 		if(this.lastTickFuture != null && !this.lastTickFuture.isDone())
 		{
-		    Adversity.log.info("waiting for last frame task completion");
+		    Adversity.LOG.info("waiting for last frame task completion");
 		    try
             {
                 this.lastTickFuture.get(5, TimeUnit.SECONDS);
             }
             catch (Exception e)
             {
-                Adversity.log.warn("Timeout waiting for simulation shutdown");
+                Adversity.LOG.warn("Timeout waiting for simulation shutdown");
                 e.printStackTrace();
             }
 		}
@@ -190,8 +190,8 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                     this.lastSimTick++;
                     this.worldTickOffset = this.lastSimTick - world.getWorldTime();
                     this.setSaveDirty(true);
-                    Adversity.log.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
-                    Adversity.log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
+                    Adversity.LOG.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
+                    Adversity.LOG.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
                 }
                 
                 this.volcanoManager.doOnTick();
@@ -220,7 +220,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("Simulator read from NBT");
+        Adversity.LOG.info("Simulator read from NBT");
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
     }
@@ -234,7 +234,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     @Override
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("saving simulation state");
+        Adversity.LOG.info("saving simulation state");
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
     }
@@ -258,7 +258,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
             }
             catch(Exception e)
             {
-                Adversity.log.error("Exception during simulator off-tick processing", e);
+                Adversity.LOG.error("Exception during simulator off-tick processing", e);
             }
         }    
      };

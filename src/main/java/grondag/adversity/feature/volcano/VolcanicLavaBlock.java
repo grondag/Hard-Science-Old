@@ -74,7 +74,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.instance.getFluidTracker().notifyBlockChange(worldIn, fromPos);
+        Simulator.INSTANCE.getFluidTracker().notifyBlockChange(worldIn, fromPos);
     }
 
     @Override
@@ -82,14 +82,14 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     {
         super.onBlockAdded(worldIn, pos, state);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.instance.getFluidTracker().registerPlacedLava(worldIn, pos, state);
+        Simulator.INSTANCE.getFluidTracker().registerPlacedLava(worldIn, pos, state);
     }
     
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         super.breakBlock(worldIn, pos, state);
-        if(this.isFlowHeight()) Simulator.instance.getFluidTracker().unregisterDestroyedLava(worldIn, pos, state);
+        if(this.isFlowHeight()) Simulator.INSTANCE.getFluidTracker().unregisterDestroyedLava(worldIn, pos, state);
     }
     
     private void handleFallingBlocks(World worldIn, BlockPos pos, IBlockState state)
@@ -121,9 +121,9 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        if(Simulator.instance.getFluidTracker() instanceof LavaSimulator)
+        if(Simulator.INSTANCE.getFluidTracker() instanceof LavaSimulator)
         {
-            LavaSimulator sim = (LavaSimulator)Simulator.instance.getFluidTracker();
+            LavaSimulator sim = (LavaSimulator)Simulator.INSTANCE.getFluidTracker();
             BlockPos pos = data.getPos();  
             LavaCell cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
             if(cell == null)

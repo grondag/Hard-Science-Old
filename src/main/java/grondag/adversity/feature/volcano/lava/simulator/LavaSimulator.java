@@ -96,7 +96,7 @@ public class LavaSimulator extends SimulationNode
                     {
                         case PARTIAL:
                             // will be ready to cool again after delay
-                            operand.setTick(Simulator.instance.getTick());
+                            operand.setTick(Simulator.INSTANCE.getTick());
                             break;
                             
                         case UNREADY:
@@ -150,7 +150,7 @@ public class LavaSimulator extends SimulationNode
                 if(target != null)
                 {
                     target.changeFluidUnits(event.amount * FLUID_UNITS_PER_LEVEL);
-                    target.updateTickIndex(Simulator.instance.getTick());
+                    target.updateTickIndex(Simulator.INSTANCE.getTick());
                     target.setRefreshRange(event.y, event.y);
                 }
                 return true;
@@ -177,7 +177,7 @@ public class LavaSimulator extends SimulationNode
                     // event not complete until we can tell cell to add lava
                     // retry - maybe validation needs to catch up
                     if(event.retryCount() >= 8)
-                        Adversity.log.info("wut?");
+                        Adversity.LOG.info("wut?");
                     return false;
                 }
                 else
@@ -190,7 +190,7 @@ public class LavaSimulator extends SimulationNode
             
             // would have to be an unhandled event type
             if(Adversity.DEBUG_MODE)
-                Adversity.log.warn("Detected unhandled block event type in event processing");
+                Adversity.LOG.warn("Detected unhandled block event type in event processing");
             
             return true;
         }
@@ -207,10 +207,6 @@ public class LavaSimulator extends SimulationNode
             
             if(target == null)
             {
-                //TODO: remove
-                if(event.retryCount() >= 7)
-                    Adversity.log.info("wut?");
-
                 // retry - maybe validation needs to catch up
                 return false;
             }
@@ -345,7 +341,7 @@ public class LavaSimulator extends SimulationNode
     {
         if(this.basaltBlocks.isEmpty()) return;
         
-        this.lastEligibleBasaltCoolingTick = Simulator.instance.getTick() - BLOCK_COOLING_DELAY_TICKS;
+        this.lastEligibleBasaltCoolingTick = Simulator.INSTANCE.getTick() - BLOCK_COOLING_DELAY_TICKS;
 
         this.basaltCoolingJob.runOn(LAVA_THREAD_POOL);
         this.basaltBlocks.removeDeletedItems();
@@ -356,7 +352,7 @@ public class LavaSimulator extends SimulationNode
     /** used by world update to notify when fillers are placed */
     public void trackCoolingBlock(BlockPos pos)
     {
-        this.basaltBlocks.add(new AgedBlockPos(pos, Simulator.instance.getTick()));
+        this.basaltBlocks.add(new AgedBlockPos(pos, Simulator.INSTANCE.getTick()));
         this.setSaveDirty(true);
     }
     
@@ -429,7 +425,7 @@ public class LavaSimulator extends SimulationNode
 //            this.itMe = true;
             this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
 //            this.itMe = false;
-            this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.instance.getTick()));
+            this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.INSTANCE.getTick()));
         }
     }
     
@@ -442,7 +438,7 @@ public class LavaSimulator extends SimulationNode
 
         // SAVE BASALT BLOCKS
         {
-            Adversity.log.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            Adversity.LOG.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
             int[] saveData = new int[basaltBlocks.size() * BASALT_BLOCKS_NBT_WIDTH];
             int i = 0;
             for(AgedBlockPos apos: basaltBlocks)
@@ -473,7 +469,7 @@ public class LavaSimulator extends SimulationNode
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
         {
-            Adversity.log.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
+            Adversity.LOG.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
         }
         else
         {
@@ -482,7 +478,7 @@ public class LavaSimulator extends SimulationNode
             {
                 this.basaltBlocks.add(new AgedBlockPos(((long)saveData[i++] << 32) | (long)saveData[i++], saveData[i++]));
             }
-            Adversity.log.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
+            Adversity.LOG.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
 
     }
@@ -566,9 +562,9 @@ public class LavaSimulator extends SimulationNode
         this.cells.validateOrBufferChunks(LAVA_THREAD_POOL);
         
         // do these on alternate ticks to help avoid ticks that are too long
-        if(Simulator.instance.getTick() >= this.nextCoolTick)
+        if(Simulator.INSTANCE.getTick() >= this.nextCoolTick)
         {
-            this.nextCoolTick = Simulator.instance.getTick() + 10;
+            this.nextCoolTick = Simulator.INSTANCE.getTick() + 10;
             if(this.nextCoolTickIsLava)
             {
                 this.nextCoolTickIsLava = false;
@@ -754,7 +750,7 @@ public class LavaSimulator extends SimulationNode
             {
                 for(int i = 0; i < 8; i++)
                 {
-                    Adversity.log.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
+                    Adversity.LOG.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
                     this.flowTotals[i] = 0;
                     this.flowCounts[i] = 0;
                 }
@@ -762,12 +758,12 @@ public class LavaSimulator extends SimulationNode
 
             if(ENABLE_PERFORMANCE_COUNTING) 
             {
-                Adversity.log.info("totalCells=" + this.getCellCount() 
+                Adversity.LOG.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
                 
-                Adversity.log.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
+                Adversity.LOG.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
 
-                Adversity.log.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+                Adversity.LOG.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
                 this.worldBuffer.clearStatistics();
             }
                

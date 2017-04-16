@@ -265,12 +265,15 @@ public class NiceTileEntity extends TileEntity{
         }
     }
 
-    public byte getDamage() { return damage; }
-    public void setDamage( byte damage) 
+    /** returns values 0-255 */
+    public int getDamage() { return (int)damage - Byte.MIN_VALUE; }
+    /** expects values 0-255 */
+    public void setDamage( int damageIn) 
     { 
-        if(this.damage != damage)
+        byte newVal = (byte)(damageIn + Byte.MIN_VALUE);
+        if(this.damage != newVal)
         {
-            this.damage = damage; 
+            this.damage = newVal; 
             this.markDirty();
         }
     }

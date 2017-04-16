@@ -249,7 +249,7 @@ public class LavaConnection implements ISimpleListItem
         this.doStepWork();
         if(this.flowedLastStep)
         {
-            int tick = Simulator.instance.getTick();
+            int tick = Simulator.INSTANCE.getTick();
             this.firstCell.updateTickIndex(tick);
             this.secondCell.updateTickIndex(tick);
         }
@@ -382,7 +382,7 @@ public class LavaConnection implements ISimpleListItem
         int flow = fluidFrom - newFluidFrom;
 
         if(flow < 0)
-            Adversity.log.debug("derp!");
+            Adversity.LOG.debug("derp!");
         return flow;
     }
     
@@ -486,14 +486,6 @@ public class LavaConnection implements ISimpleListItem
                 // have to instead subtract volume below lowest common floor and then split remainder
                 flow = this.getConstrainedFlow(availableFluidUnits, this.freeFlow(fluidTo, fluidFrom, fluidTotal));
             }
-            
-            //TODO: remove
-            int newSurfaceLow = AbstractLavaCell.pressureSurface(this.floorUnitsTo, this.volumeUnitsTo, fluidTo + flow);
-            int newSurfaceHigh = AbstractLavaCell.pressureSurface(this.floorUnitsFrom, this.volumeUnitsFrom, fluidFrom - flow);
-            if(newSurfaceLow > newSurfaceHigh)
-            {
-                Adversity.log.info("Probable oscillation detected");
-            }
 
             if(flow < LavaSimulator.MIN_FLOW_UNITS)
             {
@@ -505,9 +497,7 @@ public class LavaConnection implements ISimpleListItem
                 if(cellFrom.changeFluidUnitsIfMatches(-flow, fluidFrom))
                 {
                     if(cellTo.changeFluidUnitsIfMatches(flow, fluidTo))
-                    {
-//                        Adversity.log.info("flow " + flow + " from " + cellFrom.x() + ", " + cellFrom.z() + " to " + cellTo.x() + ", " + cellTo.z());
-                        
+                    {                        
                         if(!this.flowedLastStep) this.flowedLastStep = true;
                         this.flowRemainingThisTick -= flow;
                         if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);

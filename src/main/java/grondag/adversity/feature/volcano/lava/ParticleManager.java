@@ -42,7 +42,7 @@ public class ParticleManager
         
         if(particle == null)
         {
-            particle = new ParticleInfo(Simulator.instance.getTick(), packedBlockPos, fluidAmount);
+            particle = new ParticleInfo(Simulator.INSTANCE.getTick(), packedBlockPos, fluidAmount);
             map.put(packedBlockPos, particle);
 //            Adversity.log.info("ParticleManager added new particle @" + PackedBlockPos.unpack(particle.packedBlockPos).toString() + " with amount=" + particle.getFluidUnits());
         }
@@ -59,8 +59,8 @@ public class ParticleManager
     {
         if(map.isEmpty()) return null;
         
-        int firstEligibleTick = Simulator.instance.getTick() - MIN_WAIT_TICKS;
-        int forceEligibleTick = Simulator.instance.getTick() - MAX_WAIT_TICKS;
+        int firstEligibleTick = Simulator.INSTANCE.getTick() - MIN_WAIT_TICKS;
+        int forceEligibleTick = Simulator.INSTANCE.getTick() - MAX_WAIT_TICKS;
         
         // wait until minimum size * minimum age, full size,  or max age
         List<ParticleInfo> candidates = map.values().parallelStream()
@@ -124,7 +124,7 @@ public class ParticleManager
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Adversity.log.warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
+            Adversity.LOG.warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
             return;
         }
 
@@ -141,12 +141,12 @@ public class ParticleManager
             }
         }
 
-        Adversity.log.info("Loaded " + map.size() + " lava entities.");
+        Adversity.LOG.info("Loaded " + map.size() + " lava entities.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Adversity.log.info("Saving " + map.size() + " lava entities.");
+        Adversity.LOG.info("Saving " + map.size() + " lava entities.");
         
         int[] saveData = new int[map.size() * NBT_SAVE_DATA_WIDTH];
         int i = 0;

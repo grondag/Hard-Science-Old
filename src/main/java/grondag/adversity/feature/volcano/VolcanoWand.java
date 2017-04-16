@@ -64,7 +64,7 @@ public class VolcanoWand extends Item
             float hitY, float hitZ)
     {
         
-        LavaTerrainHelper terrainThingy = Simulator.instance.getFluidTracker().terrainHelper;
+        LavaTerrainHelper terrainThingy = Simulator.INSTANCE.getFluidTracker().terrainHelper;
         
         BlockPos targetPos = pos.up();
         float h = terrainThingy.computeIdealBaseFlowHeight(PackedBlockPos.pack(targetPos));

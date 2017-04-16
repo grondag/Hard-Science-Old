@@ -29,7 +29,7 @@ public class Adversity {
 
 	public static final boolean DEBUG_MODE = true;
 	
-	public static Logger log;
+	public static Logger LOG;
 
 	public static WorldType adversityWorld;
 	
@@ -41,13 +41,12 @@ public class Adversity {
 		@SideOnly(Side.CLIENT)
 		public ItemStack getTabIconItem() 
 		{
-			//TODO need a real Icon
 			return NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_ITEM.getDefaultInstance();
 		}
 	};
 
 	@Instance
-	public static Adversity instance = new Adversity();
+	public static Adversity INSTANCE = new Adversity();
 
 	@SidedProxy(clientSide = "grondag.adversity.ClientProxy", serverSide = "grondag.adversity.ServerProxy")
 	public static CommonProxy proxy;

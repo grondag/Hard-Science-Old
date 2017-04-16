@@ -299,7 +299,7 @@ public class CellChunk implements ISimpleListItem
                 if(entryCell == null)
                 {
                     if(Adversity.DEBUG_MODE)
-                        Adversity.log.warn("Null entry cell in chunk being unloaded.");
+                        Adversity.LOG.warn("Null entry cell in chunk being unloaded.");
                     continue;
                 }
                 
@@ -307,7 +307,7 @@ public class CellChunk implements ISimpleListItem
                 if(firstCell == null)
                 {
                     if(Adversity.DEBUG_MODE)
-                        Adversity.log.warn("First cell in entry cell is null in chunk being unloaded.");
+                        Adversity.LOG.warn("First cell in entry cell is null in chunk being unloaded.");
                     
                     // strange case - do our best
                     entryCell.setDeleted();
@@ -317,7 +317,7 @@ public class CellChunk implements ISimpleListItem
                 entryCell = firstCell;
                 
                 if(Adversity.DEBUG_MODE && entryCell.belowCell() != null)
-                    Adversity.log.warn("First cell is not actually the first cell.");
+                    Adversity.LOG.warn("First cell is not actually the first cell.");
                     
                 do
                 {
@@ -344,13 +344,13 @@ public class CellChunk implements ISimpleListItem
     LavaCell getEntryCell(int x, int z)
     {
         if(Adversity.DEBUG_MODE && this.isUnloaded)
-            Adversity.log.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
+            Adversity.LOG.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
         
         if(Adversity.DEBUG_MODE)
         {
             LavaCell result = this.entryCells[getIndex(x, z)];
             if(result != null && result.isDeleted())
-                Adversity.log.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
+                Adversity.LOG.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
             return result;
         }
         else

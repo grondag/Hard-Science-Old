@@ -136,7 +136,7 @@ public class CoolingBlock extends FlowDynamicBlock
     public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
     {
         // Gather orphaned blocks
-        Simulator.instance.getFluidTracker().registerCoolingBlock(worldIn, pos);
+        Simulator.INSTANCE.getFluidTracker().registerCoolingBlock(worldIn, pos);
     }
     
     

@@ -90,7 +90,7 @@ public class WorldStateBuffer implements IBlockAccess
         {            
             if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
             {
-                Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                Adversity.LOG.warn("Access to MC world in worldBuffer occurred outside expected time window.");
             }
             
             // prevent concurrent access to MC world
@@ -156,11 +156,11 @@ public class WorldStateBuffer implements IBlockAccess
                     chunk = this.usedBuffers.poll();
                     if(chunk == null)
                     {
-                        chunk = new ChunkBuffer(packedChunkPos, Simulator.instance.getTick());
+                        chunk = new ChunkBuffer(packedChunkPos, Simulator.INSTANCE.getTick());
                     }
                     else
                     {
-                        chunk.renew(packedChunkPos, Simulator.instance.getTick());
+                        chunk.renew(packedChunkPos, Simulator.INSTANCE.getTick());
                     }
                     chunks.put(packedChunkPos, chunk);
                 }
@@ -187,7 +187,7 @@ public class WorldStateBuffer implements IBlockAccess
     {
         this.perfStateApplication.startRun();
         
-        int currentTick = Simulator.instance.getTick();
+        int currentTick = Simulator.INSTANCE.getTick();
         
         boolean maybeSomethingToDo = true;
         int foundCount = 0;
@@ -326,7 +326,7 @@ public class WorldStateBuffer implements IBlockAccess
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Adversity.log.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
+            Adversity.LOG.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
             return;
         }
 
@@ -341,7 +341,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
 //        this.isLoading = false;
 
-        Adversity.log.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
+        Adversity.LOG.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
@@ -352,7 +352,7 @@ public class WorldStateBuffer implements IBlockAccess
             recordCount+= chunk.size();
         }
         
-        Adversity.log.info("Saving " + recordCount + " world updates.");
+        Adversity.LOG.info("Saving " + recordCount + " world updates.");
         
         int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;
@@ -626,7 +626,7 @@ public class WorldStateBuffer implements IBlockAccess
                 
                 if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
                 {
-                    Adversity.log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                    Adversity.LOG.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
                 if(this.worldChunk == null || !this.worldChunk.isLoaded())

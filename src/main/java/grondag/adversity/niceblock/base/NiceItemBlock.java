@@ -150,7 +150,7 @@ public class NiceItemBlock extends ItemBlock
             //so only display if clicking on air
             if (blockpos != null && world.getBlockState(blockpos).getMaterial() == Material.AIR && ((NiceBlock)this.block).hasAppearanceGui())
             {
-                player.openGui(Adversity.instance, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+                player.openGui(Adversity.INSTANCE, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }
@@ -259,7 +259,6 @@ public class NiceItemBlock extends ItemBlock
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-        // TODO Auto-generated method stub
         return ((NiceBlock)this.block).getItemStackDisplayName(stack);
     }
     
