@@ -1,12 +1,18 @@
 package grondag.adversity;
 
+import java.lang.reflect.Array;
 import java.util.concurrent.ThreadLocalRandom;
+
+import com.google.gson.Gson;
 
 import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.Simulator;
+import it.unimi.dsi.fastutil.Arrays;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -19,33 +25,46 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class CommonEventHandler 
 {
     public static final CommonEventHandler INSTANCE = new CommonEventHandler();
-    //TODO: localize
-    private static final String[] DENIALS = 
-    {
-        "Absolutely not.",
-        "Nope.",
-        "Not happening",
-        "Doctor No sends his regards.",
-        "You must be joking.",
-        "I made a list of things that aren't going to happen, and what you just tried is on it.",
-        "Nice try.",
-        "That's not going to work.",
-        "DENIED!"
-    };
+    private static final String[] DENIALS;
     
+    static
+    {
+        String[] denials = {"DENIED"};
+        try
+        {
+            Gson g = new Gson();
+            @SuppressWarnings("deprecation")
+            String json = I18n.translateToLocal("misc.denials");
+            denials = g.fromJson(json, String[].class);
+        }
+        catch(Exception e)
+        {
+            Adversity.LOG.warn("Unable to parse localized denial messages. Using default.");
+        }
+        DENIALS = denials;
+    }
+    
+    /**
+     * Troll user if they attempt to put volcanic lava in a bucket.
+     */
     @SubscribeEvent(priority = EventPriority.HIGH) 
     public void onFillBucket(FillBucketEvent event)
     {
-        RayTraceResult target = event.getTarget();
-
-        if(target.typeOfHit == RayTraceResult.Type.BLOCK 
-                && event.getWorld().getBlockState(target.getBlockPos()).getBlock() instanceof VolcanicLavaBlock)
+        if(event.getEntityPlayer() != null && event.getWorld().isRemote)
         {
-            if(event.getEntityPlayer() != null && event.getWorld().isRemote)
+            RayTraceResult target = event.getTarget();
+            if(target != null && target.typeOfHit == RayTraceResult.Type.BLOCK)
             {
-                event.getEntityPlayer().sendMessage(new TextComponentString(DENIALS[ThreadLocalRandom.current().nextInt(DENIALS.length)]));
+                if(target.getBlockPos() != null)
+                {
+                    IBlockState state = event.getWorld().getBlockState(target.getBlockPos());
+                    if(state.getBlock() instanceof VolcanicLavaBlock)
+                    {
+                        event.getEntityPlayer().sendMessage(new TextComponentString(DENIALS[ThreadLocalRandom.current().nextInt(DENIALS.length)]));
+                        event.setCanceled(true);
+                    }
+                }
             }
-            event.setCanceled(true);
         }
     }
     
