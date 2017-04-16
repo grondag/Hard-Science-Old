@@ -4,13 +4,12 @@ import java.util.Collection;
 import java.util.concurrent.Executor;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
+import grondag.adversity.feature.volcano.lava.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.ParticleManager;
 import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
-import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEventHandler;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;

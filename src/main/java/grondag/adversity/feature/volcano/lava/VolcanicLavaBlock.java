@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano;
+package grondag.adversity.feature.volcano.lava;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;

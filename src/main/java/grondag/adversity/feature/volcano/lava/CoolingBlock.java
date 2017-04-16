@@ -1,9 +1,9 @@
-package grondag.adversity.feature.volcano;
+package grondag.adversity.feature.volcano.lava;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.feature.volcano.lava.WorldStateBuffer;
+import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;

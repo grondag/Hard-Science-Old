@@ -21,6 +21,7 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+@SuppressWarnings("unused")
 public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider 
 {
     

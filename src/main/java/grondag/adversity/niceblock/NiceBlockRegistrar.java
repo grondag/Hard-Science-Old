@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock;
 
-import grondag.adversity.feature.volcano.CoolingBlock;
-import grondag.adversity.feature.volcano.VolcanicLavaBlock;
+import grondag.adversity.feature.volcano.lava.CoolingBlock;
+import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.init.ModItems;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.ModelDispatcher;

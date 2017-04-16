@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -10,8 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.CoolingBlock;
-import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.adversity.feature.volcano.lava.CoolingBlock;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.PerformanceCollector;
 import grondag.adversity.library.PerformanceCounter;

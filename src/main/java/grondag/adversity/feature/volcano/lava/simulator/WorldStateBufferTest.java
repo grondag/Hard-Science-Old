@@ -1,4 +1,4 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.feature.volcano.lava.simulator;
 
 import org.junit.Test;
 

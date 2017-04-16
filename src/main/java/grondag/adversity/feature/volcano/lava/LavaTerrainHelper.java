@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import gnu.trove.list.TLongList;
+import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;

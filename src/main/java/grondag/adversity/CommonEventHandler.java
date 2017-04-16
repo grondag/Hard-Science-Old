@@ -2,7 +2,7 @@ package grondag.adversity;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.feature.volcano.VolcanicLavaBlock;
+import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.util.math.RayTraceResult;
@@ -16,12 +16,6 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-//import com.grondag.adversity.feature.drylands.Drylands;
-//
-//import net.minecraftforge.event.terraingen.ChunkGeneratorEvent.ReplaceBiomeBlocks;
-//import net.minecraftforge.fml.common.eventhandler.Event.Result;
-//import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-//
 public class CommonEventHandler 
 {
     public static final CommonEventHandler INSTANCE = new CommonEventHandler();

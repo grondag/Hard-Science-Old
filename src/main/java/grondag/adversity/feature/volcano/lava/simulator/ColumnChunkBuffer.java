@@ -1,6 +1,6 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
-import grondag.adversity.feature.volcano.lava.WorldStateBuffer.ChunkBuffer;
+import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer.ChunkBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.Chunk;
