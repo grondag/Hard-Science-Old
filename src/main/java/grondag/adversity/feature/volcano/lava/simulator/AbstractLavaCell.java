@@ -222,13 +222,6 @@ public abstract class AbstractLavaCell
     
     public boolean changeFluidUnitsIfMatches(int deltaUnits, int expectedPriorUnits)
     {
-        //        if(amount > 0 && this.fluidUnits == 0)
-        //        {
-        //            //TODO: check for melting causing floor to merge with a non-barrier block below
-        //            // should cause cell to merge will cell below if happens.
-        //            // otherwise floor remains intact
-        //        }
-        
         int newUnits = expectedPriorUnits + deltaUnits;
         
         if(newUnits < 0)
@@ -241,7 +234,7 @@ public abstract class AbstractLavaCell
         return this.fluidUnits.compareAndSet(expectedPriorUnits, expectedPriorUnits + deltaUnits);
     }
 
-    protected abstract void clearHasFluidChanged();
+//    protected abstract void clearHasSurfaceChanged();
     protected abstract void invalidateRawRetention();
     
     public int fluidUnits()
@@ -249,9 +242,13 @@ public abstract class AbstractLavaCell
         return this.fluidUnits.get();
     }
     
+    /**
+     * Returns at least 1 if cell has any fluid, even if less than one full level.
+     */
     public int fluidLevels()
     {
-        return this.fluidUnits.get() / LavaSimulator.FLUID_UNITS_PER_LEVEL;
+        int units = this.fluidUnits.get();
+        return units == 0 ? 0 : Math.max(1, units / LavaSimulator.FLUID_UNITS_PER_LEVEL);
     }
 
     public boolean isEmpty()
@@ -282,9 +279,11 @@ public abstract class AbstractLavaCell
      * Top level that contains fluid in the world. For columns under pressure
      * does not reflect extra fluid - is limited by the cell ceiling. 
      * Will return cell floor if there is no fluid in the cell.
+     * If cell has any fluid at all, will be at least one level above floor.
      */
     public int worldSurfaceLevel()
     {
+        //fluidLevels() handles case of showing level = 1 when fluid units are less than a full level
         return Math.min(this.ceilingLevel(), this.floorLevel() + this.fluidLevels()); 
     }
 

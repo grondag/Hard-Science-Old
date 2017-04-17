@@ -82,10 +82,6 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private boolean wasBoreFlowEnabled = false;
     
-    //private final VolcanoHazeMaker	hazeMaker		= new VolcanoHazeMaker();
-    
-//    private int						hazeTimer		= 60;
-    
     private static final int BORE_RADIUS = 5;
     private static final int BORE_RADIUS_SQUARED = BORE_RADIUS * BORE_RADIUS;
     
@@ -273,10 +269,9 @@ public class TileVolcano extends TileEntity implements ITickable{
         }
         
         // Clear # of blocks up to configured limit or until last block of this level
-        // TODO: make the limit actually configurable
         
         int clearCount = 0;
-        while(clearCount++ < 20 && offsetIndex < BORE_OFFSETS.size())
+        while(clearCount++ < Configurator.VOLCANO.moundBlocksPerTick && offsetIndex < BORE_OFFSETS.size())
         {
             Vec3i offset = BORE_OFFSETS.get(offsetIndex++);
             BlockPos clearPos = new BlockPos(this.pos.getX() + offset.getX(), this.clearingLevel, this.pos.getZ() + offset.getZ());
@@ -289,12 +284,21 @@ public class TileVolcano extends TileEntity implements ITickable{
     
     /** 
      * Waits for the lava simulator load to drop below the configured threshold.
+     * Then wait for the configured number of cooldown ticks.
+     * If load goes above threshold, restart the count.
      * Return CLEARING if done and can move to next stage. 
      */
     private VolcanoStage doCooling()
     {
-        //TODO: make configurable
-        return Simulator.INSTANCE.getFluidTracker().loadFactor() > 0.5F ? VolcanoStage.COOLING : VolcanoStage.CLEARING;
+        if(Simulator.INSTANCE.getFluidTracker().loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
+        {
+            this.lavaCooldownTicks = 0;
+            return VolcanoStage.COOLING;
+        }
+        else
+        {
+            return this.lavaCooldownTicks++ > Configurator.VOLCANO.cooldownWaitTicks ? VolcanoStage.CLEARING : VolcanoStage.COOLING;
+        }
     }
     
     /** 
@@ -468,127 +472,11 @@ public class TileVolcano extends TileEntity implements ITickable{
             this.world.markChunkDirty(this.pos, this);
         }
     }
-  
-
-    //	@Override
-    //	public void updateOld() {
-    //	    if(this.world.isRemote) return;
-    //	    
-    //	    
-    //	    // dead volcanoes don't do anything
-    //	    if(stage == VolcanoStage.DEAD) return;
-    //        
-    //        if(weight < Integer.MAX_VALUE) weight++;
-    //	    
-    //        // everything after this point only happens 1x every 16 ticks.
-    //        if ((this.world.getTotalWorldTime() & 15) != 15) return;
-    //
-    //        this.markDirty();
-    //
-    // //       if (node.isActive()) {
-    //
-    //            this.markDirty();
-    //
-    //			if ((this.world.getTotalWorldTime() & 255) == 255) {
-    //				Adversity.log.info("Volcanot State @" + this.pos.toString() + " = " + this.stage);
-    //			}
-    //
-    //			this.makeHaze();
-    //			
-    //			if (this.stage == VolcanoStage.NEW) 
-    //			{
-    //				this.level = this.getPos().getY();
-    //
-    //				++this.level;
-    //
-    //				this.levelsTilDormant = 80 - this.level;
-    //				this.stage = VolcanoStage.NEW_LEVEL;
-    //			}
-    //			else if (this.stage == VolcanoStage.DORMANT) 
-    //			{
-    //
-    //			    // Simulation shouldn't reactivate a volcano that is already at build limit
-    //			    // but deactivate if it somehow does.
-    //				if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
-    //				{
-    //				    this.weight = 0;
-    //				    this.stage = VolcanoStage.DEAD;
-    //					this.node.deActivate();
-    //					return;
-    //				}
-    //				
-    //				int window = VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT - this.level;
-    //				int interval = Math.min(1, window / 10);
-    //				
-    //                // always grow at least 10% of the available window
-    //                // plus 0 to 36% with a total average around 28%
-    //				this.levelsTilDormant = Math.min(window,
-    //				        interval
-    //				        + this.world.rand.nextInt(interval)
-    //				        + this.world.rand.nextInt(interval)
-    //				        + this.world.rand.nextInt(interval)
-    //				        + this.world.rand.nextInt(interval));
-    //
-    //				if (this.level >= 70) {
-    //					this.blowOut(4, 5);
-    //				}
-    //				this.stage = VolcanoStage.BUILDING_INNER;
-    //			} 
-    //			else if (this.stage == VolcanoStage.NEW_LEVEL) 
-    //			{
-    //				if (!this.areInnerBlocksOpen(this.level)) {
-    //				    this.world.createExplosion(null, this.pos.getX(), this.level - 1, this.pos.getZ(), 5, true);
-    //				}
-    //				this.stage = VolcanoStage.BUILDING_INNER;
-    //			} 
-    //			else if (this.stage == VolcanoStage.BUILDING_INNER) 
-    //			{
-    //				if (this.buildLevel <= this.pos.getY() || this.buildLevel > this.level) {
-    //					this.buildLevel = this.pos.getY() + 1;
-    //				}
-    //				Useful.fill2dCircleInPlaneXZ(this.world, this.pos.getX(), this.buildLevel, this.pos.getZ(), 3,
-    //						Volcano.blockVolcanicLava.getDefaultState());
-    //				if (this.buildLevel < this.level) {
-    //					++this.buildLevel;
-    //				} else {
-    //					this.buildLevel = 0;
-    //					this.stage = VolcanoStage.TESTING_OUTER;
-    //				}
-    //			}
-    //			else if (this.stage == VolcanoStage.TESTING_OUTER)
-    //			{
-    //				if (this.areOuterBlocksOpen(this.level))
-    //				{
-    //					this.stage = VolcanoStage.BUILDING_INNER;
-    //				}
-    //				else if (this.levelsTilDormant == 0)
-    //				{
-    //					this.stage = VolcanoStage.DORMANT;
-    //					if (this.level >= VolcanoManager.VolcanoNode.MAX_VOLCANO_HEIGHT) 
-    //	                {
-    //	                    this.weight = 0;
-    //	                    this.stage = VolcanoStage.DEAD;
-    //	                }
-    //					this.node.deActivate();
-    //				}
-    //				else 
-    //				{
-    //					++this.level;
-    //					--this.levelsTilDormant;
-    //					this.stage = VolcanoStage.NEW_LEVEL;
-    //				}
-    //			}
-    ////		}
-    //        
-    //        node.updateWorldState(this.weight, this.level);
-    //	}
 
     @Override
     public void readFromNBT(NBTTagCompound tagCompound) 
     {
         super.readFromNBT(tagCompound);
-      
-//        Adversity.log.info("readNBT volcanoTile");
 
         this.stage = VolcanoStage.values()[tagCompound.getInteger("stage")];
         this.level = tagCompound.getInteger("level");
@@ -599,18 +487,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         this.lavaCounter = tagCompound.getInteger("lavaCounter");
         this.lavaCooldownTicks = tagCompound.getInteger("cooldownTicks");
 
-//        this.lavaManager = null;
-//        this.lavaManagerData = tagCompound.getIntArray("lavaManager");
-//        this.spaceManager = new SpaceManager(this.pos, tagCompound.getIntArray("spaceManager"));
-//        this.lavaBlocks = new BlockManager(this.pos, true, tagCompound.getIntArray("lavaBlocks"));
-//        this.topBlocks = new BlockManager(this.pos, true, tagCompound.getIntArray("topBlocks"));
-//        this.coolingBlocks = new BlockManager(this.pos, false, tagCompound.getIntArray("coolingBlocks"));
-//        this.adjustmentList = new HashSet<BlockPos>();
-
         this.nodeId = tagCompound.getInteger("nodeId");
-
-
-        //this.hazeMaker.readFromNBT(tagCompound);
     }
 
     @Override
@@ -625,18 +502,8 @@ public class TileVolcano extends TileEntity implements ITickable{
         tagCompound.setInteger("lavaCounter", this.lavaCounter);
         tagCompound.setInteger("cooldownTicks", lavaCooldownTicks);
 
-//        tagCompound.setIntArray("spaceManager", this.spaceManager.getArray());
-//        tagCompound.setIntArray("lavaBlocks", this.lavaBlocks.getArray());
-//        tagCompound.setIntArray("topBlocks", this.topBlocks.getArray());
-//        tagCompound.setIntArray("lavaManager", this.lavaManager.getArray());
-//
-//        tagCompound.setIntArray("coolingBlocks", this.coolingBlocks.getArray());      
-
         if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
         return super.writeToNBT(tagCompound);
-
-        //this.hazeMaker.writeToNBT(tagCompound);
-
     }
 
     /**

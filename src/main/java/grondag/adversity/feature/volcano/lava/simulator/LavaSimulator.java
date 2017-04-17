@@ -510,19 +510,13 @@ public class LavaSimulator extends SimulationNode
         this.lavaBlockPlacementEvents.readNBT(nbt);
         this.lavaAddEvents.readNBT(nbt);
     }
-
-   
-
- 
-    
+  
     public void notifyBlockChange(World worldIn, BlockPos pos)
     {
         if(itMe) return;
         LavaCell entry = this.cells.getEntryCell(pos.getX(), pos.getZ());
         if(entry != null) entry.setValidationNeeded(true);      
     }
-
-  
     
     /**
      * Updates fluid simulation for one game tick.
@@ -583,7 +577,6 @@ public class LavaSimulator extends SimulationNode
         this.worldBuffer.isMCWorldAccessAppropriate = false;
         
         this.setSaveDirty(true);
-        
 
         perfOnTick.endRun();
         perfOnTick.addCount(1);
@@ -688,7 +681,7 @@ public class LavaSimulator extends SimulationNode
             {
                 LavaCell cell = this.cells.getCellIfExists(p.x(), p.y(), p.z());
                 
-                // abort on strangeness
+                // abort on strangeness, particle is discarded
                 if(cell == null) continue;
                 
                 if(p.y() - cell.worldSurfaceY() > 3)

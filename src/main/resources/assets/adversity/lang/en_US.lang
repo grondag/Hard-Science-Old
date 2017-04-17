@@ -1,6 +1,11 @@
 
 #MISC
 misc.denials=["Absolutely not.","Nope.","Not happening","Doctor No sends his regards.","You must be joking.","I made a list of things that aren\u0027t going to happen, and what you just tried is on it.","Nice try.","That\u0027s not going to work.","DENIED!"]
+misc.mode_set=Mode set to %s
+
+#ITEMS
+item.terrain_wand.name=Terrain Wand
+item.volcano_wand.name=Volcano Wand
 
 flexstone=Flexstone
 durastone=Durastone 

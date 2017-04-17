@@ -1,6 +1,5 @@
 package grondag.adversity;
 
-import java.lang.reflect.Array;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
@@ -8,7 +7,6 @@ import com.google.gson.Gson;
 import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.Simulator;
-import it.unimi.dsi.fastutil.Arrays;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
@@ -21,6 +19,8 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class CommonEventHandler 
 {
@@ -48,6 +48,7 @@ public class CommonEventHandler
      * Troll user if they attempt to put volcanic lava in a bucket.
      */
     @SubscribeEvent(priority = EventPriority.HIGH) 
+    @SideOnly(Side.SERVER)
     public void onFillBucket(FillBucketEvent event)
     {
         if(event.getEntityPlayer() != null && event.getWorld().isRemote)
@@ -79,28 +80,33 @@ public class CommonEventHandler
     }
     
     @SubscribeEvent
+    @SideOnly(Side.SERVER)
     public void onBlockBreak(BlockEvent.BreakEvent event) 
     {
         // Lava blocks have their own handling
-        if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
+        if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
             Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
     @SubscribeEvent
+    @SideOnly(Side.SERVER)
     public void onBlockPlaced(BlockEvent.PlaceEvent event)
     {
         // Lava blocks have their own handling
-        if(!(event.getState().getBlock() instanceof VolcanicLavaBlock))
+        if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof VolcanicLavaBlock))
         {
             Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
     @SubscribeEvent
+    @SideOnly(Side.SERVER)
     public void onBlockMultiPlace(BlockEvent.MultiPlaceEvent event)
     {
+        if(event.getWorld().isRemote) return;
+        
         LavaSimulator sim = Simulator.INSTANCE.getFluidTracker();
         for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
         {

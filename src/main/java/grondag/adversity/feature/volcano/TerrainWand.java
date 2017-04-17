@@ -9,6 +9,7 @@ import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -71,8 +72,8 @@ public class TerrainWand extends Item
             tag.setString(MODE_TAG, newMode.name());
             stack.setTagCompound(tag);
 
-            //TODO: localize
-            playerIn.sendMessage(new TextComponentString("Mode targetPos to " + newMode.toString()));
+            String message = I18n.format("misc.mode_set", newMode.toString());
+            playerIn.sendMessage(new TextComponentString(message));
 
         }
         return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);

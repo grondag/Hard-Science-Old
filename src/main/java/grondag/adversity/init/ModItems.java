@@ -3,7 +3,6 @@ package grondag.adversity.init;
 import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.TerrainWand;
-import grondag.adversity.feature.volcano.VolcanoWand;
 import grondag.adversity.feature.volcano.lava.LavaBlobItem;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -36,7 +35,8 @@ public class ModItems
  
         itemReg.register(new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble").setCreativeTab(Adversity.tabAdversity));
         itemReg.register(new LavaBlobItem().setRegistryName("lava_blob").setUnlocalizedName("lava_blob").setCreativeTab(Adversity.tabAdversity));
-        itemReg.register(new VolcanoWand().setCreativeTab(Adversity.tabAdversity));
+        //Disabled until volcano world gen / activation logic revisited
+        //itemReg.register(new VolcanoWand().setCreativeTab(Adversity.tabAdversity));
         itemReg.register(new TerrainWand().setCreativeTab(Adversity.tabAdversity));
     }
 

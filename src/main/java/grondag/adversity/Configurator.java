@@ -121,9 +121,21 @@ public class Configurator
     
     public static class Volcano
     {
+        @Comment("Fraction of alloted CPU usage must be drop below this before volcano starts to flow again.")
+        @RangeDouble(min = 0.3, max = 0.7)
+        public float cooldownTargetLoadFactor = 0.5F;
+        
+        @Comment("After volcano in cooldown reaches the target load factor, it waits this many ticks before flowing again.")
+        @RangeInt(min = 0, max = 6000)
+        public int cooldownWaitTicks = 200;
+        
         @Comment("Y-axis build limit at which Volcano becomes permanently dormant.")
         @RangeInt(min = 128, max = 255)
         public int maxYLevel = 147; 
+        
+        @Comment("Number of blocks per tick that can be cleared by volcano mounding. Values above 1 are mostly useful for testing.")
+        @RangeInt(min = 1, max = 64)
+        public int moundBlocksPerTick = 64;
         
         @Comment("Radius of one standard deviation, in blocks, for underground volcano mounding.")
         @RangeInt(min = 14, max = 28)
