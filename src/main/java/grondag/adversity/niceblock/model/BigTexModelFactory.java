@@ -7,12 +7,12 @@ import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
@@ -21,8 +21,8 @@ import net.minecraft.util.BlockRenderLayer;
 
 public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
-    //TODO: use SimpleLoadingCache
-    private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
+
+    private final Int2ObjectOpenHashMap<List<BakedQuad>> faceCache = new Int2ObjectOpenHashMap<List<BakedQuad>>(4096);
     
     public static enum BigTexScale
     {

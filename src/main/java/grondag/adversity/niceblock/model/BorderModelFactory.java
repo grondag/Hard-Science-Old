@@ -12,13 +12,13 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
@@ -26,8 +26,7 @@ import net.minecraft.util.BlockRenderLayer;
 
 public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
-    //TODO: replace with SimpleLoadingCache
-    private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
+    private final Int2ObjectOpenHashMap<List<BakedQuad>> faceCache = new Int2ObjectOpenHashMap<List<BakedQuad>>(4096);
     
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][CornerJoinFaceState.values().length];
     
@@ -74,17 +73,14 @@ public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         return textures;
     }
 
-    //TODO: optimize
+    private static final int OFFSET_FJS = EnumFacing.values().length;
+    private static final int OFFSET_TEX = OFFSET_FJS * CornerJoinFaceState.values().length;
     private int makeCacheKey(EnumFacing face, CornerJoinFaceState fjs, int colorIndex, int textureIndex)
     {
-    	int key = face.ordinal();
-    	int offset = EnumFacing.values().length;
-    	key += fjs.ordinal() * offset;
-    	offset *= CornerJoinFaceState.values().length;
-    	key += textureIndex * offset;
-    	offset *= this.textureComponent.getValueCount();
-    	key += colorIndex * offset;
-    	return key;
+    	return face.ordinal()
+    	        + fjs.ordinal() * OFFSET_FJS
+    	        + textureIndex * OFFSET_TEX
+    	        + colorIndex * OFFSET_TEX * (int)this.textureComponent.getValueCount();
     }
     
     public List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face) 

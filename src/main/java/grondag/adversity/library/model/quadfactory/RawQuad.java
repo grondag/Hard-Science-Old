@@ -10,7 +10,6 @@ import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -32,7 +31,7 @@ public class RawQuad
     public int color;
     public LightingMode lightingMode = LightingMode.SHADED;
     public boolean lockUV = false;
-    public boolean isItem = false;
+//    public boolean isItem = false;
 //    public String tag = "";
     public boolean shouldContractUVs = true;
     
@@ -105,7 +104,7 @@ public class RawQuad
         this.color = fromObject.color;
         this.lightingMode = fromObject.lightingMode;
         this.lockUV = fromObject.lockUV;
-        this.isItem = fromObject.isItem;
+//        this.isItem = fromObject.isItem;
         this.ancestorQuadID = fromObject.ancestorQuadID;
         this.isInverted = fromObject.isInverted;
         this.faceNormal = fromObject.faceNormal;
@@ -755,19 +754,20 @@ public class RawQuad
         int[] vertexData = new int[28];
 
         // see LightingMode for more info on how this enables full brightness for block models.
-        VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
+//        VertexFormat format = this.isItem ? DefaultVertexFormats.ITEM : lightingMode.vertexFormat;
+        VertexFormat format = lightingMode.vertexFormat;
 
         float[] faceNormal = this.getFaceNormalArray();          
 
         // The item renderer doesn't recognize pre-baked lightmaps, so we have to get creative.
-        // TODO: this is really a hack - doesn't work well if item is at angle to Y axis
+        // REMOVED: this was really a hack - doesn't work well if item is at angle to Y axis
         // There does not yet appear to be a supported method for full-bright items.
-        if(this.isItem && this.lightingMode == LightingMode.FULLBRIGHT)
-        {
-            faceNormal[0] = 0;
-            faceNormal[1] = 1;
-            faceNormal[2] = 0;
-        }
+//        if(this.isItem && this.lightingMode == LightingMode.FULLBRIGHT)
+//        {
+//            faceNormal[0] = 0;
+//            faceNormal[1] = 1;
+//            faceNormal[2] = 0;
+//        }
 
         for(int v = 0; v < 4; v++)
         {

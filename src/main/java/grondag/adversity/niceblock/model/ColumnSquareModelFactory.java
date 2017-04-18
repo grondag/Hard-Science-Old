@@ -85,7 +85,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
         }
     }
     
-    //TODO: optimize
+
     private int makeCacheKey(EnumFacing face, EnumFacing.Axis axis, CornerJoinFaceState fjs, int colorIndex, int textureIndex)
     {
     	int key = axis.ordinal();
@@ -137,18 +137,17 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
         int cacheKey = 0;
         List<BakedQuad> retVal = null;
         
-        // don't cache item faces - should only ever be called 1x, plus are diff. than block faces
-        //TODO can likely remove this distinction if move caulking for block faces to quad baking general case
-        if(!isItem)
-        {
+        // REMOVED: no longer attempting to render item faces at full brightness
+//        if(!isItem)
+//        {
             cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), state.getValue(this.colorComponent).ordinal, textureIndex);
             retVal = faceCache.get(cacheKey);
-        }
+//        }
         
         if(retVal == null)
         {
 	    	RawQuad quadInputs = new RawQuad();
-	    	quadInputs.isItem = isItem;
+//	    	quadInputs.isItem = isItem;
 	        ColorMap colorMap = state.getValue(this.colorComponent);
 	        quadInputs.color = colorMap.getColor(EnumColorMap.BASE);
 	        int cutColor = modelInputs.modelType == ModelType.NORMAL 
