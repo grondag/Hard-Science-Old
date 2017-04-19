@@ -366,7 +366,7 @@ public class NiceBlock extends Block implements IWailaProvider
 
     public ModelStateSetValue getModelState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return dispatcher.getStateSet().getSetValueFromBits(getModelStateKey(state, world, pos));
+        return dispatcher.getStateSet().getSetValueFromKey(getModelStateKey(state, world, pos));
     }
     
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)

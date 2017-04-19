@@ -71,7 +71,7 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
         if(stack != null)
         {
             NiceItemBlock myItem = (NiceItemBlock) Item.getItemFromBlock(this);
-            ModelStateSetValue modelState = this.dispatcher.getStateSet().getSetValueFromBits( this.getModelStateKey(state, world, pos));
+            ModelStateSetValue modelState = this.dispatcher.getStateSet().getSetValueFromKey( this.getModelStateKey(state, world, pos));
             myItem.setColorMapID(stack, modelState.getValue(this.dispatcher.getStateSet().getFirstColorMapComponent()).ordinal);
         }
 
@@ -129,7 +129,7 @@ public class NiceBlockPlus extends NiceBlock implements ITileEntityProvider
             long modelKey = NiceItemBlock.getModelStateKey(stack);
             if(modelKey != 0L)
             {
-                ColorMap colorMap = dispatcher.getStateSet().getSetValueFromBits(modelKey).getValue(colorComponent);
+                ColorMap colorMap = dispatcher.getStateSet().getSetValueFromKey(modelKey).getValue(colorComponent);
                 if(colorMap != null)
                 {
                     tooltip.add("Color: " + colorMap.colorMapName);

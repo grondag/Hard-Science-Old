@@ -111,7 +111,7 @@ public class ModelDispatcher implements IBakedModel
 		@Override
 		public SparseLayerMap load(long key) {
 			
-			ModelStateSetValue state = stateSet.getSetValueFromBits(key);
+			ModelStateSetValue state = stateSet.getSetValueFromKey(key);
 			
 			SparseLayerMap result = layerMapBuilder.makeNewMap();
 			for(BlockRenderLayer layer : layerMapBuilder.layerList)
@@ -132,7 +132,7 @@ public class ModelDispatcher implements IBakedModel
 		@Override
 		public SimpleItemBlockModel load(long key) 
 		{
-			ModelStateSetValue state = stateSet.getSetValueFromBits(key);
+			ModelStateSetValue state = stateSet.getSetValueFromKey(key);
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 			
 			for(ModelFactory<?> model : models)

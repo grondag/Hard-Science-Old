@@ -108,7 +108,7 @@ public class NiceItemBlock extends ItemBlock
     {
         ModelDispatcher dispatch = ((NiceBlock)this.block).dispatcher;
         ModelStateSet stateSet = dispatch.getStateSet();
-        return stateSet.getSetValueFromBits(getModelStateKey(stack)).getValue(stateSet.getFirstColorMapComponent()).ordinal;
+        return stateSet.getSetValueFromKey(getModelStateKey(stack)).getValue(stateSet.getFirstColorMapComponent()).ordinal;
     }
     
     public void setColorMapID(ItemStack stack, int colorMapID)
@@ -119,7 +119,7 @@ public class NiceItemBlock extends ItemBlock
         ModelColorMap colorMap = stateSet.getFirstColorMapComponent().createValueFromBits(colorMapID);
     //ModelComponent
         long oldModelKey = getModelStateKey(stack);
-        long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromBits(oldModelKey), colorMap).getKey();
+        long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromKey(oldModelKey), colorMap).getKey();
         if(oldModelKey != newModelKey)
         {
             setModelStateKey(stack, newModelKey);
@@ -133,7 +133,7 @@ public class NiceItemBlock extends ItemBlock
         ModelDispatcher dispatch = ((NiceBlock)this.block).dispatcher;
         ModelStateSet stateSet = dispatch.getStateSet();
         long oldModelKey = getModelStateKey(stack);
-        long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromBits(oldModelKey), flowJoin).getKey();
+        long newModelKey = stateSet.getValueWithUpdates(stateSet.getSetValueFromKey(oldModelKey), flowJoin).getKey();
         if(oldModelKey != newModelKey)
         {
             setModelStateKey(stack, newModelKey);

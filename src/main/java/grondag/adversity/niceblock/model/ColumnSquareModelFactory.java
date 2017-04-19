@@ -35,10 +35,6 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
     private final double marginOffset;
     private final double cutDepth;
 
-    /** overextend some quads by this amount to prevent pinholes */
-    //TODO: handle this in quad baking - will probably interfere with CSG operations
-    private static final double CAULK = 0.0001;
-
     //TODO: use SimpleLoadingCache
     private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
     
@@ -210,64 +206,64 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                 //bottom
                 if(!hasBottomJoin)
                 {
-                    qi.setupFaceQuad(face, 0.0 - CAULK, 0.0 - CAULK, 1.0 + CAULK, bottomCapHeight + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, 0.0, 0.0, 1.0, bottomCapHeight, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }              
 
                 //top
                 if(!hasTopJoin)
                 {
-                    qi.setupFaceQuad(face, 0.0 - CAULK, 1.0 - topCapHeight - CAULK, 1.0 + CAULK, 1.0 + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, 0.0, 1.0 - topCapHeight, 1.0, 1.0, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
 
                 //left margin
                 if(leftMarginWidth > 0)
                 {
-                    qi.setupFaceQuad(face, 0.0 - CAULK, bottomCapHeight - CAULK, leftMarginWidth + CAULK, 1.0 - topCapHeight + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, 0.0, bottomCapHeight, leftMarginWidth, 1.0 - topCapHeight, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
 
                 // right margin
                 if(rightMarginWidth > 0)
                 {
-                    qi.setupFaceQuad(face, 1.0 - rightMarginWidth - CAULK, bottomCapHeight - CAULK, 1.0 + CAULK, 1.0 - topCapHeight + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, 1.0 - rightMarginWidth, bottomCapHeight, 1.0, 1.0 - topCapHeight, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
 
                 //splines
                 for(int i = 0; i < actualCutCount - 1; i++)
                 {
-                    qi.setupFaceQuad(face, leftMarginWidth + cutWidth * 2.0 * (double)i + cutWidth - CAULK, bottomCapHeight - CAULK,
-                            leftMarginWidth + cutWidth * 2.0 * ((double)i + 1.0) + CAULK, 1.0 - topCapHeight + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, leftMarginWidth + cutWidth * 2.0 * (double)i + cutWidth, bottomCapHeight,
+                            leftMarginWidth + cutWidth * 2.0 * ((double)i + 1.0), 1.0 - topCapHeight, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
                 
                 // top left corner
                 if(fjs.needsCorner(topFace, leftFace, face))
                 {
-                    qi.setupFaceQuad(face, Math.max(leftMarginWidth, 0.0) - CAULK, 1.0 - baseMarginWidth - CAULK, leftMarginWidth + cutWidth + CAULK, 1.0 + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, Math.max(leftMarginWidth, 0.0), 1.0 - baseMarginWidth, leftMarginWidth + cutWidth, 1.0, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
                 
                 // bottom left corner
                 if(fjs.needsCorner(bottomFace, leftFace, face))
                 {
-                    qi.setupFaceQuad(face, Math.max(leftMarginWidth, 0.0) - CAULK, 0.0 - CAULK, leftMarginWidth + cutWidth + CAULK, baseMarginWidth + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, Math.max(leftMarginWidth, 0.0), 0.0, leftMarginWidth + cutWidth, baseMarginWidth, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
          
                 // top right corner
                 if(fjs.needsCorner(topFace, rightFace, face))
                 {
-                    qi.setupFaceQuad(face, 1.0 - rightMarginWidth - cutWidth - CAULK, 1.0 - baseMarginWidth - CAULK, Math.min(1.0 - rightMarginWidth, 1.0) + CAULK, 1.0 + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, 1.0 - rightMarginWidth - cutWidth, 1.0 - baseMarginWidth, Math.min(1.0 - rightMarginWidth, 1.0), 1.0, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
                 
                 // bottom right corner
                 if(fjs.needsCorner(bottomFace, rightFace, face))
                 {
-                    qi.setupFaceQuad(face, 1.0 - rightMarginWidth - cutWidth - CAULK, 0.0 - CAULK, Math.min(1.0 - rightMarginWidth, 1.0) + CAULK, baseMarginWidth + CAULK, 0.0, topFace);
+                    qi.setupFaceQuad(face, 1.0 - rightMarginWidth - cutWidth, 0.0, Math.min(1.0 - rightMarginWidth, 1.0), baseMarginWidth, 0.0, topFace);
                     builder.add(qi.createBakedQuad());
                 }
             }
@@ -396,15 +392,15 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                         
                         // margin corner faces
                         tri.setupFaceQuad(face, 
-                                new FaceVertex(baseMarginWidth - CAULK, 1.0 - baseMarginWidth - CAULK, 0),
-                                new FaceVertex(baseMarginWidth + CAULK, 1.0 + CAULK, 0),
-                                new FaceVertex(0.0 - CAULK, 1.0 + CAULK, 0), 
+                                new FaceVertex(baseMarginWidth, 1.0 - baseMarginWidth, 0),
+                                new FaceVertex(baseMarginWidth, 1.0, 0),
+                                new FaceVertex(0.0, 1.0, 0), 
                                 side);
                         builder.add(tri.createBakedQuad());
                         tri.setupFaceQuad(face, 
-                                new FaceVertex(1.0 - baseMarginWidth - CAULK, 1.0 + CAULK, 0),  
-                                new FaceVertex(1.0 - baseMarginWidth + CAULK, 1.0 -baseMarginWidth - CAULK, 0), 
-                                new FaceVertex(1.0 + CAULK, 1.0 + CAULK, 0), 
+                                new FaceVertex(1.0 - baseMarginWidth, 1.0, 0),  
+                                new FaceVertex(1.0 - baseMarginWidth, 1.0 -baseMarginWidth, 0), 
+                                new FaceVertex(1.0, 1.0, 0), 
                                 side);
                         builder.add(tri.createBakedQuad());                
                     }
@@ -413,11 +409,11 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                     {
                         // margin corner sides
                         setupCutSideQuad(qi, cutColor, 
-                                new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -baseMarginWidth - CAULK, 1.0 -cutDepth, 1.0 + CAULK, 1, 1.0 -baseMarginWidth, face));
+                                new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -baseMarginWidth, 1.0 -cutDepth, 1.0, 1, 1.0 -baseMarginWidth, face));
                         builder.add(qi.createBakedQuad());
 
                         setupCutSideQuad(qi, cutColor, 
-                                new SimpleQuadBounds(Useful.leftOf(face, side), 0.0 - CAULK, 1.0 -cutDepth, baseMarginWidth + CAULK, 1, 1.0 -baseMarginWidth, face));
+                                new SimpleQuadBounds(Useful.leftOf(face, side), 0.0, 1.0 -cutDepth, baseMarginWidth, 1, 1.0 -baseMarginWidth, face));
                         builder.add(qi.createBakedQuad());
                     }
 
@@ -430,19 +426,19 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                         if(modelInputs.modelType != ModelType.LAMP_BASE)
                         {
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(xLeft - CAULK, 1.0 -xLeft - CAULK, 0),  
-                                    new FaceVertex(xRight + CAULK, 1.0 -xRight - CAULK, 0),
-                                    new FaceVertex(xRight + CAULK, 1.0 + CAULK, 0), 
-                                    new FaceVertex(xLeft - CAULK, 1.0 + CAULK, 0), 
+                                    new FaceVertex(xLeft, 1.0 -xLeft, 0),  
+                                    new FaceVertex(xRight, 1.0 -xRight, 0),
+                                    new FaceVertex(xRight, 1.0, 0), 
+                                    new FaceVertex(xLeft, 1.0, 0), 
                                     side);
                             builder.add(qi.createBakedQuad());
                             // mirror on right side, reverse winding order
                             builder.add(qi.createBakedQuad());                             
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(1.0 - xRight - CAULK, 1.0 - xRight  - CAULK, 0),  
-                                    new FaceVertex(1.0 - xLeft + CAULK, 1.0 -xLeft - CAULK, 0),
-                                    new FaceVertex(1.0 - xLeft + CAULK, 1.0 + CAULK, 0), 
-                                    new FaceVertex(1.0 - xRight - CAULK, 1.0 + CAULK, 0), 
+                                    new FaceVertex(1.0 - xRight, 1.0 - xRight , 0),  
+                                    new FaceVertex(1.0 - xLeft, 1.0 -xLeft, 0),
+                                    new FaceVertex(1.0 - xLeft, 1.0, 0), 
+                                    new FaceVertex(1.0 - xRight, 1.0, 0), 
                                     side);
                             builder.add(qi.createBakedQuad());
                         }
@@ -455,21 +451,21 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                             if(xLeft < 0.4999)
                             {
                                 setupCutSideQuad(qi, cutColor, 
-                                        new SimpleQuadBounds(Useful.leftOf(face, side), 0.0 - CAULK, 1.0 -cutDepth, xLeft + CAULK, 1.0, xLeft, face));
+                                        new SimpleQuadBounds(Useful.leftOf(face, side), 0.0, 1.0 -cutDepth, xLeft, 1.0, xLeft, face));
                                 builder.add(qi.createBakedQuad());
 
                                 setupCutSideQuad(qi, cutColor, 
-                                        new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -xLeft - CAULK, 1.0 -cutDepth, 1.0 + CAULK, 1.0, xLeft, face));
+                                        new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -xLeft, 1.0 -cutDepth, 1.0, 1.0, xLeft, face));
                                 builder.add(qi.createBakedQuad());
                             }
                             if(xRight < 0.4999)
                             {
                                 setupCutSideQuad(qi, cutColor, 
-                                        new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -xRight - CAULK, 1.0 -cutDepth, 1.0 + CAULK, 1.0, 1.0 -xRight, face));
+                                        new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -xRight, 1.0 -cutDepth, 1.0, 1.0, 1.0 -xRight, face));
                                 builder.add(qi.createBakedQuad());
 
                                 setupCutSideQuad(qi, cutColor, 
-                                        new SimpleQuadBounds(Useful.leftOf(face, side), 0.0 - CAULK, 1.0 -cutDepth, xRight + CAULK, 1.0, 1.0 -xRight, face));
+                                        new SimpleQuadBounds(Useful.leftOf(face, side), 0.0, 1.0 -cutDepth, xRight, 1.0, 1.0 -xRight, face));
 
                                 builder.add(qi.createBakedQuad());
                             }
@@ -484,10 +480,10 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                     {
                         // outer face
                         qi.setupFaceQuad(face, 
-                                new FaceVertex(baseMarginWidth-CAULK, 1.0 -baseMarginWidth, 0),  
-                                new FaceVertex(1.0 -baseMarginWidth+CAULK, 1.0 -baseMarginWidth, 0),
-                                new FaceVertex(1.0 +CAULK, 1.0, 0), 
-                                new FaceVertex(0-CAULK, 1.0, 0), 
+                                new FaceVertex(baseMarginWidth, 1.0 -baseMarginWidth, 0),  
+                                new FaceVertex(1.0 -baseMarginWidth, 1.0 -baseMarginWidth, 0),
+                                new FaceVertex(1.0, 1.0, 0), 
+                                new FaceVertex(0, 1.0, 0), 
                                 side);
                         builder.add(qi.createBakedQuad());   
                     }
@@ -500,7 +496,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                             double offset = baseMarginWidth + (cutWidth * 2.0 * i);
 
                             setupCutSideQuad(qi, cutColor,
-                                    new SimpleQuadBounds(side.getOpposite(), offset - CAULK, 1.0 -cutDepth, 1.0 -offset + CAULK, 1.0, 1.0 -offset, face));
+                                    new SimpleQuadBounds(side.getOpposite(), offset, 1.0 -cutDepth, 1.0 -offset, 1.0, 1.0 -offset, face));
                             builder.add(qi.createBakedQuad());
 
                         }
@@ -514,7 +510,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                         {
                             // inner cut sides
                             setupCutSideQuad(qi, cutColor,
-                                    new SimpleQuadBounds(side, offset - CAULK, 1.0 -cutDepth, 1.0 -offset + CAULK, 1.0, offset, face));
+                                    new SimpleQuadBounds(side, offset, 1.0 -cutDepth, 1.0 -offset, 1.0, offset, face));
                             builder.add(qi.createBakedQuad());
                         }
 
@@ -522,10 +518,10 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
                         {
                             // spline / center
                             qi.setupFaceQuad(face, 
-                                    new FaceVertex(Math.min(0.5, offset + cutWidth) - CAULK, 1.0 - offset - cutWidth - CAULK, 0),  
-                                    new FaceVertex(Math.max(0.5, 1.0 - offset - cutWidth) + CAULK, 1.0 - offset - cutWidth - CAULK, 0),
-                                    new FaceVertex(1.0 - offset + CAULK, 1.0 - offset + CAULK, 0), 
-                                    new FaceVertex(offset - CAULK, 1.0 - offset + CAULK, 0), 
+                                    new FaceVertex(Math.min(0.5, offset + cutWidth), 1.0 - offset - cutWidth, 0),  
+                                    new FaceVertex(Math.max(0.5, 1.0 - offset - cutWidth), 1.0 - offset - cutWidth, 0),
+                                    new FaceVertex(1.0 - offset, 1.0 - offset, 0), 
+                                    new FaceVertex(offset, 1.0 - offset, 0), 
                                     side);
                             builder.add(qi.createBakedQuad());  
                         }

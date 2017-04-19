@@ -64,7 +64,7 @@ public class HeightBlock extends NiceBlockPlus
         // add meta values if adding to existing block instance
         IBlockState state = worldIn.getBlockState(posPlaced);
         ModelStateSet set = dispatcher.getStateSet();
-        ModelStateSetValue stateSetValue = set.getSetValueFromBits(NiceItemBlock.getModelStateKey(stack));
+        ModelStateSetValue stateSetValue = set.getSetValueFromKey(NiceItemBlock.getModelStateKey(stack));
         
         if(state.getBlock() == this 
                 && set.doComponentValuesMatch(set.getFirstColorMapComponent(),

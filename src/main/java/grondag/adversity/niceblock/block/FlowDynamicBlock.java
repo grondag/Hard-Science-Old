@@ -167,7 +167,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
         if(stack != null)
         {
             NiceItemBlock myItem = (NiceItemBlock) Item.getItemFromBlock(this);
-            ModelStateSetValue modelState = this.dispatcher.getStateSet().getSetValueFromBits( this.getModelStateKey(state, world, pos));
+            ModelStateSetValue modelState = this.dispatcher.getStateSet().getSetValueFromKey( this.getModelStateKey(state, world, pos));
             myItem.setFlowState(stack, modelState.getWrappedValue(ModelStateComponents.FLOW_JOIN));
         }
 

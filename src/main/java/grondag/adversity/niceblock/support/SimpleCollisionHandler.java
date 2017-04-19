@@ -38,7 +38,7 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
      @Override
     public List<RawQuad> getCollisionQuads(long modelKey)
     {
-        return modelFactory.getCollisionQuads(modelStateSet.getSetValueFromBits(modelKey));
+        return modelFactory.getCollisionQuads(modelStateSet.getSetValueFromKey(modelKey));
     }
 
     @Override

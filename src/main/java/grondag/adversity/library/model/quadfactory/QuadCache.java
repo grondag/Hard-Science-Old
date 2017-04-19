@@ -1,16 +1,10 @@
 package grondag.adversity.library.model.quadfactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import grondag.adversity.Configurator;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 
 public class QuadCache
 {

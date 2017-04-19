@@ -1392,7 +1392,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
     public boolean canCool(int simTickIndex)
     {
         //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.fluidUnits() == 0 || simTickIndex - this.lastTickIndex < 20000) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.fluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
         
         if(this.connections.size() < 4) return true;
         
