@@ -19,6 +19,7 @@ import grondag.adversity.library.PerformanceCollector;
 import grondag.adversity.library.PerformanceCounter;
 import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.CountedJob.CountedJobTask;
+import grondag.adversity.library.model.quadfactory.QuadCache;
 import grondag.adversity.library.Job;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
@@ -762,6 +763,9 @@ public class LavaSimulator extends SimulationNode
             
             this.nextStatTime = now + PERFORMANCE_INTERVAL_MILLIS;
 
+            //TODO: doesn't belong here
+            Adversity.LOG.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+            
             
 //                this.cells.logDebugInfo();
         }

@@ -840,8 +840,11 @@ public class RawQuad
         //                    vertexToInts(this.v3.xCoord, this.v3.yCoord, this.v3.zCoord, this.v3.u, this.v3.v, v3.color, this.textureSprite),
         //                    vertexToInts(this.v4.xCoord, this.v4.yCoord, this.v4.zCoord, this.v4.u, this.v4.v, v4.color, this.textureSprite));
 
-        return new BakedQuad(vertexData, color, this.face, textureSprite, 
-                lightingMode == LightingMode.SHADED && !Configurator.RENDER.enableCustomShading, format);
+        return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, color, this.face, textureSprite, 
+                lightingMode == LightingMode.SHADED && !Configurator.RENDER.enableCustomShading, format));
+        
+//        return new BakedQuad(vertexData, color, this.face, textureSprite, 
+//                lightingMode == LightingMode.SHADED && !Configurator.RENDER.enableCustomShading, format);
 
     }
 

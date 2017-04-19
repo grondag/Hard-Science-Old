@@ -76,6 +76,13 @@ public class Configurator
     
     public static class Render
     {
+        @Comment("Maxiumum number of quads held in cache for reuse. Higher numbers may result is less memory consuption overall, up to a point.")
+        @RangeInt(min = 0xFFFF, max = 0xFFFFF)
+        public int quadCacheSizeLimit = 524280;
+        
+        @Comment("Collect statistics on quad caching.")
+        public boolean enableQuadCacheStatistics = true;
+        
         @Comment({"Shade blocks from this mod with a uniform light vector. Provides a somewhat better appearance for flowing ",
                   "lava blocks (for example) but may appear odd when next to blocks from Vanilla or other mods."})
         public boolean enableCustomShading = true;
