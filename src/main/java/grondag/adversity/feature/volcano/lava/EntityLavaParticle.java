@@ -268,20 +268,13 @@ public class EntityLavaParticle extends Entity
             Simulator.INSTANCE.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount());
         }
         //            this.world.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
-        this.shouldDie = true;
         this.setDead();
     }
 
-    //TODO: remove, was for debug
 
-    private boolean shouldDie = false;
     @Override
     public void setDead()
     {
-        if(!this.world.isRemote & !this.shouldDie)
-        {
-            Adversity.LOG.info("unintended particle death");
-        }
         liveParticleCount--;
         super.setDead();
     }

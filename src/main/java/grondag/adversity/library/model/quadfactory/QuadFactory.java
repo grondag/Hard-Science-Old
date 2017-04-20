@@ -50,23 +50,7 @@ public class QuadFactory
 
 
     public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();
-    /**
-     * Takes a normal vanilla quad and recolors it to return a normal quad.
-     */
-//    public static BakedQuad recolorVanillaQuad(BakedQuad quadIn, int color)
-//    {
-//        //TODO: handle generic faces better
-//        float shade = quadIn.getFace() == null ? 1.0F : LightUtil.diffuseLight(quadIn.getFace());
-//        int colorOut = shadeColor(color, shade, true);
-//
-//        int[] aint = quadIn.getVertexData();
-//        aint[3] = colorOut;
-//        aint[3 + 7] = colorOut;
-//        aint[3 + 14] = colorOut;
-//        aint[3 + 21] = colorOut;
-//
-//        return new BakedQuad(aint, colorOut, quadIn.getFace(), quadIn.getSprite(), quadIn.shouldApplyDiffuseLighting(), quadIn.getFormat());
-//    }
+
 
     public static int shadeColor(int color, float shade, boolean glOrder)
     {

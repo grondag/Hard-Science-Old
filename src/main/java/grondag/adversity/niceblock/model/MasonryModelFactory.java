@@ -35,8 +35,6 @@ public class MasonryModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     /**
      * Textures are generated in blocks of 8, but only some are used in each block.
      * Skip the unused ones so that we don't waste texture memory.
-     * 
-     * TODO: put this into parent?
      */
     @Override
     public String[] getAllTextureNames()

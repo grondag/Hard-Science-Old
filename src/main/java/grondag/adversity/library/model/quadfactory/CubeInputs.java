@@ -48,7 +48,6 @@ public class CubeInputs{
         //necessary for bigtex blocks
         qi.useSimpleRotation = true;
         
-        //TODO: support flat lighting mode?
         qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
         qi.textureSprite = this.textureSprite;

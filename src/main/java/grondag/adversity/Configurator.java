@@ -108,6 +108,9 @@ public class Configurator
         @RangeDouble(min = -1, max = 1)
         public float normalZ = 0.25F;
       
+        @Comment("Debug Feature: draw block boundaries for non-cubic blocks.")
+        public boolean debugDrawBlockBoundariesForNonCubicBlocks = false;
+        
         public static float normalLightFactor;
         
         public static Vec3d lightingNormal;

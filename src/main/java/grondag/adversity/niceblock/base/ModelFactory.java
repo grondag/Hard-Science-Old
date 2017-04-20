@@ -25,19 +25,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 
-/**
-
-Generates and BakedModel instances
-for a given controller/state instance.
-
-May cache some pre-baked elements for performance optimization.
-getBlockModelForVariant()
-getItemQuadsForVariant()
-handleBake()
-
-
-TODO: remove super inheritance and references
- */
 public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
 {
     protected final ModelStateSet stateSet;
@@ -146,9 +133,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
     {
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
     }
-    
-//    public boolean isShaded() { return modelInputs.isShaded; }
-    
+        
     public static class ModelInputs
     {
         public final String textureName;
