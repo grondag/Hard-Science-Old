@@ -12,7 +12,6 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +24,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 
 public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
-{
-    private final Int2ObjectOpenHashMap<List<BakedQuad>> faceCache = new Int2ObjectOpenHashMap<List<BakedQuad>>(4096);
-    
+{    
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][CornerJoinFaceState.values().length];
     
     /** Texture offsets */
@@ -73,15 +70,6 @@ public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         return textures;
     }
 
-    private static final int OFFSET_FJS = EnumFacing.values().length;
-    private static final int OFFSET_TEX = OFFSET_FJS * CornerJoinFaceState.values().length;
-    private int makeCacheKey(EnumFacing face, CornerJoinFaceState fjs, int colorIndex, int textureIndex)
-    {
-    	return face.ordinal()
-    	        + fjs.ordinal() * OFFSET_FJS
-    	        + textureIndex * OFFSET_TEX
-    	        + colorIndex * OFFSET_TEX * (int)this.textureComponent.getValueCount();
-    }
     
     public List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face) 
     {
@@ -89,19 +77,7 @@ public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     	
     	CornerJoinBlockState bjs = state.getValue(ModelStateComponents.CORNER_JOIN);
         int altTextureIndex = state.getValue(this.textureComponent);
-        int cacheKey = makeCacheKey(face, bjs.getFaceJoinState(face), state.getValue(this.colorComponent).ordinal, altTextureIndex);
-        List<BakedQuad> retVal = faceCache.get(cacheKey);
-
-        if(retVal == null)
-        {
-            retVal = makeBorderFace(state.getValue(this.colorComponent).getColor(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
-            synchronized(faceCache)
-            {
-                faceCache.put(cacheKey, retVal);
-            }
-        }
-   
-        return retVal;
+        return makeBorderFace(state.getValue(this.colorComponent).getColor(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
     }
 
 

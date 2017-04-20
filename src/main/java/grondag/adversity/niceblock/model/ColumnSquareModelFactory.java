@@ -19,9 +19,11 @@ import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 
 import java.util.List;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
@@ -35,8 +37,9 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
     private final double marginOffset;
     private final double cutDepth;
 
-    //TODO: use SimpleLoadingCache
-    private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
+    private final Cache<Integer, List<BakedQuad>> cache = CacheBuilder.newBuilder()
+            .concurrencyLevel(4)
+            .maximumSize(4096).build();
     
     public static class ColumnSquareInputs extends ModelInputs
     {
@@ -106,7 +109,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
-            builder.setQuads(face, makeFaceQuads(state, face, false));
+            builder.setQuads(face, makeFaceQuads(state, face));
         }
         return builder.build();
     }
@@ -117,12 +120,12 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.addAll(this.makeFaceQuads(state, face, true));
+            general.addAll(this.makeFaceQuads(state, face));
         }        
         return general.build();
     }
     
-    public List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face, boolean isItem)  
+    public List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face)  
     {
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
 
@@ -137,7 +140,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
 //        if(!isItem)
 //        {
             cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), state.getValue(this.colorComponent).ordinal, textureIndex);
-            retVal = faceCache.get(cacheKey);
+            retVal = cache.getIfPresent(cacheKey);
 //        }
         
         if(retVal == null)
@@ -163,14 +166,9 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
 	        {
 	            retVal = makeSideFace(face, quadInputs, bjs.getFaceJoinState(face), cutColor, axis);
 	        }
+        	
+	        cache.put(cacheKey, retVal);
 	        
-	        if(!isItem)
-	        {
-	            synchronized(faceCache)
-    	        {
-    	        	faceCache.put(cacheKey, retVal);
-    	        }
-	        }
         }
         return retVal;
     }

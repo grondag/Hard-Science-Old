@@ -1,7 +1,6 @@
 package grondag.adversity.niceblock.model;
 
 import grondag.adversity.library.Rotation;
-import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.joinstate.SimpleJoinFaceState;
 import grondag.adversity.library.model.FaceQuadInputs;
 import grondag.adversity.library.model.QuadContainer;
@@ -18,7 +17,6 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
@@ -26,9 +24,6 @@ import net.minecraft.util.EnumFacing;
 
 public class MasonryModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
-    //TODO: use SimpleLoadingCache
-    private final TIntObjectHashMap<List<BakedQuad>> faceCache = new TIntObjectHashMap<List<BakedQuad>>(4096);
-    
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][SimpleJoinFaceState.values().length];
 
 	public MasonryModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
@@ -58,39 +53,14 @@ public class MasonryModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         return textures;
     }
 
-    private int makeCacheKey(EnumFacing face, SimpleJoinFaceState fjs, int colorIndex, int textureIndex)
-    {
-         int key = face.ordinal();
-        int offset = EnumFacing.values().length;
-        key += fjs.ordinal() * offset;
-        offset *= CornerJoinFaceState.values().length;
-        key += textureIndex * offset;
-        offset *= this.textureComponent.getValueCount();
-        key += colorIndex * offset;
-        return key;
-    }
-    
-
-    private List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face) 
+     private List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face) 
     {
     	
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
         
         SimpleJoinFaceState fjs = SimpleJoinFaceState.find(face, state.getValue(ModelStateComponents.MASONRY_JOIN));
         int altTextureIndex = state.getValue(this.textureComponent);
-        int cacheKey = makeCacheKey(face, fjs, state.getValue(this.colorComponent).ordinal, altTextureIndex);
-        List<BakedQuad> retVal = faceCache.get(cacheKey);
-
-        if(retVal == null)
-        {
-            retVal = makeFace(face, fjs, state.getValue(this.colorComponent), altTextureIndex, false);
-            synchronized(faceCache)
-            {
-                faceCache.put(cacheKey, retVal);
-            }
-        }
-   
-        return retVal;
+        return makeFace(face, fjs, state.getValue(this.colorComponent), altTextureIndex, false);
     }
 
 	private List<BakedQuad> makeFace(EnumFacing face, SimpleJoinFaceState fjs, ColorMap colorMap, int altTextureIndex, boolean isItem)

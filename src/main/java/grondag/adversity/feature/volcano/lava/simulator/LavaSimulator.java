@@ -24,6 +24,7 @@ import grondag.adversity.library.Job;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.model.BigTexModelFactory;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.base.NodeRoots;
@@ -765,8 +766,7 @@ public class LavaSimulator extends SimulationNode
 
             //TODO: doesn't belong here
             Adversity.LOG.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
-            
-            
+        
 //                this.cells.logDebugInfo();
         }
     }

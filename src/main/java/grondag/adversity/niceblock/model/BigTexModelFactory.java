@@ -7,10 +7,7 @@ import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-
 import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.Minecraft;
@@ -21,8 +18,6 @@ import net.minecraft.util.BlockRenderLayer;
 
 public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 {
-
-    private final Int2ObjectOpenHashMap<List<BakedQuad>> faceCache = new Int2ObjectOpenHashMap<List<BakedQuad>>(4096);
     
     public static enum BigTexScale
     {
@@ -155,36 +150,17 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 
 	}
 
-    private int makeCacheKey(ModelStateSetValue state, int faceIndex, EnumFacing face)
-    {
-        int key = face.ordinal();
-        key |= faceIndex << 3;
-        key |= state.getValue(this.colorComponent).ordinal << 15;
-
-        return key;
-    }
-    
-    @Override
+	@Override
     public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
         if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        
         QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
             int faceIndex = FACE_SELECTORS[state.getValue(this.bigTexComponent).getIndex()].selectors[face.ordinal()];
-            int cacheKey = makeCacheKey(state, faceIndex, face);
-            List<BakedQuad> faceQuads = faceCache.get(cacheKey);
-            
-            if(faceQuads == null)
-            {
-                faceQuads = makeBigTexFace(state, faceIndex, face);
-                synchronized(faceCache)
-                {
-                    faceCache.put(cacheKey, faceQuads);
-                }
-            }
-            builder.setQuads(face, faceQuads);
+            builder.setQuads(face, makeBigTexFace(state, faceIndex, face));
         }
         return builder.build();
     }
