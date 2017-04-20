@@ -3,6 +3,7 @@ package grondag.adversity.niceblock.modelstate;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.library.cache.ILoadingCache;
@@ -32,12 +33,25 @@ public class ModelStateSet
     private final ModelColorMapComponent firstColorMapComponent;
     private final ModelSpeciesComponent firstSpeciesComponent;
     
-    public static ModelStateSet find(ModelStateGroup... groups)
+    public static ModelStateSet find(ModelStateSet... sets)
+    {
+        HashSet<ModelStateComponent<?,?>> set = new HashSet<ModelStateComponent<?,?>>();
+        for(ModelStateSet s : sets)
+        {
+            for(ModelStateComponent<?,?> c : s.includedTypes)
+            {
+                set.add(c);
+            }
+        }
+        return find(set.toArray(new ModelStateComponent<?,?>[set.size()]));
+    }
+    
+    public static ModelStateSet find(ModelStateComponent<?,?>... components)
     {
         BitSet key = new BitSet();
-        for(ModelStateGroup g : groups)
+        for(ModelStateComponent<?,?> c : components)
         {
-            key.set(g.getOrdinal());
+            key.set(c.getOrdinal());
         }
         
         ModelStateSet result; 
@@ -46,14 +60,14 @@ public class ModelStateSet
             result = stateSets.get(key);
             if(result == null)
             {
-                result = new ModelStateSet(groups);
+                result = new ModelStateSet(components);
                 stateSets.put(key, result);
             }
         }
         return result;
     }
-
-    private final ILoadingCache<ModelStateSetValue> valueCache = new ManagedLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024, 0xFFFF);
+    
+     private final ILoadingCache<ModelStateSetValue> valueCache = new ManagedLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024, 0xFFFF);
     
     private class StateCacheLoader implements SimpleCacheLoader<ModelStateSetValue>
     {
@@ -69,7 +83,7 @@ public class ModelStateSet
         }
     }
     
-    private ModelStateSet(ModelStateGroup... groups)
+    private ModelStateSet(ModelStateComponent<?,?>... components)
     {
 
         
@@ -88,34 +102,32 @@ public class ModelStateSet
         boolean canRefresh = false;
         boolean noAlwaysRefresh = true;
 
-        for(ModelStateGroup g : groups)
+        for(ModelStateComponent<?,?> c : components)
         {
-            for(ModelStateComponent<?,?> c : g.getComponents())
+            if(typeIndexes[c.getOrdinal()] == NOT_PRESENT)
             {
-                if(typeIndexes[c.getOrdinal()] == NOT_PRESENT)
+                typeIndexes[c.getOrdinal()] = componentCounter++;
+                shiftBits[c.getOrdinal()] = shift;
+                shift += c.getBitLength();
+                canRefresh = canRefresh || c.getRefreshType() != WorldRefreshType.NEVER;
+                noAlwaysRefresh = noAlwaysRefresh && c.getRefreshType() != WorldRefreshType.ALWAYS;
+                
+                if(c.getRefreshType() == WorldRefreshType.NEVER)
                 {
-                    typeIndexes[c.getOrdinal()] = componentCounter++;
-                    shiftBits[c.getOrdinal()] = shift;
-                    shift += c.getBitLength();
-                    canRefresh = canRefresh || c.getRefreshType() != WorldRefreshType.NEVER;
-                    noAlwaysRefresh = noAlwaysRefresh && c.getRefreshType() != WorldRefreshType.ALWAYS;
-                    
-                    if(c.getRefreshType() == WorldRefreshType.NEVER)
-                    {
-                        persistenceMask |= c.getBitMask() << shiftBits[c.getOrdinal()];
-                    }
-                    
-                    if(colorMap == null && c instanceof ModelColorMapComponent)
-                    {
-                        colorMap = (ModelColorMapComponent) c;
-                    }
-                    if(species == null && c instanceof ModelSpeciesComponent)
-                    {
-                        species = (ModelSpeciesComponent) c;
-                    }
+                    persistenceMask |= c.getBitMask() << shiftBits[c.getOrdinal()];
+                }
+                
+                if(colorMap == null && c instanceof ModelColorMapComponent)
+                {
+                    colorMap = (ModelColorMapComponent) c;
+                }
+                if(species == null && c instanceof ModelSpeciesComponent)
+                {
+                    species = (ModelSpeciesComponent) c;
                 }
             }
         }
+        
         this.firstColorMapComponent = colorMap;
         this.firstSpeciesComponent = species;
         this.usesWorldState = canRefresh;
@@ -123,7 +135,7 @@ public class ModelStateSet
         this.persistenceMask = persistenceMask;
         this.bitLength = shift;
         
-        //initialize smaller array to include only types that are part of one or more groups
+        //initialize smaller array to hold only included types for fast reference
         typeCount = componentCounter;
         this.includedTypes = new ModelStateComponent<?,?>[typeCount];
         for(int i = 0; i < ModelStateComponents.getCount(); i++)
@@ -147,6 +159,16 @@ public class ModelStateSet
             }
         }
         return key;
+    }
+    
+    /**
+     * Used to compute a key for a subset of a larger component set.
+     * Intended for use in individual models that don't need all components
+     * and that want to cache elements of the model based on state inputs.
+     */
+    public long computeKey(ModelStateSetValue setValue)
+    {
+        return setValue.getStateSet() == this ? setValue.getKey() : computeKey(setValue.values);
     }
     
     public long computeMask(ModelStateValue<?,?>... components)
@@ -219,10 +241,10 @@ public class ModelStateSet
         return (key1 & mask) == (key2 & mask);
     }
     
-    public ModelStateSetValue getSetValueFromKey(long bits)
+    public ModelStateSetValue getSetValueFromKey(long key)
     {
-        ModelStateSetValue result = valueCache.get(bits);
-        if(Adversity.DEBUG_MODE)
+        ModelStateSetValue result = valueCache.get(key);
+        if(Adversity.DEBUG_MODE && result == null)
         {
             Adversity.LOG.info("Unable to retrieve model state set value. Should never happen.");
         }
@@ -265,6 +287,11 @@ public class ModelStateSet
         public long getKey()
         {
             return key;
+        }
+        
+        public ModelStateSet getStateSet()
+        {
+            return ModelStateSet.this;
         }
     }
 }

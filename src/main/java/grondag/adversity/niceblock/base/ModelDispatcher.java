@@ -12,7 +12,6 @@ import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.modelstate.ModelStateGroup;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
@@ -154,18 +153,18 @@ public class ModelDispatcher implements IBakedModel
         this.models = models;
         
         ArrayList<BlockRenderLayer> layerList = new ArrayList<BlockRenderLayer>();
-        ModelStateGroup groups[] = new ModelStateGroup[models.length];
+        ModelStateSet subSets[] = new ModelStateSet[models.length];
         for(int i = 0 ; i < models.length; i++)
         {
-            groups[i] = models[i].getStateGroup();
+            subSets[i] = models[i].getStateSet();
         }
-        this.stateSet = ModelStateSet.find(groups);
+        this.stateSet = ModelStateSet.find(subSets);
 
         HashSet<AbstractCollisionHandler> collisionHandlers = new HashSet<AbstractCollisionHandler>();
 
         for(int i = 0; i < models.length; i++)
         {
-            groups[i] = models[i].getStateGroup();
+            subSets[i] = models[i].getStateSet();
             AbstractCollisionHandler handler = models[i].getCollisionHandler(this);
             if(handler != null)
             {

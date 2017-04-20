@@ -4,7 +4,6 @@ import java.util.List;
 
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -14,31 +13,30 @@ import net.minecraft.world.IBlockAccess;
 public class SimpleCollisionHandler extends AbstractCollisionHandler
 {
     protected final ModelFactory<?> modelFactory;
-    protected final ModelStateSet modelStateSet;
    
     public SimpleCollisionHandler(ModelFactory<?> modelFactory)
     {
         this.modelFactory = modelFactory;
-        this.modelStateSet = ModelStateSet.find(modelFactory.getStateGroup());
     }
 
  
     @Override
     public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelStateSetValue modelState)
     {
-        return modelState.getKey();
+        //NB: can't use modelState key directly - it may be a superset of this model's state
+        return this.modelFactory.getStateSet().computeKey(modelState);
     }
 
     @Override
     public int getKeyBitLength()
     {
-        return this.modelStateSet.bitLength;
+        return this.modelFactory.getStateSet().bitLength;
     }
     
      @Override
     public List<RawQuad> getCollisionQuads(long modelKey)
     {
-        return modelFactory.getCollisionQuads(modelStateSet.getSetValueFromKey(modelKey));
+        return modelFactory.getCollisionQuads(this.modelFactory.getStateSet().getSetValueFromKey(modelKey));
     }
 
     @Override

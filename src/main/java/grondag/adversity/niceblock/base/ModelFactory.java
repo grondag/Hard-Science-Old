@@ -12,7 +12,7 @@ import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
 import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateGroup;
+import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.modelstate.ModelTextureComponent;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
@@ -40,7 +40,7 @@ TODO: remove super inheritance and references
  */
 public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
 {
-    protected final ModelStateGroup stateGroup;
+    protected final ModelStateSet stateSet;
     protected final V modelInputs;
     protected final ModelColorMapComponent colorComponent;
     protected final ModelTextureComponent textureComponent;
@@ -51,7 +51,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
     
     public ModelFactory(V modelInputs, ModelStateComponent<?,?>... components)
     {
-        this.stateGroup = ModelStateGroup.find(components);
+        this.stateSet = ModelStateSet.find(components);
         this.modelInputs = modelInputs;
 
         ModelColorMapComponent colorComponent = null;
@@ -90,7 +90,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         return this.modelInputs.renderLayer == renderLayer;
     }
 
-    public ModelStateGroup getStateGroup() { return stateGroup; }
+    public ModelStateSet getStateSet() { return stateSet; }
     
     public abstract QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
     public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state);    
