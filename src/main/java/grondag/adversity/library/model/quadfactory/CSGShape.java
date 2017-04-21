@@ -33,7 +33,6 @@ package grondag.adversity.library.model.quadfactory;
  */
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -41,11 +40,8 @@ import java.util.stream.Stream;
 
 import net.minecraft.util.math.AxisAlignedBB;
 
-public class CSGShape extends LinkedList<RawQuad>
+public class CSGShape extends ArrayList<RawQuad>
 {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 796007237565914078L;
 
     public CSGShape(List<RawQuad> quads)

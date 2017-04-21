@@ -178,7 +178,6 @@ public class QuadFactory
         
         }
 
-        //TODO; the toQuads should happen automatically during quad baking, but will require changing return type of backing to list
         results.addAll(top.toQuads());
         results.addAll(bottom.toQuads());
         return results;

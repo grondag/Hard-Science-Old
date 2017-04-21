@@ -1,7 +1,7 @@
 package grondag.adversity.library.model.quadfactory;
 
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -119,7 +119,7 @@ public class RawQuad
 
     public List<RawQuad> toQuads()
     {
-        LinkedList<RawQuad> retVal = new LinkedList<RawQuad>();
+        ArrayList<RawQuad> retVal = new ArrayList<RawQuad>();
 
         if(this.vertexCount <= 4)
         {
@@ -158,7 +158,7 @@ public class RawQuad
      */
     public List<RawQuad> toTris()
     {
-        LinkedList<RawQuad>  retVal= new LinkedList<RawQuad>();
+        ArrayList<RawQuad>  retVal= new ArrayList<RawQuad>(this.getVertexCount()-2);
 
         if(this.getVertexCount() == 3)
         {
