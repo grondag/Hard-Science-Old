@@ -5,7 +5,7 @@ import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.init.ModItems;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -18,6 +18,7 @@ import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.block.HeightBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory;
+import grondag.adversity.niceblock.model.TextureScale;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
 import grondag.adversity.niceblock.model.ColorModelFactory;
@@ -76,35 +77,35 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
-    private final static ModelFactory.ModelInputs RAW_FLEXSTONE_INPUTS = new ModelFactory.ModelInputs("raw_flexstone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance RAW_FLEXSTONE_INPUTS = new ModelAppearance("raw_flexstone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static ColorModelFactory RAW_FLEXSTONE_MODEL = new ColorModelFactory(RAW_FLEXSTONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher RAW_FLEXSTONE_DISPATCH = new ModelDispatcher(RAW_FLEXSTONE_MODEL);
     public static final NiceBlock RAW_FLEXSTONE_BLOCK = new NiceBlock(RAW_FLEXSTONE_DISPATCH, BaseMaterial.FLEXSTONE, "raw");
     public static final NiceItemBlock RAW_FLEXSTONE_ITEM = new NiceItemBlock(RAW_FLEXSTONE_BLOCK);
     
-    private final static ModelFactory.ModelInputs RAW_DURASTONE_INPUTS = new ModelFactory.ModelInputs("raw_durastone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance RAW_DURASTONE_INPUTS = new ModelAppearance("raw_durastone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static ColorModelFactory RAW_DURASTONE_MODEL = new ColorModelFactory(RAW_DURASTONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher RAW_DURASTONE_DISPATCH = new ModelDispatcher(RAW_DURASTONE_MODEL);
     public static final NiceBlock RAW_DURASTONE_BLOCK = new NiceBlock(RAW_DURASTONE_DISPATCH, BaseMaterial.DURASTONE, "raw");
     public static final NiceItemBlock RAW_DURASTONE_ITEM = new NiceItemBlock(RAW_DURASTONE_BLOCK);
 
-    private final static ModelFactory.ModelInputs COLORED_STONE_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance COLORED_STONE_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static ColorModelFactory COLORED_STONE_MODEL = new ColorModelFactory(COLORED_STONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher COLORED_STONE_DISPATCH = new ModelDispatcher(COLORED_STONE_MODEL);
     public static final NiceBlockPlus COLORED_STONE_BLOCK = new NiceBlockPlus(COLORED_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "colored");
     public static final NiceItemBlock COLORED_STONE_ITEM = new NiceItemBlock(COLORED_STONE_BLOCK);
     
-    private final static ModelFactory.ModelInputs BIGTEX_INPUTS = new ModelFactory.ModelInputs("weathered_smooth_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static BigTexModelFactory BIGTEX_MODEL = new BigTexModelFactory(BIGTEX_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BLOCK,
+    private final static ModelAppearance BIGTEX_INPUTS = new ModelAppearance("weathered_smooth_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static BigTexModelFactory BIGTEX_MODEL = new BigTexModelFactory(BIGTEX_INPUTS, TextureScale.LARGE, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1);
     private static final ModelDispatcher BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL);
     public static final NiceBlockPlus BIGTEX_BLOCK = new NiceBlockPlus(BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigtex");
     public static final NiceItemBlock BIGTEX_ITEM = new NiceItemBlock(BIGTEX_BLOCK);
 
-    private final static ModelFactory.ModelInputs BORDER_INPUTS = new ModelFactory.ModelInputs("bordertest", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
+    private final static ModelAppearance BORDER_INPUTS = new ModelAppearance("bordertest", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
     private final static BorderModelFactory BORDER_MODEL = new BorderModelFactory(BORDER_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1);
 
@@ -112,7 +113,7 @@ public class NiceBlockRegistrar
     public static final BigBlock BORDER_BIGTEX_BLOCK = new BigBlock(BORDER_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "border", NicePlacement.PLACEMENT_3x3x3);
     public static final NiceItemBlock BORDER_BIGTEX_ITEM = new NiceItemBlock(BORDER_BIGTEX_BLOCK);
 
-    private final static ModelFactory.ModelInputs MASONRY_INPUTS = new ModelFactory.ModelInputs("masonrytest", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
+    private final static ModelAppearance MASONRY_INPUTS = new ModelAppearance("masonrytest", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
     private final static MasonryModelFactory MASONRY_MODEL = new MasonryModelFactory(MASONRY_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.MASONRY_JOIN, ModelStateComponents.TEXTURE_1);
 
@@ -120,15 +121,15 @@ public class NiceBlockRegistrar
     public static final BigBlock MASONRY_BIGTEX_BLOCK = new BigBlock(MASONRY_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigbrick", NicePlacement.PLACEMENT_2x1x1);
     public static final NiceItemBlock MASONRY_BIGTEX_ITEM = new NiceItemBlock(MASONRY_BIGTEX_BLOCK);
 
-    private static final ModelFactory.ModelInputs COLUMN_INPUTS_BASE 
-        = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private static final ModelAppearance COLUMN_INPUTS_BASE 
+        = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
 
-    private static final ModelFactory.ModelInputs COLUMN_INPUTS_LAMP 
-    = new ModelFactory.ModelInputs("colored_stone", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
+    private static final ModelAppearance COLUMN_INPUTS_LAMP 
+    = new ModelAppearance("colored_stone", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
 
     // need overlay on a separate layer to keep it out of AO lighting
-    private static final ModelFactory.ModelInputs COLUMN_INPUTS_OVERLAY 
-    = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
+    private static final ModelAppearance COLUMN_INPUTS_OVERLAY 
+    = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
     
     
     private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
@@ -205,7 +206,7 @@ public class NiceBlockRegistrar
 //    public static final NiceItemBlock HOT_SQUARE_BASALT_ITEM = new NiceItemBlock(HOT_SQUARE_BASALT_BLOCK);
 
     
-    private final static ModelFactory.ModelInputs HEIGHT_STONE_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance HEIGHT_STONE_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static HeightModelFactory HEIGHT_STONE_MODEL = new HeightModelFactory(HEIGHT_STONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_16);
     private static final ModelDispatcher HEIGHT_STONE_DISPATCH = new ModelDispatcher(HEIGHT_STONE_MODEL);
@@ -213,7 +214,7 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock HEIGHT_STONE_ITEM = new NiceItemBlock(HEIGHT_STONE_BLOCK);
 
     //TODO: move all these to volcano package
-    private final static ModelFactory.ModelInputs HOT_FLOWING_LAVA_INPUTS = new ModelFactory.ModelInputs("lava", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
+    private final static ModelAppearance HOT_FLOWING_LAVA_INPUTS = new ModelAppearance("lava", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
     private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
     private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
@@ -224,23 +225,23 @@ public class NiceBlockRegistrar
              new VolcanicLavaBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "fill", true);
     public static final NiceItemBlock HOT_FLOWING_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_FILLER_BLOCK);
     
-    private final static ModelFactory.ModelInputs COOL_FLOWING_BASALT_INPUTS = new ModelFactory.ModelInputs("basalt_cool", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance COOL_FLOWING_BASALT_INPUTS = new ModelAppearance("basalt_cool", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static FlowModelFactory COOL_FLOWING_BASALT_MODEL = new FlowModelFactory(COOL_FLOWING_BASALT_INPUTS, true, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
     
-    private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_0_INPUTS = new ModelFactory.ModelInputs("basalt_cooling", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
+    private final static ModelAppearance HOT_FLOWING_BASALT_0_INPUTS = new ModelAppearance("basalt_cooling", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
     private final static FlowModelFactory HOT_FLOWING_BASALT_0_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_0_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
-    private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_1_INPUTS = new ModelFactory.ModelInputs("basalt_warm", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
+    private final static ModelAppearance HOT_FLOWING_BASALT_1_INPUTS = new ModelAppearance("basalt_warm", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
     private final static FlowModelFactory HOT_FLOWING_BASALT_1_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_1_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
-    private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_2_INPUTS = new ModelFactory.ModelInputs("basalt_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
+    private final static ModelAppearance HOT_FLOWING_BASALT_2_INPUTS = new ModelAppearance("basalt_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
     private final static FlowModelFactory HOT_FLOWING_BASALT_2_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_2_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
-    private final static ModelFactory.ModelInputs HOT_FLOWING_BASALT_3_INPUTS = new ModelFactory.ModelInputs("basalt_very_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
+    private final static ModelAppearance HOT_FLOWING_BASALT_3_INPUTS = new ModelAppearance("basalt_very_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
     private final static FlowModelFactory HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_3_INPUTS, false, ModelStateComponents.FLOW_JOIN,
             ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
 
@@ -308,7 +309,7 @@ public class NiceBlockRegistrar
    public static final NiceItemBlock HOT_STATIC_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_LAVA_FILLER_BLOCK);
    
     
-    private final static ModelFactory.ModelInputs BASALT_COBBLE_INPUTS = new ModelFactory.ModelInputs("cobble", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance BASALT_COBBLE_INPUTS = new ModelAppearance("cobble", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static ColorModelFactory BASALT_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BASALT,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher BASALT_COBBLE_DISPATCH = new ModelDispatcher(BASALT_COBBLE_MODEL);
@@ -325,9 +326,9 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COBBLE_DURASTONE_ITEM = new NiceItemBlock(COBBLE_DURASTONE_BLOCK);
 
     
-    private final static ModelFactory.ModelInputs COOL_SQUARE_BASALT_INPUTS = new ModelFactory.ModelInputs("basalt_cut", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance COOL_SQUARE_BASALT_INPUTS = new ModelAppearance("basalt_cut", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static BigTexModelFactory COOL_SQUARE_BASALT_MODEL 
-        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BASALT,
+        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, TextureScale.LARGE, ModelStateComponents.COLORS_BASALT,
                 ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1);
     private static final ModelDispatcher COOL_SQUARE_BASALT_DISPATCH = new ModelDispatcher(COOL_SQUARE_BASALT_MODEL);
     public static final NiceBlock COOL_SQUARE_BASALT_BLOCK = new FlowSimpleBlock(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "cool")
@@ -335,7 +336,7 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
     
     private final static BigTexModelFactory COLORED_BASALT_MODEL 
-        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, BigTexModelFactory.BigTexScale.LARGE, ModelStateComponents.COLORS_BLOCK,
+        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, TextureScale.LARGE, ModelStateComponents.COLORS_BLOCK,
                 ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1);
     private static final ModelDispatcher COLORED_BASALT_DISPATCH = new ModelDispatcher(COLORED_BASALT_MODEL);
     
@@ -345,7 +346,7 @@ public class NiceBlockRegistrar
     public static final NiceBlock CUT_ROCK_DURASTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BaseMaterial.DURASTONE, "cut_rock");
     public static final NiceItemBlock CUT_ROCK_DURASTONE_ITEM = new NiceItemBlock(CUT_ROCK_DURASTONE_BLOCK);
 
-    private final static ModelFactory.ModelInputs CSG_TEST_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private final static ModelAppearance CSG_TEST_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private final static CSGModelFactory CSG_TEST_MODEL = new CSGModelFactory(CSG_TEST_INPUTS, ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
     private static final ModelDispatcher CSG_TEST_DISPATCH = new ModelDispatcher(CSG_TEST_MODEL);

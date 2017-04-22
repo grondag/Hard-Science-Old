@@ -24,7 +24,6 @@ import grondag.adversity.library.Job;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.model.BigTexModelFactory;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.base.NodeRoots;

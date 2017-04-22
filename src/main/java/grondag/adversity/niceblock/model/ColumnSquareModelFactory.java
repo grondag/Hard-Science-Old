@@ -11,7 +11,7 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelFactory.ModelInputs;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -41,14 +41,14 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
             .concurrencyLevel(4)
             .maximumSize(4096).build();
     
-    public static class ColumnSquareInputs extends ModelInputs
+    public static class ColumnSquareInputs extends ModelAppearance
     {
 
         public final int cutCount;
         public final boolean areCutsOnEdge;
         public final ModelType modelType;
         
-        public ColumnSquareInputs(ModelInputs baseInputs, int cutCount, boolean areCutsOnEdge, ModelType modelType)
+        public ColumnSquareInputs(ModelAppearance baseInputs, int cutCount, boolean areCutsOnEdge, ModelType modelType)
         {
             super(baseInputs.textureName, baseInputs.lightingMode, baseInputs.renderLayer);
             this.cutCount = cutCount;

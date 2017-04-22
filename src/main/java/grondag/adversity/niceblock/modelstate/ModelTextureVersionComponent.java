@@ -7,11 +7,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
-public class ModelTextureComponent extends ModelStateComponent<ModelTextureComponent.ModelTextureIndex, Integer>
+public class ModelTextureVersionComponent extends ModelStateComponent<ModelTextureVersionComponent.ModelTextureIndex, Integer>
 {
     private final IAlternator alternator;
 
-    public ModelTextureComponent(int ordinal, int alternateCount)
+    public ModelTextureVersionComponent(int ordinal, int alternateCount)
     {
         super(ordinal, alternateCount > 1 ? WorldRefreshType.CACHED : WorldRefreshType.NEVER, alternateCount);
         alternator = Alternator.getAlternator(alternateCount, 957293844);
@@ -24,15 +24,15 @@ public class ModelTextureComponent extends ModelStateComponent<ModelTextureCompo
     }
 
     @Override
-    public ModelTextureComponent.ModelTextureIndex createValueFromBits(long bits)
+    public ModelTextureVersionComponent.ModelTextureIndex createValueFromBits(long bits)
     {
-        return new ModelTextureComponent.ModelTextureIndex((int) bits);
+        return new ModelTextureVersionComponent.ModelTextureIndex((int) bits);
     }
 
     @Override
-    public Class<ModelTextureComponent.ModelTextureIndex> getStateType()
+    public Class<ModelTextureVersionComponent.ModelTextureIndex> getStateType()
     {
-        return ModelTextureComponent.ModelTextureIndex.class;
+        return ModelTextureVersionComponent.ModelTextureIndex.class;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ModelTextureComponent extends ModelStateComponent<ModelTextureCompo
         return Integer.class;
     }
     
-    public class ModelTextureIndex extends ModelStateValue<ModelTextureComponent.ModelTextureIndex, Integer>
+    public class ModelTextureIndex extends ModelStateValue<ModelTextureVersionComponent.ModelTextureIndex, Integer>
     {
         private ModelTextureIndex(Integer value)
         {
@@ -55,9 +55,9 @@ public class ModelTextureComponent extends ModelStateComponent<ModelTextureCompo
         }
 
         @Override
-        public ModelStateComponent<ModelTextureComponent.ModelTextureIndex, Integer> getComponent()
+        public ModelStateComponent<ModelTextureVersionComponent.ModelTextureIndex, Integer> getComponent()
         {
-            return ModelTextureComponent.this;
+            return ModelTextureVersionComponent.this;
         }
     }
 }

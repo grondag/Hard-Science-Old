@@ -7,6 +7,7 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
@@ -22,11 +23,11 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 
-public class MasonryModelFactory extends ModelFactory<ModelFactory.ModelInputs>
+public class MasonryModelFactory extends ModelFactory<ModelAppearance>
 {
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][SimpleJoinFaceState.values().length];
 
-	public MasonryModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+	public MasonryModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
     {
         super(modelInputs, components);
     }

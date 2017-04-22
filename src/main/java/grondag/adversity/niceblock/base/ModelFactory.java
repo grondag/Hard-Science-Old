@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import grondag.adversity.library.model.QuadContainer;
-import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
@@ -14,7 +13,7 @@ import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.modelstate.ModelTextureComponent;
+import grondag.adversity.niceblock.modelstate.ModelTextureVersionComponent;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -25,12 +24,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 
-public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
+public abstract class ModelFactory<V extends ModelAppearance>
 {
     protected final ModelStateSet stateSet;
     protected final V modelInputs;
     protected final ModelColorMapComponent colorComponent;
-    protected final ModelTextureComponent textureComponent;
+    protected final ModelTextureVersionComponent textureComponent;
     protected final ModelRotationComponent rotationComponent;
     protected final ModelBigTexComponent bigTexComponent;
     protected final ModelSpeciesComponent speciesComponent;
@@ -42,7 +41,7 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         this.modelInputs = modelInputs;
 
         ModelColorMapComponent colorComponent = null;
-        ModelTextureComponent textureComponent = null;
+        ModelTextureVersionComponent textureComponent = null;
         ModelRotationComponent rotationComponent = null;
         ModelBigTexComponent bigTexComponent = null;
         ModelSpeciesComponent speciesComponent = null;
@@ -52,8 +51,8 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         {
             if(c instanceof ModelColorMapComponent)
                 colorComponent = (ModelColorMapComponent) c;
-            else if(c instanceof ModelTextureComponent)
-                textureComponent = (ModelTextureComponent) c;
+            else if(c instanceof ModelTextureVersionComponent)
+                textureComponent = (ModelTextureVersionComponent) c;
             else if(c instanceof ModelRotationComponent)
                 rotationComponent = (ModelRotationComponent) c;
             else if(c instanceof ModelBigTexComponent)
@@ -134,20 +133,6 @@ public abstract class ModelFactory<V extends ModelFactory.ModelInputs>
         return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
     }
         
-    public static class ModelInputs
-    {
-        public final String textureName;
-        public final LightingMode lightingMode;
-        public final BlockRenderLayer renderLayer;
-        
-        public ModelInputs(String textureName, LightingMode lightingMode, BlockRenderLayer renderLayer)
-        {
-            this.textureName = textureName;
-            this.lightingMode = lightingMode;
-            this.renderLayer = renderLayer;
-        }
-    }
-    
     public  AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return Block.FULL_BLOCK_AABB;

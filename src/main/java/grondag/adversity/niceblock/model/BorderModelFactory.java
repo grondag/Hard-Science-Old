@@ -8,6 +8,7 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
@@ -23,7 +24,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
+public class BorderModelFactory extends ModelFactory<ModelAppearance>
 {    
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][CornerJoinFaceState.values().length];
     
@@ -45,7 +46,7 @@ public class BorderModelFactory extends ModelFactory<ModelFactory.ModelInputs>
     private final static int TEXTURE_COUNT = 13;
     private final static int TEXTURE_BLOCK_SIZE = 16;
  
-    public BorderModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+    public BorderModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
     {
         super(modelInputs, components);
     }

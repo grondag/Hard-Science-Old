@@ -14,6 +14,7 @@ import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -36,9 +37,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 
-public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
+public class FlowModelFactory extends ModelFactory<ModelAppearance>
 {
-    private static ModelFactory.ModelInputs COLLISION_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private static ModelAppearance COLLISION_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     //main diff is lack of species
     private static FlowModelFactory COLLISION_INSTANCE = new FlowModelFactory(COLLISION_INPUTS, true, ModelStateComponents.FLOW_JOIN,
            ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
@@ -68,7 +69,7 @@ public class FlowModelFactory extends ModelFactory<ModelFactory.ModelInputs>
         new AxisAlignedBB(0, 0, 0, 1, 1, 1)
     };
     
-    public FlowModelFactory(ModelInputs modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
+    public FlowModelFactory(ModelAppearance modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
     {
         super(modelInputs, components);
     }

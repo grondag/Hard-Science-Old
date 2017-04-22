@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.niceblock.base.ModelAppearanceLists;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.FixedColorMapProvider;
@@ -58,41 +59,36 @@ public class ModelStateComponents
     private static int counter = 0;
     private static final ModelStateComponent<?,?>[] MODEL_STATE_COMPONENTS = new ModelStateComponent<?,?>[45];
 
-//    private static ArrayList<ModelStateComponent<?,?>> list = new ArrayList<ModelStateComponent<?,?>>(20);
-
     public static final ModelAxisComponent AXIS = register(new ModelAxisComponent(counter++));
     
-    public static final ModelCornerJoinComponent CORNER_JOIN = register(new ModelCornerJoinComponent(counter++, BlockTests.BIG_BLOCK_MATCH));
 
     public static final ModelRotationComponent ROTATION = register(new ModelRotationComponent(counter++));
     public static final ModelRotationComponent ROTATION_NONE = register(new ModelRotationComponent(counter++, true));
     
-    public static final ModelTextureComponent TEXTURE_1 = register(new ModelTextureComponent(counter++, 1));
-    public static final ModelTextureComponent TEXTURE_2 = register(new ModelTextureComponent(counter++, 2));
-    public static final ModelTextureComponent TEXTURE_4 = register(new ModelTextureComponent(counter++, 4));
+    public static final ModelTextureVersionComponent TEXTURE_1 = register(new ModelTextureVersionComponent(counter++, 1));
+    public static final ModelTextureVersionComponent TEXTURE_2 = register(new ModelTextureVersionComponent(counter++, 2));
+    public static final ModelTextureVersionComponent TEXTURE_4 = register(new ModelTextureVersionComponent(counter++, 4));
     
     public static final ModelBigTexComponent BIG_TEX_META_VARIED = register(new ModelBigTexComponent(counter++, true));
+    public static final ModelBigTexComponent BIG_TEX_IGNORE_META = register(new ModelBigTexComponent(counter++, false));
 
-    public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
-    
-    
-    public static final ModelSimpleJoinComponent MASONRY_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.MASONRY_MATCH));
-
-    public static final ModelSpeciesComponent SPECIES_4 = register(new ModelSpeciesComponent(counter++, 4));
-
-    public static final ModelColorMapComponent COLORS_WHITE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
-            NoColorMapProvider.INSTANCE));
-
-    public static final ModelSpeciesComponent SPECIES_16 = register(new ModelSpeciesComponent(counter++, 16));
-
-    public static final ModelFlowJoinComponent FLOW_JOIN = register(new ModelFlowJoinComponent(counter++, WorldRefreshType.CACHED));
     public static final ModelFlowTexComponent FLOW_TEX = register(new ModelFlowTexComponent(counter++));
     
-    //TODO: remove
+    public static final ModelSpeciesComponent SPECIES_4 = register(new ModelSpeciesComponent(counter++, 4));
+    public static final ModelSpeciesComponent SPECIES_16 = register(new ModelSpeciesComponent(counter++, 16));
+    
+    public static final ModelCornerJoinComponent CORNER_JOIN = register(new ModelCornerJoinComponent(counter++, BlockTests.BIG_BLOCK_MATCH));
+    public static final ModelSimpleJoinComponent MASONRY_JOIN = register(new ModelSimpleJoinComponent(counter++, BlockTests.MASONRY_MATCH));
+    public static final ModelFlowJoinComponent FLOW_JOIN = register(new ModelFlowJoinComponent(counter++, WorldRefreshType.CACHED));
+
+
+    public static final ModelColorMapComponent COLORS_BLOCK = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER, BlockColorMapProvider.INSTANCE));
+    public static final ModelColorMapComponent COLORS_WHITE = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
+            NoColorMapProvider.INSTANCE));
     public static final ModelColorMapComponent COLORS_BASALT = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK, 0))));
     
-    public static final ModelBigTexComponent BIG_TEX_IGNORE_META = register(new ModelBigTexComponent(counter++, false));
+    public static final ModelAppearanceComponent APPERANCE_BLOCK_SOLID = new ModelAppearanceComponent(counter++, WorldRefreshType.NEVER, ModelAppearanceLists.BLOCK_SOLID);
     
     public static int getCount()
     {

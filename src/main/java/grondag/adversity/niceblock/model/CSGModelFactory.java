@@ -11,6 +11,7 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
@@ -23,14 +24,14 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.Vec3d;
 
-public class CSGModelFactory extends ModelFactory<ModelFactory.ModelInputs>
+public class CSGModelFactory extends ModelFactory<ModelAppearance>
 {
-    private static ModelFactory.ModelInputs COLLISION_INPUTS = new ModelFactory.ModelInputs("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private static ModelAppearance COLLISION_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
     private static CSGModelFactory COLLISION_INSTANCE = new CSGModelFactory(COLLISION_INPUTS, ModelStateComponents.COLORS_WHITE,
             ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
     private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
     
-    public CSGModelFactory(ModelInputs modelInputs, ModelStateComponent<?,?>... components)
+    public CSGModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
     {
         super(modelInputs, components);
     }

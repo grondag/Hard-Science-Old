@@ -4,6 +4,7 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -16,29 +17,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
+public class BigTexModelFactory extends ModelFactory<ModelAppearance>
 {
     
-    public static enum BigTexScale
-    {
-        /** 16x16 */
-        LARGE(1),
-        /** 8x8 */
-        MEDIUM(2),
-        /** 4x4 */
-        SMALL(4),
-        /** 2x2 */
-        TINY(8);
-        
-        protected final int sliceIncrement;
-        
-        private BigTexScale(int sliceIncrement)
-        {
-            this.sliceIncrement = sliceIncrement;
-        }
-      
-    }
-    private final BigTexScale scale;
+    private final TextureScale scale;
 	
 	/** Tells us which face to select for each block within a 16x16x16 
 	 * space for up to 16 different meta values.
@@ -47,7 +29,7 @@ public class BigTexModelFactory extends ModelFactory<ModelFactory.ModelInputs>
 	 */
 	protected final static FaceSelector[] FACE_SELECTORS = new FaceSelector[16 * 4096];
 
-	public BigTexModelFactory(ModelInputs modelInputs, BigTexScale scale, ModelStateComponent<?,?>... components)
+	public BigTexModelFactory(ModelAppearance modelInputs, TextureScale scale, ModelStateComponent<?,?>... components)
 	{
 		super(modelInputs, components);
 		this.scale = scale;
