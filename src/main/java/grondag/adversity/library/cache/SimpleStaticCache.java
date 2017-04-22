@@ -2,6 +2,12 @@ package grondag.adversity.library.cache;
 
 import grondag.adversity.library.Useful;
 
+/**
+ * Read-only version of an existing cache.
+ * Performs no loads and returns null for keys not found.
+ * Used by managed cache.
+ * @author grondag
+ */
 public class SimpleStaticCache<V> implements ILoadingCache<V>
 {
     private final CacheState<V> state;
