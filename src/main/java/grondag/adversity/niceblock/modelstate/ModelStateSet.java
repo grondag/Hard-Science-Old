@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.library.cache.ILoadingCache;
-import grondag.adversity.library.cache.ManagedLoadingCache;
-import grondag.adversity.library.cache.SimpleCacheLoader;
+import grondag.adversity.library.cache.longKey.ILongLoadingCache;
+import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
+import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
@@ -67,9 +67,9 @@ public class ModelStateSet
         return result;
     }
     
-     private final ILoadingCache<ModelStateSetValue> valueCache = new ManagedLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024, 0xFFFF);
+     private final ILongLoadingCache<ModelStateSetValue> valueCache = new LongManagedLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024, 0xFFFF);
     
-    private class StateCacheLoader implements SimpleCacheLoader<ModelStateSetValue>
+    private class StateCacheLoader implements LongSimpleCacheLoader<ModelStateSetValue>
     {
         @Override
         public ModelStateSetValue load(long key)

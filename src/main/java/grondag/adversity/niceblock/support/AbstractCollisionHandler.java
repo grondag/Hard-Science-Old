@@ -2,8 +2,8 @@ package grondag.adversity.niceblock.support;
 
 import java.util.List;
 
-import grondag.adversity.library.cache.ManagedLoadingCache;
-import grondag.adversity.library.cache.SimpleCacheLoader;
+import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
+import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import net.minecraft.block.state.IBlockState;
@@ -17,7 +17,7 @@ import net.minecraft.world.IBlockAccess;
  */
 public abstract class AbstractCollisionHandler 
 {
-    protected final ManagedLoadingCache<List<AxisAlignedBB>> modelBounds = new ManagedLoadingCache<List<AxisAlignedBB>>(new ComplexBoundsLoader(), 0xF, 0xFFF);
+    protected final LongManagedLoadingCache<List<AxisAlignedBB>> modelBounds = new LongManagedLoadingCache<List<AxisAlignedBB>>(new ComplexBoundsLoader(), 0xF, 0xFFF);
     
 //    protected final ManagedLoadingCache<AxisAlignedBB> collisionBounds = new ManagedLoadingCache<AxisAlignedBB>(new CollisionBoundsLoader(), 0xF, 0xFFF);
 
@@ -37,7 +37,7 @@ public abstract class AbstractCollisionHandler
     public abstract int getKeyBitLength();
 
     
-    protected class ComplexBoundsLoader implements SimpleCacheLoader<List<AxisAlignedBB>>
+    protected class ComplexBoundsLoader implements LongSimpleCacheLoader<List<AxisAlignedBB>>
     {
         @Override
         public List<AxisAlignedBB> load(long key)

@@ -1,19 +1,21 @@
-package grondag.adversity.library.cache;
+package grondag.adversity.library.cache.longKey;
+
 
 import grondag.adversity.library.Useful;
 
 //import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimpleLoadingCache<V> implements ILoadingCache<V>
+public class LongDualLoadingCache<V> implements ILongLoadingCache<V>
 {
 
     private volatile int capacity;
     private volatile int maxFill;
     private volatile int size;
+    private final int maxCapacity;
     
     public int getSize() { return size; }
     
-    private volatile CacheState<V> state;
+    private volatile LongCacheState<V> state;
     
 //    public AtomicInteger calls = new AtomicInteger(0);
 //    public AtomicInteger hits = new AtomicInteger(0);
@@ -21,21 +23,22 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
     
     private Object writeLock = new Object();
     
-    private volatile SimpleCacheLoader<V> loader;
+    private volatile LongSimpleCacheLoader<V> loader;
     
     private final static float LOAD_FACTOR = 0.75F;
 
-    public SimpleLoadingCache(SimpleCacheLoader<V> loader, int startingCapacity)
+    public LongDualLoadingCache(LongSimpleCacheLoader<V> loader, int startingCapacity, int maxCapacity)
     {
         this.loader = loader;
+        this.maxCapacity = maxCapacity;
         capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR)) + 1);
         this.clear();
     }
 
     /** releases loader and afterwards returns null for any keys not found */
-    public SimpleStaticCache<V> getStaticCache()
+    public LongSimpleStaticCache<V> getStaticCache()
     {
-        return new SimpleStaticCache<V>(this.state);
+        return new LongSimpleStaticCache<V>(this.state);
     }
 
     @Override
@@ -44,9 +47,9 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
     {
         synchronized(writeLock)
         {
-            CacheState<V> newState = new CacheState<V>();
-            newState.keys = new long[capacity + 1];
-            newState.values = (V[]) new Object[capacity + 1];
+            LongCacheState<V> newState = new LongCacheState<V>();
+            newState.keys = new long[capacity * 2 + 2];
+            newState.values = (V[]) new Object[capacity * 2 + 2];
             newState.positionMask = capacity - 1;
             newState.zeroLocation = capacity;
             state = newState;
@@ -60,7 +63,7 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
     {
 //        calls.incrementAndGet();
         
-        CacheState<V> localState = state;
+        LongCacheState<V> localState = state;
         
         // Zero value normally indicates an unused spot in key array
         // so requires special handling to prevent search weirdness.
@@ -85,13 +88,13 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
         }
         
         long keyHash = Useful.longHash(key);
-        int position = (int) (keyHash & localState.positionMask);
-        long currentKey = localState.keys[position];       
+        int positionDual = (int) (keyHash & localState.positionMask) << 1;
+        long currentKey = localState.keys[positionDual];       
      
         if(currentKey == key) 
         {
 //            hits.incrementAndGet();
-            return localState.values[position];
+            return localState.values[positionDual];
         }
         
         if(currentKey == 0) return load(key, keyHash);
@@ -99,22 +102,22 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
         while (true) 
         {
 //            searchCount.incrementAndGet();
-            position = (position + 1) & localState.positionMask;
-            currentKey = localState.keys[position];
+            positionDual = (positionDual + 1) & localState.positionMask;
+            currentKey = localState.keys[positionDual];
             
             if(currentKey == 0) return load(key, keyHash);
             
             if(currentKey == key)
             {
 //                hits.incrementAndGet();
-                return localState.values[position];
+                return localState.values[positionDual];
             }
         }
     }
     
     private V load(long key, long keyHash)
     {
-        CacheState<V> localState = state;
+        LongCacheState<V> localState = state;
         
         // no need to handle zero key here - is handled as special case in get();
         int position = (int) (keyHash & localState.positionMask);
@@ -177,26 +180,28 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
         {
             int oldCapacity = capacity;
             capacity = capacity << 1;
+            int dualCapacity = capacity << 1;
             maxFill = (int) (capacity * LOAD_FACTOR);
             int positionMask = capacity - 1;
-            CacheState<V> oldState = state;
-            CacheState<V> newState = new CacheState<V>();
+            LongCacheState<V> oldState = state;
+            LongCacheState<V> newState = new LongCacheState<V>();
             newState.positionMask = positionMask;
-            newState.zeroLocation = capacity;
+            newState.zeroLocation = dualCapacity;
             final long[] oldKeys = oldState.keys;
             final V[] oldValues = oldState.values;
-            final long[] newKeys = new long[capacity + 1];
-            final V[] newValues = (V[]) new Object[capacity + 1];
+            final long[] newKeys = new long[dualCapacity + 2];
+            final V[] newValues = (V[]) new Object[dualCapacity + 2];
             int position;
+            int dualPositionMask = dualCapacity - 1;
             
-            for(int i = oldCapacity; i-- != 0;)
+            for(int i = oldCapacity << 1; i != 0; i -= 2)
             {
                 if(oldKeys[i] != 0)
                 {
-                    position = (int) (Useful.longHash(oldKeys[i]) & positionMask);
+                    position = (int) (Useful.longHash(oldKeys[i]) & positionMask) << 1;
                     if(newKeys[position] != 0)
                     {
-                        while (!((newKeys[position = (position + 1) & positionMask]) == (0)));
+                        while (!((newKeys[position = (position + 2) & dualPositionMask]) == (0)));
                     }
                     newKeys[position] = oldKeys[i];
                     newValues[position] = oldValues[i];
@@ -204,7 +209,7 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
             }
     
             // transfer zero key value (keep simple by doing even if null)
-            newValues[capacity] = oldValues[oldCapacity];
+            newValues[capacity << 1] = oldValues[oldCapacity << 1];
             
             newState.keys = newKeys;
             newState.values = newValues;
@@ -215,3 +220,4 @@ public class SimpleLoadingCache<V> implements ILoadingCache<V>
     }
     
 }
+

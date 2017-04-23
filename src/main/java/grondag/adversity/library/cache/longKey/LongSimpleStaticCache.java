@@ -1,4 +1,4 @@
-package grondag.adversity.library.cache;
+package grondag.adversity.library.cache.longKey;
 
 import grondag.adversity.library.Useful;
 
@@ -8,11 +8,11 @@ import grondag.adversity.library.Useful;
  * Used by managed cache.
  * @author grondag
  */
-public class SimpleStaticCache<V> implements ILoadingCache<V>
+public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
 {
-    private final CacheState<V> state;
+    private final LongCacheState<V> state;
 
-    public SimpleStaticCache(CacheState<V> stateIn)
+    public LongSimpleStaticCache(LongCacheState<V> stateIn)
     {
         this.state = stateIn;
     }

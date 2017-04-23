@@ -1,6 +1,6 @@
-package grondag.adversity.library.cache;
+package grondag.adversity.library.cache.longKey;
 
-public class CacheState<V>
+public class LongCacheState<V>
 {
     protected long[] keys;
     protected V[] values;
