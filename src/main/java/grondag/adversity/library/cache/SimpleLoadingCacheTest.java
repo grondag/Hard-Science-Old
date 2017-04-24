@@ -16,7 +16,6 @@ import grondag.adversity.library.cache.longKey.ILongLoadingCache;
 import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
-import grondag.adversity.library.cache.longKey.AtomicLongSimpleLoadingCache;
 import grondag.adversity.library.cache.objectKey.IObjectLoadingCache;
 import grondag.adversity.library.cache.objectKey.ObjectManagedLoadingCache;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
@@ -27,8 +26,11 @@ public class SimpleLoadingCacheTest
 {
     /** added to key to produce result */
     private static final long MAGIC_NUMBER = 42L;
-
-    private class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long> 
+    private static final int TEST_PASSES = 10000000;
+    private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
+    
+    
+    private static class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long> 
     {
 
         @Override
@@ -44,9 +46,22 @@ public class SimpleLoadingCacheTest
         }
     }
     
+    private static interface CacheAdapter
+    {
+        public abstract long get(long key);
+        
+        public abstract CacheAdapter newInstance(int startingSize, int maxSize);
+    }
+    
     private static abstract class Runner implements Callable<Void>
     {
-        protected abstract long get(long key);
+        
+        private final CacheAdapter subject;
+        
+        private Runner(CacheAdapter subject)
+        {
+            this.subject = subject;
+        }
         
         @Override
         public Void call()
@@ -55,11 +70,11 @@ public class SimpleLoadingCacheTest
             {
                 Random random = ThreadLocalRandom.current();
                 
-                for(int i = 0; i < 10000000; i++)
+                for(int i = 0; i < TEST_PASSES; i++)
                 {
-                    long input = random.nextInt(0x2FFFF);
-                    Long result = get(input);
-                    assert(result.longValue() == input + MAGIC_NUMBER);
+                    long key = getKey(i, random.nextLong());
+                    Long result = subject.get(key);
+                    assert(result.longValue() == key + MAGIC_NUMBER);
                 }
             }
             catch(Exception e)
@@ -69,93 +84,116 @@ public class SimpleLoadingCacheTest
             return null;
         }
         
-        public abstract Runner copy();
+        public abstract long getKey(int step, long randomLong);
     }
-
-    private static class GoogleRunner extends Runner
-    {    
-        private LoadingCache<Long, Long> cache;
+    
+    private static class UniformRunner extends Runner
+    {
+        private final long keyMask;
         
-        private GoogleRunner(LoadingCache<Long, Long> cache)
+        private UniformRunner(CacheAdapter subject, long keyMask)
         {
-            this.cache = cache;
+            super(subject);
+            this.keyMask = keyMask;
         }
 
         @Override
-        protected long get(long key)
+        public long getKey(int step, long randomLong)
+        {
+            return randomLong & keyMask;
+        }
+    }
+
+
+    private static class GoogleAdapter implements CacheAdapter
+    {    
+        private LoadingCache<Long, Long> cache;
+     
+        @Override
+        public long get(long key)
         {
             return cache.getUnchecked(key);
         }
-        
+
         @Override
-        public GoogleRunner copy()
+        public CacheAdapter newInstance(int startingSize, int maxSize)
         {
-            return new GoogleRunner(cache);
+            GoogleAdapter result = new GoogleAdapter();
+            
+            if(maxSize == 0)
+            {
+                result.cache = CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(startingSize).build(new Loader());
+            }
+            else
+            {
+                result.cache = CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(startingSize).maximumSize(maxSize).build(new Loader());
+            }
+            return result;
         }
     }
 
-    private static class LongRunner extends Runner
+    private static class LongAdapter implements CacheAdapter
     {    
         private ILongLoadingCache<Long> cache;
         
-        private LongRunner(ILongLoadingCache<Long> cache)
-        {
-            this.cache = cache;
-        }
-
         @Override
-        protected long get(long key)
+        public long get(long key)
         {
             return cache.get(key);
         }
-        
-        @Override
-        public LongRunner copy()
-        {
-            return new LongRunner(cache);
-        }
-    }
-    
-    private static class ObjectRunner extends Runner
-    {    
-        private IObjectLoadingCache<Long, Long> cache;
-        
-        private ObjectRunner(IObjectLoadingCache<Long, Long> cache)
-        {
-            this.cache = cache;
-        }
 
         @Override
-        protected long get(long key)
+        public CacheAdapter newInstance(int startingSize, int maxSize)
         {
-            return cache.get(key);
-        }
-        
-        @Override
-        public ObjectRunner copy()
-        {
-            return new ObjectRunner(cache);
+            LongAdapter result = new LongAdapter();
+            if(maxSize == 0)
+            {
+                result.cache = new LongSimpleLoadingCache<Long>(new Loader(), startingSize);
+            }
+            else
+            {
+                result.cache = new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), startingSize), maxSize);
+            }
+            return result;
         }
     }
     
-    private void doTestInner(ExecutorService executor, Runner runner)
+//    private static class ObjectRunner extends Runner
+//    {    
+//        private IObjectLoadingCache<Long, Long> cache;
+//        
+//        private ObjectRunner(IObjectLoadingCache<Long, Long> cache)
+//        {
+//
+//            result.cache = LongAdapter;
+//        }
+//
+//        @Override
+//        protected long get(long key)
+//        {
+//            return cache.get(key);
+//        }
+//        
+//        @Override
+//        public ObjectRunner copy()
+//        {
+//            return new ObjectRunner(cache);
+//        }
+//    }
+    
+    private void doTestInner(ExecutorService executor, CacheAdapter subject)
     {
         ArrayList<Runner> runs = new ArrayList<Runner>();
-        runs.add(runner.copy());
-        runs.add(runner.copy());
-        runs.add(runner.copy());
-        runs.add(runner.copy());
-        runs.add(runner.copy());
-        runs.add(runner.copy());
-        runs.add(runner.copy());
-        runs.add(runner);
+        for(int i = 0; i < THREAD_COUNT; i++ )
+        {
+            runs.add(new UniformRunner(subject.newInstance(4096, 0), 0x2FFF));
+        }
         long startTime = System.nanoTime();
         try
         {
-//            runner.call();
             executor.invokeAll(runs);
-            System.out.println("Mean lookuptime - elapsed = " + ((System.nanoTime() - startTime) / 80000000));
-            System.out.println("Mean lookuptime - in thread = " + ((System.nanoTime() - startTime) / 10000000));
+            System.out.println("Mean lookuptime - elapsed = " + ((System.nanoTime() - startTime) / (TEST_PASSES * THREAD_COUNT)));
+            System.out.println("Mean lookuptime - in thread = " + ((System.nanoTime() - startTime) / TEST_PASSES));
         }
         catch (Exception e)
         {
@@ -164,26 +202,26 @@ public class SimpleLoadingCacheTest
     }
         
     
-    public void doTestOuter(ExecutorService executor, int conncurrencyLevel)
+    public void doTestOuter(ExecutorService executor)
     {
       
         System.out.println("Running simple long cache test");
-        doTestInner(executor, new LongRunner(new LongSimpleLoadingCache<Long>(new Loader(), 4096)));
+        doTestInner(executor, new LongAdapter());
         
-        System.out.println("Running simple object cache test");
-        doTestInner(executor, new ObjectRunner(new ObjectSimpleLoadingCache<Long, Long>(new Loader(), 4096)));
+//        System.out.println("Running simple object cache test");
+//        doTestInner(executor, new ObjectRunner(new ObjectSimpleLoadingCache<Long, Long>(new Loader(), 4096)));
 
-        System.out.println("Running google cache test with large max");
-        doTestInner(executor, new GoogleRunner(CacheBuilder.newBuilder().concurrencyLevel(conncurrencyLevel).initialCapacity(4096).maximumSize(0x4FFFF).build(new Loader())));
+        System.out.println("Running google cache test");
+        doTestInner(executor, new GoogleAdapter());
         
-        System.out.println("Running managed long cache test");
-        doTestInner(executor, new LongRunner(new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), 4096), 0xAFFF)));
-        
-        System.out.println("Running managed object cache test");
-        doTestInner(executor, new ObjectRunner(new ObjectManagedLoadingCache<Long, Long>(new Loader(), 4096, 0xAFFF)));
-
-        System.out.println("Running google cache test with reasonable max");
-        doTestInner(executor, new GoogleRunner(CacheBuilder.newBuilder().concurrencyLevel(conncurrencyLevel).initialCapacity(4096).maximumSize(0xAFFF).build(new Loader())));
+//        System.out.println("Running managed long cache test");
+//        doTestInner(executor, new LongRunner(new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), 4096), 0xAFFF)));
+//        
+//        System.out.println("Running managed object cache test");
+//        doTestInner(executor, new ObjectRunner(new ObjectManagedLoadingCache<Long, Long>(new Loader(), 4096, 0xAFFF)));
+//
+//        System.out.println("Running google cache test with reasonable max");
+//        doTestInner(executor, new GoogleAdapter(CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(4096).maximumSize(0xAFFF).build(new Loader())));
         
         
     }
@@ -191,16 +229,15 @@ public class SimpleLoadingCacheTest
     @Test
     public void test()
     {
-        int conncurrencyLevel = Runtime.getRuntime().availableProcessors();
         
         ExecutorService executor;
-        executor = Executors.newFixedThreadPool(conncurrencyLevel);
+        executor = Executors.newFixedThreadPool(THREAD_COUNT);
         
         System.out.println("WARM UP RUN");
-        doTestOuter(executor, conncurrencyLevel);
+        doTestOuter(executor);
         
         System.out.println("TEST RUN");
-        doTestOuter(executor, conncurrencyLevel);
+        doTestOuter(executor);
     }
 
 }
