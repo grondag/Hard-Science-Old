@@ -8,14 +8,17 @@ import grondag.adversity.library.Useful;
  * Used by managed cache.
  * @author grondag
  */
-public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
+public class AtomicLongSimpleStaticCache<V> implements ILongLoadingCache<V>
 {
-    private final LongCacheState<V> state;
+    private final AtomicLongCacheState<V> state;
 
-    public LongSimpleStaticCache(LongCacheState<V> stateIn)
+    public AtomicLongSimpleStaticCache(AtomicLongCacheState<V> stateIn)
     {
         this.state = stateIn;
     }
+    
+    @Override
+    public int size() { return state.size.get(); }
     
     @Override
     public void clear()
@@ -31,16 +34,16 @@ public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
         // so requires special handling to prevent search weirdness.
         if(key == 0)
         {
-            return state.values[state.zeroLocation];
+            return state.values.get(state.zeroLocation);
         }
         
         long keyHash = Useful.longHash(key);
         int position = (int) (keyHash & state.positionMask);
-        long currentKey = state.keys[position];       
+        long currentKey = state.keys.get(position);       
      
         if(currentKey == key) 
         {
-            return state.values[position];
+            return state.values.get(position);
         }
         
         if(currentKey == 0) return null;
@@ -48,22 +51,14 @@ public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
         while (true) 
         {
             position = (position + 1) & state.positionMask;
-            currentKey = state.keys[position];
+            currentKey = state.keys.get(position);
             
             if(currentKey == 0) return null;
             
             if(currentKey == key)
             {
-                return state.values[position];
+                return state.values.get(position);
             }
         }
     }
-
-    @Override
-    public int size()
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
 }

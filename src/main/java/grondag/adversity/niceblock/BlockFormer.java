@@ -5,10 +5,10 @@ import net.minecraft.item.Item;
 public class BlockFormer extends Item
 {
     //TODO: WIP
-    private String label;
-    private ShapeMode mode;
-    private Object undoLog;
-    private Object material;
+//    private String label;
+//    private ShapeMode mode;
+//    private Object undoLog;
+//    private Object material;
     /**
     
     universal
