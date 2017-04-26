@@ -9,6 +9,7 @@ import grondag.adversity.Adversity;
 import grondag.adversity.library.cache.longKey.ILongLoadingCache;
 import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
+import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
@@ -67,7 +68,8 @@ public class ModelStateSet
         return result;
     }
     
-     private final ILongLoadingCache<ModelStateSetValue> valueCache = new LongManagedLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024, 0xFFFF);
+     private final ILongLoadingCache<ModelStateSetValue> valueCache 
+         = new LongManagedLoadingCache<ModelStateSetValue>(new LongSimpleLoadingCache<ModelStateSetValue>(new StateCacheLoader(), 1024), 0xFFFF);
     
     private class StateCacheLoader implements LongSimpleCacheLoader<ModelStateSetValue>
     {

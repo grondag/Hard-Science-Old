@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
+import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import net.minecraft.block.state.IBlockState;
@@ -17,7 +18,7 @@ import net.minecraft.world.IBlockAccess;
  */
 public abstract class AbstractCollisionHandler 
 {
-    protected final LongManagedLoadingCache<List<AxisAlignedBB>> modelBounds = new LongManagedLoadingCache<List<AxisAlignedBB>>(new ComplexBoundsLoader(), 0xF, 0xFFF);
+    protected final LongManagedLoadingCache<List<AxisAlignedBB>> modelBounds = new LongManagedLoadingCache<List<AxisAlignedBB>>(new LongSimpleLoadingCache<List<AxisAlignedBB>>(new ComplexBoundsLoader(), 0xF), 0xFFF);
     
 //    protected final ManagedLoadingCache<AxisAlignedBB> collisionBounds = new ManagedLoadingCache<AxisAlignedBB>(new CollisionBoundsLoader(), 0xF, 0xFFF);
 

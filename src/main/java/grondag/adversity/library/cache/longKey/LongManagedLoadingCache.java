@@ -70,7 +70,7 @@ public class LongManagedLoadingCache<V> implements ILongLoadingCache<V>
                 V result = backup.get(key);
                 if(result == null)
                 {
-                    if(backupMisses.incrementAndGet() > missAllowance) 
+                    if(backupMisses.incrementAndGet() > missAllowance && this.backupCache != null) 
                     {
                         this.backupCache = null;
                     }

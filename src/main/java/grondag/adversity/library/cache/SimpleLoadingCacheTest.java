@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 
@@ -26,22 +27,39 @@ public class SimpleLoadingCacheTest
 {
     /** added to key to produce result */
     private static final long MAGIC_NUMBER = 42L;
-    private static final int TEST_PASSES = 10000000;
+    private static final int STEP_COUNT = 10000000;
     private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
-    
+    private static final int TWIDDLE_COUNT = 0;
+    private static final AtomicLong twiddler = new AtomicLong(0);
     
     private static class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long> 
     {
 
+        @SuppressWarnings("unused")
         @Override
         public Long load(long key)
         {
+            if(TWIDDLE_COUNT > 0)
+            {
+              for(int i = 0; i < TWIDDLE_COUNT; i++)
+              {
+                  twiddler.incrementAndGet();
+              }
+            }
             return new Long(key + MAGIC_NUMBER);
         }
 
+        @SuppressWarnings("unused")
         @Override
         public Long load(Long key)
         {
+            if(TWIDDLE_COUNT > 0)
+            {
+              for(int i = 0; i < TWIDDLE_COUNT; i++)
+              {
+                  twiddler.incrementAndGet();
+              }
+            }
             return load(key.longValue());
         }
     }
@@ -53,7 +71,7 @@ public class SimpleLoadingCacheTest
         public abstract CacheAdapter newInstance(int startingSize, int maxSize);
     }
     
-    private static abstract class Runner implements Callable<Void>
+    private abstract class Runner implements Callable<Void>
     {
         
         private final CacheAdapter subject;
@@ -70,7 +88,7 @@ public class SimpleLoadingCacheTest
             {
                 Random random = ThreadLocalRandom.current();
                 
-                for(int i = 0; i < TEST_PASSES; i++)
+                for(int i = 0; i < STEP_COUNT; i++)
                 {
                     long key = getKey(i, random.nextLong());
                     Long result = subject.get(key);
@@ -87,7 +105,7 @@ public class SimpleLoadingCacheTest
         public abstract long getKey(int step, long randomLong);
     }
     
-    private static class UniformRunner extends Runner
+    private class UniformRunner extends Runner
     {
         private final long keyMask;
         
@@ -104,15 +122,47 @@ public class SimpleLoadingCacheTest
         }
     }
 
+    /** shifts from one set of uniform demand to another and then back again */
+    private class ShiftRunner extends Runner
+    {
+        private final static int FIRST_MILESTONE = STEP_COUNT / 3;
+        private final static int SECOND_MILESTONE = FIRST_MILESTONE * 2;
 
-    private static class GoogleAdapter implements CacheAdapter
+        private final long keyMask;
+        
+        private ShiftRunner(CacheAdapter subject, long keyMask)
+        {
+            super(subject);
+            this.keyMask = keyMask;
+        }
+
+        @Override
+        public long getKey(int step, long randomLong)
+        {
+            //return odd values in 1st and 3rd phase, even in middle phase
+            if(step < FIRST_MILESTONE || step > SECOND_MILESTONE)
+            {
+                if((randomLong & 1L) == 0) randomLong++;
+            }
+            else
+            {
+                if((randomLong & 1L) == 1) randomLong++;
+            }
+            return randomLong & keyMask;
+        }
+    }
+
+    private class GoogleAdapter implements CacheAdapter
     {    
         private LoadingCache<Long, Long> cache;
      
         @Override
         public long get(long key)
         {
-            return cache.getUnchecked(key);
+            long startTime = System.nanoTime();
+            long result = cache.getUnchecked(key);
+            nanoCount.addAndGet(System.nanoTime() - startTime);
+            return result;
         }
 
         @Override
@@ -132,14 +182,17 @@ public class SimpleLoadingCacheTest
         }
     }
 
-    private static class LongAdapter implements CacheAdapter
+    private class LongAdapter implements CacheAdapter
     {    
         private ILongLoadingCache<Long> cache;
         
         @Override
         public long get(long key)
         {
-            return cache.get(key);
+            long startTime = System.nanoTime();
+            long result = cache.get(key);
+            nanoCount.addAndGet(System.nanoTime() - startTime);
+            return result;
         }
 
         @Override
@@ -181,24 +234,122 @@ public class SimpleLoadingCacheTest
 //        }
 //    }
     
+    AtomicLong nanoCount = new AtomicLong(0);
+    
     private void doTestInner(ExecutorService executor, CacheAdapter subject)
     {
+        System.out.println("Theoretical best case: Unconstrained memory test with large starting size - uniform random demand");
         ArrayList<Runner> runs = new ArrayList<Runner>();
+        nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(4096, 0), 0x2FFF));
+            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0), 0xFFFFF));
         }
-        long startTime = System.nanoTime();
         try
         {
             executor.invokeAll(runs);
-            System.out.println("Mean lookuptime - elapsed = " + ((System.nanoTime() - startTime) / (TEST_PASSES * THREAD_COUNT)));
-            System.out.println("Mean lookuptime - in thread = " + ((System.nanoTime() - startTime) / TEST_PASSES));
+            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+        
+        System.out.println("Practical best case: Constrained with starting size == key space == max capacity - uniform random demand");
+        runs.clear();
+        nanoCount.set(0);
+        for(int i = 0; i < THREAD_COUNT; i++ )
+        {
+            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0), 0xFFFFF));
+        }
+        try
+        {
+            executor.invokeAll(runs);
+            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println("Suboptimal case: Moderately constrained memory test - uniform random demand");
+        runs.clear();
+        nanoCount.set(0);
+        for(int i = 0; i < THREAD_COUNT; i++ )
+        {
+            runs.add(new UniformRunner(subject.newInstance(4096, 0xCCCCC), 0xFFFFF));
+        }
+        try
+        {
+            executor.invokeAll(runs);
+            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        System.out.println("Suboptimal case: Preallocated moderately constrained memory test - uniform random demand");
+        runs.clear();
+        nanoCount.set(0);
+        for(int i = 0; i < THREAD_COUNT; i++ )
+        {
+            runs.add(new UniformRunner(subject.newInstance(0xCCCCC, 0xCCCCC), 0xFFFFF));
+        }
+        try
+        {
+            executor.invokeAll(runs);
+            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        System.out.println("Worst case: Severely constrained memory test - uniform random demand");
+        runs.clear();
+        nanoCount.set(0);
+        for(int i = 0; i < THREAD_COUNT; i++ )
+        {
+            runs.add(new UniformRunner(subject.newInstance(4096, 0x2FFFF), 0xFFFFF));
+        }
+        try
+        {
+            executor.invokeAll(runs);
+            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println("Nominal case: Preallocated moderately constrained memory test - shifting random demand");
+        runs.clear();
+        nanoCount.set(0);
+        for(int i = 0; i < THREAD_COUNT; i++ )
+        {
+            runs.add(new ShiftRunner(subject.newInstance(0x7FFFF, 0x7FFFF), 0xFFFFF));
+        }
+        try
+        {
+            executor.invokeAll(runs);
+            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        System.out.println("Nominal case / single thread: Preallocated moderately constrained memory test - shifting random demand");
+        runs.clear();
+        nanoCount.set(0);
+        for(int i = 0; i < THREAD_COUNT; i++)
+        {
+            new ShiftRunner(subject.newInstance(0x7FFFF, 0x7FFFF), 0xFFFFF).call();
+        }
+        System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+
+        System.out.println("");
     }
         
     
@@ -211,8 +362,8 @@ public class SimpleLoadingCacheTest
 //        System.out.println("Running simple object cache test");
 //        doTestInner(executor, new ObjectRunner(new ObjectSimpleLoadingCache<Long, Long>(new Loader(), 4096)));
 
-        System.out.println("Running google cache test");
-        doTestInner(executor, new GoogleAdapter());
+//        System.out.println("Running google cache test");
+//        doTestInner(executor, new GoogleAdapter());
         
 //        System.out.println("Running managed long cache test");
 //        doTestInner(executor, new LongRunner(new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), 4096), 0xAFFF)));

@@ -12,7 +12,8 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     
     private volatile LongCacheState<V> state;
     
-    private Object writeLock = new Object();
+    private Object[] writeLock = new Object[64];
+    private Object zeroLock = new Object();
     
     private volatile LongSimpleCacheLoader<V> loader;
     
@@ -20,9 +21,14 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
 
     public LongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
+        for(int i = 0; i < writeLock.length; i++)
+        {
+            writeLock[i] = new Object();
+        }
+        if(startingCapacity < 64) startingCapacity = 64;
         this.loader = loader;
         this.state = new LongCacheState<V>();
-        this.state.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR)) + 1);
+        this.state.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR)));
         this.clear();
     }
 
@@ -39,15 +45,16 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     @SuppressWarnings("unchecked")
     public void clear()
     {
+        //TODO
         synchronized(writeLock)
         {
             int capacity = this.state.capacity;
             LongCacheState<V> newState = new LongCacheState<V>();
+            newState.zeroValue = null;
             newState.capacity = capacity;
-            newState.keys = new long[capacity + 1];
-            newState.values = (V[]) new Object[capacity + 1];
+            newState.keys = new long[capacity];
+            newState.values = (V[]) new Object[capacity];
             newState.positionMask = capacity - 1;
-            newState.zeroLocation = capacity;
             newState.size.set(0);
             newState.maxFill = (int) (capacity * LOAD_FACTOR);
             state = newState;
@@ -64,19 +71,19 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
         // so requires special handling to prevent search weirdness.
         if(key == 0)
         {
-            if(localState.values[localState.zeroLocation] == null)
+            if(localState.zeroValue == null)
             {
                 V value = loader.load(key);
-                synchronized(writeLock)
+                synchronized(zeroLock)
                 {
                     localState = state;
-                    if(localState.values[localState.zeroLocation] == null)
+                    if(localState.zeroValue == null)
                     {
-                        localState.values[localState.zeroLocation] = value;
+                        localState.zeroValue = value;
                     }
                 }
             }
-            return localState.values[localState.zeroLocation];
+            return localState.zeroValue;
         }
         
         long keyHash = Useful.longHash(key);
@@ -116,7 +123,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
         if(currentKey == 0)
         {
             V result = loader.load(key);
-            synchronized(writeLock)
+            synchronized(writeLock[position & 63])
             {
                 //Abort save if another thread took our spot or expanded array.
                 //Will simply reload if necessary next time.
@@ -139,7 +146,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             if(currentKey == 0)
             {
                 V result = loader.load(key);
-                synchronized(writeLock)
+                synchronized(writeLock[position & 63])
                 {
                     //Abort save if another thread took our spot or expanded array.
                     //Will simply reload if necessary next time.
@@ -163,6 +170,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     @SuppressWarnings("unchecked")
     private void expand() 
     {
+        //TODO
         synchronized(writeLock)
         {
             int oldCapacity = state.capacity;
@@ -173,11 +181,11 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             newState.maxFill = (int) (newCapacity * LOAD_FACTOR);
             int positionMask = newCapacity - 1;
             newState.positionMask = positionMask;
-            newState.zeroLocation = newCapacity;
+            newState.zeroValue = oldState.zeroValue;
             final long[] oldKeys = oldState.keys;
             final V[] oldValues = oldState.values;
-            final long[] newKeys = new long[newCapacity + 1];
-            final V[] newValues = (V[]) new Object[newCapacity + 1];
+            final long[] newKeys = new long[newCapacity];
+            final V[] newValues = (V[]) new Object[newCapacity];
             int position;
             
             int newSize = 0;
@@ -197,14 +205,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
                 }
             }
     
-            // transfer zero key value
-            if(oldValues[oldCapacity] != null)
-            {
-                newValues[newCapacity] = oldValues[oldCapacity];
-                newSize++;
-            }
-
-            newState.size.set(newSize);
+                     newState.size.set(newSize);
             newState.keys = newKeys;
             newState.values = newValues;
             

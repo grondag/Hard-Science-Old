@@ -18,6 +18,9 @@ public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
     }
     
     @Override
+    public int size() { return state.size.get(); }
+    
+    @Override
     public void clear()
     {
         //NOOP
@@ -31,7 +34,7 @@ public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
         // so requires special handling to prevent search weirdness.
         if(key == 0)
         {
-            return state.values[state.zeroLocation];
+            return state.zeroValue;
         }
         
         long keyHash = Useful.longHash(key);
@@ -58,12 +61,4 @@ public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
             }
         }
     }
-
-    @Override
-    public int size()
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
 }
