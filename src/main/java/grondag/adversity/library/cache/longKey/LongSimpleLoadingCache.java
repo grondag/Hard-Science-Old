@@ -13,11 +13,10 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     private volatile LongCacheState<V> state;
     
     private Object[] writeLock = new Object[64];
-    private Object zeroLock = new Object();
     
     private volatile LongSimpleCacheLoader<V> loader;
     
-    private final static float LOAD_FACTOR = 0.75F;
+    final static float LOAD_FACTOR = 0.75F;
 
     public LongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
@@ -27,8 +26,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
         }
         if(startingCapacity < 64) startingCapacity = 64;
         this.loader = loader;
-        this.state = new LongCacheState<V>();
-        this.state.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR)));
+        this.state = new LongCacheState<V>(1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR))));
         this.clear();
     }
 
@@ -42,172 +40,162 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     public LongSimpleCacheLoader<V> getLoader() { return this.loader; }
     
     @Override
-    @SuppressWarnings("unchecked")
     public void clear()
     {
-        //TODO
-        synchronized(writeLock)
-        {
-            int capacity = this.state.capacity;
-            LongCacheState<V> newState = new LongCacheState<V>();
-            newState.zeroValue = null;
-            newState.capacity = capacity;
-            newState.keys = new long[capacity];
-            newState.values = (V[]) new Object[capacity];
-            newState.positionMask = capacity - 1;
-            newState.size.set(0);
-            newState.maxFill = (int) (capacity * LOAD_FACTOR);
-            state = newState;
-        }
+        this.state = new LongCacheState<V>(this.state.capacity);
     }
     
     @Override
     public V get(long key)
     {
-        
         LongCacheState<V> localState = state;
         
         // Zero value normally indicates an unused spot in key array
         // so requires special handling to prevent search weirdness.
         if(key == 0)
         {
-            if(localState.zeroValue == null)
+            V value = localState.zeroValue.get();
+            if(value == null)
             {
-                V value = loader.load(key);
-                synchronized(zeroLock)
+                value = loader.load(key);
+                if(localState.zeroValue.compareAndSet(null, value))
                 {
-                    localState = state;
-                    if(localState.zeroValue == null)
-                    {
-                        localState.zeroValue = value;
-                    }
+                    return value;
+                }
+                else
+                {
+                    //another thread got there first
+                    return localState.zeroValue.get();
                 }
             }
-            return localState.zeroValue;
+            return value;
         }
         
         long keyHash = Useful.longHash(key);
         int position = (int) (keyHash & localState.positionMask);
-        long currentKey = localState.keys[position];       
+        long currentKey = localState.keys[position >> localState.segmentShift][position & localState.indexMask];       
      
         if(currentKey == key) 
         {
-            return localState.values[position];
+            return localState.values[position >> localState.segmentShift][position & localState.indexMask];
         }
         
-        if(currentKey == 0) return load(localState, key, keyHash);
+        if(currentKey == 0) return load(localState, key, position);
 
         while (true) 
         {
             position = (position + 1) & localState.positionMask;
-            currentKey = localState.keys[position];
+            currentKey = localState.keys[position >> localState.segmentShift][position & localState.indexMask];
             
-            if(currentKey == 0) return load(localState, key, keyHash);
+            if(currentKey == 0) return load(localState, key, position);
             
             if(currentKey == key)
             {
-                return localState.values[position];
+                return localState.values[position >> localState.segmentShift][position & localState.indexMask];
             }
         }
     }
     
-    private V load(LongCacheState<V> localState, long key, long keyHash)
+    private V load(LongCacheState<V> localState, long key, int position)
     {        
         // no need to handle zero key here - is handled as special case in get();
-        int position = (int) (keyHash & localState.positionMask);
-        long currentKey = localState.keys[position];       
-
-        // small chance another thread added our value before we got our lock
-        if(currentKey == key) return localState.values[position];
-
+        final V result = loader.load(key);
+        int segment = position >> localState.segmentShift;
+        long[] keySegment = localState.keys[segment];
+        V[] valueSegment = localState.values[segment];
+        int index = position & localState.indexMask;
+        long currentKey;       
+        
+        synchronized(keySegment)
+        {
+            currentKey = keySegment[index];
+            if(currentKey == 0)
+            {
+                //write value first in case another thread tries to read it based on key before we can write it
+                valueSegment[index] = result;
+                keySegment[index] = key;
+            }
+        }
         if(currentKey == 0)
         {
-            V result = loader.load(key);
-            synchronized(writeLock[position & 63])
-            {
-                //Abort save if another thread took our spot or expanded array.
-                //Will simply reload if necessary next time.
-                if(state.keys[position] == 0 && state.positionMask == localState.positionMask)
-                {
-                    //write value first in case another thread tries to read it based on key before we can write it
-                    localState.values[position] = result;
-                    localState.keys[position] = key;
-                    if(localState.size.incrementAndGet() == localState.maxFill) expand(); 
-                }
-            }
+            if(localState.size.incrementAndGet() == localState.maxFill) expand(); 
             return result;
         }
-
+        // small chance another thread added our value before we got our lock
+        else if(currentKey == key) return valueSegment[index];
+        
         while (true) 
         {
             position = (position + 1) & localState.positionMask;
-            currentKey = localState.keys[position];
+            if(segment != position >> localState.segmentShift)
+            {
+                segment = position >> localState.segmentShift;
+                keySegment = localState.keys[segment];
+                valueSegment = localState.values[segment];
+            }
+            index = position & localState.indexMask;  
             
+            synchronized(keySegment)
+            {
+                currentKey = keySegment[index];       
+                if(currentKey == 0)
+                {
+                    //write value first in case another thread tries to read it based on key before we can write it
+                    valueSegment[index] = result;
+                    keySegment[index] = key;
+                }
+            }
             if(currentKey == 0)
             {
-                V result = loader.load(key);
-                synchronized(writeLock[position & 63])
-                {
-                    //Abort save if another thread took our spot or expanded array.
-                    //Will simply reload if necessary next time.
-                    if(state.keys[position] == 0 && state.positionMask == localState.positionMask)
-                    {
-                        //write value first in case another thread tries to read it based on key before we can write it
-                        localState.values[position] = result;
-                        localState.keys[position] = key;
-                        if(localState.size.incrementAndGet() == localState.maxFill) expand(); 
-                    }
-                }
+                if(localState.size.incrementAndGet() == localState.maxFill) expand(); 
                 return result;
             }
-            
             // small chance another thread added our value before we got our lock
-            if(currentKey == key) return localState.values[position];
+            else if(currentKey == key) return valueSegment[index];
         }
         
     }
     
-    @SuppressWarnings("unchecked")
     private void expand() 
     {
         //TODO
-        synchronized(writeLock)
+        synchronized(this)
         {
             int oldCapacity = state.capacity;
             int newCapacity = state.capacity << 1;
             LongCacheState<V> oldState = state;
-            LongCacheState<V> newState = new LongCacheState<V>();
-            newState.capacity = newCapacity;
-            newState.maxFill = (int) (newCapacity * LOAD_FACTOR);
-            int positionMask = newCapacity - 1;
-            newState.positionMask = positionMask;
-            newState.zeroValue = oldState.zeroValue;
-            final long[] oldKeys = oldState.keys;
-            final V[] oldValues = oldState.values;
-            final long[] newKeys = new long[newCapacity];
-            final V[] newValues = (V[]) new Object[newCapacity];
-            int position;
+            LongCacheState<V> newState = new LongCacheState<V>(newCapacity);
+            int positionMask = newState.positionMask;
+            newState.zeroValue.set(oldState.zeroValue.get());
+            final long[][] oldKeys = oldState.keys;
+            final V[][] oldValues = oldState.values;
+            final long[][] newKeys = newState.keys;
+            final V[][] newValues = newState.values;
             
             int newSize = 0;
-            
-            for(int i = oldCapacity; i-- != 0;)
+           
+            for(int i = 0; i < 64; i++)
             {
-                if(oldKeys[i] != 0)
+                for(int j = oldCapacity >> 5; j-- != 0;)
                 {
-                    position = (int) (Useful.longHash(oldKeys[i]) & positionMask);
-                    if(newKeys[position] != 0)
+                    if(oldKeys[i][j] != 0)
                     {
-                        while (!((newKeys[position = (position + 1) & positionMask]) == (0)));
+                        int position = (int) (Useful.longHash(oldKeys[i][j]) & positionMask);
+                        if(newKeys[position >> newState.segmentShift][position & newState.indexMask] != 0)
+                        {
+                            do
+                            {
+                                position = (position + 1) & positionMask;
+                            }
+                            while (newKeys[position >> newState.segmentShift][position & newState.indexMask] != 0);
+                        }
+                        newKeys[position >> newState.segmentShift][position & newState.indexMask]= oldKeys[i][j];
+                        newValues[position >> newState.segmentShift][position & newState.indexMask] = oldValues[i][j];
+                        newSize++;
                     }
-                    newKeys[position] = oldKeys[i];
-                    newValues[position] = oldValues[i];
-                    newSize++;
                 }
             }
-    
-                     newState.size.set(newSize);
-            newState.keys = newKeys;
-            newState.values = newValues;
+             newState.size.set(newSize);
             
             // make visible to readers
             state = newState;

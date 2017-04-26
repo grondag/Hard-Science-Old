@@ -1,5 +1,6 @@
 package grondag.adversity.niceblock.modelstate;
 
+import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.NiceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -23,15 +24,8 @@ public abstract class ModelStateComponent<T extends ModelStateValue<T, V>, V>
     public ModelStateComponent(int ordinal, WorldRefreshType refreshType, long valueCount)
     {
         this.valueCount = valueCount;
-        bitLength = Long.SIZE - Long.numberOfLeadingZeros(valueCount - 1);
-
-        // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
-        long mask = 0L;
-        for(int i = 0; i < bitLength; i++)
-        {
-            mask |= (1L << i);
-        }
-        this.bitMask = mask;
+        this.bitLength = Useful.bitLength(valueCount);
+        this.bitMask = Useful.longBitMask(this.bitLength);
         this.ordinal = ordinal;
         this.refreshType = refreshType;
     }
