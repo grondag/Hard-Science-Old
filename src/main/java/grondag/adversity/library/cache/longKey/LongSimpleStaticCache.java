@@ -37,28 +37,13 @@ public class LongSimpleStaticCache<V> implements ILongLoadingCache<V>
             return state.zeroValue.get();
         }
         
-        long keyHash = Useful.longHash(key);
-        int position = (int) (keyHash & state.positionMask);
-        long currentKey = state.keys[position >> state.segmentShift][position & state.indexMask];       
-     
-        if(currentKey == key) 
-        {
-            return state.values[position >> state.segmentShift][position & state.indexMask];
-        }
+        int position = (int) (Useful.longHash(key) & state.positionMask);
         
-        if(currentKey == 0) return null;
-
-        while (true) 
+        do
         {
+            if(state.keys[position] == key) return state.values[position];
+            if(state.keys[position] == 0) return null;
             position = (position + 1) & state.positionMask;
-            currentKey = state.keys[position >> state.segmentShift][position & state.indexMask];
-            
-            if(currentKey == 0) return null;
-            
-            if(currentKey == key)
-            {
-                return state.values[position >> state.segmentShift][position & state.indexMask];
-            }
-        }
+        } while(true);
     }
 }

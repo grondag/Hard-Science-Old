@@ -238,29 +238,31 @@ public class SimpleLoadingCacheTest
     
     private void doTestInner(ExecutorService executor, CacheAdapter subject)
     {
-        System.out.println("Theoretical best case: Unconstrained memory test with large starting size - uniform random demand");
         ArrayList<Runner> runs = new ArrayList<Runner>();
-        nanoCount.set(0);
-        for(int i = 0; i < THREAD_COUNT; i++ )
-        {
-            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0), 0xFFFFF));
-        }
-        try
-        {
-            executor.invokeAll(runs);
-            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        
+//        System.out.println("Theoretical best case: Unconstrained memory test with large starting size - uniform random demand");
+//        runs.clear();
+//        nanoCount.set(0);
+//        for(int i = 0; i < THREAD_COUNT; i++ )
+//        {
+//            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0), 0xFFFFF));
+//        }
+//        try
+//        {
+//            executor.invokeAll(runs);
+//            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
         
         System.out.println("Practical best case: Constrained with starting size == key space == max capacity - uniform random demand");
         runs.clear();
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0), 0xFFFFF));
+            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0xFFFFF), 0xFFFFF));
         }
         try
         {
@@ -272,22 +274,22 @@ public class SimpleLoadingCacheTest
             e.printStackTrace();
         }
 
-        System.out.println("Suboptimal case: Moderately constrained memory test - uniform random demand");
-        runs.clear();
-        nanoCount.set(0);
-        for(int i = 0; i < THREAD_COUNT; i++ )
-        {
-            runs.add(new UniformRunner(subject.newInstance(4096, 0xCCCCC), 0xFFFFF));
-        }
-        try
-        {
-            executor.invokeAll(runs);
-            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+//        System.out.println("Suboptimal case: Moderately constrained memory test - uniform random demand");
+//        runs.clear();
+//        nanoCount.set(0);
+//        for(int i = 0; i < THREAD_COUNT; i++ )
+//        {
+//            runs.add(new UniformRunner(subject.newInstance(4096, 0xCCCCC), 0xFFFFF));
+//        }
+//        try
+//        {
+//            executor.invokeAll(runs);
+//            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
         
         System.out.println("Suboptimal case: Preallocated moderately constrained memory test - uniform random demand");
         runs.clear();
@@ -311,7 +313,7 @@ public class SimpleLoadingCacheTest
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(4096, 0x2FFFF), 0xFFFFF));
+            runs.add(new UniformRunner(subject.newInstance(0x2FFFF, 0x2FFFF), 0xFFFFF));
         }
         try
         {

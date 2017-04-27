@@ -2,7 +2,7 @@ package grondag.adversity.library.cache.longKey;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LongManagedLoadingCache<V> implements ILongLoadingCache<V>
+public class LongManagedLoadingCache<V> implements ILongLoadingCache<V>, CacheOversizeHandler
 {
     private final LongSimpleCacheLoader<V> loader;
     private final int maxCapacity;
@@ -10,6 +10,7 @@ public class LongManagedLoadingCache<V> implements ILongLoadingCache<V>
     
     public LongManagedLoadingCache(ILongLoadingCache<V> startingCache, int maxCapacity)
     {
+        startingCache.setOversizeHandler(this);
         this.activeCache = startingCache;
         this.loader = startingCache.getLoader();
         this.maxCapacity = maxCapacity;
@@ -28,18 +29,7 @@ public class LongManagedLoadingCache<V> implements ILongLoadingCache<V>
     @Override
     public V get(long key)
     {
-        V result = activeCache.get(key);
-        if(activeCache.size() >= maxCapacity)
-        {
-            synchronized(activeCache)
-            {
-                if(activeCache.size() >= maxCapacity)
-                {
-                    activeCache = activeCache.createNew(new BackupCacheLoader<V>(loader, activeCache.getStaticCache()), maxCapacity);
-                }
-            }
-        }
-        return result;
+        return activeCache.get(key);
     }
 
     private static class BackupCacheLoader<V> implements LongSimpleCacheLoader<V>
@@ -83,5 +73,13 @@ public class LongManagedLoadingCache<V> implements ILongLoadingCache<V>
             }
         }
         
+    }
+
+    @Override
+    public void notifyOversize()
+    {
+        ILongLoadingCache<V> newCache = activeCache.createNew(new BackupCacheLoader<V>(loader, activeCache.getStaticCache()), maxCapacity);
+        newCache.setOversizeHandler(this);
+        activeCache = newCache;
     }
 }
