@@ -1,45 +1,49 @@
 package grondag.adversity.library.cache.longKey;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import grondag.adversity.library.Useful;
 
 //import java.util.concurrent.atomic.AtomicInteger;
 
 public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
 {
-    public CacheOversizeHandler oversizeHandler = null;
+    private final int capacity;
+    private final int maxFill;
+    private final int positionMask;
     
-    @Override
-    public int size() { return activeState.size.get(); }
+    private final LongSimpleCacheLoader<V> primaryLoader;
+    private final LongSimpleCacheLoader<V> backupLoader = new BackupLoadHandler();
+    private volatile LongSimpleCacheLoader<V> activeLoader;
+    
+    private final AtomicInteger backupMissCount = new AtomicInteger(0);
     
     private volatile LongCacheState<V> activeState;
+    private final AtomicReference<LongCacheState<V>> backupState = new AtomicReference<LongCacheState<V>>();
     
     private Object writeLock = new Object();
     
-    private volatile LongSimpleCacheLoader<V> loader;
-    
     final static float LOAD_FACTOR = 0.75F;
 
-    public LongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int startingCapacity)
+    public LongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
     {
-        if(startingCapacity < 64) startingCapacity = 64;
-        this.loader = loader;
-        this.activeState = new LongCacheState<V>(1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR))));
+        this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / LOAD_FACTOR)));
+        this.maxFill = (int) (capacity * LongSimpleLoadingCache.LOAD_FACTOR);
+        this.positionMask = capacity - 1;
+        this.primaryLoader = loader;
+        this.activeLoader = loader;
+        this.activeState = new LongCacheState<V>(this.capacity);
         this.clear();
     }
 
-    /** releases loader and afterwards returns null for any keys not found */
-    public ILongLoadingCache<V> getStaticCache()
-    {
-        return new LongSimpleStaticCache<V>(this.activeState);
-    }
-
     @Override
-    public LongSimpleCacheLoader<V> getLoader() { return this.loader; }
+    public int size() { return activeState.size.get(); }
     
     @Override
     public void clear()
     {
-        this.activeState = new LongCacheState<V>(this.activeState.capacity);
+        this.activeState = new LongCacheState<V>(this.capacity);
     }
     
     @Override
@@ -54,7 +58,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             V value = localState.zeroValue.get();
             if(value == null)
             {
-                value = loader.load(key);
+                value = primaryLoader.load(0);
                 if(localState.zeroValue.compareAndSet(null, value))
                 {
                     return value;
@@ -68,7 +72,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             return value;
         }
         
-        int position = (int) (Useful.longHash(key) & localState.positionMask);
+        int position = (int) (Useful.longHash(key) & positionMask);
         
         do
         {
@@ -76,15 +80,43 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             
             if(localState.keys[position] == 0) return load(localState, key, position);
             
-            position = (position + 1) & localState.positionMask;
+            position = (position + 1) & positionMask;
             
         } while (true);
+    }
+    
+    
+    private class BackupLoadHandler implements LongSimpleCacheLoader<V>
+    {
+        @Override
+        public V load(final long key)
+        {
+            LongCacheState<V> backup = backupState.get();
+            int position = (int) (Useful.longHash(key) & positionMask);
+            do
+            {
+                if(backup.keys[position] == key) return backup.values[position];
+                if(backup.keys[position] == 0)
+                {
+                    if((backupMissCount.incrementAndGet() & 0xFF) == 0xFF) 
+                    {
+                        if(backupMissCount.get() > activeState.size.get() / 2)
+                        {
+                            activeLoader = primaryLoader;
+                            backupState.compareAndSet(backup, null);
+                        }
+                    }
+                    return primaryLoader.load(key);
+                }
+                position = (position + 1) & positionMask;
+            } while(true);
+        }
     }
     
     private V load(LongCacheState<V> localState, long key, int position)
     {        
         // no need to handle zero key here - is handled as special case in get();
-        final V result = loader.load(key);
+        final V result = activeLoader.load(key);
         long currentKey;       
         
         do
@@ -104,66 +136,25 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             // small chance another thread added our value before we got our lock
             if(currentKey == key) return localState.values[position];
             
-            position = (position + 1) & localState.positionMask;
+            position = (position + 1) & positionMask;
             
         } while(true);
         
-        if(localState.size.incrementAndGet() == localState.maxFill && this.oversizeHandler != null) this.oversizeHandler.notifyOversize(); 
-        return result;
-    }
-    
-    private void expand() 
-    {
-        synchronized(writeLock)
+        if(localState.size.incrementAndGet() == this.maxFill)
         {
-            int oldCapacity = activeState.capacity;
-            int newCapacity = activeState.capacity << 1;
-            LongCacheState<V> oldState = activeState;
-            LongCacheState<V> newState = new LongCacheState<V>(newCapacity);
-            int positionMask = newState.positionMask;
-            newState.zeroValue.set(oldState.zeroValue.get());
-            final long[] oldKeys = oldState.keys;
-            final V[] oldValues = oldState.values;
-            final long[] newKeys = newState.keys;
-            final V[] newValues = newState.values;
-            
-            int newSize = 0;
-       
-            for(int j = oldCapacity - 1; j-- != 0;)
-            {
-                if(oldKeys[j] != 0)
-                {
-                    int position = (int) (Useful.longHash(oldKeys[j]) & positionMask);
-                    if(newKeys[position] != 0)
-                    {
-                        do
-                        {
-                            position = (position + 1) & positionMask;
-                        }
-                        while (newKeys[position] != 0);
-                    }
-                    newKeys[position]= oldKeys[j];
-                    newValues[position] = oldValues[j];
-                    newSize++;
-                }
-            }
-            
-             newState.size.set(newSize);
-            
-            // make visible to readers
-            activeState = newState;
+            LongCacheState<V> newState = new LongCacheState<V>(this.capacity);
+            // doing this means we don't have to handle zero value in backup cache value lookup
+            newState.zeroValue.set(this.activeState.zeroValue.get());
+            this.backupState.set(this.activeState);
+            this.activeState = newState;
+            this.activeLoader = backupLoader;
         }
+        return result;
     }
     
     @Override
     public ILongLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
         return new LongSimpleLoadingCache<V>(loader, startingCapacity);
-    }
-    
-    @Override
-    public void setOversizeHandler(CacheOversizeHandler handler)
-    {
-        this.oversizeHandler = handler;
     }
 }

@@ -14,13 +14,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import grondag.adversity.library.cache.longKey.ILongLoadingCache;
-import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
-import grondag.adversity.library.cache.objectKey.IObjectLoadingCache;
-import grondag.adversity.library.cache.objectKey.ObjectManagedLoadingCache;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
-import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
 import io.netty.util.internal.ThreadLocalRandom;
 
 public class SimpleLoadingCacheTest
@@ -29,7 +25,7 @@ public class SimpleLoadingCacheTest
     private static final long MAGIC_NUMBER = 42L;
     private static final int STEP_COUNT = 10000000;
     private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int TWIDDLE_COUNT = 0;
+    private static final int LOAD_COST = 10;
     private static final AtomicLong twiddler = new AtomicLong(0);
     
     private static class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long> 
@@ -39,9 +35,9 @@ public class SimpleLoadingCacheTest
         @Override
         public Long load(long key)
         {
-            if(TWIDDLE_COUNT > 0)
+            if(LOAD_COST > 0)
             {
-              for(int i = 0; i < TWIDDLE_COUNT; i++)
+              for(int i = 0; i < LOAD_COST; i++)
               {
                   twiddler.incrementAndGet();
               }
@@ -53,9 +49,9 @@ public class SimpleLoadingCacheTest
         @Override
         public Long load(Long key)
         {
-            if(TWIDDLE_COUNT > 0)
+            if(LOAD_COST > 0)
             {
-              for(int i = 0; i < TWIDDLE_COUNT; i++)
+              for(int i = 0; i < LOAD_COST; i++)
               {
                   twiddler.incrementAndGet();
               }
@@ -68,7 +64,7 @@ public class SimpleLoadingCacheTest
     {
         public abstract long get(long key);
         
-        public abstract CacheAdapter newInstance(int startingSize, int maxSize);
+        public abstract CacheAdapter newInstance(int maxSize);
     }
     
     private abstract class Runner implements Callable<Void>
@@ -166,18 +162,12 @@ public class SimpleLoadingCacheTest
         }
 
         @Override
-        public CacheAdapter newInstance(int startingSize, int maxSize)
+        public CacheAdapter newInstance(int maxSize)
         {
             GoogleAdapter result = new GoogleAdapter();
+  
+            result.cache = CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(maxSize).maximumSize(maxSize).build(new Loader());
             
-            if(maxSize == 0)
-            {
-                result.cache = CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(startingSize).build(new Loader());
-            }
-            else
-            {
-                result.cache = CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(startingSize).maximumSize(maxSize).build(new Loader());
-            }
             return result;
         }
     }
@@ -196,17 +186,10 @@ public class SimpleLoadingCacheTest
         }
 
         @Override
-        public CacheAdapter newInstance(int startingSize, int maxSize)
+        public CacheAdapter newInstance(int maxSize)
         {
             LongAdapter result = new LongAdapter();
-            if(maxSize == 0)
-            {
-                result.cache = new LongSimpleLoadingCache<Long>(new Loader(), startingSize);
-            }
-            else
-            {
-                result.cache = new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), startingSize), maxSize);
-            }
+            result.cache = new LongSimpleLoadingCache<Long>(new Loader(), maxSize);
             return result;
         }
     }
@@ -240,29 +223,12 @@ public class SimpleLoadingCacheTest
     {
         ArrayList<Runner> runs = new ArrayList<Runner>();
         
-//        System.out.println("Theoretical best case: Unconstrained memory test with large starting size - uniform random demand");
-//        runs.clear();
-//        nanoCount.set(0);
-//        for(int i = 0; i < THREAD_COUNT; i++ )
-//        {
-//            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0), 0xFFFFF));
-//        }
-//        try
-//        {
-//            executor.invokeAll(runs);
-//            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-        
-        System.out.println("Practical best case: Constrained with starting size == key space == max capacity - uniform random demand");
+        System.out.println("Practical best case: key space == max capacity - uniform random demand");
         runs.clear();
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0xFFFFF, 0xFFFFF), 0xFFFFF));
+            runs.add(new UniformRunner(subject.newInstance(0xFFFFF), 0xFFFFF));
         }
         try
         {
@@ -274,29 +240,12 @@ public class SimpleLoadingCacheTest
             e.printStackTrace();
         }
 
-//        System.out.println("Suboptimal case: Moderately constrained memory test - uniform random demand");
-//        runs.clear();
-//        nanoCount.set(0);
-//        for(int i = 0; i < THREAD_COUNT; i++ )
-//        {
-//            runs.add(new UniformRunner(subject.newInstance(4096, 0xCCCCC), 0xFFFFF));
-//        }
-//        try
-//        {
-//            executor.invokeAll(runs);
-//            System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-        
-        System.out.println("Suboptimal case: Preallocated moderately constrained memory test - uniform random demand");
+        System.out.println("Suboptimal case: moderately constrained memory test - uniform random demand");
         runs.clear();
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0xCCCCC, 0xCCCCC), 0xFFFFF));
+            runs.add(new UniformRunner(subject.newInstance(0xCCCCC), 0xFFFFF));
         }
         try
         {
@@ -313,7 +262,7 @@ public class SimpleLoadingCacheTest
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0x2FFFF, 0x2FFFF), 0xFFFFF));
+            runs.add(new UniformRunner(subject.newInstance(0x2FFFF), 0xFFFFF));
         }
         try
         {
@@ -325,12 +274,12 @@ public class SimpleLoadingCacheTest
             e.printStackTrace();
         }
 
-        System.out.println("Nominal case: Preallocated moderately constrained memory test - shifting random demand");
+        System.out.println("Nominal case: moderately constrained memory test - shifting random demand");
         runs.clear();
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new ShiftRunner(subject.newInstance(0x7FFFF, 0x7FFFF), 0xFFFFF));
+            runs.add(new ShiftRunner(subject.newInstance(0x7FFFF), 0xFFFFF));
         }
         try
         {
@@ -347,7 +296,7 @@ public class SimpleLoadingCacheTest
         nanoCount.set(0);
         for(int i = 0; i < THREAD_COUNT; i++)
         {
-            new ShiftRunner(subject.newInstance(0x7FFFF, 0x7FFFF), 0xFFFFF).call();
+            new ShiftRunner(subject.newInstance(0x7FFFF), 0xFFFFF).call();
         }
         System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
 
