@@ -7,7 +7,7 @@ import grondag.adversity.library.Useful;
 
 //import java.util.concurrent.atomic.AtomicInteger;
 
-public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
+public class LongSimpleLoadingCache<V>
 {
     private final int capacity;
     private final int maxFill;
@@ -22,7 +22,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     
     private final Object writeLock = new Object();
     
-    final static float LOAD_FACTOR = 0.75F;
+    final static float LOAD_FACTOR = 0.5F;
 
     public LongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
     {
@@ -34,16 +34,13 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
         this.clear();
     }
 
-    @Override
     public int size() { return activeState.size.get(); }
     
-    @Override
     public void clear()
     {
         this.activeState = new LongCacheState<V>(this.capacity);
     }
     
-    @Override
     public V get(long key)
     {
         LongCacheState<V> localState = activeState;
@@ -81,8 +78,6 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             
         } while (true);
     }
-    
-    
 
     protected V loadFromBackup(LongCacheState<V> backup, final long key)
     {
@@ -143,12 +138,15 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             newState.zeroValue.set(this.activeState.zeroValue.get());
             this.backupState.set(this.activeState);
             this.activeState = newState;
+            this.backupMissCount.set(0);
         }
+        
+        if(result == null)
+            System.out.println("derp");
         return result;
     }
     
-    @Override
-    public ILongLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
+    public LongSimpleLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
         return new LongSimpleLoadingCache<V>(loader, startingCapacity);
     }
