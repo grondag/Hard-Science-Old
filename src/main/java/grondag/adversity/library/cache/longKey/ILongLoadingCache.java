@@ -14,7 +14,7 @@ public interface ILongLoadingCache<V>
 //        System.out.println("ILongLoadingCache: unsupported call to setOversizeHandler - not implemented.");
 //    }
     
-    public default ILongLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
+    public default ILongLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int maxSize)
     {
         System.out.println("ILongLoadingCache: unsupported call to createNew - not implemented.");
         return null;

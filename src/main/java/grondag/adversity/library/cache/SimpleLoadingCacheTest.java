@@ -14,6 +14,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import grondag.adversity.library.cache.longKey.ILongLoadingCache;
+import grondag.adversity.library.cache.longKey.LongCompoundLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
@@ -30,6 +31,10 @@ public class SimpleLoadingCacheTest
     
     private static class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long> 
     {
+        public Loader createNew()
+        {
+            return new Loader();
+        }
 
         @SuppressWarnings("unused")
         @Override
@@ -226,9 +231,10 @@ public class SimpleLoadingCacheTest
         System.out.println("Practical best case: key space == max capacity - uniform random demand");
         runs.clear();
         nanoCount.set(0);
+        subject = subject.newInstance(0xFFFFF);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0xFFFFF), 0xFFFFF));
+            runs.add(new UniformRunner(subject, 0xFFFFF));
         }
         try
         {
@@ -243,9 +249,10 @@ public class SimpleLoadingCacheTest
         System.out.println("Suboptimal case: moderately constrained memory test - uniform random demand");
         runs.clear();
         nanoCount.set(0);
+        subject = subject.newInstance(0xCCCCC);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0xCCCCC), 0xFFFFF));
+            runs.add(new UniformRunner(subject, 0xFFFFF));
         }
         try
         {
@@ -260,9 +267,10 @@ public class SimpleLoadingCacheTest
         System.out.println("Worst case: Severely constrained memory test - uniform random demand");
         runs.clear();
         nanoCount.set(0);
+        subject = subject.newInstance(0x2FFFF);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject.newInstance(0x2FFFF), 0xFFFFF));
+            runs.add(new UniformRunner(subject, 0xFFFFF));
         }
         try
         {
@@ -277,9 +285,10 @@ public class SimpleLoadingCacheTest
         System.out.println("Nominal case: moderately constrained memory test - shifting random demand");
         runs.clear();
         nanoCount.set(0);
+        subject = subject.newInstance(0x7FFFF);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new ShiftRunner(subject.newInstance(0x7FFFF), 0xFFFFF));
+            runs.add(new ShiftRunner(subject, 0xFFFFF));
         }
         try
         {
@@ -291,12 +300,13 @@ public class SimpleLoadingCacheTest
             e.printStackTrace();
         }
         
-        System.out.println("Nominal case / single thread: Preallocated moderately constrained memory test - shifting random demand");
+        System.out.println("Nominal case / single thread: moderately constrained memory test - shifting random demand");
         runs.clear();
         nanoCount.set(0);
+        subject = subject.newInstance(0x7FFFF);
         for(int i = 0; i < THREAD_COUNT; i++)
         {
-            new ShiftRunner(subject.newInstance(0x7FFFF), 0xFFFFF).call();
+            new ShiftRunner(subject, 0xFFFFF).call();
         }
         System.out.println("Mean get() time = " + (nanoCount.get() / (STEP_COUNT * THREAD_COUNT)));
 
@@ -313,8 +323,8 @@ public class SimpleLoadingCacheTest
 //        System.out.println("Running simple object cache test");
 //        doTestInner(executor, new ObjectRunner(new ObjectSimpleLoadingCache<Long, Long>(new Loader(), 4096)));
 
-//        System.out.println("Running google cache test");
-//        doTestInner(executor, new GoogleAdapter());
+        System.out.println("Running google cache test");
+        doTestInner(executor, new GoogleAdapter());
         
 //        System.out.println("Running managed long cache test");
 //        doTestInner(executor, new LongRunner(new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), 4096), 0xAFFF)));

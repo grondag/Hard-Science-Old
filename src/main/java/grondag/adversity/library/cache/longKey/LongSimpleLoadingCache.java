@@ -11,18 +11,16 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
 {
     private final int capacity;
     private final int maxFill;
-    private final int positionMask;
+    protected final int positionMask;
     
-    private final LongSimpleCacheLoader<V> primaryLoader;
-    private final LongSimpleCacheLoader<V> backupLoader = new BackupLoadHandler();
-    private volatile LongSimpleCacheLoader<V> activeLoader;
+    protected final LongSimpleCacheLoader<V> loader;
     
     private final AtomicInteger backupMissCount = new AtomicInteger(0);
     
-    private volatile LongCacheState<V> activeState;
+    protected volatile LongCacheState<V> activeState;
     private final AtomicReference<LongCacheState<V>> backupState = new AtomicReference<LongCacheState<V>>();
     
-    private Object writeLock = new Object();
+    private final Object writeLock = new Object();
     
     final static float LOAD_FACTOR = 0.75F;
 
@@ -31,8 +29,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
         this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / LOAD_FACTOR)));
         this.maxFill = (int) (capacity * LongSimpleLoadingCache.LOAD_FACTOR);
         this.positionMask = capacity - 1;
-        this.primaryLoader = loader;
-        this.activeLoader = loader;
+        this.loader = loader;
         this.activeState = new LongCacheState<V>(this.capacity);
         this.clear();
     }
@@ -58,7 +55,7 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             V value = localState.zeroValue.get();
             if(value == null)
             {
-                value = primaryLoader.load(0);
+                value = loader.load(0);
                 if(localState.zeroValue.compareAndSet(null, value))
                 {
                     return value;
@@ -86,41 +83,40 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     }
     
     
-    private class BackupLoadHandler implements LongSimpleCacheLoader<V>
+
+    protected V loadFromBackup(LongCacheState<V> backup, final long key)
     {
-        @Override
-        public V load(final long key)
+        int position = (int) (Useful.longHash(key) & positionMask);
+        do
         {
-            LongCacheState<V> backup = backupState.get();
-            int position = (int) (Useful.longHash(key) & positionMask);
-            do
+            if(backup.keys[position] == key) return backup.values[position];
+            if(backup.keys[position] == 0)
             {
-                if(backup.keys[position] == key) return backup.values[position];
-                if(backup.keys[position] == 0)
+                if((backupMissCount.incrementAndGet() & 0xFF) == 0xFF) 
                 {
-                    if((backupMissCount.incrementAndGet() & 0xFF) == 0xFF) 
+                    if(backupMissCount.get() > activeState.size.get() / 2)
                     {
-                        if(backupMissCount.get() > activeState.size.get() / 2)
-                        {
-                            activeLoader = primaryLoader;
-                            backupState.compareAndSet(backup, null);
-                        }
+                        backupState.compareAndSet(backup, null);
                     }
-                    return primaryLoader.load(key);
                 }
-                position = (position + 1) & positionMask;
-            } while(true);
-        }
+                return loader.load(key);
+            }
+            position = (position + 1) & positionMask;
+        } while(true);
     }
     
-    private V load(LongCacheState<V> localState, long key, int position)
+    
+    protected V load(LongCacheState<V> localState, long key, int position)
     {        
         // no need to handle zero key here - is handled as special case in get();
-        final V result = activeLoader.load(key);
-        long currentKey;       
+        
+        LongCacheState<V> backupState = this.backupState.get();
+        
+        final V result = backupState == null ? loader.load(key) : loadFromBackup(backupState, key);
         
         do
         {
+            long currentKey;       
             synchronized(writeLock)
             {
                 currentKey = localState.keys[position];
@@ -147,7 +143,6 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
             newState.zeroValue.set(this.activeState.zeroValue.get());
             this.backupState.set(this.activeState);
             this.activeState = newState;
-            this.activeLoader = backupLoader;
         }
         return result;
     }
@@ -157,4 +152,39 @@ public class LongSimpleLoadingCache<V> implements ILongLoadingCache<V>
     {
         return new LongSimpleLoadingCache<V>(loader, startingCapacity);
     }
+
+    /**
+     * Identical to parent except avoids check for zero-valued keys.
+     * Used in compound loader for sub caches that will never see the zero key.
+     * @author grondag
+     *
+     * @param <V>
+     */
+    public static class NonZeroLongSimpleLoadingCache<V> extends LongSimpleLoadingCache<V>
+    {
+
+        public NonZeroLongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
+        {
+            super(loader, maxSize);
+        }
+        
+        @Override
+        public V get(long key)
+        {
+            LongCacheState<V> localState = activeState;
+            
+            int position = (int) (Useful.longHash(key) & positionMask);
+            
+            do
+            {
+                if(localState.keys[position] == key) return localState.values[position];
+                
+                if(localState.keys[position] == 0) return load(localState, key, position);
+                
+                position = (position + 1) & positionMask;
+                
+            } while (true);
+        }
+    }
+   
 }
