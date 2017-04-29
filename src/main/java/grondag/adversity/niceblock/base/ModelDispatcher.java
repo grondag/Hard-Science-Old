@@ -1,8 +1,6 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.library.cache.longKey.ILongLoadingCache;
-import grondag.adversity.library.cache.longKey.LongManagedLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.library.model.ItemModelDelegate;
@@ -55,10 +53,8 @@ public class ModelDispatcher implements IBakedModel
     private TextureAtlasSprite particleTexture;
 
     //custom loading cache is almost 2X faster than guava LoadingCache for our use case
-    private final ILongLoadingCache<SparseLayerMap> modelCache = new LongManagedLoadingCache<SparseLayerMap>(
-            new LongSimpleLoadingCache<SparseLayerMap>(new BlockCacheLoader(), 1024), 0xFFFF);
-    private final ILongLoadingCache<SimpleItemBlockModel> itemCache = new LongManagedLoadingCache<SimpleItemBlockModel>(
-            new LongSimpleLoadingCache<SimpleItemBlockModel>(new ItemCacheLoader(), 256), 0xFFF);
+    private final LongSimpleLoadingCache<SparseLayerMap> modelCache = new LongSimpleLoadingCache<SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
+    private final LongSimpleLoadingCache<SimpleItemBlockModel> itemCache = new LongSimpleLoadingCache<SimpleItemBlockModel>(new ItemCacheLoader(), 0xFFF);
     
     
 //    private final LoadingCache<Long, SparseLayerMap> cache = CacheBuilder.newBuilder().initialCapacity(1024).maximumSize(0xFFFF).build(new LoaderThingy());
@@ -126,7 +122,7 @@ public class ModelDispatcher implements IBakedModel
 				result.set(layer, QuadContainer.merge(containers));
 			}
 			return result;
-		}       
+		}
     }
     
     private class ItemCacheLoader implements LongSimpleCacheLoader<SimpleItemBlockModel>
