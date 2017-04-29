@@ -9,6 +9,7 @@ import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelRotationComponent;
+import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
@@ -27,6 +28,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 public abstract class ModelFactory<V extends ModelAppearance>
 {
     protected final ModelStateSet stateSet;
+    protected final ModelShape shape;
     protected final V modelInputs;
     protected final ModelColorMapComponent colorComponent;
     protected final ModelTextureVersionComponent textureComponent;
@@ -35,10 +37,11 @@ public abstract class ModelFactory<V extends ModelAppearance>
     protected final ModelSpeciesComponent speciesComponent;
     protected final ModelFlowTexComponent flowTexComponent;
     
-    public ModelFactory(V modelInputs, ModelStateComponent<?,?>... components)
+    public ModelFactory(ModelShape shape, V modelInputs, ModelStateComponent<?,?>... components)
     {
-        this.stateSet = ModelStateSet.find(components);
+        this.stateSet = ModelStateSet.find(shape, components);
         this.modelInputs = modelInputs;
+        this.shape = shape;
 
         ModelColorMapComponent colorComponent = null;
         ModelTextureVersionComponent textureComponent = null;

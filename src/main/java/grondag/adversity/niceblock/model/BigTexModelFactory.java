@@ -6,6 +6,7 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import java.util.List;
@@ -31,7 +32,7 @@ public class BigTexModelFactory extends ModelFactory<ModelAppearance>
 
 	public BigTexModelFactory(ModelAppearance modelInputs, TextureScale scale, ModelStateComponent<?,?>... components)
 	{
-		super(modelInputs, components);
+		super(ModelShape.CUBE, modelInputs, components);
 		this.scale = scale;
 	}
 

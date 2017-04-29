@@ -10,6 +10,7 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -48,7 +49,7 @@ public class BorderModelFactory extends ModelFactory<ModelAppearance>
  
     public BorderModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
     {
-        super(modelInputs, components);
+        super(ModelShape.COLUMN_SQUARE, modelInputs, components);
     }
     
 

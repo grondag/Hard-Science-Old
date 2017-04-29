@@ -13,6 +13,7 @@ import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
+import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -67,7 +68,7 @@ public class ColumnSquareModelFactory extends ModelFactory<ColumnSquareModelFact
     
     public ColumnSquareModelFactory(ColumnSquareInputs modelInputs, ModelStateComponent<?,?>... components)
     {
-        super(modelInputs, components);
+        super(ModelShape.COLUMN_SQUARE, modelInputs, components);
         if(modelInputs.areCutsOnEdge)
         {
             cutWidth = 0.5 / (modelInputs.cutCount + 1.0);

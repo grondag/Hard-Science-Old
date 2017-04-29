@@ -20,6 +20,7 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent.FlowTexValue;
+import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
@@ -71,7 +72,7 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
     
     public FlowModelFactory(ModelAppearance modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
     {
-        super(modelInputs, components);
+        super(ModelShape.FLOWING_TERRAIN, modelInputs, components);
     }
 
     @Override

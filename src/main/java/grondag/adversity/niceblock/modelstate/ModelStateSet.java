@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -20,7 +21,8 @@ public class ModelStateSet
     private static HashMap<BitSet, ModelStateSet> stateSets = new HashMap<BitSet, ModelStateSet>();
 
     private static final int NOT_PRESENT = -1;
-
+    private static final int SHAPE_MASK = Useful.intBitMask(Useful.bitLength(ModelShape.values().length));
+    
     private final int[] typeIndexes = new int[ModelStateComponents.getCount()];
     private final int[] shiftBits = new int[ModelStateComponents.getCount()];
     private final ModelStateComponent<?,?>[] includedTypes;
@@ -31,21 +33,27 @@ public class ModelStateSet
     public final int bitLength;
     private final ModelColorMapComponent firstColorMapComponent;
     private final ModelSpeciesComponent firstSpeciesComponent;
+    public final ModelShape shape;
     
     public static ModelStateSet find(ModelStateSet... sets)
     {
+        ModelShape newShape = sets[0].shape;
+        
         HashSet<ModelStateComponent<?,?>> set = new HashSet<ModelStateComponent<?,?>>();
         for(ModelStateSet s : sets)
         {
+            if(s.shape != newShape && Adversity.DEBUG_MODE)
+                Adversity.LOG.warn("Mixed shapes in model state construction. Unexpected behaviour could occur.");
+            
             for(ModelStateComponent<?,?> c : s.includedTypes)
             {
                 set.add(c);
             }
         }
-        return find(set.toArray(new ModelStateComponent<?,?>[set.size()]));
+        return find(newShape, set.toArray(new ModelStateComponent<?,?>[set.size()]));
     }
     
-    public static ModelStateSet find(ModelStateComponent<?,?>... components)
+    public static ModelStateSet find(ModelShape shapeIn, ModelStateComponent<?,?>... components)
     {
         BitSet key = new BitSet();
         for(ModelStateComponent<?,?> c : components)
@@ -53,13 +61,23 @@ public class ModelStateSet
             key.set(c.getOrdinal());
         }
         
+        int shapeOffset = ModelStateComponents.getCount();
+        
+        for(int b = 0; b <= SHAPE_MASK; b = b << 1)
+        {
+            if((b & shapeIn.ordinal()) == b)
+            {
+                key.set(shapeOffset++);
+            }
+        }
+
         ModelStateSet result; 
         synchronized(stateSets)
         {
             result = stateSets.get(key);
             if(result == null)
             {
-                result = new ModelStateSet(components);
+                result = new ModelStateSet(shapeIn, components);
                 stateSets.put(key, result);
             }
         }
@@ -83,9 +101,10 @@ public class ModelStateSet
         }
     }
     
-    private ModelStateSet(ModelStateComponent<?,?>... components)
+    private ModelStateSet(ModelShape shapeIn, ModelStateComponent<?,?>... components)
     {
 
+        this.shape = shapeIn;
         
         //initialize lookup array for all component types to default that none are present
         for(int i = 0; i < ModelStateComponents.getCount(); i++)
@@ -251,7 +270,7 @@ public class ModelStateSet
         return result;
     }
     
-    public class ModelStateSetValue
+    public class ModelStateSetValue implements IModelState
     {
         private final ModelStateValue<?,?>[] values;
         private final long key;
