@@ -2,6 +2,7 @@ package grondag.adversity.library.cache.objectKey;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import static grondag.adversity.library.cache.SimpleLoadingCache.*;
 
 import javax.annotation.Nonnull;
 
@@ -19,8 +20,6 @@ public class ObjectSimpleLoadingCache<K, V>
     private final AtomicReference<ObjectCacheState> backupState = new AtomicReference<ObjectCacheState>();
     
     private final Object writeLock = new Object();
-    
-    final static float LOAD_FACTOR = 0.5F;
 
     public ObjectSimpleLoadingCache(ObjectSimpleCacheLoader<K, V> loader, int maxSize)
     {

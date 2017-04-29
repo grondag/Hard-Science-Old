@@ -17,6 +17,8 @@ import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
+import grondag.adversity.library.cache.wideKey.WideSimpleCacheLoader;
+import grondag.adversity.library.cache.wideKey.WideSimpleLoadingCache;
 import grondag.adversity.library.cache.longKey.LongAtomicLoadingCache;
 import io.netty.util.internal.ThreadLocalRandom;
 
@@ -29,14 +31,13 @@ public class SimpleLoadingCacheTest
     private static final int LOAD_COST = 10;
     private static final AtomicLong twiddler = new AtomicLong(0);
     
-    private static class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long> 
+    private static class Loader extends CacheLoader<Long, Long> implements LongSimpleCacheLoader<Long>, ObjectSimpleCacheLoader<Long, Long>, WideSimpleCacheLoader<Long> 
     {
         public Loader createNew()
         {
             return new Loader();
         }
 
-        @SuppressWarnings("unused")
         @Override
         public Long load(long key)
         {
@@ -50,7 +51,6 @@ public class SimpleLoadingCacheTest
             return new Long(key + MAGIC_NUMBER);
         }
 
-        @SuppressWarnings("unused")
         @Override
         public Long load(Long key)
         {
@@ -62,6 +62,19 @@ public class SimpleLoadingCacheTest
               }
             }
             return load(key.longValue());
+        }
+
+        @Override
+        public Long load(long key1, long key2)
+        {
+            if(LOAD_COST > 0)
+            {
+              for(int i = 0; i < LOAD_COST; i++)
+              {
+                  twiddler.incrementAndGet();
+              }
+            }
+            return load(key1);
         }
     }
     
@@ -153,7 +166,6 @@ public class SimpleLoadingCacheTest
         }
     }
 
-    @SuppressWarnings("unused")
     private class GoogleAdapter implements CacheAdapter
     {    
         private LoadingCache<Long, Long> cache;
@@ -178,7 +190,6 @@ public class SimpleLoadingCacheTest
         }
     }
 
-    @SuppressWarnings("unused")
     private class LongAtomicAdapter implements CacheAdapter
     {    
         private LongAtomicLoadingCache<Long> cache;
@@ -201,7 +212,6 @@ public class SimpleLoadingCacheTest
         }
     }
     
-    @SuppressWarnings("unused")
     private class LongSimpleAdapter implements CacheAdapter
     {    
         private LongSimpleLoadingCache<Long> cache;
@@ -242,6 +252,28 @@ public class SimpleLoadingCacheTest
         {
             ObjectSimpleAdapter result = new ObjectSimpleAdapter();
             result.cache = new ObjectSimpleLoadingCache<Long, Long>(new Loader(), maxSize);
+            return result;
+        }
+    }
+    
+    private class WideSimpleAdapter implements CacheAdapter
+    {    
+        private WideSimpleLoadingCache<Long> cache;
+        
+        @Override
+        public long get(long key)
+        {
+            long startTime = System.nanoTime();
+            long result = cache.get(key, key * 31);
+            nanoCount.addAndGet(System.nanoTime() - startTime);
+            return result;
+        }
+
+        @Override
+        public CacheAdapter newInstance(int maxSize)
+        {
+            WideSimpleAdapter result = new WideSimpleAdapter();
+            result.cache = new WideSimpleLoadingCache<Long>(new Loader(), maxSize);
             return result;
         }
     }
@@ -341,27 +373,20 @@ public class SimpleLoadingCacheTest
     public void doTestOuter(ExecutorService executor)
     {
         
-//        System.out.println("Running simple long cache test");
-//        doTestInner(executor, new LongSimpleAdapter());
+        System.out.println("Running simple long cache test");
+        doTestInner(executor, new LongSimpleAdapter());
       
-//        System.out.println("Running atomic long cache test");
-//        doTestInner(executor, new LongAtomicAdapter());
+        System.out.println("Running atomic long cache test");
+        doTestInner(executor, new LongAtomicAdapter());
+        
+        System.out.println("Running wide key cache test");
+        doTestInner(executor, new WideSimpleAdapter());
         
         System.out.println("Running simple object cache test");
         doTestInner(executor, new ObjectSimpleAdapter());
 
         System.out.println("Running google cache test");
         doTestInner(executor, new GoogleAdapter());
-        
-//        System.out.println("Running managed long cache test");
-//        doTestInner(executor, new LongRunner(new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), 4096), 0xAFFF)));
-//        
-//        System.out.println("Running managed object cache test");
-//        doTestInner(executor, new ObjectRunner(new ObjectManagedLoadingCache<Long, Long>(new Loader(), 4096, 0xAFFF)));
-//
-//        System.out.println("Running google cache test with reasonable max");
-//        doTestInner(executor, new GoogleAdapter(CacheBuilder.newBuilder().concurrencyLevel(THREAD_COUNT).initialCapacity(4096).maximumSize(0xAFFF).build(new Loader())));
-        
         
     }
     
