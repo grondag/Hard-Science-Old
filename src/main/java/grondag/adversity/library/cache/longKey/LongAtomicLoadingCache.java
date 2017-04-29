@@ -4,12 +4,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import grondag.adversity.Adversity;
+import static grondag.adversity.library.Danger.*;
 import grondag.adversity.library.Useful;
+import grondag.adversity.library.cache.SimpleLoadingCache;
 import sun.misc.Unsafe;
 
-//import java.util.concurrent.atomic.AtomicInteger;
-
-public class LongSimpleLoadingCache2<V>
+@SuppressWarnings("unused")
+public class LongAtomicLoadingCache<V>
 {
     private final int capacity;
     private final int maxFill;
@@ -21,45 +22,12 @@ public class LongSimpleLoadingCache2<V>
     
     protected volatile LongCacheState<V> activeState;
     private final AtomicReference<LongCacheState<V>> backupState = new AtomicReference<LongCacheState<V>>();
-    
-    private final Object writeLock = new Object();
-    
-    final static float LOAD_FACTOR = 0.5F;
-    
-    private static final Unsafe unsafe = UnsafeHelper.getUnsafe();
-    private static final int longBase = unsafe.arrayBaseOffset(long[].class);
-    private static final int longScale;
-    private static final int longShift;
-    
-    private static final int objectBase = unsafe.arrayBaseOffset(Object[].class);
-    private static final int objectScale;
-    private static final int objectShift;
+     
 
-    static {
-        longScale = unsafe.arrayIndexScale(long[].class);
-        if ((longScale & (longScale - 1)) != 0)
-            throw new Error("data type scale not a power of two");
-        longShift = 31 - Integer.numberOfLeadingZeros(longScale);
-        
-        
-        objectScale = unsafe.arrayIndexScale(Object[].class);
-        if ((objectScale & (objectScale - 1)) != 0)
-            throw new Error("data type scale not a power of two");
-        objectShift = 31 - Integer.numberOfLeadingZeros(objectScale);
-    }
-
-    private static long longByteOffset(int i) {
-        return ((long) i << longShift) + longBase;
-    }
-    
-    private static long objectByteOffset(int i) {
-        return ((long) i << objectShift) + objectBase;
-    }
-
-    public LongSimpleLoadingCache2(LongSimpleCacheLoader<V> loader, int maxSize)
+    public LongAtomicLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
     {
-        this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / LOAD_FACTOR)));
-        this.maxFill = (int) (capacity * LongSimpleLoadingCache2.LOAD_FACTOR);
+        this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / SimpleLoadingCache.LOAD_FACTOR)));
+        this.maxFill = (int) (capacity * SimpleLoadingCache.LOAD_FACTOR);
         this.positionMask = capacity - 1;
         this.loader = loader;
         this.activeState = new LongCacheState<V>(this.capacity);
@@ -102,9 +70,9 @@ public class LongSimpleLoadingCache2<V>
         long offset = longByteOffset(position);
         do
         {
-            long currentKey = unsafe.getLongVolatile(localState.keys, offset);
+            long currentKey = UNSAFE.getLongVolatile(localState.keys, offset);
             
-            if(currentKey == key) return returnValueSafely(localState, position, key);  
+            if(currentKey == key) return getValueEventually(localState, position, key);  
             
             if(currentKey == 0) return load(localState, key, position);
             
@@ -147,14 +115,14 @@ public class LongSimpleLoadingCache2<V>
         
         do
         {
-            if(unsafe.compareAndSwapLong(localState.keys, offset, 0, key))
+            if(UNSAFE.compareAndSwapLong(localState.keys, offset, 0, key))
             {
-                unsafe.putObjectVolatile(localState.values, objectByteOffset(position), result);
+                UNSAFE.putObjectVolatile(localState.values, objectByteOffset(position), result);
                 break;
             }
             
             // small chance another thread added our value before we got our lock
-            if(unsafe.getLongVolatile(localState.keys, offset) == key) return returnValueSafely(localState, position, key);            
+            if(UNSAFE.getLongVolatile(localState.keys, offset) == key) return getValueEventually(localState, position, key);            
             position = (position + 1) & positionMask;
             offset = longByteOffset(position);
             
@@ -169,55 +137,52 @@ public class LongSimpleLoadingCache2<V>
             this.activeState = newState;
             this.backupMissCount.set(0);
         }
-        
-        //TODO: remove
-        if(result == null)
-            System.out.println("derp");
+
         return result;
     }
     
     @SuppressWarnings("unchecked")
-    private V returnValueSafely(LongCacheState<V> localState, int position, long key)
+    private V getValueEventually(LongCacheState<V> localState, int position, long key)
     {
         long offset = objectByteOffset(position);
         
-        V result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        V result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
 
         // Another thread has updated key but hasn't yet updated the value.
         // Should be very rare.  Retry several times until value appears.
 
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        result = (V) unsafe.getObjectVolatile(localState.values, offset);
+        result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
         if(Adversity.DEBUG_MODE)
@@ -227,9 +192,9 @@ public class LongSimpleLoadingCache2<V>
         return loader.load(key);
     }
     
-    public LongSimpleLoadingCache2<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
+    public LongAtomicLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
-        return new LongSimpleLoadingCache2<V>(loader, startingCapacity);
+        return new LongAtomicLoadingCache<V>(loader, startingCapacity);
     }
     
     /**
@@ -239,7 +204,7 @@ public class LongSimpleLoadingCache2<V>
      *
      * @param <V>
      */
-    public static class NonZeroLongSimpleLoadingCache<V> extends LongSimpleLoadingCache2<V>
+    public static class NonZeroLongSimpleLoadingCache<V> extends LongAtomicLoadingCache<V>
     {
 
         public NonZeroLongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)

@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import grondag.adversity.library.Useful;
+import grondag.adversity.library.cache.SimpleLoadingCache;
 
 //import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,13 +22,11 @@ public class LongSimpleLoadingCache<V>
     private final AtomicReference<LongCacheState<V>> backupState = new AtomicReference<LongCacheState<V>>();
     
     private final Object writeLock = new Object();
-    
-    final static float LOAD_FACTOR = 0.5F;
 
     public LongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
     {
-        this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / LOAD_FACTOR)));
-        this.maxFill = (int) (capacity * LongSimpleLoadingCache.LOAD_FACTOR);
+        this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / SimpleLoadingCache.LOAD_FACTOR)));
+        this.maxFill = (int) (capacity * SimpleLoadingCache.LOAD_FACTOR);
         this.positionMask = capacity - 1;
         this.loader = loader;
         this.activeState = new LongCacheState<V>(this.capacity);
@@ -141,6 +140,7 @@ public class LongSimpleLoadingCache<V>
             this.backupMissCount.set(0);
         }
         
+        //TODO: remove
         if(result == null)
             System.out.println("derp");
         return result;
@@ -150,7 +150,7 @@ public class LongSimpleLoadingCache<V>
     {
         return new LongSimpleLoadingCache<V>(loader, startingCapacity);
     }
-
+    
     /**
      * Identical to parent except avoids check for zero-valued keys.
      * Used in compound loader for sub caches that will never see the zero key.
@@ -184,5 +184,5 @@ public class LongSimpleLoadingCache<V>
             } while (true);
         }
     }
-   
+
 }

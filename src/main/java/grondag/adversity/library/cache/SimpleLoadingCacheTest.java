@@ -13,10 +13,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import grondag.adversity.library.cache.longKey.LongCompoundLoadingCache;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
-import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache2;
+import grondag.adversity.library.cache.longKey.LongAtomicLoadingCache;
 import grondag.adversity.library.cache.objectKey2.ObjectSimpleCacheLoader;
 import grondag.adversity.library.cache.objectKey2.ObjectSimpleLoadingCache;
 import io.netty.util.internal.ThreadLocalRandom;
@@ -180,9 +179,9 @@ public class SimpleLoadingCacheTest
     }
 
     @SuppressWarnings("unused")
-    private class LongCompoundAdapter implements CacheAdapter
+    private class LongAtomicAdapter implements CacheAdapter
     {    
-        private LongCompoundLoadingCache<Long> cache;
+        private LongAtomicLoadingCache<Long> cache;
         
         @Override
         public long get(long key)
@@ -196,8 +195,8 @@ public class SimpleLoadingCacheTest
         @Override
         public CacheAdapter newInstance(int maxSize)
         {
-            LongCompoundAdapter result = new LongCompoundAdapter();
-            result.cache = new LongCompoundLoadingCache<Long>(new Loader(), maxSize);
+            LongAtomicAdapter result = new LongAtomicAdapter();
+            result.cache = new LongAtomicLoadingCache<Long>(new Loader(), maxSize);
             return result;
         }
     }
@@ -205,7 +204,7 @@ public class SimpleLoadingCacheTest
     @SuppressWarnings("unused")
     private class LongSimpleAdapter implements CacheAdapter
     {    
-        private LongSimpleLoadingCache2<Long> cache;
+        private LongSimpleLoadingCache<Long> cache;
         
         @Override
         public long get(long key)
@@ -220,7 +219,7 @@ public class SimpleLoadingCacheTest
         public CacheAdapter newInstance(int maxSize)
         {
             LongSimpleAdapter result = new LongSimpleAdapter();
-            result.cache = new LongSimpleLoadingCache2<Long>(new Loader(), maxSize);
+            result.cache = new LongSimpleLoadingCache<Long>(new Loader(), maxSize);
             return result;
         }
     }
@@ -277,7 +276,7 @@ public class SimpleLoadingCacheTest
         subject = subject.newInstance(0xCCCCC);
         for(int i = 0; i < THREAD_COUNT; i++ )
         {
-            runs.add(new UniformRunner(subject, 0xFFFFF));
+            runs.add(new UniformRunner(subject, 0xFFFFF)); 
         }
         try
         {
@@ -344,9 +343,9 @@ public class SimpleLoadingCacheTest
         
         System.out.println("Running simple long cache test");
         doTestInner(executor, new LongSimpleAdapter());
-//      
-//        System.out.println("Running compound long cache test");
-//        doTestInner(executor, new LongCompoundAdapter());
+      
+        System.out.println("Running atomic long cache test");
+        doTestInner(executor, new LongAtomicAdapter());
         
 //        System.out.println("Running simple object cache test");
 //        doTestInner(executor, new ObjectSimpleAdapter());
