@@ -1,9 +1,8 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.library.cache.ILoadingCache;
-import grondag.adversity.library.cache.ManagedLoadingCache;
-import grondag.adversity.library.cache.SimpleCacheLoader;
+import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
+import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.library.model.ItemModelDelegate;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.SimpleItemBlockModel;
@@ -54,8 +53,8 @@ public class ModelDispatcher implements IBakedModel
     private TextureAtlasSprite particleTexture;
 
     //custom loading cache is almost 2X faster than guava LoadingCache for our use case
-    private final ILoadingCache<SparseLayerMap> modelCache = new ManagedLoadingCache<SparseLayerMap>(new BlockCacheLoader(), 1024, 0xFFFF);
-    private final ILoadingCache<SimpleItemBlockModel> itemCache = new ManagedLoadingCache<SimpleItemBlockModel>( new ItemCacheLoader(), 256, 0xFFF);
+    private final LongSimpleLoadingCache<SparseLayerMap> modelCache = new LongSimpleLoadingCache<SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
+    private final LongSimpleLoadingCache<SimpleItemBlockModel> itemCache = new LongSimpleLoadingCache<SimpleItemBlockModel>(new ItemCacheLoader(), 0xFFF);
     
     
 //    private final LoadingCache<Long, SparseLayerMap> cache = CacheBuilder.newBuilder().initialCapacity(1024).maximumSize(0xFFFF).build(new LoaderThingy());
@@ -105,7 +104,7 @@ public class ModelDispatcher implements IBakedModel
 //        return result;        
 //    }
     
-    private class BlockCacheLoader implements SimpleCacheLoader<SparseLayerMap>
+    private class BlockCacheLoader implements LongSimpleCacheLoader<SparseLayerMap>
     {
 		@Override
 		public SparseLayerMap load(long key) {
@@ -123,10 +122,10 @@ public class ModelDispatcher implements IBakedModel
 				result.set(layer, QuadContainer.merge(containers));
 			}
 			return result;
-		}       
+		}
     }
     
-    private class ItemCacheLoader implements SimpleCacheLoader<SimpleItemBlockModel>
+    private class ItemCacheLoader implements LongSimpleCacheLoader<SimpleItemBlockModel>
     {
 		@Override
 		public SimpleItemBlockModel load(long key) 

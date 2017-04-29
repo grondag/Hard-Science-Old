@@ -509,6 +509,56 @@ public class Useful {
        return x * x;
    }
    
+   /** 
+    * Bit length needed to contain the given value.
+    * Intended for unsigned values.
+    */
+   public static int bitLength(long maxValue)
+   {
+       return Long.SIZE - Long.numberOfLeadingZeros(maxValue - 1);
+   }
+   
+   /** 
+    * Bit length needed to contain the given value.
+    * Intended for unsigned values.
+    */
+   public static int bitLength(int maxValue)
+   {
+       return Integer.SIZE - Integer.numberOfLeadingZeros(maxValue - 1);
+   }
+   
+   /**
+    * Returns bit mask for a value of given bit length 
+    */
+   public static long longBitMask(int bitLength)
+   {
+       bitLength = clamp(bitLength, 0, Long.SIZE);
+
+       // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
+       long mask = 0L;
+       for(int i = 0; i < bitLength; i++)
+       {
+           mask |= (1L << i);
+       }
+       return mask;
+   }
+
+   /**
+    * Returns bit mask for a value of given bit length 
+    */
+   public static int intBitMask(int bitLength)
+   {
+       bitLength = clamp(bitLength, 0, Integer.SIZE);
+
+       // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
+       int mask = 0;
+       for(int i = 0; i < bitLength; i++)
+       {
+           mask |= (1L << i);
+       }
+       return mask;
+   }
+   
 //   /**
 //    * Kept for possible future use.
 //    * Optimized sort for three element array
