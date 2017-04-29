@@ -192,43 +192,9 @@ public class LongAtomicLoadingCache<V>
         return loader.load(key);
     }
     
+    // for test harness
     public LongAtomicLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
         return new LongAtomicLoadingCache<V>(loader, startingCapacity);
     }
-    
-    /**
-     * Identical to parent except avoids check for zero-valued keys.
-     * Used in compound loader for sub caches that will never see the zero key.
-     * @author grondag
-     *
-     * @param <V>
-     */
-    public static class NonZeroLongSimpleLoadingCache<V> extends LongAtomicLoadingCache<V>
-    {
-
-        public NonZeroLongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
-        {
-            super(loader, maxSize);
-        }
-        
-        @Override
-        public V get(long key)
-        {
-            LongCacheState<V> localState = activeState;
-            
-            int position = (int) (Useful.longHash(key) & positionMask);
-            
-            do
-            {
-                if(localState.keys[position] == key) return localState.values[position];
-                
-                if(localState.keys[position] == 0) return load(localState, key, position);
-                
-                position = (position + 1) & positionMask;
-                
-            } while (true);
-        }
-    }
-
 }

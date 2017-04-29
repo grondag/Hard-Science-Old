@@ -15,9 +15,9 @@ import com.google.common.cache.LoadingCache;
 
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
+import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
+import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
 import grondag.adversity.library.cache.longKey.LongAtomicLoadingCache;
-import grondag.adversity.library.cache.objectKey2.ObjectSimpleCacheLoader;
-import grondag.adversity.library.cache.objectKey2.ObjectSimpleLoadingCache;
 import io.netty.util.internal.ThreadLocalRandom;
 
 public class SimpleLoadingCacheTest
@@ -341,17 +341,17 @@ public class SimpleLoadingCacheTest
     public void doTestOuter(ExecutorService executor)
     {
         
-        System.out.println("Running simple long cache test");
-        doTestInner(executor, new LongSimpleAdapter());
+//        System.out.println("Running simple long cache test");
+//        doTestInner(executor, new LongSimpleAdapter());
       
-        System.out.println("Running atomic long cache test");
-        doTestInner(executor, new LongAtomicAdapter());
+//        System.out.println("Running atomic long cache test");
+//        doTestInner(executor, new LongAtomicAdapter());
         
-//        System.out.println("Running simple object cache test");
-//        doTestInner(executor, new ObjectSimpleAdapter());
+        System.out.println("Running simple object cache test");
+        doTestInner(executor, new ObjectSimpleAdapter());
 
-//        System.out.println("Running google cache test");
-//        doTestInner(executor, new GoogleAdapter());
+        System.out.println("Running google cache test");
+        doTestInner(executor, new GoogleAdapter());
         
 //        System.out.println("Running managed long cache test");
 //        doTestInner(executor, new LongRunner(new LongManagedLoadingCache<Long>(new LongSimpleLoadingCache<Long>(new Loader(), 4096), 0xAFFF)));

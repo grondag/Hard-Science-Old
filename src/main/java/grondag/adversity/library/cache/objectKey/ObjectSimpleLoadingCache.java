@@ -1,213 +1,131 @@
 package grondag.adversity.library.cache.objectKey;
 
-public class ObjectSimpleLoadingCache<K, V> implements IObjectLoadingCache<K, V>
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.Nonnull;
+
+public class ObjectSimpleLoadingCache<K, V>
 {
+    private final int capacity;
+    private final int maxFill;
+    protected final int positionMask;
+    
+    protected final ObjectSimpleCacheLoader<K, V> loader;
+    
+    private final AtomicInteger backupMissCount = new AtomicInteger(0);
+    
+    protected volatile ObjectCacheState activeState;
+    private final AtomicReference<ObjectCacheState> backupState = new AtomicReference<ObjectCacheState>();
+    
+    private final Object writeLock = new Object();
+    
+    final static float LOAD_FACTOR = 0.5F;
 
-    private volatile int capacity;
-    private volatile int maxFill;
-    private volatile int size;
-    
-    public int getSize() { return size; }
-    
-    private volatile ObjectCacheState<K, V> state;
-    
-//    public AtomicInteger calls = new AtomicInteger(0);
-//    public AtomicInteger hits = new AtomicInteger(0);
-//    public AtomicInteger searchCount = new AtomicInteger(0);
-    
-    private Object writeLock = new Object();
-    
-    private volatile ObjectSimpleCacheLoader<K, V> loader;
-    
-    private final static float LOAD_FACTOR = 0.75F;
-
-    public ObjectSimpleLoadingCache(ObjectSimpleCacheLoader<K, V> loader, int startingCapacity)
+    public ObjectSimpleLoadingCache(ObjectSimpleCacheLoader<K, V> loader, int maxSize)
     {
+        this.capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (maxSize / LOAD_FACTOR)));
+        this.maxFill = (int) (capacity * LOAD_FACTOR);
+        this.positionMask = capacity * 2 - 1;
         this.loader = loader;
-        capacity = 1 << (Long.SIZE - Long.numberOfLeadingZeros((long) (startingCapacity / LOAD_FACTOR)) + 1);
+        this.activeState = new ObjectCacheState(this.capacity);
         this.clear();
     }
 
-    /** releases loader and afterwards returns null for any keys not found */
-    public ObjectSimpleStaticCache<K, V> getStaticCache()
-    {
-        return new ObjectSimpleStaticCache<K, V>(this.state);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
+    public int size() { return activeState.size.get(); }
+    
     public void clear()
     {
-        synchronized(writeLock)
-        {
-            ObjectCacheState<K, V> newState = new ObjectCacheState<K, V>();
-            newState.keys = (K[]) new Object[capacity + 1];
-            newState.values = (V[]) new Object[capacity + 1];
-            newState.positionMask = capacity - 1;
-            newState.nullLocation = capacity;
-            state = newState;
-            size = 0;
-            maxFill = (int) (capacity * LOAD_FACTOR);
-        }
+        this.activeState = new ObjectCacheState(this.capacity);
     }
     
-    @Override
-    public V get(K key)
+    @SuppressWarnings("unchecked")
+    public V get(@Nonnull K key)
     {
-//        calls.incrementAndGet();
+        if(key == null) return null;
         
-        ObjectCacheState<K, V> localState = state;
+        ObjectCacheState localState = activeState;
         
-        // Null value normally indicates an unused spot in key array
-        // so requires special handling to prevent search weirdness.
-        if(key == null)
+        int position = (key.hashCode() * 2) & positionMask;
+        
+        do
         {
-            if(localState.values[localState.nullLocation] == null)
+            if(localState.kv[position] == null) return load(localState, key, position);
+
+            if(localState.kv[position].equals(key)) return (V) localState.kv[position + 1];
+            
+            position = (position + 2) & positionMask;
+            
+        } while (true);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected V loadFromBackup(ObjectCacheState backup, final K key)
+    {
+        int position = (key.hashCode() * 2) & positionMask;
+        do
+        {
+            if(backup.kv[position] == null)
             {
-                synchronized(writeLock)
+                if((backupMissCount.incrementAndGet() & 0xFF) == 0xFF) 
                 {
-                    localState = state;
-                    if(localState.values[localState.nullLocation] == null)
+                    if(backupMissCount.get() > activeState.size.get() / 2)
                     {
-                        localState.values[localState.nullLocation] = loader.load(key);
+                        backupState.compareAndSet(backup, null);
                     }
                 }
+                return loader.load(key);
             }
-//            else
-//            {
-//                hits.incrementAndGet();
-//            }
-            return localState.values[localState.nullLocation];
-        }
-        
-        int keyHash = key.hashCode();
-        int position = keyHash & localState.positionMask;
-        K currentKey = localState.keys[position];       
-     
-        if(currentKey == null) return load(key, keyHash);
-
-        if(currentKey.equals(key)) 
-        {
-//            hits.incrementAndGet();
-            return localState.values[position];
-        }
-
-        while (true) 
-        {
-//            searchCount.incrementAndGet();
-            position = (position + 1) & localState.positionMask;
-            currentKey = localState.keys[position];
             
-            if(currentKey == null) return load(key, keyHash);
+            if(backup.kv[position].equals(key)) return (V) backup.kv[position + 1];
             
-            if(currentKey.equals(key))
-            {
-//                hits.incrementAndGet();
-                return localState.values[position];
-            }
-        }
+            position = (position + 2) & positionMask;
+        } while(true);
     }
     
-    private V load(K key, int keyHash)
-    {
-        ObjectCacheState<K, V> localState = state;
+    
+    @SuppressWarnings("unchecked")
+    protected V load(ObjectCacheState localState, K key, int position)
+    {        
         
-        // no need to handle null key here - is handled as special case in get();
-        int position = keyHash & localState.positionMask;
-        K currentKey = localState.keys[position];       
-
-        if(currentKey == null)
+        ObjectCacheState backupState = this.backupState.get();
+        
+        final V result = backupState == null ? loader.load(key) : loadFromBackup(backupState, key);
+        
+        do
         {
-            V result = loader.load(key);
+            Object currentKey;       
             synchronized(writeLock)
             {
-                //Abort save if another thread took our spot or expanded array.
-                //Will simply reload if necessary next time.
-                if(state.keys[position] == null && state.positionMask == localState.positionMask)
+                currentKey = localState.kv[position];
+                if(currentKey == null)
                 {
                     //write value first in case another thread tries to read it based on key before we can write it
-                    localState.values[position] = result;
-                    localState.keys[position] = key;
-                    if(++size >= maxFill) expand(); 
+                    localState.kv[position + 1] = result;
+                    localState.kv[position] = key;
+                    break;
                 }
-            }
-            return result;
-        }
-
-        // small chance another thread added our value before we got our lock
-        if(currentKey.equals(key)) return localState.values[position];
-        
-        while (true) 
-        {
-            position = (position + 1) & localState.positionMask;
-            currentKey = localState.keys[position];
-            
-            if(currentKey == null)
-            {
-                V result = loader.load(key);
-                synchronized(writeLock)
-                {
-                    //Abort save if another thread took our spot or expanded array.
-                    //Will simply reload if necessary next time.
-                    if(state.keys[position] == null && state.positionMask == localState.positionMask)
-                    {
-                        //write value first in case another thread tries to read it based on key before we can write it
-                        localState.values[position] = result;
-                        localState.keys[position] = key;
-                        if(++size >= maxFill) expand(); 
-                    }
-                }
-                return result;
             }
             
             // small chance another thread added our value before we got our lock
-            if(currentKey.equals(key)) return localState.values[position];
-        }
+            if(currentKey.equals(key)) return (V) localState.kv[position + 1];
+            
+            position = (position + 2) & positionMask;
+            
+        } while(true);
         
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void expand() 
-    {
-        synchronized(writeLock)
+        if(localState.size.incrementAndGet() == this.maxFill)
         {
-            int oldCapacity = capacity;
-            capacity = capacity << 1;
-            maxFill = (int) (capacity * LOAD_FACTOR);
-            int positionMask = capacity - 1;
-            ObjectCacheState<K, V> oldState = state;
-            ObjectCacheState<K, V> newState = new ObjectCacheState<K, V>();
-            newState.positionMask = positionMask;
-            newState.nullLocation = capacity;
-            final K[] oldKeys = oldState.keys;
-            final V[] oldValues = oldState.values;
-            final K[] newKeys = (K[]) new Object[capacity + 1];
-            final V[] newValues = (V[]) new Object[capacity + 1];
-            int position;
-            
-            for(int i = oldCapacity; i-- != 0;)
-            {
-                if(oldKeys[i] != null)
-                {
-                    position = (int) (oldKeys[i].hashCode() & positionMask);
-                    if(newKeys[position] != null)
-                    {
-                        while (!((newKeys[position = (position + 1) & positionMask]) == null));
-                    }
-                    newKeys[position] = oldKeys[i];
-                    newValues[position] = oldValues[i];
-                }
-            }
-    
-            // transfer null key value (keep simple by doing even if null)
-            newValues[capacity] = oldValues[oldCapacity];
-            
-            newState.keys = newKeys;
-            newState.values = newValues;
-            
-            // make visible to readers
-            state = newState;
+            ObjectCacheState newState = new ObjectCacheState(this.capacity);
+            this.backupState.set(this.activeState);
+            this.activeState = newState;
+            this.backupMissCount.set(0);
         }
+        return result;
     }
     
+    public ObjectSimpleLoadingCache<K, V> createNew(ObjectSimpleCacheLoader<K, V> loader, int startingCapacity)
+    {
+        return new ObjectSimpleLoadingCache<K, V>(loader, startingCapacity);
+    }
 }

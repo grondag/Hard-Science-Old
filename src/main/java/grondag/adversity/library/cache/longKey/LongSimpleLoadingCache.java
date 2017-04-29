@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.SimpleLoadingCache;
 
-//import java.util.concurrent.atomic.AtomicInteger;
 
 public class LongSimpleLoadingCache<V>
 {
@@ -140,49 +139,12 @@ public class LongSimpleLoadingCache<V>
             this.backupMissCount.set(0);
         }
         
-        //TODO: remove
-        if(result == null)
-            System.out.println("derp");
         return result;
     }
     
+    /** for test harness */
     public LongSimpleLoadingCache<V> createNew(LongSimpleCacheLoader<V> loader, int startingCapacity)
     {
         return new LongSimpleLoadingCache<V>(loader, startingCapacity);
     }
-    
-    /**
-     * Identical to parent except avoids check for zero-valued keys.
-     * Used in compound loader for sub caches that will never see the zero key.
-     * @author grondag
-     *
-     * @param <V>
-     */
-    public static class NonZeroLongSimpleLoadingCache<V> extends LongSimpleLoadingCache<V>
-    {
-
-        public NonZeroLongSimpleLoadingCache(LongSimpleCacheLoader<V> loader, int maxSize)
-        {
-            super(loader, maxSize);
-        }
-        
-        @Override
-        public V get(long key)
-        {
-            LongCacheState<V> localState = activeState;
-            
-            int position = (int) (Useful.longHash(key) & positionMask);
-            
-            do
-            {
-                if(localState.keys[position] == key) return localState.values[position];
-                
-                if(localState.keys[position] == 0) return load(localState, key, position);
-                
-                position = (position + 1) & positionMask;
-                
-            } while (true);
-        }
-    }
-
 }

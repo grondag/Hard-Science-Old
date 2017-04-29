@@ -1,9 +1,15 @@
 package grondag.adversity.library.cache.objectKey;
 
-public class ObjectCacheState<K, V>
+import java.util.concurrent.atomic.AtomicInteger;
+
+
+public class ObjectCacheState
 {
-    protected K[] keys;
-    protected V[] values;
-    protected int positionMask;
-    protected int nullLocation;
+    protected AtomicInteger size = new AtomicInteger(0);
+    protected final Object[] kv;
+
+    public ObjectCacheState(int capacityIn)
+    {
+        this.kv = new Object[capacityIn * 2];
+    }
 }
