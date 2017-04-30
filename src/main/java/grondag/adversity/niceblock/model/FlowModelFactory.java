@@ -12,7 +12,6 @@ import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -24,7 +23,6 @@ import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -40,12 +38,17 @@ import net.minecraft.world.IBlockAccess;
 
 public class FlowModelFactory extends ModelFactory<ModelAppearance>
 {
-    private static ModelAppearance COLLISION_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    //main diff is lack of species
-    private static FlowModelFactory COLLISION_INSTANCE = new FlowModelFactory(COLLISION_INPUTS, true, ModelStateComponents.FLOW_JOIN,
-           ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
-    private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
+    
 
+    public static SimpleCollisionHandler makeCollisionHandler()
+    {
+        ModelAppearance inputs = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+        //main diff is lack of species
+        FlowModelFactory factory = new FlowModelFactory(inputs, true, ModelStateComponents.FLOW_JOIN,
+               ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
+        return new SimpleCollisionHandler(factory);
+    }
+    
     private static final AxisAlignedBB[] COLLISION_BOUNDS =
     {
         new AxisAlignedBB(0, 0, 0, 1, 1, 1),
@@ -472,16 +475,16 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
         quad.maxV = quad.minV + 2;
     }
     
-    @Override
-    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
-    {
-        return COLLISION_HANDLER;
-    }
+//    @Override
+//    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+//    {
+//        return COLLISION_HANDLER;
+//    }
 
     @Override
     public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        return COLLISION_INSTANCE.makeRawQuads(state);
+        return this.makeRawQuads(state);
     }
 
     @Override

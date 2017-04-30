@@ -15,7 +15,6 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.modelstate.ModelTextureVersionComponent;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -96,10 +95,10 @@ public abstract class ModelFactory<V extends ModelAppearance>
     /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
-    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
-    {
-        return null;
-    }
+//    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+//    {
+//        return null;
+//    }
     
     /** override if need to do some setup that must wait until bake event */
     public void handleBakeEvent(ModelBakeEvent event)

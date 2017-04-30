@@ -9,7 +9,6 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap;
@@ -17,7 +16,6 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -32,11 +30,15 @@ import net.minecraft.world.IBlockAccess;
 public class HeightModelFactory extends ColorModelFactory
 {
     
-    private static ModelAppearance COLLISION_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    //main diff is lack of species
-    private static HeightModelFactory COLLISION_INSTANCE = new HeightModelFactory(COLLISION_INPUTS, ModelStateComponents.COLORS_WHITE,
-            ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
-    private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
+    public static SimpleCollisionHandler makeCollisionHandler()
+    {
+        ModelAppearance inputs = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+        //main diff is lack of species
+        HeightModelFactory factory = new HeightModelFactory(inputs, ModelStateComponents.COLORS_WHITE,
+                ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
+        return new SimpleCollisionHandler(factory);
+    }
+    
     
     private static final AxisAlignedBB[] COLLISION_BOUNDS =
     {
@@ -145,11 +147,11 @@ public class HeightModelFactory extends ColorModelFactory
         return general.build();
     }
     
-    @Override
-    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
-    {
-        return COLLISION_HANDLER;
-    }
+//    @Override
+//    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+//    {
+//        return COLLISION_HANDLER;
+//    }
 
     @Override
     public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
@@ -157,7 +159,7 @@ public class HeightModelFactory extends ColorModelFactory
         ImmutableList.Builder<RawQuad> general = new ImmutableList.Builder<RawQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.add(COLLISION_INSTANCE.makeFaceQuad(state, face));
+            general.add(this.makeFaceQuad(state, face));
         }        
         return general.build();
     }

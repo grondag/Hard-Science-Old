@@ -13,10 +13,7 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import com.google.common.collect.ImmutableList;
@@ -48,7 +45,7 @@ public class ModelDispatcher implements IBakedModel
     private final boolean renderLayerFlags[] = new boolean[BlockRenderLayer.values().length];
     private final boolean shadedFlags[] = new boolean[BlockRenderLayer.values().length];
     private final SparseLayerMapBuilder layerMapBuilder;
-    private final AbstractCollisionHandler collisionHandler;
+//    private final AbstractCollisionHandler collisionHandler;
     
     private TextureAtlasSprite particleTexture;
 
@@ -159,16 +156,16 @@ public class ModelDispatcher implements IBakedModel
         }
         this.stateSet = ModelStateSet.find(subSets);
 
-        HashSet<AbstractCollisionHandler> collisionHandlers = new HashSet<AbstractCollisionHandler>();
+//        HashSet<AbstractCollisionHandler> collisionHandlers = new HashSet<AbstractCollisionHandler>();
 
         for(int i = 0; i < models.length; i++)
         {
             subSets[i] = models[i].getStateSet();
-            AbstractCollisionHandler handler = models[i].getCollisionHandler(this);
-            if(handler != null)
-            {
-                collisionHandlers.add(handler);
-            }
+//            AbstractCollisionHandler handler = models[i].getCollisionHandler(this);
+//            if(handler != null)
+//            {
+//                collisionHandlers.add(handler);
+//            }
             
             for(BlockRenderLayer layer : BlockRenderLayer.values())
             {
@@ -181,18 +178,18 @@ public class ModelDispatcher implements IBakedModel
             }
         }
        
-        if(collisionHandlers.isEmpty())
-        {
-            this.collisionHandler = null;
-        }
-        else if(collisionHandlers.size() == 1)
-        {
-            this.collisionHandler = (AbstractCollisionHandler) collisionHandlers.toArray()[0];
-        }
-        else
-        {
-            this.collisionHandler = new CompositeCollisionHandler(collisionHandlers);
-        }
+//        if(collisionHandlers.isEmpty())
+//        {
+//            this.collisionHandler = null;
+//        }
+//        else if(collisionHandlers.size() == 1)
+//        {
+//            this.collisionHandler = (AbstractCollisionHandler) collisionHandlers.toArray()[0];
+//        }
+//        else
+//        {
+//            this.collisionHandler = new CompositeCollisionHandler(collisionHandlers);
+//        }
         
         layerMapBuilder = new SparseLayerMapBuilder(layerList);
    
@@ -231,10 +228,10 @@ public class ModelDispatcher implements IBakedModel
     /**
      * Override if special collision handling is needed due to non-cubic shape.
      */
-    public AbstractCollisionHandler getCollisionHandler()
-    {
-        return this.collisionHandler;
-    }
+//    public AbstractCollisionHandler getCollisionHandler()
+//    {
+//        return this.collisionHandler;
+//    }
 
     /**
      * Used by NiceBlock to control rendering.

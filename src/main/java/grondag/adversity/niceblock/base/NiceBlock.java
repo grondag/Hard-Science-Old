@@ -97,12 +97,6 @@ public class NiceBlock extends Block implements IWailaProvider
      */
     private final String displayName;
  
-    /**
-     * CAN BE NULL! If non-null, blocks requires special collision handling, typically because it is not a standard cube shape. Retrieved from model cook book at instantiation and
-     * reference saved for simpler coding.
-     */
-    public final AbstractCollisionHandler collisionHandler;
-    
     public final ModelDispatcher dispatcher;
         
     /** non-null if this drops something other than itself */
@@ -128,8 +122,6 @@ public class NiceBlock extends Block implements IWailaProvider
         String makeName = I18n.translateToLocal(getStyleName());
         if(makeName == null || makeName.equals("")) makeName = getStyleName();
         displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
-
-        collisionHandler = dispatcher.getCollisionHandler();
 
         // let registrar know to register us when appropriate
         NiceBlockRegistrar.allBlocks.add(this);
@@ -379,7 +371,7 @@ public class NiceBlock extends Block implements IWailaProvider
      */
     public boolean needsCustomHighlight()
     {
-        return this.collisionHandler != null;
+        return this.dispatcher.getStateSet().shape.getCollisionHandler() != null;
     }
     
     @SuppressWarnings("deprecation")
@@ -387,6 +379,8 @@ public class NiceBlock extends Block implements IWailaProvider
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {
+        AbstractCollisionHandler collisionHandler = this.dispatcher.getStateSet().shape.getCollisionHandler();
+        
         if (collisionHandler == null)
         {
             super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185477_7_);
@@ -395,7 +389,7 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
             
-            List<AxisAlignedBB> bounds = this.collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos));
+            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos));
  
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
@@ -410,13 +404,13 @@ public class NiceBlock extends Block implements IWailaProvider
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        if (collisionHandler == null)
+        if (this.dispatcher.getStateSet().shape.getCollisionHandler() == null)
         {
             return super.getCollisionBoundingBox(state, worldIn, pos);
         }
         else
         {
-            return this.collisionHandler.getCollisionBoundingBox(state, worldIn, pos);
+            return this.dispatcher.getStateSet().shape.getCollisionHandler().getCollisionBoundingBox(state, worldIn, pos);
         }
     }
     
@@ -425,7 +419,7 @@ public class NiceBlock extends Block implements IWailaProvider
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
-        if (collisionHandler == null)
+        if (this.dispatcher.getStateSet().shape.getCollisionHandler() == null)
         {
             return super.collisionRayTrace(blockState, worldIn, pos, start, end);
         }
@@ -462,7 +456,7 @@ public class NiceBlock extends Block implements IWailaProvider
     @SuppressWarnings("deprecation")
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
 
-        if (collisionHandler == null)
+        if (this.dispatcher.getStateSet().shape.getCollisionHandler() == null)
         {
             return new ImmutableList.Builder<AxisAlignedBB>().add(this.getBoundingBox(state, worldIn, pos)).build();
         }
@@ -470,7 +464,7 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
     
-            for (AxisAlignedBB aabb : this.collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
+            for (AxisAlignedBB aabb : this.dispatcher.getStateSet().shape.getCollisionHandler().getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
             {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }

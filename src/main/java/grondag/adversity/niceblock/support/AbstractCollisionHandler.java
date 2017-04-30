@@ -19,8 +19,6 @@ public abstract class AbstractCollisionHandler
 {
     protected final LongSimpleLoadingCache<List<AxisAlignedBB>> modelBounds = new LongSimpleLoadingCache<List<AxisAlignedBB>>(new ComplexBoundsLoader(),  0xFFF);
     
-//    protected final ManagedLoadingCache<AxisAlignedBB> collisionBounds = new ManagedLoadingCache<AxisAlignedBB>(new CollisionBoundsLoader(), 0xF, 0xFFF);
-
     public List<AxisAlignedBB> getCollisionBoxes(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelStateSetValue modelState)
     {
         return modelBounds.get(getCollisionKey(state, worldIn, pos, modelState));
@@ -45,13 +43,5 @@ public abstract class AbstractCollisionHandler
             return CollisionBoxGenerator.makeCollisionBoxList(getCollisionQuads(key));
         }
     }
-//
-//    protected class CollisionBoundsLoader implements SimpleCacheLoader<AxisAlignedBB>
-//    {
-//        @Override
-//        public AxisAlignedBB load(long key)
-//        {
-//            return CollisionBoxGenerator.makeBoxSimpleMethod(getCollisionQuads(key));
-//        }
-//    }
+
 }

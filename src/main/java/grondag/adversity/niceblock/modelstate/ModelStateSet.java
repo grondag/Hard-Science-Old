@@ -63,9 +63,9 @@ public class ModelStateSet
         
         int shapeOffset = ModelStateComponents.getCount();
         
-        for(int b = 0; b <= SHAPE_MASK; b = b << 1)
+        for(int b = 1; b <= SHAPE_MASK; b = b << 1)
         {
-            if((b & shapeIn.ordinal()) == b)
+            if((b & shapeIn.ordinal()) != 0)
             {
                 key.set(shapeOffset++);
             }
@@ -302,15 +302,42 @@ public class ModelStateSet
         
         /**
          * Unique ID encapsulating entire state.
+           This object will be the key itself.
          */
+        @Deprecated
         public long getKey()
         {
             return key;
         }
         
-        public ModelStateSet getStateSet()
+        private ModelStateSet getStateSet()
         {
             return ModelStateSet.this;
+        }
+
+        @Override
+        public ModelShape getShape()
+        {
+            return ModelStateSet.this.shape;
+        }
+        
+        @Override
+        public boolean equals(Object obj)
+        {
+            if(obj instanceof ModelStateSetValue)
+            {
+                if(this == obj) return true;
+                ModelStateSetValue other = (ModelStateSetValue)obj;
+                return other.getShape() == this.getShape() && other.key == this.key;
+            }
+            return false;
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            //TODO may not be good distribution to just add the shape ordinal...
+            return (int)(Useful.longHash(this.key + getShape().ordinal()));
         }
     }
 }

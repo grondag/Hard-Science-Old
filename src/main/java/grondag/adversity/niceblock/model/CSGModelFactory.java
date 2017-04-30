@@ -9,7 +9,6 @@ import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
@@ -18,7 +17,6 @@ import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -27,10 +25,13 @@ import net.minecraft.util.math.Vec3d;
 
 public class CSGModelFactory extends ModelFactory<ModelAppearance>
 {
-    private static ModelAppearance COLLISION_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private static CSGModelFactory COLLISION_INSTANCE = new CSGModelFactory(COLLISION_INPUTS, ModelStateComponents.COLORS_WHITE,
-            ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
-    private static SimpleCollisionHandler COLLISION_HANDLER = new SimpleCollisionHandler(COLLISION_INSTANCE);
+    public static SimpleCollisionHandler makeCollisionHandler()
+    {
+        ModelAppearance inputs = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+        CSGModelFactory factory = new CSGModelFactory(inputs, ModelStateComponents.COLORS_WHITE,
+                ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
+        return new SimpleCollisionHandler(factory);
+    }
     
     public CSGModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
     {
@@ -151,15 +152,15 @@ public class CSGModelFactory extends ModelFactory<ModelAppearance>
         return builder.build();
     }
 
-    @Override
-    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
-    {
-        return COLLISION_HANDLER;
-    }
+//    @Override
+//    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
+//    {
+//        return COLLISION_HANDLER;
+//    }
 
     @Override
     public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        return COLLISION_INSTANCE.makeRawQuads(state);
+        return this.makeRawQuads(state);
     }
 }
