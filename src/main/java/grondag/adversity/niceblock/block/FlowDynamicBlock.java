@@ -151,7 +151,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
         double volume = 0;
-        for(AxisAlignedBB box : this.dispatcher.getStateSet().shape.getCollisionHandler().getCollisionBoxes(state, world, pos, this.getModelState(state, world, pos)))
+        for(AxisAlignedBB box : this.dispatcher.getStateSet().shape.collisionHandler().getCollisionBoxes(state, world, pos, this.getModelState(state, world, pos)))
         {
             volume += Useful.AABBVolume(box);
         }
