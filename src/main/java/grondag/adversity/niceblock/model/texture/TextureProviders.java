@@ -1,9 +1,9 @@
-package grondag.adversity.niceblock.texture;
+package grondag.adversity.niceblock.model.texture;
 
 import java.util.ArrayList;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.texture.TextureProvider.Texture;
+import grondag.adversity.niceblock.model.texture.TextureProvider.Texture;
 import net.minecraft.util.BlockRenderLayer;
 
 public class TextureProviders

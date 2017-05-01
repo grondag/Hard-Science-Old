@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.modelstate;
+package grondag.adversity.niceblock.model.shape;
 
 
 import java.util.ArrayList;
@@ -8,9 +8,8 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.model.CSGModelFactory;
-import grondag.adversity.niceblock.model.FlowModelFactory;
-import grondag.adversity.niceblock.model.HeightModelFactory;
+import grondag.adversity.niceblock.modelstate.ModelStateComponent;
+import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 
 public enum ModelShape

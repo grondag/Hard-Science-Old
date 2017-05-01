@@ -4,9 +4,9 @@ import java.util.List;
 
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.texture.TextureProvider;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 

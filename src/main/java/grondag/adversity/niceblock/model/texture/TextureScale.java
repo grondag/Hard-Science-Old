@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.texture;
+package grondag.adversity.niceblock.model.texture;
 
 public enum TextureScale
 {

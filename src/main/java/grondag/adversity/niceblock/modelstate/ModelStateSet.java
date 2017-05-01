@@ -10,6 +10,7 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.niceblock.model.shape.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 
 import net.minecraft.block.state.IBlockState;

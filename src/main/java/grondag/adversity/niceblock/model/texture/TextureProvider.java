@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.texture;
+package grondag.adversity.niceblock.model.texture;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,8 +7,8 @@ import java.util.List;
 import grondag.adversity.library.BitPacker;
 import grondag.adversity.library.BitPacker.BitElement;
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.model.BorderModelFactory;
-import grondag.adversity.niceblock.model.MasonryModelFactory;
+import grondag.adversity.niceblock.model.shape.painter.BorderModelFactory;
+import grondag.adversity.niceblock.model.shape.painter.MasonryModelFactory;
 import net.minecraft.util.BlockRenderLayer;
 
 public class TextureProvider

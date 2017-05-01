@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.model;
+package grondag.adversity.niceblock.model.shape;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,12 +12,13 @@ import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.model.shape.painter.ColorModelFactory;
+import grondag.adversity.niceblock.model.texture.TextureProviders;
+import grondag.adversity.niceblock.model.texture.TextureProvider.Texture.TextureState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
-import grondag.adversity.niceblock.texture.TextureProviders;
-import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;

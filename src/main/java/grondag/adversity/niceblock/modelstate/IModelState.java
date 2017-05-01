@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.model.shape.ModelShape;
 
 public interface IModelState
 {
