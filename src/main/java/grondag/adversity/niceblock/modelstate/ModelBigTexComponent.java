@@ -1,7 +1,7 @@
 package grondag.adversity.niceblock.modelstate;
 
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.model.shape.painter.BigTexModelFactory;
+import grondag.adversity.niceblock.model.painter.BigTexModelFactory;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;

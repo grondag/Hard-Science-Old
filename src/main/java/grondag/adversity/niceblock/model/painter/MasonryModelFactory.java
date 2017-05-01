@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.model.shape.painter;
+package grondag.adversity.niceblock.model.painter;
 
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.joinstate.SimpleJoinFaceState;
