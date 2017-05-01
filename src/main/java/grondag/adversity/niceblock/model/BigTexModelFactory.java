@@ -4,11 +4,13 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
+import grondag.adversity.niceblock.texture.TextureScale;
+
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
@@ -18,11 +20,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BigTexModelFactory extends ModelFactory<ModelAppearance>
+public class BigTexModelFactory extends ModelFactory
 {
-    
-    private final TextureScale scale;
-	
 	/** Tells us which face to select for each block within a 16x16x16 
 	 * space for up to 16 different meta values.
 	 * 
@@ -30,20 +29,21 @@ public class BigTexModelFactory extends ModelFactory<ModelAppearance>
 	 */
 	protected final static FaceSelector[] FACE_SELECTORS = new FaceSelector[16 * 4096];
 
-	public BigTexModelFactory(ModelAppearance modelInputs, TextureScale scale, ModelStateComponent<?,?>... components)
+	public BigTexModelFactory(ModelStateComponent<?,?>... components)
 	{
-		super(ModelShape.CUBE, modelInputs, components);
-		this.scale = scale;
+		super(ModelShape.CUBE, components);
 	}
 
-	private List<BakedQuad> makeBigTexFace(ModelStateSetValue state, int faceIndex, EnumFacing face)
+	private List<BakedQuad> makeBigTexFace(TextureState texState, ModelStateSetValue state, int faceIndex, EnumFacing face)
 	{
 		CubeInputs cube = new CubeInputs();
 		cube.color = state.getValue(colorComponent).getColor(EnumColorMap.BASE);
 		cube.textureSprite = 
             Minecraft.getMinecraft().getTextureMapBlocks()
-            .getAtlasSprite(buildTextureName(modelInputs.textureName, 0));
+            .getAtlasSprite(texState.buildTextureName());
 
+		TextureScale scale = texState.textureScale();
+		
         int i = ((faceIndex >> 4) * scale.sliceIncrement) & 15;
         int j = (faceIndex * scale.sliceIncrement) & 15;
         
@@ -134,22 +134,22 @@ public class BigTexModelFactory extends ModelFactory<ModelAppearance>
 	}
 
 	@Override
-    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
         
         QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
             int faceIndex = FACE_SELECTORS[state.getValue(this.bigTexComponent).getIndex()].selectors[face.ordinal()];
-            builder.setQuads(face, makeBigTexFace(state, faceIndex, face));
+            builder.setQuads(face, makeBigTexFace(texState, state, faceIndex, face));
         }
         return builder.build();
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
+    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
     {
         CubeInputs cubeInputs = new CubeInputs();
         cubeInputs.u0 = 0;
@@ -157,10 +157,10 @@ public class BigTexModelFactory extends ModelFactory<ModelAppearance>
         cubeInputs.u1 = 1;
         cubeInputs.v1 = 1;
         cubeInputs.isItem = true;
-        cubeInputs.isOverlay = modelInputs.renderLayer != BlockRenderLayer.SOLID;
+        cubeInputs.isOverlay = texState.renderLayer != BlockRenderLayer.SOLID;
         cubeInputs.color = state.getValue(colorComponent).getColor(EnumColorMap.BASE);
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks()
-                .getAtlasSprite(buildTextureName(modelInputs.textureName, 0));
+                .getAtlasSprite(texState.buildTextureName());
 
         ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
 
@@ -171,12 +171,6 @@ public class BigTexModelFactory extends ModelFactory<ModelAppearance>
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.NORTH));
         itemBuilder.addAll(cubeInputs.makeFace(EnumFacing.SOUTH));
         return itemBuilder.build();     
-    }
-
-    @Override
-    public String buildTextureName(String baseName, int offset)
-    {
-        return "adversity:blocks/" + baseName;
     }
     
     public static class BigTexInfo

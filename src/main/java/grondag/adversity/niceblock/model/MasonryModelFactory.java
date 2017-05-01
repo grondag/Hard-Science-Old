@@ -7,13 +7,13 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
 
 import java.util.List;
 
@@ -24,53 +24,35 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 
-public class MasonryModelFactory extends ModelFactory<ModelAppearance>
+public class MasonryModelFactory extends ModelFactory
 {
+    public static int TEXTURE_COUNT = Textures.values().length;
+    public static int TEXTURE_BLOCK_SIZE = 8;
+    
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][SimpleJoinFaceState.values().length];
 
-	public MasonryModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
+	public MasonryModelFactory(ModelStateComponent<?,?>... components)
     {
-        super(ModelShape.CUBE, modelInputs, components);
+        super(ModelShape.CUBE, components);
     }
 
-	    
-    /**
-     * Textures are generated in blocks of 8, but only some are used in each block.
-     * Skip the unused ones so that we don't waste texture memory.
-     */
-    @Override
-    public String[] getAllTextureNames()
+    private List<BakedQuad> makeFaceQuads(TextureState texState, ModelStateSetValue state, EnumFacing face) 
     {
-        String[] textures = new String[(int) this.textureComponent.getValueCount() * TEXTURE_COUNT];
-        
-        for(int i = 0; i < this.textureComponent.getValueCount(); i++)
-        {
-            for(int j = 0; j < TEXTURE_COUNT; j++)
-            {
-                textures[i * TEXTURE_COUNT + j] = this.buildTextureName(modelInputs.textureName, i * TEXTURE_BLOCK_SIZE + j);
-            }
-        }
-        return textures;
-    }
-
-     private List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face) 
-    {
-    	
         if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
         
         SimpleJoinFaceState fjs = SimpleJoinFaceState.find(face, state.getValue(ModelStateComponents.MASONRY_JOIN));
         int altTextureIndex = state.getValue(this.textureComponent);
-        return makeFace(face, fjs, state.getValue(this.colorComponent), altTextureIndex, false);
+        return makeFace(texState, face, fjs, state.getValue(this.colorComponent), altTextureIndex, false);
     }
 
-	private List<BakedQuad> makeFace(EnumFacing face, SimpleJoinFaceState fjs, ColorMap colorMap, int altTextureIndex, boolean isItem)
+	private List<BakedQuad> makeFace(TextureState texState, EnumFacing face, SimpleJoinFaceState fjs, ColorMap colorMap, int altTextureIndex, boolean isItem)
 	{
         /** bump out slightly on item models to avoid depth-fighting */
 
        FaceQuadInputs inputs = FACE_INPUTS[face.ordinal()][fjs.ordinal()];
        
        if(inputs == null) return QuadFactory.EMPTY_QUAD_LIST;
-       
+           
        CubeInputs cubeInputs = new CubeInputs();
        cubeInputs.color = colorMap.getColor(EnumColorMap.BORDER);
        cubeInputs.textureRotation = inputs.rotation;
@@ -82,32 +64,32 @@ public class MasonryModelFactory extends ModelFactory<ModelAppearance>
        cubeInputs.isItem = isItem;
        cubeInputs.textureSprite = 
                Minecraft.getMinecraft().getTextureMapBlocks()
-               .getAtlasSprite(buildTextureName(modelInputs.textureName, altTextureIndex * TEXTURE_BLOCK_SIZE + inputs.textureOffset));
+               .getAtlasSprite(texState.buildTextureName(altTextureIndex, inputs.textureOffset));
        
        return cubeInputs.makeFace(face);
 	}
 	
     @Override
-    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
         QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
-            builder.setQuads(face, makeFaceQuads(state, face));
+            builder.setQuads(face, makeFaceQuads(texState, state, face));
         }
         return builder.build();
     }
     
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
+    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
     {
         ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
         
         for(EnumFacing face : EnumFacing.values())
         {
-        	itemBuilder.addAll(makeFace(face, SimpleJoinFaceState.ALL, state.getValue(this.colorComponent), 0, true));
+        	itemBuilder.addAll(makeFace(texState, face, SimpleJoinFaceState.ALL, state.getValue(this.colorComponent), 0, true));
         }
         return itemBuilder.build(); 
     }
@@ -120,9 +102,6 @@ public class MasonryModelFactory extends ModelFactory<ModelAppearance>
     	BOTTOM,
     	ALL;
     }
-    
-    private static int TEXTURE_COUNT = Textures.values().length;
-    private static int TEXTURE_BLOCK_SIZE = 8;
     
     static
     {

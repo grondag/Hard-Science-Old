@@ -29,7 +29,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -40,7 +39,7 @@ public class ModelDispatcher implements IBakedModel
 {
     private final String resourceName = UUID.randomUUID().toString();
     private final String particleTextureName;
-    private final ModelFactory<?>[] models;
+    private final ModelHolder[] models;
     private final ModelStateSet stateSet;
     private final boolean renderLayerFlags[] = new boolean[BlockRenderLayer.values().length];
     private final boolean shadedFlags[] = new boolean[BlockRenderLayer.values().length];
@@ -112,7 +111,7 @@ public class ModelDispatcher implements IBakedModel
 			for(BlockRenderLayer layer : layerMapBuilder.layerList)
 			{
 				ArrayList<QuadContainer> containers = new ArrayList<QuadContainer>();
-				for(ModelFactory<?> model : models)
+				for(ModelHolder model : models)
 				{
 					containers.add(model.getFaceQuads(state, layer));
 				}
@@ -130,7 +129,7 @@ public class ModelDispatcher implements IBakedModel
 			ModelStateSetValue state = stateSet.getSetValueFromKey(key);
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 			
-			for(ModelFactory<?> model : models)
+			for(ModelHolder model : models)
 			{
 				builder.addAll(model.getItemQuads(state));
 			}
@@ -138,12 +137,12 @@ public class ModelDispatcher implements IBakedModel
 		}       
     }
   
-    public ModelDispatcher(ModelFactory<?>... models)
+    public ModelDispatcher(ModelHolder... models)
     {
     	this(models[0].getDefaultParticleTexture(), models);
     }
     
-    public ModelDispatcher(String particleTextureName, ModelFactory<?>... models)
+    public ModelDispatcher(String particleTextureName, ModelHolder... models)
     {
         this.particleTextureName = particleTextureName;
         this.models = models;
@@ -173,7 +172,7 @@ public class ModelDispatcher implements IBakedModel
                 {
                     renderLayerFlags[layer.ordinal()] = true;
                     layerList.add(layer);
-                    shadedFlags[layer.ordinal()] = shadedFlags[layer.ordinal()] || models[i].modelInputs.lightingMode == LightingMode.SHADED;
+                    shadedFlags[layer.ordinal()] = shadedFlags[layer.ordinal()] || models[i].lightingMode() == LightingMode.SHADED;
                 }
             }
         }
@@ -196,33 +195,11 @@ public class ModelDispatcher implements IBakedModel
         NiceBlockRegistrar.allDispatchers.add(this);
     }
         
-    /**
-     * Register all textures that will be needed for associated models. 
-     * Happens before model bake.
-     */
-    public void handleTexturePreStitch(Pre event)
-    {
-        event.getMap().registerSprite(new ResourceLocation(particleTextureName));
-        
-        for(ModelFactory<?> model : models)
-        {
-            for (String tex : model.getAllTextureNames())
-            {
-                event.getMap().registerSprite(new ResourceLocation(tex));
-            }
-        }
-    }
-
-    public void handleBakeEvent(ModelBakeEvent event)
+      public void handleBakeEvent(ModelBakeEvent event)
     {
         //clear caches to force rebaking of cached models
         modelCache.clear();
         itemCache.clear();
-        
-        for(ModelFactory<?> model : models)
-        {
-            model.handleBakeEvent(event);
-        }
     }
 
     /**

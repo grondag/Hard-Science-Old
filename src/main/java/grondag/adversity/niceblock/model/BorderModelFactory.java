@@ -8,12 +8,12 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.BlockRenderLayer;
 
-public class BorderModelFactory extends ModelFactory<ModelAppearance>
+public class BorderModelFactory extends ModelFactory
 {    
     protected final static FaceQuadInputs[][] FACE_INPUTS = new FaceQuadInputs[EnumFacing.values().length][CornerJoinFaceState.values().length];
     
@@ -44,60 +44,39 @@ public class BorderModelFactory extends ModelFactory<ModelAppearance>
     private final static int TEXTURE_JOIN_ALL_TR_BL_BR = 11;
     private final static int TEXTURE_JOIN_ALL_ALL_CORNERS = 12;
     
-    private final static int TEXTURE_COUNT = 13;
-    private final static int TEXTURE_BLOCK_SIZE = 16;
+    public final static int TEXTURE_COUNT = 13;
+    public final static int TEXTURE_BLOCK_SIZE = 16;
  
-    public BorderModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
+    public BorderModelFactory(ModelStateComponent<?,?>... components)
     {
-        super(ModelShape.COLUMN_SQUARE, modelInputs, components);
+        super(ModelShape.COLUMN_SQUARE, components);
     }
     
-
-    /**
-     * Textures are generated in blocks of 16, but only 13 are used in each block.
-     * Skip the unused ones so that we don't waste texture memory.
-     */
-    @Override
-    public String[] getAllTextureNames()
-    {
-        String[] textures = new String[(int) this.textureComponent.getValueCount() * TEXTURE_COUNT];
-        
-        for(int i = 0; i < this.textureComponent.getValueCount(); i++)
-        {
-            for(int j = 0; j < TEXTURE_COUNT; j++)
-            {
-                textures[i * TEXTURE_COUNT + j] = this.buildTextureName(modelInputs.textureName, i * TEXTURE_BLOCK_SIZE + j);
-            }
-        }
-        return textures;
-    }
-
-    
-    public List<BakedQuad> makeFaceQuads(ModelStateSetValue state, EnumFacing face) 
+    public List<BakedQuad> makeFaceQuads(TextureState texState, ModelStateSetValue state, EnumFacing face) 
     {
     	if (face == null) return QuadFactory.EMPTY_QUAD_LIST;
     	
     	CornerJoinBlockState bjs = state.getValue(ModelStateComponents.CORNER_JOIN);
         int altTextureIndex = state.getValue(this.textureComponent);
-        return makeBorderFace(state.getValue(this.colorComponent).getColor(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
+        return makeBorderFace(texState, state.getValue(this.colorComponent).getColor(EnumColorMap.BORDER), altTextureIndex, bjs.getFaceJoinState(face), face);
     }
 
 
     @Override
-    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
         QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
-            builder.setQuads(face, makeFaceQuads(state, face));
+            builder.setQuads(face, makeFaceQuads(texState, state, face));
         }
         return builder.build();
     }
     
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
+    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
     {
         CubeInputs cubeInputs = new CubeInputs();
         cubeInputs.u0 = 0;
@@ -105,10 +84,10 @@ public class BorderModelFactory extends ModelFactory<ModelAppearance>
         cubeInputs.u1 = 16;
         cubeInputs.v1 = 16;
         cubeInputs.isItem = true;
-        cubeInputs.isOverlay = modelInputs.renderLayer != BlockRenderLayer.SOLID;
+        cubeInputs.isOverlay = texState.renderLayer != BlockRenderLayer.SOLID;
         cubeInputs.color = state.getValue(this.colorComponent).getColor(EnumColorMap.BORDER);
         cubeInputs.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                buildTextureName(modelInputs.textureName, TEXTURE_JOIN_NONE));
+                texState.buildTextureName(0, TEXTURE_JOIN_NONE));
 
         ImmutableList.Builder<BakedQuad> itemBuilder = new ImmutableList.Builder<BakedQuad>();
 
@@ -121,7 +100,7 @@ public class BorderModelFactory extends ModelFactory<ModelAppearance>
         return itemBuilder.build(); 
     }
 
-    private List<BakedQuad> makeBorderFace(int color, int alternateTextureIndex, CornerJoinFaceState fjs, EnumFacing face){
+    private List<BakedQuad> makeBorderFace(TextureState texState, int color, int alternateTextureIndex, CornerJoinFaceState fjs, EnumFacing face){
         
         FaceQuadInputs inputs = FACE_INPUTS[face.ordinal()][fjs.ordinal()];
         
@@ -140,7 +119,7 @@ public class BorderModelFactory extends ModelFactory<ModelAppearance>
         cubeInputs.v1 = inputs.flipV ? 0 : 16;
         cubeInputs.textureSprite = 
                 Minecraft.getMinecraft().getTextureMapBlocks()
-                    .getAtlasSprite(buildTextureName(modelInputs.textureName, alternateTextureIndex * TEXTURE_BLOCK_SIZE + inputs.textureOffset));
+                    .getAtlasSprite(texState.buildTextureName(alternateTextureIndex, inputs.textureOffset));
         
         return cubeInputs.makeFace(face);
     }

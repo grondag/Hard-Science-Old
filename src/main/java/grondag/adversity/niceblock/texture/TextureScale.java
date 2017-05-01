@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.model;
+package grondag.adversity.niceblock.texture;
 
 public enum TextureScale
 {
@@ -13,7 +13,7 @@ public enum TextureScale
     /** 1x1 */
     SINGLE(16);
     
-    protected final int sliceIncrement;
+    public final int sliceIncrement;
     
     private TextureScale(int sliceIncrement)
     {

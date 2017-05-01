@@ -15,6 +15,7 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.modelstate.ModelTextureVersionComponent;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -22,13 +23,11 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.event.ModelBakeEvent;
 
-public abstract class ModelFactory<V extends ModelAppearance>
+public abstract class ModelFactory
 {
     protected final ModelStateSet stateSet;
     protected final ModelShape shape;
-    protected final V modelInputs;
     protected final ModelColorMapComponent colorComponent;
     protected final ModelTextureVersionComponent textureComponent;
     protected final ModelRotationComponent rotationComponent;
@@ -36,10 +35,9 @@ public abstract class ModelFactory<V extends ModelAppearance>
     protected final ModelSpeciesComponent speciesComponent;
     protected final ModelFlowTexComponent flowTexComponent;
     
-    public ModelFactory(ModelShape shape, V modelInputs, ModelStateComponent<?,?>... components)
+    public ModelFactory(ModelShape shape, ModelStateComponent<?,?>... components)
     {
         this.stateSet = ModelStateSet.find(shape, components);
-        this.modelInputs = modelInputs;
         this.shape = shape;
 
         ModelColorMapComponent colorComponent = null;
@@ -73,15 +71,10 @@ public abstract class ModelFactory<V extends ModelAppearance>
         this.flowTexComponent = flowTexComponent;
     }
     
-    public boolean canRenderInLayer(BlockRenderLayer renderLayer) 
-    { 
-        return this.modelInputs.renderLayer == renderLayer;
-    }
-
     public ModelStateSet getStateSet() { return stateSet; }
     
-    public abstract QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer);
-    public abstract List<BakedQuad> getItemQuads(ModelStateSetValue state);    
+    public abstract QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer);
+    public abstract List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state);    
     
     /** 
      * Provide fast, simple quads for generating collision boxes. 
@@ -91,50 +84,7 @@ public abstract class ModelFactory<V extends ModelAppearance>
     {
         return Collections.emptyList();
     }
-    
-    /**
-     * Override if special collision handling is needed due to non-cubic shape.
-     */
-//    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
-//    {
-//        return null;
-//    }
-    
-    /** override if need to do some setup that must wait until bake event */
-    public void handleBakeEvent(ModelBakeEvent event)
-    {
-        // NOOP: default implementation assumes lazy baking
-    }
-    
-    /**
-     * Identifies all textures needed for texture stitch.
-     * Assumes a single texture per model.
-     * Override if have something more complicated.
-     */
-    public String[] getAllTextureNames()
-    {
-        if(this.modelInputs.textureName == null) return new String[0];
-        
-        final String retVal[] = new String[(int) this.textureComponent.getValueCount()];
-
-        for (int i = 0; i < retVal.length; i++)
-        {
-            retVal[i] = buildTextureName(this.modelInputs.textureName, i);
-        }
-        return retVal;
-    }
-    
-    /** used by dispatched as default particle texture */
-    public String getDefaultParticleTexture() 
-    { 
-    	return buildTextureName(modelInputs.textureName, 0);
-    }
-    
-    protected String buildTextureName(String baseName, int offset)
-    {
-        return "adversity:blocks/" + baseName + "_" + (offset >> 3) + "_" + (offset & 7);
-    }
-        
+       
     public  AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         return Block.FULL_BLOCK_AABB;

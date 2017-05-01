@@ -10,7 +10,6 @@ import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.ModelShape;
@@ -18,27 +17,32 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
+import grondag.adversity.niceblock.texture.TextureProviders;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.Vec3d;
 
-public class CSGModelFactory extends ModelFactory<ModelAppearance>
+public class CSGModelFactory extends ModelFactory
 {
     public static SimpleCollisionHandler makeCollisionHandler()
     {
-        ModelAppearance inputs = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-        CSGModelFactory factory = new CSGModelFactory(inputs, ModelStateComponents.COLORS_WHITE,
+        CSGModelFactory factory = new CSGModelFactory(ModelStateComponents.COLORS_WHITE,
                 ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
         return new SimpleCollisionHandler(factory);
     }
     
-    public CSGModelFactory(ModelAppearance modelInputs, ModelStateComponent<?,?>... components)
+    public CSGModelFactory(ModelStateComponent<?,?>... components)
     {
-        super(ModelShape.ICOSAHEDRON, modelInputs, components);
+        super(ModelShape.ICOSAHEDRON, components);
     }
-
-    protected List<RawQuad> makeRawQuads(ModelStateSetValue state)
+    
+    //TODO: should eventually be removed
+    private static TextureState DEFAULT_TEXTURE_STATE 
+        = TextureProviders.BLOCK_INDIVIDUAL.get(0).getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID);
+    
+    protected List<RawQuad> makeRawQuads(TextureState texState, ModelStateSetValue state)
     {
         RawQuad template = new RawQuad();
         template.lockUV = true;
@@ -46,8 +50,8 @@ public class CSGModelFactory extends ModelFactory<ModelAppearance>
         template.color = colorMap.getColor(EnumColorMap.BASE);
         template.rotation = state.getValue(rotationComponent);
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
-        template.lightingMode = modelInputs.lightingMode;
+                texState.buildTextureName(state.getValue(textureComponent)));
+        template.lightingMode = texState.lightingMode;
     
        // CSGShape  delta = null;
         CSGShape result = null;
@@ -132,18 +136,18 @@ public class CSGModelFactory extends ModelFactory<ModelAppearance>
     }
     
     @Override
-    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
         
-        return QuadContainer.fromRawQuads(this.makeRawQuads(state));
+        return QuadContainer.fromRawQuads(this.makeRawQuads(texState, state));
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
+    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        for(RawQuad quad : this.makeRawQuads(state))
+        for(RawQuad quad : this.makeRawQuads(texState, state))
         {
       
             builder.add(quad.createBakedQuad());
@@ -161,6 +165,6 @@ public class CSGModelFactory extends ModelFactory<ModelAppearance>
     @Override
     public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        return this.makeRawQuads(state);
+        return this.makeRawQuads(DEFAULT_TEXTURE_STATE, state);
     }
 }

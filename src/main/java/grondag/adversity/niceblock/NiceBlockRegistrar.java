@@ -5,7 +5,8 @@ import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.init.ModItems;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelAppearance;
+import grondag.adversity.niceblock.base.ModelFactory;
+import grondag.adversity.niceblock.base.ModelHolder;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -18,11 +19,10 @@ import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.block.HeightBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory;
-import grondag.adversity.niceblock.model.TextureScale;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
 import grondag.adversity.niceblock.model.ColorModelFactory;
-import grondag.adversity.niceblock.model.ColumnSquareModelFactory;
+//import grondag.adversity.niceblock.model.ColumnSquareModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory;
 import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
@@ -31,8 +31,12 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 import grondag.adversity.niceblock.support.NicePlacement;
+import grondag.adversity.niceblock.texture.TextureProvider;
+import grondag.adversity.niceblock.texture.TextureProviders;
+import grondag.adversity.niceblock.texture.TextureScale;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import net.minecraft.block.Block;
@@ -42,8 +46,10 @@ import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -77,146 +83,136 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
-    private final static ModelAppearance RAW_FLEXSTONE_INPUTS = new ModelAppearance("raw_flexstone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static ColorModelFactory RAW_FLEXSTONE_MODEL = new ColorModelFactory(RAW_FLEXSTONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+
+    private final static ModelHolder RAW_FLEXSTONE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION), 
+            TextureProviders.TEX_BLOCK_RAW_FLEXSTONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher RAW_FLEXSTONE_DISPATCH = new ModelDispatcher(RAW_FLEXSTONE_MODEL);
     public static final NiceBlock RAW_FLEXSTONE_BLOCK = new NiceBlock(RAW_FLEXSTONE_DISPATCH, BaseMaterial.FLEXSTONE, "raw");
     public static final NiceItemBlock RAW_FLEXSTONE_ITEM = new NiceItemBlock(RAW_FLEXSTONE_BLOCK);
     
-    private final static ModelAppearance RAW_DURASTONE_INPUTS = new ModelAppearance("raw_durastone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static ColorModelFactory RAW_DURASTONE_MODEL = new ColorModelFactory(RAW_DURASTONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private final static ModelHolder RAW_DURASTONE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
+            TextureProviders.TEX_BLOCK_RAW_DURASTONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher RAW_DURASTONE_DISPATCH = new ModelDispatcher(RAW_DURASTONE_MODEL);
     public static final NiceBlock RAW_DURASTONE_BLOCK = new NiceBlock(RAW_DURASTONE_DISPATCH, BaseMaterial.DURASTONE, "raw");
     public static final NiceItemBlock RAW_DURASTONE_ITEM = new NiceItemBlock(RAW_DURASTONE_BLOCK);
 
-    private final static ModelAppearance COLORED_STONE_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static ColorModelFactory COLORED_STONE_MODEL = new ColorModelFactory(COLORED_STONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private final static ModelHolder COLORED_STONE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
+            TextureProviders.TEX_BLOCK_COLORED_STONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher COLORED_STONE_DISPATCH = new ModelDispatcher(COLORED_STONE_MODEL);
     public static final NiceBlockPlus COLORED_STONE_BLOCK = new NiceBlockPlus(COLORED_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "colored");
     public static final NiceItemBlock COLORED_STONE_ITEM = new NiceItemBlock(COLORED_STONE_BLOCK);
     
-    private final static ModelAppearance BIGTEX_INPUTS = new ModelAppearance("weathered_smooth_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static BigTexModelFactory BIGTEX_MODEL = new BigTexModelFactory(BIGTEX_INPUTS, TextureScale.LARGE, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1);
+    private final static ModelHolder BIGTEX_MODEL = new ModelHolder(new BigTexModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1),
+            TextureProviders.TEX_BT_WEATHERED_STONE.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL);
     public static final NiceBlockPlus BIGTEX_BLOCK = new NiceBlockPlus(BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigtex");
     public static final NiceItemBlock BIGTEX_ITEM = new NiceItemBlock(BIGTEX_BLOCK);
 
-    private final static ModelAppearance BORDER_INPUTS = new ModelAppearance("bordertest", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static BorderModelFactory BORDER_MODEL = new BorderModelFactory(BORDER_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1);
+    private final static ModelHolder BORDER_MODEL = new ModelHolder(new BorderModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1),
+            TextureProviders.TEX_BORDER_TEST.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT));
 
     private static final ModelDispatcher BORDER_BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL, BORDER_MODEL);
     public static final BigBlock BORDER_BIGTEX_BLOCK = new BigBlock(BORDER_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "border", NicePlacement.PLACEMENT_3x3x3);
     public static final NiceItemBlock BORDER_BIGTEX_ITEM = new NiceItemBlock(BORDER_BIGTEX_BLOCK);
 
-    private final static ModelAppearance MASONRY_INPUTS = new ModelAppearance("masonrytest", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
-    private final static MasonryModelFactory MASONRY_MODEL = new MasonryModelFactory(MASONRY_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.MASONRY_JOIN, ModelStateComponents.TEXTURE_1);
+    private final static ModelHolder MASONRY_MODEL = new ModelHolder(new MasonryModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.MASONRY_JOIN, ModelStateComponents.TEXTURE_1),
+            TextureProviders.TEX_MASONRY_TEST.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED));
 
     private static final ModelDispatcher MASONRY_BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL, MASONRY_MODEL);
     public static final BigBlock MASONRY_BIGTEX_BLOCK = new BigBlock(MASONRY_BIGTEX_DISPATCH, BaseMaterial.FLEXSTONE, "bigbrick", NicePlacement.PLACEMENT_2x1x1);
     public static final NiceItemBlock MASONRY_BIGTEX_ITEM = new NiceItemBlock(MASONRY_BIGTEX_BLOCK);
 
-    private static final ModelAppearance COLUMN_INPUTS_BASE 
-        = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+//    private static final ModelAppearance COLUMN_INPUTS_BASE 
+//        = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
+//
+//    private static final ModelAppearance COLUMN_INPUTS_LAMP 
+//    = new ModelAppearance("colored_stone", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
+//
+//    // need overlay on a separate layer to keep it out of AO lighting
+//    private static final ModelAppearance COLUMN_INPUTS_OVERLAY 
+//    = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
+//    
+//    
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
+//         = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 2, true, ColumnSquareModelFactory.ModelType.LAMP_BASE);
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_OUTER 
+//    = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 2, true, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
+//
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_2_INNER 
+//        = new ColumnSquareModelFactory(COLUMN_INPUTS_2_INNER, ModelStateComponents.COLORS_BLOCK,
+//            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_2_OUTER 
+//        = new ColumnSquareModelFactory(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
+//        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    
+//    private static final ModelDispatcher COLUMN_2_DISPATCH = new ModelDispatcher(COLUMN_MODEL_2_INNER , COLUMN_MODEL_2_OUTER);
+//    public static final ColumnSquareBlock COLUMN_2_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2");
+//    public static final NiceItemBlock COLUMN_2_ITEM = new NiceItemBlock(COLUMN_2_BLOCK);
+//
+//    
+//    
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_3 
+//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_BASE, 3, true, ColumnSquareModelFactory.ModelType.NORMAL);
+//  
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_3
+//        = new ColumnSquareModelFactory(COLUMN_INPUTS_3, ModelStateComponents.COLORS_BLOCK,
+//        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    
+//    private static final ModelDispatcher COLUMN_3_DISPATCH = new ModelDispatcher(COLUMN_MODEL_3);
+//    public static final ColumnSquareBlock COLUMN_3_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_3_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_3");
+//    public static final NiceItemBlock COLUMN_3_ITEM = new NiceItemBlock(COLUMN_3_BLOCK);
+//
+//    
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_4_INNER 
+//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 4, false, ColumnSquareModelFactory.ModelType.LAMP_BASE);
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_4_OUTER 
+//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 4, false, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
+//    
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_4_INNER 
+//       = new ColumnSquareModelFactory(COLUMN_INPUTS_4_INNER, ModelStateComponents.COLORS_BLOCK,
+//           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_4_OUTER 
+//       = new ColumnSquareModelFactory(COLUMN_INPUTS_4_OUTER, ModelStateComponents.COLORS_BLOCK,
+//       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    
+//    private static final ModelDispatcher COLUMN_4_DISPATCH = new ModelDispatcher(COLUMN_MODEL_4_INNER, COLUMN_MODEL_4_OUTER);
+//    public static final ColumnSquareBlock COLUMN_4_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_4_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_4");
+//    public static final NiceItemBlock COLUMN_4_ITEM = new NiceItemBlock(COLUMN_4_BLOCK);
+//
+//    
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_5_INNER 
+//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 5, false, ColumnSquareModelFactory.ModelType.LAMP_BASE);
+//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_5_OUTER 
+//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 5, false, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
+//    
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_5_INNER 
+//       = new ColumnSquareModelFactory(COLUMN_INPUTS_5_INNER, ModelStateComponents.COLORS_BLOCK,
+//           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    private final static ColumnSquareModelFactory COLUMN_MODEL_5_OUTER 
+//       = new ColumnSquareModelFactory(COLUMN_INPUTS_5_OUTER, ModelStateComponents.COLORS_BLOCK,
+//       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
+//    
+//    private static final ModelDispatcher COLUMN_5_DISPATCH = new ModelDispatcher(COLUMN_MODEL_5_INNER, COLUMN_MODEL_5_OUTER);
+//    public static final ColumnSquareBlock COLUMN_5_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_5_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_5");
+//    public static final NiceItemBlock COLUMN_5_ITEM = new NiceItemBlock(COLUMN_5_BLOCK);
 
-    private static final ModelAppearance COLUMN_INPUTS_LAMP 
-    = new ModelAppearance("colored_stone", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
-
-    // need overlay on a separate layer to keep it out of AO lighting
-    private static final ModelAppearance COLUMN_INPUTS_OVERLAY 
-    = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
-    
-    
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
-         = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 2, true, ColumnSquareModelFactory.ModelType.LAMP_BASE);
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_OUTER 
-    = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 2, true, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
-
-    private final static ColumnSquareModelFactory COLUMN_MODEL_2_INNER 
-        = new ColumnSquareModelFactory(COLUMN_INPUTS_2_INNER, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    private final static ColumnSquareModelFactory COLUMN_MODEL_2_OUTER 
-        = new ColumnSquareModelFactory(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
-        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    
-    private static final ModelDispatcher COLUMN_2_DISPATCH = new ModelDispatcher(COLUMN_MODEL_2_INNER , COLUMN_MODEL_2_OUTER);
-    public static final ColumnSquareBlock COLUMN_2_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2");
-    public static final NiceItemBlock COLUMN_2_ITEM = new NiceItemBlock(COLUMN_2_BLOCK);
-
-    
-    
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_3 
-        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_BASE, 3, true, ColumnSquareModelFactory.ModelType.NORMAL);
-  
-    private final static ColumnSquareModelFactory COLUMN_MODEL_3
-        = new ColumnSquareModelFactory(COLUMN_INPUTS_3, ModelStateComponents.COLORS_BLOCK,
-        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    
-    private static final ModelDispatcher COLUMN_3_DISPATCH = new ModelDispatcher(COLUMN_MODEL_3);
-    public static final ColumnSquareBlock COLUMN_3_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_3_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_3");
-    public static final NiceItemBlock COLUMN_3_ITEM = new NiceItemBlock(COLUMN_3_BLOCK);
-
-    
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_4_INNER 
-        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 4, false, ColumnSquareModelFactory.ModelType.LAMP_BASE);
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_4_OUTER 
-        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 4, false, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
-    
-    private final static ColumnSquareModelFactory COLUMN_MODEL_4_INNER 
-       = new ColumnSquareModelFactory(COLUMN_INPUTS_4_INNER, ModelStateComponents.COLORS_BLOCK,
-           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    private final static ColumnSquareModelFactory COLUMN_MODEL_4_OUTER 
-       = new ColumnSquareModelFactory(COLUMN_INPUTS_4_OUTER, ModelStateComponents.COLORS_BLOCK,
-       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    
-    private static final ModelDispatcher COLUMN_4_DISPATCH = new ModelDispatcher(COLUMN_MODEL_4_INNER, COLUMN_MODEL_4_OUTER);
-    public static final ColumnSquareBlock COLUMN_4_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_4_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_4");
-    public static final NiceItemBlock COLUMN_4_ITEM = new NiceItemBlock(COLUMN_4_BLOCK);
-
-    
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_5_INNER 
-        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 5, false, ColumnSquareModelFactory.ModelType.LAMP_BASE);
-    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_5_OUTER 
-        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 5, false, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
-    
-    private final static ColumnSquareModelFactory COLUMN_MODEL_5_INNER 
-       = new ColumnSquareModelFactory(COLUMN_INPUTS_5_INNER, ModelStateComponents.COLORS_BLOCK,
-           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    private final static ColumnSquareModelFactory COLUMN_MODEL_5_OUTER 
-       = new ColumnSquareModelFactory(COLUMN_INPUTS_5_OUTER, ModelStateComponents.COLORS_BLOCK,
-       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-    
-    private static final ModelDispatcher COLUMN_5_DISPATCH = new ModelDispatcher(COLUMN_MODEL_5_INNER, COLUMN_MODEL_5_OUTER);
-    public static final ColumnSquareBlock COLUMN_5_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_5_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_5");
-    public static final NiceItemBlock COLUMN_5_ITEM = new NiceItemBlock(COLUMN_5_BLOCK);
-
-
-    
-//    private final static ModelFactory.ModelInputs HOT_SQUARE_BASALT_INPUTS = new ModelFactory.ModelInputs("hot_basalt", false, BlockRenderLayer.TRANSLUCENT);
-//    private final static SpeciesModelFactory HOT_SQUARE_BASALT_MODEL 
-//        = new SpeciesModelFactory(HOT_SQUARE_BASALT_INPUTS, ModelStateComponents.COLORS_WHITE,
-//            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_4);
-//    private static final ModelDispatcher HOT_SQUARE_BASALT_DISPATCH = new ModelDispatcher( COOL_SQUARE_BASALT_MODEL, HOT_SQUARE_BASALT_MODEL);
-//    public static final NiceBlock HOT_SQUARE_BASALT_BLOCK = (NiceBlock) new HotBasaltBlock(HOT_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "hot");
-//    public static final NiceItemBlock HOT_SQUARE_BASALT_ITEM = new NiceItemBlock(HOT_SQUARE_BASALT_BLOCK);
-
-    
-    private final static ModelAppearance HEIGHT_STONE_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static HeightModelFactory HEIGHT_STONE_MODEL = new HeightModelFactory(HEIGHT_STONE_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_16);
+    private final static ModelHolder HEIGHT_STONE_MODEL = new ModelHolder(new HeightModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_16),
+            TextureProviders.TEX_BLOCK_COLORED_STONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher HEIGHT_STONE_DISPATCH = new ModelDispatcher(HEIGHT_STONE_MODEL);
     public static final NiceBlockPlus HEIGHT_STONE_BLOCK = new HeightBlock(HEIGHT_STONE_DISPATCH, BaseMaterial.FLEXSTONE, "stacked");
     public static final NiceItemBlock HEIGHT_STONE_ITEM = new NiceItemBlock(HEIGHT_STONE_BLOCK);
 
     //TODO: move all these to volcano package
-    private final static ModelAppearance HOT_FLOWING_LAVA_INPUTS = new ModelAppearance("lava", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory HOT_FLOWING_LAVA_MODEL = new FlowModelFactory(HOT_FLOWING_LAVA_INPUTS, true, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
+    private final static ModelHolder HOT_FLOWING_LAVA_MODEL = new ModelHolder(new FlowModelFactory(true, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE),
+            TextureProviders.TEX_BT_LAVA.getTextureState(false, LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID));
     private static final ModelDispatcher HOT_FLOWING_LAVA_DISPATCH = new ModelDispatcher(HOT_FLOWING_LAVA_MODEL);    
     public static final VolcanicLavaBlock HOT_FLOWING_LAVA_HEIGHT_BLOCK = 
              new VolcanicLavaBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "flow", false);
@@ -225,25 +221,25 @@ public class NiceBlockRegistrar
              new VolcanicLavaBlock(HOT_FLOWING_LAVA_DISPATCH, BaseMaterial.VOLCANIC_LAVA, "fill", true);
     public static final NiceItemBlock HOT_FLOWING_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_FLOWING_LAVA_FILLER_BLOCK);
     
-    private final static ModelAppearance COOL_FLOWING_BASALT_INPUTS = new ModelAppearance("basalt_cool", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static FlowModelFactory COOL_FLOWING_BASALT_MODEL = new FlowModelFactory(COOL_FLOWING_BASALT_INPUTS, true, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
+    private final static ModelHolder COOL_FLOWING_BASALT_MODEL = new ModelHolder(new FlowModelFactory(true, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT),
+            TextureProviders.TEX_BT_BASALT_COOL.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
     
-    private final static ModelAppearance HOT_FLOWING_BASALT_0_INPUTS = new ModelAppearance("basalt_cooling", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_0_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_0_INPUTS, false, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
+    private final static ModelHolder HOT_FLOWING_BASALT_0_MODEL = new ModelHolder(new FlowModelFactory(false, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT),
+            TextureProviders.TEX_BT_BASALT_COOLING.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT));
 
-    private final static ModelAppearance HOT_FLOWING_BASALT_1_INPUTS = new ModelAppearance("basalt_warm", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_1_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_1_INPUTS, false, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
+    private final static ModelHolder HOT_FLOWING_BASALT_1_MODEL = new ModelHolder(new FlowModelFactory(false, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT),
+            TextureProviders.TEX_BT_BASALT_WARM.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT));
 
-    private final static ModelAppearance HOT_FLOWING_BASALT_2_INPUTS = new ModelAppearance("basalt_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_2_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_2_INPUTS, false, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
+    private final static ModelHolder HOT_FLOWING_BASALT_2_MODEL = new ModelHolder(new FlowModelFactory(false, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT),
+            TextureProviders.TEX_BT_BASALT_HOT.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT));
 
-    private final static ModelAppearance HOT_FLOWING_BASALT_3_INPUTS = new ModelAppearance("basalt_very_hot", LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT);
-    private final static FlowModelFactory HOT_FLOWING_BASALT_3_MODEL = new FlowModelFactory(HOT_FLOWING_BASALT_3_INPUTS, false, ModelStateComponents.FLOW_JOIN,
-            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT);
+    private final static ModelHolder HOT_FLOWING_BASALT_3_MODEL = new ModelHolder(new FlowModelFactory(false, ModelStateComponents.FLOW_JOIN,
+            ModelStateComponents.FLOW_TEX, ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_BASALT),
+            TextureProviders.TEX_BT_BASALT_VERY_HOT.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT));
 
     // COOL BASALT
     private static final ModelDispatcher COOL_FLOWING_BASALT_DISPATCH = new ModelDispatcher(COOL_FLOWING_BASALT_MODEL); 
@@ -309,15 +305,16 @@ public class NiceBlockRegistrar
    public static final NiceItemBlock HOT_STATIC_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_LAVA_FILLER_BLOCK);
    
     
-    private final static ModelAppearance BASALT_COBBLE_INPUTS = new ModelAppearance("cobble", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static ColorModelFactory BASALT_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BASALT,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private final static ModelHolder BASALT_COBBLE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BASALT,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
+            TextureProviders.TEX_BLOCK_COBBLE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher BASALT_COBBLE_DISPATCH = new ModelDispatcher(BASALT_COBBLE_MODEL);
     public static final NiceBlock BASALT_COBBLE_BLOCK = new NiceBlock(BASALT_COBBLE_DISPATCH, BaseMaterial.BASALT, "basalt_cobble");
     public static final NiceItemBlock BASALT_COBBLE_ITEM = new NiceItemBlock(BASALT_COBBLE_BLOCK);
 
-    private final static ColorModelFactory COLORED_COBBLE_MODEL = new ColorModelFactory(BASALT_COBBLE_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private final static ModelHolder COLORED_COBBLE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
+            TextureProviders.TEX_BLOCK_COBBLE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher COLORED_COBBLE_DISPATCH = new ModelDispatcher(COLORED_COBBLE_MODEL);
     public static final NiceBlock COBBLE_FLEXSTONE_BLOCK = new NiceBlockPlus(COLORED_COBBLE_DISPATCH, BaseMaterial.FLEXSTONE, "cobble");
     public static final NiceItemBlock COBBLE_FLEXSTONE_ITEM = new NiceItemBlock(COBBLE_FLEXSTONE_BLOCK);
@@ -326,18 +323,19 @@ public class NiceBlockRegistrar
     public static final NiceItemBlock COBBLE_DURASTONE_ITEM = new NiceItemBlock(COBBLE_DURASTONE_BLOCK);
 
     
-    private final static ModelAppearance COOL_SQUARE_BASALT_INPUTS = new ModelAppearance("basalt_cut", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static BigTexModelFactory COOL_SQUARE_BASALT_MODEL 
-        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, TextureScale.LARGE, ModelStateComponents.COLORS_BASALT,
-                ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1);
+    private final static ModelHolder COOL_SQUARE_BASALT_MODEL 
+        = new ModelHolder(new BigTexModelFactory(ModelStateComponents.COLORS_BASALT,
+                ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1),
+                TextureProviders.TEX_BT_BASALT_CUT.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher COOL_SQUARE_BASALT_DISPATCH = new ModelDispatcher(COOL_SQUARE_BASALT_MODEL);
     public static final NiceBlock COOL_SQUARE_BASALT_BLOCK = new FlowSimpleBlock(COOL_SQUARE_BASALT_DISPATCH, BaseMaterial.BASALT, "cool")
             .setDropItem(BASALT_COBBLE_ITEM);
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
     
-    private final static BigTexModelFactory COLORED_BASALT_MODEL 
-        = new BigTexModelFactory(COOL_SQUARE_BASALT_INPUTS, TextureScale.LARGE, ModelStateComponents.COLORS_BLOCK,
-                ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1);
+    private final static ModelHolder COLORED_BASALT_MODEL 
+        = new ModelHolder(new BigTexModelFactory(ModelStateComponents.COLORS_BLOCK,
+                ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1),
+                TextureProviders.TEX_BT_BASALT_CUT.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher COLORED_BASALT_DISPATCH = new ModelDispatcher(COLORED_BASALT_MODEL);
     
     public static final NiceBlock CUT_ROCK_FLEXSTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BaseMaterial.FLEXSTONE, "cut_rock");
@@ -346,9 +344,9 @@ public class NiceBlockRegistrar
     public static final NiceBlock CUT_ROCK_DURASTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BaseMaterial.DURASTONE, "cut_rock");
     public static final NiceItemBlock CUT_ROCK_DURASTONE_ITEM = new NiceItemBlock(CUT_ROCK_DURASTONE_BLOCK);
 
-    private final static ModelAppearance CSG_TEST_INPUTS = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-    private final static CSGModelFactory CSG_TEST_MODEL = new CSGModelFactory(CSG_TEST_INPUTS, ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION);
+    private final static ModelHolder CSG_TEST_MODEL = new ModelHolder(new CSGModelFactory(ModelStateComponents.COLORS_BLOCK,
+            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
+            TextureProviders.TEX_BLOCK_COLORED_STONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher CSG_TEST_DISPATCH = new ModelDispatcher(CSG_TEST_MODEL);
     public static final CSGBlock CSG_TEST_BLOCK = new CSGBlock(CSG_TEST_DISPATCH, BaseMaterial.FLEXSTONE, "csg_test");
     public static final NiceItemBlock CSG_TEST_ITEM = new NiceItemBlock(CSG_TEST_BLOCK);
@@ -498,18 +496,22 @@ public class NiceBlockRegistrar
 
     /**
      * Centralized event handler for NiceModel texture stitch.
+     * Register all textures that will be needed for associated models. 
+     * Happens before model bake.
      */
     @SubscribeEvent
     public void stitcherEventPre(TextureStitchEvent.Pre event)
     {
-        for (ModelDispatcher dispatcher : allDispatchers)
+        ArrayList<String> textureList = new ArrayList<String>();
+        
+        for (TextureProvider t : TextureProviders.ALL_TEXTURE_PROVIDERS)
         {
-            dispatcher.handleTexturePreStitch(event);
+            t.addTexturesForPrestich(textureList);
         }
-
-        for (ModelDispatcher dispatcher : allDispatchers)
+        
+        for(String s : textureList)
         {
-            dispatcher.handleTexturePreStitch(event);
+            event.getMap().registerSprite(new ResourceLocation(s));
         }
     }
 

@@ -13,7 +13,6 @@ import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -24,6 +23,8 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
+import grondag.adversity.niceblock.texture.TextureProviders;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -36,15 +37,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 
-public class FlowModelFactory extends ModelFactory<ModelAppearance>
+public class FlowModelFactory extends ModelFactory
 {
     
-
+    //TODO: should eventually be removed
+    private static TextureState DEFAULT_TEXTURE_STATE 
+        = TextureProviders.BIG_TEX.get(0).getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID);
+    
     public static SimpleCollisionHandler makeCollisionHandler()
     {
-        ModelAppearance inputs = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
         //main diff is lack of species
-        FlowModelFactory factory = new FlowModelFactory(inputs, true, ModelStateComponents.FLOW_JOIN,
+        FlowModelFactory factory = new FlowModelFactory(true, ModelStateComponents.FLOW_JOIN,
                ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
         return new SimpleCollisionHandler(factory);
     }
@@ -73,15 +76,9 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
         new AxisAlignedBB(0, 0, 0, 1, 1, 1)
     };
     
-    public FlowModelFactory(ModelAppearance modelInputs, boolean enableCollision, ModelStateComponent<?,?>... components) 
+    public FlowModelFactory(boolean enableCollision, ModelStateComponent<?,?>... components) 
     {
-        super(ModelShape.FLOWING_TERRAIN, modelInputs, components);
-    }
-
-    @Override
-    public String buildTextureName(String baseName, int offset)
-    {
-        return "adversity:blocks/" + baseName;
+        super(ModelShape.FLOWING_TERRAIN, components);
     }
 
     //TODO: make configurable
@@ -96,18 +93,18 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
     }
 
     @Override
-    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
 
-        return QuadContainer.fromRawQuads(this.makeRawQuads(state));
+        return QuadContainer.fromRawQuads(this.makeRawQuads(texState, state));
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
+    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
     {
         ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        for(RawQuad quad : this.makeRawQuads(state))
+        for(RawQuad quad : this.makeRawQuads(texState, state))
         {
 
             builder.add(quad.createBakedQuad());
@@ -117,7 +114,7 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
     }
 
 
-    public List<RawQuad> makeRawQuads(ModelStateSetValue state)
+    public List<RawQuad> makeRawQuads(TextureState texState, ModelStateSetValue state)
     {
         CSGShape rawQuads = new CSGShape();
         RawQuad template = new RawQuad();
@@ -126,8 +123,8 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
         template.lockUV = true;
         //        template.rotation = state.getValue(this.rotationComponent);
         template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
-        template.lightingMode = modelInputs.lightingMode;
+                texState.buildTextureName());
+        template.lightingMode = texState.lightingMode;
         // default - need to change for sides and bottom
         template.setFace(EnumFacing.UP);
         
@@ -484,7 +481,7 @@ public class FlowModelFactory extends ModelFactory<ModelAppearance>
     @Override
     public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
     {
-        return this.makeRawQuads(state);
+        return this.makeRawQuads(DEFAULT_TEXTURE_STATE, state);
     }
 
     @Override

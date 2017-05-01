@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.niceblock.base.ModelAppearanceLists;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.FixedColorMapProvider;
@@ -87,9 +86,7 @@ public class ModelStateComponents
             NoColorMapProvider.INSTANCE));
     public static final ModelColorMapComponent COLORS_BASALT = register(new ModelColorMapComponent(counter++, WorldRefreshType.NEVER,
             new FixedColorMapProvider(ColorMap.makeColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK, 0))));
-    
-    public static final ModelAppearanceComponent APPERANCE_BLOCK_SOLID = new ModelAppearanceComponent(counter++, WorldRefreshType.NEVER, ModelAppearanceLists.BLOCK_SOLID);
-    
+        
     public static int getCount()
     {
         return counter;

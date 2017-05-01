@@ -28,7 +28,8 @@ public enum ModelShape
         HEIGHT.collisionHandler = HeightModelFactory.makeCollisionHandler();
         
         COLUMN_SQUARE.stateComponents = new ImmutableList.Builder<ModelStateComponent<?, ?>>()
-                .add(ModelStateComponents.AXIS).add(ModelStateComponents.CORNER_JOIN).build();
+                .add(ModelStateComponents.AXIS)
+                .add(ModelStateComponents.CORNER_JOIN).build();
         
         FLOWING_TERRAIN.stateComponents = new ImmutableList.Builder<ModelStateComponent<?, ?>>()
                 .add(ModelStateComponents.FLOW_JOIN).build();
@@ -39,7 +40,7 @@ public enum ModelShape
     
     private AbstractCollisionHandler collisionHandler = null;
     
-    private List<ModelFactory<?>> models = new ArrayList<ModelFactory<?>>();
+    private List<ModelFactory> models = new ArrayList<ModelFactory>();
     
     /** Components that MUST be included for models with this shape because they determine topology */
     private List<ModelStateComponent<?, ?>> stateComponents = Collections.emptyList();
@@ -52,12 +53,12 @@ public enum ModelShape
         return collisionHandler;
     }
     
-    public void addModel(ModelFactory<?> model)
+    public void addModel(ModelFactory model)
     {
         this.models.add(model);
     }
     
-    public List<ModelFactory<?>> models()
+    public List<ModelFactory> models()
     {
         return Collections.unmodifiableList(this.models);
     }

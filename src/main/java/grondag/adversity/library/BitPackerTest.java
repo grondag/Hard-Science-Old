@@ -1,10 +1,7 @@
 package grondag.adversity.library;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
-import grondag.adversity.library.BitPacker.BitElement;
 import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
 import grondag.adversity.library.BitPacker.BitElement.EnumElement;
 import grondag.adversity.library.BitPacker.BitElement.IntElement;

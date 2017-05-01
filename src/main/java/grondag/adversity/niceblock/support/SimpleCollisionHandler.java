@@ -12,9 +12,9 @@ import net.minecraft.world.IBlockAccess;
 
 public class SimpleCollisionHandler extends AbstractCollisionHandler
 {
-    protected final ModelFactory<?> modelFactory;
+    protected final ModelFactory modelFactory;
    
-    public SimpleCollisionHandler(ModelFactory<?> modelFactory)
+    public SimpleCollisionHandler(ModelFactory modelFactory)
     {
         this.modelFactory = modelFactory;
     }

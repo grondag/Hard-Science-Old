@@ -9,7 +9,6 @@ import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.ModelAppearance;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
@@ -17,6 +16,8 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
+import grondag.adversity.niceblock.texture.TextureProviders;
+import grondag.adversity.niceblock.texture.TextureProvider.Texture.TextureState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -30,11 +31,14 @@ import net.minecraft.world.IBlockAccess;
 public class HeightModelFactory extends ColorModelFactory
 {
     
+    //TODO: should eventually be removed
+    private static TextureState DEFAULT_TEXTURE_STATE 
+        = TextureProviders.BLOCK_INDIVIDUAL.get(0).getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID);
+    
     public static SimpleCollisionHandler makeCollisionHandler()
     {
-        ModelAppearance inputs = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
         //main diff is lack of species
-        HeightModelFactory factory = new HeightModelFactory(inputs, ModelStateComponents.COLORS_WHITE,
+        HeightModelFactory factory = new HeightModelFactory(ModelStateComponents.COLORS_WHITE,
                 ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE);
         return new SimpleCollisionHandler(factory);
     }
@@ -64,14 +68,14 @@ public class HeightModelFactory extends ColorModelFactory
             
     };
     
-    public HeightModelFactory(ModelAppearance modelInputs, ModelStateComponent<?, ?>... components)
+    public HeightModelFactory(ModelStateComponent<?, ?>... components)
     {
-        super(modelInputs, components);
+        super(components);
     }
 
 
     // TODO: need to handle lack of species for collision version
-    protected RawQuad makeFaceQuad(ModelStateSetValue state, EnumFacing face)
+    protected RawQuad makeFaceQuad(TextureState texState, ModelStateSetValue state, EnumFacing face)
     {
         if (face == null) return null;
 
@@ -80,8 +84,8 @@ public class HeightModelFactory extends ColorModelFactory
         result.color = colorMap.getColor(EnumColorMap.BASE);
         result.rotation = state.getValue(rotationComponent);
         result.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                buildTextureName(modelInputs.textureName, state.getValue(textureComponent)));
-        result.lightingMode = modelInputs.lightingMode;
+                texState.buildTextureName(state.getValue(textureComponent)));
+        result.lightingMode = texState.lightingMode;
         result.lockUV = true;
         result.setFace(face);
         double height = ((state.getValue(speciesComponent) & 15) + 1) / 16.0;
@@ -124,25 +128,25 @@ public class HeightModelFactory extends ColorModelFactory
 
   
     @Override
-    public QuadContainer getFaceQuads(ModelStateSetValue state, BlockRenderLayer renderLayer)
+    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
     {
-        if(renderLayer != modelInputs.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
          QuadContainer.QuadContainerBuilder builder = new QuadContainer.QuadContainerBuilder();
         builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
         for(EnumFacing face : EnumFacing.values())
         {
-            builder.setQuads(face, Collections.singletonList(this.makeFaceQuad(state, face).createBakedQuad()));
+            builder.setQuads(face, Collections.singletonList(this.makeFaceQuad(texState, state, face).createBakedQuad()));
         }
         return builder.build();
     }
 
     @Override
-    public List<BakedQuad> getItemQuads(ModelStateSetValue state)
+    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
     {
         ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.add(this.makeFaceQuad(state, face).createBakedQuad());
+            general.add(this.makeFaceQuad(texState, state, face).createBakedQuad());
         }        
         return general.build();
     }
@@ -159,7 +163,7 @@ public class HeightModelFactory extends ColorModelFactory
         ImmutableList.Builder<RawQuad> general = new ImmutableList.Builder<RawQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
         {
-            general.add(this.makeFaceQuad(state, face));
+            general.add(this.makeFaceQuad(DEFAULT_TEXTURE_STATE, state, face));
         }        
         return general.build();
     }
