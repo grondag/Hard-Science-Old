@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.model.shape;
+package grondag.adversity.niceblock.model;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.SimpleCollisionHandler;
+import grondag.adversity.superblock.model.shape.ModelShape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.BlockRenderLayer;

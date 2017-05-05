@@ -5,7 +5,6 @@ import java.util.List;
 
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.model.shape.ModelShape;
 import grondag.adversity.niceblock.model.texture.TextureProvider.Texture.TextureState;
 import grondag.adversity.niceblock.modelstate.ModelBigTexComponent;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
@@ -15,6 +14,7 @@ import grondag.adversity.niceblock.modelstate.ModelSpeciesComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.niceblock.modelstate.ModelTextureVersionComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

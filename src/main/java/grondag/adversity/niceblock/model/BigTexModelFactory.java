@@ -1,15 +1,15 @@
-package grondag.adversity.niceblock.model.painter;
+package grondag.adversity.niceblock.model;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.model.shape.ModelShape;
-import grondag.adversity.niceblock.model.texture.TextureScale;
 import grondag.adversity.niceblock.model.texture.TextureProvider.Texture.TextureState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.superblock.model.shape.ModelShape;
+import grondag.adversity.superblock.texture.TextureScale;
 
 import java.util.List;
 import com.google.common.collect.ImmutableList;

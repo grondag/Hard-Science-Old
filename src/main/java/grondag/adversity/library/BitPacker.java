@@ -13,6 +13,9 @@ public class BitPacker
     private void addElement(BitElement element)
     {
         element.shift = this.totalBitLength;
+        element.shiftedMask = element.mask << element.shift;
+        element.shiftedInverseMask = ~ element.shiftedMask;
+        
         this.totalBitLength += element.bitLength;
         this.bitMask = Useful.longBitMask(totalBitLength);
         assert(totalBitLength < 64);
@@ -70,6 +73,8 @@ public class BitPacker
         protected final int bitLength;
         protected long mask;
         protected int shift;
+        protected long shiftedMask;
+        protected long shiftedInverseMask;
         
         private BitElement(long valueCount)
         {
@@ -87,8 +92,20 @@ public class BitPacker
                 this.values = e.getEnumConstants();
             }
             
-            public long getBits(T e) { return (e.ordinal() & mask) << shift; }
-            public T getValue(long bits) { return values[(int) ((bits >> shift) & mask)]; }
+            public long getBits(T e)
+            {
+                return (e.ordinal() & mask) << shift; 
+            }
+            
+            public long setBits(T e, long bitsIn)
+            { 
+                return (bitsIn & this.shiftedInverseMask) | getBits(e);
+            }
+            
+            public T getValue(long bits)
+            { 
+                return values[(int) ((bits >> shift) & mask)]; 
+            }
         }
         
         /** Stores values in given range as bits.  Handles negative values */
@@ -105,6 +122,11 @@ public class BitPacker
             public long getBits(int i) 
             { 
                 return (((long)i - minValue) & mask) << shift; 
+            }
+            
+            public long setBits(int i, long bitsIn)
+            { 
+                return (bitsIn & this.shiftedInverseMask) | getBits(i);
             }
             
             public int getValue(long bits)
@@ -132,6 +154,11 @@ public class BitPacker
                 return ((i - minValue) & mask) << shift; 
             }
             
+            public long setBits(long i, long bitsIn)
+            { 
+                return (bitsIn & this.shiftedInverseMask) | getBits(i);
+            }
+            
             public long getValue(long bits)
             { 
                 return ((bits >> shift) & mask) + minValue; 
@@ -148,6 +175,11 @@ public class BitPacker
             public long getBits(boolean b) 
             { 
                 return ((b ? 1 : 0) & mask) << shift; 
+            }
+            
+            public long setBits(boolean b, long bitsIn)
+            { 
+                return (bitsIn & this.shiftedInverseMask) | getBits(b);
             }
             
             public boolean getValue(long bits)

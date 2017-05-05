@@ -4,8 +4,11 @@ import java.util.ArrayList;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.texture.TextureProvider.Texture;
+import grondag.adversity.superblock.texture.TextureLayout;
+import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.BlockRenderLayer;
 
+//TODO: remove
 public class TextureProviders
 {
     static final LightingMode[] LIGHTING_BOTH = {LightingMode.FULLBRIGHT, LightingMode.SHADED};

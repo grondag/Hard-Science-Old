@@ -49,6 +49,18 @@ public class BitPackerTest
         assert(bool1.getValue(bits) == false);
         assert(bool2.getValue(bits) == true);
         assert(long1.getValue(bits) == 0);
+        
+        
+        bits = int1.setBits(38, bits);
+        bits = enum1.setBits(Things1.ONE, bits);
+        bits = long1.setBits(52947, bits);
+        bits = bool1.setBits(true, bits);
+        
+        
+        assert(enum1.getValue(bits) == Things1.ONE);
+        assert(int1.getValue(bits) == 38);
+        assert(bool1.getValue(bits) == true);
+        assert(long1.getValue(bits) == 52947);
     }
 
 }

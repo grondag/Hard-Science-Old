@@ -3,6 +3,8 @@ package grondag.adversity.niceblock.model.texture;
 import org.junit.Test;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.superblock.texture.TextureLayout;
+import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.BlockRenderLayer;
 
 public class TextureProviderTest
