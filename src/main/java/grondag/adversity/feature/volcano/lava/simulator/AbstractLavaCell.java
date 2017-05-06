@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 
 public abstract class AbstractLavaCell
@@ -202,8 +202,8 @@ public abstract class AbstractLavaCell
     {
         if(this.fluidUnits.addAndGet(deltaUnits) < 0)
         {
-            if(Adversity.DEBUG_MODE)
-                Adversity.LOG.info(String.format("Negative fluid units detected.  NewAmount=%1$d Delta=%2$d cellID=%3$d", this.fluidUnits.get(), deltaUnits, this.id));
+            if(Output.DEBUG_MODE)
+                Output.getLog().info(String.format("Negative fluid units detected.  NewAmount=%1$d Delta=%2$d cellID=%3$d", this.fluidUnits.get(), deltaUnits, this.id));
             this.fluidUnits.set(0);
         }
         
@@ -213,8 +213,8 @@ public abstract class AbstractLavaCell
     {
         if(newUnits < 0)
         {
-            if(Adversity.DEBUG_MODE)
-                Adversity.LOG.info(String.format("Negative fluid units detected.  NewAmount=%1$d cellID=%2$d", newUnits, this.id));
+            if(Output.DEBUG_MODE)
+                Output.getLog().info(String.format("Negative fluid units detected.  NewAmount=%1$d cellID=%2$d", newUnits, this.id));
             newUnits = 0;
         }
         this.fluidUnits.set(newUnits);
@@ -227,8 +227,8 @@ public abstract class AbstractLavaCell
         if(newUnits < 0)
         {
             newUnits = 0;
-            if(Adversity.DEBUG_MODE)
-                    Adversity.LOG.info(String.format("Negative fluid units detected.  PriorAmount=%1$d Deltar=%2$d cellID=%3$d", expectedPriorUnits, deltaUnits, this.id));
+            if(Output.DEBUG_MODE)
+                    Output.getLog().info(String.format("Negative fluid units detected.  PriorAmount=%1$d Deltar=%2$d cellID=%3$d", expectedPriorUnits, deltaUnits, this.id));
         }
       
         return this.fluidUnits.compareAndSet(expectedPriorUnits, expectedPriorUnits + deltaUnits);

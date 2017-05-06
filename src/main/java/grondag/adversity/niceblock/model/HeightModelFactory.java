@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
@@ -178,7 +178,7 @@ public class HeightModelFactory extends ColorModelFactory
         }
         catch (Exception ex)
         {
-            Adversity.LOG.info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Output.getLog().info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }

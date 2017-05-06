@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.QuadContainer;
@@ -493,7 +493,7 @@ public class FlowModelFactory extends ModelFactory
         }
         catch (Exception ex)
         {
-            Adversity.LOG.info("FlowModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Output.getLog().info("FlowModelFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }

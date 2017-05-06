@@ -35,7 +35,7 @@ public class CSGModelFactory extends ModelFactory
     
     public CSGModelFactory(ModelStateComponent<?,?>... components)
     {
-        super(ModelShape.ICOSAHEDRON, components);
+        super(ModelShape.SPHERE, components);
     }
     
     //TODO: should eventually be removed

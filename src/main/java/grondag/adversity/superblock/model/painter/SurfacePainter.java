@@ -8,16 +8,18 @@ import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.superblock.model.shape.SurfaceTopology;
 
+import static grondag.adversity.superblock.model.state.ModelState.StateValue.*;
+
 public enum SurfacePainter
 {
-    NONE,
-    CUBIC_TILES,
-    CUBIC_BIGTEX,
-    CUBIC_BORDER,
-    CUBIC_MASONRY,
-    SURFACE_TILES,
-    SURFACE_CYLINDER,
-    SURFACE_TOROID;
+    NONE(STATE_FLAG_NONE),
+    CUBIC_TILES(STATE_FLAG_NEEDS_BLOCK_RANDOMS),
+    CUBIC_BIGTEX(STATE_FLAG_NEEDS_BIGTEX),
+    CUBIC_BORDER(STATE_FLAG_NEEDS_CORNER_JOIN),
+    CUBIC_MASONRY(STATE_FLAG_NEEDS_SIMPLE_JOIN),
+    SURFACE_TILES(STATE_FLAG_NONE),
+    SURFACE_CYLINDER(STATE_FLAG_NONE),
+    SURFACE_TOROID(STATE_FLAG_NONE);
     
     static
     {
@@ -55,6 +57,13 @@ public enum SurfacePainter
                 .add(TextureProviders.BLOCK_INDIVIDUAL, TextureProviders.BIG_TEX).build();
         SURFACE_TOROID.surfaceTopologies = new ImmutableList.Builder<SurfaceTopology>()
                 .add(SurfaceTopology.TOROIDAL).build();}
+    
+    public final int stateFlags;
+    
+    private SurfacePainter(int stateFlags)
+    {
+        this.stateFlags = stateFlags;
+    }
     
     private List<TextureProvider> textureProviders;
     public List<TextureProvider> textureProviders() { return this.textureProviders; }

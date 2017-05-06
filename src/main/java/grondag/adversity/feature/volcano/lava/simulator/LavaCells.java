@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
-import grondag.adversity.Adversity;
+
+import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.simulator.Simulator;
@@ -417,7 +418,7 @@ public class LavaCells
             }
         }
         
-        Adversity.LOG.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
+        Output.getLog().info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
         nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -432,7 +433,7 @@ public class LavaCells
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)
         {
-            Adversity.LOG.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
+            Output.getLog().warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
         }
         else
         {
@@ -487,16 +488,16 @@ public class LavaCells
             // Make sure other stuff is up to date
             this.updateStuffJob.runOn(this.sim.LAVA_THREAD_POOL);
             
-            Adversity.LOG.info("Loaded " + this.cellList.size() + " lava cells.");
+            Output.getLog().info("Loaded " + this.cellList.size() + " lava cells.");
         }
     }
     
     public void logDebugInfo()
     {
-        Adversity.LOG.info(this.cellChunks.size() + " loaded cell chunks");
+        Output.getLog().info(this.cellChunks.size() + " loaded cell chunks");
         for(CellChunk chunk : this.cellChunks.values())
         {
-            Adversity.LOG.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
+            Output.getLog().info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
                 + " zStart=" + PackedBlockPos.getChunkZStart(chunk.packedChunkPos)
                 + " activeCount=" + chunk.getActiveCount() + " entryCount=" + chunk.getEntryCount()
                     );

@@ -16,9 +16,6 @@ import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.logging.log4j.Logger;
-
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 
 
@@ -26,10 +23,6 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 public class Adversity {
 	public static final String MODID = "adversity";
 	public static final String MODNAME = "Adversity";
-
-	public static final boolean DEBUG_MODE = true;
-	
-	public static Logger LOG;
 
 	public static WorldType adversityWorld;
 	

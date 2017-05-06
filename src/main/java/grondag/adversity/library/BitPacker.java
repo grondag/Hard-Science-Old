@@ -97,7 +97,7 @@ public class BitPacker
                 return (e.ordinal() & mask) << shift; 
             }
             
-            public long setBits(T e, long bitsIn)
+            public long setValue(T e, long bitsIn)
             { 
                 return (bitsIn & this.shiftedInverseMask) | getBits(e);
             }
@@ -124,7 +124,7 @@ public class BitPacker
                 return (((long)i - minValue) & mask) << shift; 
             }
             
-            public long setBits(int i, long bitsIn)
+            public long setValue(int i, long bitsIn)
             { 
                 return (bitsIn & this.shiftedInverseMask) | getBits(i);
             }
@@ -154,7 +154,7 @@ public class BitPacker
                 return ((i - minValue) & mask) << shift; 
             }
             
-            public long setBits(long i, long bitsIn)
+            public long setValue(long i, long bitsIn)
             { 
                 return (bitsIn & this.shiftedInverseMask) | getBits(i);
             }
@@ -177,7 +177,7 @@ public class BitPacker
                 return ((b ? 1 : 0) & mask) << shift; 
             }
             
-            public long setBits(boolean b, long bitsIn)
+            public long setValue(boolean b, long bitsIn)
             { 
                 return (bitsIn & this.shiftedInverseMask) | getBits(b);
             }

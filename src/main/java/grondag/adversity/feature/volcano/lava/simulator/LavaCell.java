@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.google.common.collect.ComparisonChain;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
@@ -971,7 +971,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     //handle strangeness that should never occur
                     if(remaining <= 0)
                     {
-                        if(Adversity.DEBUG_MODE) Adversity.LOG.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
+                        if(Output.DEBUG_MODE) Output.getLog().debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
                         
                         break;
                     }
@@ -1171,13 +1171,13 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                         newCell.above = upperCell;
                         upperCell.below = newCell;
                         
-                        if(Adversity.DEBUG_MODE)
+                        if(Output.DEBUG_MODE)
                         {
                             if(newCell.intersectsWith(newCell.above) || newCell.isVerticallyAdjacentTo(newCell.above))
-                                Adversity.LOG.warn("Added cell intersects with cell above. Should never happen.");
+                                Output.getLog().warn("Added cell intersects with cell above. Should never happen.");
                             
                             if(newCell.intersectsWith(newCell.below) || newCell.isVerticallyAdjacentTo(newCell.below))
-                                Adversity.LOG.warn("Added cell intersects with cell below. Should never happen.");
+                                Output.getLog().warn("Added cell intersects with cell below. Should never happen.");
                         }
                         
                         return;
@@ -1185,8 +1185,8 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     lowerCell = upperCell;
                     upperCell = lowerCell.above;
                     
-                    if(Adversity.DEBUG_MODE && lowerCell == upperCell)
-                        Adversity.LOG.info("Strangeness in lava cell NBT load.");
+                    if(Output.DEBUG_MODE && lowerCell == upperCell)
+                        Output.getLog().info("Strangeness in lava cell NBT load.");
                 }
                 
                 // if we get to here, new cell is the uppermost
@@ -1530,8 +1530,8 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
      */
     private int getFlowFloorRawRetentionDepth()
     {
-        if(Adversity.DEBUG_MODE && !this.isBottomFlow()) 
-            Adversity.LOG.warn("Flow floor retention depth computed for non-flow-floor cell.");
+        if(Output.DEBUG_MODE && !this.isBottomFlow()) 
+            Output.getLog().warn("Flow floor retention depth computed for non-flow-floor cell.");
         
         int myFloor = this.floorUnits();
         
@@ -1731,8 +1731,8 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
     {
         if(this.locator == null)
         {
-            if(Adversity.DEBUG_MODE)
-                Adversity.LOG.warn("Missing cell locator object.");
+            if(Output.DEBUG_MODE)
+                Output.getLog().warn("Missing cell locator object.");
             return this;
         }
         

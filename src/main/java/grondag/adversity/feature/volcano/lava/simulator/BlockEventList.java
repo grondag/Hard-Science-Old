@@ -3,7 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.library.ISimpleListItem;
@@ -87,7 +87,7 @@ public class BlockEventList
             }
         }
         
-        Adversity.LOG.info("Saving " + i / BlockEvent.NBT_WIDTH + " Block Events with tag " + this.nbtTagName);
+        Output.getLog().info("Saving " + i / BlockEvent.NBT_WIDTH + " Block Events with tag " + this.nbtTagName);
         
         nbt.setIntArray(this.nbtTagName, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -101,7 +101,7 @@ public class BlockEventList
         //confirm correct size
         if(saveData == null || saveData.length % BlockEvent.NBT_WIDTH != 0)
         {
-            Adversity.LOG.warn("Invalid save data loading block events with tag " + nbtTagName + ". Lava blocks may not be updated properly.");
+            Output.getLog().warn("Invalid save data loading block events with tag " + nbtTagName + ". Lava blocks may not be updated properly.");
         }
         else
         {
@@ -114,7 +114,7 @@ public class BlockEventList
                 i += BlockEvent.NBT_WIDTH;
             }
           
-            Adversity.LOG.info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
+            Output.getLog().info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
         }
     }
     
@@ -145,8 +145,8 @@ public class BlockEventList
             else if(retryCount++ > maxRetries)
             {
                 //exceeded max retries - give up
-                if(Adversity.DEBUG_MODE)
-                    Adversity.LOG.info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
+                if(Output.DEBUG_MODE)
+                    Output.getLog().info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
                 retryCount = IS_COMPLETE;
             }
         }

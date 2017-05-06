@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -59,7 +59,7 @@ public class SimpleItemBlockModel implements IBakedModel, IPerspectiveAwareModel
     @Override
     public TextureAtlasSprite getParticleTexture()
     {
-        Adversity.LOG.warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
+        Output.getLog().warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
         return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
     }
 

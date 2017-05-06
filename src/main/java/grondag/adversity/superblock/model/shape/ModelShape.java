@@ -14,14 +14,38 @@ import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.superblock.model.state.ModelState;
+import grondag.adversity.superblock.model.state.ModelState.StateFormat;
+
+import static grondag.adversity.superblock.model.state.ModelState.StateValue.*;
 
 public enum ModelShape
 {
-    CUBE,
-    COLUMN_SQUARE,
-    FLOWING_TERRAIN,
-    ICOSAHEDRON,
-    HEIGHT;
+    CUBE(StateFormat.BLOCK, STATE_FLAG_NONE),
+    COLUMN_SQUARE(StateFormat.BLOCK, STATE_FLAG_NEEDS_CORNER_JOIN),
+    HEIGHT(StateFormat.BLOCK, STATE_FLAG_NONE),
+    
+    BOX(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    SPHERE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    DOME(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    CYLINDER(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    TUBE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    CONE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    PYRAMID(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    TORUS(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    ICOSAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    TETRAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    OCTAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    DODECAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
+    
+    FLOWING_TERRAIN(StateFormat.FLOW, STATE_FLAG_NEEDS_BIGTEX);
+    
+    
+    private ModelShape(StateFormat stateFormat, int stateFlags)
+    {
+        this.stateFormat = stateFormat;
+        this.stateFlags = stateFlags;
+    }
     
     static
     {
@@ -44,9 +68,9 @@ public enum ModelShape
         FLOWING_TERRAIN.stateComponents = new ImmutableList.Builder<ModelStateComponent<?, ?>>()
                 .add(ModelStateComponents.FLOW_JOIN).build();
         
-        ICOSAHEDRON.surfaces = new ImmutableList.Builder<Surface>()
-                .add(ICOSAHEDRON.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
-        ICOSAHEDRON.collisionHandler = CSGModelFactory.makeCollisionHandler();
+        SPHERE.surfaces = new ImmutableList.Builder<Surface>()
+                .add(SPHERE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
+        SPHERE.collisionHandler = CSGModelFactory.makeCollisionHandler();
 
         HEIGHT.surfaces = new ImmutableList.Builder<Surface>()
                 .add(HEIGHT.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
@@ -60,6 +84,9 @@ public enum ModelShape
     private List<ModelFactory> models = new ArrayList<ModelFactory>();
     
     private int nextSurfaceOrdinal = 0;
+    
+    public final StateFormat stateFormat;
+    public final int stateFlags;
     
     /** Surfaces that compose the model. */
     private List<Surface> surfaces = Collections.emptyList();
@@ -94,7 +121,7 @@ public enum ModelShape
     {
         return this.stateComponents;
     }
-    
+        
     private Surface makeSurface(SurfaceType paintType, SurfaceTopology topology)
     {
         return new Surface(this.nextSurfaceOrdinal++, paintType, topology);

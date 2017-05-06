@@ -3,8 +3,9 @@ package grondag.adversity.library.cache.longKey;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import grondag.adversity.Adversity;
 import static grondag.adversity.library.Danger.*;
+
+import grondag.adversity.Output;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.SimpleLoadingCache;
 import sun.misc.Unsafe;
@@ -185,7 +186,7 @@ public class LongAtomicLoadingCache<V>
         result = (V) UNSAFE.getObjectVolatile(localState.values, offset);
         if(result != null) return result;
         
-        if(Adversity.DEBUG_MODE)
+        if(Output.DEBUG_MODE)
             System.out.println("LongSimpleLoadingCache: returning new loaded value despite key hit because cached value not yet written by other thread.");
         
         // abort and return loaded value directly

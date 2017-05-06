@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob.CountedJobProviderBacker;
 
 /**
@@ -96,8 +96,8 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
      */
     public void add(T item)
     {
-        if(Adversity.DEBUG_MODE && this.isMaintaining)
-            Adversity.LOG.warn("Unsupported add operation on simple concurrent list during maintenance operation");
+        if(Output.DEBUG_MODE && this.isMaintaining)
+            Output.getLog().warn("Unsupported add operation on simple concurrent list during maintenance operation");
         
         int index = this.size.getAndIncrement();
         if(index < this.capacity)
@@ -221,8 +221,8 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     @SuppressWarnings("unchecked")
     public Stream<T> stream(boolean isParallel)
     {
-        if(Adversity.DEBUG_MODE && this.isMaintaining)
-            Adversity.LOG.warn("Unsupported stream operation on simple concurrent list while maintenance operation ongoing");
+        if(Output.DEBUG_MODE && this.isMaintaining)
+            Output.getLog().warn("Unsupported stream operation on simple concurrent list while maintenance operation ongoing");
         
         return (Stream<T>) StreamSupport.stream(Arrays.spliterator(items, 0, this.size.get()), isParallel);
     }

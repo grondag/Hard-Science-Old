@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.FlowDirection;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
@@ -382,7 +382,7 @@ public class LavaConnection implements ISimpleListItem
         int flow = fluidFrom - newFluidFrom;
 
         if(flow < 0)
-            Adversity.LOG.debug("derp!");
+            Output.getLog().debug("derp!");
         return flow;
     }
     

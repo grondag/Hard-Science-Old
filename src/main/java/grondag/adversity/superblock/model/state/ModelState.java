@@ -8,6 +8,7 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.BitPacker.BitElement.EnumElement;
 import grondag.adversity.library.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.BitPacker.BitElement.LongElement;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.library.joinstate.SimpleJoin;
@@ -17,6 +18,7 @@ import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
+import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent.WorldRefreshType;
 import grondag.adversity.superblock.model.painter.SurfacePainter;
 import grondag.adversity.superblock.model.shape.ModelShape;
@@ -37,15 +39,21 @@ public class ModelState
     private static final IAlternator ROTATION_ALTERNATOR = Alternator.getAlternator(4, 45927934);
     private static final IAlternator BLOCK_ALTERNATOR = Alternator.getAlternator(8, 2953424);
   
-    
+    public static enum StateFormat
+    {
+        /** use for flowing terrain shapes */
+        FLOW,
+        /** use for single blocks */
+        BLOCK,
+        /** use for sliced multi-block shapes (sphere, cylinder, etc.) */
+        MULTIBLOCK
+    }
     //package scope to allow inspection in test harness
     static final BitPacker PACKER_0 = new BitPacker();
     private static final EnumElement<ModelShape> P0_SHAPE = PACKER_0.createEnumElement(ModelShape.class);
     @SuppressWarnings("unchecked")
     private static final EnumElement<SurfacePainter>[] P0_PAINTERS = new EnumElement[MAX_PAINTERS];
     private static final IntElement[] P0_PAINT_COLOR = new IntElement[MAX_PAINTERS];
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<LightingMode>[] P0_PAINT_LIGHT= new EnumElement[MAX_PAINTERS];
     
     static final BitPacker PACKER_1 = new BitPacker();
     @SuppressWarnings("unchecked")
@@ -56,25 +64,47 @@ public class ModelState
     static final BitPacker PACKER_2 = new BitPacker();
     @SuppressWarnings("unchecked")
     private static final EnumElement<BlockRenderLayer>[] P2_PAINT_LAYER = new EnumElement[MAX_PAINTERS];
+    @SuppressWarnings("unchecked")
+    private static final EnumElement<LightingMode>[] P2_PAINT_LIGHT= new EnumElement[MAX_PAINTERS];
     private static final EnumElement<EnumFacing.Axis> P2_AXIS = PACKER_2.createEnumElement(EnumFacing.Axis.class);
-    private static final IntElement P2_BLOCK_VERSION = PACKER_2.createIntElement(8);
-    private static final EnumElement<Rotation> P2_ROTATION = PACKER_2.createEnumElement(Rotation.class);
-    private static final IntElement P2_BIGTEX_INDEX = PACKER_2.createIntElement(16 * 16 * 16);
-    private static final IntElement P2_SPECIES = PACKER_2.createIntElement(16);
-    private static final IntElement P2_CORNER_JOIN = PACKER_2.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
-    private static final IntElement P2_SIMPLE_JOIN = PACKER_2.createIntElement(SimpleJoin.STATE_COUNT);
+    private static final BooleanElement P2_AXIS_INVERTED = PACKER_2.createBooleanElement();
+
+    static final BitPacker PACKER_3_BLOCK = new BitPacker();
+    private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
+    private static final IntElement P3B_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
+    private static final EnumElement<Rotation> P3B_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+    private static final IntElement P3B_BIGTEX_INDEX = PACKER_3_BLOCK.createIntElement(16 * 16 * 16);
+    private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
+//    private static final IntElement P3B_SIMPLE_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
     
-    // future components?
-    // bigtex version (32 or maybe 64 variants per 16x16x16 nibble)
-    // isUpright (show if shape is flipped along axis)
-    // isCorner - origin of multiblock is lower corner instead of block center
-    // offset - position relative to multiblock origin - 21 bits
+    static final BitPacker PACKER_3_MULTIBLOCK = new BitPacker();
+    private static final BooleanElement P3M_IS_CORNER = PACKER_3_MULTIBLOCK.createBooleanElement();
+    private static final IntElement P3M_OFFSET_X = PACKER_3_MULTIBLOCK.createIntElement(256);
+    private static final IntElement P3M_OFFSET_Y = PACKER_3_MULTIBLOCK.createIntElement(256);
+    private static final IntElement P3M_OFFSET_Z = PACKER_3_MULTIBLOCK.createIntElement(256);
+    
+    private static final IntElement P3M_SCALE_X = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+    private static final IntElement P3M_SCALE_Y = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+    private static final IntElement P3M_SCALE_Z = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+
+    // zero value indicates solid shape
+    private static final IntElement P3M_WALL_THICKNESS = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+    
+    static final BitPacker PACKER_3_FLOW = new BitPacker();
+    private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
+    
+    //TODO
+    // move bigtex to p2, break out components, doesn't apply to multiblock
+    // add shape-defined int to p2
+    // add getters and setters and world update and tests for multiblock and flow elements
+    // safety checks on shape-dependent get/set methods
+    // use same bits for simple/corner joins and use simplest world state reader needed?
+
     static
     {
         for(int i = 0; i < MAX_PAINTERS; i++)
         {
-            // p0 has 3 bits to start
-            P0_PAINT_LIGHT[i] = PACKER_0.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
+            // p0 reserve 7 bits for shape
             P0_PAINTERS[i] = PACKER_0.createEnumElement(SurfacePainter.class);   // 3 bits each x4 = 12
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
 
@@ -83,6 +113,7 @@ public class ModelState
             P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
             P1_PAINT_ROTATION[i] = PACKER_1.createBooleanElement(); // 1 bit each x4 = 4
 
+            P2_PAINT_LIGHT[i] = PACKER_2.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
             P2_PAINT_LAYER[i] = PACKER_2.createEnumElement(BlockRenderLayer.class); // 2 bits each x4 = 8
         }
     }
@@ -103,6 +134,48 @@ public class ModelState
         
         private int hashCode = -1;
         
+        /**
+         * For readability.
+         */
+        public static final int STATE_FLAG_NONE = 0;
+      
+        /* 
+         * Enables lazy derivation - set after derivation is complete.
+         * NB - check logic assumes that ALL bits are zero for simplicity.
+         */
+        private static final int STATE_FLAG_IS_POPULATED = 1;
+        
+        /** 
+         * Applies to block-type states.  
+         * True if is a block type state and requires full join state.
+         */
+        public static final int STATE_FLAG_NEEDS_CORNER_JOIN = STATE_FLAG_IS_POPULATED << 1;
+        
+        /** 
+         * Applies to block-type states.  
+         * True if is a block type state and requires full join state.
+         */
+        public static final int STATE_FLAG_NEEDS_SIMPLE_JOIN = STATE_FLAG_NEEDS_CORNER_JOIN << 1;
+        
+        /** 
+         * True if big-tex world state is needed. Applies for block and flow state formats.
+         */
+        public static final int STATE_FLAG_NEEDS_BIGTEX = STATE_FLAG_NEEDS_SIMPLE_JOIN << 1;
+        
+        /** 
+         * True if block version and rotation are needed. Applies for block formats.
+         */
+        public static final int STATE_FLAG_NEEDS_BLOCK_RANDOMS= STATE_FLAG_NEEDS_BIGTEX << 1;
+        
+        /** 
+         * True if meta values (species) is needed.
+         */
+        public static final int STATE_FLAG_NEEDS_SPECIES= STATE_FLAG_NEEDS_BLOCK_RANDOMS << 1;
+        
+        
+        /** contains indicators derived from shape and painters */
+        private byte stateFlags;
+        
         public StateValue()
         {
             
@@ -115,6 +188,21 @@ public class ModelState
             this.bits1 = bits[1];
             this.bits2 = bits[2];
             this.bits3 = bits[3];
+        }
+        
+        private void populateStateFlagsIfNeeded()
+        {
+            if(stateFlags == 0)
+            {
+                stateFlags = (byte) (STATE_FLAG_IS_POPULATED | getShape().stateFlags
+                        | getSurfacePainter(0).stateFlags | getSurfacePainter(1).stateFlags
+                        | getSurfacePainter(2).stateFlags | getSurfacePainter(3).stateFlags);
+            }
+        }
+        
+        private void clearStateFlags()
+        {
+            if(this.stateFlags != 0) this.stateFlags  = 0;
         }
         
         public boolean isStatic() { return this.isStatic; }
@@ -149,7 +237,7 @@ public class ModelState
         
         private void invalidateHashCode()
         {
-            this.hashCode = -1;
+            if(this.hashCode != -1) this.hashCode = -1;
         }
         
         @Override
@@ -164,24 +252,42 @@ public class ModelState
         
         public void refreshFromWorld(IBlockState state, IBlockAccess world, BlockPos pos)
         {
-            //TODO: see what elements are used by shape and by selected painters
-            // then only update those elements
+            populateStateFlagsIfNeeded();
             
-            //TODO: simple and corner join - perhaps only check meta? Default to meta when placed that doesn't connect to 
-            // different shapes, colors, substance, etc.  But would allow forced connections.  NOTE - would not work for columns.
-            // Maybe have parameters on which block test to use, or based on shape?
+            long localBits = bits3;
             
-            long localBits = bits2;
-            
-            localBits = P2_BLOCK_VERSION.setBits(BLOCK_ALTERNATOR.getAlternate(pos), localBits);
-            
-            localBits = P2_ROTATION.setBits(Rotation.values()[ROTATION_ALTERNATOR.getAlternate(pos)], localBits);
-            
-            localBits = P2_BIGTEX_INDEX.setBits(((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15), localBits);
+            switch(this.getShape().stateFormat)
+            {
+            case BLOCK:
+                
+                //TODO: see what elements are used by selected painters
+                // then only update those elements
 
-            localBits = P2_SPECIES.setBits(state.getValue(NiceBlock.META), localBits);
+                localBits = P3B_BLOCK_VERSION.setValue(BLOCK_ALTERNATOR.getAlternate(pos), localBits);
+                localBits = P3B_BLOCK_ROTATION.setValue(Rotation.values()[ROTATION_ALTERNATOR.getAlternate(pos)], localBits);
+                localBits = P3B_BIGTEX_INDEX.setValue(((pos.getX() & 15) << 8) | ((pos.getY() & 15) << 4) | (pos.getZ() & 15), localBits);
+                localBits = P3B_SPECIES.setValue(state.getValue(NiceBlock.META), localBits);
+
+                                
+                //TODO: simple and corner join - perhaps only check meta? Default to meta when placed that doesn't connect to 
+                // different shapes, colors, substance, etc.  But would allow forced connections.  NOTE - would not work for columns.
+                // Maybe have parameters on which block test to use, or based on shape?
+                
+                break;
+
+            case FLOW:
+                localBits = P3F_FLOW_JOIN.setValue(FlowHeightState.getBitsFromWorldStatically((NiceBlock)state.getBlock(), state, world, pos), localBits);
+                break;
             
-            bits2 = localBits;
+            case MULTIBLOCK:
+                break;
+                
+            default:
+                break;
+            
+            }
+            
+            bits3 = localBits;
             
         }
 
@@ -193,8 +299,9 @@ public class ModelState
         
         public void setShape(ModelShape shape)
         {
-            bits0 = P0_SHAPE.setBits(shape, bits0);
+            bits0 = P0_SHAPE.setValue(shape, bits0);
             invalidateHashCode();
+            clearStateFlags();
         }
         
         public SurfacePainter getSurfacePainter(int painterIndex)
@@ -204,7 +311,9 @@ public class ModelState
         
         public void setSurfacePainter(int painterIndex, SurfacePainter painter)
         {
-            bits0 = P0_PAINTERS[painterIndex].setBits(painter, bits0);
+            bits0 = P0_PAINTERS[painterIndex].setValue(painter, bits0);
+            invalidateHashCode();
+            clearStateFlags();
         }
         
         public SurfaceType getSurfaceType(int painterIndex)
@@ -214,7 +323,8 @@ public class ModelState
         
         public void setSurfaceType(int painterIndex, SurfaceType surfaceType)
         {
-            bits1 = P1_SURFACE_TYPES[painterIndex].setBits(surfaceType, bits1);
+            bits1 = P1_SURFACE_TYPES[painterIndex].setValue(surfaceType, bits1);
+            invalidateHashCode();
         }
         
         public ColorMap getColorMap(int painterIndex)
@@ -224,7 +334,8 @@ public class ModelState
         
         public void setColorMap(int painterIndex, ColorMap map)
         {
-            bits0 = P0_PAINT_COLOR[painterIndex].setBits(map.ordinal, bits0);
+            bits0 = P0_PAINT_COLOR[painterIndex].setValue(map.ordinal, bits0);
+            invalidateHashCode();
         }
 
         public Texture getTexture(int painterIndex)
@@ -234,17 +345,19 @@ public class ModelState
         
         public void setTexture(int painterIndex, Texture tex)
         {
-            bits1 = P1_PAINT_TEXTURE[painterIndex].setBits(tex.ordinal, bits1);
+            bits1 = P1_PAINT_TEXTURE[painterIndex].setValue(tex.ordinal, bits1);
+            invalidateHashCode();
         }
         
         public LightingMode getLightingMode(int painterIndex)
         {
-            return P0_PAINT_LIGHT[painterIndex].getValue(bits0);
+            return P2_PAINT_LIGHT[painterIndex].getValue(bits2);
         }
         
         public void setLightingMode(int painterIndex, LightingMode lightingMode)
         {
-            bits0 = P0_PAINT_LIGHT[painterIndex].setBits(lightingMode, bits0);
+            bits2 = P2_PAINT_LIGHT[painterIndex].setValue(lightingMode, bits2);
+            invalidateHashCode();
         }
         
         public BlockRenderLayer getRenderLayer(int painterIndex)
@@ -254,7 +367,8 @@ public class ModelState
         
         public void setRenderLayer(int painterIndex, BlockRenderLayer renderLayer)
         {
-            bits2 = P2_PAINT_LAYER[painterIndex].setBits(renderLayer, bits2);
+            bits2 = P2_PAINT_LAYER[painterIndex].setValue(renderLayer, bits2);
+            invalidateHashCode();
         }
 
         public boolean getRotationEnabled(int painterIndex)
@@ -264,7 +378,8 @@ public class ModelState
         
         public void setRotationEnabled(int painterIndex, boolean isEnabled)
         {
-            bits1 = P1_PAINT_ROTATION[painterIndex].setBits(isEnabled, bits1);
+            bits1 = P1_PAINT_ROTATION[painterIndex].setValue(isEnabled, bits1);
+            invalidateHashCode();
         }
         
         public EnumFacing.Axis getAxis()
@@ -274,67 +389,87 @@ public class ModelState
         
         public void setAxis(EnumFacing.Axis axis)
         {
-            bits2 = P2_AXIS.setBits(axis, bits2);
+            bits2 = P2_AXIS.setValue(axis, bits2);
+            invalidateHashCode();
+        }
+        
+        public boolean isAxisInverted()
+        {
+            return P2_AXIS_INVERTED.getValue(bits2);
+        }
+        
+        public void setAxisInverted(boolean isInverted)
+        {
+            bits2 = P2_AXIS_INVERTED.setValue(isInverted, bits2);
+            invalidateHashCode();
         }
         
         public Rotation getRotation()
         {
-            return P2_ROTATION.getValue(bits2);
+            populateStateFlagsIfNeeded();
+            return P3B_BLOCK_ROTATION.getValue(bits3);
         }
         
         public void setRotation(Rotation rotation)
         {
-            bits2 = P2_ROTATION.setBits(rotation, bits2);
+            populateStateFlagsIfNeeded();
+            bits3 = P3B_BLOCK_ROTATION.setValue(rotation, bits3);
+            invalidateHashCode();
         }
 
         public int getBlockVersion()
         {
-            return P2_BLOCK_VERSION.getValue(bits2);
+            return P3B_BLOCK_VERSION.getValue(bits3);
         }
         
         public void setBlockVersion(int version)
         {
-            bits2 = P2_BLOCK_VERSION.setBits(version, bits2);
+            bits3 = P3B_BLOCK_VERSION.setValue(version, bits3);
+            invalidateHashCode();
         }
         
         public int getBigTexIndex()
         {
-            return P2_BIGTEX_INDEX.getValue(bits2);
+            return P3B_BIGTEX_INDEX.getValue(bits3);
         }
         
         public void setBigTexIndex(int index)
         {
-            bits2 = P2_BIGTEX_INDEX.setBits(index, bits2);
+            bits3 = P3B_BIGTEX_INDEX.setValue(index, bits3);
+            invalidateHashCode();
         }
         
         public int getSpecies()
         {
-            return P2_SPECIES.getValue(bits2);
+            return P3B_SPECIES.getValue(bits3);
         }
         
         public void setSpecies(int species)
         {
-            bits2 = P2_SPECIES.setBits(species, bits2);
+            bits3 = P3B_SPECIES.setValue(species, bits3);
+            invalidateHashCode();
         }
         
         public CornerJoinBlockState getCornerJoin()
         {
-            return CornerJoinBlockStateSelector.getJoinState(P2_CORNER_JOIN.getValue(bits2));
+            return CornerJoinBlockStateSelector.getJoinState(P3B_BLOCK_JOIN.getValue(bits3));
         }
         
         public void setCornerJoin(CornerJoinBlockState join)
         {
-            bits2 = P2_CORNER_JOIN.setBits(join.getIndex(), bits2);
+            bits3 = P3B_BLOCK_JOIN.setValue(join.getIndex(), bits3);
+            invalidateHashCode();
         }
         
-        public SimpleJoin getSimpleJoin()
-        {
-            return new SimpleJoin(P2_SIMPLE_JOIN.getValue(bits2));
-        }
-        
-        public void setSimpleJoin(SimpleJoin join)
-        {
-            bits2 = P2_SIMPLE_JOIN.setBits(join.getIndex(), bits2);
-        }
+//        public SimpleJoin getSimpleJoin()
+//        {
+//            return new SimpleJoin(P3B_SIMPLE_JOIN.getValue(bits3));
+//        }
+//        
+//        public void setSimpleJoin(SimpleJoin join)
+//        {
+//            bits3 = P3B_SIMPLE_JOIN.setValue(join.getIndex(), bits3);
+//            invalidateHashCode();
+//        }
     }
 }

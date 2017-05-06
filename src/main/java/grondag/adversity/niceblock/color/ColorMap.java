@@ -1,6 +1,6 @@
 package grondag.adversity.niceblock.color;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.Color;
 import grondag.adversity.library.Color.EnumHCLFailureMode;
 import grondag.adversity.niceblock.color.HueSet.Chroma;
@@ -54,7 +54,7 @@ public class ColorMap
                 EnumHCLFailureMode.REDUCE_CHROMA);
         if(!whichColor.IS_VISIBLE)
         {
-            Adversity.LOG.debug("makeColorMap produced invisible border color for " + mapName);
+            Output.getLog().debug("makeColorMap produced invisible border color for " + mapName);
         }
         newColorMap.setColor(EnumColorMap.BORDER, whichColor.RGB_int | 0xFF000000);
     
@@ -64,7 +64,7 @@ public class ColorMap
         Color lampColor = Color.fromHCL(hue.hueDegrees(), Math.min(chromaIn.value * 0.65, 25), Color.HCL_MAX);
         if(lampColor.RGB_int == 0)
         {
-            Adversity.LOG.info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);
+            Output.getLog().info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);
         }
         newColorMap.setColor(EnumColorMap.LAMP, lampColor.RGB_int | 0xFF000000);
     

@@ -3,7 +3,7 @@ package grondag.adversity.library;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 
 public class PerformanceCollector
 {
@@ -45,15 +45,15 @@ public class PerformanceCollector
         }
         if(total == 0) total = 1;  // prevent div by zero below
         
-        Adversity.LOG.info("======================================================================================");
-        Adversity.LOG.info("Performance Measurement for " + this.title );
-        Adversity.LOG.info("--------------------------------------------------------------------------------------");
+        Output.getLog().info("======================================================================================");
+        Output.getLog().info("Performance Measurement for " + this.title );
+        Output.getLog().info("--------------------------------------------------------------------------------------");
         for(PerformanceCounter counter : this.counters)
         {
-            Adversity.LOG.info((counter.runTime() * 100 / total) + "% " + counter.stats());
+            Output.getLog().info((counter.runTime() * 100 / total) + "% " + counter.stats());
         }
-        Adversity.LOG.info("--------------------------------------------------------------------------------------");
-        Adversity.LOG.info(String.format("TOTAL TIME = %1$.3fs (%2$,dns)", (double)total/1000000000L, total));
+        Output.getLog().info("--------------------------------------------------------------------------------------");
+        Output.getLog().info(String.format("TOTAL TIME = %1$.3fs (%2$,dns)", (double)total/1000000000L, total));
     }
     
     public void clearStats()

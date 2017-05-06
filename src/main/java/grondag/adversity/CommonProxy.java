@@ -25,7 +25,7 @@ public class CommonProxy
 {
 	public void preInit(FMLPreInitializationEvent event) 
 	{
-		Adversity.LOG = event.getModLog();
+		Output.setLog(event.getModLog());
 		
         AdversityMessages.registerNetworkMessages();
 

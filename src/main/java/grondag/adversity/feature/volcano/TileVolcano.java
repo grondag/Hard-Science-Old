@@ -13,8 +13,8 @@ import net.minecraft.util.math.Vec3i;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
@@ -151,7 +151,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 
                 if(node == null)
                 {
-                    Adversity.LOG.info("Setting up new Volcano Node @" + this.pos.toString());
+                    Output.getLog().info("Setting up new Volcano Node @" + this.pos.toString());
                     this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
                     this.nodeId = node.getID();
                     this.node.setLocation(this.pos,this.world.provider.getDimension());
@@ -159,7 +159,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 }
                 else
                 {
-                    Adversity.LOG.info("Recovered Volcano Node @" + this.pos.toString());
+                    Output.getLog().info("Recovered Volcano Node @" + this.pos.toString());
                     this.nodeId = node.getID();
                     this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
                 }
@@ -170,12 +170,12 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
             else
             {
-                Adversity.LOG.info("retrieving Volcano node @" + this.pos.toString());
+                Output.getLog().info("retrieving Volcano node @" + this.pos.toString());
 
                 this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.nodeId);
                 if(this.node == null)
                 {
-                    Adversity.LOG.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
+                    Output.getLog().warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
                     + ". Created new simulation node.  Simulation state was lost.");
                     this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
                     this.node.setLocation(this.pos,this.world.provider.getDimension());

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
@@ -40,7 +40,7 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
         
         if(this.keyBitLength > 64) 
         {
-            Adversity.LOG.warn("Composite collision handler bit length exceeded.  Collision boxes may be borked.");
+            Output.getLog().warn("Composite collision handler bit length exceeded.  Collision boxes may be borked.");
         }
     }
     

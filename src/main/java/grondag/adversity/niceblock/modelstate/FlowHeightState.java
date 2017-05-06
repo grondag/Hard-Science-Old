@@ -3,6 +3,12 @@ package grondag.adversity.niceblock.modelstate;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.NiceBlock;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public class FlowHeightState
 {
@@ -399,5 +405,127 @@ public class FlowHeightState
         }
         retval += " Y-OFFSET=" + yOffset;
         return retval;
+    }
+
+    public static long getBitsFromWorldStatically(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        int centerHeight;
+        int sideHeight[] = new int[4];
+        int cornerHeight[] = new int[4];
+        int yOffset = 0;
+    
+        //        Adversity.log.info("flowstate getBitsFromWorld @" + pos.toString());
+    
+        int yOrigin = pos.getY();
+        IBlockState originState = state;
+    
+        if(block.isFlowFiller())
+        {
+            int offset = IFlowBlock.getYOffsetFromState(state);
+            yOrigin -= offset;
+            yOffset = offset;
+            originState = world.getBlockState(pos.down(offset));
+            if(!IFlowBlock.isFlowHeight(originState.getBlock()))
+            {
+                return EMPTY_BLOCK_STATE_KEY;
+            }
+        }
+        else
+        {
+            // If under another flow height block, handle similar to filler block.
+            // Not a perfect fix if they are stacked, but shouldn't normally be.
+            //                Adversity.log.info("flowstate is height block");
+    
+            // try to use block above as height origin
+            originState = world.getBlockState(pos.up().up());
+            if(IFlowBlock.isFlowHeight(originState.getBlock()))
+            {
+                yOrigin += 2;
+                yOffset = -2;
+                //                    Adversity.log.info("origin 2 up");
+            }
+            else
+            {
+                originState = world.getBlockState(pos.up());
+                if(IFlowBlock.isFlowHeight(originState.getBlock()))
+                {
+                    yOrigin += 1;
+                    yOffset = -1;
+                    //                        Adversity.log.info("origin 1 up");
+                }
+                else
+                {
+                    // didn't work, handle as normal height block
+                    originState = state;
+                    //                        Adversity.log.info("origin self");
+                }
+            }
+        }
+    
+        int[][] neighborHeight = new int[3][3];
+        neighborHeight[1][1] = IFlowBlock.getFlowHeightFromState(originState);
+    
+        MutableBlockPos mutablePos = new MutableBlockPos();
+        for(int x = 0; x < 3; x++)
+        {
+            for(int z = 0; z < 3; z++)
+            {
+                if(x == 1 && z == 1 ) continue;
+                mutablePos.setPos(pos.getX() - 1 + x, yOrigin, pos.getZ() - 1 + z);
+    
+                neighborHeight[x][z] = getFlowHeight(world, mutablePos);
+    
+            }
+        }
+    
+        centerHeight = neighborHeight[1][1];
+    
+        for(HorizontalFace side : HorizontalFace.values())
+        {
+            sideHeight[side.ordinal()] = neighborHeight[side.directionVector.getX() + 1][side.directionVector.getZ() + 1];
+        }
+    
+        for(HorizontalCorner corner : HorizontalCorner.values())
+        {
+            cornerHeight[corner.ordinal()] = neighborHeight[corner.directionVector.getX() + 1][corner.directionVector.getZ() + 1];
+        }
+    
+        return computeStateKey(centerHeight, sideHeight, cornerHeight, yOffset);
+    
+    }
+
+    /** 
+     * Pass in pos with Y of flow block for which we are getting data.
+     * Returns relative flow height based on blocks 2 above through 2 down.
+     * Gets called frequently, thus the use of mutable pos.
+     */
+    public static int getFlowHeight(IBlockAccess world, MutableBlockPos pos)
+    {
+        pos.setY(pos.getY() + 2);;
+        IBlockState state = world.getBlockState(pos);
+        int h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return 2 * BLOCK_LEVELS_INT + h;
+    
+        pos.setY(pos.getY() - 1);
+        state = world.getBlockState(pos);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return BLOCK_LEVELS_INT + h;
+    
+        pos.setY(pos.getY() - 1);
+        state = world.getBlockState(pos);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return h;
+    
+        pos.setY(pos.getY() - 1);
+        state = world.getBlockState(pos);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return -BLOCK_LEVELS_INT + h;
+    
+        pos.setY(pos.getY() - 1);
+        state = world.getBlockState(pos);
+        h = IFlowBlock.getFlowHeightFromState(state);
+        if(h > 0) return -2 * BLOCK_LEVELS_INT + h;
+    
+        return NO_BLOCK;
     }
 }

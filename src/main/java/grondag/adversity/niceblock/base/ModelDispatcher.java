@@ -1,6 +1,7 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
 import grondag.adversity.library.model.ItemModelDelegate;
@@ -281,14 +282,14 @@ public class ModelDispatcher implements IBakedModel
         SparseLayerMap map = modelCache.get(modelStateKey);
         if(map == null) 
         {
-            Adversity.LOG.warn("Missing layer map for occlusion key.");
+            Output.getLog().warn("Missing layer map for occlusion key.");
             return 0;
         }
         
         QuadContainer container = map.get(BlockRenderLayer.SOLID);
         if(container == null) 
         {
-            Adversity.LOG.warn("Missing model for occlusion key.");
+            Output.getLog().warn("Missing model for occlusion key.");
             return 0;
         }
         return container.getOcclusionHash(face);

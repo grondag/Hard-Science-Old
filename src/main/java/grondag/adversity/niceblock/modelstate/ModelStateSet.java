@@ -5,7 +5,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
 import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
@@ -42,8 +42,8 @@ public class ModelStateSet
         HashSet<ModelStateComponent<?,?>> set = new HashSet<ModelStateComponent<?,?>>();
         for(ModelStateSet s : sets)
         {
-            if(s.shape != newShape && Adversity.DEBUG_MODE)
-                Adversity.LOG.warn("Mixed shapes in model state construction. Unexpected behaviour could occur.");
+            if(s.shape != newShape && Output.DEBUG_MODE)
+                Output.getLog().warn("Mixed shapes in model state construction. Unexpected behaviour could occur.");
             
             for(ModelStateComponent<?,?> c : s.includedTypes)
             {
@@ -263,9 +263,9 @@ public class ModelStateSet
     public ModelStateSetValue getSetValueFromKey(long key)
     {
         ModelStateSetValue result = valueCache.get(key);
-        if(Adversity.DEBUG_MODE && result == null)
+        if(Output.DEBUG_MODE && result == null)
         {
-            Adversity.LOG.info("Unable to retrieve model state set value. Should never happen.");
+            Output.getLog().info("Unable to retrieve model state set value. Should never happen.");
         }
         return result;
     }

@@ -2,7 +2,7 @@ package grondag.adversity.library;
 
 import java.util.Arrays;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 
 /**
  * Lightweight, non-concurrent collection-like class for managing small unordered lists.
@@ -64,9 +64,9 @@ public class SimpleUnorderedArrayList<T>
     /** Does NOT preserve order! */
     public void remove(int index)
     {
-        if(Adversity.DEBUG_MODE && this.isEmpty())
+        if(Output.DEBUG_MODE && this.isEmpty())
         {
-            Adversity.LOG.warn("SimpleUnoderedArrayList detected attempt to remove item from empty list.");
+            Output.getLog().warn("SimpleUnoderedArrayList detected attempt to remove item from empty list.");
         }
         
         this.size--;

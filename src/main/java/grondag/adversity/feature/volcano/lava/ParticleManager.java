@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ComparisonChain;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.simulator.Simulator;
@@ -124,7 +124,7 @@ public class ParticleManager
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Adversity.LOG.warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
+            Output.getLog().warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
             return;
         }
 
@@ -141,12 +141,12 @@ public class ParticleManager
             }
         }
 
-        Adversity.LOG.info("Loaded " + map.size() + " lava entities.");
+        Output.getLog().info("Loaded " + map.size() + " lava entities.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Adversity.LOG.info("Saving " + map.size() + " lava entities.");
+        Output.getLog().info("Saving " + map.size() + " lava entities.");
         
         int[] saveData = new int[map.size() * NBT_SAVE_DATA_WIDTH];
         int i = 0;
