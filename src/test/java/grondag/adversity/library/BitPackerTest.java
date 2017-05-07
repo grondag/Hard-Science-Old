@@ -31,6 +31,10 @@ public class BitPackerTest
         
         LongElement long1 = packer.createLongElement(-1, 634235);
         
+        IntElement int3 = packer.createIntElement(8);
+        
+        assert(packer.bitLength() == 64);
+        
         long bits = 0;
 
         bits |= int1.getBits(42);
@@ -40,7 +44,7 @@ public class BitPackerTest
         bits |= bool1.getBits(false);
         bits |= bool2.getBits(true);
         bits |= long1.getBits(0);
-        
+        bits |= int3.getBits(7);
         
         assert(enum1.getValue(bits) == Things1.THREE);
         assert(enum2.getValue(bits) == Things2.H);
@@ -49,18 +53,19 @@ public class BitPackerTest
         assert(bool1.getValue(bits) == false);
         assert(bool2.getValue(bits) == true);
         assert(long1.getValue(bits) == 0);
-        
+        assert(int3.getValue(bits) == 7);
         
         bits = int1.setValue(38, bits);
         bits = enum1.setValue(Things1.ONE, bits);
         bits = long1.setValue(52947, bits);
         bits = bool1.setValue(true, bits);
-        
+        bits = int3.setValue(0, bits);
         
         assert(enum1.getValue(bits) == Things1.ONE);
         assert(int1.getValue(bits) == 38);
         assert(bool1.getValue(bits) == true);
         assert(long1.getValue(bits) == 52947);
+        assert(int3.getValue(bits) == 0);
     }
 
 }

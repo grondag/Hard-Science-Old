@@ -33,7 +33,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class ModelDispatcher implements IBakedModel

@@ -5,7 +5,6 @@ import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.init.ModItems;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.base.ModelHolder;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
@@ -13,7 +12,6 @@ import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.block.BigBlock;
 import grondag.adversity.niceblock.block.CSGBlock;
-import grondag.adversity.niceblock.block.ColumnSquareBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
@@ -25,30 +23,22 @@ import grondag.adversity.niceblock.model.ColorModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory;
 import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
-import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
 import grondag.adversity.niceblock.support.NicePlacement;
-import grondag.adversity.superblock.texture.TextureScale;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.event.TextureStitchEvent.Pre;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -398,10 +388,6 @@ public class NiceBlockRegistrar
 
     public static void preInit(FMLPreInitializationEvent event)
     {
-        // SET UP COLOR ATLAS
-        // {
-        // NiceHues.INSTANCE.writeColorAtlas(event.getModConfigurationDirectory());
-        // }
 
         // REGISTER ALL BLOCKS
         for (NiceBlock block : allBlocks)
@@ -452,15 +438,6 @@ public class NiceBlockRegistrar
         }
     }
 
-    private static class DummyColorHandler implements IItemColor
-    {
-        private static final DummyColorHandler INSTANCE = new DummyColorHandler();
-        
-        @Override
-        public int getColorFromItemstack(ItemStack stack, int tintIndex) {
-            return 0xFFFFFFFF;
-        }
-    }
     /**
      * Centralized event handler for NiceModel baking.
      */
@@ -475,13 +452,14 @@ public class NiceBlockRegistrar
             event.getModelRegistry().putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
         }
 
-        for (ModelDispatcher dispatcher : allDispatchers)
-        {
-            dispatcher.handleBakeEvent(event);
-            // dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
-
-            event.getModelRegistry().putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
-        }
+        // no idea why this was here twice
+//        for (ModelDispatcher dispatcher : allDispatchers)
+//        {
+//            dispatcher.handleBakeEvent(event);
+//            // dispatcher.controller.getBakedModelFactory().handleBakeEvent(event);
+//
+//            event.getModelRegistry().putObject(new ModelResourceLocation(dispatcher.getModelResourceString()), dispatcher);
+//        }
 
         for (NiceBlock block : allBlocks)
         {
@@ -490,27 +468,6 @@ public class NiceBlockRegistrar
                 event.getModelRegistry().putObject(new ModelResourceLocation(block.getRegistryName() + "." + stack.getMetadata(), "inventory"),
                         block.dispatcher);
             }
-        }
-    }
-
-    /**
-     * Centralized event handler for NiceModel texture stitch.
-     * Register all textures that will be needed for associated models. 
-     * Happens before model bake.
-     */
-    @SubscribeEvent
-    public void stitcherEventPre(TextureStitchEvent.Pre event)
-    {
-        ArrayList<String> textureList = new ArrayList<String>();
-        
-        for (TextureProvider t : TextureProviders.ALL_TEXTURE_PROVIDERS)
-        {
-            t.addTexturesForPrestich(textureList);
-        }
-        
-        for(String s : textureList)
-        {
-            event.getMap().registerSprite(new ResourceLocation(s));
         }
     }
 
@@ -536,31 +493,4 @@ public class NiceBlockRegistrar
         else 
             return NiceBlockRegistrar.COOL_FLOWING_BASALT_FILLER_BLOCK;
     }   
-     
-    
-    // /**
-    // * Centralized event handler for NiceModel texture stitch.
-    // */
-    // @SubscribeEvent
-    // public void stitcherEventPost(TextureStitchEvent.Post event) {
-    // for (ModelRegistration reg : allModels) {
-    // reg.model.handleTexturePostStitch(event);
-    // }
-    // }
-
-    // /**
-    // * Contains stuff we need to replace model references during model bake.
-    // */
-    // private static class ModelRegistration{
-    // public final NiceModel model;
-    // public final ModelResourceLocation mrlBlock;
-    // public final ModelResourceLocation mrlItem;
-    //
-    // public ModelRegistration(NiceModel model, ModelResourceLocation mrlBlock, ModelResourceLocation mrlItem){
-    // this.model = model;
-    // this.mrlBlock = mrlBlock;
-    // this.mrlItem = mrlItem;
-    // }
-    // }
-
 }

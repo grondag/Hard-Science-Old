@@ -1,6 +1,5 @@
 package grondag.adversity.niceblock.modelstate;
 
-import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.superblock.model.shape.ModelShape;
 
 public interface IModelState

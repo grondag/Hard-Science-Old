@@ -106,6 +106,13 @@ public class NeighborBlocks {
     }
 
     /**
+     * For testing
+     */
+    public NeighborTestResults getFakeNeighborTestResults(int faceFlags) {
+        return new NeighborTestResults(faceFlags);
+    }
+    
+    /**
      * Convenient data structure for returning test results.
      */
     public class NeighborTestResults {
@@ -114,10 +121,18 @@ public class NeighborBlocks {
         private int resultFlags = 0;
         private final IBlockTest test;
 
-        protected NeighborTestResults(IBlockTest test) {
+        private NeighborTestResults(IBlockTest test) {
             this.test = test;
         }
 
+        // for testing
+        private NeighborTestResults(int faceFlags)
+        {
+            this.test = null;
+            this.resultFlags = faceFlags;
+            this.completionFlags = Useful.intBitMask(26);
+        }
+        
         public boolean result(EnumFacing face)
         {
             int bitFlag = FACE_FLAGS[face.ordinal()];

@@ -4,5 +4,6 @@ public interface ObjectSimpleCacheLoader<K, V>
 {
     abstract public V load(K key);
     
-    abstract ObjectSimpleCacheLoader<K, V> createNew();
+    /** for benchmark testing */
+    default ObjectSimpleCacheLoader<K, V> createNew() { return null; };
 }

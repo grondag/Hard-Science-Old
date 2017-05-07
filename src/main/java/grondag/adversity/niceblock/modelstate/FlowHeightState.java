@@ -5,6 +5,7 @@ import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
@@ -409,6 +410,16 @@ public class FlowHeightState
 
     public static long getBitsFromWorldStatically(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
+        return getBitsFromWorldStatically(block.isFlowFiller(), state, world, pos);
+    }
+    
+    public static long getBitsFromWorldStatically(SuperBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return getBitsFromWorldStatically(block.isFlowFiller(), state, world, pos);
+    }
+    
+    private static long getBitsFromWorldStatically(boolean isFlowFiller, IBlockState state, IBlockAccess world, BlockPos pos)
+    {
         int centerHeight;
         int sideHeight[] = new int[4];
         int cornerHeight[] = new int[4];
@@ -419,7 +430,7 @@ public class FlowHeightState
         int yOrigin = pos.getY();
         IBlockState originState = state;
     
-        if(block.isFlowFiller())
+        if(isFlowFiller)
         {
             int offset = IFlowBlock.getYOffsetFromState(state);
             yOrigin -= offset;

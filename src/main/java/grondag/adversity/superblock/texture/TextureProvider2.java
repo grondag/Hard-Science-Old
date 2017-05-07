@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import grondag.adversity.library.BitPacker;
-import grondag.adversity.library.BitPacker.BitElement;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;

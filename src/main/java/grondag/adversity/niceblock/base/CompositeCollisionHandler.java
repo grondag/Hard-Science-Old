@@ -9,6 +9,7 @@ import grondag.adversity.Output;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -54,6 +55,16 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
         }
         return key;
     }
+    
+    @Override
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelState modelState)
+    {
+        //TODO 
+        // Won't actually get used by superblocks.
+        // When niceblocks are retired need to update this to actually handle CSG shapes
+        // or more accurately, use this class as the starting point for the collision handle for the CSG shape.
+        return modelState.getShape().collisionHandler().getCollisionKey(state, worldIn, pos, modelState);
+    }
 
     @Override
     public int getKeyBitLength()
@@ -92,5 +103,4 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
         }
         return result;
     }
-
 }

@@ -8,13 +8,13 @@ import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.superblock.model.shape.SurfaceTopology;
 
-import static grondag.adversity.superblock.model.state.ModelState.StateValue.*;
+import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelState.*;
 
 public enum SurfacePainter
 {
     NONE(STATE_FLAG_NONE),
     CUBIC_TILES(STATE_FLAG_NEEDS_BLOCK_RANDOMS),
-    CUBIC_BIGTEX(STATE_FLAG_NEEDS_BIGTEX),
+    CUBIC_BIGTEX(STATE_FLAG_NEEDS_POS),
     CUBIC_BORDER(STATE_FLAG_NEEDS_CORNER_JOIN),
     CUBIC_MASONRY(STATE_FLAG_NEEDS_SIMPLE_JOIN),
     SURFACE_TILES(STATE_FLAG_NONE),

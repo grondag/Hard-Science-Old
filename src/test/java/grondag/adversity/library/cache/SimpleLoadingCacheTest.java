@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
@@ -394,13 +393,15 @@ public class SimpleLoadingCacheTest
     public void test()
     {
         
-        ExecutorService executor;
-        executor = Executors.newFixedThreadPool(THREAD_COUNT);
+        // not really a unit test, so disable unless actually want to run
         
-        System.out.println("WARM UP RUN");
-        doTestOuter(executor);
-        
-        System.out.println("TEST RUN");
-        doTestOuter(executor);
+//        ExecutorService executor;
+//        executor = Executors.newFixedThreadPool(THREAD_COUNT);
+//        
+//        System.out.println("WARM UP RUN");
+//        doTestOuter(executor);
+//        
+//        System.out.println("TEST RUN");
+//        doTestOuter(executor);
     }
 }

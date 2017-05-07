@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.base.ModelFactory;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -26,6 +27,13 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
         //NB: can't use modelState key directly - it may be a superset of this model's state
         return this.modelFactory.getStateSet().computeKey(modelState);
     }
+    
+    @Override
+    public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelState modelState)
+    {
+        //TODO: need a way to map shape-only elements to an identifier - may not fit inside a long
+        return 0;
+    }
 
     @Override
     public int getKeyBitLength()
@@ -44,6 +52,5 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
     {
         return modelFactory.getCollisionBoundingBox(state, worldIn, pos);
     }
-     
      
 }

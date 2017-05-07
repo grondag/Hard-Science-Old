@@ -14,10 +14,9 @@ import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.modelstate.ModelStateComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
-import grondag.adversity.superblock.model.state.ModelState;
-import grondag.adversity.superblock.model.state.ModelState.StateFormat;
+import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 
-import static grondag.adversity.superblock.model.state.ModelState.StateValue.*;
+import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelState.*;
 
 public enum ModelShape
 {
@@ -38,7 +37,7 @@ public enum ModelShape
     OCTAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
     DODECAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
     
-    FLOWING_TERRAIN(StateFormat.FLOW, STATE_FLAG_NEEDS_BIGTEX);
+    FLOWING_TERRAIN(StateFormat.FLOW, STATE_FLAG_NEEDS_POS);
     
     
     private ModelShape(StateFormat stateFormat, int stateFlags)

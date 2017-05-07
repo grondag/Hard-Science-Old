@@ -18,7 +18,7 @@ public class BitPacker
         
         this.totalBitLength += element.bitLength;
         this.bitMask = Useful.longBitMask(totalBitLength);
-        assert(totalBitLength < 64);
+        assert(totalBitLength <= 64);
     }
     
     public int bitLength() { return this.totalBitLength; }
