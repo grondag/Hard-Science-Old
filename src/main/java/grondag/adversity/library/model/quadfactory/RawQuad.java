@@ -11,6 +11,7 @@ import grondag.adversity.library.Useful;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -34,6 +35,8 @@ public class RawQuad
 //    public boolean isItem = false;
 //    public String tag = "";
     public boolean shouldContractUVs = true;
+    
+    public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
     
     public float minU = 0;
     public float maxU = 16;
@@ -115,6 +118,7 @@ public class RawQuad
         this.maxU = fromObject.maxU;
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
+        this.renderLayer = fromObject.renderLayer;
     }
 
     public List<RawQuad> toQuads()

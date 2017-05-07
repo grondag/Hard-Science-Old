@@ -31,8 +31,7 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
     @Override
     public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelState modelState)
     {
-        //TODO: need a way to map shape-only elements to an identifier - may not fit inside a long
-        return 0;
+        return modelState.getShape().meshFactory.getCollisionKeyFromModelState(modelState);
     }
 
     @Override

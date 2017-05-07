@@ -8,9 +8,12 @@ import grondag.adversity.library.model.SimpleItemBlockModel;
 import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
+import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.superblock.model.state.ModelStateFactory;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
@@ -45,19 +48,25 @@ public class SuperDispatcher
 		@Override
 		public SparseLayerMap load(ModelState key) {
 			
+		    Collection<RawQuad> paintedQuads = getFormattedQuads(key);
+		    
+		    @SuppressWarnings("unchecked")
+            ArrayList<RawQuad>[] containers = new ArrayList[BlockRenderLayer.values().length];
+		    for(int i = 0; i < containers.length; i++)
+		    {
+		        containers[i] = new ArrayList<RawQuad>();
+		    }
+		    
+			for(RawQuad quad : paintedQuads)
+			{
+			    containers[quad.renderLayer.ordinal()].add(quad);
+			}
+
 			SparseLayerMap result = layerMapBuilder.makeNewMap();
 			for(BlockRenderLayer layer : layerMapBuilder.layerList)
 			{
-			    // TODO
-			    // get shape quads
-			    // paint em
-			    // pack into container
-//				ArrayList<QuadContainer> containers = new ArrayList<QuadContainer>();
-//				for(ModelHolder model : models)
-//				{
-//					containers.add(model.getFaceQuads(state, layer));
-//				}
-//				result.set(layer, QuadContainer.merge(containers));
+
+				result.set(layer, QuadContainer.fromRawQuads(containers[layer.ordinal()]));
 			}
 			return result;
 		}
@@ -69,16 +78,11 @@ public class SuperDispatcher
 		public SimpleItemBlockModel load(ModelState key) 
 		{
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-	    	  // TODO
-            // get shape quads
-            // paint em
-            // pack into delegate
-//			for(ModelHolder model : models)
-//			{
-//				builder.addAll(model.getItemQuads(state));
-//			}
-//			return new SimpleItemBlockModel(builder.build(), shadedFlags[0]);
-	    	return null;
+	    	for(RawQuad quad : getFormattedQuads(key))
+	    	{
+	    	    builder.add(quad.createBakedQuad());
+	    	}
+			return new SimpleItemBlockModel(builder.build(), key.getRenderLayerShadedFlags() != 0);
 		}       
     }
     
@@ -118,6 +122,17 @@ public class SuperDispatcher
             return 0;
         }
         return container.getOcclusionHash(face);
+    }
+    
+    private Collection<RawQuad> getFormattedQuads(ModelState modelState)
+    {
+        Collection<RawQuad> shapeQuads = modelState.getShape().meshFactory.getShapeQuads(modelState);
+        ArrayList<RawQuad> result = new ArrayList<RawQuad>();
+        for(int i = 0; i < ModelStateFactory.MAX_PAINTERS; i++) 
+        {
+            modelState.getSurfacePainter(0).addPaintedQuadsToList(shapeQuads, result);
+        }
+        return result;
     }
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)

@@ -63,8 +63,8 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
         // Won't actually get used by superblocks.
         // When niceblocks are retired need to update this to actually handle CSG shapes
         // or more accurately, use this class as the starting point for the collision handle for the CSG shape.
-        return modelState.getShape().collisionHandler().getCollisionKey(state, worldIn, pos, modelState);
-    }
+        return modelState.getShape().meshFactory.getCollisionKeyFromModelState(modelState);
+   }
 
     @Override
     public int getKeyBitLength()

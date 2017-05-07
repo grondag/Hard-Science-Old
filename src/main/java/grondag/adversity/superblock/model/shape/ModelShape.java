@@ -1,147 +1,95 @@
 package grondag.adversity.superblock.model.shape;
 
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-
-import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.model.CSGModelFactory;
-import grondag.adversity.niceblock.model.FlowModelFactory;
-import grondag.adversity.niceblock.model.HeightModelFactory;
-import grondag.adversity.niceblock.modelstate.ModelStateComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 
-import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelState.*;
-
 public enum ModelShape
 {
-    CUBE(StateFormat.BLOCK, STATE_FLAG_NONE),
-    COLUMN_SQUARE(StateFormat.BLOCK, STATE_FLAG_NEEDS_CORNER_JOIN),
-    HEIGHT(StateFormat.BLOCK, STATE_FLAG_NONE),
-    
-    BOX(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    SPHERE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    DOME(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    CYLINDER(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    TUBE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    CONE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    PYRAMID(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    TORUS(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    ICOSAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    TETRAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    OCTAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    DODECAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE),
-    
-    FLOWING_TERRAIN(StateFormat.FLOW, STATE_FLAG_NEEDS_POS);
-    
-    
-    private ModelShape(StateFormat stateFormat, int stateFlags)
-    {
-        this.stateFormat = stateFormat;
-        this.stateFlags = stateFlags;
-    }
-    
-    static
-    {
-        CUBE.surfaces = new ImmutableList.Builder<Surface>()
-                .add(CUBE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
-        
-        COLUMN_SQUARE.surfaces = new ImmutableList.Builder<Surface>()
-                .add(COLUMN_SQUARE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC))
-                .add(COLUMN_SQUARE.makeSurface(SurfaceType.CUT, SurfaceTopology.CUBIC))
-                .add(COLUMN_SQUARE.makeSurface(SurfaceType.LAMP, SurfaceTopology.CUBIC)).build();
-        COLUMN_SQUARE.stateComponents = new ImmutableList.Builder<ModelStateComponent<?, ?>>()
-                .add(ModelStateComponents.AXIS)
-                .add(ModelStateComponents.CORNER_JOIN).build();
-        
-        
-        FLOWING_TERRAIN.surfaces = new ImmutableList.Builder<Surface>()
-                .add(FLOWING_TERRAIN.makeSurface(SurfaceType.MAIN, SurfaceTopology.TILED))
-                .add(FLOWING_TERRAIN.makeSurface(SurfaceType.BLOCKFACE, SurfaceTopology.CUBIC)).build();
-        FLOWING_TERRAIN.collisionHandler = FlowModelFactory.makeCollisionHandler();
-        FLOWING_TERRAIN.stateComponents = new ImmutableList.Builder<ModelStateComponent<?, ?>>()
-                .add(ModelStateComponents.FLOW_JOIN).build();
-        
-        SPHERE.surfaces = new ImmutableList.Builder<Surface>()
-                .add(SPHERE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
-        SPHERE.collisionHandler = CSGModelFactory.makeCollisionHandler();
+    CUBE(new CubeMeshFactory()),
+    COLUMN_SQUARE(new CubeMeshFactory()),
+    HEIGHT(new CubeMeshFactory()),
+    BOX(new CubeMeshFactory()),
+    SPHERE(new CubeMeshFactory()),
+    DOME(new CubeMeshFactory()),
+    CYLINDER(new CubeMeshFactory()),
+    TUBE(new CubeMeshFactory()),
+    CONE(new CubeMeshFactory()),
+    PYRAMID(new CubeMeshFactory()),
+    TORUS(new CubeMeshFactory()),
+    ICOSAHEDRON(new CubeMeshFactory()),
+    TETRAHEDRON(new CubeMeshFactory()),
+    OCTAHEDRON(new CubeMeshFactory()),
+    DODECAHEDRON(new CubeMeshFactory()),
+    FLOWING_TERRAIN(new CubeMeshFactory());
 
-        HEIGHT.surfaces = new ImmutableList.Builder<Surface>()
-                .add(HEIGHT.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
-        HEIGHT.collisionHandler = HeightModelFactory.makeCollisionHandler();
-        HEIGHT.stateComponents = new ImmutableList.Builder<ModelStateComponent<?, ?>>()
-                .add(ModelStateComponents.SPECIES_16).build();
+    //    COLUMN_SQUARE(StateFormat.BLOCK, STATE_FLAG_NEEDS_CORNER_JOIN, new CubeMeshFactory()),
+    //    HEIGHT(StateFormat.BLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    
+    //    BOX(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    SPHERE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    DOME(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    CYLINDER(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    TUBE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    CONE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    PYRAMID(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    TORUS(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    ICOSAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    TETRAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    OCTAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    DODECAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
+    //    
+    //    FLOWING_TERRAIN(StateFormat.FLOW, STATE_FLAG_NEEDS_POS, new CubeMeshFactory());
+
+
+    private ModelShape(ShapeMeshFactory meshFactory)
+    {
+        this.meshFactory = meshFactory;
+        this.stateFlags = meshFactory.stateFlags;
+        this.stateFormat = meshFactory.stateFormat;
+        this.surfaces = meshFactory.surfaces;
+        this.collisionHandler = meshFactory.getCollisionHandler();
     }
-    
-    private AbstractCollisionHandler collisionHandler = null;
-    
-    private List<ModelFactory> models = new ArrayList<ModelFactory>();
-    
-    private int nextSurfaceOrdinal = 0;
-    
+
+    //    static
+    //    {
+    //        CUBE.surfaces = new ImmutableList.Builder<Surface>()
+    //                .add(CUBE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
+    //        
+    //        COLUMN_SQUARE.surfaces = new ImmutableList.Builder<Surface>()
+    //                .add(COLUMN_SQUARE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC))
+    //                .add(COLUMN_SQUARE.makeSurface(SurfaceType.CUT, SurfaceTopology.CUBIC))
+    //                .add(COLUMN_SQUARE.makeSurface(SurfaceType.LAMP, SurfaceTopology.CUBIC)).build();
+    //        
+    //        
+    //        FLOWING_TERRAIN.surfaces = new ImmutableList.Builder<Surface>()
+    //                .add(FLOWING_TERRAIN.makeSurface(SurfaceType.MAIN, SurfaceTopology.TILED))
+    //                .add(FLOWING_TERRAIN.makeSurface(SurfaceType.BLOCKFACE, SurfaceTopology.CUBIC)).build();
+    //        
+    //        SPHERE.surfaces = new ImmutableList.Builder<Surface>()
+    //                .add(SPHERE.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
+    //
+    //        HEIGHT.surfaces = new ImmutableList.Builder<Surface>()
+    //                .add(HEIGHT.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
+    //    }
+
+    public final ShapeMeshFactory meshFactory;
+
+    // these are reproduced here to avoid an extra hop because will be called from hot inner loops
+
+    /** used by ModelState to know why type of state representation is needed by this shape */
     public final StateFormat stateFormat;
-    public final int stateFlags;
-    
-    /** Surfaces that compose the model. */
-    private List<Surface> surfaces = Collections.emptyList();
 
-    /** Components that MUST be included for models with this shape because they determine topology */
-    private List<ModelStateComponent<?, ?>> stateComponents = Collections.emptyList();
+    /** bits flags used by ModelState to know which optional state elements are needed by this shape */
+    public final int stateFlags;
+
+    /** Surfaces that compose the model. */
+    public final List<Surface> surfaces;
     
-    /**
-     * CAN BE NULL! If non-null, blocks with this shape require special collision handling, typically because it is not a standard cube shape. 
-     */
-    public AbstractCollisionHandler collisionHandler()
-    {
-        return collisionHandler;
-    }
+    /** may be null! */
+    public final AbstractCollisionHandler collisionHandler;
     
-    public void addModel(ModelFactory model)
-    {
-        this.models.add(model);
-    }
-    
-    public List<ModelFactory> models()
-    {
-        return Collections.unmodifiableList(this.models);
-    }
-    
-    public List<Surface> surfaces()
-    {
-        return this.surfaces;
-    }
-    
-    public List<ModelStateComponent<?, ?>> components()
-    {
-        return this.stateComponents;
-    }
-        
-    private Surface makeSurface(SurfaceType paintType, SurfaceTopology topology)
-    {
-        return new Surface(this.nextSurfaceOrdinal++, paintType, topology);
-    }
-    
-    public class Surface
-    {
-        public final int ordinal;
-        public final SurfaceType paintType;
-        public final SurfaceTopology topology;
-        
-        private Surface(int ordinal, SurfaceType paintType, SurfaceTopology topology)
-        {
-            this.ordinal = ordinal;
-            this.paintType = paintType;
-            this.topology = topology;
-        }
-        
-        public ModelShape shape()
-        {
-            return ModelShape.this;
-        }
-    }
+    //TODO: remove - is for NiceBlock support, and doesn't fully work
+    public AbstractCollisionHandler collisionHandler() { return this.collisionHandler; }
 }

@@ -1,9 +1,11 @@
 package grondag.adversity.superblock.model.painter;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.superblock.model.shape.SurfaceTopology;
@@ -70,5 +72,10 @@ public enum SurfacePainter
     
     private List<SurfaceTopology> surfaceTopologies;
     public List<SurfaceTopology> surfaceTopologies() { return this.surfaceTopologies; }
+    
+    public void addPaintedQuadsToList(Collection<RawQuad> shapeQuads, List<RawQuad> outputQuads)
+    {
+        //TODO
+    }
 
 }
