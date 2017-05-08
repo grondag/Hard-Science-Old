@@ -1,4 +1,4 @@
-package grondag.adversity.superblock.model.shape;
+package grondag.adversity.superblock.model.painter.surface;
 
 /**
  * All surfaces in a model are assigned a paint type.

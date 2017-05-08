@@ -8,20 +8,21 @@ import com.google.common.collect.ImmutableList;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
-import grondag.adversity.superblock.model.shape.SurfaceTopology;
+import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelState.*;
 
 public enum SurfacePainter
 {
-    NONE(STATE_FLAG_NONE),
-    CUBIC_TILES(STATE_FLAG_NEEDS_BLOCK_RANDOMS),
-    CUBIC_BIGTEX(STATE_FLAG_NEEDS_POS),
-    CUBIC_BORDER(STATE_FLAG_NEEDS_CORNER_JOIN),
-    CUBIC_MASONRY(STATE_FLAG_NEEDS_SIMPLE_JOIN),
-    SURFACE_TILES(STATE_FLAG_NONE),
-    SURFACE_CYLINDER(STATE_FLAG_NONE),
-    SURFACE_TOROID(STATE_FLAG_NONE);
+    NONE(STATE_FLAG_NONE, QuadPainter::nullQuadPainter),
+    CUBIC_TILES(STATE_FLAG_NEEDS_BLOCK_RANDOMS, CubicQuadPainters::paintCubicTiles),
+    CUBIC_BIGTEX(STATE_FLAG_NEEDS_POS, CubicQuadPainters::paintCubicBigTex),
+    CUBIC_BORDER(STATE_FLAG_NEEDS_CORNER_JOIN, CubicQuadPainters::paintCubicBorder),
+    CUBIC_MASONRY(STATE_FLAG_NEEDS_SIMPLE_JOIN, CubicQuadPainters::paintCubicMasonry),
+    SURFACE_TILES(STATE_FLAG_NONE, SurfaceQuadPainters::paintSurfaceTiles),
+    SURFACE_CYLINDER(STATE_FLAG_NONE, SurfaceQuadPainters::paintSurfaceCylinder),
+    SURFACE_TOROID(STATE_FLAG_NONE, SurfaceQuadPainters::paintSurfaceTorus);
     
     static
     {
@@ -62,9 +63,12 @@ public enum SurfacePainter
     
     public final int stateFlags;
     
-    private SurfacePainter(int stateFlags)
+    private final QuadPainter quadPainter;
+    
+    private SurfacePainter(int stateFlags, QuadPainter quadPainter)
     {
         this.stateFlags = stateFlags;
+        this.quadPainter = quadPainter;
     }
     
     private List<TextureProvider> textureProviders;
@@ -73,9 +77,9 @@ public enum SurfacePainter
     private List<SurfaceTopology> surfaceTopologies;
     public List<SurfaceTopology> surfaceTopologies() { return this.surfaceTopologies; }
     
-    public void addPaintedQuadsToList(Collection<RawQuad> shapeQuads, List<RawQuad> outputQuads)
+    public void addPaintedQuadsToList(ModelState modelState, int painterIndex, Collection<RawQuad> shapeQuads, List<RawQuad> outputQuads)
     {
-        //TODO
+        quadPainter.addPaintedQuadsToList(modelState, painterIndex, shapeQuads, outputQuads);
     }
 
 }

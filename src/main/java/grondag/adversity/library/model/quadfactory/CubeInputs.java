@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.Rotation;
+import grondag.adversity.superblock.model.painter.surface.Surface;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
@@ -21,7 +22,8 @@ public class CubeInputs{
     public boolean isOverlay = false;
     public boolean isItem = false;
     public LightingMode lightingMode = LightingMode.SHADED;
-
+    public Surface surface;
+    
     public CubeInputs()
     {
         //NOOP
@@ -40,7 +42,7 @@ public class CubeInputs{
         this.rotateBottom = true;
     }
 
-    public List<BakedQuad> makeFace(EnumFacing side){
+    public RawQuad makeRawFace(EnumFacing side){
 
         RawQuad qi = new RawQuad();
         qi.color = this.color;
@@ -51,12 +53,11 @@ public class CubeInputs{
         qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
         qi.textureSprite = this.textureSprite;
+        qi.surface = this.surface;
 
         double minBound = this.isOverlay ? -0.0002 : 0.0;
         double maxBound = this.isOverlay ? 1.0002 : 1.0;
         qi.setFace(side);
-
-        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 
         switch(side)
         {
@@ -102,10 +103,16 @@ public class CubeInputs{
             qi.setVertex(3, new Vertex(minBound, maxBound, maxBound, u0, v0, this.color));
             break;
         }
+        
+        return qi;
+    }
+    
+    public List<BakedQuad> makeFace(EnumFacing side){
 
-
+        RawQuad qi = makeRawFace(side);
+ 
+        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
         builder.add(qi.createBakedQuad()).build();
-
         return builder.build();
     }
 }

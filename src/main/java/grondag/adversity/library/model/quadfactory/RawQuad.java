@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import grondag.adversity.Configurator;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
+import grondag.adversity.superblock.model.painter.surface.Surface;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -37,6 +38,7 @@ public class RawQuad
     public boolean shouldContractUVs = true;
     
     public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
+    public Surface surface;
     
     public float minU = 0;
     public float maxU = 16;
@@ -119,6 +121,7 @@ public class RawQuad
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
         this.renderLayer = fromObject.renderLayer;
+        this.surface = fromObject.surface;
     }
 
     public List<RawQuad> toQuads()

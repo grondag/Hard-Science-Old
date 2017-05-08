@@ -1,4 +1,4 @@
-package grondag.adversity.superblock.model.shape;
+package grondag.adversity.superblock.model.painter.surface;
 
 /**
  * Used by painters to know how to UV map a surface for painting.

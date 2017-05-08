@@ -130,7 +130,7 @@ public class SuperDispatcher
         ArrayList<RawQuad> result = new ArrayList<RawQuad>();
         for(int i = 0; i < ModelStateFactory.MAX_PAINTERS; i++) 
         {
-            modelState.getSurfacePainter(0).addPaintedQuadsToList(shapeQuads, result);
+            modelState.getSurfacePainter(i).addPaintedQuadsToList(modelState, i, shapeQuads, result);
         }
         return result;
     }

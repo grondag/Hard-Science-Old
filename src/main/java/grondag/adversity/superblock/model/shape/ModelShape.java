@@ -3,6 +3,7 @@ package grondag.adversity.superblock.model.shape;
 import java.util.List;
 
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 
 public enum ModelShape
