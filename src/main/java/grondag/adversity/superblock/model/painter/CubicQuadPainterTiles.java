@@ -24,7 +24,7 @@ public class CubicQuadPainterTiles extends CubicQuadPainter
     {
         RawQuad result = inputQuad.clone();
         
-        result.color = this.colorMap.getColor(EnumColorMap.BASE);
+        result.recolor(this.colorMap.getColor(EnumColorMap.BASE));
         if(this.isRotationEnabled)
         {
             result.rotation = this.rotation;

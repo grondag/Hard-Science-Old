@@ -6,6 +6,8 @@ import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockVolcano;
 import grondag.adversity.niceblock.DummyColorHandler;
+import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.superblock.block.StaticTestBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperDispatcher;
 import grondag.adversity.superblock.block.SuperStateMapper;
@@ -36,7 +38,7 @@ public class ModBlocks
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
-//        event.getRegistry().register(new SuperBlock(BaseMaterial.FLEXSTONE, "test"));
+        event.getRegistry().register(new StaticTestBlock(BaseMaterial.FLEXSTONE, "test"));
     }
     
     @SubscribeEvent

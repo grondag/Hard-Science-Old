@@ -79,7 +79,8 @@ public class BinaryEnumSet<T extends Enum<?>>
     {
         List<T> result = new ArrayList<T>(values.length);
         
-        final int bitCount = Useful.bitLength(flagsIn);
+        final int bitCount = Integer.SIZE - Integer.numberOfLeadingZeros(flagsIn);
+        
         for(int i = 0; i < bitCount; i++)
         {
             if((flagsIn & (1 << i)) != 0)

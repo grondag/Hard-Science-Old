@@ -50,6 +50,7 @@ public class CommonProxy
 	    Configurator.recalcDervied();
 	    NetworkRegistry.INSTANCE.registerGuiHandler(Adversity.INSTANCE, new AdversityGuiHandler());
 		ModRecipes.init(event);
+		ModBlocks.init(event);
         NiceBlockRegistrar.init(event);
 	}
 

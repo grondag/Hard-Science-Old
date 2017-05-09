@@ -42,7 +42,7 @@ public class ModModels
      * Happens before model bake.
      */
     @SubscribeEvent
-    public void stitcherEventPre(TextureStitchEvent.Pre event)
+    public static void stitcherEventPre(TextureStitchEvent.Pre event)
     {
         ArrayList<String> textureList = new ArrayList<String>();
         

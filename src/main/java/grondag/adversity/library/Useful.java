@@ -524,6 +524,7 @@ public class Useful {
     */
    public static int bitLength(int maxValue)
    {
+       if(maxValue == 0) return 0;
        return Integer.SIZE - Integer.numberOfLeadingZeros(maxValue - 1);
    }
    

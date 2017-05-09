@@ -81,7 +81,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider
     * Needed after getBlockState and after getActualState but before getExtendedState, 
     * so must be a regular property but is not saved to meta.
     */
-   public static final PropertyInteger SHADE_FLAGS = PropertyInteger.create("shadeFlags", 0, ModelState.BENUMSET_RENDER_LAYER.combinationCount() - 1);
+   public static final PropertyInteger SHADE_FLAGS = PropertyInteger.create("shade_flags", 0, ModelState.BENUMSET_RENDER_LAYER.combinationCount() - 1);
 
    /**
     * Contains state passed from getExtendedState to handleBlockState. Using a custom unlisted property because we need large int values and the vanilla implementation enumerates

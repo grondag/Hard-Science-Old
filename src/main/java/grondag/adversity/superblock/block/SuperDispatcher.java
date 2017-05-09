@@ -38,7 +38,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 public class SuperDispatcher
 {
     private final String resourceName;
-    private final SparseLayerMapBuilder layerMapBuilder;
+    private final SparseLayerMapBuilder[] layerMapBuilders;
     
     //custom loading cache is at least 2X faster than guava LoadingCache for our use case
     private final ObjectSimpleLoadingCache<ModelState, SparseLayerMap> modelCache = new ObjectSimpleLoadingCache<ModelState, SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
@@ -65,11 +65,14 @@ public class SuperDispatcher
 			    containers[quad.renderLayer.ordinal()].add(quad);
 			}
 
-			SparseLayerMap result = layerMapBuilder.makeNewMap();
-			for(BlockRenderLayer layer : layerMapBuilder.layerList)
-			{
+			SparseLayerMap result = layerMapBuilders[key.getCanRenderInLayerFlags()].makeNewMap();
 
-				result.set(layer, QuadContainer.fromRawQuads(containers[layer.ordinal()]));
+			for(BlockRenderLayer layer : BlockRenderLayer.values())
+			{
+			    if(!containers[layer.ordinal()].isEmpty())
+			    {
+			        result.set(layer, QuadContainer.fromRawQuads(containers[layer.ordinal()]));
+			    }
 			}
 			return result;
 		}
@@ -92,11 +95,13 @@ public class SuperDispatcher
     public SuperDispatcher(String resourceName)
     {
         this.resourceName = resourceName;
-        ArrayList<BlockRenderLayer> layerList = new ArrayList<BlockRenderLayer>();
-        layerMapBuilder = new SparseLayerMapBuilder(layerList);
+
         this.delegates = new DispatcherDelegate[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
-        for(int i = 0; i < this.delegates.length; i++)
+        this.layerMapBuilders = new SparseLayerMapBuilder[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
+
+        for(int i = 0; i < ModelState.BENUMSET_RENDER_LAYER.combinationCount(); i++)
         {
+            layerMapBuilders[i] = new SparseLayerMapBuilder(ModelState.BENUMSET_RENDER_LAYER.getValuesForSetFlags(i));
             this.delegates[i] = new DispatcherDelegate(i);
         }
     }

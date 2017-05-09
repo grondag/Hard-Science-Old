@@ -58,6 +58,7 @@ public class TexturePalletteProvider
         public final int textureVersionCount;
         public final TextureScale textureScale;
         public final TextureLayout textureLayout;
+        private final int textureVersionMask;
         
         /** Used to limit user selection, is not enforced. */
         public final boolean allowRotation;
@@ -81,6 +82,7 @@ public class TexturePalletteProvider
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
             this.textureVersionCount = textureVersionCount;
+            this.textureVersionMask = Math.max(0, textureVersionCount - 1);
             this.textureScale = textureScale;
             this.textureLayout = layout;
            
@@ -186,21 +188,21 @@ public class TexturePalletteProvider
             return buildTextureNameBigTex();
         }
         
-        public TextureAtlasSprite getTextureSprite(int index)
+        public TextureAtlasSprite getTextureSprite(int version)
         {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(index));
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version & this.textureVersionMask));
         }
         
-        private String buildTextureName(int index)
+        private String buildTextureName(int version)
         {
             if(textureBaseName == null) return "";
-            return buildTextureName_X_8(index);
+            return buildTextureName_X_8(version);
             
         }
         
         public TextureAtlasSprite getTextureSprite(int version, int index)
         {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version, index));
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version & this.textureVersionMask, index));
         }
         
         private String buildTextureName(int version, int index)
