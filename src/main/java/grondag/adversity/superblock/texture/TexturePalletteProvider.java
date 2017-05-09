@@ -7,35 +7,37 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
 
-public class TextureProvider2
+public class TexturePalletteProvider
 {
     
-    private static final Texture[] ARRAY_TEMPLATE = new Texture[0];
+    private static final TexturePallette[] ARRAY_TEMPLATE = new TexturePallette[0];
     
-    private final ArrayList<Texture> textures = new ArrayList<Texture>();
+    private final ArrayList<TexturePallette> texturePallettes = new ArrayList<TexturePallette>();
     
     private int nextOrdinal = 0;
     
-    public Texture addTexture(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
+    public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
     {
-        Texture result = new Texture(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayers);
-        textures.add(result);
+        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayers);
+        texturePallettes.add(result);
         return result;
     }
 
-    public int size() { return textures.size(); }
+    public int size() { return texturePallettes.size(); }
 
-    public boolean isEmpty() { return textures.isEmpty(); }
+    public boolean isEmpty() { return texturePallettes.isEmpty(); }
 
-    public boolean contains(Object o) { return textures.contains(o); }
+    public boolean contains(Object o) { return texturePallettes.contains(o); }
    
-    public Iterator<Texture> iterator() { return textures.iterator(); }
+    public Iterator<TexturePallette> iterator() { return texturePallettes.iterator(); }
    
-    public Texture[] toArray() { return textures.toArray(ARRAY_TEMPLATE); }
+    public TexturePallette[] toArray() { return texturePallettes.toArray(ARRAY_TEMPLATE); }
    
-    public Texture get(int index) { return textures.get(index); }
+    public TexturePallette get(int index) { return texturePallettes.get(index); }
     
     /**
      * Identifies all textures needed for texture stitch.
@@ -44,13 +46,13 @@ public class TextureProvider2
      */
     public void addTexturesForPrestich(List<String> textureList)
     {
-        for(Texture t : this.textures)
+        for(TexturePallette t : this.texturePallettes)
         {
             t.addTexturesForPrestich(textureList);
         }
     }
     
-    public class Texture
+    public class TexturePallette
     {
         public final String textureBaseName;
         public final int textureVersionCount;
@@ -74,7 +76,7 @@ public class TextureProvider2
         
         public final int ordinal;
 
-        private Texture(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
         {
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
@@ -173,20 +175,35 @@ public class TextureProvider2
             }
         }
         
-        public String buildTextureName()
+        public TextureAtlasSprite getTextureSprite()
+        {
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName());
+        }
+        
+        private String buildTextureName()
         {
             if(textureBaseName == null) return "";
             return buildTextureNameBigTex();
         }
         
-        public String buildTextureName(int index)
+        public TextureAtlasSprite getTextureSprite(int index)
+        {
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(index));
+        }
+        
+        private String buildTextureName(int index)
         {
             if(textureBaseName == null) return "";
             return buildTextureName_X_8(index);
             
         }
         
-        public String buildTextureName(int version, int index)
+        public TextureAtlasSprite getTextureSprite(int version, int index)
+        {
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version, index));
+        }
+        
+        private String buildTextureName(int version, int index)
         {
             if(textureBaseName == null) return "";
             switch(textureLayout)

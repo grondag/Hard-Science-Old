@@ -1,56 +1,51 @@
 package grondag.adversity.superblock.model.shape;
 
-import java.util.List;
+import java.util.function.Supplier;
 
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
-import grondag.adversity.superblock.model.painter.surface.Surface;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 
 public enum ModelShape
 {
-    CUBE(new CubeMeshFactory()),
-    COLUMN_SQUARE(new CubeMeshFactory()),
-    HEIGHT(new CubeMeshFactory()),
-    BOX(new CubeMeshFactory()),
-    SPHERE(new CubeMeshFactory()),
-    DOME(new CubeMeshFactory()),
-    CYLINDER(new CubeMeshFactory()),
-    TUBE(new CubeMeshFactory()),
-    CONE(new CubeMeshFactory()),
-    PYRAMID(new CubeMeshFactory()),
-    TORUS(new CubeMeshFactory()),
-    ICOSAHEDRON(new CubeMeshFactory()),
-    TETRAHEDRON(new CubeMeshFactory()),
-    OCTAHEDRON(new CubeMeshFactory()),
-    DODECAHEDRON(new CubeMeshFactory()),
-    FLOWING_TERRAIN(new CubeMeshFactory());
+    CUBE(CubeMeshFactory::getShapeMeshFactory),
+    COLUMN_SQUARE(CubeMeshFactory::getShapeMeshFactory),
+    HEIGHT(CubeMeshFactory::getShapeMeshFactory),
+    BOX(CubeMeshFactory::getShapeMeshFactory),
+    SPHERE(CubeMeshFactory::getShapeMeshFactory),
+    DOME(CubeMeshFactory::getShapeMeshFactory),
+    CYLINDER(CubeMeshFactory::getShapeMeshFactory),
+    TUBE(CubeMeshFactory::getShapeMeshFactory),
+    CONE(CubeMeshFactory::getShapeMeshFactory),
+    PYRAMID(CubeMeshFactory::getShapeMeshFactory),
+    TORUS(CubeMeshFactory::getShapeMeshFactory),
+    ICOSAHEDRON(CubeMeshFactory::getShapeMeshFactory),
+    TETRAHEDRON(CubeMeshFactory::getShapeMeshFactory),
+    OCTAHEDRON(CubeMeshFactory::getShapeMeshFactory),
+    DODECAHEDRON(CubeMeshFactory::getShapeMeshFactory),
+    FLOWING_TERRAIN(CubeMeshFactory::getShapeMeshFactory);
+    
+    // have to do this here or get initialization errors
+//    static
+//    {
+//        CUBE.setFactory(new CubeMeshFactory());
+//        COLUMN_SQUARE.setFactory(new CubeMeshFactory());
+//        HEIGHT.setFactory(new CubeMeshFactory());
+//        BOX.setFactory(new CubeMeshFactory());
+//        SPHERE.setFactory(new CubeMeshFactory());
+//        DOME.setFactory(new CubeMeshFactory());
+//        CYLINDER.setFactory(new CubeMeshFactory());
+//        TUBE.setFactory(new CubeMeshFactory());
+//        CONE.setFactory(new CubeMeshFactory());
+//        PYRAMID.setFactory(new CubeMeshFactory());
+//        TORUS.setFactory(new CubeMeshFactory());
+//        ICOSAHEDRON.setFactory(new CubeMeshFactory());
+//        TETRAHEDRON.setFactory(new CubeMeshFactory());
+//        OCTAHEDRON.setFactory(new CubeMeshFactory());
+//        DODECAHEDRON.setFactory(new CubeMeshFactory());
+//        FLOWING_TERRAIN.setFactory(new CubeMeshFactory());
+//    }
 
-    //    COLUMN_SQUARE(StateFormat.BLOCK, STATE_FLAG_NEEDS_CORNER_JOIN, new CubeMeshFactory()),
-    //    HEIGHT(StateFormat.BLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    
-    //    BOX(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    SPHERE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    DOME(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    CYLINDER(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    TUBE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    CONE(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    PYRAMID(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    TORUS(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    ICOSAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    TETRAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    OCTAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    DODECAHEDRON(StateFormat.MULTIBLOCK, STATE_FLAG_NONE, new CubeMeshFactory()),
-    //    
-    //    FLOWING_TERRAIN(StateFormat.FLOW, STATE_FLAG_NEEDS_POS, new CubeMeshFactory());
-
-
-    private ModelShape(ShapeMeshFactory meshFactory)
+    private ModelShape(Supplier<ShapeMeshGenerator> meshFactoryGetter)
     {
-        this.meshFactory = meshFactory;
-        this.stateFlags = meshFactory.stateFlags;
-        this.stateFormat = meshFactory.stateFormat;
-        this.surfaces = meshFactory.surfaces;
-        this.collisionHandler = meshFactory.getCollisionHandler();
+        this.meshFactoryGetter = meshFactoryGetter;
     }
 
     //    static
@@ -75,22 +70,13 @@ public enum ModelShape
     //                .add(HEIGHT.makeSurface(SurfaceType.MAIN, SurfaceTopology.CUBIC)).build();
     //    }
 
-    public final ShapeMeshFactory meshFactory;
+    private final Supplier<ShapeMeshGenerator> meshFactoryGetter;
+    private ShapeMeshGenerator meshFactory;
 
-    // these are reproduced here to avoid an extra hop because will be called from hot inner loops
-
-    /** used by ModelState to know why type of state representation is needed by this shape */
-    public final StateFormat stateFormat;
-
-    /** bits flags used by ModelState to know which optional state elements are needed by this shape */
-    public final int stateFlags;
-
-    /** Surfaces that compose the model. */
-    public final List<Surface> surfaces;
     
-    /** may be null! */
-    public final AbstractCollisionHandler collisionHandler;
-    
-    //TODO: remove - is for NiceBlock support, and doesn't fully work
-    public AbstractCollisionHandler collisionHandler() { return this.collisionHandler; }
+    public ShapeMeshGenerator meshFactory()
+    {
+        if(this.meshFactory == null) this.meshFactory = this.meshFactoryGetter.get();
+        return meshFactory;
+    }
 }

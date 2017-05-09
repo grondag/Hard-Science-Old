@@ -21,10 +21,10 @@ import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.painter.SurfacePainter;
-import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.texture.Textures;
-import grondag.adversity.superblock.texture.TextureProvider2.Texture;
+import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -34,6 +34,7 @@ import net.minecraft.world.IBlockAccess;
 public class ModelStateFactory
 {
     public static final int MAX_PAINTERS = 4;
+    public static final int MAX_SURFACES = 4;
     
     private static final IAlternator ROTATION_ALTERNATOR = Alternator.getAlternator(4, 45927934);
     private static final IAlternator BLOCK_ALTERNATOR = Alternator.getAlternator(8, 2953424);
@@ -57,8 +58,7 @@ public class ModelStateFactory
     private static final EnumElement<EnumFacing.Axis> P0_AXIS = PACKER_0.createEnumElement(EnumFacing.Axis.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<SurfaceType>[] P1_SURFACE_TYPES = new EnumElement[MAX_PAINTERS];
+    private static final IntElement[] P1_SURFACE_INDEX = new IntElement[MAX_PAINTERS];
     private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[MAX_PAINTERS];
     private static final BooleanElement[] P1_PAINT_ROTATION= new BooleanElement[MAX_PAINTERS];
     @SuppressWarnings("unchecked")
@@ -92,7 +92,7 @@ public class ModelStateFactory
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
 
             
-            P1_SURFACE_TYPES[i] = PACKER_1.createEnumElement(SurfaceType.class);  // 2 bits each  x4 = 8
+            P1_SURFACE_INDEX[i] = PACKER_1.createIntElement(MAX_SURFACES);  // 2 bits each  x4 = 8
             P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
             P1_PAINT_ROTATION[i] = PACKER_1.createBooleanElement(); // 1 bit each x4 = 4
             P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
@@ -202,7 +202,7 @@ public class ModelStateFactory
         {
             if(stateFlags == 0)
             {
-                int flags = STATE_FLAG_IS_POPULATED | getShape().stateFlags;
+                int flags = STATE_FLAG_IS_POPULATED | getShape().meshFactory().stateFlags;
                 int layerFlags = 0;
                 int shadedFlags = 0xF; // default to all true (shaded)
                 
@@ -212,10 +212,10 @@ public class ModelStateFactory
                     if(p != SurfacePainter.NONE)
                     {
                         flags |= p.stateFlags;
-                        BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), layerFlags, true);
+                        layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), layerFlags, true);
                         
                         if(this.getLightingMode(i) == LightingMode.FULLBRIGHT) 
-                            BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), shadedFlags, false);
+                            shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), shadedFlags, false);
                     }
                 }
                 this.stateFlags = (byte) flags;
@@ -285,7 +285,7 @@ public class ModelStateFactory
                 bits2 = b2;
             }
             
-            switch(this.getShape().stateFormat)
+            switch(this.getShape().meshFactory().stateFormat)
             {
             case BLOCK:
                 
@@ -393,23 +393,27 @@ public class ModelStateFactory
         //  PACKER 1 ATTRIBUTES (NOT SHAPE-DEPENDENT)
         ////////////////////////////////////////////////////
         
-        public SurfaceType getSurfaceType(int painterIndex)
+        public Surface getSurface(int painterIndex)
         {
-            return P1_SURFACE_TYPES[painterIndex].getValue(bits1);
+            return getShape().meshFactory().surfaces.get(P1_SURFACE_INDEX[painterIndex].getValue(bits1));
         }
         
-        public void setSurfaceType(int painterIndex, SurfaceType surfaceType)
+        /**
+         * Doesn't check that the provided surface actually belongs to the shape
+         * that is set in this state.  Be good. :-)
+         */
+        public void setSurface(int painterIndex, Surface surface)
         {
-            bits1 = P1_SURFACE_TYPES[painterIndex].setValue(surfaceType, bits1);
+            bits1 = P1_SURFACE_INDEX[painterIndex].setValue(surface.ordinal, bits1);
             invalidateHashCode();
         }
         
-        public Texture getTexture(int painterIndex)
+        public TexturePallette getTexture(int painterIndex)
         {
             return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[painterIndex].getValue(bits1));
         }
         
-        public void setTexture(int painterIndex, Texture tex)
+        public void setTexture(int painterIndex, TexturePallette tex)
         {
             bits1 = P1_PAINT_TEXTURE[painterIndex].setValue(tex.ordinal, bits1);
             invalidateHashCode();
@@ -532,7 +536,7 @@ public class ModelStateFactory
         
         public Rotation getRotation()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("getRotation on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
@@ -541,7 +545,7 @@ public class ModelStateFactory
         
         public void setRotation(Rotation rotation)
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setRotation on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
@@ -551,7 +555,7 @@ public class ModelStateFactory
 
         public int getBlockVersion()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setBlockVersion on model state does not apply for shape");
             
             return P3B_BLOCK_VERSION.getValue(bits3);
@@ -559,7 +563,7 @@ public class ModelStateFactory
         
         public void setBlockVersion(int version)
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setBlockVersion on model state does not apply for shape");
             
             bits3 = P3B_BLOCK_VERSION.setValue(version, bits3);
@@ -568,7 +572,7 @@ public class ModelStateFactory
 
         public int getSpecies()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("getSpecies on model state does not apply for shape");
             
             return P3B_SPECIES.getValue(bits3);
@@ -576,7 +580,7 @@ public class ModelStateFactory
         
         public void setSpecies(int species)
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setSpecies on model state does not apply for shape");
             
             bits3 = P3B_SPECIES.setValue(species, bits3);
@@ -585,7 +589,7 @@ public class ModelStateFactory
         
         public CornerJoinBlockState getCornerJoin()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setCornerJoin on model state does not apply for shape");
             
             return CornerJoinBlockStateSelector.getJoinState(P3B_BLOCK_JOIN.getValue(bits3));
@@ -593,7 +597,7 @@ public class ModelStateFactory
         
         public void setCornerJoin(CornerJoinBlockState join)
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setCornerJoin on model state does not apply for shape");
             
             bits3 = P3B_BLOCK_JOIN.setValue(join.getIndex(), bits3);
@@ -602,7 +606,7 @@ public class ModelStateFactory
         
         public SimpleJoin getSimpleJoin()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.BLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("getSimpleJoin on model state does not apply for shape");
             
             
@@ -618,7 +622,7 @@ public class ModelStateFactory
         {
             if(Output.DEBUG_MODE)
             {
-                if(this.getShape().stateFormat != StateFormat.BLOCK)
+                if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 {
                     Output.getLog().warn("Ignored setSimpleJoin on model state that does not apply for shape");
                     return;
@@ -643,7 +647,7 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public long getMultiBlockBits()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.MULTIBLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
                 Output.getLog().warn("getMultiBlockBits on model state does not apply for shape");
             
             return bits3;
@@ -652,7 +656,7 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public void setMultiBlockBits(long bits)
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.MULTIBLOCK)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
                 Output.getLog().warn("setMultiBlockBits on model state does not apply for shape");
             
             bits3 = bits;
@@ -665,7 +669,7 @@ public class ModelStateFactory
         
         public FlowHeightState getFlowState()
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.FLOW)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
                 Output.getLog().warn("getFlowState on model state does not apply for shape");
                 
             return new FlowHeightState(P3F_FLOW_JOIN.getValue(bits3));
@@ -673,7 +677,7 @@ public class ModelStateFactory
         
         public void setFlowState(FlowHeightState flowState)
         {
-            if(Output.DEBUG_MODE && this.getShape().stateFormat != StateFormat.FLOW)
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
                 Output.getLog().warn("setFlowState on model state does not apply for shape");
 
             bits3 = P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);

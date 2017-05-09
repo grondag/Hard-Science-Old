@@ -371,7 +371,7 @@ public class NiceBlock extends Block implements IWailaProvider
      */
     public boolean needsCustomHighlight()
     {
-        return this.dispatcher.getStateSet().shape.collisionHandler() != null;
+        return this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() != null;
     }
     
     @SuppressWarnings("deprecation")
@@ -379,7 +379,7 @@ public class NiceBlock extends Block implements IWailaProvider
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {
-        AbstractCollisionHandler collisionHandler = this.dispatcher.getStateSet().shape.collisionHandler();
+        AbstractCollisionHandler collisionHandler = this.dispatcher.getStateSet().shape.meshFactory().collisionHandler();
         
         if (collisionHandler == null)
         {
@@ -404,13 +404,13 @@ public class NiceBlock extends Block implements IWailaProvider
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        if (this.dispatcher.getStateSet().shape.collisionHandler() == null)
+        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
         {
             return super.getCollisionBoundingBox(state, worldIn, pos);
         }
         else
         {
-            return this.dispatcher.getStateSet().shape.collisionHandler().getCollisionBoundingBox(state, worldIn, pos);
+            return this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoundingBox(state, worldIn, pos);
         }
     }
     
@@ -419,7 +419,7 @@ public class NiceBlock extends Block implements IWailaProvider
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
-        if (this.dispatcher.getStateSet().shape.collisionHandler() == null)
+        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
         {
             return super.collisionRayTrace(blockState, worldIn, pos, start, end);
         }
@@ -456,7 +456,7 @@ public class NiceBlock extends Block implements IWailaProvider
     @SuppressWarnings("deprecation")
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
 
-        if (this.dispatcher.getStateSet().shape.collisionHandler() == null)
+        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
         {
             return new ImmutableList.Builder<AxisAlignedBB>().add(this.getBoundingBox(state, worldIn, pos)).build();
         }
@@ -464,7 +464,7 @@ public class NiceBlock extends Block implements IWailaProvider
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
     
-            for (AxisAlignedBB aabb : this.dispatcher.getStateSet().shape.collisionHandler().getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
+            for (AxisAlignedBB aabb : this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
             {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }

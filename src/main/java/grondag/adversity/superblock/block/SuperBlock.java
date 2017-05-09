@@ -431,7 +431,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider
    {
        ModelState modelState = this.getModelState(state, worldIn, pos);
        
-       AbstractCollisionHandler collisionHandler = modelState.getShape().collisionHandler();
+       AbstractCollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
        
        if (collisionHandler == null)
        {
@@ -456,7 +456,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider
    @Override
    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
    {
-       AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos).getShape().collisionHandler();
+       AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos).getShape().meshFactory().collisionHandler();
        if (handler == null)
        {
            return super.getCollisionBoundingBox(state, worldIn, pos);
@@ -472,7 +472,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider
    @Override
    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
    {
-       if (this.getModelState(blockState, worldIn, pos).getShape().collisionHandler() == null)
+       if (this.getModelState(blockState, worldIn, pos).getShape().meshFactory().collisionHandler() == null)
        {
            return super.collisionRayTrace(blockState, worldIn, pos, start, end);
        }
@@ -509,7 +509,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider
    @SuppressWarnings("deprecation")
    public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state)
    {
-       AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos).getShape().collisionHandler();
+       AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos).getShape().meshFactory().collisionHandler();
        if (handler == null)
        {
            return new ImmutableList.Builder<AxisAlignedBB>().add(this.getBoundingBox(state, worldIn, pos)).build();

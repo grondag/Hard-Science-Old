@@ -12,8 +12,9 @@ import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 
+
 @SuppressWarnings("unused")
-public abstract class ShapeMeshFactory
+public abstract class ShapeMeshGenerator
 {
     /** used by ModelState to know why type of state representation is needed by this shape */
     public final StateFormat stateFormat;
@@ -31,10 +32,10 @@ public abstract class ShapeMeshFactory
     /**
      * CAN BE NULL! If non-null, blocks with this shape require special collision handling, typically because it is not a standard cube shape. 
      */
-    public AbstractCollisionHandler getCollisionHandler() { return null; };
+    public AbstractCollisionHandler collisionHandler() { return null; };
     public long getCollisionKeyFromModelState(ModelState modelState) { return 0; };
     
-    protected ShapeMeshFactory(StateFormat stateFormat, int stateFlags, Surface... surfaces)
+    protected ShapeMeshGenerator(StateFormat stateFormat, int stateFlags, Surface... surfaces)
     {
         this.stateFormat = stateFormat;
         this.stateFlags = stateFlags;

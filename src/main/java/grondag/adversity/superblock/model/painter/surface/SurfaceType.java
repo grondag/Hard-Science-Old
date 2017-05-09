@@ -1,8 +1,8 @@
 package grondag.adversity.superblock.model.painter.surface;
 
 /**
- * All surfaces in a model are assigned a paint type.
- * Each paint type in a model is assigned one or more painters.
+ * All surfaces in a model are assigned a surface type.
+ * Each surface type in a model is assigned one or more painters.
  * Painter(s) assigned to that paint type will paint all surfaces in the model with the given type.
  */
 public enum SurfaceType

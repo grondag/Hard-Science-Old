@@ -31,7 +31,7 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
     @Override
     public long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelState modelState)
     {
-        return modelState.getShape().meshFactory.getCollisionKeyFromModelState(modelState);
+        return modelState.getShape().meshFactory().getCollisionKeyFromModelState(modelState);
     }
 
     @Override

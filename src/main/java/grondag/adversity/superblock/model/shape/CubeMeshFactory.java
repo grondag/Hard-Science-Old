@@ -18,11 +18,18 @@ import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
 import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumFacing;
 
-public class CubeMeshFactory extends ShapeMeshFactory
+public class CubeMeshFactory extends ShapeMeshGenerator
 {
+    private static ShapeMeshGenerator instance;
+    
+    public static ShapeMeshGenerator getShapeMeshFactory()
+    {
+        if(instance == null) instance = new CubeMeshFactory();
+        return instance; 
+    };
+    
     /** never changes so may as well save it */
     private final Collection<RawQuad> cachedQuads;
     
@@ -44,7 +51,6 @@ public class CubeMeshFactory extends ShapeMeshFactory
         ColorMap colorMap = NoColorMapProvider.INSTANCE.getColorMap(0);
         result.color = colorMap.getColor(EnumColorMap.BASE);
         result.textureRotation = Rotation.ROTATE_NONE;
-        result.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
         result.lightingMode = LightingMode.SHADED;
         result.u0 = 0;
         result.v0 = 0;

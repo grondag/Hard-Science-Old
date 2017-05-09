@@ -9,7 +9,9 @@ import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.state.ModelStateFactory;
+import grondag.adversity.superblock.model.painter.QuadPainter;
+import grondag.adversity.superblock.model.painter.SurfacePainter;
+import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
+@SuppressWarnings("unused")
 public class SuperDispatcher
 {
     private final String resourceName;
@@ -126,11 +129,25 @@ public class SuperDispatcher
     
     private Collection<RawQuad> getFormattedQuads(ModelState modelState)
     {
-        Collection<RawQuad> shapeQuads = modelState.getShape().meshFactory.getShapeQuads(modelState);
         ArrayList<RawQuad> result = new ArrayList<RawQuad>();
-        for(int i = 0; i < ModelStateFactory.MAX_PAINTERS; i++) 
+        QuadPainter p0 = modelState.getSurfacePainter(0).quadPainterFactory.makeQuadPainter(modelState, 0);
+        QuadPainter p1 = modelState.getSurfacePainter(1).quadPainterFactory.makeQuadPainter(modelState, 1);
+        QuadPainter p2 = modelState.getSurfacePainter(2).quadPainterFactory.makeQuadPainter(modelState, 2);
+        QuadPainter p3 = modelState.getSurfacePainter(3).quadPainterFactory.makeQuadPainter(modelState, 3);
+        
+        Surface s0 = p0.surface;
+        Surface s1 = p1.surface;
+        Surface s2 = p2.surface;
+        Surface s3 = p3.surface;
+        
+        for(RawQuad shapeQuad : modelState.getShape().meshFactory().getShapeQuads(modelState))
         {
-            modelState.getSurfacePainter(i).addPaintedQuadsToList(modelState, i, shapeQuads, result);
+            Surface qSurface = shapeQuad.surface;
+            
+            if(qSurface == s0) p0.addPaintedQuadToList(shapeQuad, result);
+            if(qSurface == s1) p1.addPaintedQuadToList(shapeQuad, result);
+            if(qSurface == s2) p2.addPaintedQuadToList(shapeQuad, result);
+            if(qSurface == s3) p3.addPaintedQuadToList(shapeQuad, result);
         }
         return result;
     }
