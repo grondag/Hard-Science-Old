@@ -2,23 +2,35 @@ package grondag.adversity.superblock.block;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import grondag.adversity.Configurator;
+import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.superblock.model.painter.SurfacePainter;
+import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SuppressWarnings("unused")
 public class SuperModelBlock extends SuperBlock implements ITileEntityProvider 
 {
     
@@ -27,6 +39,16 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         super(material, styleName);
     }
         
+    /**
+     * Because meta controls render layer visibility, default meta value
+     * must correspond to default model state.
+     */
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
+    {
+        list.add(getSubItems().get(ModelState.BENUMSET_RENDER_LAYER.getFlagForValue(BlockRenderLayer.SOLID)));
+    }
     
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
@@ -78,6 +100,25 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     public boolean hasAppearanceGui()
     {
         return true;
+    }
+    
+    @Override
+    public ModelState getDefaultModelState()
+    {
+        ModelState modelState = new ModelState();
+        modelState.setShape(ModelShape.CUBE);
+        modelState.setStatic(false);
+
+        modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(539));
+        modelState.setLightingMode(0, LightingMode.SHADED);
+        modelState.setRenderLayer(0, BlockRenderLayer.SOLID);
+        modelState.setRotationEnabled(0, true);
+        modelState.setSurfacePainter(0, SurfacePainter.CUBIC_TILES);
+  
+        modelState.setSurface(0, ModelShape.CUBE.meshFactory().surfaces.get(0));
+        modelState.setTexture(0, Textures.ALL_TEXTURES.get(1));
+
+        return modelState;
     }
 
     @Override

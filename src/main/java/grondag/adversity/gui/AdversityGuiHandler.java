@@ -6,9 +6,8 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 
 public class AdversityGuiHandler implements IGuiHandler
 {
-    private static int guiIndex = 0;
-    
-    public static final int GUI_NICE_BLOCK_ITEM = guiIndex++;
+    public static final int GUI_NICE_BLOCK_ITEM = 0;
+    public static final int GUI_SUPERMODEL_ITEM = 1;
 
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) 
@@ -19,7 +18,18 @@ public class AdversityGuiHandler implements IGuiHandler
     @Override
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) 
     {
-        return new NiceGuiScreen();
+        switch(id)
+        {
+        case GUI_NICE_BLOCK_ITEM:
+            return new NiceGuiScreen();
+            
+        case GUI_SUPERMODEL_ITEM:
+            return new SuperGuiScreen();
+            
+        default:
+            return null;
+            
+        }
     }
 
 }

@@ -211,7 +211,7 @@ public class SuperTileEntity extends TileEntity
 
     private NBTTagCompound doWriteToNBT(NBTTagCompound compound)
     {
-        if(modelState != null) compound.setIntArray(MODEL_STATE_TAG, modelState.getBits());
+        if(modelState != null) compound.setIntArray(MODEL_STATE_TAG, modelState.getBitsIntArray());
         if(damage != 0) compound.setByte(DAMAGE_TAG, damage);
         if(placementShape != 0) compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
         return compound;
@@ -221,7 +221,7 @@ public class SuperTileEntity extends TileEntity
     { 
         if(this.modelState == null)
         {
-            this.modelState = ((SuperBlock)this.blockType).getDefaultModelState();
+            this.modelState = ((SuperBlock)state.getBlock()).getDefaultModelState();
             this.isModelStateCacheDirty = true;
         }
         if(this.isModelStateCacheDirty)
@@ -236,7 +236,7 @@ public class SuperTileEntity extends TileEntity
     { 
 //        Adversity.log.info("setModelKey pos=" + pos.toString());
 //        Adversity.log.info("oldModelKey=" + this.modelKey + " newModelKey=" + modelKey );
-        if(!this.modelState.equals(modelState))
+        if(this.modelState == null || !this.modelState.equals(modelState))
         {
             this.modelState = modelState;
             this.isModelStateCacheDirty = true;

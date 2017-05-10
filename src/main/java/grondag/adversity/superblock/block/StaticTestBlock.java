@@ -13,6 +13,26 @@ import net.minecraft.util.BlockRenderLayer;
 public class StaticTestBlock extends SuperBlock
 {
 
+    /** 
+     * TODO
+     * 
+     * Make species dynamic at block level - for static blocks can use meta
+     * because render layers are hard-coded - indicate with property on the block
+     * 
+     * BigTex painter
+     * Border painter
+     * Masonry painter
+     * GUI
+     * SuperModelBlocks
+     * 
+     * Shape generators
+     * Add back volcano blocks
+     * Add various substance blocks
+     * 
+     * Block Former Tool
+     * Construction Guide Block
+     */
+
     
     public StaticTestBlock(BaseMaterial material, String styleName)
     {

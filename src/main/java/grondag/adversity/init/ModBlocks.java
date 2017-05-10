@@ -10,6 +10,7 @@ import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.superblock.block.StaticTestBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperDispatcher;
+import grondag.adversity.superblock.block.SuperModelBlock;
 import grondag.adversity.superblock.block.SuperStateMapper;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
@@ -39,6 +40,8 @@ public class ModBlocks
     {
         event.getRegistry().register(new BlockVolcano());
         event.getRegistry().register(new StaticTestBlock(BaseMaterial.FLEXSTONE, "test"));
+        event.getRegistry().register(new SuperModelBlock(BaseMaterial.FLEXSTONE, "supermodel_flex"));
+        
     }
     
     @SubscribeEvent

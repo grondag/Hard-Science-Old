@@ -52,7 +52,7 @@ public class ModelStateTest
         state.setAxisInverted(true);
         state.setStaticShapeBits(879579585L);
         
-        int persistedState[] = state.getBits();
+        int persistedState[] = state.getBitsIntArray();
         
         ModelState reloadedState = new ModelState(persistedState);
         

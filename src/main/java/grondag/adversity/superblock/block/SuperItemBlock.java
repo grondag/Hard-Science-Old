@@ -76,7 +76,7 @@ public class SuperItemBlock extends ItemBlock
                 tag = new NBTTagCompound();
                 stack.setTagCompound(tag);
             }
-            tag.setIntArray(ITEM_MODEL_BITS, modelState.getBits());;
+            tag.setIntArray(ITEM_MODEL_BITS, modelState.getBitsIntArray());;
         }
     }
  
@@ -90,7 +90,7 @@ public class SuperItemBlock extends ItemBlock
             //so only display if clicking on air
             if (blockpos != null && world.getBlockState(blockpos).getMaterial() == Material.AIR && ((SuperBlock)this.block).hasAppearanceGui())
             {
-                player.openGui(Adversity.INSTANCE, AdversityGuiHandler.GUI_NICE_BLOCK_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+                player.openGui(Adversity.INSTANCE, AdversityGuiHandler.GUI_SUPERMODEL_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }

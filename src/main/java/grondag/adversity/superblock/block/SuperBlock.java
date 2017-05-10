@@ -113,8 +113,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider
    // set in constructor to have different appearance
    protected int[] defaultModelStateBits;
    
-   // change in constructor to have more variants
-   protected int metaCount = 1;
+   // change in constructor to have fewer variants
+   protected int metaCount = 16;
    
    @SuppressWarnings("deprecation")
    public SuperBlock(BaseMaterial material, String styleName)
@@ -333,7 +333,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider
    
    public final void setDefaultModelState(ModelState modelState)
    {
-       this.defaultModelStateBits = modelState.getBits();
+       this.defaultModelStateBits = modelState.getBitsIntArray();
    }
    
    /** 
@@ -357,13 +357,13 @@ public abstract class SuperBlock extends Block implements IWailaProvider
     }
 
    /** Only meaningful use is for itemRenderer which 
-   * checks this to know if it should do depth checking on item renders
+   * checks this to know if it should do depth checking on item renders.
+   * Get no state here, so always report that we should.
    */
    @Override
    public BlockRenderLayer getBlockLayer()
    {
-       return canRenderInLayer(null, BlockRenderLayer.TRANSLUCENT)
-               ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+       return BlockRenderLayer.TRANSLUCENT;
    }
 
    /**

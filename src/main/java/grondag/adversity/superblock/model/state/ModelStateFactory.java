@@ -181,7 +181,15 @@ public class ModelStateFactory
             bits3 = ((long)bits[6]) << 32 | (bits[7] & 0xffffffffL);
         }
         
-        public int[] getBits() 
+        public ModelState(long b0, long b1, long b2, long b3)
+        {
+            bits0 = b0;
+            bits1 = b1;
+            bits2 = b2;
+            bits3 = b3;
+        }
+        
+        public int[] getBitsIntArray() 
         {
             int[] result = new int[8];
             result[0] = (int) (this.isStatic ? (bits0 >> 32) | INT_SIGN_BIT : (bits0 >> 32));
@@ -197,6 +205,11 @@ public class ModelStateFactory
             result[7] = (int) (bits3);
             return result;
         }
+        
+        public long getBits0() {return this.bits0;}
+        public long getBits1() {return this.bits1;}
+        public long getBits2() {return this.bits2;}
+        public long getBits3() {return this.bits3;}
         
         private void populateStateFlagsIfNeeded()
         {
