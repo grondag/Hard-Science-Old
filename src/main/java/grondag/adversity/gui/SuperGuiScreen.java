@@ -3,6 +3,8 @@ package grondag.adversity.gui;
 
 import java.io.IOException;
 
+import org.lwjgl.opengl.GL11;
+
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
@@ -10,6 +12,7 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -34,6 +37,9 @@ public class SuperGuiScreen extends GuiScreen
     
     private int meta = 0;
     private ModelState modelState = null;
+    private ItemStack heldItem;
+    
+    private boolean hasUpdates = false;
     
     @Override
     public boolean doesGuiPauseGame()
@@ -46,6 +52,12 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
         colorPicker.handleMouseInput(mouseX, mouseY);
+        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
+        {
+            this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
+            SuperItemBlock.setModelState(heldItem, modelState);
+            this.hasUpdates = true;
+        }
     }
     
     @Override
@@ -53,6 +65,12 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         colorPicker.handleMouseInput(mouseX, mouseY);
+        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
+        {
+            this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
+            SuperItemBlock.setModelState(heldItem, modelState);
+            this.hasUpdates = true;
+        }
     }
     
     @Override
@@ -61,10 +79,20 @@ public class SuperGuiScreen extends GuiScreen
         super.mouseReleased(mouseX, mouseY, state);
         colorPicker.handleMouseInput(mouseX, mouseY);
         
+        // todo - put into shared routine
         if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
         {
             this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
+            SuperItemBlock.setModelState(heldItem, modelState);
+            this.hasUpdates = true;
+        }
+        
+        // todo - create an apply button - so can escape out and not save changes
+
+        if(this.hasUpdates)
+        {
             AdversityMessages.INSTANCE.sendToServer(new PacketUpdateSuperModelBlock(this.meta, this.modelState));
+            this.hasUpdates = false;
         }
     }
 
@@ -78,6 +106,8 @@ public class SuperGuiScreen extends GuiScreen
     public void initGui()
     {
         super.initGui();
+        
+        this.heldItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
                 
         int margin = (int) (this.height * MARGIN_FACTOR);
         this.xStart = margin;
@@ -87,21 +117,21 @@ public class SuperGuiScreen extends GuiScreen
         
         if(colorPicker == null)
         {
-            ItemStack heldItem = mc.player.getHeldItem(EnumHand.MAIN_HAND);
-            if (heldItem == null || !(heldItem.getItem() instanceof SuperItemBlock)) 
+            
+            if (this.heldItem == null || !(this.heldItem.getItem() instanceof SuperItemBlock)) 
             {
                 // Cannot happen!
                 return;
             }
-            this.meta = heldItem.getMetadata();
+            this.meta = this.heldItem.getMetadata();
             this.modelState = SuperItemBlock.getModelState(heldItem);
             
-            colorPicker = new ColorPicker(this.xStart + 10, this.yStart + 10, this.ySize - 20);
+            colorPicker = new ColorPicker(this.xStart + 80, this.yStart + 10, 40);
             colorPicker.setColorMapID(this.modelState.getColorMap(0).ordinal);
         }
         else
         {
-            colorPicker.resize(this.xStart + 10, this.yStart + 10, this.ySize - 20);
+            colorPicker.resize(this.xStart + 80, this.yStart + 10, 40);
         }
         
 
@@ -115,10 +145,17 @@ public class SuperGuiScreen extends GuiScreen
         this.colorPicker.drawControl(mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRenderer, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
         
-        int left = this.xStart + this.xSize / 2;
-        int top = this.yStart + this.ySize / 4;
-        drawRect(left, top , left + this.ySize / 2, top + this.ySize / 2, 
-                BlockColorMapProvider.INSTANCE.getColorMap(this.colorPicker.getColorMapID()).getColor(EnumColorMap.BASE));
+        if(this.heldItem != null)
+        {
+            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, heldItem, (this.xStart + 10), (this.yStart + 10), 4);
+//            GL11.glPushMatrix();
+//            GL11.glScalef(2, 2, 1);
+//            this.itemRender.renderItemAndEffectIntoGUI(this.heldItem, left + this.ySize / 2, top + this.ySize / 2);
+//            GL11.glPopMatrix();
+        }
+        
+//        drawRect(left, top , left + this.ySize / 2, top + this.ySize / 2, 
+//                BlockColorMapProvider.INSTANCE.getColorMap(this.colorPicker.getColorMapID()).getColor(EnumColorMap.BASE));
         
         super.drawScreen(mouseX, mouseY, partialTicks);
  

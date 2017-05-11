@@ -12,13 +12,18 @@ public class ColorMap
     public final String colorMapName;
     public final int ordinal;
     public final Hue hue;
+    public final Chroma chroma;
+    public final Luminance luminance;
+    
     private final int[] colors = new int[EnumColorMap.values().length];
 
-    public ColorMap(String vectorName, Hue hue, int ordinal)
+    public ColorMap(String vectorName, Hue hue, Chroma chromaIn, Luminance luminanceIn, int ordinal)
     {
         this.colorMapName = vectorName;
         this.ordinal = ordinal;
         this.hue = hue;
+        this.chroma = chromaIn;
+        this.luminance = luminanceIn;
     }
 
     public ColorMap setColor(EnumColorMap whichColor, int colorValue)
@@ -36,7 +41,7 @@ public class ColorMap
     {
         String mapName =  luminanceIn.name + " " + chromaIn.name + " " + hue.hueName();
                 
-        ColorMap newColorMap = new ColorMap(mapName, hue, ordinal);
+        ColorMap newColorMap = new ColorMap(mapName, hue, chromaIn, luminanceIn, ordinal);
     
         // use these for manipulation so can use realistic values for HCL_MAX inputs
         double chroma = chromaIn.value;

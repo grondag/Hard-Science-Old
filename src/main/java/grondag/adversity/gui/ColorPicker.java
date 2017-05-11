@@ -15,8 +15,8 @@ public class ColorPicker
     
     private int colorMapID = 0;
     
-//    private double top;
-    private double left;
+    private double top;
+//    private double left;
 //    private double size;
     private double centerX;
     private double centerY;
@@ -24,6 +24,7 @@ public class ColorPicker
     private double radiusOuter;
     private double arc = 360 / NiceHues.Hue.values().length;
     
+    private double gridLeft;
     private double gridTop;
     private double gridIncrement;
     
@@ -36,25 +37,26 @@ public class ColorPicker
         this.selectedHue = BlockColorMapProvider.INSTANCE.getColorMap(colorMapID).hue;
     }
     
-    public ColorPicker(double left, double top, double size)
+    public ColorPicker(double left, double top, double diameter)
     {
-        resize(left, top, size);
+        resize(left, top, diameter);
     }
     
-    public void resize(double left, double top, double size)
+    public void resize(double left, double top, double diameter)
     {
-        this.left = left;
-//        this.top = top;
+//        this.left = left;
+        this.top = top;
 //        this.size = size;
         
-        radiusOuter = size / 4.0;
+        radiusOuter = diameter / 2.0;
         centerX = left + radiusOuter;
         centerY = top + radiusOuter;
         radiusInner = radiusOuter * 0.85;
         
-        this.gridIncrement = size / 2.0 / HueSet.Chroma.values().length;
+        this.gridIncrement = radiusInner * 2 / Luminance.values().length;
 
-        this.gridTop = top + size / 2.0 + 10;
+        this.gridLeft = left + diameter + 10;
+        this.gridTop = this.centerY - radiusInner;
     }
     
     public void drawControl(int mouseX, int mouseY, float partialTicks)
@@ -88,7 +90,7 @@ public class ColorPicker
       for(Luminance l : Luminance.values())
       {
           bottom = top + this.gridIncrement;
-          left = this.left;
+          left = this.gridLeft;
           for(Chroma c : Chroma.values())
           {
               right = left + this.gridIncrement;
@@ -101,6 +103,14 @@ public class ColorPicker
           }
           top = bottom;
       }
+      
+      ColorMap selectedColormap = BlockColorMapProvider.INSTANCE.getColorMap(this.colorMapID);
+      
+      double sLeft = this.gridLeft + selectedColormap.chroma.ordinal() * this.gridIncrement;
+      double sTop = this.gridTop + selectedColormap.luminance.ordinal() * this.gridIncrement;
+      
+      GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrement + 1, sTop + this.gridIncrement + 1, 0xFFFFFFFF);
+      GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrement + 0.5, sTop + this.gridIncrement + 0.5, selectedColormap.getColor(EnumColorMap.BASE));
       
 //      for(int j = 0; j < Hue.values().length; j++)
 //      {
@@ -126,12 +136,13 @@ public class ColorPicker
             
             this.selectedHue = Hue.values()[index];
         }
-        else if(mouseY >= this.gridTop)
+        else if(mouseX >= this.gridLeft)
         {
-            int l = (int) Math.floor((mouseY - gridTop) / this.gridIncrement);
-            int c = (int) Math.floor((mouseX - this.left) / this.gridIncrement);
+            int l = (int) Math.floor((mouseY - this.gridTop) / this.gridIncrement);
+            int c = (int) Math.floor((mouseX - this.gridLeft) / this.gridIncrement);
             
-            if(l <  HueSet.Luminance.values().length && c < HueSet.Chroma.values().length )
+            if(l >= 0 && l <  HueSet.Luminance.values().length 
+                    && c >= 0 && c < HueSet.Chroma.values().length )
             {
                 ColorMap testMap = BlockColorMapProvider.INSTANCE.getColorMap(
                         this.selectedHue, 

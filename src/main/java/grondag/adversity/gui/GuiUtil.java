@@ -1,9 +1,13 @@
 package grondag.adversity.gui;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.item.ItemStack;
 
 public class GuiUtil
 {
@@ -68,5 +72,36 @@ public class GuiUtil
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
     }
+    
+    // hat tip to McJty
+    public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, int x, int y, double scale)
+    {
+        GlStateManager.color(1F, 1F, 1F);
+
+        boolean rc = false;
+
+        if (itm != null && itm.getItem() != null) {
+            rc = true;
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, 0.0F, 32.0F);
+            GlStateManager.color(1F, 1F, 1F, 1F);
+            GlStateManager.scale(scale, scale, 1);
+            GlStateManager.enableRescaleNormal();
+            GlStateManager.enableLighting();
+            short short1 = 240;
+            short short2 = 240;
+            net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, short1 / 1.0F, short2 / 1.0F);
+            itemRender.renderItemAndEffectIntoGUI(itm, (int)(x / scale), (int)(y / scale));
+//            renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt, txt.length() - 2);
+//            itemRender.renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt);
+            GlStateManager.popMatrix();
+            GlStateManager.disableRescaleNormal();
+            GlStateManager.disableLighting();
+        }
+
+        return rc;
+    }
+
 
 }
