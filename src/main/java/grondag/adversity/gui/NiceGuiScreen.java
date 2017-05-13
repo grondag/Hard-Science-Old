@@ -3,6 +3,7 @@ package grondag.adversity.gui;
 
 import java.io.IOException;
 
+import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateNiceItemBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -110,7 +111,7 @@ public class NiceGuiScreen extends GuiScreen
     {
         this.drawGradientRect(this.xStart, this.yStart, this.xStart + this.xSize, this.yStart + this.ySize, -1072689136, -804253680);
 
-        this.colorPicker.drawControl(mouseX, mouseY, partialTicks);
+        this.colorPicker.drawControl(this.mc, this.itemRender, mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRenderer, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
         
         int left = this.xStart + this.xSize / 2;

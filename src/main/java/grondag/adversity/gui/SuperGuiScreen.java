@@ -3,22 +3,30 @@ package grondag.adversity.gui;
 
 import java.io.IOException;
 
-import org.lwjgl.opengl.GL11;
-
+import grondag.adversity.gui.control.Button;
+import grondag.adversity.gui.control.ColorPicker;
+import grondag.adversity.gui.control.ItemPreview;
+import grondag.adversity.gui.control.TabBar;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.niceblock.model.texture.TextureProvider.Texture;
 import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.texture.TextureLayout;
+import grondag.adversity.superblock.texture.TexturePalletteProvider;
+import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.Textures;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 public class SuperGuiScreen extends GuiScreen
 {
@@ -27,19 +35,34 @@ public class SuperGuiScreen extends GuiScreen
 //    /** The Y size of the window in pixels. */
 //    protected int ySize = 46;
     
-    private final float MARGIN_FACTOR = 0.2F;
+    private static final int CONTROL_BACKGROUND = 0x9AFFFFFF;
+    private static final float MARGIN_FACTOR = 0.2F;
+    private static final int CONTROL_INTERNAL_MARGIN = 5;
+    private static final int CONTROL_EXTERNAL_MARGIN = 5;
+    
+    private static final int BUTTON_ID_CANCEL = 0;
+    private static final int BUTTON_ID_ACCEPT = 1;
+    
+    //TODO: localize
+    private static final String STR_ACCEPT = "Accept";
+    private static final String STR_CANCEL = "Cancel";
+    
     private int xStart;
     private int yStart;
     private int xSize;
     private int ySize;
 
     private ColorPicker colorPicker;
+    private ItemPreview itemPreview;
+    private TabBar<TexturePallette> textureTabBar;
     
     private int meta = 0;
     private ModelState modelState = null;
-    private ItemStack heldItem;
     
     private boolean hasUpdates = false;
+    
+    private int buttonWidth;
+    private int buttonHeight;
     
     @Override
     public boolean doesGuiPauseGame()
@@ -47,17 +70,21 @@ public class SuperGuiScreen extends GuiScreen
         return false;
     }
 
+    private void updateItemPreviewState()
+    {
+        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
+        {
+            this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
+            SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
+            this.hasUpdates = true;
+        }
+    }
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
         colorPicker.handleMouseInput(mouseX, mouseY);
-        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
-        {
-            this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
-            SuperItemBlock.setModelState(heldItem, modelState);
-            this.hasUpdates = true;
-        }
+        updateItemPreviewState();
     }
     
     @Override
@@ -65,12 +92,7 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         colorPicker.handleMouseInput(mouseX, mouseY);
-        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
-        {
-            this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
-            SuperItemBlock.setModelState(heldItem, modelState);
-            this.hasUpdates = true;
-        }
+        updateItemPreviewState();
     }
     
     @Override
@@ -78,24 +100,20 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.mouseReleased(mouseX, mouseY, state);
         colorPicker.handleMouseInput(mouseX, mouseY);
-        
-        // todo - put into shared routine
-        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
-        {
-            this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
-            SuperItemBlock.setModelState(heldItem, modelState);
-            this.hasUpdates = true;
-        }
-        
-        // todo - create an apply button - so can escape out and not save changes
+        updateItemPreviewState();
+    }
 
-        if(this.hasUpdates)
+    @Override
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if(this.hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
             AdversityMessages.INSTANCE.sendToServer(new PacketUpdateSuperModelBlock(this.meta, this.modelState));
             this.hasUpdates = false;
         }
+        this.mc.displayGuiScreen((GuiScreen)null);
     }
-
+    
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
@@ -107,34 +125,75 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.initGui();
         
-        this.heldItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
-                
         int margin = (int) (this.height * MARGIN_FACTOR);
         this.xStart = margin;
         this.yStart = margin;
         this.xSize = this.width - (margin - 1) * 2;
         this.ySize = this.height - (margin - 1) * 2;
         
-        if(colorPicker == null)
+        FontRenderer fr = this.mc.fontRenderer;
+        this.buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        this.buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        
+        int buttonTop = this.yStart + this.ySize - this.buttonHeight - CONTROL_EXTERNAL_MARGIN;
+       
+        // buttons are cleared by super each time
+        this.addButton(new Button(BUTTON_ID_ACCEPT, this.xStart + CONTROL_EXTERNAL_MARGIN, buttonTop, this.buttonWidth, this.buttonHeight, STR_ACCEPT));
+        this.addButton(new Button(BUTTON_ID_CANCEL, this.xStart + CONTROL_EXTERNAL_MARGIN * 2 + this.buttonWidth, buttonTop, this.buttonWidth, this.buttonHeight, STR_CANCEL));
+        
+        if(this.textureTabBar == null)
+        {
+            this.textureTabBar = new TabBar<TexturePallette>(this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 20 );
+            this.textureTabBar.setItemsPerTab(10);
+            
+            for(TexturePallette tex : Textures.ALL_TEXTURES)
+            {
+                if(tex.textureLayout == TextureLayout.BIGTEX || tex.textureLayout == TextureLayout.SPLIT_X_8)
+                {
+                    this.textureTabBar.add(tex);
+                }
+            }
+            
+        }
+        else
+        {
+            this.textureTabBar.resize(this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 20);
+        }
+        
+        if(this.itemPreview == null)
+        {
+            this.itemPreview = new ItemPreview(this.xStart, this.yStart, 80);
+            this.itemPreview.setBackgroundColor(CONTROL_BACKGROUND);
+            this.itemPreview.setInnerMargin(CONTROL_INTERNAL_MARGIN);
+            this.itemPreview.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
+            this.itemPreview.previewItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
+        }
+        else
+        {
+            this.itemPreview.resize(this.xStart, this.yStart, 80);
+        }
+
+        if(this.colorPicker == null)
         {
             
-            if (this.heldItem == null || !(this.heldItem.getItem() instanceof SuperItemBlock)) 
+            if (this.itemPreview.previewItem == null || !(this.itemPreview.previewItem.getItem() instanceof SuperItemBlock)) 
             {
-                // Cannot happen!
+                // Abort on strangeness
                 return;
             }
-            this.meta = this.heldItem.getMetadata();
-            this.modelState = SuperItemBlock.getModelState(heldItem);
+            this.meta = this.itemPreview.previewItem.getMetadata();
+            this.modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
             
-            colorPicker = new ColorPicker(this.xStart + 80, this.yStart + 10, 40);
-            colorPicker.setColorMapID(this.modelState.getColorMap(0).ordinal);
+            this.colorPicker = new ColorPicker(this.xStart + 80, this.yStart + 10, 40);
+            this.colorPicker.setColorMapID(this.modelState.getColorMap(0).ordinal);
+            this.colorPicker.setBackgroundColor(CONTROL_BACKGROUND);
+            this.colorPicker.setInnerMargin(CONTROL_INTERNAL_MARGIN);
+            this.colorPicker.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
         }
         else
         {
             colorPicker.resize(this.xStart + 80, this.yStart + 10, 40);
         }
-        
-
     }
 
     @Override
@@ -142,20 +201,15 @@ public class SuperGuiScreen extends GuiScreen
     {
         this.drawGradientRect(this.xStart, this.yStart, this.xStart + this.xSize, this.yStart + this.ySize, -1072689136, -804253680);
 
-        this.colorPicker.drawControl(mouseX, mouseY, partialTicks);
+        this.colorPicker.drawControl(this.mc, this.itemRender, mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRenderer, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
-        
-        if(this.heldItem != null)
-        {
-            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, heldItem, (this.xStart + 10), (this.yStart + 10), 4);
-//            GL11.glPushMatrix();
-//            GL11.glScalef(2, 2, 1);
-//            this.itemRender.renderItemAndEffectIntoGUI(this.heldItem, left + this.ySize / 2, top + this.ySize / 2);
-//            GL11.glPopMatrix();
-        }
         
 //        drawRect(left, top , left + this.ySize / 2, top + this.ySize / 2, 
 //                BlockColorMapProvider.INSTANCE.getColorMap(this.colorPicker.getColorMapID()).getColor(EnumColorMap.BASE));
+        
+        this.itemPreview.drawControl(this.mc, this.itemRender, mouseX, mouseY, partialTicks);
+        
+        this.textureTabBar.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
         
         super.drawScreen(mouseX, mouseY, partialTicks);
  

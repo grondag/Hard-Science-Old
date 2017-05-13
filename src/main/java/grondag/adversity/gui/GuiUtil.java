@@ -1,6 +1,7 @@
 package grondag.adversity.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderItem;
@@ -74,7 +75,7 @@ public class GuiUtil
     }
     
     // hat tip to McJty
-    public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, int x, int y, double scale)
+    public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, double x, double y, double scale)
     {
         GlStateManager.color(1F, 1F, 1F);
 
@@ -103,5 +104,19 @@ public class GuiUtil
         return rc;
     }
 
+    /**
+     * Renders the specified text to the screen, center-aligned. Args : renderer, string, x, y, color
+     */
+    public static void drawCenteredStringNoShadow(FontRenderer fontRendererIn, String text, float x, float y, int color)
+    {
+        fontRendererIn.drawString(text, x - fontRendererIn.getStringWidth(text) / 2, y, color, false);
+    }
 
+    /**
+     * Renders the specified text to the screen. Args : renderer, string, x, y, color
+     */
+    public static void drawStringNoShadow(FontRenderer fontRendererIn, String text, int x, int y, int color)
+    {
+        fontRendererIn.drawString(text, x, y, color, false);
+    }
 }

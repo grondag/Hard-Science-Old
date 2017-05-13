@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
 
-public class TexturePalletteProvider
+public class TexturePalletteProvider implements Iterable<TexturePalletteProvider.TexturePallette>
 {
     
     private static final TexturePallette[] ARRAY_TEMPLATE = new TexturePallette[0];
