@@ -1,6 +1,7 @@
 package grondag.adversity.gui.control;
 
 import grondag.adversity.gui.GuiUtil;
+import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
@@ -114,7 +115,7 @@ public class ColorPicker extends GuiControl
     }
 
     @Override
-    public void handleMouseInput(int mouseX, int mouseY)
+    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
     {
         double distance = Math.sqrt((Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)));
 
@@ -171,22 +172,26 @@ public class ColorPicker extends GuiControl
     }
     
     @Override
+    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    {
+        this.handleMouseClick(mc, mouseX, mouseY);
+    }
+    
+    @Override
     protected void handleCoordinateUpdate()
     {
-        radiusOuter = this.contentHeight / 2.0;
-        centerX = this.contentLeft + radiusOuter;
-        centerY = this.contentTop + radiusOuter;
+        radiusOuter = this.height / 2.0;
+        centerX = this.left + radiusOuter;
+        centerY = this.top + radiusOuter;
         radiusInner = radiusOuter * 0.85;
 
         this.gridIncrement = radiusInner * 2 / Luminance.values().length;
 
-        this.gridLeft = this.contentLeft + this.contentHeight + this.innerMargin;
+        this.gridLeft = this.left + this.height + CONTROL_INTERNAL_MARGIN;
         this.gridTop = this.centerY - radiusInner;
         
-        this.width = this.height + this.innerMargin + this.gridIncrement * Chroma.values().length;
-        this.contentWidth = this.width - this.innerMargin - this.outerMargin - this.innerMargin - this.outerMargin;
-        this.contentRight = this.contentLeft + this.contentWidth;
-        this.backgroundRight = this.left + this.width - this.outerMargin - this.outerMargin;
+        this.width = this.height + CONTROL_INTERNAL_MARGIN + this.gridIncrement * Chroma.values().length;
+        this.right = this.left + this.width;
     }
 
 }

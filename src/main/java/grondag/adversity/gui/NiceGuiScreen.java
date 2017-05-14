@@ -44,21 +44,21 @@ public class NiceGuiScreen extends GuiScreen
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        colorPicker.handleMouseInput(mouseX, mouseY);
+//        colorPicker.handleMouseInput(mouseX, mouseY);
     }
     
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        colorPicker.handleMouseInput(mouseX, mouseY);
+//        colorPicker.handleMouseInput(mouseX, mouseY);
     }
     
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) 
     {
         super.mouseReleased(mouseX, mouseY, state);
-        colorPicker.handleMouseInput(mouseX, mouseY);
+//        colorPicker.handleMouseInput(mouseX, mouseY);
         
         if(this.colorMapID != colorPicker.getColorMapID())
         {

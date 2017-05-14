@@ -1,20 +1,22 @@
 package grondag.adversity.gui;
 
 
-import java.io.IOException;
+import static grondag.adversity.gui.base.GuiControl.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import grondag.adversity.gui.base.TabBar;
 import grondag.adversity.gui.control.Button;
 import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
-import grondag.adversity.gui.control.TabBar;
+import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.model.texture.TextureProvider.Texture;
 import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureLayout;
-import grondag.adversity.superblock.texture.TexturePalletteProvider;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
@@ -24,9 +26,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
-import net.minecraftforge.fml.client.FMLClientHandler;
 
 public class SuperGuiScreen extends GuiScreen
 {
@@ -35,10 +35,9 @@ public class SuperGuiScreen extends GuiScreen
 //    /** The Y size of the window in pixels. */
 //    protected int ySize = 46;
     
-    private static final int CONTROL_BACKGROUND = 0x9AFFFFFF;
+
     private static final float MARGIN_FACTOR = 0.2F;
-    private static final int CONTROL_INTERNAL_MARGIN = 5;
-    private static final int CONTROL_EXTERNAL_MARGIN = 5;
+
     
     private static final int BUTTON_ID_CANCEL = 0;
     private static final int BUTTON_ID_ACCEPT = 1;
@@ -54,7 +53,7 @@ public class SuperGuiScreen extends GuiScreen
 
     private ColorPicker colorPicker;
     private ItemPreview itemPreview;
-    private TabBar<TexturePallette> textureTabBar;
+    private TexturePicker textureTabBar;
     
     private int meta = 0;
     private ModelState modelState = null;
@@ -72,9 +71,20 @@ public class SuperGuiScreen extends GuiScreen
 
     private void updateItemPreviewState()
     {
-        if(this.modelState != null && this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
+        // abort on strangeness
+        if(this.modelState == null) return;
+
+        if(this.modelState.getColorMap(0).ordinal != colorPicker.getColorMapID())
         {
             this.modelState.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID()));
+            this.textureTabBar.colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker.getColorMapID());
+            SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
+            this.hasUpdates = true;
+        }
+        
+        if(this.modelState.getTexture(0) != this.textureTabBar.getSelected())
+        {
+            this.modelState.setTexture(0, this.textureTabBar.getSelected());
             SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
             this.hasUpdates = true;
         }
@@ -83,7 +93,8 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        colorPicker.handleMouseInput(mouseX, mouseY);
+        colorPicker.handleMouseClick(this.mc, mouseX, mouseY);
+        this.textureTabBar.handleMouseClick(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
     
@@ -91,17 +102,18 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        colorPicker.handleMouseInput(mouseX, mouseY);
+        colorPicker.handleMouseDrag(this.mc, mouseX, mouseY);
+        this.textureTabBar.handleMouseDrag(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
     
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) 
-    {
-        super.mouseReleased(mouseX, mouseY, state);
-        colorPicker.handleMouseInput(mouseX, mouseY);
-        updateItemPreviewState();
-    }
+//    @Override
+//    protected void mouseReleased(int mouseX, int mouseY, int state) 
+//    {
+//        super.mouseReleased(mouseX, mouseY, state);
+//
+//        updateItemPreviewState();
+//    }
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException
@@ -141,40 +153,13 @@ public class SuperGuiScreen extends GuiScreen
         this.addButton(new Button(BUTTON_ID_ACCEPT, this.xStart + CONTROL_EXTERNAL_MARGIN, buttonTop, this.buttonWidth, this.buttonHeight, STR_ACCEPT));
         this.addButton(new Button(BUTTON_ID_CANCEL, this.xStart + CONTROL_EXTERNAL_MARGIN * 2 + this.buttonWidth, buttonTop, this.buttonWidth, this.buttonHeight, STR_CANCEL));
         
-        if(this.textureTabBar == null)
-        {
-            this.textureTabBar = new TabBar<TexturePallette>(this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 20 );
-            this.textureTabBar.setItemsPerTab(10);
-            
-            for(TexturePallette tex : Textures.ALL_TEXTURES)
-            {
-                if(tex.textureLayout == TextureLayout.BIGTEX || tex.textureLayout == TextureLayout.SPLIT_X_8)
-                {
-                    this.textureTabBar.add(tex);
-                }
-            }
-            
-        }
-        else
-        {
-            this.textureTabBar.resize(this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 20);
-        }
-        
         if(this.itemPreview == null)
         {
             this.itemPreview = new ItemPreview(this.xStart, this.yStart, 80);
-            this.itemPreview.setBackgroundColor(CONTROL_BACKGROUND);
-            this.itemPreview.setInnerMargin(CONTROL_INTERNAL_MARGIN);
-            this.itemPreview.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
+//            this.itemPreview.setBackgroundColor(CONTROL_BACKGROUND);
+//            this.itemPreview.setInnerMargin(CONTROL_INTERNAL_MARGIN);
+//            this.itemPreview.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
             this.itemPreview.previewItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
-        }
-        else
-        {
-            this.itemPreview.resize(this.xStart, this.yStart, 80);
-        }
-
-        if(this.colorPicker == null)
-        {
             
             if (this.itemPreview.previewItem == null || !(this.itemPreview.previewItem.getItem() instanceof SuperItemBlock)) 
             {
@@ -183,12 +168,44 @@ public class SuperGuiScreen extends GuiScreen
             }
             this.meta = this.itemPreview.previewItem.getMetadata();
             this.modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
+        }
+        else
+        {
+            this.itemPreview.resize(this.xStart, this.yStart, 80);
+        }
+        
+        // abort on strangeness
+        if(this.modelState == null) return;
+        
+        if(this.textureTabBar == null)
+        {
+            ArrayList<TexturePallette> textures = new ArrayList<TexturePallette>();
+            for(TexturePallette tex : Textures.ALL_TEXTURES)
+            {
+                if(tex.textureLayout == TextureLayout.BIGTEX || tex.textureLayout == TextureLayout.SPLIT_X_8)
+                {
+                    textures.add(tex);
+                }
+            }
+            
+            this.textureTabBar = new TexturePicker(textures, this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 48 );
+            this.textureTabBar.setSelected(this.modelState.getTexture(0));
+            this.textureTabBar.showSelected();
+            this.textureTabBar.colorMap = this.modelState.getColorMap(0);
+        }
+        else
+        {
+            this.textureTabBar.resize(this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 48);
+        }
+        
+        if(this.colorPicker == null)
+        {
             
             this.colorPicker = new ColorPicker(this.xStart + 80, this.yStart + 10, 40);
             this.colorPicker.setColorMapID(this.modelState.getColorMap(0).ordinal);
-            this.colorPicker.setBackgroundColor(CONTROL_BACKGROUND);
-            this.colorPicker.setInnerMargin(CONTROL_INTERNAL_MARGIN);
-            this.colorPicker.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
+//            this.colorPicker.setBackgroundColor(CONTROL_BACKGROUND);
+//            this.colorPicker.setInnerMargin(CONTROL_INTERNAL_MARGIN);
+//            this.colorPicker.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
         }
         else
         {

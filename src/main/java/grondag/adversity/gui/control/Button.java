@@ -1,11 +1,11 @@
 package grondag.adversity.gui.control;
 
+import static grondag.adversity.gui.base.GuiControl.*;
+
 import grondag.adversity.gui.GuiUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
-
-import static grondag.adversity.gui.control.GuiControl.*;
 
 public class Button extends GuiButton
 {

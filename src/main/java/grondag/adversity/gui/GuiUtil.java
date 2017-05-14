@@ -1,13 +1,16 @@
 package grondag.adversity.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 
 public class GuiUtil
@@ -48,10 +51,53 @@ public class GuiUtil
         vertexbuffer.pos(right, top, 0.0D).endVertex();
         vertexbuffer.pos(left, top, 0.0D).endVertex();
         tessellator.draw();
+        GlStateManager.color(1, 1, 1, 1);
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
     }
 
+    /**
+     * Draws a horizontal of the given width between two points.
+     */
+    public static void drawHorizontalLine(double startX, double endX, double y, double width, int color)
+    {
+        if (endX < startX)
+        {
+            double x = startX;
+            startX = endX;
+            endX = x;
+        }
+        
+        double halfWidth = width / 2;
+
+        drawRect(startX - halfWidth, y - halfWidth, endX + halfWidth, y + halfWidth, color);
+    }
+
+    /**
+     * Draws a vertical of the given width between two points.
+     */
+    public static void drawVerticalLine(double x, double startY, double endY, double width, int color)
+    {
+        if (endY < startY)
+        {
+            double y = startY;
+            startY = endY;
+            endY = y;
+        }
+
+        double halfWidth = width / 2;
+        
+        drawRect(x - halfWidth, startY - halfWidth, x + halfWidth, endY + halfWidth, color);
+    }
+    
+    public static void drawBox(double left, double top, double right, double bottom, double lineWidth, int color)
+    {
+        drawVerticalLine(left, top, bottom, lineWidth, color);
+        drawVerticalLine(right, top, bottom, lineWidth, color);
+        drawHorizontalLine(left, right, top, lineWidth, color);
+        drawHorizontalLine(left, right, bottom, lineWidth, color);
+    }
+    
     public static void drawQuad(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int color)
     {
         float f3 = (float)(color >> 24 & 255) / 255.0F;
@@ -72,6 +118,44 @@ public class GuiUtil
         tessellator.draw();
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+    }
+    
+    /**
+     * Draws a rectangle using the provide texture sprite and color
+     */
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color)
+    {
+        float alpha = (float)(color >> 24 & 255) / 255.0F;
+        float red = (float)(color >> 16 & 255) / 255.0F;
+        float green = (float)(color >> 8 & 255) / 255.0F;
+        float blue = (float)(color & 255) / 255.0F;
+        
+        Tessellator tessellator = Tessellator.getInstance();
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        GlStateManager.enableBlend();
+        GlStateManager.enableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.color(1, 1, 1, 1);
+
+        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + heightIn), zLevel)
+            .tex((double)textureSprite.getMinU(), (double)textureSprite.getMaxV())
+            .color(red, green, blue, alpha).endVertex();
+        vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + heightIn), zLevel)
+            .tex((double)textureSprite.getMaxU(), (double)textureSprite.getMaxV())
+            .color(red, green, blue, alpha).endVertex();
+        vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + 0), zLevel)
+            .tex((double)textureSprite.getMaxU(), (double)textureSprite.getMinV())
+            .color(red, green, blue, alpha).endVertex();
+        vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + 0), zLevel)
+            .tex((double)textureSprite.getMinU(), (double)textureSprite.getMinV())
+            .color(red, green, blue, alpha).endVertex();
+        tessellator.draw();
+    }
+    
+    public static void playPressedSound(Minecraft mc)
+    {
+        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
     
     // hat tip to McJty
@@ -119,4 +203,5 @@ public class GuiUtil
     {
         fontRendererIn.drawString(text, x, y, color, false);
     }
+    
 }

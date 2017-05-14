@@ -177,6 +177,13 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             }
         }
         
+        /** used for GUI texture preview */
+        public TextureAtlasSprite getPreviewSprite()
+        {
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getDefaultParticleTexture());
+        }
+        
+        
         public TextureAtlasSprite getTextureSprite()
         {
             return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName());
