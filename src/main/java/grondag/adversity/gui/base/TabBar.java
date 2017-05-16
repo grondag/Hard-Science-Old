@@ -1,9 +1,9 @@
 package grondag.adversity.gui.base;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import grondag.adversity.Output;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.Minecraft;
@@ -29,9 +29,12 @@ public abstract class TabBar<T> extends GuiControl
     
     private double maxItemSize = 32;
     private double actualItemSize;
-    private double actualItemMargin;
+    private double verticalItemMargin;
+    private double horizontalItemMargin;
     private double tabTop;
     private double tabBottom;
+    private double tabAllowance;
+    private double tabMargin;
     
     private List<T> items;
     
@@ -47,17 +50,14 @@ public abstract class TabBar<T> extends GuiControl
     private MouseLocation currentMouseLocation;
     private int currentMouseIndex;
     
-    public TabBar(List<T> items, double left, double top, double width, double height)
+    public TabBar(List<T> items)
     {
-        super(left, top, width, height);
         this.items = items;
-        this.handleCoordinateUpdate();
     }
 
     @Override
     protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-       
         updateMouseLocation(mouseX, mouseY);
         
         int start = this.getFirstDisplayedIndex();
@@ -84,24 +84,43 @@ public abstract class TabBar<T> extends GuiControl
             if(++column == this.itemsPerRow)
             {
                 column = 0;
-                itemY += (this.actualItemSize + actualItemMargin);
+                itemY += (this.actualItemSize + this.verticalItemMargin);
                 itemX = this.left;
             }
             else
             {
-                itemX += (this.actualItemSize + actualItemMargin);
+                itemX += (this.actualItemSize + this.horizontalItemMargin);
             }
         }
         
         double tabMiddleY = (tabTop + tabBottom) / 2.0;
         
-        double x = this.left + ARROW_WIDTH + this.actualItemMargin;
-        for(int i = 0; i < this.tabCount; i++)
+        
+        
+        // if tabs are too small, just do a continuous bar
+        double tabLeft = this.left + ARROW_WIDTH + ITEM_SPACING;
+        if(this.tabMargin == 0.0)
         {
-            GuiUtil.drawRect(x, tabTop, x + this.tabWidth, tabTop + TAB_HEIGHT,
-                    i == this.selectedTabIndex ? this.selectedColor : this.buttonColor);
             
-            x += (this.tabWidth + this.actualItemMargin);
+            GuiUtil.drawRect(tabLeft, tabTop, tabLeft + this.tabAllowance, tabTop + TAB_HEIGHT,this.buttonColor);
+     
+            // box width is same as tab height, so need to have it be half that extra to the right so that we keep our margins with the arrows
+            double selectionCenterX = this.tabCount > 1 
+                ? tabLeft + TAB_HEIGHT / 2.0 + (this.tabAllowance - TAB_HEIGHT) * (double) this.selectedTabIndex / (this.tabCount - 1)
+                : tabLeft + this.tabAllowance / 2.0;
+            
+            GuiUtil.drawRect(selectionCenterX -  TAB_HEIGHT / 2.0, tabTop, selectionCenterX +  TAB_HEIGHT / 2.0, tabTop + TAB_HEIGHT, this.selectedColor);
+            
+        }
+        else
+        {
+            for(int i = 0; i < this.tabCount; i++)
+            {
+                GuiUtil.drawRect(tabLeft, tabTop, tabLeft + this.tabWidth, tabTop + TAB_HEIGHT,
+                        i == this.selectedTabIndex ? this.selectedColor : this.buttonColor);
+                
+                tabLeft += (this.tabWidth + this.tabMargin);
+            }
         }
         GuiUtil.drawQuad(this.left, tabMiddleY, this.left + ARROW_WIDTH, tabBottom, this.left + ARROW_WIDTH, tabTop, this.left, tabMiddleY, this.buttonColor);
 
@@ -119,25 +138,26 @@ public abstract class TabBar<T> extends GuiControl
         }
         else if(mouseY >= this.tabTop && mouseY <= this.tabBottom)
         {
-            if(mouseX <= this.left + ARROW_WIDTH + this.actualItemMargin / 2)
+            if(mouseX <= this.left + ARROW_WIDTH + ITEM_SPACING / 2.0)
             {
                 this.currentMouseLocation = MouseLocation.LEFT_ARROW;
             }
-            else if(mouseX >= this.right - ARROW_WIDTH -  this.actualItemMargin / 2)
+            else if(mouseX >= this.right - ARROW_WIDTH - ITEM_SPACING / 2.0)
             {
                 this.currentMouseLocation = MouseLocation.RIGHT_ARROW;
             }
             else
             {
                 this.currentMouseLocation = MouseLocation.TAB;
-                this.currentMouseIndex = (int) ((mouseX - this.left - ARROW_WIDTH - this.actualItemMargin / 2) / (this.tabWidth + this.actualItemMargin));
+                this.currentMouseIndex = Useful.clamp((int) ((mouseX - this.left - ARROW_WIDTH - ITEM_SPACING / 2) / (this.tabAllowance) * this.tabCount), 0, this.tabCount - 1);
+//                this.currentMouseIndex = (int) ((mouseX - this.left - ARROW_WIDTH - this.actualItemMargin / 2) / (this.tabWidth + this.tabMargin));
             }
         }
-        else if(mouseY < this.tabTop - this.actualItemMargin / 2)
+        else if(mouseY < this.tabTop - this.verticalItemMargin / 2)
         {
             this.currentMouseLocation = MouseLocation.ITEM;
-            int newIndex = this.getFirstDisplayedIndex() + (int)((mouseY - this.top - this.actualItemMargin / 2) / (this.actualItemSize + this.actualItemMargin)) * this.itemsPerRow
-                    + (int)((mouseX - this.left - this.actualItemMargin / 2) / (this.actualItemSize + this.actualItemMargin));
+            int newIndex = this.getFirstDisplayedIndex() + (int)((mouseY - this.top - this.verticalItemMargin / 2) / (this.actualItemSize + this.verticalItemMargin)) * this.itemsPerRow
+                    + (int)((mouseX - this.left - this.horizontalItemMargin / 2) / (this.actualItemSize + this.horizontalItemMargin));
             
             this.currentMouseIndex = (newIndex < this.items.size()) ? newIndex : -1;
         }
@@ -160,16 +180,22 @@ public abstract class TabBar<T> extends GuiControl
             this.itemsPerRow = (int) ((this.width + ITEM_SPACING) / (actualItemSize + ITEM_SPACING));
             this.itemsPerTab = rowsPerTab * itemsPerRow;
             double itemGap = this.width - this.actualItemSize * itemsPerRow;
-            this.actualItemMargin = this.itemsPerRow == 0 ? 0 : itemGap / (this.itemsPerRow - 1);
+            this.horizontalItemMargin = this.itemsPerRow == 0 ? 0 : itemGap / (this.itemsPerRow - 1);
+            this.verticalItemMargin = ITEM_SPACING;
             this.tabCount = this.itemsPerTab > 0 ? (this.items.size() + this.itemsPerTab - 1) / this.itemsPerTab : 0;
-            this.tabWidth = this.tabCount > 0 ? (this.width - (this.tabCount + 1) * this.actualItemMargin - ARROW_WIDTH * 2) / this.tabCount : 0;
-            this.tabTop = this.top + (actualItemSize + this.actualItemMargin) * this.rowsPerTab ;
+            this.tabAllowance = this.width - (ARROW_WIDTH + ITEM_SPACING) * 2;
+            this.tabMargin = this.tabCount <= 1 ? 0.0 : Useful.clamp((tabAllowance - this.tabCount * TAB_HEIGHT) / (tabCount - 1), 0.0, TAB_MARGIN);
+            if(this.tabMargin < 1) this.tabMargin = 0.0;
+            this.tabWidth = this.tabCount <= 1 ? this.tabAllowance : (this.tabAllowance - (this.tabCount - 1) * this.tabMargin) / this.tabCount;
+            this.tabTop = this.top + (actualItemSize + this.verticalItemMargin) * this.rowsPerTab ;
             this.tabBottom = tabTop + TAB_HEIGHT;
+            
+            if(Output.DEBUG_MODE) assert(this.tabBottom <= this.bottom);
         }
     }
 
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
     {
         this.updateMouseLocation(mouseX, mouseY);
         switch(this.currentMouseLocation)
@@ -200,7 +226,7 @@ public abstract class TabBar<T> extends GuiControl
     }
     
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
     {
         this.updateMouseLocation(mouseX, mouseY);
         switch(this.currentMouseLocation)
@@ -228,13 +254,13 @@ public abstract class TabBar<T> extends GuiControl
     public void add(T item)
     {
         this.items.add(item);
-        this.refreshContentCoordinates();
+        this.isDirty = true;
     }
 
     public void addAll(Collection<T> items)
     {
         this.items.addAll(items);
-        this.refreshContentCoordinates();
+        this.isDirty = true;
     }
     
     public void addAll(T[] itemsIn)
@@ -243,7 +269,7 @@ public abstract class TabBar<T> extends GuiControl
         {
             this.items.add(item);
         }
-        this.refreshContentCoordinates();
+        this.isDirty = true;
     }
     
     public T get(int index)
@@ -264,17 +290,18 @@ public abstract class TabBar<T> extends GuiControl
     public void clear()
     {
         this.items.clear();
-        this.refreshContentCoordinates();
+        this.isDirty = true;
     }
     
     public void setMaxItemSize(double maxItemSize)
     {
         this.maxItemSize = Math.max(16,  maxItemSize);
-        this.handleCoordinateUpdate();
+        this.isDirty = true;
     }
     
     public int getItemsPerTab()
     {
+        this.refreshContentCoordinatesIfNeeded();
         return this.itemsPerTab;
     }
    
@@ -303,12 +330,14 @@ public abstract class TabBar<T> extends GuiControl
     /** index of first item on selected tab */
     public int getFirstDisplayedIndex()
     {
+        this.refreshContentCoordinatesIfNeeded();
         return this.selectedTabIndex * this.itemsPerTab;
     }
     
     /** index of first item on selected tab, EXCLUSIVE of the last item */
     public int getLastDisplayedIndex()
     {
+        this.refreshContentCoordinatesIfNeeded();
         return Useful.min((this.selectedTabIndex + 1) * this.itemsPerTab, this.items.size());
     }
     
@@ -318,6 +347,7 @@ public abstract class TabBar<T> extends GuiControl
      */
     public int getHighlightIndex()
     {
+        this.refreshContentCoordinatesIfNeeded();
         int result = this.selectedItemIndex - this.getFirstDisplayedIndex();
         return (result < 0 || result >= this.getItemsPerTab()) ? -1 : result;
     }
@@ -325,11 +355,13 @@ public abstract class TabBar<T> extends GuiControl
     /** moves the tab selection to show the currently selected item */
     public void showSelected()
     {
-        this.selectedTabIndex = this.selectedItemIndex / this.getItemsPerTab();
+        this.refreshContentCoordinatesIfNeeded();
+        if(this.getItemsPerTab() > 0) this.selectedTabIndex = this.selectedItemIndex / this.getItemsPerTab();
     }
     
     protected double actualItemSize() 
     {
+        this.refreshContentCoordinatesIfNeeded();
         return this.actualItemSize;
-    }
+    }   
 }

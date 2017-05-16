@@ -9,31 +9,27 @@ import net.minecraft.item.ItemStack;
 public class ItemPreview extends GuiControl
 {
     public ItemStack previewItem;
-
-    public ItemPreview(double left, double top, double size)
-    {
-        super(left, top, size, size);
-    }
     
-    public void resize(double left, double top, double size)
-    {
-        this.resize(left, top, size, size);
-    }
-
+    private double contentLeft;
+    private double contentTop;
+    private double contentScale;
+  
     @Override
     public void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-        double scale = this.width / 15;
         if(this.previewItem != null)
         {
-            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, this.previewItem, this.left, this.top, scale);
+            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, this.previewItem, this.contentLeft, this.contentTop, this.contentScale);
         }
     }
 
     @Override
     protected void handleCoordinateUpdate()
     {
-        // nothing special
+        double contentSize = Math.min(this.width, this.height);
+        this.contentLeft = this.left + (this.width - contentSize) / 2;
+        this.contentTop = this.top + (this.height - contentSize) / 2;
+        this.contentScale = contentSize / 15;
     }
 
     @Override

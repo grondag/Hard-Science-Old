@@ -6,10 +6,11 @@ import static grondag.adversity.gui.base.GuiControl.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import grondag.adversity.gui.base.TabBar;
+import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.gui.control.Button;
 import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
+import grondag.adversity.gui.control.Panel;
 import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
@@ -63,6 +64,8 @@ public class SuperGuiScreen extends GuiScreen
     private int buttonWidth;
     private int buttonHeight;
     
+    private Panel mainPanel;
+    
     @Override
     public boolean doesGuiPauseGame()
     {
@@ -93,8 +96,8 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        colorPicker.handleMouseClick(this.mc, mouseX, mouseY);
-        this.textureTabBar.handleMouseClick(this.mc, mouseX, mouseY);
+        colorPicker.mouseClick(this.mc, mouseX, mouseY);
+        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
     
@@ -102,8 +105,8 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        colorPicker.handleMouseDrag(this.mc, mouseX, mouseY);
-        this.textureTabBar.handleMouseDrag(this.mc, mouseX, mouseY);
+        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
+        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
     
@@ -138,27 +141,25 @@ public class SuperGuiScreen extends GuiScreen
         super.initGui();
         
         int margin = (int) (this.height * MARGIN_FACTOR);
-        this.xStart = margin;
-        this.yStart = margin;
-        this.xSize = this.width - (margin - 1) * 2;
         this.ySize = this.height - (margin - 1) * 2;
+        this.yStart = margin;
+        this.xSize = (int) (this.ySize * GuiUtil.GOLDEN_RATIO);
+        this.xStart = (this.width - this.xSize) / 2;
         
         FontRenderer fr = this.mc.fontRenderer;
         this.buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
         this.buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
         
         int buttonTop = this.yStart + this.ySize - this.buttonHeight - CONTROL_EXTERNAL_MARGIN;
+        int buttonLeft = this.xStart + this.xSize - CONTROL_EXTERNAL_MARGIN * 2 - this.buttonWidth * 2;
        
         // buttons are cleared by super each time
-        this.addButton(new Button(BUTTON_ID_ACCEPT, this.xStart + CONTROL_EXTERNAL_MARGIN, buttonTop, this.buttonWidth, this.buttonHeight, STR_ACCEPT));
-        this.addButton(new Button(BUTTON_ID_CANCEL, this.xStart + CONTROL_EXTERNAL_MARGIN * 2 + this.buttonWidth, buttonTop, this.buttonWidth, this.buttonHeight, STR_CANCEL));
+        this.addButton(new Button(BUTTON_ID_ACCEPT, buttonLeft, buttonTop, this.buttonWidth, this.buttonHeight, STR_ACCEPT));
+        this.addButton(new Button(BUTTON_ID_CANCEL, buttonLeft + CONTROL_EXTERNAL_MARGIN + this.buttonWidth, buttonTop, this.buttonWidth, this.buttonHeight, STR_CANCEL));
         
         if(this.itemPreview == null)
         {
-            this.itemPreview = new ItemPreview(this.xStart, this.yStart, 80);
-//            this.itemPreview.setBackgroundColor(CONTROL_BACKGROUND);
-//            this.itemPreview.setInnerMargin(CONTROL_INTERNAL_MARGIN);
-//            this.itemPreview.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
+            this.itemPreview = new ItemPreview();
             this.itemPreview.previewItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
             
             if (this.itemPreview.previewItem == null || !(this.itemPreview.previewItem.getItem() instanceof SuperItemBlock)) 
@@ -169,11 +170,7 @@ public class SuperGuiScreen extends GuiScreen
             this.meta = this.itemPreview.previewItem.getMetadata();
             this.modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
         }
-        else
-        {
-            this.itemPreview.resize(this.xStart, this.yStart, 80);
-        }
-        
+    
         // abort on strangeness
         if(this.modelState == null) return;
         
@@ -188,29 +185,63 @@ public class SuperGuiScreen extends GuiScreen
                 }
             }
             
-            this.textureTabBar = new TexturePicker(textures, this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 48 );
+            this.textureTabBar = new TexturePicker(textures, this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100);
+            this.textureTabBar.setHeight(48);
+            this.textureTabBar.setWidth(120);
             this.textureTabBar.setSelected(this.modelState.getTexture(0));
             this.textureTabBar.showSelected();
             this.textureTabBar.colorMap = this.modelState.getColorMap(0);
         }
-        else
-        {
-            this.textureTabBar.resize(this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100, 200, 48);
-        }
         
         if(this.colorPicker == null)
         {
-            
-            this.colorPicker = new ColorPicker(this.xStart + 80, this.yStart + 10, 40);
+            this.colorPicker = new ColorPicker();
             this.colorPicker.setColorMapID(this.modelState.getColorMap(0).ordinal);
-//            this.colorPicker.setBackgroundColor(CONTROL_BACKGROUND);
-//            this.colorPicker.setInnerMargin(CONTROL_INTERNAL_MARGIN);
-//            this.colorPicker.setOuterMargin(CONTROL_EXTERNAL_MARGIN);
+        }
+       
+        if(this.mainPanel == null)
+        {
+            this.mainPanel = (Panel) new Panel(false)
+                    .setOuterMarginWidth(0)
+                    .setInnerMarginWidth(CONTROL_EXTERNAL_MARGIN)
+                    .resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, this.xSize - CONTROL_EXTERNAL_MARGIN * 2, this.ySize - CONTROL_EXTERNAL_MARGIN * 3 - this.buttonHeight);
+
+            Panel leftPanel = (Panel) new Panel(true)
+                    .setInnerMarginWidth(CONTROL_EXTERNAL_MARGIN)
+                    .add(new Panel(true)
+                            .setOuterMarginWidth(CONTROL_EXTERNAL_MARGIN)
+                            .add(itemPreview)
+                            .setBackgroundColor(GuiControl.CONTROL_BACKGROUND)
+                            .setVerticalWeight(1))
+                    .add(new Panel(true)
+                            .setBackgroundColor(GuiControl.CONTROL_BACKGROUND)
+                            .setVerticalWeight(3))
+                    .setWidth(100)
+                    .setHorizontalLayout(Layout.FIXED)
+                    .resize(0, 0, (this.xSize - CONTROL_EXTERNAL_MARGIN) * 2.0 / 7.0, 1);
+
+            
+            Panel rightPanel = (Panel) new Panel(true)
+                    .setOuterMarginWidth(CONTROL_EXTERNAL_MARGIN)
+                    .setInnerMarginWidth(CONTROL_EXTERNAL_MARGIN)
+                    .addAll(this.colorPicker.setVerticalWeight(2).setHorizontalLayout(Layout.PROPORTIONAL),
+                            this.textureTabBar.setVerticalWeight(5))
+                    .setHorizontalWeight(5)
+                    .setBackgroundColor(GuiControl.CONTROL_BACKGROUND);
+           
+            
+            
+            this.mainPanel.addAll(leftPanel, rightPanel);
+
         }
         else
         {
-            colorPicker.resize(this.xStart + 80, this.yStart + 10, 40);
+            //TODO: really ugly how the sizing hints work
+            ((Panel)this.mainPanel.get(0)).resize( 0, 0, (this.xSize - CONTROL_EXTERNAL_MARGIN) * 2.0 / 7.0, 1);
+            this.mainPanel.resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, this.xSize - CONTROL_EXTERNAL_MARGIN * 2, this.ySize - CONTROL_EXTERNAL_MARGIN * 3 - this.buttonHeight);
         }
+        
+    
     }
 
     @Override
@@ -218,11 +249,9 @@ public class SuperGuiScreen extends GuiScreen
     {
         this.drawGradientRect(this.xStart, this.yStart, this.xStart + this.xSize, this.yStart + this.ySize, -1072689136, -804253680);
 
-        this.colorPicker.drawControl(this.mc, this.itemRender, mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, Integer.toString(BlockColorMapProvider.INSTANCE.getColorMapCount()), this.width / 2, this.yStart + 20, 16777215);
+        this.mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
         
-//        drawRect(left, top , left + this.ySize / 2, top + this.ySize / 2, 
-//                BlockColorMapProvider.INSTANCE.getColorMap(this.colorPicker.getColorMapID()).getColor(EnumColorMap.BASE));
+        this.colorPicker.drawControl(this.mc, this.itemRender, mouseX, mouseY, partialTicks);
         
         this.itemPreview.drawControl(this.mc, this.itemRender, mouseX, mouseY, partialTicks);
         
@@ -231,28 +260,6 @@ public class SuperGuiScreen extends GuiScreen
         super.drawScreen(mouseX, mouseY, partialTicks);
  
     }
-//    private static void drawLine(int x1, int y1, int x2, int y2, int color) {
-//        float f3 = (color >> 24 & 255) / 255.0F;
-//        float f = (color >> 16 & 255) / 255.0F;
-//        float f1 = (color >> 8 & 255) / 255.0F;
-//        float f2 = (color & 255) / 255.0F;
-//        Tessellator tessellator = Tessellator.getInstance();
-//        VertexBuffer buffer = tessellator.getBuffer();
-//
-//        buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
-//        GlStateManager.enableBlend();
-//        GlStateManager.disableTexture2D();
-//        GlStateManager.disableDepth();
-//        GL11.glLineWidth(2.0f);
-//        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-//        GlStateManager.color(f, f1, f2, f3);
-//        buffer.pos(x1, y1, 0.0D).endVertex();
-//        buffer.pos(x2, y2, 0.0D).endVertex();
-//        tessellator.draw();
-//        GlStateManager.enableTexture2D();
-//        GlStateManager.enableDepth();
-//        GlStateManager.disableBlend();
-//    }
 
     @Override
     public void drawBackground(int tint)

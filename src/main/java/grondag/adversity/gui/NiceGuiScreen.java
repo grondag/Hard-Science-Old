@@ -95,12 +95,12 @@ public class NiceGuiScreen extends GuiScreen
             NiceItemBlock niceItem = (NiceItemBlock)heldItem.getItem();
             this.colorMapID = niceItem.getColorMapID(heldItem);
             
-            colorPicker = new ColorPicker(this.xStart + 10, this.yStart + 10, this.ySize - 20);
+            colorPicker = new ColorPicker();
             colorPicker.setColorMapID(this.colorMapID);
         }
         else
         {
-            colorPicker.resize(this.xStart + 10, this.yStart + 10, this.ySize - 20);
+            colorPicker.resize(this.xStart + 10, this.yStart + 10, 20, 60);
         }
         
 

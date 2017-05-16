@@ -29,7 +29,8 @@ public class ColorPicker extends GuiControl
 
     private double gridLeft;
     private double gridTop;
-    private double gridIncrement;
+    private double gridIncrementX;
+    private double gridIncrementY;
 
     public Hue getHue() { return selectedHue; }
     public void setHue(Hue h) { selectedHue = h; }
@@ -41,20 +42,14 @@ public class ColorPicker extends GuiControl
         this.selectedChroma = BlockColorMapProvider.INSTANCE.getColorMap(colorMapID).chroma;
     }
 
-    public ColorPicker(double left, double top, double diameter)
+    public ColorPicker()
     {
-        super(left, top, diameter, diameter);
-    }
-
-    public void resize(double left, double top, double diameter)
-    {
-        super.resize(left, top, diameter, diameter);
+        this.setAspectRatio(height(1.0));
     }
 
     @Override
-    public void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-
         for(int h = 0; h < Hue.values().length; h++)
         {
             double radius = (h == this.selectedHue.ordinal()) ? radiusOuter : radiusInner;
@@ -82,11 +77,11 @@ public class ColorPicker extends GuiControl
         double bottom;
         for(Luminance l : Luminance.values())
         {
-            bottom = top + this.gridIncrement;
+            bottom = top + this.gridIncrementY;
             left = this.gridLeft;
             for(Chroma c : Chroma.values())
             {
-                right = left + this.gridIncrement;
+                right = left + this.gridIncrementX;
                 ColorMap colormap = BlockColorMapProvider.INSTANCE.getColorMap(selectedHue, c, l);
                 if(colormap != null)
                 {
@@ -99,24 +94,18 @@ public class ColorPicker extends GuiControl
 
         ColorMap selectedColormap = BlockColorMapProvider.INSTANCE.getColorMap(this.colorMapID);
 
-        double sLeft = this.gridLeft + selectedColormap.chroma.ordinal() * this.gridIncrement;
-        double sTop = this.gridTop + selectedColormap.luminance.ordinal() * this.gridIncrement;
+        double sLeft = this.gridLeft + selectedColormap.chroma.ordinal() * this.gridIncrementX;
+        double sTop = this.gridTop + selectedColormap.luminance.ordinal() * this.gridIncrementY;
 
-        GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrement + 1, sTop + this.gridIncrement + 1, 0xFFFFFFFF);
-        GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrement + 0.5, sTop + this.gridIncrement + 0.5, selectedColormap.getColor(EnumColorMap.BASE));
-
-        //      for(int j = 0; j < Hue.values().length; j++)
-        //      {
-        //          int color = BlockColorMapProvider.INSTANCE.getColorMap(j * BlockColorMapProvider.INSTANCE.COLORS_PER_HUE + i).getColor(EnumColorMap.BASE);
-        //          float x = colorWidth * i + left;
-        //          float y = colorHeight * j + top;
-        //          drawRect(x, y, x + colorWidth, y + colorHeight, color);
-        //      }
+        GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrementX + 1, sTop + this.gridIncrementY + 1, 0xFFFFFFFF);
+        GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrementX + 0.5, sTop + this.gridIncrementY + 0.5, selectedColormap.getColor(EnumColorMap.BASE));
     }
 
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
     {
+        this.refreshContentCoordinatesIfNeeded();
+        
         double distance = Math.sqrt((Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)));
 
         if(distance < this.radiusOuter + 2)
@@ -151,8 +140,8 @@ public class ColorPicker extends GuiControl
         }
         else if(mouseX >= this.gridLeft)
         {
-            int l = (int) Math.floor((mouseY - this.gridTop) / this.gridIncrement);
-            int c = (int) Math.floor((mouseX - this.gridLeft) / this.gridIncrement);
+            int l = (int) Math.floor((mouseY - this.gridTop) / this.gridIncrementY);
+            int c = (int) Math.floor((mouseX - this.gridLeft) / this.gridIncrementX);
 
             if(l >= 0 && l <  HueSet.Luminance.values().length 
                     && c >= 0 && c < HueSet.Chroma.values().length )
@@ -172,7 +161,7 @@ public class ColorPicker extends GuiControl
     }
     
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
     {
         this.handleMouseClick(mc, mouseX, mouseY);
     }
@@ -180,18 +169,41 @@ public class ColorPicker extends GuiControl
     @Override
     protected void handleCoordinateUpdate()
     {
-        radiusOuter = this.height / 2.0;
-        centerX = this.left + radiusOuter;
-        centerY = this.top + radiusOuter;
-        radiusInner = radiusOuter * 0.85;
+        this.radiusOuter = outerRadius(this.height);
+        this.centerX = this.left + this.radiusOuter;
+        this.centerY = this.top + this.radiusOuter;
+        this.radiusInner = innerRadius(height);
 
-        this.gridIncrement = radiusInner * 2 / Luminance.values().length;
-
-        this.gridLeft = this.left + this.height + CONTROL_INTERNAL_MARGIN;
+        this.gridIncrementX = (this.width - this.height) / (Chroma.values().length + 1);
+        this.gridIncrementY = this.radiusInner * 2 / Luminance.values().length;
+        this.gridLeft = this.left + this.height + this.gridIncrementX;
         this.gridTop = this.centerY - radiusInner;
-        
-        this.width = this.height + CONTROL_INTERNAL_MARGIN + this.gridIncrement * Chroma.values().length;
-        this.right = this.left + this.width;
     }
-
+    
+    private static double outerRadius(double height) { return height / 2.0; }
+    private static double innerRadius(double height) { return outerRadius(height) * 0.85; }
+//    private static double gridIncrement(double height) { return innerRadius(height) * 2 / Luminance.values().length; }
+//    private static double width(double height) { return height + gridIncrement(height) * (Chroma.values().length + 1); }
+    
+    private static double height(double width)
+    {
+         /**
+          * w = h  + gi(h) * (cvl + 1)
+          * h + gi(h) * (cvl + 1) = w
+          * h + innerRadius(h) * 2 / lvl * (cvl + 1) = w
+          * h + outerRadius(h) * 0.85 * 2 / lvl * (cvl + 1) = w
+          * h + h / 2 * 0.85 * 2 / lvl * (cvl + 1) = w
+          * h + h (0.85  / lvl * (cvl + 1)) = w
+          * h * (1 + 0.85  / lvl * (cvl + 1)) = w
+          * h = w / (1 + 0.85  / lvl * (cvl + 1))
+          */
+        return width / (1.0 + 0.85 / Luminance.values().length * (Chroma.values().length + 1));
+    }
+    
+    @Override 
+    public GuiControl setWidth(double width)
+    {
+        // width is always derived from height, so have to work backwards to correct height value
+        return this.setHeight(height(width));
+    }
 }

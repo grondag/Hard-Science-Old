@@ -16,6 +16,7 @@ import net.minecraft.item.ItemStack;
 public class GuiUtil
 {
 
+    public static final double GOLDEN_RATIO = 1.618033988;
     /** 
      * Same as vanilla routine but accepts double values
      */
@@ -89,6 +90,29 @@ public class GuiUtil
         
         drawRect(x - halfWidth, startY - halfWidth, x + halfWidth, endY + halfWidth, color);
     }
+    
+//  private static void drawLine(int x1, int y1, int x2, int y2, int color) {
+//  float f3 = (color >> 24 & 255) / 255.0F;
+//  float f = (color >> 16 & 255) / 255.0F;
+//  float f1 = (color >> 8 & 255) / 255.0F;
+//  float f2 = (color & 255) / 255.0F;
+//  Tessellator tessellator = Tessellator.getInstance();
+//  VertexBuffer buffer = tessellator.getBuffer();
+//
+//  buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+//  GlStateManager.enableBlend();
+//  GlStateManager.disableTexture2D();
+//  GlStateManager.disableDepth();
+//  GL11.glLineWidth(2.0f);
+//  GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+//  GlStateManager.color(f, f1, f2, f3);
+//  buffer.pos(x1, y1, 0.0D).endVertex();
+//  buffer.pos(x2, y2, 0.0D).endVertex();
+//  tessellator.draw();
+//  GlStateManager.enableTexture2D();
+//  GlStateManager.enableDepth();
+//  GlStateManager.disableBlend();
+//}
     
     public static void drawBox(double left, double top, double right, double bottom, double lineWidth, int color)
     {

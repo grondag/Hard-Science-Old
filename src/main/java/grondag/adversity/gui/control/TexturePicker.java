@@ -15,9 +15,9 @@ public class TexturePicker extends TabBar<TexturePallette>
 
     public ColorMap colorMap;
     
-    public TexturePicker(List<TexturePallette> items, double left, double top, double width, double height)
+    public TexturePicker(List<TexturePallette> items, double left, double top)
     {
-        super(items, left, top, width, height);
+        super(items);
     }
 
     @Override

@@ -1,35 +1,12 @@
 package grondag.adversity.gui.base;
 
+import grondag.adversity.gui.Layout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.RenderItem;
 
 public abstract class GuiControl extends Gui
-{    
-    protected double top;
-    protected double left;
-    protected double height;
-    protected double width;
-    protected double bottom;
-    protected double right;
-    
-//    protected double outerMargin;
-//    protected double innerMargin;
-    
-//    protected double contentTop;
-//    protected double contentLeft;
-//    protected double contentHeight;
-//    protected double contentWidth;
-//    protected double contentBottom;
-//    protected double contentRight;
-    
-//    protected double backgroundTop;
-//    protected double backgroundLeft;
-//    protected double backgroundBottom;
-//    protected double backgroundRight;
-
-//    private int backgroundColor;
-    
+{      
     public static final int BUTTON_COLOR_DEFAULT = 0x9AFFFFFF;
     public static final int DISABLED_COLOR_DEFAULT = 0x4AFFFFFF;
     public static final int FOCUS_COLOR_DEFAULT = 0xFFFFFFFF;
@@ -39,25 +16,43 @@ public abstract class GuiControl extends Gui
     public static final int CONTROL_EXTERNAL_MARGIN = 5;    
     public static final int CONTROL_BACKGROUND = 0x9AFFFFFF;
     
-    protected GuiControl() {};
+    protected double top;
+    protected double left;
+    protected double height;
+    protected double width;
+    protected double bottom;
+    protected double right;
     
-    protected GuiControl(double left, double top, double width, double height)
-    {
-        this.resize(left, top, width, height);
-    }
+    protected int horizontalWeight = 1;
+    protected int verticalWeight = 1;
     
-    public void resize(double left, double top, double width, double height)
+    protected Layout horizontalLayout = Layout.WEIGHTED;
+    protected Layout verticalLayout = Layout.WEIGHTED;
+    
+    protected int backgroundColor = 0;
+    
+    protected boolean isDirty = false;
+    
+    /** 
+     * If a control has consistent shape, is height / width. 
+     * Multiply width by this number to get height. 
+     * Divide height by this number to get width.
+     */
+    protected double aspectRatio = 1.0;
+    
+    public GuiControl resize(double left, double top, double width, double height)
     {
-        this.top = top;
         this.left = left;
-        this.height = height;
+        this.top = top;
         this.width = width;
-        this.refreshContentCoordinates();
+        this.height = height;
+        this.isDirty = true;
+        return this;
     }
     
     public void drawControl(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-//        this.drawBackground(partialTicks);
+        this.refreshContentCoordinatesIfNeeded();
         this.drawContent(mc, itemRender, mouseX, mouseY, partialTicks);
     }
     
@@ -65,32 +60,32 @@ public abstract class GuiControl extends Gui
     
     /** called after any coordinate-related input changes */
     protected abstract void handleCoordinateUpdate();
-//    
-//    protected void drawBackground(float partialTicks)
-//    {
-//        GuiUtil.drawRect(backgroundLeft(), backgroundTop(), backgroundRight(), backgroundBottom(), getBackgroundColor());
-//    }
     
-    public abstract void handleMouseClick(Minecraft mc, int mouseX, int mouseY);
+    protected abstract void handleMouseClick(Minecraft mc, int mouseX, int mouseY);
     
-    public abstract void handleMouseDrag(Minecraft mc, int mouseX, int mouseY);
+    protected abstract void handleMouseDrag(Minecraft mc, int mouseX, int mouseY);
     
-    protected void refreshContentCoordinates()
+    public void mouseClick(Minecraft mc, int mouseX, int mouseY)
     {
-//        double totalMargin = this.innerMargin + this.outerMargin;
-//        this.contentTop = this.top + totalMargin;
-//        this.contentLeft = this.left + totalMargin;
-//        this.contentHeight = this.height - totalMargin - totalMargin;
-//        this.contentWidth = this.width - totalMargin - totalMargin;
-        this.bottom = this.top + this.height;
-        this.right = this.left + this.width;
-        
-//        this.backgroundTop = this.top + this.outerMargin;
-//        this.backgroundLeft = this.left + this.outerMargin;
-//        this.backgroundBottom = this.top + this.height - this.outerMargin;
-//        this.backgroundRight = this.left + this.width - this.outerMargin;
-        
-        this.handleCoordinateUpdate();
+        this.refreshContentCoordinatesIfNeeded();
+        this.handleMouseClick(mc, mouseX, mouseY);
+    }
+    
+    public void mouseDrag(Minecraft mc, int mouseX, int mouseY)
+    {
+        this.refreshContentCoordinatesIfNeeded();
+        this.handleMouseDrag(mc, mouseX, mouseY);
+    }
+    
+    protected void refreshContentCoordinatesIfNeeded()
+    {
+        if(this.isDirty)
+        {
+            this.bottom = this.top + this.height;
+            this.right = this.left + this.width;
+            this.handleCoordinateUpdate();
+            this.isDirty = false;
+        }
     }
 
     public double getTop()
@@ -98,10 +93,17 @@ public abstract class GuiControl extends Gui
         return top;
     }
 
-    public void setTop(double top)
+    public GuiControl setTop(double top)
     {
         this.top = top;
-        this.refreshContentCoordinates();
+        this.isDirty = true;
+        return this;
+    }
+    
+    public double getBottom()
+    {
+        this.refreshContentCoordinatesIfNeeded();
+        return this.bottom;
     }
 
     public double getLeft()
@@ -109,21 +111,29 @@ public abstract class GuiControl extends Gui
         return left;
     }
 
-    public void setLeft(double left)
+    public GuiControl setLeft(double left)
     {
         this.left = left;
-        this.refreshContentCoordinates();
+        this.isDirty = true;
+        return this;
     }
 
+    public double getRight()
+    {
+        this.refreshContentCoordinatesIfNeeded();
+        return this.right;
+    }
+    
     public double getHeight()
     {
         return height;
     }
 
-    public void setHeight(double height)
+    public GuiControl setHeight(double height)
     {
         this.height = height;
-        this.refreshContentCoordinates();
+        this.isDirty = true;
+        return this;
     }
 
     public double getWidth()
@@ -131,91 +141,76 @@ public abstract class GuiControl extends Gui
         return width;
     }
 
-    public void setWidth(double width)
+    public GuiControl setWidth(double width)
     {
         this.width = width;
-        this.refreshContentCoordinates();
+        this.isDirty = true;
+        return this;
+    }
+   
+    public int getBackgroundColor()
+    {
+        return backgroundColor;
     }
 
-//    public double getOuterMargin()
-//    {
-//        return outerMargin;
-//    }
-//
-//    public void setOuterMargin(double outerMargin)
-//    {
-//        this.outerMargin = outerMargin;
-//        this.refreshContentCoordinates();
-//    }
-//
-//    public double getInnerMargin()
-//    {
-//        return innerMargin;
-//    }
-//
-//    public void setInnerMargin(double innerMargin)
-//    {
-//        this.innerMargin = innerMargin;
-//        this.refreshContentCoordinates();
-//    }
-//
-//    public double contentTop()
-//    {
-//        return contentTop;
-//    }
-//
-//    public double contentLeft()
-//    {
-//        return contentLeft;
-//    }
-//
-//    public double contentHeight()
-//    {
-//        return contentHeight;
-//    }
-//
-//    public double contentWidth()
-//    {
-//        return contentWidth;
-//    }
-//
-//    public double contentBottom()
-//    {
-//        return contentBottom;
-//    }
-//
-//    public double contentRight()
-//    {
-//        return contentRight;
-//    }
-//
-//    public double backgroundTop()
-//    {
-//        return backgroundTop;
-//    }
-//
-//    public double backgroundLeft()
-//    {
-//        return backgroundLeft;
-//    }
-//
-//    public double backgroundBottom()
-//    {
-//        return backgroundBottom;
-//    }
-//
-//    public double backgroundRight()
-//    {
-//        return backgroundRight;
-//    }
-//
-//    public int getBackgroundColor()
-//    {
-//        return backgroundColor;
-//    }
-//
-//    public void setBackgroundColor(int backgroundColor)
-//    {
-//        this.backgroundColor = backgroundColor;
-//    }
+    public GuiControl setBackgroundColor(int backgroundColor)
+    {
+        this.backgroundColor = backgroundColor;
+        return this;
+    }
+
+    public double getAspectRatio()
+    {
+        return aspectRatio;
+    }
+
+    public GuiControl setAspectRatio(double aspectRatio)
+    {
+        this.aspectRatio = aspectRatio;
+        return this;
+    }
+
+    public int getHorizontalWeight()
+    {
+        return horizontalWeight;
+    }
+
+    public GuiControl setHorizontalWeight(int horizontalWeight)
+    {
+        this.horizontalWeight = horizontalWeight;
+        return this;
+    }
+
+    public int getVerticalWeight()
+    {
+        return verticalWeight;
+    }
+
+    public GuiControl setVerticalWeight(int verticalWeight)
+    {
+        this.verticalWeight = verticalWeight;
+        return this;
+    }
+
+    public Layout getHorizontalLayout()
+    {
+        return horizontalLayout;
+    }
+
+    public GuiControl setHorizontalLayout(Layout horizontalLayout)
+    {
+        this.horizontalLayout = horizontalLayout;
+        return this;
+    }
+
+    public Layout getVerticalLayout()
+    {
+        return verticalLayout;
+    }
+
+    public GuiControl setVerticalLayout(Layout verticalLayout)
+    {
+        this.verticalLayout = verticalLayout;
+        return this;
+    }
 }
