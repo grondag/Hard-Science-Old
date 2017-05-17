@@ -1,5 +1,6 @@
 package grondag.adversity.gui;
 
+import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
@@ -149,10 +150,21 @@ public class GuiUtil
      */
     public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color)
     {
+        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE);
+    }
+    
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale)
+    {
         float alpha = (float)(color >> 24 & 255) / 255.0F;
         float red = (float)(color >> 16 & 255) / 255.0F;
         float green = (float)(color >> 8 & 255) / 255.0F;
         float blue = (float)(color & 255) / 255.0F;
+        
+        
+        double maxU = textureSprite.getMinU() + (textureSprite.getMaxU() - textureSprite.getMinU())  / scale.sliceCount;
+        
+     
+        double maxV = textureSprite.getMinV() + (textureSprite.getMaxV() - textureSprite.getMinV())  / scale.sliceCount;
         
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -163,13 +175,13 @@ public class GuiUtil
 
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
         vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + heightIn), zLevel)
-            .tex((double)textureSprite.getMinU(), (double)textureSprite.getMaxV())
+            .tex((double)textureSprite.getMinU(), maxV)
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + heightIn), zLevel)
-            .tex((double)textureSprite.getMaxU(), (double)textureSprite.getMaxV())
+            .tex(maxU, maxV)
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + 0), zLevel)
-            .tex((double)textureSprite.getMaxU(), (double)textureSprite.getMinV())
+            .tex(maxU, (double)textureSprite.getMinV())
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + 0), zLevel)
             .tex((double)textureSprite.getMinU(), (double)textureSprite.getMinV())

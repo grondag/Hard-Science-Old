@@ -14,10 +14,12 @@ public enum TextureScale
     SINGLE(16);
     
     public final int sliceIncrement;
+    public final int sliceCount;
     
     private TextureScale(int sliceIncrement)
     {
         this.sliceIncrement = sliceIncrement;
+        this.sliceCount = 16 / sliceIncrement;
     }
 
 }

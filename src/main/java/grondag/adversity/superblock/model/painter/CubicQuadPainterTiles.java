@@ -2,21 +2,16 @@ package grondag.adversity.superblock.model.painter;
 
 import java.util.List;
 
-import grondag.adversity.library.Rotation;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 public class CubicQuadPainterTiles extends CubicQuadPainter
 {
-    private final Rotation rotation;
-    private final int blockVersion;
-    
     protected CubicQuadPainterTiles(ModelState modelState, int painterIndex)
     {
         super(modelState, painterIndex);
-        this.rotation = modelState.getRotation();
-        this.blockVersion = modelState.getBlockVersion();
     }
 
     @Override
@@ -24,7 +19,7 @@ public class CubicQuadPainterTiles extends CubicQuadPainter
     {
         RawQuad result = inputQuad.clone();
         
-        result.recolor(this.colorMap.getColor(EnumColorMap.BASE));
+        result.recolor(this.colorMap.getColor(this.lightingMode == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP : EnumColorMap.BASE));
         if(this.isRotationEnabled)
         {
             result.rotation = this.rotation;

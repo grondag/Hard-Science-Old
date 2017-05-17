@@ -55,9 +55,18 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     public class TexturePallette
     {
         public final String textureBaseName;
+        
+        /** number of texture versions must be a power of 2 */
         public final int textureVersionCount;
+        
         public final TextureScale textureScale;
         public final TextureLayout textureLayout;
+        
+        /**
+         * Masks the version number provided by consumers - alternators that
+         * drive number generation may support larger number of values. 
+         * Implies number of texture versions must be a power of 2 
+         */
         private final int textureVersionMask;
         
         /** Used to limit user selection, is not enforced. */
@@ -75,6 +84,9 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
          */
         public final int renderLayerFlags;
         
+        /**
+         * Globally unique id
+         */
         public final int ordinal;
 
         private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
@@ -101,7 +113,6 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
                 layerFlags |= 1 << layer.ordinal();
             }
             this.renderLayerFlags = layerFlags;
-            
         }
         
         /**

@@ -3,7 +3,6 @@ package grondag.adversity.gui.base;
 import java.util.Collection;
 import java.util.List;
 
-import grondag.adversity.Output;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.library.Useful;
 import net.minecraft.client.Minecraft;

@@ -16,6 +16,7 @@ import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.superblock.block.SuperItemBlock;
+import grondag.adversity.superblock.model.painter.SurfacePainter;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureLayout;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
@@ -87,7 +88,10 @@ public class SuperGuiScreen extends GuiScreen
         
         if(this.modelState.getTexture(0) != this.textureTabBar.getSelected())
         {
-            this.modelState.setTexture(0, this.textureTabBar.getSelected());
+            TexturePallette tex = this.textureTabBar.getSelected();
+            //TODO: ugly, need a lookup function from texture to painter
+            this.modelState.setSurfacePainter(0, tex.textureLayout == TextureLayout.BIGTEX ? SurfacePainter.CUBIC_BIGTEX :SurfacePainter.CUBIC_TILES);
+            this.modelState.setTexture(0, tex);
             SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
             this.hasUpdates = true;
         }

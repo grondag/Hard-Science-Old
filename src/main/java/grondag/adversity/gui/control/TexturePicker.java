@@ -25,6 +25,6 @@ public class TexturePicker extends TabBar<TexturePallette>
     {
         int color = this.colorMap == null ? 0xFFFFFFFF : this.colorMap.getColor(EnumColorMap.BASE);
       
-        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, item.getPreviewSprite(), (int)this.actualItemSize(), (int)this.actualItemSize(), color);
+        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, item.getPreviewSprite(), (int)this.actualItemSize(), (int)this.actualItemSize(), color, item.textureScale);
     }
 }

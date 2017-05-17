@@ -67,11 +67,11 @@ public class ModelStateFactory
     static final BitPacker PACKER_2 = new BitPacker();
     @SuppressWarnings("unchecked")
     private static final EnumElement<BlockRenderLayer>[] P2_PAINT_LAYER = new EnumElement[MAX_PAINTERS];
-    private static final IntElement P2_POS_X = PACKER_2.createIntElement(16);
-    private static final IntElement P2_POS_Y = PACKER_2.createIntElement(16);
-    private static final IntElement P2_POS_Z = PACKER_2.createIntElement(16);
+    private static final IntElement P2_POS_X = PACKER_2.createIntElement(32);
+    private static final IntElement P2_POS_Y = PACKER_2.createIntElement(32);
+    private static final IntElement P2_POS_Z = PACKER_2.createIntElement(32);
     /** value semantics are owned by consumer - only constraints are size and does not update from world */
-    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 44);
+    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 41);
 
     static final BitPacker PACKER_3_BLOCK = new BitPacker();
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
@@ -292,9 +292,9 @@ public class ModelStateFactory
             if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS)
             {
                 long b2 = bits2;
-                b2 = P2_POS_X.setValue((pos.getX() & 15), b2);
-                b2 = P2_POS_Y.setValue((pos.getY() & 15), b2);
-                b2 = P2_POS_Z.setValue((pos.getZ() & 15), b2);
+                b2 = P2_POS_X.setValue((pos.getX() & 31), b2);
+                b2 = P2_POS_Y.setValue((pos.getY() & 31), b2);
+                b2 = P2_POS_Z.setValue((pos.getZ() & 31), b2);
                 bits2 = b2;
             }
             
