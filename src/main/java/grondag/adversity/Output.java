@@ -15,6 +15,7 @@ public class Output
         if(log == null) log = LogManager.getLogger();
         return log;
     }
+    
     public static void setLog(Logger lOG)
     {
         log = lOG;

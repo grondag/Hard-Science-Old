@@ -44,8 +44,10 @@ public class BigTexModelFactory extends ModelFactory
 
 		TextureScale scale = texState.textureScale();
 		
-        int i = ((faceIndex >> 4) * scale.sliceIncrement) & 15;
-        int j = (faceIndex * scale.sliceIncrement) & 15;
+//        int i = ((faceIndex >> 4) * scale.sliceIncrement) & 15;
+//        int j = (faceIndex * scale.sliceIncrement) & 15;
+        int i = ((faceIndex >> 4)) & 15;
+        int j = (faceIndex) & 15;
         
         //top 4 bits of faceIndex are meta
         // lower meta bits are uv flip and upper bits are rotation

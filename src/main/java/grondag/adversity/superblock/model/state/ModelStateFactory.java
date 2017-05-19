@@ -25,6 +25,7 @@ import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -36,8 +37,11 @@ public class ModelStateFactory
     public static final int MAX_PAINTERS = 4;
     public static final int MAX_SURFACES = 4;
     
-    private static final IAlternator ROTATION_ALTERNATOR = Alternator.getAlternator(4, 45927934);
-    private static final IAlternator BLOCK_ALTERNATOR = Alternator.getAlternator(8, 2953424);
+    private static final IAlternator[] ROTATION_ALTERNATOR = new IAlternator[TextureScale.values().length];
+            
+           // Alternator.getAlternator(4, 45927934);
+    private static final IAlternator[] BLOCK_ALTERNATOR = new IAlternator[TextureScale.values().length]; //Alternator.getAlternator(8, 2953424);
+
   
     public static enum StateFormat
     {
@@ -75,9 +79,25 @@ public class ModelStateFactory
 
     static final BitPacker PACKER_3_BLOCK = new BitPacker();
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
-    private static final IntElement P3B_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
-    private static final EnumElement<Rotation> P3B_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
     private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
+    
+    // these provide random alternate for texture version and rotation for single blocks or cubic groups of blocks 
+    private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
+    @SuppressWarnings("unchecked")
+    private static final EnumElement<Rotation> P3B_BLOCK_ROTATION[] = new EnumElement[TextureScale.values().length];
+    
+
+//    private static final IntElement P3B_2x2_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
+//    private static final EnumElement<Rotation> P3B_2x2_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+//    private static final IntElement P3B_4x4_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
+//    private static final EnumElement<Rotation> P3B_4x4_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+//    private static final IntElement P3B_8x8_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
+//    private static final EnumElement<Rotation> P3B_8x8_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+//    private static final IntElement P3B_16x16_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
+//    private static final EnumElement<Rotation> P3B_16x16_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+//    private static final IntElement P3B_32x32_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
+//    private static final EnumElement<Rotation> P3B_32x32_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+
     
     static final BitPacker PACKER_3_FLOW = new BitPacker();
     private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
@@ -98,6 +118,16 @@ public class ModelStateFactory
             P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
 
             P2_PAINT_LAYER[i] = PACKER_2.createEnumElement(BlockRenderLayer.class); // 2 bits each x4 = 8
+        }
+        
+        // TODO: for texture alternators, do we need to support a larger number of alternates for zoomed uniforms?
+        // Will have 16 if we a zoom a texture with 4 alternates
+        for(TextureScale scale : TextureScale.values())
+        {
+            ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
+            BLOCK_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(8, 2953424, scale.power);
+            P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
+            P3B_BLOCK_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
         }
     }
     
@@ -140,7 +170,12 @@ public class ModelStateFactory
         /** 
          * True if block version and rotation are needed. Applies for block formats.
          */
-        public static final int STATE_FLAG_NEEDS_BLOCK_RANDOMS= STATE_FLAG_NEEDS_POS << 1;
+        public static final int STATE_FLAG_NEEDS_BLOCK_RANDOMS = STATE_FLAG_NEEDS_POS << 1;
+        public static final int STATE_FLAG_NEEDS_2x2_BLOCK_RANDOMS = STATE_FLAG_NEEDS_BLOCK_RANDOMS << 1;
+        public static final int STATE_FLAG_NEEDS_4x4_BLOCK_RANDOMS = STATE_FLAG_NEEDS_2x2_BLOCK_RANDOMS << 1;
+        public static final int STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS = STATE_FLAG_NEEDS_4x4_BLOCK_RANDOMS << 1;
+        public static final int STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS = STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS << 1;
+        public static final int STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS = STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS << 1;
         
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
@@ -156,7 +191,8 @@ public class ModelStateFactory
         private int hashCode = -1;
         
         /** contains indicators derived from shape and painters */
-        private byte stateFlags;
+        private int stateFlags;
+        
         /** Bits set to indicate which layers can be rendered. Needed for fast lookup during render loop. */
         private byte renderLayerEnabledFlags;
         /** 
@@ -229,9 +265,17 @@ public class ModelStateFactory
                         
                         if(this.getLightingMode(i) == LightingMode.FULLBRIGHT) 
                             shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), shadedFlags, false);
+                        
+                        TexturePallette tex =  getTexture(i);
+                        if(tex != null)
+                        {
+                            flags |= tex.stateFlags;
+                        }
                     }
+                    
+            
                 }
-                this.stateFlags = (byte) flags;
+                this.stateFlags = flags;
                 this.renderLayerEnabledFlags = (byte) layerFlags;
                 this.renderLayerShadedFlags = (byte) shadedFlags;
             }
@@ -304,10 +348,13 @@ public class ModelStateFactory
                 
                 long b3 = bits3;
                 
-                if((STATE_FLAG_NEEDS_BLOCK_RANDOMS & stateFlags) == STATE_FLAG_NEEDS_BLOCK_RANDOMS)
+                for(TextureScale scale : TextureScale.values())
                 {
-                    b3 = P3B_BLOCK_VERSION.setValue(BLOCK_ALTERNATOR.getAlternate(pos), b3);
-                    b3 = P3B_BLOCK_ROTATION.setValue(Rotation.values()[ROTATION_ALTERNATOR.getAlternate(pos)], b3);
+                    if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
+                    {
+                        b3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(BLOCK_ALTERNATOR[scale.ordinal()].getAlternate(pos), b3);
+                        b3 = P3B_BLOCK_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
+                    }
                 }
                 
                 //TODO: simple and corner join - perhaps only check meta? Default to meta when placed that doesn't connect to 
@@ -430,6 +477,7 @@ public class ModelStateFactory
         {
             bits1 = P1_PAINT_TEXTURE[painterIndex].setValue(tex.ordinal, bits1);
             invalidateHashCode();
+            clearStateFlags();
         }
         
         public LightingMode getLightingMode(int painterIndex)
@@ -547,39 +595,39 @@ public class ModelStateFactory
         //  PACKER 3 ATTRIBUTES  (BLOCK FORMAT)
         ////////////////////////////////////////////////////
         
-        public Rotation getRotation()
+        public Rotation getRotation(TextureScale scale)
         {
             if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("getRotation on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
-            return P3B_BLOCK_ROTATION.getValue(bits3);
+            return P3B_BLOCK_ROTATION[scale.ordinal()].getValue(bits3);
         }
         
-        public void setRotation(Rotation rotation)
+        public void setRotation(Rotation rotation, TextureScale scale)
         {
             if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setRotation on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
-            bits3 = P3B_BLOCK_ROTATION.setValue(rotation, bits3);
+            bits3 = P3B_BLOCK_ROTATION[scale.ordinal()].setValue(rotation, bits3);
             invalidateHashCode();
         }
 
-        public int getBlockVersion()
+        public int getBlockVersion(TextureScale scale)
         {
             if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.getLog().warn("setBlockVersion on model state does not apply for shape");
+                Output.getLog().warn("getBlockVersion on model state does not apply for shape");
             
-            return P3B_BLOCK_VERSION.getValue(bits3);
+            return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
         }
         
-        public void setBlockVersion(int version)
+        public void setBlockVersion(int version, TextureScale scale)
         {
             if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("setBlockVersion on model state does not apply for shape");
             
-            bits3 = P3B_BLOCK_VERSION.setValue(version, bits3);
+            bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
             invalidateHashCode();
         }
 

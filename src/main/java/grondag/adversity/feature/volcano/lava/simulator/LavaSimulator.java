@@ -531,7 +531,8 @@ public class LavaSimulator extends SimulationNode
      */
     public void doOnTick()
     {
-        this.doStats();
+        //TODO: put back
+//        this.doStats();
         perfOnTick.startRun();
         
         // Enable detection of improper world access 

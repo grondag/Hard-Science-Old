@@ -20,4 +20,14 @@ public enum LightingMode
     {
         FULLBRIGHT.vertexFormat = DefaultVertexFormats.BLOCK;
     }
+    
+    public static int makeLightFlags(LightingMode[] lightingModes)
+    {
+        int lightFlags = 0;
+        for(LightingMode mode : lightingModes)
+        {
+            lightFlags |= 1 << mode.ordinal();
+        }
+        return lightFlags;
+    }
 }

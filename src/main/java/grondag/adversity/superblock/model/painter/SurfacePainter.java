@@ -12,8 +12,8 @@ import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelSt
 
 public enum SurfacePainter
 {
-NONE(STATE_FLAG_NONE, QuadPainter::makeNullQuadPainter),
-    CUBIC_TILES(STATE_FLAG_NEEDS_BLOCK_RANDOMS, CubicQuadPainterTiles::makeQuadPainter),
+    NONE(STATE_FLAG_NONE, QuadPainter::makeNullQuadPainter),
+    CUBIC_TILES(STATE_FLAG_NONE, CubicQuadPainterTiles::makeQuadPainter),
     CUBIC_BIGTEX(STATE_FLAG_NEEDS_POS, CubicQuadPainterBigTex::makeQuadPainter),
     CUBIC_BORDER(STATE_FLAG_NEEDS_CORNER_JOIN, CubicQuadPainterBorders::makeQuadPainter),
     CUBIC_MASONRY(STATE_FLAG_NEEDS_SIMPLE_JOIN, CubicQuadPainterMasonry::makeQuadPainter),

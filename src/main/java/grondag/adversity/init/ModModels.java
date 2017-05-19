@@ -7,6 +7,8 @@ import grondag.adversity.niceblock.model.texture.TextureProvider;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.superblock.block.SuperDispatcher;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -46,10 +48,7 @@ public class ModModels
     {
         ArrayList<String> textureList = new ArrayList<String>();
         
-        for (TextureProvider t : TextureProviders.ALL_TEXTURE_PROVIDERS)
-        {
-            t.addTexturesForPrestich(textureList);
-        }
+        Textures.ALL_TEXTURES.addTexturesForPrestich(textureList);
         
         for(String s : textureList)
         {

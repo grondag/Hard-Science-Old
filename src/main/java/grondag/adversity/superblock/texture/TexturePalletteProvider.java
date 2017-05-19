@@ -7,6 +7,8 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
+import grondag.adversity.superblock.model.state.ModelStateFactory;
+import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
@@ -23,6 +25,14 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
     {
         TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayers);
+        texturePallettes.add(result);
+        return result;
+    }
+    
+    public TexturePallette addZoomedPallete(TexturePallette source)
+    {
+        TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, source.textureVersionCount, source.textureScale.zoom(), source.textureLayout, source.allowRotation, 
+                    source.lightingModeFlags, source.renderLayerFlags);
         texturePallettes.add(result);
         return result;
     }
@@ -88,8 +98,20 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
          * Globally unique id
          */
         public final int ordinal;
+        
+        /**
+         * Used by modelstate to know which world state must be retrieved to drive this texture
+         * (rotation and block version)
+         */
+        public final int stateFlags;
 
         private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
+        {
+            this(ordinal, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, 
+                    LightingMode.makeLightFlags(lightingModes), RenderLayerHelper.makeRenderLayerFlags(renderLayers));
+        }
+        
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, int renderLayerFlags)
         {
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
@@ -97,22 +119,12 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             this.textureVersionMask = Math.max(0, textureVersionCount - 1);
             this.textureScale = textureScale;
             this.textureLayout = layout;
-           
             this.allowRotation = allowRotation;
-            
-            int lightFlags = 0;
-            for(LightingMode mode : lightingModes)
-            {
-                lightFlags |= 1 << mode.ordinal();
-            }
-            this.lightingModeFlags = lightFlags;
-            
-            int layerFlags = 0;
-            for(BlockRenderLayer layer : renderLayers)
-            {
-                layerFlags |= 1 << layer.ordinal();
-            }
-            this.renderLayerFlags = layerFlags;
+            this.lightingModeFlags = lightingModeFlags;
+            this.renderLayerFlags = renderLayerFlags;
+  
+            this.stateFlags = (this.allowRotation || this.textureVersionCount > 1)
+                    ? this.textureScale.modelStateFlag : ModelStateFactory.ModelState.STATE_FLAG_NONE;
         }
         
         /**
@@ -194,18 +206,6 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getDefaultParticleTexture());
         }
         
-        
-        public TextureAtlasSprite getTextureSprite()
-        {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName());
-        }
-        
-        private String buildTextureName()
-        {
-            if(textureBaseName == null) return "";
-            return buildTextureNameBigTex();
-        }
-        
         public TextureAtlasSprite getTextureSprite(int version)
         {
             return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version & this.textureVersionMask));
@@ -214,8 +214,10 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
         private String buildTextureName(int version)
         {
             if(textureBaseName == null) return "";
-            return buildTextureName_X_8(version);
             
+            return (this.textureLayout == TextureLayout.BIGTEX)
+                    ? buildTextureNameBigTex()
+                    : buildTextureName_X_8(version);
         }
         
         public TextureAtlasSprite getTextureSprite(int version, int index)

@@ -20,6 +20,7 @@ import grondag.adversity.superblock.model.painter.SurfacePainter;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureLayout;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TextureScale;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -90,7 +91,7 @@ public class SuperGuiScreen extends GuiScreen
         {
             TexturePallette tex = this.textureTabBar.getSelected();
             //TODO: ugly, need a lookup function from texture to painter
-            this.modelState.setSurfacePainter(0, tex.textureLayout == TextureLayout.BIGTEX ? SurfacePainter.CUBIC_BIGTEX :SurfacePainter.CUBIC_TILES);
+            this.modelState.setSurfacePainter(0, tex.textureScale == TextureScale.SINGLE ? SurfacePainter.CUBIC_TILES : SurfacePainter.CUBIC_BIGTEX);
             this.modelState.setTexture(0, tex);
             SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
             this.hasUpdates = true;
