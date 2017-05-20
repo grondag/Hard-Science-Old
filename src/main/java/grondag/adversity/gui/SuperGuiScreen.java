@@ -12,6 +12,7 @@ import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.Panel;
 import grondag.adversity.gui.control.TexturePicker;
+import grondag.adversity.gui.control.VisiblitySelector;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
@@ -101,8 +102,9 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        colorPicker.mouseClick(this.mc, mouseX, mouseY);
-        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
+        this.mainPanel.mouseClick(mc, mouseX, mouseY);
+//        colorPicker.mouseClick(this.mc, mouseX, mouseY);
+//        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
     
@@ -110,8 +112,9 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
-        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
+        this.mainPanel.mouseDrag(mc, mouseX, mouseY);
+//        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
+//        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
     
@@ -204,6 +207,12 @@ public class SuperGuiScreen extends GuiScreen
             this.colorPicker.setColorMapID(this.modelState.getColorMap(0).ordinal);
         }
        
+        VisiblitySelector selector = new VisiblitySelector();
+        selector.add("ColorPicker", colorPicker);
+        selector.add("ItemPreview", itemPreview);
+        selector.add("TextureTabBar", this.textureTabBar);
+        
+        
         if(this.mainPanel == null)
         {
             this.mainPanel = (Panel) new Panel(false)
@@ -219,6 +228,7 @@ public class SuperGuiScreen extends GuiScreen
                             .setBackgroundColor(GuiControl.CONTROL_BACKGROUND)
                             .setVerticalWeight(1))
                     .add(new Panel(true)
+                            .add(selector)
                             .setBackgroundColor(GuiControl.CONTROL_BACKGROUND)
                             .setVerticalWeight(3))
                     .setWidth(100)

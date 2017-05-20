@@ -33,6 +33,8 @@ public abstract class GuiControl extends Gui
     
     protected boolean isDirty = false;
     
+    protected boolean isVisible = true;
+    
     /** 
      * If a control has consistent shape, is height / width. 
      * Multiply width by this number to get height. 
@@ -53,7 +55,7 @@ public abstract class GuiControl extends Gui
     public void drawControl(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
         this.refreshContentCoordinatesIfNeeded();
-        this.drawContent(mc, itemRender, mouseX, mouseY, partialTicks);
+        if(this.isVisible) this.drawContent(mc, itemRender, mouseX, mouseY, partialTicks);
     }
     
     protected abstract void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks);
@@ -67,14 +69,20 @@ public abstract class GuiControl extends Gui
     
     public void mouseClick(Minecraft mc, int mouseX, int mouseY)
     {
-        this.refreshContentCoordinatesIfNeeded();
-        this.handleMouseClick(mc, mouseX, mouseY);
+        if(this.isVisible)
+        {
+            this.refreshContentCoordinatesIfNeeded();
+            this.handleMouseClick(mc, mouseX, mouseY);
+        }
     }
     
     public void mouseDrag(Minecraft mc, int mouseX, int mouseY)
     {
-        this.refreshContentCoordinatesIfNeeded();
-        this.handleMouseDrag(mc, mouseX, mouseY);
+        if(this.isVisible)
+        {
+            this.refreshContentCoordinatesIfNeeded();
+            this.handleMouseDrag(mc, mouseX, mouseY);
+        }
     }
     
     protected void refreshContentCoordinatesIfNeeded()
@@ -83,6 +91,7 @@ public abstract class GuiControl extends Gui
         {
             this.bottom = this.top + this.height;
             this.right = this.left + this.width;
+            
             this.handleCoordinateUpdate();
             this.isDirty = false;
         }
@@ -212,5 +221,15 @@ public abstract class GuiControl extends Gui
     {
         this.verticalLayout = verticalLayout;
         return this;
+    }
+
+    public boolean isVisible()
+    {
+        return isVisible;
+    }
+
+    public void setVisible(boolean isVisible)
+    {
+        this.isVisible = isVisible;
     }
 }

@@ -188,15 +188,21 @@ public class Panel extends GuiControl
     @Override
     public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
     {
-        // TODO Auto-generated method stub
-        
+        this.refreshContentCoordinatesIfNeeded();
+        for(GuiControl child : this.children)
+        {
+            child.mouseClick(mc, mouseX, mouseY);
+        }
     }
 
     @Override
     public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
     {
-        // TODO Auto-generated method stub
-        
+        this.refreshContentCoordinatesIfNeeded();
+        for(GuiControl child : this.children)
+        {
+            child.mouseDrag(mc, mouseX, mouseY);
+        }
     }
     
 //    @Override
