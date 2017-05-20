@@ -77,7 +77,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
          * drive number generation may support larger number of values. 
          * Implies number of texture versions must be a power of 2 
          */
-        private final int textureVersionMask;
+        public final int textureVersionMask;
         
         /** Used to limit user selection, is not enforced. */
         public final boolean allowRotation;
@@ -241,15 +241,5 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             }
         }
         
-        public int textureOrdinal() { return ordinal; }
-        public String textureBaseName() { return textureBaseName; }
-        public TextureScale textureScale() { return textureScale; }
-        public TextureLayout textureLayout() { return textureLayout; }
-        
-        /** 
-         * Note that texture state does NOT specify which of multiple texture version should be rendered
-         * because this is expected to be driven by world state. It only lets the model know how many are available.
-         */
-        public int textureVersionCount() { return textureVersionCount; }
     }
 }

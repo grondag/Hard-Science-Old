@@ -24,33 +24,46 @@ public class Textures
     public static final int MAX_TEXTURES = 4096;
       
     public static final TexturePallette BLOCK_COBBLE = ALL_TEXTURES.addTexturePallette("cobble", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
-    public static final TexturePallette BLOCK_RAW_FLEXSTONE = ALL_TEXTURES.addTexturePallette("raw_flexstone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
-    public static final TexturePallette BLOCK_RAW_DURASTONE = ALL_TEXTURES.addTexturePallette("raw_durastone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
-    public static final TexturePallette BLOCK_COLORED_STONE = ALL_TEXTURES.addTexturePallette("colored_stone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
-    
     public static final TexturePallette BLOCK_COBBLE_ZOOM = ALL_TEXTURES.addZoomedPallete(BLOCK_COBBLE);
+   
+    public static final TexturePallette BLOCK_RAW_FLEXSTONE = ALL_TEXTURES.addTexturePallette("raw_flexstone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
+    public static final TexturePallette BLOCK_RAW_FLEXSTONE_ZOOM = ALL_TEXTURES.addZoomedPallete(BLOCK_RAW_FLEXSTONE);
+    
+    public static final TexturePallette BLOCK_RAW_DURASTONE = ALL_TEXTURES.addTexturePallette("raw_durastone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
+    public static final TexturePallette BLOCK_RAW_DURASTONE_ZOOM = ALL_TEXTURES.addZoomedPallete(BLOCK_RAW_DURASTONE);
+    
+    public static final TexturePallette BLOCK_COLORED_STONE = ALL_TEXTURES.addTexturePallette("colored_stone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, SOLID_ONLY);
+    public static final TexturePallette BLOCK_COLORED_STONE_ZOOM = ALL_TEXTURES.addZoomedPallete(BLOCK_COLORED_STONE);
     
     public static final TexturePallette BIGTEX_WEATHERED_STONE = ALL_TEXTURES.addTexturePallette("weathered_smooth_stone", 1, TextureScale.LARGE, TextureLayout.BIGTEX, false, LIGHTING_SHADED_ONLY, SOLID_ONLY);
-    public static final TexturePallette BIGTEX_LAVA = ALL_TEXTURES.addTexturePallette("lava", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_WEATHERED_STONE_ZOOM = ALL_TEXTURES.addZoomedPallete(BIGTEX_WEATHERED_STONE);
+    
+    public static final TexturePallette BIGTEX_BASALT_CUT = ALL_TEXTURES.addTexturePallette("basalt_cut", 1, TextureScale.LARGE, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_BASALT_CUT_ZOOM = ALL_TEXTURES.addZoomedPallete(BIGTEX_BASALT_CUT);
+
     public static final TexturePallette BIGTEX_BASALT_COOL = ALL_TEXTURES.addTexturePallette("basalt_cool", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM = ALL_TEXTURES.addZoomedPallete(BIGTEX_BASALT_COOL);
+    public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM_X2 = ALL_TEXTURES.addZoomedPallete(BIGTEX_BASALT_COOL_ZOOM);
+
+    
+    public static final TexturePallette BIGTEX_LAVA = ALL_TEXTURES.addTexturePallette("lava", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
     public static final TexturePallette BIGTEX_BASALT_COOLING = ALL_TEXTURES.addTexturePallette("basalt_cooling", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
     public static final TexturePallette BIGTEX_BASALT_WARM = ALL_TEXTURES.addTexturePallette("basalt_warm", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
     public static final TexturePallette BIGTEX_BASALT_HOT = ALL_TEXTURES.addTexturePallette("basalt_hot", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
     public static final TexturePallette BIGTEX_BASALT_VERY_HOT = ALL_TEXTURES.addTexturePallette("basalt_very_hot", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
-    public static final TexturePallette BIGTEX_BASALT_CUT = ALL_TEXTURES.addTexturePallette("basalt_cut", 1, TextureScale.LARGE, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
     
-    public static final TexturePallette BIGTEX_WEATHERED_STONE_ZOOM = ALL_TEXTURES.addZoomedPallete(BIGTEX_WEATHERED_STONE);
     
     public static final TexturePallette BORDER_TEST = ALL_TEXTURES.addTexturePallette("bordertest", 1, TextureScale.SINGLE, TextureLayout.BORDER_13, false, LIGHTING_SHADED_ONLY, TRANS_ONLY);
 
     public static final TexturePallette MASONRY_TEST = ALL_TEXTURES.addTexturePallette("masonrytest", 1, TextureScale.SINGLE, TextureLayout.MASONRY_5, false, LIGHTING_SHADED_ONLY, CUTOUT_M_ONLY);
 
-    public static final TexturePallette BIGTEX_TEST1 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.TINY, TextureLayout.SPLIT_X_8, false, LIGHTING_BOTH, SOLID_AND_TRANS);
-    public static final TexturePallette BIGTEX_TEST2 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.SMALL, TextureLayout.SPLIT_X_8, false, LIGHTING_BOTH, SOLID_AND_TRANS);
-    public static final TexturePallette BIGTEX_TEST3 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.MEDIUM, TextureLayout.SPLIT_X_8, false, LIGHTING_BOTH, SOLID_AND_TRANS);
-    public static final TexturePallette BIGTEX_TEST4 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.LARGE, TextureLayout.SPLIT_X_8, false, LIGHTING_BOTH, SOLID_AND_TRANS);
-    public static final TexturePallette BIGTEX_TEST5 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.GIANT, TextureLayout.SPLIT_X_8, false, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_TEST1 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.TINY, TextureLayout.SPLIT_X_8, true, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_TEST2 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.SMALL, TextureLayout.SPLIT_X_8, true, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_TEST3 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.MEDIUM, TextureLayout.SPLIT_X_8, true, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_TEST4 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.LARGE, TextureLayout.SPLIT_X_8, true, LIGHTING_BOTH, SOLID_AND_TRANS);
+    public static final TexturePallette BIGTEX_TEST5 = ALL_TEXTURES.addTexturePallette("bigtex", 4, TextureScale.GIANT, TextureLayout.SPLIT_X_8, true, LIGHTING_BOTH, SOLID_AND_TRANS);
 
+    public static final TexturePallette BIGTEX_TEST_SINGLE = ALL_TEXTURES.addTexturePallette("bigtex_single", 1, TextureScale.SMALL, TextureLayout.BIGTEX, false, LIGHTING_BOTH, SOLID_AND_TRANS);
     
     
 }
