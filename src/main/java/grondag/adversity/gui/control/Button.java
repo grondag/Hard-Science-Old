@@ -7,12 +7,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 
+import static grondag.adversity.gui.GuiUtil.VerticalAlignment.*;
+import static grondag.adversity.gui.GuiUtil.HorizontalAlignment.*;
+
 public class Button extends GuiButton
 {
-    public int buttonColor = BUTTON_COLOR_DEFAULT;
-    public int disabledColor = DISABLED_COLOR_DEFAULT;
-    public int hoverColor = FOCUS_COLOR_DEFAULT;
-    public int textColor = TEXT_COLOR_DEFAULT;
+    public int buttonColor = BUTTON_COLOR_ACTIVE;
+    public int disabledColor = BUTTON_COLOR_INACTIVE;
+    public int hoverColor = BUTTON_COLOR_FOCUS;
+    public int textColor = TEXT_COLOR_ACTIVE;
 
     public Button(int buttonId, int x, int y, int width, int height, String buttonText)
     {
@@ -38,7 +41,7 @@ public class Button extends GuiButton
 
             GuiUtil.drawRect(this.xPosition, this.yPosition, this.xPosition + this.width - 1, this.yPosition + this.height - 1, color);
             FontRenderer fontrenderer = mc.fontRenderer;
-            GuiUtil.drawCenteredStringNoShadow(fontrenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, this.textColor);
+            GuiUtil.drawAlignedStringNoShadow(fontrenderer, this.displayString, this.xPosition, this.yPosition, this.width, this.height, this.textColor, CENTER, MIDDLE);
         }
     }
 }

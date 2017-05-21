@@ -70,5 +70,4 @@ public class CubeMeshFactory extends ShapeMeshGenerator
        
         return builder.build();
     }
-
 }

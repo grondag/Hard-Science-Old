@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.color.ColorMap;
+import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
@@ -17,18 +18,18 @@ public abstract class QuadPainter
     protected final ColorMap colorMap;
     protected final BlockRenderLayer renderLayer;
     protected final LightingMode lightingMode;
-    protected final boolean isRotationEnabled;
     protected final TexturePallette texture;
     public final Surface surface;
+    public final PaintLayer paintLayer;
     
-    protected QuadPainter(ModelState modelState, int painterIndex)
+    public QuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
     {
-        this.colorMap = modelState.getColorMap(painterIndex);
-        this.renderLayer = modelState.getRenderLayer(painterIndex);
-        this.lightingMode = modelState.getLightingMode(painterIndex);
-        this.isRotationEnabled = modelState.getRotationEnabled(painterIndex);
-        this.texture = modelState.getTexture(painterIndex);
-        this.surface = modelState.getSurface(painterIndex);
+        this.surface = surface;
+        this.paintLayer = paintLayer;
+        this.colorMap = modelState.getColorMap(paintLayer);
+        this.renderLayer = modelState.getRenderLayer(paintLayer);
+        this.lightingMode = modelState.getLightingMode(paintLayer);
+        this.texture = modelState.getTexture(paintLayer);
     }
     
     /** for null painter only */
@@ -37,18 +38,18 @@ public abstract class QuadPainter
         this.colorMap = null;
         this.renderLayer = null;
         this.lightingMode = null;
-        this.isRotationEnabled = false;
         this.surface = null;
+        this.paintLayer = null;
         this.texture = null;
     }
     
-    @FunctionalInterface
-    public static interface QuadPainterFactory
-    {
-        public QuadPainter makeQuadPainter(ModelState modelState, int painterIndex);
-    }
+//    @FunctionalInterface
+//    public static interface QuadPainterFactory
+//    {
+//        public QuadPainter makeQuadPainter(Surface surface, PaintLayer paintLayer, ModelState modelState);
+//    }
     
-    public static QuadPainter makeNullQuadPainter(ModelState modelState, int painterIndex)
+    public static QuadPainter makeNullQuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         return NullQuadPainter.INSTANCE;
     }

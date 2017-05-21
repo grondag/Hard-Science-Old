@@ -20,8 +20,7 @@ import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.SurfacePainter;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
@@ -34,9 +33,6 @@ import net.minecraft.world.IBlockAccess;
 
 public class ModelStateFactory
 {
-    public static final int MAX_PAINTERS = 4;
-    public static final int MAX_SURFACES = 4;
-    
     private static final IAlternator[] ROTATION_ALTERNATOR = new IAlternator[TextureScale.values().length];
             
            // Alternator.getAlternator(4, 45927934);
@@ -55,27 +51,24 @@ public class ModelStateFactory
     //package scope to allow inspection in test harness
     static final BitPacker PACKER_0 = new BitPacker();
     private static final EnumElement<ModelShape> P0_SHAPE = PACKER_0.createEnumElement(ModelShape.class);
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<SurfacePainter>[] P0_PAINTERS = new EnumElement[MAX_PAINTERS];
-    private static final IntElement[] P0_PAINT_COLOR = new IntElement[MAX_PAINTERS];
+    private static final IntElement[] P0_PAINT_COLOR = new IntElement[PaintLayer.DYNAMIC_SIZE];
     private static final BooleanElement P0_AXIS_INVERTED = PACKER_0.createBooleanElement();
     private static final EnumElement<EnumFacing.Axis> P0_AXIS = PACKER_0.createEnumElement(EnumFacing.Axis.class);
+    @SuppressWarnings("unchecked")
+    private static final EnumElement<BlockRenderLayer>[] P0_PAINT_LAYER = new EnumElement[PaintLayer.DYNAMIC_SIZE];
+    private static final BooleanElement[] P0_PAINT_LAYER_ENABLED = new BooleanElement[PaintLayer.DYNAMIC_SIZE];
     
     static final BitPacker PACKER_1 = new BitPacker();
-    private static final IntElement[] P1_SURFACE_INDEX = new IntElement[MAX_PAINTERS];
-    private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[MAX_PAINTERS];
-    private static final BooleanElement[] P1_PAINT_ROTATION= new BooleanElement[MAX_PAINTERS];
+    private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
     @SuppressWarnings("unchecked")
-    private static final EnumElement<LightingMode>[] P1_PAINT_LIGHT= new EnumElement[MAX_PAINTERS];
+    private static final EnumElement<LightingMode>[] P1_PAINT_LIGHT= new EnumElement[PaintLayer.DYNAMIC_SIZE];
 
     static final BitPacker PACKER_2 = new BitPacker();
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<BlockRenderLayer>[] P2_PAINT_LAYER = new EnumElement[MAX_PAINTERS];
     private static final IntElement P2_POS_X = PACKER_2.createIntElement(32);
     private static final IntElement P2_POS_Y = PACKER_2.createIntElement(32);
     private static final IntElement P2_POS_Z = PACKER_2.createIntElement(32);
     /** value semantics are owned by consumer - only constraints are size and does not update from world */
-    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 41);
+    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 30);
 
     static final BitPacker PACKER_3_BLOCK = new BitPacker();
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
@@ -86,38 +79,24 @@ public class ModelStateFactory
     @SuppressWarnings("unchecked")
     private static final EnumElement<Rotation> P3B_BLOCK_ROTATION[] = new EnumElement[TextureScale.values().length];
     
-
-//    private static final IntElement P3B_2x2_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
-//    private static final EnumElement<Rotation> P3B_2x2_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-//    private static final IntElement P3B_4x4_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
-//    private static final EnumElement<Rotation> P3B_4x4_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-//    private static final IntElement P3B_8x8_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
-//    private static final EnumElement<Rotation> P3B_8x8_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-//    private static final IntElement P3B_16x16_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
-//    private static final EnumElement<Rotation> P3B_16x16_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-//    private static final IntElement P3B_32x32_BLOCK_VERSION = PACKER_3_BLOCK.createIntElement(8);
-//    private static final EnumElement<Rotation> P3B_32x32_BLOCK_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-
-    
     static final BitPacker PACKER_3_FLOW = new BitPacker();
     private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
 
     
     static
     {
-        for(int i = 0; i < MAX_PAINTERS; i++)
+        for(int i = 0; i < PaintLayer.STATIC_SIZE; i++)
         {
             // p0 reserve 7 bits for shape
-            P0_PAINTERS[i] = PACKER_0.createEnumElement(SurfacePainter.class);   // 3 bits each x4 = 12
+            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x5 = 48
+        }
+        
+        for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
+        {
+            P0_PAINT_LAYER[i] = PACKER_0.createEnumElement(BlockRenderLayer.class); // 2 bits each x5 = 8
+            P0_PAINT_LAYER_ENABLED[i] = PACKER_0.createBooleanElement();
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
-
-            
-            P1_SURFACE_INDEX[i] = PACKER_1.createIntElement(MAX_SURFACES);  // 2 bits each  x4 = 8
-            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
-            P1_PAINT_ROTATION[i] = PACKER_1.createBooleanElement(); // 1 bit each x4 = 4
-            P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
-
-            P2_PAINT_LAYER[i] = PACKER_2.createEnumElement(BlockRenderLayer.class); // 2 bits each x4 = 8
+            P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x5 = 4
         }
         
         // TODO: for texture alternators, do we need to support a larger number of alternates for zoomed uniforms?
@@ -255,26 +234,42 @@ public class ModelStateFactory
                 int layerFlags = 0;
                 int shadedFlags = 0xF; // default to all true (shaded)
                 
-                for(int i = 0; i < 4; i++)
+                if(this.isPaintLayerEnabled(PaintLayer.BASE))
                 {
-                    SurfacePainter p =  getSurfacePainter(i);
-                    if(p != SurfacePainter.NONE)
-                    {
-                        flags |= p.stateFlags;
-                        layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), layerFlags, true);
-                        
-                        if(this.getLightingMode(i) == LightingMode.FULLBRIGHT) 
-                            shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(i), shadedFlags, false);
-                        
-                        TexturePallette tex =  getTexture(i);
-                        if(tex != null)
-                        {
-                            flags |= tex.stateFlags;
-                        }
-                    }
-                    
-            
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.BASE), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.BASE), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.BASE).stateFlags;
+                    flags |= getTexture(PaintLayer.CUT).stateFlags;
                 }
+ 
+                if(this.isPaintLayerEnabled(PaintLayer.DETAIL))
+                {
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.DETAIL) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.DETAIL).stateFlags;
+
+                }
+                
+                if(this.isPaintLayerEnabled(PaintLayer.LAMP))
+                {
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.LAMP) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.LAMP).stateFlags;
+
+                }
+                
+                if(this.isPaintLayerEnabled(PaintLayer.OVERLAY))
+                {
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.OVERLAY) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.OVERLAY).stateFlags;
+
+                }
+                
                 this.stateFlags = flags;
                 this.renderLayerEnabledFlags = (byte) layerFlags;
                 this.renderLayerShadedFlags = (byte) shadedFlags;
@@ -333,18 +328,12 @@ public class ModelStateFactory
             
             populateStateFlagsIfNeeded();
             
-            if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS)
-            {
-                long b2 = bits2;
-                b2 = P2_POS_X.setValue((pos.getX() & 31), b2);
-                b2 = P2_POS_Y.setValue((pos.getY() & 31), b2);
-                b2 = P2_POS_Z.setValue((pos.getZ() & 31), b2);
-                bits2 = b2;
-            }
-            
             switch(this.getShape().meshFactory().stateFormat)
             {
             case BLOCK:
+ 
+                // for bigtex texture randomization
+                if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos);
                 
                 long b3 = bits3;
                 
@@ -374,6 +363,9 @@ public class ModelStateFactory
                 break;
 
             case FLOW:
+                // for bigtex texture randomization
+                if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos);
+
                 bits3 = P3F_FLOW_JOIN.setValue(FlowHeightState.getBitsFromWorldStatically((SuperBlock)state.getBlock(), state, world, pos), bits3);
                 break;
             
@@ -386,6 +378,19 @@ public class ModelStateFactory
             }
             
             return this;
+        }
+        
+        /** 
+         * Saves world block pos relative to 32x32x32 cube boundaries.
+         * Used by BigTex surface painting for texture randomization on non-multiblock shapes.
+         */
+        private void refreshBlockPosFromWorld(BlockPos pos)
+        {
+            long b2 = bits2;
+            b2 = P2_POS_X.setValue((pos.getX() & 31), b2);
+            b2 = P2_POS_Y.setValue((pos.getY() & 31), b2);
+            b2 = P2_POS_Z.setValue((pos.getZ() & 31), b2);
+            bits2 = b2;
         }
 
         ////////////////////////////////////////////////////
@@ -404,26 +409,14 @@ public class ModelStateFactory
             clearStateFlags();
         }
         
-        public SurfacePainter getSurfacePainter(int painterIndex)
+        public ColorMap getColorMap(PaintLayer layer)
         {
-            return P0_PAINTERS[painterIndex].getValue(bits0);
+            return BlockColorMapProvider.INSTANCE.getColorMap(P0_PAINT_COLOR[layer.dynamicIndex].getValue(bits0));
         }
         
-        public void setSurfacePainter(int painterIndex, SurfacePainter painter)
+        public void setColorMap(PaintLayer layer, ColorMap map)
         {
-            bits0 = P0_PAINTERS[painterIndex].setValue(painter, bits0);
-            invalidateHashCode();
-            clearStateFlags();
-        }
-        
-        public ColorMap getColorMap(int painterIndex)
-        {
-            return BlockColorMapProvider.INSTANCE.getColorMap(P0_PAINT_COLOR[painterIndex].getValue(bits0));
-        }
-        
-        public void setColorMap(int painterIndex, ColorMap map)
-        {
-            bits0 = P0_PAINT_COLOR[painterIndex].setValue(map.ordinal, bits0);
+            bits0 = P0_PAINT_COLOR[layer.dynamicIndex].setValue(map.ordinal, bits0);
             invalidateHashCode();
         }
         
@@ -448,46 +441,68 @@ public class ModelStateFactory
             bits0 = P0_AXIS_INVERTED.setValue(isInverted, bits0);
             invalidateHashCode();
         }
+        
+        public BlockRenderLayer getRenderLayer(PaintLayer layer)
+        {
+            return P0_PAINT_LAYER[layer.dynamicIndex].getValue(bits0);
+        }
+        
+        public void setRenderLayer(PaintLayer layer, BlockRenderLayer renderLayer)
+        {
+            bits0 = P0_PAINT_LAYER[layer.dynamicIndex].setValue(renderLayer, bits0);
+            invalidateHashCode();
+        }
+
+        public boolean isPaintLayerEnabled(PaintLayer layer)
+        {
+            return P0_PAINT_LAYER_ENABLED[layer.dynamicIndex].getValue(bits0);
+        }
+        
+        public void setPaintLayerEnabled(PaintLayer layer, boolean isEnabled)
+        {
+            bits0 = P0_PAINT_LAYER_ENABLED[layer.dynamicIndex].setValue(isEnabled, bits0);
+            invalidateHashCode();
+        }
+        
+        /** returns true if any surface painter is configured to have the given layer */
+        public boolean canRenderInLayer(BlockRenderLayer renderLayer)
+        {
+            this.populateStateFlagsIfNeeded();
+            return BENUMSET_RENDER_LAYER.isFlagSetForValue(renderLayer, this.renderLayerEnabledFlags);
+        }
+        
+        /** 
+         * Exposed for use as a lookup key in model dispatch logic. 
+         * Identifies which block render layers can be rendered in this model.
+         * Can be decoded with {@link #BENUMSET_RENDER_LAYER} 
+         */
+        public byte getCanRenderInLayerFlags() { return this.renderLayerEnabledFlags; };
+
 
         ////////////////////////////////////////////////////
         //  PACKER 1 ATTRIBUTES (NOT SHAPE-DEPENDENT)
         ////////////////////////////////////////////////////
         
-        public Surface getSurface(int painterIndex)
+        public TexturePallette getTexture(PaintLayer layer)
         {
-            return getShape().meshFactory().surfaces.get(P1_SURFACE_INDEX[painterIndex].getValue(bits1));
+            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
         }
         
-        /**
-         * Doesn't check that the provided surface actually belongs to the shape
-         * that is set in this state.  Be good. :-)
-         */
-        public void setSurface(int painterIndex, Surface surface)
+        public void setTexture(PaintLayer layer, TexturePallette tex)
         {
-            bits1 = P1_SURFACE_INDEX[painterIndex].setValue(surface.ordinal, bits1);
-            invalidateHashCode();
-        }
-        
-        public TexturePallette getTexture(int painterIndex)
-        {
-            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[painterIndex].getValue(bits1));
-        }
-        
-        public void setTexture(int painterIndex, TexturePallette tex)
-        {
-            bits1 = P1_PAINT_TEXTURE[painterIndex].setValue(tex.ordinal, bits1);
+            bits1 = P1_PAINT_TEXTURE[layer.ordinal()].setValue(tex.ordinal, bits1);
             invalidateHashCode();
             clearStateFlags();
         }
         
-        public LightingMode getLightingMode(int painterIndex)
+        public LightingMode getLightingMode(PaintLayer layer)
         {
-            return P1_PAINT_LIGHT[painterIndex].getValue(bits1);
+            return P1_PAINT_LIGHT[layer.dynamicIndex].getValue(bits1);
         }
         
-        public void setLightingMode(int painterIndex, LightingMode lightingMode)
+        public void setLightingMode(PaintLayer layer, LightingMode lightingMode)
         {
-            bits1 = P1_PAINT_LIGHT[painterIndex].setValue(lightingMode, bits1);
+            bits1 = P1_PAINT_LIGHT[layer.dynamicIndex].setValue(lightingMode, bits1);
             invalidateHashCode();
         }
         
@@ -505,46 +520,10 @@ public class ModelStateFactory
          */
         public byte getRenderLayerShadedFlags() { return this.renderLayerShadedFlags; };
         
-        public boolean getRotationEnabled(int painterIndex)
-        {
-            return P1_PAINT_ROTATION[painterIndex].getValue(bits1);
-        }
-        
-        public void setRotationEnabled(int painterIndex, boolean isEnabled)
-        {
-            bits1 = P1_PAINT_ROTATION[painterIndex].setValue(isEnabled, bits1);
-            invalidateHashCode();
-        }
-        
         ////////////////////////////////////////////////////
         //  PACKER 2 ATTRIBUTES  (NOT SHAPE-DEPENDENT)
         ////////////////////////////////////////////////////
-        
-        public BlockRenderLayer getRenderLayer(int painterIndex)
-        {
-            return P2_PAINT_LAYER[painterIndex].getValue(bits2);
-        }
-        
-        public void setRenderLayer(int painterIndex, BlockRenderLayer renderLayer)
-        {
-            bits2 = P2_PAINT_LAYER[painterIndex].setValue(renderLayer, bits2);
-            invalidateHashCode();
-        }
-
-        /** returns true if any surface painter is configured to have the given layer */
-        public boolean canRenderInLayer(BlockRenderLayer renderLayer)
-        {
-            this.populateStateFlagsIfNeeded();
-            return BENUMSET_RENDER_LAYER.isFlagSetForValue(renderLayer, this.renderLayerEnabledFlags);
-        }
-        
-        /** 
-         * Exposed for use as a lookup key in model dispatch logic. 
-         * Identifies which block render layers can be rendered in this model.
-         * Can be decoded with {@link #BENUMSET_RENDER_LAYER} 
-         */
-        public byte getCanRenderInLayerFlags() { return this.renderLayerEnabledFlags; };
-        
+           
         public int getPosX()
         {
             return P2_POS_X.getValue(bits2);
@@ -650,16 +629,24 @@ public class ModelStateFactory
         
         public CornerJoinBlockState getCornerJoin()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.getLog().warn("setCornerJoin on model state does not apply for shape");
+            if(Output.DEBUG_MODE)
+            {
+                populateStateFlagsIfNeeded();
+                if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                    Output.getLog().warn("getCornerJoin on model state does not apply for shape");
+            }
             
             return CornerJoinBlockStateSelector.getJoinState(P3B_BLOCK_JOIN.getValue(bits3));
         }
         
         public void setCornerJoin(CornerJoinBlockState join)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.getLog().warn("setCornerJoin on model state does not apply for shape");
+            if(Output.DEBUG_MODE)
+            {
+                populateStateFlagsIfNeeded();
+                if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                    Output.getLog().warn("setCornerJoin on model state does not apply for shape");
+            }
             
             bits3 = P3B_BLOCK_JOIN.setValue(join.getIndex(), bits3);
             invalidateHashCode();

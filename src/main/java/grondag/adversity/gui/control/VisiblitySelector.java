@@ -1,35 +1,25 @@
 package grondag.adversity.gui.control;
 
-import java.util.ArrayList;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.base.GuiControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderItem;
 
+import static grondag.adversity.gui.GuiUtil.VerticalAlignment.*;
+import static grondag.adversity.gui.GuiUtil.HorizontalAlignment.*;
+
 public class VisiblitySelector extends GuiControl
 {
-    private ArrayList<Pair<String, GuiControl>> controls = new ArrayList<Pair<String, GuiControl>>();
+    private final VisibilityPanel target;
     
-    private static final int NO_SELECTION = -1;
-    private int visibleIndex = NO_SELECTION;
+    public static final int NO_SELECTION = -1;
     
     private double buttonHeight;
     
-    public void add(String name, GuiControl control)
+    public VisiblitySelector(VisibilityPanel target)
     {
-        this.controls.add(Pair.of(name, control));
-        if(control.isVisible())
-        {
-            if(this.visibleIndex != NO_SELECTION)
-            {
-                this.controls.get(this.visibleIndex).getRight().setVisible(false);
-            }
-            this.visibleIndex = this.controls.size() - 1;
-        }
+        this.target = target;
     }
     
     @Override
@@ -40,25 +30,16 @@ public class VisiblitySelector extends GuiControl
         
         int hoverIndex = this.getButtonIndex(mouseX, mouseY);
         
-        for(int i = 0; i < controls.size(); i++)
+        for(int i = 0; i < target.size(); i++)
         {
-            String label = controls.get(i).getLeft();
+            String label = target.getLabel(i);
             
-            int textColor = GuiControl.TEXT_COLOR_DEFAULT;
-            
-            GuiUtil.drawBox(this.left, y, this.right, y + this.buttonHeight, 1, BUTTON_COLOR_DEFAULT);
-            
-            if(i == hoverIndex)
-            {
-                textColor = 0xFF000000;
-                GuiUtil.drawRect(this.left + 1 , y + 1, this.right - 1, y + this.buttonHeight - 1, FOCUS_COLOR_DEFAULT);
-            }
-            else if(i == visibleIndex)
-            {
-                GuiUtil.drawRect(this.left + 1 , y + 1, this.right - 1, y + this.buttonHeight - 1, BUTTON_COLOR_DEFAULT);
-            }
-            
-            GuiUtil.drawCenteredStringNoShadow(fontrenderer, label, (float)(this.left + this.width / 2), (float)(y + this.buttonHeight / 2), textColor);
+            GuiUtil.drawBox(this.left, y, this.right, y + this.buttonHeight, 1, BUTTON_COLOR_ACTIVE);
+            int buttonColor = i == hoverIndex ? BUTTON_COLOR_FOCUS : i == this.target.getVisiblityIndex() ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR_INACTIVE;
+            GuiUtil.drawRect(this.left + 2 , y + 2, this.right - 2, y + this.buttonHeight - 2, buttonColor);
+
+            int textColor = i == hoverIndex ? TEXT_COLOR_FOCUS : i == this.target.getVisiblityIndex() ? TEXT_COLOR_ACTIVE : TEXT_COLOR_INACTIVE;
+            GuiUtil.drawAlignedStringNoShadow(fontrenderer, label, (float)this.left, (float)y, (float)this.width, (float)this.buttonHeight, textColor, CENTER, MIDDLE);
             
             y += this.buttonHeight;
         }
@@ -73,15 +54,15 @@ public class VisiblitySelector extends GuiControl
         
         int selection = (int) ((mouseY - this.top) / this.buttonHeight);
         
-        return (selection < 0 || selection >= this.controls.size()) ? NO_SELECTION : selection;
+        return (selection < 0 || selection >= this.target.size()) ? NO_SELECTION : selection;
     }
     
     @Override
     protected void handleCoordinateUpdate()
     {
-        if(this.controls.size() > 0)
+        if(this.target.size() > 0)
         {
-            this.buttonHeight = this.height / this.controls.size();
+            this.buttonHeight = this.height / this.target.size();
         }
     }
 
@@ -90,16 +71,20 @@ public class VisiblitySelector extends GuiControl
     {
         int clickIndex = this.getButtonIndex(mouseX, mouseY);
         
-        if(clickIndex != NO_SELECTION && clickIndex != this.visibleIndex)
+        if(clickIndex != NO_SELECTION && clickIndex != this.target.getVisiblityIndex())
         {
-            this.controls.get(this.visibleIndex).getRight().setVisible(false);
-            this.visibleIndex = clickIndex;
-            this.controls.get(clickIndex).getRight().setVisible(true);
+            this.target.setVisiblityIndex(clickIndex);
         }
     }
 
     @Override
     protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    {
+        // ignore
+    }
+
+    @Override
+    protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
         // ignore
     }

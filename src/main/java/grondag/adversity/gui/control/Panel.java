@@ -2,6 +2,7 @@ package grondag.adversity.gui.control;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.Layout;
 import grondag.adversity.gui.base.GuiControl;
@@ -188,7 +189,6 @@ public class Panel extends GuiControl
     @Override
     public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
     {
-        this.refreshContentCoordinatesIfNeeded();
         for(GuiControl child : this.children)
         {
             child.mouseClick(mc, mouseX, mouseY);
@@ -198,11 +198,19 @@ public class Panel extends GuiControl
     @Override
     public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
     {
-        this.refreshContentCoordinatesIfNeeded();
         for(GuiControl child : this.children)
         {
             child.mouseDrag(mc, mouseX, mouseY);
         }
+    }
+    
+    @Override
+    protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
+    {
+        for(GuiControl child : this.children)
+        {
+            child.mouseScroll(mouseX, mouseY, scrollDelta);
+        }       
     }
     
 //    @Override
@@ -262,4 +270,5 @@ public class Panel extends GuiControl
         this.isDirty = true;
         return this;
     }
+
 }

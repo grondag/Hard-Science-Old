@@ -43,4 +43,11 @@ public class ItemPreview extends GuiControl
     {
         // nothing special
     }
+
+    @Override
+    protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
+    {
+        // ignore
+    }
+    
 }

@@ -7,14 +7,16 @@ import net.minecraft.client.renderer.RenderItem;
 
 public abstract class GuiControl extends Gui
 {      
-    public static final int BUTTON_COLOR_DEFAULT = 0x9AFFFFFF;
-    public static final int DISABLED_COLOR_DEFAULT = 0x4AFFFFFF;
-    public static final int FOCUS_COLOR_DEFAULT = 0xFFFFFFFF;
-    public static final int TEXT_COLOR_DEFAULT = 0xFF000000;
+    public static final int BUTTON_COLOR_ACTIVE = 0x9AFFFFFF;
+    public static final int BUTTON_COLOR_INACTIVE = 0x2AFFFFFF;
+    public static final int BUTTON_COLOR_FOCUS = 0xFFBAF6FF;
+    public static final int TEXT_COLOR_ACTIVE = 0xFF000000;
+    public static final int TEXT_COLOR_INACTIVE = 0xFFEEEEEE;
+    public static final int TEXT_COLOR_FOCUS = 0xFF000000;
     
     public static final int CONTROL_INTERNAL_MARGIN = 5;
     public static final int CONTROL_EXTERNAL_MARGIN = 5;    
-    public static final int CONTROL_BACKGROUND = 0x9AFFFFFF;
+    public static final int CONTROL_BACKGROUND = 0x4AFFFFFF;
     
     protected double top;
     protected double left;
@@ -34,6 +36,13 @@ public abstract class GuiControl extends Gui
     protected boolean isDirty = false;
     
     protected boolean isVisible = true;
+    
+    /** cumulative scroll distance from all events */
+    protected int scrollDistance;
+    /** cumulative distance before scroll is recognized */
+    protected int scrollIncrementDistance = 128;
+    /** last scroll increment - used to compute a delta */
+    protected int lastScrollIncrement = 0;
     
     /** 
      * If a control has consistent shape, is height / width. 
@@ -67,11 +76,14 @@ public abstract class GuiControl extends Gui
     
     protected abstract void handleMouseDrag(Minecraft mc, int mouseX, int mouseY);
     
+    protected abstract void handleMouseScroll(int mouseX, int mouseY, int scrollDelta);
+    
     public void mouseClick(Minecraft mc, int mouseX, int mouseY)
     {
         if(this.isVisible)
         {
             this.refreshContentCoordinatesIfNeeded();
+            if(mouseX < this.left || mouseX > this.right || mouseY < this.top || mouseY > this.bottom) return;
             this.handleMouseClick(mc, mouseX, mouseY);
         }
     }
@@ -81,8 +93,31 @@ public abstract class GuiControl extends Gui
         if(this.isVisible)
         {
             this.refreshContentCoordinatesIfNeeded();
+            if(mouseX < this.left || mouseX > this.right || mouseY < this.top || mouseY > this.bottom) return;
             this.handleMouseDrag(mc, mouseX, mouseY);
         }
+    }
+    
+    public void mouseScroll(int mouseX, int mouseY, int scrollDelta)
+    {
+        if(this.isVisible)
+        {
+            this.refreshContentCoordinatesIfNeeded();
+            if(mouseX < this.left || mouseX > this.right || mouseY < this.top || mouseY > this.bottom) return;
+            this.scrollDistance += scrollDelta;
+            this.handleMouseScroll(mouseX, mouseY, scrollDelta);
+        }
+    }
+    
+    protected int mouseIncrementDelta()
+    {
+        int newIncrement = this.scrollDistance / this.scrollIncrementDistance;
+        int result = newIncrement - this.lastScrollIncrement;
+        if(result != 0)
+        {
+            this.lastScrollIncrement = newIncrement;
+        }
+        return result;
     }
     
     protected void refreshContentCoordinatesIfNeeded()

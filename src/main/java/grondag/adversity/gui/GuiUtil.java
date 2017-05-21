@@ -223,13 +223,59 @@ public class GuiUtil
 
         return rc;
     }
+    
+    public static enum HorizontalAlignment
+    {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+    
+    public static enum VerticalAlignment
+    {
+        TOP,
+        MIDDLE,
+        BOTTOM
+    }
 
     /**
      * Renders the specified text to the screen, center-aligned. Args : renderer, string, x, y, color
      */
-    public static void drawCenteredStringNoShadow(FontRenderer fontRendererIn, String text, float x, float y, int color)
+    public static void drawAlignedStringNoShadow(FontRenderer fontRendererIn, String text, float x, float y, float width, float height, int color, HorizontalAlignment hAlign, VerticalAlignment vAlign)
     {
-        fontRendererIn.drawString(text, x - fontRendererIn.getStringWidth(text) / 2, y, color, false);
+
+        switch(hAlign)
+        {
+        case RIGHT:
+            x += width - fontRendererIn.getStringWidth(text);
+            break;
+            
+        case CENTER:
+            x += (width - fontRendererIn.getStringWidth(text)) / 2;
+            break;
+            
+        case LEFT:
+        default:
+            break;
+        
+        }
+        
+        switch(vAlign)
+        {
+        case BOTTOM:
+            y += height - fontRendererIn.FONT_HEIGHT;
+            break;
+            
+        case MIDDLE:
+            y += (height - fontRendererIn.FONT_HEIGHT) / 2;
+            break;
+            
+        case TOP:
+        default:
+            break;
+        
+        }
+        fontRendererIn.drawString(text, x, y, color, false);
     }
 
     /**

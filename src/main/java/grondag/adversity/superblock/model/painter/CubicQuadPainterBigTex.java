@@ -6,6 +6,8 @@ import grondag.adversity.library.Rotation;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.EnumFacing;
@@ -18,9 +20,9 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
     private final Vec3i pos;
     private final int species;
     
-    protected CubicQuadPainterBigTex(ModelState modelState, int painterIndex)
+    public CubicQuadPainterBigTex(ModelState modelState, Surface surface, PaintLayer paintLayer)
     {
-        super(modelState, painterIndex);
+        super(modelState, surface, paintLayer);
         this.pos = new Vec3i(modelState.getPosX(), modelState.getPosY(), modelState.getPosZ());
         this.species = modelState.getSpecies();
     }
@@ -171,9 +173,5 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             return vec;
         
         }
-    }
-    public static QuadPainter makeQuadPainter(ModelState modelState, int painterIndex)
-    {
-        return new CubicQuadPainterBigTex(modelState, painterIndex);
     }
 }

@@ -9,9 +9,12 @@ import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.QuadPainter;
-import grondag.adversity.superblock.model.painter.SurfacePainter;
+import grondag.adversity.superblock.model.painter.QuadPainterFactory;
 import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import grondag.adversity.superblock.model.shape.ShapeMeshGenerator;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 import java.util.ArrayList;
@@ -135,24 +138,28 @@ public class SuperDispatcher
     private Collection<RawQuad> getFormattedQuads(ModelState modelState)
     {
         ArrayList<RawQuad> result = new ArrayList<RawQuad>();
-        QuadPainter p0 = modelState.getSurfacePainter(0).quadPainterFactory.makeQuadPainter(modelState, 0);
-        QuadPainter p1 = modelState.getSurfacePainter(1).quadPainterFactory.makeQuadPainter(modelState, 1);
-        QuadPainter p2 = modelState.getSurfacePainter(2).quadPainterFactory.makeQuadPainter(modelState, 2);
-        QuadPainter p3 = modelState.getSurfacePainter(3).quadPainterFactory.makeQuadPainter(modelState, 3);
-        
-        Surface s0 = p0.surface;
-        Surface s1 = p1.surface;
-        Surface s2 = p2.surface;
-        Surface s3 = p3.surface;
+         
+        ShapeMeshGenerator mesher = modelState.getShape().meshFactory();
+                
+        ArrayList<QuadPainter> painters = new ArrayList<QuadPainter>();
+        for(Surface surface : mesher.surfaces)
+        {
+            for(PaintLayer paintLayer : PaintLayer.values())
+            {
+                if(modelState.isPaintLayerEnabled(paintLayer) && paintLayer.surfaceType == surface.surfaceType)
+                {
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, paintLayer));
+                }
+            }
+        }
         
         for(RawQuad shapeQuad : modelState.getShape().meshFactory().getShapeQuads(modelState))
         {
             Surface qSurface = shapeQuad.surface;
-            
-            if(qSurface == s0) p0.addPaintedQuadToList(shapeQuad, result);
-            if(qSurface == s1) p1.addPaintedQuadToList(shapeQuad, result);
-            if(qSurface == s2) p2.addPaintedQuadToList(shapeQuad, result);
-            if(qSurface == s3) p3.addPaintedQuadToList(shapeQuad, result);
+            for(QuadPainter p : painters)
+            {
+                if(qSurface == p.surface) p.addPaintedQuadToList(shapeQuad, result);
+            }
         }
         return result;
     }

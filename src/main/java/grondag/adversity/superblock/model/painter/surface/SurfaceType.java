@@ -9,17 +9,9 @@ public enum SurfaceType
 {
     /** Surface that comprises most of the model. Can glow or be translucent. May or may not align with a block face. */
     MAIN,
-    
+
     /**
-     * Block-aligned faces that should be distinct from the main surface. 
-     * Painters can detect which face a quad is for, so this is NOT needed to implement something like grass.
-     * Typical use case is for flow block or CSG cuts of large shapes where the nominal surface
-     * is defined as MAIN and the block-aligned cut surfaces are BLOCKFACE.
-     */
-    BLOCKFACE,
-    
-    /**
-     * Cuts into the block that don't align with a block face.
+     * Cuts into the block or the cut sides of blocks that result from CSG cuts to world block boundaries.
      */
     CUT,
     

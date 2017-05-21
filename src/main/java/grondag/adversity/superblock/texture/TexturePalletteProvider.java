@@ -7,7 +7,6 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
-import grondag.adversity.superblock.model.state.ModelStateFactory;
 import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -22,9 +21,9 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     
     private int nextOrdinal = 0;
     
-    public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
+    public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers, TextureGroup textureGroup)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayers);
+        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayers, textureGroup);
         texturePallettes.add(result);
         return result;
     }
@@ -32,7 +31,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     public TexturePallette addZoomedPallete(TexturePallette source)
     {
         TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, source.textureVersionCount, source.textureScale.zoom(), source.textureLayout, source.allowRotation, 
-                    source.lightingModeFlags, source.renderLayerFlags);
+                    source.lightingModeFlags, source.renderLayerFlags, source.textureGroup);
         texturePallettes.add(result);
         return result;
     }
@@ -104,14 +103,17 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
          * (rotation and block version)
          */
         public final int stateFlags;
+        
+        public final TextureGroup textureGroup;
 
-        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers)
+        /** yes, this is too damn many parameters, but not like it's going to escape into the wild... */
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers, TextureGroup textureGroup)
         {
             this(ordinal, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, 
-                    LightingMode.makeLightFlags(lightingModes), RenderLayerHelper.makeRenderLayerFlags(renderLayers));
+                    LightingMode.makeLightFlags(lightingModes), RenderLayerHelper.makeRenderLayerFlags(renderLayers), textureGroup);
         }
         
-        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, int renderLayerFlags)
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, int renderLayerFlags, TextureGroup textureGroup)
         {
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
@@ -122,9 +124,9 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             this.allowRotation = allowRotation;
             this.lightingModeFlags = lightingModeFlags;
             this.renderLayerFlags = renderLayerFlags;
+            this.textureGroup = textureGroup;
   
-            this.stateFlags = (this.allowRotation || this.textureVersionCount > 1)
-                    ? this.textureScale.modelStateFlag : ModelStateFactory.ModelState.STATE_FLAG_NONE;
+            this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag;
         }
         
         /**

@@ -1,7 +1,5 @@
 package grondag.adversity.library;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import net.minecraft.util.math.BlockPos;

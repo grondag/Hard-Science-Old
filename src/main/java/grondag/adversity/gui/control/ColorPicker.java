@@ -1,5 +1,6 @@
 package grondag.adversity.gui.control;
 
+import grondag.adversity.Output;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
@@ -101,11 +102,39 @@ public class ColorPicker extends GuiControl
         GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrementX + 0.5, sTop + this.gridIncrementY + 0.5, selectedColormap.getColor(EnumColorMap.BASE));
     }
 
+    private void changeHueIfDifferent(Hue newHue)
+    {
+        if(newHue != this.selectedHue)
+        {
+            this.selectedHue = newHue;
+
+            ColorMap currentMap = BlockColorMapProvider.INSTANCE.getColorMap(this.colorMapID);
+            HueSet.Chroma currentChroma = this.selectedChroma;
+            HueSet.Luminance currentLuminance = currentMap.luminance;
+
+            //TODO: remove
+            if(newHue == null || currentChroma == null || currentLuminance == null)
+            {
+                Output.getLog().info("boop");
+            }
+            
+            ColorMap newMap = BlockColorMapProvider.INSTANCE.getColorMap(
+                    newHue, currentChroma, currentLuminance);
+
+            while(newMap == null)
+            {
+                currentChroma = HueSet.Chroma.values()[currentChroma.ordinal() - 1];
+                newMap = BlockColorMapProvider.INSTANCE.getColorMap(
+                        newHue, currentChroma, currentLuminance);
+            }
+
+            this.colorMapID = newMap.ordinal;
+        }
+    }
+    
     @Override
     protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
     {
-        this.refreshContentCoordinatesIfNeeded();
-        
         double distance = Math.sqrt((Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)));
 
         if(distance < this.radiusOuter + 2)
@@ -116,27 +145,8 @@ public class ColorPicker extends GuiControl
 
             if(index >= Hue.values().length) index = 0;
 
-            Hue newHue = Hue.values()[index];
-            if(newHue != this.selectedHue)
-            {
-                this.selectedHue = newHue;
-
-                ColorMap currentMap = BlockColorMapProvider.INSTANCE.getColorMap(this.colorMapID);
-                HueSet.Chroma currentChroma = this.selectedChroma;
-                HueSet.Luminance currentLuminance = currentMap.luminance;
-
-                ColorMap newMap = BlockColorMapProvider.INSTANCE.getColorMap(
-                        newHue, currentChroma, currentLuminance);
-
-                while(newMap == null)
-                {
-                    currentChroma = HueSet.Chroma.values()[currentChroma.ordinal() - 1];
-                    newMap = BlockColorMapProvider.INSTANCE.getColorMap(
-                            newHue, currentChroma, currentLuminance);
-                }
-
-                this.colorMapID = newMap.ordinal;
-            }
+            this.changeHueIfDifferent(Hue.values()[index]);
+         
         }
         else if(mouseX >= this.gridLeft)
         {
@@ -166,6 +176,21 @@ public class ColorPicker extends GuiControl
         this.handleMouseClick(mc, mouseX, mouseY);
     }
     
+    @Override
+    protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
+    {
+        int inc = this.mouseIncrementDelta();
+        if(inc != 0)
+        {
+            int ord = this.selectedHue.ordinal() + inc;
+            if(ord < 0) 
+                ord = Hue.values().length - 1;
+            else if(ord >= Hue.values().length) 
+                ord = 0;
+            this.changeHueIfDifferent(Hue.values()[ord]);
+        }
+    }
+
     @Override
     protected void handleCoordinateUpdate()
     {

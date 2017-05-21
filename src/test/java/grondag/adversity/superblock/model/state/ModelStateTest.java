@@ -7,7 +7,7 @@ import grondag.adversity.library.Rotation;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.superblock.model.painter.SurfacePainter;
+import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureScale;
@@ -33,15 +33,16 @@ public class ModelStateTest
         state.setShape(ModelShape.COLUMN_SQUARE);
         state.setStatic(true);
 
-        state.setColorMap(0, BlockColorMapProvider.INSTANCE.getColorMap(5));
-        state.setLightingMode(0, LightingMode.FULLBRIGHT);
-        state.setRenderLayer(0, BlockRenderLayer.CUTOUT_MIPPED);
-        state.setRenderLayer(1, BlockRenderLayer.TRANSLUCENT);
-        state.setRotationEnabled(0, true);
-        state.setSurfacePainter(0, SurfacePainter.CUBIC_BORDER);
-        state.setSurfacePainter(1, SurfacePainter.SURFACE_CYLINDER);
-        state.setSurface(0, ModelShape.COLUMN_SQUARE.meshFactory().surfaces.get(0));
-        state.setTexture(0, Textures.ALL_TEXTURES.get(3));
+        state.setPaintLayerEnabled(PaintLayer.BASE, true);
+        state.setPaintLayerEnabled(PaintLayer.DETAIL, true);
+        state.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(5));
+        state.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(7));
+        state.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
+        state.setLightingMode(PaintLayer.DETAIL, LightingMode.SHADED);
+        state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.CUTOUT_MIPPED);
+        state.setRenderLayer(PaintLayer.DETAIL, BlockRenderLayer.TRANSLUCENT);
+        state.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
+        state.setTexture(PaintLayer.DETAIL, Textures.BORDER_TEST);
         state.setAxis(EnumFacing.Axis.Z);
         state.setRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
         state.setBlockVersion(7, TextureScale.SINGLE);
@@ -62,16 +63,16 @@ public class ModelStateTest
         
         assert(reloadedState.getShape() == ModelShape.COLUMN_SQUARE);
         assert(reloadedState.isStatic());
-
-        assert(reloadedState.getColorMap(0) == BlockColorMapProvider.INSTANCE.getColorMap(5));
-        assert(reloadedState.getLightingMode(0) == LightingMode.FULLBRIGHT);
-        assert(reloadedState.getRenderLayer(0) == BlockRenderLayer.CUTOUT_MIPPED);
-        assert(reloadedState.getRenderLayer(1) == BlockRenderLayer.TRANSLUCENT);
-        assert(reloadedState.getRotationEnabled(0) == true);
-        assert(reloadedState.getSurfacePainter(0) == SurfacePainter.CUBIC_BORDER);
-        assert(reloadedState.getSurfacePainter(1) == SurfacePainter.SURFACE_CYLINDER);
-        assert(reloadedState.getSurface(0) == ModelShape.COLUMN_SQUARE.meshFactory().surfaces.get(0));
-        assert(reloadedState.getTexture(0) == Textures.ALL_TEXTURES.get(3));
+        assert(reloadedState.isPaintLayerEnabled(PaintLayer.BASE));
+        assert(reloadedState.isPaintLayerEnabled(PaintLayer.DETAIL));
+        assert(reloadedState.getColorMap(PaintLayer.BASE) == BlockColorMapProvider.INSTANCE.getColorMap(5));
+        assert(reloadedState.getColorMap(PaintLayer.DETAIL) == BlockColorMapProvider.INSTANCE.getColorMap(7));
+        assert(reloadedState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT);
+        assert(reloadedState.getLightingMode(PaintLayer.DETAIL) == LightingMode.SHADED);
+        assert(reloadedState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.CUTOUT_MIPPED);
+        assert(reloadedState.getRenderLayer(PaintLayer.DETAIL) == BlockRenderLayer.TRANSLUCENT);
+        assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_RAW_FLEXSTONE);
+        assert(reloadedState.getTexture(PaintLayer.DETAIL) == Textures.BORDER_TEST);
         assert(reloadedState.getAxis()) == EnumFacing.Axis.Z;
         assert(reloadedState.getRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
         assert(reloadedState.getBlockVersion(TextureScale.SINGLE)) == 7;
@@ -88,9 +89,6 @@ public class ModelStateTest
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED) == true);
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.TRANSLUCENT) == true);
 
-       
-        assert(reloadedState.getSurfacePainter(2) == SurfacePainter.NONE);
-        assert(reloadedState.getSurfacePainter(3) == SurfacePainter.NONE);
         
         
     }

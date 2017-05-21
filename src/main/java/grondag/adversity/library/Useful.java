@@ -24,6 +24,8 @@ import net.minecraft.util.EnumFacing;
  */
 public class Useful {
 	
+    //TODO: use methods in MathHelper instead
+    
     /** clamps the input value to the given range, inclusive */
     public static int clamp(int input, int min, int max)
     {

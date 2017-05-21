@@ -6,8 +6,11 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.Output;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
+import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.model.painter.QuadPainter;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
