@@ -15,8 +15,10 @@ import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.Panel;
 import grondag.adversity.gui.control.TexturePicker;
+import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
+import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketUpdateSuperModelBlock;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
@@ -24,11 +26,13 @@ import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 
 public class SuperGuiScreen extends GuiScreen
@@ -56,6 +60,10 @@ public class SuperGuiScreen extends GuiScreen
 
     private ColorPicker[] colorPicker;
     private TexturePicker[] textureTabBar;
+    private Toggle[] layerToggle;
+    private Toggle[] fullBrightToggle;
+    private Toggle[] translucentToggle;
+    
     private ItemPreview itemPreview;
     
     private int meta = 0;
@@ -81,11 +89,20 @@ public class SuperGuiScreen extends GuiScreen
 
         // TODO - set shape first
         
-        ModelShape shape = modelState.getShape();
+        ModelShape shape = this.modelState.getShape();
         
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
             updateItemPreviewSub(layer);
+        }
+        
+        if(this.hasUpdates)
+        {
+            // see notes in SuperBlock for canRenderInLayer()
+            this.meta = this.modelState.getRenderLayerShadedFlags();
+            
+            this.itemPreview.previewItem.setItemDamage(this.meta);
+            SuperItemBlock.setModelState(this.itemPreview.previewItem, this.modelState);
         }
     }
     
@@ -93,20 +110,39 @@ public class SuperGuiScreen extends GuiScreen
     {
         if(this.modelState.getColorMap(layer).ordinal != colorPicker[layer.dynamicIndex].getColorMapID())
         {
-            this.modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.ordinal()].getColorMapID()));
-            this.textureTabBar[layer.ordinal()].colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.ordinal()].getColorMapID());
-            SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
+            this.modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
+            this.textureTabBar[layer.dynamicIndex].colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID());
             this.hasUpdates = true;
         }
         
-        if(this.modelState.getTexture(layer) != this.textureTabBar[layer.ordinal()].getSelected())
+        TexturePallette tex = this.textureTabBar[layer.dynamicIndex].getSelected();
+        if(this.modelState.getTexture(layer) != tex)
         {
-            TexturePallette tex = this.textureTabBar[layer.ordinal()].getSelected();
-            //TODO: ugly, need a lookup function from texture to painter
             this.modelState.setTexture(layer, tex);
-            SuperItemBlock.setModelState(this.itemPreview.previewItem, modelState);
             this.hasUpdates = true;
         }
+        
+        if(layer != PaintLayer.BASE && (this.modelState.isPaintLayerEnabled(layer) != this.layerToggle[layer.dynamicIndex].isOn()))
+        {
+            this.modelState.setPaintLayerEnabled(layer, this.layerToggle[layer.dynamicIndex].isOn());
+            this.hasUpdates = true;
+        }
+        
+        if(!((this.modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && this.fullBrightToggle[layer.dynamicIndex].isOn()))
+        {
+            this.modelState.setLightingMode(layer, this.fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
+            this.hasUpdates = true;
+        }
+        
+        if(!((this.modelState.getRenderLayer(layer) != BlockRenderLayer.SOLID) && this.translucentToggle[layer.dynamicIndex].isOn()))
+        {
+            BlockRenderLayer targetLayer = this.translucentToggle[layer.dynamicIndex].isOn() 
+                    ? RenderLayerHelper.getMostTransparentLayerFromFlags(tex.renderLayerFlags)
+                    : BlockRenderLayer.SOLID;
+            this.modelState.setRenderLayer(layer, targetLayer);
+            this.hasUpdates = true;
+        }
+        
     }
     
     @Override
@@ -196,25 +232,26 @@ public class SuperGuiScreen extends GuiScreen
         if(this.textureTabBar == null)
         {
             this.textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
-                    
+            this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
+            this.layerToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            this.translucentToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            this.fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
             {
                 TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<TexturePallette>(), this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100).setVerticalWeight(5);
                 this.textureTabBar[i] = t;
-            }
+                
+                this.colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
             
-            loadTextures();
+                this.layerToggle[i] = new Toggle().setLabel("Enabled");
+                this.translucentToggle[i] = new Toggle().setLabel("Translucent");
+                this.fullBrightToggle[i] = new Toggle().setLabel("Glowing");
+            }
+            // base layer is always included
+            this.layerToggle[PaintLayer.BASE.ordinal()].setVisible(false);
         }
         
-        if(this.colorPicker == null)
-        {
-            this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
-            for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
-            {
-                this.colorPicker[i] = (ColorPicker) new ColorPicker().setVerticalWeight(2).setHorizontalLayout(Layout.PROPORTIONAL);
-            }
-        }
-       
         if(this.mainPanel == null)
         {
             
@@ -226,17 +263,33 @@ public class SuperGuiScreen extends GuiScreen
             
             //TODO: localize
             int GROUP_BASE = rightPanel.createVisiblityGroup("Base Layer");
-            rightPanel.addAll(GROUP_BASE, this.colorPicker[PaintLayer.BASE.ordinal()],this.textureTabBar[PaintLayer.BASE.ordinal()]);
+            GuiControl tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.BASE.ordinal()],
+                    this.translucentToggle[PaintLayer.BASE.ordinal()], this.fullBrightToggle[PaintLayer.BASE.ordinal()])
+                    .setHorizontalWeight(2);
+            GuiControl tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(GROUP_BASE, tempH, this.textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(GROUP_BASE);
             
-            int GROUP_BORDER = rightPanel.createVisiblityGroup("Overlay");            
-            rightPanel.addAll(GROUP_BORDER, this.colorPicker[PaintLayer.OVERLAY.ordinal()],this.textureTabBar[PaintLayer.OVERLAY.ordinal()]);
+            int GROUP_BORDER = rightPanel.createVisiblityGroup("Overlay"); 
+            tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.OVERLAY.ordinal()],
+                    this.translucentToggle[PaintLayer.OVERLAY.ordinal()], this.fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
+                    .setHorizontalWeight(2);
+            tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(GROUP_BORDER, tempH,this.textureTabBar[PaintLayer.OVERLAY.ordinal()]);
 
             int GROUP_DECO = rightPanel.createVisiblityGroup("Decoration");
-            rightPanel.addAll(GROUP_DECO, this.colorPicker[PaintLayer.DETAIL.ordinal()],this.textureTabBar[PaintLayer.DETAIL.ordinal()]);
+            tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.DETAIL.ordinal()],
+                    this.translucentToggle[PaintLayer.DETAIL.ordinal()], this.fullBrightToggle[PaintLayer.DETAIL.ordinal()])
+                    .setHorizontalWeight(2);
+            tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(GROUP_DECO, tempH, this.textureTabBar[PaintLayer.DETAIL.ordinal()]);
 
             int GROUP_LAMP = rightPanel.createVisiblityGroup("Lamp");            
-            rightPanel.addAll(GROUP_LAMP, this.colorPicker[PaintLayer.LAMP.ordinal()],this.textureTabBar[PaintLayer.LAMP.ordinal()]);
+            tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.LAMP.ordinal()],
+                    this.translucentToggle[PaintLayer.LAMP.ordinal()], this.fullBrightToggle[PaintLayer.LAMP.ordinal()])
+                    .setHorizontalWeight(2);
+            tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(GROUP_LAMP, tempH, this.textureTabBar[PaintLayer.LAMP.ordinal()]);
 
             int GROUP_SHAPE = rightPanel.createVisiblityGroup("Shape");  
             
@@ -265,6 +318,8 @@ public class SuperGuiScreen extends GuiScreen
                     .resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, this.xSize - CONTROL_EXTERNAL_MARGIN * 2, this.ySize - CONTROL_EXTERNAL_MARGIN * 3 - this.buttonHeight);
             
             this.mainPanel.addAll(leftPanel, rightPanel);
+            
+            loadControlValuesFromModelState();
 
         }
         else
@@ -277,17 +332,27 @@ public class SuperGuiScreen extends GuiScreen
     
     }
 
-    private void loadTextures()
+    
+    private void loadControlValuesFromModelState()
     {
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
-            TexturePicker t = this.textureTabBar[layer.ordinal()];
+            TexturePicker t = this.textureTabBar[layer.dynamicIndex];
             
             t.clear();
             t.addAll(Textures.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
             t.setSelected(this.modelState.getTexture(layer));
             t.showSelected();
             t.colorMap = this.modelState.getColorMap(layer);
+            
+            ColorPicker c = this.colorPicker[layer.dynamicIndex];
+            c.setColorMapID(this.modelState.getColorMap(layer).ordinal);
+            
+            this.layerToggle[layer.dynamicIndex].setOn(modelState.isPaintLayerEnabled(layer));
+            
+            this.fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
+
+            this.translucentToggle[layer.dynamicIndex].setOn(modelState.getRenderLayer(layer) != BlockRenderLayer.SOLID);
         }
     }
     

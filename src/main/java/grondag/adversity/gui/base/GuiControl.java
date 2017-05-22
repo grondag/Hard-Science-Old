@@ -13,6 +13,7 @@ public abstract class GuiControl extends Gui
     public static final int TEXT_COLOR_ACTIVE = 0xFF000000;
     public static final int TEXT_COLOR_INACTIVE = 0xFFEEEEEE;
     public static final int TEXT_COLOR_FOCUS = 0xFF000000;
+    public static final int TEXT_COLOR_LABEL = 0xFFFFFFFF;
     
     public static final int CONTROL_INTERNAL_MARGIN = 5;
     public static final int CONTROL_EXTERNAL_MARGIN = 5;    
