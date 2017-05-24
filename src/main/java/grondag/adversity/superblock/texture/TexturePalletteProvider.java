@@ -7,7 +7,6 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
-import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
@@ -21,9 +20,9 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     
     private int nextOrdinal = 0;
     
-    public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers, TextureGroup textureGroup)
+    public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer renderLayer, TextureGroup textureGroup)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayers, textureGroup);
+        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, lightingModes, renderLayer, textureGroup);
         texturePallettes.add(result);
         return result;
     }
@@ -31,7 +30,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     public TexturePallette addZoomedPallete(TexturePallette source)
     {
         TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, source.textureVersionCount, source.textureScale.zoom(), source.textureLayout, source.allowRotation, 
-                    source.lightingModeFlags, source.renderLayerFlags, source.textureGroup);
+                    source.lightingModeFlags, source.renderLayer, source.textureGroup);
         texturePallettes.add(result);
         return result;
     }
@@ -88,10 +87,10 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
         
         public final int lightingModeFlags;
         /** 
-         * Bit at ordinal position indicates if layer is supported.
-         * Used to limit user selection, is not enforced.
+         * Layer that should be used for rendering this texture.
+         * SOLID textures may still be rendered as translucent for materials like glass.
          */
-        public final int renderLayerFlags;
+        public final BlockRenderLayer renderLayer;
         
         /**
          * Globally unique id
@@ -107,13 +106,13 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
         public final TextureGroup textureGroup;
 
         /** yes, this is too damn many parameters, but not like it's going to escape into the wild... */
-        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer[] renderLayers, TextureGroup textureGroup)
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, LightingMode[] lightingModes, BlockRenderLayer renderLayer, TextureGroup textureGroup)
         {
             this(ordinal, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, 
-                    LightingMode.makeLightFlags(lightingModes), RenderLayerHelper.makeRenderLayerFlags(renderLayers), textureGroup);
+                    LightingMode.makeLightFlags(lightingModes), renderLayer, textureGroup);
         }
         
-        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, int renderLayerFlags, TextureGroup textureGroup)
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, BlockRenderLayer renderLayer, TextureGroup textureGroup)
         {
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
@@ -123,7 +122,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             this.textureLayout = layout;
             this.allowRotation = allowRotation;
             this.lightingModeFlags = lightingModeFlags;
-            this.renderLayerFlags = renderLayerFlags;
+            this.renderLayer = renderLayer;
             this.textureGroup = textureGroup;
   
             this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag;

@@ -1,14 +1,9 @@
 package grondag.adversity.superblock.block;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-import grondag.adversity.library.IBlockTest;
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.support.BlockTests;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;

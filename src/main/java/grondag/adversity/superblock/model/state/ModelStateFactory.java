@@ -60,6 +60,7 @@ public class ModelStateFactory
     @SuppressWarnings("unchecked")
     private static final EnumElement<BlockRenderLayer>[] P0_PAINT_LAYER = new EnumElement[PaintLayer.DYNAMIC_SIZE];
     private static final BooleanElement[] P0_PAINT_LAYER_ENABLED = new BooleanElement[PaintLayer.DYNAMIC_SIZE];
+    private static final BooleanElement P0_MASONRY_BORDER = PACKER_0.createBooleanElement();
     
     static final BitPacker PACKER_1 = new BitPacker();
     private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
@@ -453,6 +454,10 @@ public class ModelStateFactory
         
         public BlockRenderLayer getRenderLayer(PaintLayer layer)
         {
+            //TODO: layer for overlay and detail always going to be tied to texture
+            // save bits in underlying data structure?
+            if(layer == PaintLayer.DETAIL || layer == PaintLayer.OVERLAY) return this.getTexture(layer).renderLayer;
+            
             return P0_PAINT_LAYER[layer.dynamicIndex].getValue(bits0);
         }
         
@@ -465,6 +470,9 @@ public class ModelStateFactory
 
         public boolean isPaintLayerEnabled(PaintLayer layer)
         {
+            //TODO: base and lamp surfaces are always rendered - save a bit in underlying data structure?
+            if(layer == PaintLayer.BASE || layer == PaintLayer.CUT || layer == PaintLayer.LAMP) return true;
+            
             return P0_PAINT_LAYER_ENABLED[layer.dynamicIndex].getValue(bits0);
         }
         
@@ -492,6 +500,17 @@ public class ModelStateFactory
             this.populateStateFlagsIfNeeded();
             return this.renderLayerEnabledFlags; 
         };
+        
+        public boolean isMasonryBorder()
+        {
+            return P0_MASONRY_BORDER.getValue(bits0);
+        }
+        
+        public void setMasonryBorder(boolean isMasonry)
+        {
+            bits0 = P0_MASONRY_BORDER.setValue(isMasonry, bits0);
+            invalidateHashCode();
+        }
 
 
         ////////////////////////////////////////////////////

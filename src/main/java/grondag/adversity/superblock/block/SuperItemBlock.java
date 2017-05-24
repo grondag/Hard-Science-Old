@@ -2,7 +2,6 @@ package grondag.adversity.superblock.block;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
-import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;

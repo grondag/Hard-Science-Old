@@ -60,7 +60,13 @@ public abstract class QuadPainter
         if(inputQuad.surface == this.surface)
         {
             RawQuad result = inputQuad.clone();
-            result.recolor(this.colorMap.getColor(this.lightingMode == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP : EnumColorMap.BASE));
+            int color = this.colorMap.getColor(this.lightingMode == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP : EnumColorMap.BASE);
+            if(this.renderLayer == BlockRenderLayer.TRANSLUCENT && this.texture.renderLayer == BlockRenderLayer.SOLID)
+            {
+                //TODO: make % translucency depend on substance
+                color = 0x40000000 | (color & 0x00FFFFFF);
+            }
+            result.recolor(color);
             result.lightingMode = this.lightingMode;
             result.renderLayer = this.renderLayer;
             result = this.paintQuad(result);

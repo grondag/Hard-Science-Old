@@ -26,7 +26,6 @@ import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
@@ -60,9 +59,12 @@ public class SuperGuiScreen extends GuiScreen
 
     private ColorPicker[] colorPicker;
     private TexturePicker[] textureTabBar;
-    private Toggle[] layerToggle;
     private Toggle[] fullBrightToggle;
-    private Toggle[] translucentToggle;
+    private Toggle overlayToggle;
+    private Toggle detailToggle;
+    private Toggle baseTranslucentToggle;
+    private Toggle lampTranslucentToggle;
+    private Toggle overlayMasonryToggle;
     
     private ItemPreview itemPreview;
     
@@ -96,6 +98,38 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewSub(layer);
         }
         
+        if(this.overlayToggle.isOn() != this.modelState.isPaintLayerEnabled(PaintLayer.OVERLAY))
+        {
+            this.modelState.setPaintLayerEnabled(PaintLayer.OVERLAY, this.overlayToggle.isOn());
+            this.hasUpdates = true;
+        }
+
+        if(this.detailToggle.isOn() != this.modelState.isPaintLayerEnabled(PaintLayer.DETAIL))
+        {
+            this.modelState.setPaintLayerEnabled(PaintLayer.DETAIL, this.detailToggle.isOn());
+            this.hasUpdates = true;
+        }
+
+        BlockRenderLayer renderLayer = this.baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        if(renderLayer != this.modelState.getRenderLayer(PaintLayer.BASE))
+        {
+            this.modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
+            this.hasUpdates = true;
+        }
+        
+        renderLayer = this.lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        if(renderLayer != this.modelState.getRenderLayer(PaintLayer.LAMP))
+        {
+            this.modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+            this.hasUpdates = true;
+        }
+
+        if(this.overlayMasonryToggle.isOn() != this.modelState.isMasonryBorder())
+        {
+            this.modelState.setMasonryBorder(this.overlayMasonryToggle.isOn());
+            this.hasUpdates = true;
+        }
+        
         if(this.hasUpdates)
         {
             // see notes in SuperBlock for canRenderInLayer()
@@ -122,27 +156,11 @@ public class SuperGuiScreen extends GuiScreen
             this.hasUpdates = true;
         }
         
-        if(layer != PaintLayer.BASE && (this.modelState.isPaintLayerEnabled(layer) != this.layerToggle[layer.dynamicIndex].isOn()))
-        {
-            this.modelState.setPaintLayerEnabled(layer, this.layerToggle[layer.dynamicIndex].isOn());
-            this.hasUpdates = true;
-        }
-        
         if(!((this.modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && this.fullBrightToggle[layer.dynamicIndex].isOn()))
         {
             this.modelState.setLightingMode(layer, this.fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
             this.hasUpdates = true;
         }
-        
-        if(!((this.modelState.getRenderLayer(layer) != BlockRenderLayer.SOLID) && this.translucentToggle[layer.dynamicIndex].isOn()))
-        {
-            BlockRenderLayer targetLayer = this.translucentToggle[layer.dynamicIndex].isOn() 
-                    ? RenderLayerHelper.getMostTransparentLayerFromFlags(tex.renderLayerFlags)
-                    : BlockRenderLayer.SOLID;
-            this.modelState.setRenderLayer(layer, targetLayer);
-            this.hasUpdates = true;
-        }
-        
     }
     
     @Override
@@ -233,8 +251,12 @@ public class SuperGuiScreen extends GuiScreen
         {
             this.textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
             this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
-            this.layerToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
-            this.translucentToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            
+            this.overlayToggle = new Toggle().setLabel("Enabled");
+            this.detailToggle = new Toggle().setLabel("Enabled");
+            this.baseTranslucentToggle = new Toggle().setLabel("Translucent");
+            this.lampTranslucentToggle = new Toggle().setLabel("Translucent");
+            this.overlayMasonryToggle = new Toggle().setLabel("Masonry");
             this.fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
             
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
@@ -244,12 +266,8 @@ public class SuperGuiScreen extends GuiScreen
                 
                 this.colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
             
-                this.layerToggle[i] = new Toggle().setLabel("Enabled");
-                this.translucentToggle[i] = new Toggle().setLabel("Translucent");
                 this.fullBrightToggle[i] = new Toggle().setLabel("Glowing");
             }
-            // base layer is always included
-            this.layerToggle[PaintLayer.BASE.ordinal()].setVisible(false);
         }
         
         if(this.mainPanel == null)
@@ -263,30 +281,27 @@ public class SuperGuiScreen extends GuiScreen
             
             //TODO: localize
             int GROUP_BASE = rightPanel.createVisiblityGroup("Base Layer");
-            GuiControl tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.BASE.ordinal()],
-                    this.translucentToggle[PaintLayer.BASE.ordinal()], this.fullBrightToggle[PaintLayer.BASE.ordinal()])
+            GuiControl tempV = new Panel(true).addAll(this.baseTranslucentToggle, this.fullBrightToggle[PaintLayer.BASE.ordinal()])
                     .setHorizontalWeight(2);
             GuiControl tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(GROUP_BASE, tempH, this.textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(GROUP_BASE);
             
             int GROUP_BORDER = rightPanel.createVisiblityGroup("Overlay"); 
-            tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.OVERLAY.ordinal()],
-                    this.translucentToggle[PaintLayer.OVERLAY.ordinal()], this.fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
+            tempV = new Panel(true).addAll(this.overlayToggle,
+                    this.overlayMasonryToggle, this.fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(GROUP_BORDER, tempH,this.textureTabBar[PaintLayer.OVERLAY.ordinal()]);
 
             int GROUP_DECO = rightPanel.createVisiblityGroup("Decoration");
-            tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.DETAIL.ordinal()],
-                    this.translucentToggle[PaintLayer.DETAIL.ordinal()], this.fullBrightToggle[PaintLayer.DETAIL.ordinal()])
+            tempV = new Panel(true).addAll(this.detailToggle, this.fullBrightToggle[PaintLayer.DETAIL.ordinal()])
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(GROUP_DECO, tempH, this.textureTabBar[PaintLayer.DETAIL.ordinal()]);
 
             int GROUP_LAMP = rightPanel.createVisiblityGroup("Lamp");            
-            tempV = new Panel(true).addAll(this.layerToggle[PaintLayer.LAMP.ordinal()],
-                    this.translucentToggle[PaintLayer.LAMP.ordinal()], this.fullBrightToggle[PaintLayer.LAMP.ordinal()])
+            tempV = new Panel(true).addAll(this.lampTranslucentToggle, this.fullBrightToggle[PaintLayer.LAMP.ordinal()])
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(GROUP_LAMP, tempH, this.textureTabBar[PaintLayer.LAMP.ordinal()]);
@@ -335,6 +350,13 @@ public class SuperGuiScreen extends GuiScreen
     
     private void loadControlValuesFromModelState()
     {
+        
+        this.overlayToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.OVERLAY));
+        this.detailToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.DETAIL));
+        this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
+        this.lampTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
+        this.overlayMasonryToggle.setOn(this.modelState.isMasonryBorder());
+
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
             TexturePicker t = this.textureTabBar[layer.dynamicIndex];
@@ -348,11 +370,7 @@ public class SuperGuiScreen extends GuiScreen
             ColorPicker c = this.colorPicker[layer.dynamicIndex];
             c.setColorMapID(this.modelState.getColorMap(layer).ordinal);
             
-            this.layerToggle[layer.dynamicIndex].setOn(modelState.isPaintLayerEnabled(layer));
-            
             this.fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
-
-            this.translucentToggle[layer.dynamicIndex].setOn(modelState.getRenderLayer(layer) != BlockRenderLayer.SOLID);
         }
     }
     
