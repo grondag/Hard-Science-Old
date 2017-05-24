@@ -2,6 +2,7 @@ package grondag.adversity.superblock.block;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
+import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -205,5 +206,23 @@ public class SuperItemBlock extends ItemBlock
         return ((SuperBlock)this.block).getItemStackDisplayName(stack);
     }
     
+    
+    public static void setStackPlacementShape(ItemStack stack, int placementShape)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
+            stack.setTagCompound(tag);
+        }
+        tag.setInteger(SuperTileEntity.PLACEMENT_SHAPE_TAG, placementShape);
+    }
+    
+    public static int getStackPlacementShape(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return (tag != null && tag.hasKey(SuperTileEntity.PLACEMENT_SHAPE_TAG)) 
+                ? tag.getInteger(SuperTileEntity.PLACEMENT_SHAPE_TAG)
+                : SuperPlacement.PLACEMENT_3x3x3;
+    }
     
 }

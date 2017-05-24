@@ -23,12 +23,14 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
+import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.niceblock.support.NicePlacement;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import mcjty.theoneprobe.api.IProbeHitData;
@@ -675,6 +677,26 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    {
+        super.addInformation(stack, playerIn, tooltip, advanced);
+        ModelState modelState = SuperItemBlock.getModelState(stack);
+        
+        ColorMap colorMap = modelState.getColorMap(PaintLayer.BASE);
+        if(colorMap != null)
+        {
+            tooltip.add("Color: " + colorMap.colorMapName);
+        }
+        
+        int placementShape = SuperItemBlock.getStackPlacementShape(stack);
+        if(placementShape != 0)
+        {
+            tooltip.add(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));
+        }
+        
+    }
+    
+    @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
     {
         return Collections.emptyList();
@@ -689,6 +711,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         {
             probeInfo.text("Species = " + modelState.getSpecies())
                 .text("Shape = " + modelState.getShape());
+            
+            int placementShape = SuperItemBlock.getStackPlacementShape(this.getStackFromBlock(blockState, world, data.getPos()));
+            if(placementShape != 0)
+            {
+                probeInfo.text(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.support.BaseMaterial;
@@ -21,10 +22,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -74,6 +77,19 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     {
         super.harvestBlock(worldIn, player, pos, state, te, stack);
         worldIn.setBlockToAir(pos);
+    }
+    
+    @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
+    {
+        ItemStack stack = super.getPickBlock(state, target, world, pos, player);
+        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        if(myTE != null)
+        {
+            int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : SuperPlacement.PLACEMENT_3x3x3;
+            SuperItemBlock.setStackPlacementShape(stack, placementShape);
+        }
+        return stack;
     }
     
     @Override
@@ -139,20 +155,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     
     public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, SuperTileEntity niceTE)
     {
-        // default is NOOP
-    }
-    
-    @Override
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
-    {
-        super.addInformation(stack, playerIn, tooltip, advanced);
-        ModelState modelState = SuperItemBlock.getModelState(stack);
-        
-        ColorMap colorMap = modelState.getColorMap(PaintLayer.BASE);
-        if(colorMap != null)
-        {
-            tooltip.add("Color: " + colorMap.colorMapName);
-        }
+        niceTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
     }
     
     // BLOCK PROPERTIES
