@@ -10,7 +10,11 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.SuperModelBlock;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
+@SuppressWarnings("unused")
 public class BlockTests
 {
     
@@ -157,6 +161,60 @@ public class BlockTests
             return matchDispather == ((NiceBlockPlus)ibs.getBlock()).dispatcher
                    && matchDispather.getStateSet().doComponentValuesMatch(colorComponent, matchKey,
                            ((NiceTileEntity) world.getTileEntity(pos)).getModelKey());
+        }       
+    }
+    
+    public static class SuperBlockBorderMatch implements IBlockTest
+    {
+        private final SuperBlock block;
+        private final int matchSpecies;
+        
+        /** pass in the info for the block you want to match */
+        public SuperBlockBorderMatch(SuperBlock block, int matchSpecies)
+        {
+            this.block = block;
+            this.matchSpecies = matchSpecies;
+        }
+        
+        /** assumes you want to match block at given position */
+        public SuperBlockBorderMatch(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            this.block = ((SuperBlock)ibs.getBlock());
+            //last param = false prevents recursion - we don't need the full model state (which depends on this logic)
+            this.matchSpecies = this.block.getModelState(ibs, world, pos, false).getSpecies();
+        }
+        
+        @Override 
+        public boolean wantsModelState() { return true; }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            return testBlock(world, ibs, pos, this.block.getModelState(ibs, world, pos, false));
+        }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
+        {
+            return ibs.getBlock() == this.block && this.matchSpecies == modelState.getSpecies();
+        }
+    }
+
+    
+    public static class SuperBlockBorderCandidateMatch implements IBlockTest
+    {
+        private final SuperBlock block;
+        
+        /** pass in the info for the block you want to match */
+        public SuperBlockBorderCandidateMatch(SuperBlock block)
+        {
+            this.block = block;
+        }
+        
+        @Override
+        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        {
+            return ibs.getBlock() == block; 
         }       
     }
 }

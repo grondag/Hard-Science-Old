@@ -1,7 +1,5 @@
 package grondag.adversity.superblock.model.painter;
 
-import java.util.List;
-
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
@@ -15,8 +13,9 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
     }
 
     @Override
-    public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
+    public RawQuad paintQuad(RawQuad quad)
     {
         // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -27,9 +27,9 @@ public class RenderLayerHelper
      */
     public static BlockRenderLayer getMostTransparentLayerFromFlags(int layerFlags)
     {
-        if((layerFlags | TRANSLUCENT_FLAG)  == TRANSLUCENT_FLAG) return BlockRenderLayer.TRANSLUCENT;
-        if((layerFlags | CUTOUT_MIPPED_FLAG)  == CUTOUT_MIPPED_FLAG) return BlockRenderLayer.CUTOUT_MIPPED;
-        if((layerFlags | CUTOUT_FLAG)  == CUTOUT_FLAG) return BlockRenderLayer.CUTOUT;
+        if((layerFlags & TRANSLUCENT_FLAG)  == TRANSLUCENT_FLAG) return BlockRenderLayer.TRANSLUCENT;
+        if((layerFlags & CUTOUT_MIPPED_FLAG)  == CUTOUT_MIPPED_FLAG) return BlockRenderLayer.CUTOUT_MIPPED;
+        if((layerFlags & CUTOUT_FLAG)  == CUTOUT_FLAG) return BlockRenderLayer.CUTOUT;
         return BlockRenderLayer.SOLID;
     }
 }

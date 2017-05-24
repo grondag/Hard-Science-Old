@@ -64,7 +64,7 @@ public class SuperTileEntity extends TileEntity
     @SideOnly(Side.CLIENT)
     public void updateClientRenderState()
     {
-//        Adversity.log.info("updateClientRenderState pos=" + pos.toString());
+//        Output.getLog().info("SuperTileEntity.updateClientRenderState  @" + pos.toString());
 
         this.isModelStateCacheDirty = true;
 
@@ -139,9 +139,8 @@ public class SuperTileEntity extends TileEntity
         // so we need to refresh render state once we have the server-side info.
 //        Adversity.log.info("handleUpdateTag pos=" + pos.toString());
 
-        super.handleUpdateTag(tag);
         ModelState oldModelState = modelState;
-        doReadFromNBT(tag);
+        super.handleUpdateTag(tag);
         if(!oldModelState.equals(modelState) && this.world.isRemote)
         {
             this.updateClientRenderState();
@@ -217,15 +216,17 @@ public class SuperTileEntity extends TileEntity
         return compound;
     }
 
-    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos)
+    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     { 
         if(this.modelState == null)
         {
             this.modelState = ((SuperBlock)state.getBlock()).getDefaultModelState();
             this.isModelStateCacheDirty = true;
         }
-        if(this.isModelStateCacheDirty)
+        if(this.isModelStateCacheDirty && refreshFromWorldIfNeeded)
         {
+//            Output.getLog().info("SuperTileEntity.getModelState world refresh  @" + pos.toString());
+
             this.modelState.refreshFromWorld(state, world, pos);
             this.isModelStateCacheDirty = false;
         }

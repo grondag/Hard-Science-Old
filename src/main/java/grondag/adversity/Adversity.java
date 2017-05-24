@@ -26,8 +26,6 @@ public class Adversity {
 
 	public static WorldType adversityWorld;
 	
-	public WorldSavedData thing;
-
 	public static CreativeTabs tabAdversity = new CreativeTabs("Adversity") 
 	{
 		@Override

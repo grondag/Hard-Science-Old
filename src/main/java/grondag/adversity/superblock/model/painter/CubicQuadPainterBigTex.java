@@ -1,11 +1,7 @@
 package grondag.adversity.superblock.model.painter;
 
-import java.util.List;
-
 import grondag.adversity.library.Rotation;
-import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -28,14 +24,10 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
     }
 
     @Override
-    public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
+    public RawQuad paintQuad(RawQuad quad)
     {
-        RawQuad result = inputQuad.clone();
         
-        result.recolor(this.colorMap.getColor(this.lightingMode == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP : EnumColorMap.BASE));
-        result.lightingMode = this.lightingMode;
-        
-        EnumFacing face = inputQuad.getFace() == null ? EnumFacing.UP : inputQuad.getFace();
+        EnumFacing face = quad.getFace() == null ? EnumFacing.UP : quad.getFace();
         
         // represents position within a 32x32x32 volume, with x, y representing position on the surface
         // qnd z representing depth into the surface
@@ -59,12 +51,12 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         if(this.texture.textureVersionCount == 1)
         {
             // single texture, so do rotation, uv flip and offset
-            result.textureSprite = this.texture.getTextureSprite(this.blockVersion);
+            quad.textureSprite = this.texture.getTextureSprite(this.blockVersion);
             
-            result.useSimpleRotation = true;
-            result.rotation = Rotation.values()[key & 3];
+            quad.useSimpleRotation = true;
+            quad.rotation = Rotation.values()[key & 3];
 
-            surfaceVec = rotateFacePerspective(surfaceVec, result.rotation, this.texture.textureScale);
+            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
             
             int xOffset = (key * 11) & this.texture.textureScale.sliceCountMask; 
             int yOffset = (key * 7) & this.texture.textureScale.sliceCountMask; 
@@ -81,35 +73,34 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             int x = flipU ? this.texture.textureScale.sliceCount - surfaceVec.getX() : surfaceVec.getX();
             int y = flipV ? this.texture.textureScale.sliceCount - surfaceVec.getY() : surfaceVec.getY();
             
-            result.minU = x * sliceIncrement;
-            result.maxU = result.minU + (flipU ? -sliceIncrement : sliceIncrement);
+            quad.minU = x * sliceIncrement;
+            quad.maxU = quad.minU + (flipU ? -sliceIncrement : sliceIncrement);
 
             
-            result.minV = y * sliceIncrement;
-            result.maxV = result.minV + (flipV ? -sliceIncrement : sliceIncrement);
+            quad.minV = y * sliceIncrement;
+            quad.maxV = quad.minV + (flipV ? -sliceIncrement : sliceIncrement);
             
         }
         else
         {
             // multiple texture versions, so do rotation and alternation
-            result.textureSprite = this.texture.getTextureSprite((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
+            quad.textureSprite = this.texture.getTextureSprite((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
             
-            result.useSimpleRotation = true;
-            result.rotation = Rotation.values()[(this.texture.allowRotation ? key + this.rotation.ordinal() : key) & 3];
+            quad.useSimpleRotation = true;
+            quad.rotation = Rotation.values()[(this.texture.allowRotation ? key + this.rotation.ordinal() : key) & 3];
 
-            surfaceVec = rotateFacePerspective(surfaceVec, result.rotation, this.texture.textureScale);
+            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
             
             float sliceIncrement = this.texture.textureScale.sliceIncrement;
             
-            result.minU = surfaceVec.getX() * sliceIncrement;
-            result.maxU = result.minU + sliceIncrement;
+            quad.minU = surfaceVec.getX() * sliceIncrement;
+            quad.maxU = quad.minU + sliceIncrement;
 
             
-            result.minV = surfaceVec.getY() * sliceIncrement;
-            result.maxV = result.minV + sliceIncrement;
+            quad.minV = surfaceVec.getY() * sliceIncrement;
+            quad.maxV = quad.minV + sliceIncrement;
         }
-
-        outputList.add(result);    
+        return quad;
     }
 
     /** 

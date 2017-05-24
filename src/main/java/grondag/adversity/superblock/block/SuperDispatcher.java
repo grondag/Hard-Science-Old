@@ -72,8 +72,10 @@ public class SuperDispatcher
 
 			for(BlockRenderLayer layer : BlockRenderLayer.values())
 			{
-			    if(!containers[layer.ordinal()].isEmpty())
+			    if(key.canRenderInLayer(layer))
 			    {
+			        if(Output.DEBUG_MODE && containers[layer.ordinal()].isEmpty())
+			            Output.getLog().warn("SuperDispatcher BlockCacheLoader: Empty quads on enabled render layer.");
 			        result.set(layer, QuadContainer.fromRawQuads(containers[layer.ordinal()]));
 			    }
 			}
@@ -234,7 +236,14 @@ public class SuperDispatcher
             }
             else
             {
-                return modelCache.get(modelState).get(layer).getQuads(side);
+                //TODO: remove
+                SparseLayerMap map = modelCache.get(modelState);
+                if(map == null) 
+                    return QuadFactory.EMPTY_QUAD_LIST;
+                QuadContainer container = map.get(layer);
+                if(container == null)
+                        return QuadFactory.EMPTY_QUAD_LIST;
+                return container.getQuads(side);
             }
         }
     
@@ -245,7 +254,7 @@ public class SuperDispatcher
             // Render layer will be null for block damage rendering.
             return layer == null 
                 ? true 
-                : ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(MinecraftForgeClient.getRenderLayer(), this.layerShadedFlags);
+                : ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, this.layerShadedFlags);
         }
     
         @Override

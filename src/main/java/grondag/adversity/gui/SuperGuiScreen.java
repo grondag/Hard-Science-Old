@@ -66,7 +66,7 @@ public class SuperGuiScreen extends GuiScreen
     
     private ItemPreview itemPreview;
     
-    private int meta = 0;
+//    private int meta = 0;
     private ModelState modelState = null;
     
     private boolean hasUpdates = false;
@@ -99,9 +99,9 @@ public class SuperGuiScreen extends GuiScreen
         if(this.hasUpdates)
         {
             // see notes in SuperBlock for canRenderInLayer()
-            this.meta = this.modelState.getRenderLayerShadedFlags();
+//            this.meta = this.modelState.getCanRenderInLayerFlags();
             
-            this.itemPreview.previewItem.setItemDamage(this.meta);
+//            this.itemPreview.previewItem.setItemDamage(this.meta);
             SuperItemBlock.setModelState(this.itemPreview.previewItem, this.modelState);
         }
     }
@@ -178,7 +178,7 @@ public class SuperGuiScreen extends GuiScreen
     {
         if(this.hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
-            AdversityMessages.INSTANCE.sendToServer(new PacketUpdateSuperModelBlock(this.meta, this.modelState));
+            AdversityMessages.INSTANCE.sendToServer(new PacketUpdateSuperModelBlock(this.itemPreview.previewItem.getMetadata(), this.modelState));
             this.hasUpdates = false;
         }
         this.mc.displayGuiScreen((GuiScreen)null);
@@ -222,7 +222,7 @@ public class SuperGuiScreen extends GuiScreen
                 // Abort on strangeness
                 return;
             }
-            this.meta = this.itemPreview.previewItem.getMetadata();
+//            this.meta = this.itemPreview.previewItem.getMetadata();
             this.modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
         }
     

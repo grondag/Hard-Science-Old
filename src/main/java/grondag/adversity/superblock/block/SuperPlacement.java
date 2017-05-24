@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.support;
+package grondag.adversity.superblock.block;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -9,6 +9,7 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
+import grondag.adversity.niceblock.support.BlockTests;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -19,43 +20,22 @@ import net.minecraft.world.World;
  * Specialized onBlockPlaced event handlers to enable building of
  * decorative multiblocks with connected textures/geometry.
  */
-public abstract class NicePlacement {
+public abstract class SuperPlacement {
     
     public static final int PLACEMENT_2x1x1 = (2 << 16) | (1 << 8) | 1;
     public static final int PLACEMENT_2x2x2 = (2 << 16) | (2 << 8) | 2;
     public static final int PLACEMENT_3x3x3 = (3 << 16) | (3 << 8) | 3;
     public static final int PLACEMENT_4x4x4 = (4 << 16) | (4 << 8) | 4;
     
-//	/** call from Block class after setting up **/
-//	public abstract IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-//			float hitZ, int meta, EntityLivingBase placer);
 
-    public abstract int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock block);
-
-    //	/** convenience factory method */
-//	public static NicePlacement makeMasonryPlacer() {
-//		return new PlacementMasonry(NiceStyle.MASONRY_A, NiceStyle.MASONRY_B,
-//				NiceStyle.MASONRY_C, NiceStyle.MASONRY_D, NiceStyle.MASONRY_E);
-//	}
-
-//	/** convenience factory method */
-//	public static NicePlacement makeColumnPlacerRound() {
-//		return new PlacementColumn(NiceStyle.COLUMN_ROUND_X, NiceStyle.COLUMN_ROUND_Y,
-//				NiceStyle.COLUMN_ROUND_Z);
-//	}
-//
-//	/** convenience factory method */
-//	public static NicePlacement makeColumnPlacerSquare() {
-//		return new PlacementColumn(NiceStyle.COLUMN_SQUARE_X, NiceStyle.COLUMN_SQUARE_Y,
-//				NiceStyle.COLUMN_SQUARE_Z);
-//	}
-
+    public abstract int getSpeciesForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, SuperBlock block);
 
 	/**
 	 * Handles placement of blocks that join together in appearance and have
 	 * multiple block instances with the same meta.
 	 * */
-	public static class PlacementBigBlock extends NicePlacement {
+	public static class PlacementBigBlock extends SuperPlacement 
+	{
 
 	    private final PlacementValidatorCubic shape;
 	    
@@ -64,7 +44,8 @@ public abstract class NicePlacement {
             this(new PlacementValidatorCubic(4, 4, 4));
         }
 
-	    public PlacementBigBlock(PlacementValidatorCubic shape){
+	    public PlacementBigBlock(PlacementValidatorCubic shape)
+	    {
 	        this.shape = shape;
 	    }
 	    
@@ -76,22 +57,20 @@ public abstract class NicePlacement {
 	
 
         @Override
-        public int getMetaForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, NiceBlock block)
+        public int getSpeciesForPlacedStack(World worldIn, BlockPos pos, EnumFacing facing, ItemStack stack, SuperBlock block)
         {
-            long matchKey = NiceItemBlock.getModelStateKey(stack);
-            IBlockTest colorMatch = new BlockTests.TestForBlockColorMatch2(block, matchKey);
             int speciesInUseFlags = 0;
-            int species;
+            
             NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos, false);
-            NeighborTestResults results = neighbors.getNeighborTestResults(colorMatch);
+            NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderCandidateMatch(block));
             
             for(EnumFacing face : PLACEMENT_ORDER)            
             {
                  if (results.result(face)) 
                  {
-                     species = neighbors.getBlockState(face).getValue(NiceBlock.META);
+                     int species = neighbors.getModelState(face).getSpecies();
                      speciesInUseFlags |= (1 << species);
-                     if (shape.isValidShape(worldIn, pos, new BlockTests.BigBlockMatch2(block, matchKey, species))) 
+                     if (shape.isValidShape(worldIn, pos, new BlockTests.SuperBlockBorderMatch(block, species))) 
                      {
                          return species;
                      }
@@ -102,17 +81,17 @@ public abstract class NicePlacement {
             {
                 if(results.result(corner))
                 {
-                    speciesInUseFlags |= (1 << neighbors.getBlockState(corner).getValue(NiceBlock.META));
+                    speciesInUseFlags |= (1 << neighbors.getModelState(corner).getSpecies());
                 }
             }
 
             
             // if no available mates, randomly choose a species 
             //that will not connect to what is surrounding
-            int salt = ThreadLocalRandom.current().nextInt(16);
+            int salt = pos.hashCode() & 15;;
             for(int i = 0; i < 16; i++)
             {
-                species = (i + salt) % 16;
+                int species = (i + salt) % 16;
                 if((speciesInUseFlags & (1 << species)) == 0)
                 {
                     return species;

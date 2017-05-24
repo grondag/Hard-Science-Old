@@ -6,11 +6,13 @@ import grondag.adversity.library.Alternator;
 import grondag.adversity.library.BinaryEnumSet;
 import grondag.adversity.library.BitPacker;
 import grondag.adversity.library.IAlternator;
+import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.BitPacker.BitElement.EnumElement;
 import grondag.adversity.library.BitPacker.BitElement.IntElement;
 import grondag.adversity.library.BitPacker.BitElement.LongElement;
+import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
 import grondag.adversity.library.joinstate.SimpleJoin;
@@ -19,6 +21,7 @@ import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
@@ -68,7 +71,7 @@ public class ModelStateFactory
     private static final IntElement P2_POS_Y = PACKER_2.createIntElement(32);
     private static final IntElement P2_POS_Z = PACKER_2.createIntElement(32);
     /** value semantics are owned by consumer - only constraints are size and does not update from world */
-    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 30);
+    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 49);
 
     static final BitPacker PACKER_3_BLOCK = new BitPacker();
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
@@ -324,6 +327,7 @@ public class ModelStateFactory
         /** returns self as convenience method */
         public ModelState refreshFromWorld(IBlockState state, IBlockAccess world, BlockPos pos)
         {
+//            Output.getLog().info("ModelState.refreshFromWorld static=" + this.isStatic + " @" + pos.toString());
             if(this.isStatic) return this;
             
             populateStateFlagsIfNeeded();
@@ -351,7 +355,10 @@ public class ModelStateFactory
                 // Maybe have parameters on which block test to use, or based on shape?
                 if((STATE_FLAG_NEEDS_CORNER_JOIN & stateFlags) == STATE_FLAG_NEEDS_CORNER_JOIN)
                 {
-//                    b3 = CornerJoinBlockStateSelector.findIndex(tests)
+//                    Output.getLog().info("ModelState.refreshFromWorld corner join refresh @" + pos.toString());
+
+                    NeighborTestResults tests = new NeighborBlocks(world, pos, false).getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this.getSpecies()));
+                    b3 = P3B_BLOCK_JOIN.setValue(CornerJoinBlockStateSelector.findIndex(tests), bits3);
                 }
                 else if ((STATE_FLAG_NEEDS_SIMPLE_JOIN & stateFlags) == STATE_FLAG_NEEDS_SIMPLE_JOIN)
                 {
@@ -376,6 +383,8 @@ public class ModelStateFactory
                 break;
             
             }
+            
+            this.invalidateHashCode();
             
             return this;
         }
@@ -450,6 +459,7 @@ public class ModelStateFactory
         public void setRenderLayer(PaintLayer layer, BlockRenderLayer renderLayer)
         {
             bits0 = P0_PAINT_LAYER[layer.dynamicIndex].setValue(renderLayer, bits0);
+            clearStateFlags();
             invalidateHashCode();
         }
 
@@ -461,6 +471,7 @@ public class ModelStateFactory
         public void setPaintLayerEnabled(PaintLayer layer, boolean isEnabled)
         {
             bits0 = P0_PAINT_LAYER_ENABLED[layer.dynamicIndex].setValue(isEnabled, bits0);
+            clearStateFlags();
             invalidateHashCode();
         }
         
@@ -476,7 +487,11 @@ public class ModelStateFactory
          * Identifies which block render layers can be rendered in this model.
          * Can be decoded with {@link #BENUMSET_RENDER_LAYER} 
          */
-        public byte getCanRenderInLayerFlags() { return this.renderLayerEnabledFlags; };
+        public byte getCanRenderInLayerFlags() 
+        { 
+            this.populateStateFlagsIfNeeded();
+            return this.renderLayerEnabledFlags; 
+        };
 
 
         ////////////////////////////////////////////////////
@@ -503,6 +518,7 @@ public class ModelStateFactory
         public void setLightingMode(PaintLayer layer, LightingMode lightingMode)
         {
             bits1 = P1_PAINT_LIGHT[layer.dynamicIndex].setValue(lightingMode, bits1);
+            clearStateFlags();
             invalidateHashCode();
         }
         
@@ -518,7 +534,11 @@ public class ModelStateFactory
          * Identifies which block render layers should be rendered with AO (not full brightness).
          * Can be decoded with {@link ModelState#BENUMSET_RENDER_LAYER} 
          */
-        public byte getRenderLayerShadedFlags() { return this.renderLayerShadedFlags; };
+        public byte getRenderLayerShadedFlags() 
+        { 
+            this.populateStateFlagsIfNeeded();
+            return this.renderLayerShadedFlags; 
+        };
         
         ////////////////////////////////////////////////////
         //  PACKER 2 ATTRIBUTES  (NOT SHAPE-DEPENDENT)

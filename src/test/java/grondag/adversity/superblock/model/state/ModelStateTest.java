@@ -39,7 +39,7 @@ public class ModelStateTest
         state.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(7));
         state.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
         state.setLightingMode(PaintLayer.DETAIL, LightingMode.SHADED);
-        state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.CUTOUT_MIPPED);
+        state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.SOLID);
         state.setRenderLayer(PaintLayer.DETAIL, BlockRenderLayer.TRANSLUCENT);
         state.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
         state.setTexture(PaintLayer.DETAIL, Textures.BORDER_TEST);
@@ -65,11 +65,12 @@ public class ModelStateTest
         assert(reloadedState.isStatic());
         assert(reloadedState.isPaintLayerEnabled(PaintLayer.BASE));
         assert(reloadedState.isPaintLayerEnabled(PaintLayer.DETAIL));
+        assert(reloadedState.isLayerShaded(BlockRenderLayer.SOLID) == false);
         assert(reloadedState.getColorMap(PaintLayer.BASE) == BlockColorMapProvider.INSTANCE.getColorMap(5));
         assert(reloadedState.getColorMap(PaintLayer.DETAIL) == BlockColorMapProvider.INSTANCE.getColorMap(7));
         assert(reloadedState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT);
         assert(reloadedState.getLightingMode(PaintLayer.DETAIL) == LightingMode.SHADED);
-        assert(reloadedState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.CUTOUT_MIPPED);
+        assert(reloadedState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID);
         assert(reloadedState.getRenderLayer(PaintLayer.DETAIL) == BlockRenderLayer.TRANSLUCENT);
         assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_RAW_FLEXSTONE);
         assert(reloadedState.getTexture(PaintLayer.DETAIL) == Textures.BORDER_TEST);
@@ -84,10 +85,14 @@ public class ModelStateTest
         assert(reloadedState.getSimpleJoin().getIndex() == CornerJoinBlockStateSelector.getJoinState(69).simpleJoin.getIndex());
         assert(reloadedState.isAxisInverted());
         assert(reloadedState.getStaticShapeBits() == 879579585L);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.SOLID) == false);
+        assert(reloadedState.canRenderInLayer(BlockRenderLayer.SOLID) == true);
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT) == false);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED) == true);
+        assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED) == false);
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.TRANSLUCENT) == true);
+        
+        int flags = reloadedState.getRenderLayerShadedFlags();
+        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.SOLID, flags) == false);
+        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.TRANSLUCENT, flags) == true);
 
         
         

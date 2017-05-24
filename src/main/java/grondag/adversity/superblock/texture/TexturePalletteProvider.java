@@ -185,7 +185,10 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             return "adversity:blocks/" + textureBaseName;
         }
         
-        /** used by dispatched as default particle texture */
+        /** 
+         * Used by dispatcher as nominal particle texture.
+         * More important usage is by GUI texture picker.
+         */
         public String getDefaultParticleTexture() 
         { 
             if(textureBaseName == null) return "";
@@ -196,9 +199,11 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
                 return buildTextureNameBigTex();
             case SPLIT_X_8:
             case MASONRY_5:    
-            case BORDER_13:
             default:
                 return buildTextureName_X_8(0);
+                
+            case BORDER_13:
+                return buildTextureName_X_8(4);
             }
         }
         

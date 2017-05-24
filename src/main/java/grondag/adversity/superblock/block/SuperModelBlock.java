@@ -83,7 +83,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         
         if(stack != null)
         {
-            SuperItemBlock.setModelState(stack, this.getModelState(state, world, pos));
+            SuperItemBlock.setModelState(stack, this.getModelState(state, world, pos, true));
         }
 
         return stack;
@@ -116,14 +116,20 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
         return modelState;
     }
+    
+    @Override
+    public int getMetaFromModelState(ModelState modelState)
+    {
+        return modelState.getCanRenderInLayerFlags();
+    }
 
     @Override
-    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos)
+    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
         if(myTE != null) 
         {
-          return myTE.getModelState(state, world, pos);
+          return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
         }
         else
         {

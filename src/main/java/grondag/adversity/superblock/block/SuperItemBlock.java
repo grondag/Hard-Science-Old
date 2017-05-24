@@ -38,7 +38,7 @@ public class SuperItemBlock extends ItemBlock
     {
         return damage;
     }
-         
+    
 //    public List<String> getWailaBody(ItemStack itemStack, List<String> current tip, IWailaDataAccessor accessor, IWailaConfigHandler config)
 //    {
 //        List<String> retVal = new ArrayList<String>();
@@ -100,28 +100,33 @@ public class SuperItemBlock extends ItemBlock
     @Override
     public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-        ItemStack stack = playerIn.getHeldItem(hand);
+        ItemStack stackIn = playerIn.getHeldItem(hand);
 
+        //TODO: always false, put back logic or remove
         boolean isAdditive = false;
-        BlockPos placedPos = worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) || (isAdditive = ((SuperBlock)block).isItemUsageAdditive(worldIn, pos, stack))
+        
+        BlockPos placedPos = worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) || (isAdditive = ((SuperBlock)block).isItemUsageAdditive(worldIn, pos, stackIn))
                 ? pos : pos.offset(facing);
         
         
-        if (stack.isEmpty())
+        if (stackIn.isEmpty())
         {
             return EnumActionResult.FAIL;
-        }        
-        else if (!playerIn.canPlayerEdit(placedPos, facing, stack))
+        }       
+        
+        if (!playerIn.canPlayerEdit(placedPos, facing, stackIn))
         {
             return EnumActionResult.FAIL;
         }
         
-        else if (isAdditive)
+        ItemStack stack = ((SuperBlock)this.block).updatedStackForPlacement(worldIn, placedPos, pos, facing, stackIn, playerIn);
+        int meta = ((SuperBlock)this.block).getMetaFromModelState(getModelState(stack));
+        
+        if (isAdditive)
         {
             IBlockState state = worldIn.getBlockState(pos);
             AxisAlignedBB axisalignedbb = state.getSelectedBoundingBox(worldIn, placedPos);
             if(!worldIn.checkNoEntityCollision(axisalignedbb.offset(pos), playerIn)) return EnumActionResult.FAIL;
-            int meta = ((SuperBlock) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
             IBlockState placedState = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn, hand);
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, placedState))
             {
@@ -135,9 +140,7 @@ public class SuperItemBlock extends ItemBlock
         
         else if (worldIn.mayPlace(this.block, placedPos, false, facing, (Entity)null))            
         {
-            int meta = ((SuperBlock) this.block).getMetaForPlacedBlockFromStack(worldIn, placedPos, pos, facing, stack, playerIn);
             IBlockState iblockstate1 = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn, hand);
-
             if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
             {
                 SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, playerIn);
@@ -178,7 +181,7 @@ public class SuperItemBlock extends ItemBlock
             SuperTileEntity niceTE = (SuperTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-//                Adversity.log.info("calling setModelKey from NiceItemBlock.placeBlockAt");
+//                Output.getLog().info("calling setModelKey from SuperItemBlock.placeBlockAt @" + pos.toString());
 
                 niceTE.setModelState(getModelState(stack));
 
