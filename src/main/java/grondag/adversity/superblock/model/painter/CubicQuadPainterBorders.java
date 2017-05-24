@@ -52,7 +52,6 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
             return null;
         
         quad.rotation = inputs.rotation;
-//        cubeInputs.rotateBottom = false;
         quad.minU = inputs.flipU ? 16 : 0;
         quad.minV = inputs.flipV ? 16 : 0;
         quad.maxU = inputs.flipU ? 0 : 16;

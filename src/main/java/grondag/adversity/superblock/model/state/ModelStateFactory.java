@@ -60,7 +60,6 @@ public class ModelStateFactory
     @SuppressWarnings("unchecked")
     private static final EnumElement<BlockRenderLayer>[] P0_PAINT_LAYER = new EnumElement[PaintLayer.DYNAMIC_SIZE];
     private static final BooleanElement[] P0_PAINT_LAYER_ENABLED = new BooleanElement[PaintLayer.DYNAMIC_SIZE];
-    private static final BooleanElement P0_MASONRY_BORDER = PACKER_0.createBooleanElement();
     
     static final BitPacker PACKER_1 = new BitPacker();
     private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
@@ -501,18 +500,6 @@ public class ModelStateFactory
             return this.renderLayerEnabledFlags; 
         };
         
-        public boolean isMasonryBorder()
-        {
-            return P0_MASONRY_BORDER.getValue(bits0);
-        }
-        
-        public void setMasonryBorder(boolean isMasonry)
-        {
-            bits0 = P0_MASONRY_BORDER.setValue(isMasonry, bits0);
-            invalidateHashCode();
-        }
-
-
         ////////////////////////////////////////////////////
         //  PACKER 1 ATTRIBUTES (NOT SHAPE-DEPENDENT)
         ////////////////////////////////////////////////////
