@@ -64,6 +64,7 @@ public class SuperGuiScreen extends GuiScreen
     private Toggle detailToggle;
     private Toggle baseTranslucentToggle;
     private Toggle lampTranslucentToggle;
+    private Toggle overlayMasonryToggle;
     
     private ItemPreview itemPreview;
     
@@ -120,6 +121,12 @@ public class SuperGuiScreen extends GuiScreen
         if(renderLayer != this.modelState.getRenderLayer(PaintLayer.LAMP))
         {
             this.modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+            this.hasUpdates = true;
+        }
+
+        if(this.overlayMasonryToggle.isOn() != this.modelState.isMasonryBorder())
+        {
+            this.modelState.setMasonryBorder(this.overlayMasonryToggle.isOn());
             this.hasUpdates = true;
         }
         
@@ -249,6 +256,7 @@ public class SuperGuiScreen extends GuiScreen
             this.detailToggle = new Toggle().setLabel("Enabled");
             this.baseTranslucentToggle = new Toggle().setLabel("Translucent");
             this.lampTranslucentToggle = new Toggle().setLabel("Translucent");
+            this.overlayMasonryToggle = new Toggle().setLabel("Masonry");
             this.fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
             
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
@@ -280,7 +288,8 @@ public class SuperGuiScreen extends GuiScreen
             rightPanel.setVisiblityIndex(GROUP_BASE);
             
             int GROUP_BORDER = rightPanel.createVisiblityGroup("Overlay"); 
-            tempV = new Panel(true).addAll(this.overlayToggle, this.fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
+            tempV = new Panel(true).addAll(this.overlayToggle,
+                    this.overlayMasonryToggle, this.fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(GROUP_BORDER, tempH,this.textureTabBar[PaintLayer.OVERLAY.ordinal()]);
@@ -346,6 +355,7 @@ public class SuperGuiScreen extends GuiScreen
         this.detailToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.DETAIL));
         this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
         this.lampTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
+        this.overlayMasonryToggle.setOn(this.modelState.isMasonryBorder());
 
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
