@@ -3,6 +3,7 @@ package grondag.adversity.superblock.model.painter;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
+import grondag.adversity.library.joinstate.SimpleJoin;
 import grondag.adversity.library.model.FaceQuadInputs;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.superblock.model.layout.PaintLayer;
@@ -46,7 +47,7 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
         EnumFacing face = quad.getFace();
         if(face == null) return null;
 
-        FaceQuadInputs inputs = FACE_INPUTS[face.ordinal()][bjs.getFaceJoinState(face).ordinal()];
+        FaceQuadInputs inputs = FACE_INPUTS[face.ordinal()][ bjs.getFaceJoinState(face).ordinal()];
 
         if(inputs == null)
             return null;

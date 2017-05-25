@@ -28,6 +28,7 @@ import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.TextureScale;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -77,11 +78,11 @@ public class ModelStateFactory
     static final BitPacker PACKER_3_BLOCK = new BitPacker();
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
     private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
-    
     // these provide random alternate for texture version and rotation for single blocks or cubic groups of blocks 
     private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
     @SuppressWarnings("unchecked")
     private static final EnumElement<Rotation> P3B_BLOCK_ROTATION[] = new EnumElement[TextureScale.values().length];
+    private static final IntElement P3B_MASONRY_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
     
     static final BitPacker PACKER_3_FLOW = new BitPacker();
     private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
@@ -350,21 +351,34 @@ public class ModelStateFactory
                         b3 = P3B_BLOCK_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
                     }
                 }
+
+                NeighborBlocks neighbors = null;
                 
-                //TODO: simple and corner join - perhaps only check meta? Default to meta when placed that doesn't connect to 
-                // different shapes, colors, substance, etc.  But would allow forced connections.  NOTE - would not work for columns.
-                // Maybe have parameters on which block test to use, or based on shape?
                 if((STATE_FLAG_NEEDS_CORNER_JOIN & stateFlags) == STATE_FLAG_NEEDS_CORNER_JOIN)
                 {
 //                    Output.getLog().info("ModelState.refreshFromWorld corner join refresh @" + pos.toString());
-
-                    NeighborTestResults tests = new NeighborBlocks(world, pos, false).getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this.getSpecies()));
-                    b3 = P3B_BLOCK_JOIN.setValue(CornerJoinBlockStateSelector.findIndex(tests), bits3);
+                    neighbors = new NeighborBlocks(world, pos, false);
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this.getSpecies()));
+                    
+                    
+                    b3 = P3B_BLOCK_JOIN.setValue(CornerJoinBlockStateSelector.findIndex(tests), b3);
                 }
                 else if ((STATE_FLAG_NEEDS_SIMPLE_JOIN & stateFlags) == STATE_FLAG_NEEDS_SIMPLE_JOIN)
                 {
-                    
+                    neighbors = new NeighborBlocks(world, pos, false);
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this.getSpecies()));
+                    b3 = P3B_BLOCK_JOIN.setValue(SimpleJoin.getIndex(tests), b3);
                 }
+           
+                if(this.isMasonryBorder())
+                {
+                    if(neighbors == null) neighbors = new NeighborBlocks(world, pos, false);
+                    NeighborTestResults masonryTests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockMasonryMatch((SuperBlock) state.getBlock(), this.getSpecies(), pos));
+                    b3 = P3B_MASONRY_JOIN.setValue(SimpleJoin.getIndex(masonryTests), b3);
+
+                }
+
+
                 
                 bits3 = b3;
                 
@@ -724,6 +738,37 @@ public class ModelStateFactory
             }
             
             bits3 = P3B_BLOCK_JOIN.setValue(join.getIndex(), bits3);
+            invalidateHashCode();
+        }
+        
+        public SimpleJoin getMasonryJoin()
+        {
+            if(Output.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || !this.isMasonryBorder()))
+                Output.getLog().warn("getMasonryJoin on model state does not apply for shape");
+            
+            populateStateFlagsIfNeeded();
+            return new SimpleJoin(P3B_MASONRY_JOIN.getValue(bits3));
+        }
+        
+        public void setMasonryJoin(SimpleJoin join)
+        {
+            if(Output.DEBUG_MODE)
+            {
+                if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                {
+                    Output.getLog().warn("Ignored setMasonryJoin on model state that does not apply for shape");
+                    return;
+                }
+                
+                populateStateFlagsIfNeeded();
+                if(((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) != 0) || !this.isMasonryBorder())
+                {
+                    Output.getLog().warn("Ignored setMasonryJoin on model state for which it does not apply");
+                    return;
+                }
+            }
+            
+            bits3 = P3B_MASONRY_JOIN.setValue(join.getIndex(), bits3);
             invalidateHashCode();
         }
         

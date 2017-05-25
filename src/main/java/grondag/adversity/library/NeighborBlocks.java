@@ -287,6 +287,21 @@ public class NeighborBlocks {
             }
             return (resultFlags & bitFlag) == bitFlag;
         }
+        
+        /** use this to override world results */
+        public void override(EnumFacing face, boolean override)
+        {
+            int bitFlag = FACE_FLAGS[face.ordinal()];
+            completionFlags |= bitFlag;
+            if(override)
+            {
+                resultFlags |= bitFlag;
+            }
+            else
+            {
+                resultFlags &= ~bitFlag;
+            }
+        }
 
         public boolean result(HorizontalFace face)
         {
