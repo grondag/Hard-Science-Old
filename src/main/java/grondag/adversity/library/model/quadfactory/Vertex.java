@@ -156,6 +156,20 @@ public class Vertex extends Vec3d
         }
 
     }
+    
+    public Vertex add(Vec3d vec)
+    {
+        return this.addVector(vec.xCoord, vec.yCoord, vec.zCoord);
+    }
+
+    /**
+     * Adds the specified x,y,z vector components to this vertex and returns the resulting vector. Does not change this
+     * vertex. UV values remain same as original. 
+     */
+    public Vertex addVector(double x, double y, double z)
+    {
+        return new Vertex(this.xCoord + x, this.yCoord + y, this.zCoord + z, u, v, color);
+    }
 
     public float[] xyzToFloatArray()
     {

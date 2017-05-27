@@ -146,12 +146,30 @@ public class SuperDispatcher
         ArrayList<QuadPainter> painters = new ArrayList<QuadPainter>();
         for(Surface surface : mesher.surfaces)
         {
-            for(PaintLayer paintLayer : PaintLayer.values())
+            switch(surface.surfaceType)
             {
-                if(modelState.isPaintLayerEnabled(paintLayer) && paintLayer.surfaceType == surface.surfaceType)
+            case CUT:
+                painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.CUT));
+                break;
+            
+            case LAMP:
+                painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.LAMP));
+                break;
+
+            case MAIN:
+                painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.BASE));
+                if(modelState.isDetailLayerEnabled())
                 {
-                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, paintLayer));
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
                 }
+                if(modelState.isOverlayLayerEnabled())
+                {
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OVERLAY));
+                }
+                break;
+
+            default:
+                break;
             }
         }
         
@@ -236,7 +254,6 @@ public class SuperDispatcher
             }
             else
             {
-                //TODO: remove
                 SparseLayerMap map = modelCache.get(modelState);
                 if(map == null) 
                     return QuadFactory.EMPTY_QUAD_LIST;

@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.Output;
 import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.init.ModModels;
 import grondag.adversity.library.NeighborBlocks;
@@ -31,7 +30,6 @@ import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
-import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;

@@ -33,16 +33,15 @@ public class ModelStateTest
         state.setShape(ModelShape.COLUMN_SQUARE);
         state.setStatic(true);
 
-        state.setPaintLayerEnabled(PaintLayer.BASE, true);
-        state.setPaintLayerEnabled(PaintLayer.DETAIL, true);
+        state.setOverlayLayerEnabled(true);
         state.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(5));
         state.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(7));
         state.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
-        state.setLightingMode(PaintLayer.DETAIL, LightingMode.SHADED);
-        state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.SOLID);
-        state.setRenderLayer(PaintLayer.DETAIL, BlockRenderLayer.TRANSLUCENT);
+        state.setLightingMode(PaintLayer.OVERLAY, LightingMode.SHADED);
+        state.setRenderLayer(PaintLayer.LAMP, BlockRenderLayer.SOLID);
+        state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.TRANSLUCENT);
         state.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
-        state.setTexture(PaintLayer.DETAIL, Textures.BORDER_TEST);
+        state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_TEST);
         state.setAxis(EnumFacing.Axis.Z);
         state.setRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
         state.setBlockVersion(7, TextureScale.SINGLE);
@@ -63,17 +62,17 @@ public class ModelStateTest
         
         assert(reloadedState.getShape() == ModelShape.COLUMN_SQUARE);
         assert(reloadedState.isStatic());
-        assert(reloadedState.isPaintLayerEnabled(PaintLayer.BASE));
-        assert(reloadedState.isPaintLayerEnabled(PaintLayer.DETAIL));
-        assert(reloadedState.isLayerShaded(BlockRenderLayer.SOLID) == false);
+        assert(reloadedState.isOverlayLayerEnabled());
+        assert(!reloadedState.isDetailLayerEnabled());
+        assert(reloadedState.isLayerShaded(BlockRenderLayer.TRANSLUCENT) == false);
         assert(reloadedState.getColorMap(PaintLayer.BASE) == BlockColorMapProvider.INSTANCE.getColorMap(5));
         assert(reloadedState.getColorMap(PaintLayer.DETAIL) == BlockColorMapProvider.INSTANCE.getColorMap(7));
         assert(reloadedState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT);
         assert(reloadedState.getLightingMode(PaintLayer.DETAIL) == LightingMode.SHADED);
-        assert(reloadedState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID);
-        assert(reloadedState.getRenderLayer(PaintLayer.DETAIL) == BlockRenderLayer.TRANSLUCENT);
+        assert(reloadedState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.SOLID);
+        assert(reloadedState.getRenderLayer(PaintLayer.OVERLAY) == BlockRenderLayer.TRANSLUCENT);
         assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_RAW_FLEXSTONE);
-        assert(reloadedState.getTexture(PaintLayer.DETAIL) == Textures.BORDER_TEST);
+        assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_TEST);
         assert(reloadedState.getAxis()) == EnumFacing.Axis.Z;
         assert(reloadedState.getRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
         assert(reloadedState.getBlockVersion(TextureScale.SINGLE)) == 7;
@@ -91,8 +90,9 @@ public class ModelStateTest
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.TRANSLUCENT) == true);
         
         int flags = reloadedState.getRenderLayerShadedFlags();
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.SOLID, flags) == false);
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.TRANSLUCENT, flags) == true);
+        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.SOLID, flags));
+        assert(!ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.TRANSLUCENT, flags));
+
 
         
         

@@ -125,7 +125,6 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         modelState.setShape(ModelShape.CUBE);
         modelState.setStatic(false);
 
-        modelState.setPaintLayerEnabled(PaintLayer.BASE, true);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(539));
         modelState.setLightingMode(PaintLayer.BASE, LightingMode.SHADED);
         modelState.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.SOLID);

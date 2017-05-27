@@ -906,9 +906,14 @@ public class RawQuad
     {
         if(faceNormal == null && getVertex(0) != null && getVertex(1) != null && getVertex(2) != null && getVertex(3) != null)
         {
-            faceNormal = getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).normalize();
+            faceNormal = computeFaceNormal();
         }
         return faceNormal;
+    }
+    
+    public Vec3d computeFaceNormal()
+    {
+        return getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).normalize();
     }
 
     public void setFaceNormal(Vec3d faceNormal)

@@ -118,15 +118,15 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewSub(layer);
         }
         
-        if(this.overlayToggle.isOn() != this.modelState.isPaintLayerEnabled(PaintLayer.OVERLAY))
+        if(this.overlayToggle.isOn() != this.modelState.isOverlayLayerEnabled())
         {
-            this.modelState.setPaintLayerEnabled(PaintLayer.OVERLAY, this.overlayToggle.isOn());
+            this.modelState.setOverlayLayerEnabled(this.overlayToggle.isOn());
             this.hasUpdates = true;
         }
 
-        if(this.detailToggle.isOn() != this.modelState.isPaintLayerEnabled(PaintLayer.DETAIL))
+        if(this.detailToggle.isOn() != this.modelState.isDetailLayerEnabled())
         {
-            this.modelState.setPaintLayerEnabled(PaintLayer.DETAIL, this.detailToggle.isOn());
+            this.modelState.setDetailLayerEnabled(this.detailToggle.isOn());
             this.hasUpdates = true;
         }
 
@@ -362,8 +362,8 @@ public class SuperGuiScreen extends GuiScreen
     {
         this.materialPicker.setBlock((SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block);
         
-        this.overlayToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.OVERLAY));
-        this.detailToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.DETAIL));
+        this.overlayToggle.setOn(this.modelState.isOverlayLayerEnabled());
+        this.detailToggle.setOn(this.modelState.isDetailLayerEnabled());
         this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
         this.lampTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
 

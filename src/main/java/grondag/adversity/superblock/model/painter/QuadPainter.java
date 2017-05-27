@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.model.quadfactory.Vertex;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.model.layout.PaintLayer;
@@ -11,6 +12,7 @@ import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.Vec3d;
 
 public abstract class QuadPainter
 {
@@ -54,9 +56,6 @@ public abstract class QuadPainter
 
     public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
     {
-        
-        //TODO: adjust z-level for paint layer here based on computed normal
-        
         if(inputQuad.surface == this.surface)
         {
             RawQuad result = inputQuad.clone();
@@ -69,6 +68,18 @@ public abstract class QuadPainter
             result.recolor(color);
             result.lightingMode = this.lightingMode;
             result.renderLayer = this.renderLayer;
+            
+            // bump texture slightly above surface to avoid z-fighting
+            if(this.paintLayer == PaintLayer.OVERLAY)
+            {
+                Vec3d bump = result.computeFaceNormal().scale(0.00005);
+                for(int i = result.getVertexCount() - 1; i >= 0; i--)
+                {
+                    Vertex v = result.getVertex(i);
+                    result.setVertex(i, (Vertex) v.add(bump));
+                }
+            }
+            
             result = this.paintQuad(result);
             if(result != null) outputList.add(result);
         }

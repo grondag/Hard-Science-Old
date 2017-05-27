@@ -28,7 +28,6 @@ import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.TextureScale;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -58,9 +57,10 @@ public class ModelStateFactory
     private static final IntElement[] P0_PAINT_COLOR = new IntElement[PaintLayer.DYNAMIC_SIZE];
     private static final BooleanElement P0_AXIS_INVERTED = PACKER_0.createBooleanElement();
     private static final EnumElement<EnumFacing.Axis> P0_AXIS = PACKER_0.createEnumElement(EnumFacing.Axis.class);
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<BlockRenderLayer>[] P0_PAINT_LAYER = new EnumElement[PaintLayer.DYNAMIC_SIZE];
-    private static final BooleanElement[] P0_PAINT_LAYER_ENABLED = new BooleanElement[PaintLayer.DYNAMIC_SIZE];
+    private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_BASE = PACKER_0.createEnumElement(BlockRenderLayer.class);
+    private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
+    private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
+    private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
     
     static final BitPacker PACKER_1 = new BitPacker();
     private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
@@ -97,8 +97,6 @@ public class ModelStateFactory
         
         for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
         {
-            P0_PAINT_LAYER[i] = PACKER_0.createEnumElement(BlockRenderLayer.class); // 2 bits each x5 = 8
-            P0_PAINT_LAYER_ENABLED[i] = PACKER_0.createBooleanElement();
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
             P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x5 = 4
         }
@@ -242,16 +240,18 @@ public class ModelStateFactory
                 int layerFlags = 0;
                 int shadedFlags = 0xF; // default to all true (shaded)
                 
-                if(this.isPaintLayerEnabled(PaintLayer.BASE))
-                {
-                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.BASE), layerFlags, true);
-                    if(this.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT) 
-                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.BASE), shadedFlags, false);
-                    flags |= getTexture(PaintLayer.BASE).stateFlags;
-                    flags |= getTexture(PaintLayer.CUT).stateFlags;
-                }
+                layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.BASE), layerFlags, true);
+                if(this.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT) 
+                    shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.BASE), shadedFlags, false);
+                flags |= getTexture(PaintLayer.BASE).stateFlags;
+                flags |= getTexture(PaintLayer.CUT).stateFlags;
  
-                if(this.isPaintLayerEnabled(PaintLayer.DETAIL))
+                layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), layerFlags, true);
+                if(this.getLightingMode(PaintLayer.LAMP) == LightingMode.FULLBRIGHT) 
+                    shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), shadedFlags, false);
+                flags |= getTexture(PaintLayer.LAMP).stateFlags;
+                
+                if(this.isDetailLayerEnabled())
                 {
                     layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), layerFlags, true);
                     if(this.getLightingMode(PaintLayer.DETAIL) == LightingMode.FULLBRIGHT) 
@@ -260,16 +260,7 @@ public class ModelStateFactory
 
                 }
                 
-                if(this.isPaintLayerEnabled(PaintLayer.LAMP))
-                {
-                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), layerFlags, true);
-                    if(this.getLightingMode(PaintLayer.LAMP) == LightingMode.FULLBRIGHT) 
-                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), shadedFlags, false);
-                    flags |= getTexture(PaintLayer.LAMP).stateFlags;
-
-                }
-                
-                if(this.isPaintLayerEnabled(PaintLayer.OVERLAY))
+                if(this.isOverlayLayerEnabled())
                 {
                     layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), layerFlags, true);
                     if(this.getLightingMode(PaintLayer.OVERLAY) == LightingMode.FULLBRIGHT) 
@@ -476,31 +467,66 @@ public class ModelStateFactory
         
         public BlockRenderLayer getRenderLayer(PaintLayer layer)
         {
-            //TODO: layer for overlay and detail always going to be tied to texture
-            // save bits in underlying data structure?
-            if(layer == PaintLayer.DETAIL || layer == PaintLayer.OVERLAY) return this.getTexture(layer).renderLayer;
+            switch(layer)
+            {
+            case DETAIL:
+            case OVERLAY:
+                return this.getTexture(layer).renderLayer;
+
+            case LAMP:
+                return P0_RENDER_LAYER_LAMP.getValue(bits0);
+                
+            case BASE:
+            case CUT:
+            default:
+                return P0_RENDER_LAYER_BASE.getValue(bits0);
             
-            return P0_PAINT_LAYER[layer.dynamicIndex].getValue(bits0);
+            }
         }
         
         public void setRenderLayer(PaintLayer layer, BlockRenderLayer renderLayer)
         {
-            bits0 = P0_PAINT_LAYER[layer.dynamicIndex].setValue(renderLayer, bits0);
+            
+            switch(layer)
+            {
+            case DETAIL:
+            case OVERLAY:
+            default:
+                if(Output.DEBUG_MODE)
+                    Output.getLog().warn("setRenderLayer on model state does not apply for given paint layer.");
+                return;
+
+            case LAMP:
+                bits0 = P0_RENDER_LAYER_LAMP.setValue(renderLayer, bits0);
+                
+            case BASE:
+            case CUT:
+                bits0 = P0_RENDER_LAYER_BASE.setValue(renderLayer, bits0);
+            }
             clearStateFlags();
             invalidateHashCode();
         }
 
-        public boolean isPaintLayerEnabled(PaintLayer layer)
+        public boolean isDetailLayerEnabled()
         {
-            //TODO: base and lamp surfaces are always rendered - save a bit in underlying data structure?
-            if(layer == PaintLayer.BASE || layer == PaintLayer.CUT || layer == PaintLayer.LAMP) return true;
-            
-            return P0_PAINT_LAYER_ENABLED[layer.dynamicIndex].getValue(bits0);
+            return P0_LAYER_ENABLED_DETAIL.getValue(bits0);
         }
         
-        public void setPaintLayerEnabled(PaintLayer layer, boolean isEnabled)
+        public void setDetailLayerEnabled(boolean isEnabled)
         {
-            bits0 = P0_PAINT_LAYER_ENABLED[layer.dynamicIndex].setValue(isEnabled, bits0);
+            bits0 = P0_LAYER_ENABLED_DETAIL.setValue(isEnabled, bits0);
+            clearStateFlags();
+            invalidateHashCode();
+        }
+        
+        public boolean isOverlayLayerEnabled()
+        {
+            return P0_LAYER_ENABLED_OVERLAY.getValue(bits0);
+        }
+        
+        public void setOverlayLayerEnabled(boolean isEnabled)
+        {
+            bits0 = P0_LAYER_ENABLED_OVERLAY.setValue(isEnabled, bits0);
             clearStateFlags();
             invalidateHashCode();
         }

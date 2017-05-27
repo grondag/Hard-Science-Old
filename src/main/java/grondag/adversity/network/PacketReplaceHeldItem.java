@@ -13,9 +13,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.IOException;
 
-import grondag.adversity.superblock.block.SuperItemBlock;
-import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
  */
