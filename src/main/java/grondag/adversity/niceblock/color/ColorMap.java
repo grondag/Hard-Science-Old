@@ -66,7 +66,7 @@ public class ColorMap
 //        newColorMap.setColor(EnumColorMap.HIGHLIGHT,
 //                NiceHues.INSTANCE.getHueSet(hue).getColorSetForHue(HuePosition.OPPOSITE).getColor(tint) | 0xFF000000);
         
-        Color lampColor = Color.fromHCL(hue.hueDegrees(), Math.min(chromaIn.value * 0.65, 25), Color.HCL_MAX);
+        Color lampColor = Color.fromHCL(hue.hueDegrees(), baseColor.HCL_C, Color.HCL_MAX, EnumHCLFailureMode.NORMAL);
         if(lampColor.RGB_int == 0)
         {
             Output.getLog().info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);

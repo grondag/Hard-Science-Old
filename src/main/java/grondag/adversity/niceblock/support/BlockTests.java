@@ -250,7 +250,7 @@ public class BlockTests
             // for masonry blocks, a join indicates that a border IS present
             
             
-            boolean isSibling = ibs.getBlock() == this.block && modelState.isMasonryBorder();
+            boolean isSibling = ibs.getBlock() == this.block && modelState.hasMasonryJoin();
             boolean isMate = isSibling 
                    && matchSpecies == modelState.getSpecies();
             

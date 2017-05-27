@@ -6,10 +6,13 @@ import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.joinstate.SimpleJoin;
 import grondag.adversity.library.model.FaceQuadInputs;
 import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.model.quadfactory.Vertex;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class CubicQuadPainterBorders extends CubicQuadPainter
 {
@@ -59,6 +62,16 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
         quad.maxU = inputs.flipU ? 0 : 16;
         quad.maxV = inputs.flipV ? 0 : 16;
         quad.textureSprite = this.texture.getTextureSprite(this.blockVersion, inputs.textureOffset);
+        
+        // bump texture slightly above surface to avoid z-fighting
+        Vec3d normal = quad.getFaceNormal();
+        normal.scale(1.0E-5F);
+        for(int i = quad.getVertexCount() - 1; i >= 0; i--)
+        {
+            Vertex v = quad.getVertex(i);
+            quad.setVertex(i, (Vertex) v.add(normal));
+        }
+        
         
         return quad;
     }

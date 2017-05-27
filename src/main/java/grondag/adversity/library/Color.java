@@ -1,5 +1,7 @@
 package grondag.adversity.library;
 
+import grondag.adversity.Output;
+
 /**
  * Simple library for color conversion and manipulation.
  * Less complicated than java.awt.color and has conversions it seems to lack.
@@ -89,7 +91,7 @@ public class Color
         }
         
         if(luminance == HCL_MAX){
-            for (double trial = 100; trial > 20; trial-= 0.1)
+            for (double trial = 100; trial > 0; trial-= 0.1)
             {
                 Color temp = fromHCLSimple(hue, chroma, trial);
                 if(temp.IS_VISIBLE)
@@ -98,10 +100,13 @@ public class Color
                     break;
                 }
             }
+            //TODO: remove
+            if(luminance == HCL_MAX)
+                Output.getLog().warn("wut?");
         }
         
         if(chroma == HCL_MAX){
-            for (double trial = 100; trial > 30; trial-= 0.1)
+            for (double trial = 100; trial > 0; trial-= 0.1)
             {
                 Color temp = fromHCLSimple(hue, trial, luminance);
                 if(temp.IS_VISIBLE)

@@ -24,8 +24,6 @@ public class MaterialPicker extends GuiControl
     //TODO: localize
     private static final String MATERIAL_LABEL = "Material";
     private static final String TOUGHNESS_LABEL = "Toughness";
-    
-    private static boolean areBlocksPopulated = false;
 
     private double boxSize;
     private double spacing;
@@ -33,8 +31,7 @@ public class MaterialPicker extends GuiControl
     private int materialIndex = NO_SELECTION;
     private int toughnessIndex = NO_SELECTION;
 
-    /** have to do this after object holder references are set */
-    private static void populateBlocks()
+    static
     {
         blocks[0][0] = (SuperBlock) ModBlocks.supermodel_flexstone;
         blocks[0][1] = (SuperBlock) ModBlocks.supermodel_durastone;
@@ -51,8 +48,6 @@ public class MaterialPicker extends GuiControl
     
     public MaterialPicker()
     {
-        if(!areBlocksPopulated) populateBlocks();
-        
         this.setAspectRatio(2.0 / 7.0);
     }
     

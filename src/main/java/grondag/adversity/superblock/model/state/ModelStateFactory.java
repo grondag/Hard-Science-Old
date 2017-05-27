@@ -61,7 +61,6 @@ public class ModelStateFactory
     @SuppressWarnings("unchecked")
     private static final EnumElement<BlockRenderLayer>[] P0_PAINT_LAYER = new EnumElement[PaintLayer.DYNAMIC_SIZE];
     private static final BooleanElement[] P0_PAINT_LAYER_ENABLED = new BooleanElement[PaintLayer.DYNAMIC_SIZE];
-    private static final BooleanElement P0_MASONRY_BORDER = PACKER_0.createBooleanElement();
     
     static final BitPacker PACKER_1 = new BitPacker();
     private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
@@ -104,8 +103,6 @@ public class ModelStateFactory
             P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x5 = 4
         }
         
-        // TODO: for texture alternators, do we need to support a larger number of alternates for zoomed uniforms?
-        // Will have 16 if we a zoom a texture with 4 alternates
         for(TextureScale scale : TextureScale.values())
         {
             ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
@@ -147,9 +144,15 @@ public class ModelStateFactory
         public static final int STATE_FLAG_NEEDS_SIMPLE_JOIN = STATE_FLAG_NEEDS_CORNER_JOIN << 1;
         
         /** 
+         * Applies to block-type states.  
+         * True if is a block type state and requires masonry join info.
+         */
+        public static final int STATE_FLAG_NEEDS_MASONRY_JOIN = STATE_FLAG_NEEDS_SIMPLE_JOIN << 1;
+        
+        /** 
          * True if position (big-tex) world state is needed. Applies for block and flow state formats.
          */
-        public static final int STATE_FLAG_NEEDS_POS = STATE_FLAG_NEEDS_SIMPLE_JOIN << 1;
+        public static final int STATE_FLAG_NEEDS_POS = STATE_FLAG_NEEDS_MASONRY_JOIN << 1;
         
         /** 
          * True if block version and rotation are needed. Applies for block formats.
@@ -291,6 +294,12 @@ public class ModelStateFactory
             }
         }
         
+        public boolean hasMasonryJoin()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == STATE_FLAG_NEEDS_MASONRY_JOIN;
+        }
+        
         public boolean isStatic() { return this.isStatic; }
         public void setStatic(boolean isStatic) { this.isStatic = isStatic; }
         
@@ -370,12 +379,11 @@ public class ModelStateFactory
                     b3 = P3B_BLOCK_JOIN.setValue(SimpleJoin.getIndex(tests), b3);
                 }
            
-                if(this.isMasonryBorder())
+                if((STATE_FLAG_NEEDS_MASONRY_JOIN & stateFlags) == STATE_FLAG_NEEDS_MASONRY_JOIN)
                 {
                     if(neighbors == null) neighbors = new NeighborBlocks(world, pos, false);
                     NeighborTestResults masonryTests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockMasonryMatch((SuperBlock) state.getBlock(), this.getSpecies(), pos));
                     b3 = P3B_MASONRY_JOIN.setValue(SimpleJoin.getIndex(masonryTests), b3);
-
                 }
 
 
@@ -515,18 +523,6 @@ public class ModelStateFactory
             return this.renderLayerEnabledFlags; 
         };
         
-        public boolean isMasonryBorder()
-        {
-            return P0_MASONRY_BORDER.getValue(bits0);
-        }
-        
-        public void setMasonryBorder(boolean isMasonry)
-        {
-            bits0 = P0_MASONRY_BORDER.setValue(isMasonry, bits0);
-            invalidateHashCode();
-        }
-
-
         ////////////////////////////////////////////////////
         //  PACKER 1 ATTRIBUTES (NOT SHAPE-DEPENDENT)
         ////////////////////////////////////////////////////
@@ -743,7 +739,7 @@ public class ModelStateFactory
         
         public SimpleJoin getMasonryJoin()
         {
-            if(Output.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || !this.isMasonryBorder()))
+            if(Output.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
                 Output.getLog().warn("getMasonryJoin on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
@@ -761,7 +757,7 @@ public class ModelStateFactory
                 }
                 
                 populateStateFlagsIfNeeded();
-                if(((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) != 0) || !this.isMasonryBorder())
+                if(((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
                 {
                     Output.getLog().warn("Ignored setMasonryJoin on model state for which it does not apply");
                     return;
