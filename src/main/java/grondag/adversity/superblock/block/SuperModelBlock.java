@@ -37,9 +37,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class SuperModelBlock extends SuperBlock implements ITileEntityProvider 
 {
     
-    public SuperModelBlock(BaseMaterial material, String styleName)
+    public SuperModelBlock(String styleName, BaseMaterial material)
     {
-        super(material, styleName);
+        super(styleName, material);
     }
         
     /**

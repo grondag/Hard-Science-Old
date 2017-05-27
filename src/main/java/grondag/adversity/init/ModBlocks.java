@@ -35,12 +35,31 @@ public class ModBlocks
 {
     private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
     
+    public static final Block supermodel_flexstone = null;
+    public static final Block supermodel_durastone = null;
+    public static final Block supermodel_hyperstone = null;
+    public static final Block supermodel_flexiglass = null;
+    public static final Block supermodel_duraglass = null;
+    public static final Block supermodel_hyperglass = null;
+    public static final Block supermodel_flexwood = null;
+    public static final Block supermodel_durawood = null;
+    public static final Block supermodel_hyperwood = null;
+    
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
         event.getRegistry().register(new StaticTestBlock(BaseMaterial.FLEXSTONE, "test"));
-        event.getRegistry().register(new SuperModelBlock(BaseMaterial.FLEXSTONE, "supermodel_flex"));
+        
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.FLEXSTONE));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.DURASTONE));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.HYPERSTONE));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.FLEXIGLASS));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.DURAGLASS));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.HYPERGLASS));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.FLEXWOOD));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.DURAWOOD));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.HYPERWOOD));
         
     }
     

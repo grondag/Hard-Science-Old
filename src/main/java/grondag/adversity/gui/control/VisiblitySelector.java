@@ -34,7 +34,7 @@ public class VisiblitySelector extends GuiControl
         {
             String label = target.getLabel(i);
             
-            GuiUtil.drawBox(this.left, y, this.right, y + this.buttonHeight, 1, BUTTON_COLOR_ACTIVE);
+            GuiUtil.drawBoxRightBottom(this.left, y, this.right, y + this.buttonHeight, 1, BUTTON_COLOR_ACTIVE);
             int buttonColor = i == hoverIndex ? BUTTON_COLOR_FOCUS : i == this.target.getVisiblityIndex() ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR_INACTIVE;
             GuiUtil.drawRect(this.left + 2 , y + 2, this.right - 2, y + this.buttonHeight - 2, buttonColor);
 

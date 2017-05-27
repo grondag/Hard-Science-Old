@@ -13,6 +13,7 @@ import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.gui.control.Button;
 import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
+import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
 import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.gui.control.Toggle;
@@ -20,8 +21,9 @@ import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.network.AdversityMessages;
-import grondag.adversity.network.PacketUpdateSuperModelBlock;
+import grondag.adversity.network.PacketReplaceHeldItem;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
+import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
@@ -31,6 +33,8 @@ import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 
@@ -57,6 +61,7 @@ public class SuperGuiScreen extends GuiScreen
     private int xSize;
     private int ySize;
 
+    private MaterialPicker materialPicker;
     private ColorPicker[] colorPicker;
     private TexturePicker[] textureTabBar;
     private Toggle[] fullBrightToggle;
@@ -89,6 +94,18 @@ public class SuperGuiScreen extends GuiScreen
         // abort on strangeness
         if(this.modelState == null) return;
 
+        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block;
+        SuperBlock newBlock = this.materialPicker.getBlock();
+        
+        if(currentBlock != newBlock && newBlock != null)
+        {
+            ItemStack newStack = new ItemStack(newBlock);
+            newStack.setItemDamage(this.itemPreview.previewItem.getItemDamage());
+            newStack.setTagCompound(this.itemPreview.previewItem.getTagCompound());
+            this.itemPreview.previewItem = newStack;
+            this.hasUpdates = true;
+        }
+        
         // TODO - set shape first
         
         ModelShape shape = this.modelState.getShape();
@@ -196,7 +213,7 @@ public class SuperGuiScreen extends GuiScreen
     {
         if(this.hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
-            AdversityMessages.INSTANCE.sendToServer(new PacketUpdateSuperModelBlock(this.itemPreview.previewItem.getMetadata(), this.modelState));
+            AdversityMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(this.itemPreview.previewItem));
             this.hasUpdates = false;
         }
         this.mc.displayGuiScreen((GuiScreen)null);
@@ -249,6 +266,7 @@ public class SuperGuiScreen extends GuiScreen
         
         if(this.textureTabBar == null)
         {
+            this.materialPicker = new MaterialPicker();
             this.textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
             this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
             
@@ -309,6 +327,7 @@ public class SuperGuiScreen extends GuiScreen
             int GROUP_SHAPE = rightPanel.createVisiblityGroup("Shape");  
             
             int GROUP_MATERIAL = rightPanel.createVisiblityGroup("Material");  
+            rightPanel.add(GROUP_MATERIAL, this.materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
             
             VisiblitySelector selector = new VisiblitySelector(rightPanel);
             
@@ -350,6 +369,7 @@ public class SuperGuiScreen extends GuiScreen
     
     private void loadControlValuesFromModelState()
     {
+        this.materialPicker.setBlock((SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block);
         
         this.overlayToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.OVERLAY));
         this.detailToggle.setOn(this.modelState.isPaintLayerEnabled(PaintLayer.DETAIL));

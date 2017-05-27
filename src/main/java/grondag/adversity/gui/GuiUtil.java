@@ -115,12 +115,17 @@ public class GuiUtil
 //  GlStateManager.disableBlend();
 //}
     
-    public static void drawBox(double left, double top, double right, double bottom, double lineWidth, int color)
+    public static void drawBoxRightBottom(double left, double top, double right, double bottom, double lineWidth, int color)
     {
         drawVerticalLine(left, top, bottom, lineWidth, color);
         drawVerticalLine(right, top, bottom, lineWidth, color);
         drawHorizontalLine(left, right, top, lineWidth, color);
         drawHorizontalLine(left, right, bottom, lineWidth, color);
+    }
+    
+    public static void drawBoxWidthHeight(double left, double top, double width, double height, double lineWidth, int color)
+    {
+        drawBoxRightBottom(left, top, left + width, top + height, lineWidth, color);
     }
     
     public static void drawQuad(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int color)
@@ -194,26 +199,31 @@ public class GuiUtil
         mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
     
-    // hat tip to McJty
-    public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, double x, double y, double scale)
+    /** 
+     * Size is in pixels.
+     * Hat tip to McJty.
+     */
+    public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, double x, double y, double contentSize)
     {
         GlStateManager.color(1F, 1F, 1F);
-
+        
         boolean rc = false;
 
         if (itm != null && itm.getItem() != null) {
             rc = true;
             GlStateManager.pushMatrix();
-            GlStateManager.translate(0.0F, 0.0F, 32.0F);
+            GlStateManager.translate(x, y, 0);
+            GlStateManager.scale(1 / 16f, 1 / 16f, 1 / 16f);
+            GlStateManager.scale(contentSize, contentSize, contentSize);
+            
             GlStateManager.color(1F, 1F, 1F, 1F);
-            GlStateManager.scale(scale, scale, 1);
             GlStateManager.enableRescaleNormal();
             GlStateManager.enableLighting();
             short short1 = 240;
             short short2 = 240;
             net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, short1 / 1.0F, short2 / 1.0F);
-            itemRender.renderItemAndEffectIntoGUI(itm, (int)(x / scale), (int)(y / scale));
+            itemRender.renderItemAndEffectIntoGUI(itm, 0, 0);
 //            renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt, txt.length() - 2);
 //            itemRender.renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt);
             GlStateManager.popMatrix();

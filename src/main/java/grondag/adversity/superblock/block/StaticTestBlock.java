@@ -36,7 +36,7 @@ public class StaticTestBlock extends SuperBlock
     
     public StaticTestBlock(BaseMaterial material, String styleName)
     {
-        super(material, styleName);
+        super(styleName, material);
     }
 
     @Override

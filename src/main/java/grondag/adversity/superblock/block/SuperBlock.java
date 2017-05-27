@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.init.ModModels;
 import grondag.adversity.library.NeighborBlocks;
@@ -30,6 +31,7 @@ import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
+import grondag.adversity.superblock.model.state.RenderLayerHelper;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
@@ -84,6 +86,26 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
 {
 
+    @Override
+    public boolean isFullyOpaque(IBlockState state)
+    {
+        // TODO Auto-generated method stub
+        return super.isFullyOpaque(state);
+    }
+
+    @Override
+    public boolean isTranslucent(IBlockState state)
+    {
+        return this.material.isTranslucent;
+    }
+
+    @Override
+    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
+    {
+        //TODO: need shape-dependent logic here also
+        return this.getModelState(state, world, pos, true).getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID;
+    }
+
     /**
      * Used for multiple purposes depending on the type of block. Thus the generic name.
      * Didn't find the block state property abstraction layer particularly useful for my purposes.
@@ -131,7 +153,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     protected int metaCount = 16;
 
     @SuppressWarnings("deprecation")
-    public SuperBlock(BaseMaterial material, String styleName)
+    public SuperBlock(String styleName, BaseMaterial material)
     {
         super(material.material);
         this.material = material;
@@ -141,12 +163,17 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         setSoundType(material.stepSound);
         setHardness(material.hardness);
         setResistance(material.resistance);
-        this.setRegistryName(material.materialName + "." + styleName);
+        this.setRegistryName(styleName + "_" + material.materialName);
         this.setUnlocalizedName(this.getRegistryName().toString());
 
         ModelState defaultState = new ModelState();
         defaultState.setShape(ModelShape.CUBE);
-        this.setDefaultModelState(defaultState);
+        BlockRenderLayer baseRenderLayer = this.material.isTranslucent
+                ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        defaultState.setRenderLayer(PaintLayer.BASE, baseRenderLayer);
+        defaultState.setRenderLayer(PaintLayer.CUT, baseRenderLayer);
+        defaultState.setRenderLayer(PaintLayer.LAMP, baseRenderLayer);
+        this.defaultModelStateBits = defaultState.getBitsIntArray();
 
 
         String makeName = I18n.translateToLocal(getStyleName());
@@ -441,10 +468,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     // Note that some of the methods here are called server-side.
     // (Ray tracing and collisions, mainly.)
 
-    public final void setDefaultModelState(ModelState modelState)
-    {
-        this.defaultModelStateBits = modelState.getBitsIntArray();
-    }
 
     /** 
      * Returns an instance of the default model state for this block.

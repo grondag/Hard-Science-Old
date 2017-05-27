@@ -73,11 +73,11 @@ public abstract class TabBar<T> extends GuiControl
         {
             if(highlightIndex == i )
             {
-                GuiUtil.drawBox(itemX - 2, itemY - 2, itemX + this.actualItemSize + 2, itemY + this.actualItemSize + 2, 1, GuiControl.BUTTON_COLOR_FOCUS);
+                GuiUtil.drawBoxRightBottom(itemX - 2, itemY - 2, itemX + this.actualItemSize + 2, itemY + this.actualItemSize + 2, 1, GuiControl.BUTTON_COLOR_FOCUS);
             }
             else if(this.selectedItemIndex == i)
             {
-                GuiUtil.drawBox(itemX - 2, itemY - 2, itemX + this.actualItemSize + 2, itemY + this.actualItemSize + 2, 1, GuiControl.BUTTON_COLOR_ACTIVE);
+                GuiUtil.drawBoxRightBottom(itemX - 2, itemY - 2, itemX + this.actualItemSize + 2, itemY + this.actualItemSize + 2, 1, GuiControl.BUTTON_COLOR_ACTIVE);
             }
             
             this.drawItem(this.get(i), mc, itemRender, itemX, itemY, partialTicks);

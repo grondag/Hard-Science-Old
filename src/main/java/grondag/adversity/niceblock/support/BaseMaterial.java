@@ -20,12 +20,28 @@ public enum BaseMaterial {
 	DURASTONE("durastone", Configurator.SUBSTANCES.durastone, Material.ROCK, SoundType.STONE, 
 	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	HYPERSTONE("hyperstone", Configurator.SUBSTANCES.hyperstone, Material.IRON, SoundType.METAL,
+	HYPERSTONE("hyperstone", Configurator.SUBSTANCES.hyperstone, Material.ROCK, SoundType.STONE,
             BlockColorMapProvider.INSTANCE.getColorMap(Hue.ULTRAMARINE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	SUPERWOOD("superwood", Configurator.SUBSTANCES.superwood, Material.WOOD, SoundType.WOOD,
+	FLEXIGLASS("flexiglass", Configurator.SUBSTANCES.flexiglass, Material.GLASS, SoundType.GLASS, 
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT).ordinal),
+    
+    DURAGLASS("duraglass", Configurator.SUBSTANCES.durastone, Material.GLASS, SoundType.GLASS, 
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
+    
+    HYPERGLASS("hyperglass", Configurator.SUBSTANCES.hyperstone, Material.GLASS, SoundType.GLASS,
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.ULTRAMARINE, Chroma.WHITE, Luminance.LIGHT).ordinal),
+	
+	FLEXWOOD("flexwood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
             BlockColorMapProvider.INSTANCE.getColorMap(Hue.BURGUNDY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	
+    DURAWOOD("durawood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BURGUNDY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+
+    HYPERWOOD("hyperwood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BURGUNDY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+
+    
 	BASALT("basalt", Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE,
             BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	
@@ -42,6 +58,7 @@ public enum BaseMaterial {
 	public final int harvestLevel;
 	public final int defaultColorMapID;
 	public final boolean isHyperMaterial;
+	public final boolean isTranslucent;
 	
 	BaseMaterial(String name, Substance substance, Material material, SoundType sound, int defaultColorMapID) 
 	{
@@ -50,11 +67,11 @@ public enum BaseMaterial {
 		this.isHyperMaterial = substance == Configurator.SUBSTANCES.hyperstone;
 		stepSound = sound;
 		this.defaultColorMapID = defaultColorMapID;
+		this.isTranslucent = this.material == Material.GLASS;
 
-		Substance props = substance;
-		hardness = props.hardness;
-		resistance = props.resistance;
-		harvestTool = props.harvestTool;
-		harvestLevel = props.harvestLevel;
+		hardness = substance.hardness;
+		resistance = substance.resistance;
+		harvestTool = substance.harvestTool;
+		harvestLevel = substance.harvestLevel;
 	}
 }

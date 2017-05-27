@@ -23,7 +23,7 @@ public class Toggle extends GuiControl
     {
         float boxRight = (float) (this.left + this.labelHeight);
         
-        GuiUtil.drawBox(this.left, this.targetAreaTop, boxRight, this.targetAreaBottom, 1, this.isMouseOver(mouseX, mouseY) ? BUTTON_COLOR_FOCUS : BUTTON_COLOR_ACTIVE);
+        GuiUtil.drawBoxRightBottom(this.left, this.targetAreaTop, boxRight, this.targetAreaBottom, 1, this.isMouseOver(mouseX, mouseY) ? BUTTON_COLOR_FOCUS : BUTTON_COLOR_ACTIVE);
         
         if(this.isOn)
         {

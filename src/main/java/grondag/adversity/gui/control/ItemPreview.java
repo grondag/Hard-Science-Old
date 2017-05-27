@@ -12,24 +12,23 @@ public class ItemPreview extends GuiControl
     
     private double contentLeft;
     private double contentTop;
-    private double contentScale;
+    private double contentSize;
   
     @Override
     public void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
         if(this.previewItem != null)
         {
-            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, this.previewItem, this.contentLeft, this.contentTop, this.contentScale);
+            GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, this.previewItem, this.contentLeft, this.contentTop, this.contentSize);
         }
     }
 
     @Override
     protected void handleCoordinateUpdate()
     {
-        double contentSize = Math.min(this.width, this.height);
+        this.contentSize = Math.min(this.width, this.height);
         this.contentLeft = this.left + (this.width - contentSize) / 2;
         this.contentTop = this.top + (this.height - contentSize) / 2;
-        this.contentScale = contentSize / 15;
     }
 
     @Override

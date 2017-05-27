@@ -30,11 +30,22 @@ public class Configurator
 
         public Substance hyperstone = new Substance(10, "pickaxe", 3, 200);
         
+        public Substance flexiglass = new Substance(2, "pickaxe", 1, 10);
+        
+        public Substance duraglass = new Substance(4, "pickaxe", 2, 50);
+
+        public Substance hyperglass = new Substance(10, "pickaxe", 3, 200);
+        
+        public Substance flexwood = new Substance(2, "axe", 1, 10);
+
+        public Substance durawood = new Substance(4, "axe", 2, 50);
+        
+        public Substance hyperwood = new Substance(10, "axe", 3, 200);
+        
         public Substance basalt = new Substance(2, "pickaxe", 1, 10);
 
         public Substance volcanicLava = new Substance(-1, "shovel", 3, 2000);
         
-        public Substance superwood = new Substance(2, "axe", 1, 10);
         
         public static class Substance
         {
