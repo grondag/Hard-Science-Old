@@ -18,6 +18,7 @@ public abstract class GuiControl extends Gui
     public static final int CONTROL_INTERNAL_MARGIN = 5;
     public static final int CONTROL_EXTERNAL_MARGIN = 5;    
     public static final int CONTROL_BACKGROUND = 0x4AFFFFFF;
+    protected static final int NO_SELECTION = -1;
     
     protected double top;
     protected double left;

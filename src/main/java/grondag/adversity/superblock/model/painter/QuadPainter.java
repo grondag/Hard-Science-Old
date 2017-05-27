@@ -10,6 +10,7 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.Vec3d;
@@ -23,6 +24,7 @@ public abstract class QuadPainter
     protected final TexturePallette texture;
     public final Surface surface;
     public final PaintLayer paintLayer;
+    protected final Translucency translucency;
     
     /**
      * Provided quad is already a clone, and should be
@@ -41,6 +43,7 @@ public abstract class QuadPainter
         this.renderLayer = modelState.getRenderLayer(paintLayer);
         this.lightingMode = modelState.getLightingMode(paintLayer);
         this.texture = modelState.getTexture(paintLayer);
+        this.translucency = modelState.getTranslucency();
     }
     
     /** for null painter only */
@@ -52,6 +55,7 @@ public abstract class QuadPainter
         this.surface = null;
         this.paintLayer = null;
         this.texture = null;
+        this.translucency = null;
     }
 
     public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
@@ -62,23 +66,23 @@ public abstract class QuadPainter
             int color = this.colorMap.getColor(this.lightingMode == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP : EnumColorMap.BASE);
             if(this.renderLayer == BlockRenderLayer.TRANSLUCENT && this.texture.renderLayer == BlockRenderLayer.SOLID)
             {
-                //TODO: make % translucency depend on substance
-                color = 0x40000000 | (color & 0x00FFFFFF);
+                color = this.translucency.alphaARGB | (color & 0x00FFFFFF);
             }
             result.recolor(color);
             result.lightingMode = this.lightingMode;
             result.renderLayer = this.renderLayer;
             
+            //TODO: not working - maybe move to quad bake?
             // bump texture slightly above surface to avoid z-fighting
-            if(this.paintLayer == PaintLayer.OVERLAY)
-            {
-                Vec3d bump = result.computeFaceNormal().scale(0.00005);
-                for(int i = result.getVertexCount() - 1; i >= 0; i--)
-                {
-                    Vertex v = result.getVertex(i);
-                    result.setVertex(i, (Vertex) v.add(bump));
-                }
-            }
+//            if(this.paintLayer == PaintLayer.OVERLAY)
+//            {
+//                Vec3d bump = result.computeFaceNormal().scale(0.0005);
+//                for(int i = result.getVertexCount() - 1; i >= 0; i--)
+//                {
+//                    Vertex v = result.getVertex(i);
+//                    result.setVertex(i, (Vertex) v.add(bump));
+//                }
+//            }
             
             result = this.paintQuad(result);
             if(result != null) outputList.add(result);

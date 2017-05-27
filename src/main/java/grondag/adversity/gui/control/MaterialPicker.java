@@ -16,8 +16,6 @@ import net.minecraft.item.ItemStack;
 
 public class MaterialPicker extends GuiControl
 {
-    private static final int NO_SELECTION = -1;
-    
     /** dimensions are material and toughness */
     private static SuperBlock[][]blocks = new SuperBlock[3][3];
     

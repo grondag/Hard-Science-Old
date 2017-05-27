@@ -61,6 +61,7 @@ public class ModelStateFactory
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
     private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
     private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
+    private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
     private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
@@ -548,6 +549,17 @@ public class ModelStateFactory
             this.populateStateFlagsIfNeeded();
             return this.renderLayerEnabledFlags; 
         };
+        
+        public Translucency getTranslucency()
+        {
+            return P0_TRANSLUCENCY.getValue(bits0);
+        }
+        
+        public void setTranslucency(Translucency translucency)
+        {
+            bits0 = P0_TRANSLUCENCY.setValue(translucency, bits0);
+            invalidateHashCode();
+        }
         
         ////////////////////////////////////////////////////
         //  PACKER 1 ATTRIBUTES (NOT SHAPE-DEPENDENT)

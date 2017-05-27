@@ -13,8 +13,6 @@ public class VisiblitySelector extends GuiControl
 {
     private final VisibilityPanel target;
     
-    public static final int NO_SELECTION = -1;
-    
     private double buttonHeight;
     
     public VisiblitySelector(VisibilityPanel target)

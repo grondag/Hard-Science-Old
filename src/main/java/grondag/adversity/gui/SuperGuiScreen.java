@@ -17,6 +17,7 @@ import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
 import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.gui.control.Toggle;
+import grondag.adversity.gui.control.TranslucencyPicker;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
 import grondag.adversity.library.model.quadfactory.LightingMode;
@@ -28,6 +29,7 @@ import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
@@ -37,6 +39,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.MathHelper;
 
 public class SuperGuiScreen extends GuiScreen
 {
@@ -62,6 +65,7 @@ public class SuperGuiScreen extends GuiScreen
     private int ySize;
 
     private MaterialPicker materialPicker;
+    private TranslucencyPicker translucencyPicker;
     private ColorPicker[] colorPicker;
     private TexturePicker[] textureTabBar;
     private Toggle[] fullBrightToggle;
@@ -106,7 +110,18 @@ public class SuperGuiScreen extends GuiScreen
             
             this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
             this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
+            this.translucencyPicker.setVisible(this.materialPicker.getBlock().material.isTranslucent);
 
+        }
+        
+        Translucency newTrans = this.materialPicker.getBlock().material.isTranslucent
+                ? this.translucencyPicker.getTranslucency()
+                : Translucency.CLEAR;
+        if(newTrans == null) newTrans = Translucency.CLEAR;
+        if(newTrans != this.modelState.getTranslucency() )
+        {
+            this.modelState.setTranslucency(newTrans);
+            this.hasUpdates = true;
         }
         
         // TODO - set shape first
@@ -227,9 +242,9 @@ public class SuperGuiScreen extends GuiScreen
     {
         super.initGui();
         
-        int margin = (int) (this.height * MARGIN_FACTOR);
-        this.ySize = this.height - (margin - 1) * 2;
-        this.yStart = margin;
+        
+        ySize = MathHelper.clamp(this.height * 3 / 5, this.fontRenderer.FONT_HEIGHT * 28, this.height);
+        this.yStart = (this.height - ySize) / 2;
         this.xSize = (int) (this.ySize * GuiUtil.GOLDEN_RATIO);
         this.xStart = (this.width - this.xSize) / 2;
         
@@ -264,6 +279,7 @@ public class SuperGuiScreen extends GuiScreen
         if(this.textureTabBar == null)
         {
             this.materialPicker = new MaterialPicker();
+            this.translucencyPicker = new TranslucencyPicker();
             this.textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
             this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
             
@@ -323,6 +339,8 @@ public class SuperGuiScreen extends GuiScreen
             
             int GROUP_MATERIAL = rightPanel.createVisiblityGroup("Material");  
             rightPanel.add(GROUP_MATERIAL, this.materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
+            rightPanel.add(GROUP_MATERIAL, this.translucencyPicker.setVerticalLayout(Layout.PROPORTIONAL));
+            rightPanel.setInnerMarginWidth(GuiControl.CONTROL_INTERNAL_MARGIN * 4);
             
             VisiblitySelector selector = new VisiblitySelector(rightPanel);
             
@@ -369,6 +387,9 @@ public class SuperGuiScreen extends GuiScreen
 
         this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
         this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
+        
+        this.translucencyPicker.setVisible(this.materialPicker.getBlock().material.isTranslucent);
+        this.translucencyPicker.setTranslucency(this.modelState.getTranslucency());
         
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {

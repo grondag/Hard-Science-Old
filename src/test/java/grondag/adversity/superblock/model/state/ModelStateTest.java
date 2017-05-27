@@ -43,6 +43,7 @@ public class ModelStateTest
         state.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
         state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_TEST);
         state.setAxis(EnumFacing.Axis.Z);
+        state.setTranslucency(Translucency.SHADED);
         state.setRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
         state.setBlockVersion(7, TextureScale.SINGLE);
         state.setPosX(3);
@@ -74,6 +75,7 @@ public class ModelStateTest
         assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_RAW_FLEXSTONE);
         assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_TEST);
         assert(reloadedState.getAxis()) == EnumFacing.Axis.Z;
+        assert(reloadedState.getTranslucency()) == Translucency.SHADED;
         assert(reloadedState.getRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
         assert(reloadedState.getBlockVersion(TextureScale.SINGLE)) == 7;
         assert(reloadedState.getPosX() == 3);

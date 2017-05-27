@@ -287,6 +287,11 @@ public class GuiUtil
         }
         fontRendererIn.drawString(text, x, y, color, false);
     }
+    
+    public static void drawAlignedStringNoShadow(FontRenderer fontRendererIn, String text, double x, double y, double width, double height, int color, HorizontalAlignment hAlign, VerticalAlignment vAlign)
+    {
+        drawAlignedStringNoShadow(fontRendererIn, text, (float)x, (float)y, (float)width, (float)height, color, hAlign, vAlign);
+    }
 
     /**
      * Renders the specified text to the screen. Args : renderer, string, x, y, color
