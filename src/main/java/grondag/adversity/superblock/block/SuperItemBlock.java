@@ -26,8 +26,6 @@ import net.minecraft.world.World;
  */
 public class SuperItemBlock extends ItemBlock
 {
-    private static String ITEM_MODEL_BITS = "AMSB";
-    
     public SuperItemBlock(SuperBlock block) {
         super(block);
         setHasSubtypes(true);
@@ -54,12 +52,8 @@ public class SuperItemBlock extends ItemBlock
             //WAILA or other mods might create a stack with no NBT
             if(tag != null)
             {
-                int[] modelBits = tag.getIntArray(ITEM_MODEL_BITS);
-                
-                if(modelBits != null && modelBits.length == 8)
-                {
-                    return new ModelState(modelBits);
-                }
+                ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
+                if(modelState != null) return modelState;
             }
         }
         return ((SuperBlock)((SuperItemBlock)stack.getItem()).block).getDefaultModelState();
@@ -74,9 +68,9 @@ public class SuperItemBlock extends ItemBlock
             if(tag == null)
             {
                 tag = new NBTTagCompound();
-                stack.setTagCompound(tag);
             }
-            tag.setIntArray(ITEM_MODEL_BITS, modelState.getBitsIntArray());;
+            SuperBlockNBTHelper.writeModelState(tag, modelState);
+            stack.setTagCompound(tag);
         }
     }
  
@@ -211,17 +205,35 @@ public class SuperItemBlock extends ItemBlock
         NBTTagCompound tag = stack.getTagCompound();
         if(tag == null){
             tag = new NBTTagCompound();
-            stack.setTagCompound(tag);
         }
-        tag.setInteger(SuperTileEntity.PLACEMENT_SHAPE_TAG, placementShape);
+        SuperBlockNBTHelper.writePlacementShape(tag, placementShape);
+        stack.setTagCompound(tag);
     }
     
     public static int getStackPlacementShape(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag != null && tag.hasKey(SuperTileEntity.PLACEMENT_SHAPE_TAG)) 
-                ? tag.getInteger(SuperTileEntity.PLACEMENT_SHAPE_TAG)
-                : SuperPlacement.PLACEMENT_3x3x3;
+        return tag == null 
+                ? 0
+                : SuperBlockNBTHelper.readPlacementShape(tag);
+    }
+    
+    public static void setStackLightValue(ItemStack stack, int lightValue)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
+        }
+        SuperBlockNBTHelper.writeLightValue(tag, lightValue);
+        stack.setTagCompound(tag);
+    }
+    
+    public static byte getLightValue(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag == null 
+                ? 0
+                : SuperBlockNBTHelper.readLightValue(tag);
     }
     
 }

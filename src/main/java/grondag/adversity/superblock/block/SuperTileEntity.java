@@ -12,22 +12,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class SuperTileEntity extends TileEntity
+public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.NBTReadHandler
 {
-
-    public static final String PLACEMENT_SHAPE_TAG = "APS";
-    public static final String DAMAGE_TAG = "ADT";
-    private static final String MODEL_STATE_TAG = "AMK";
-    
-    public static final String CMD_SET_MODEL_KEY = "setModelKey";
-
     private ModelState modelState;
 
     /** used by big blocks */
     private int placementShape;
-
-    /** used by hyperstone */
-    private byte damage = 0;
+    
+    /** non-zero if block emits light */
+    private byte lightValue = 0;
 
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
@@ -53,11 +46,6 @@ public class SuperTileEntity extends TileEntity
     {
 //        Adversity.log.info("onLoad");
         super.onLoad();
-//        if(this.worldObj.isRemote)
-//        {
-//            //TODO: could this be better handled elsewhere, performance-wise?
-//            updateClientRenderState();
-//        }
     }
 
     
@@ -125,8 +113,7 @@ public class SuperTileEntity extends TileEntity
     public NBTTagCompound getUpdateTag()
     {
 //        Adversity.log.info("getUpdateTag pos=" + pos.toString());
-
-        return this.doWriteToNBT(super.getUpdateTag());
+        return SuperBlockNBTHelper.writeToNBT(super.getUpdateTag(), this.modelState, this.placementShape, this.lightValue);
     }
 
     /**
@@ -154,8 +141,7 @@ public class SuperTileEntity extends TileEntity
     public SPacketUpdateTileEntity getUpdatePacket()
     {
 //        Adversity.log.info("getUpdatePacket pos=" + pos.toString());
-        NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        doWriteToNBT(nbtTagCompound);
+        NBTTagCompound nbtTagCompound = SuperBlockNBTHelper.writeToNBT(new NBTTagCompound(), this.modelState, this.placementShape, this.lightValue);
         int metadata = getBlockMetadata();
         return new SPacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
     }
@@ -168,7 +154,7 @@ public class SuperTileEntity extends TileEntity
     {
 //        Adversity.log.info("OnDataPacket pos=" + pos.toString());
         ModelState oldModelState = modelState;
-        doReadFromNBT(pkt.getNbtCompound());
+        SuperBlockNBTHelper.readFromNBT(pkt.getNbtCompound(), this);
         if(!oldModelState.equals(modelState) && this.world.isRemote)
         {
             this.updateClientRenderState();
@@ -181,39 +167,26 @@ public class SuperTileEntity extends TileEntity
 //        Adversity.log.info("readFromNBT START pos=" + pos.toString());
         super.readFromNBT(compound);
 //        Adversity.log.info("readFromNBT POST-SUPER pos=" + pos.toString());
-        doReadFromNBT(compound);
+        SuperBlockNBTHelper.readFromNBT(compound, this);
         isLoaded = true;
     }
 
-    private void doReadFromNBT(NBTTagCompound compound)
+    @Override
+    public void handleNBTRead(ModelState modelState, int placementShape, byte lightValue)
     {
-        int[] stateBits = compound.getIntArray(MODEL_STATE_TAG);
-        if(stateBits == null || stateBits.length != 8)
-        {
-            modelState = ((SuperBlock)this.getBlockType()).getDefaultModelState();
-        }
-        else
-        {
-            modelState = new ModelState(compound.getIntArray(MODEL_STATE_TAG));            
-        }
-        placementShape = compound.getInteger(PLACEMENT_SHAPE_TAG);
-        damage = compound.getByte(DAMAGE_TAG);
+        this.modelState = (modelState == null)
+                ? ((SuperBlock)this.getBlockType()).getDefaultModelState()
+                : modelState;
+        this.placementShape = placementShape;
+        this.lightValue = lightValue;
     }
-
+   
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
 //        Adversity.log.info("writeToNBT pos=" + pos.toString());
-        doWriteToNBT(compound);
+        SuperBlockNBTHelper.writeToNBT(compound, this.modelState, this.placementShape, this.lightValue);
         return super.writeToNBT(compound);
-    }
-
-    private NBTTagCompound doWriteToNBT(NBTTagCompound compound)
-    {
-        if(modelState != null) compound.setIntArray(MODEL_STATE_TAG, modelState.getBitsIntArray());
-        if(damage != 0) compound.setByte(DAMAGE_TAG, damage);
-        if(placementShape != 0) compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
-        return compound;
     }
 
     public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
@@ -241,23 +214,7 @@ public class SuperTileEntity extends TileEntity
         {
             this.modelState = modelState;
             this.isModelStateCacheDirty = true;
-            if(!this.world.isRemote)
-            {
-                this.markDirty();
-            }
-        }
-    }
-
-    /** returns values 0-255 */
-    public int getDamage() { return (int)damage - Byte.MIN_VALUE; }
-    /** expects values 0-255 */
-    public void setDamage( int damageIn) 
-    { 
-        byte newVal = (byte)(damageIn + Byte.MIN_VALUE);
-        if(this.damage != newVal)
-        {
-            this.damage = newVal; 
-            this.markDirty();
+            if(!this.world.isRemote) this.markDirty();
         }
     }
 
@@ -269,8 +226,21 @@ public class SuperTileEntity extends TileEntity
         if(this.placementShape != placementShape)
         {
             this.placementShape = placementShape;
-            this.markDirty();
+            if(!this.world.isRemote) this.markDirty();
         }
     }
 
+    public byte getLightValue()
+    {
+        return lightValue;
+    }
+
+    public void setLightValue(byte lightValue)
+    {
+        if(this.lightValue != lightValue)
+        {
+            this.lightValue = lightValue;
+            if(!this.world.isRemote) this.markDirty();
+        }
+    }
 }

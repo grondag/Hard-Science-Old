@@ -103,4 +103,10 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
         }
         return result;
     }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        return getCollisionBoundingBox(state, worldIn, pos);
+    }
 }

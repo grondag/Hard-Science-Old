@@ -132,11 +132,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     private final String styleName;
 
-    /**
-     * Use in UI
-     */
-    private final String displayName;
-
     /** non-null if this drops something other than itself */
     private Item dropItem;
 
@@ -174,12 +169,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         defaultState.setRenderLayer(PaintLayer.CUT, baseRenderLayer);
         defaultState.setRenderLayer(PaintLayer.LAMP, baseRenderLayer);
         this.defaultModelStateBits = defaultState.getBitsIntArray();
-
-
-        String makeName = I18n.translateToLocal(getStyleName());
-        if(makeName == null || makeName.equals("")) makeName = getStyleName();
-
-        displayName = makeName + " " + I18n.translateToLocal(material.materialName); 
     }
 
     @SuppressWarnings("deprecation")
@@ -486,29 +475,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return null;
     }
 
-    @Override
-    public EnumFacing getBedDirection(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getBedDirection(state, world, pos);
-    }
-
-    @Override
-    public BlockPos getBedSpawnPosition(IBlockState state, IBlockAccess world, BlockPos pos, EntityPlayer player)
-    {
-        // TODO Auto-generated method stub
-        return super.getBedSpawnPosition(state, world, pos, player);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getBlockHardness(blockState, worldIn, pos);
-    }
-
-    /** Only meaningful use is for itemRenderer which 
+     /** Only meaningful use is for itemRenderer which 
      * checks this to know if it should do depth checking on item renders.
      * Get no state here, so always report that we should.
      */
@@ -518,19 +485,24 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return BlockRenderLayer.TRANSLUCENT;
     }
 
-    @Override
-    public BlockStateContainer getBlockState()
-    {
-        // TODO Auto-generated method stub
-        return super.getBlockState();
-    }
-
+    /**
+     * Used in many places and seems to provide min/max bounds for rendering purposes.
+     * For example, seems to determine at what height rain falls.
+     * In most cases is same as collision bounding box.
+     */
     @SuppressWarnings("deprecation")
     @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        // TODO Auto-generated method stub
-        return super.getBoundingBox(state, source, pos);
+        AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos, true).getShape().meshFactory().collisionHandler();
+        if (handler == null)
+        {
+            return super.getBoundingBox(state, worldIn, pos);
+        }
+        else
+        {
+            return handler.getCollisionBoundingBox(state, worldIn, pos);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -548,22 +520,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getComparatorInputOverride(blockState, worldIn, pos);
-    }
-
-    @Override
-    public CreativeTabs getCreativeTabToDisplayOn()
-    {
-        // TODO Auto-generated method stub
-        return super.getCreativeTabToDisplayOn();
-    }
-
-    /** 
+     /** 
      * Returns an instance of the default model state for this block.
      * Because model states are mutable, every call returns a new instance.
      */
@@ -572,10 +529,13 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return new ModelState(this.defaultModelStateBits);
     }
 
+    /**
+     * Main reason for override is that we have to add NBT to stack for ItemBlock drops.
+     * Also don't use fortune for our drops.
+     */
     @Override
     public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
-
         List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
 
         if(this.dropItem == null)
@@ -594,42 +554,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return ret;
     }
 
-    @Override
-    public boolean getEnableStats()
-    {
-        // TODO Auto-generated method stub
-        return super.getEnableStats();
-    }
-
-    @Override
-    public float getEnchantPowerBonus(World world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getEnchantPowerBonus(world, pos);
-    }
-
-    @Override
-    public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune)
-    {
-        // TODO Auto-generated method stub
-        return super.getExpDrop(state, world, pos, fortune);
-    }
-
-    @Override
-    public float getExplosionResistance(Entity exploder)
-    {
-        // TODO Auto-generated method stub
-        return super.getExplosionResistance(exploder);
-    }
-
-    @Override
-    public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion)
-    {
-        // TODO Auto-generated method stub
-        return super.getExplosionResistance(world, pos, exploder, explosion);
-    }
-
-    /**
+     /**
      * Determines which model should be displayed via MODEL_KEY. 
      */
     @Override
@@ -638,58 +563,55 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return ((IExtendedBlockState)state).withProperty(MODEL_STATE, getModelState(state, world, pos, true));
     }
 
+    /**
+     * Would always return 0 anyway because we aren't in the list of encouragements that the Fire block maintains.
+     */
     @Override
     public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        // TODO Auto-generated method stub
-        return super.getFireSpreadSpeed(world, pos, face);
+        return 0;
     }
 
+    /** lowest-tier wood has a small chance of burning */
     @Override
     public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        // TODO Auto-generated method stub
-        return super.getFlammability(world, pos, face);
+        return this.material == BaseMaterial.FLEXWOOD ? 1 : 0;
     }
 
-    @Override
-    public int getHarvestLevel(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getHarvestLevel(state);
-    }
-
-    @Override
-    public String getHarvestTool(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getHarvestTool(state);
-    }
-
-    @SuppressWarnings("deprecation")
     @Override
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        // TODO Auto-generated method stub
-        return super.getItem(worldIn, pos, state);
+        //Do not trust the state passed in, because nobody should be calling this method anyway.
+        IBlockState goodState = worldIn.getBlockState(pos);
+        return getStackFromBlock(goodState, worldIn, pos);
     }
 
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * DO NOT USE THIS FOR SUPERBLOCKS!
+     * Use {@link #getStackFromBlock(IBlockState, IBlockAccess, BlockPos)} instead.
+     * 
+     * Also, yes, I overrode this method just to add this warning.
+     */
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        // TODO Auto-generated method stub
         return super.getItemDropped(state, rand, fortune);
     }
 
+    // TODO: Localize
+    @SuppressWarnings("deprecation")
     public String getItemStackDisplayName(ItemStack stack)
     {
-        return displayName;
+        return I18n.translateToLocal(this.material.materialName + "." + this.styleName); 
     }
 
     /**
      * Accessed via state information.
      * Used by chunk for world lighting and to determine height map.
-     * Blocks with 0 opacity are apparently considered open for height map generation.
+     * Blocks with 0 opacity are apparently ignored for height map generation.
      * 
      * 0 means fully transparent
      * values 1-15 are various degrees of opacity
@@ -738,12 +660,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     // LOCALIZATION
-    @Override
-    public String getLocalizedName()
-    {
-        return displayName;
-    }
-
     @SuppressWarnings("deprecation")
     @Override
     public MapColor getMapColor(IBlockState state)

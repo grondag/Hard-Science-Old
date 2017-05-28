@@ -51,5 +51,11 @@ public class SimpleCollisionHandler extends AbstractCollisionHandler
     {
         return modelFactory.getCollisionBoundingBox(state, worldIn, pos);
     }
+    
+    @Override
+    public AxisAlignedBB getRenderBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        return modelFactory.getRenderBoundingBox(state, worldIn, pos);
+    }
      
 }

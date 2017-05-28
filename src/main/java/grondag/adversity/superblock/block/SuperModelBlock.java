@@ -79,6 +79,35 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         worldIn.setBlockToAir(pos);
     }
     
+    /**
+     * SuperModel blocks light emission level is stored in tile entity.
+     * Is not part of model state because does not affect rendering.
+     * However, {@link #getLightValue(IBlockState)} will return 0.
+     * That version is not used in vanilla forge except to determine if flat
+     * render pipeline should be used for emissive blocks.
+     * Should not be a problem because render logic also checks
+     * isAmbientOcclusion() on the baked model itself.
+     * 
+     */
+    @Override
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        return myTE == null
+                ? 0
+                : myTE.getLightValue();
+    }
+    
+    /**
+     * Set light level emitted by block.
+     * Inputs are masked to 0-15
+     */
+    public void setLightValue(IBlockState state, IBlockAccess world, BlockPos pos, int lightValue)
+    {
+        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        if(myTE != null) myTE.setLightValue((byte)(lightValue & 0xF));
+    }
+    
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {

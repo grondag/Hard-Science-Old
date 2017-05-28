@@ -89,4 +89,9 @@ public abstract class ModelFactory
     {
         return Block.FULL_BLOCK_AABB;
     }
+
+    public AxisAlignedBB getRenderBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        return getCollisionBoundingBox(state, worldIn, pos);
+    }
 }

@@ -31,8 +31,18 @@ public abstract class AbstractCollisionHandler
         return modelBounds.get(getCollisionKey(state, worldIn, pos, modelState));
     }
     
+    /**
+     * Provides minimal enclosing AABB to be used for collision handling.
+     * Will almost always be the same as render bounding box.
+     */
     public  abstract AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos);
   
+    /**
+     * Provides minimal enclosing AABB to be used for rendering. 
+     * Will almost always be the same as collision bounding box.
+     */
+    public  abstract AxisAlignedBB getRenderBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos);
+
     //TODO remove when niceblock is retired
     public abstract long getCollisionKey(IBlockState state, IBlockAccess worldIn, BlockPos pos, ModelStateSetValue modelState);
     
