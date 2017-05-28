@@ -27,7 +27,7 @@ public class TranslucencyPicker extends GuiControl
     
     private int getMouseIndex(int mouseX, int mouseY)
     {
-        if(mouseX < this.firstBoxLeft - this.spacing / 2 || mouseX > this.right || mouseY < this.top || mouseY > this.right)
+        if(mouseX < this.firstBoxLeft - this.spacing / 2 || mouseX > this.right || mouseY < this.top || mouseY > this.bottom)
             return NO_SELECTION;
         
         return MathHelper.clamp((int) ((mouseX - this.firstBoxLeft + this.spacing) / (this.height + this.spacing)), 0, Translucency.values().length - 1);

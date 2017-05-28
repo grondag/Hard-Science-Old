@@ -228,7 +228,7 @@ public class SuperItemBlock extends ItemBlock
         stack.setTagCompound(tag);
     }
     
-    public static byte getLightValue(ItemStack stack)
+    public static byte getStackLightValue(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
         return tag == null 

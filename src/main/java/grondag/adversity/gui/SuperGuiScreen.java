@@ -10,11 +10,13 @@ import org.lwjgl.input.Mouse;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.gui.base.GuiControl;
+import grondag.adversity.gui.control.BrightnessSlider;
 import grondag.adversity.gui.control.Button;
 import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
+import grondag.adversity.gui.control.Slider;
 import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.TranslucencyPicker;
@@ -65,6 +67,7 @@ public class SuperGuiScreen extends GuiScreen
     private Toggle detailToggle;
     private Toggle baseTranslucentToggle;
     private Toggle lampTranslucentToggle;
+    private BrightnessSlider brightnessSlider;
     
     private ItemPreview itemPreview;
     
@@ -103,7 +106,12 @@ public class SuperGuiScreen extends GuiScreen
             this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
             this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
             this.translucencyPicker.setVisible(this.materialPicker.getBlock().material.isTranslucent);
-
+        }
+        
+        if(this.brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(this.itemPreview.previewItem))
+        {
+            SuperItemBlock.setStackLightValue(this.itemPreview.previewItem, this.brightnessSlider.getBrightness());
+            this.hasUpdates = true;
         }
         
         Translucency newTrans = this.materialPicker.getBlock().material.isTranslucent
@@ -280,6 +288,7 @@ public class SuperGuiScreen extends GuiScreen
             this.baseTranslucentToggle = new Toggle().setLabel("Translucent");
             this.lampTranslucentToggle = new Toggle().setLabel("Translucent");
             this.fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            this.brightnessSlider = new BrightnessSlider(this.mc);
             
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
             {
@@ -327,11 +336,12 @@ public class SuperGuiScreen extends GuiScreen
             tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(GROUP_LAMP, tempH, this.textureTabBar[PaintLayer.LAMP.ordinal()]);
 
-            int GROUP_SHAPE = rightPanel.createVisiblityGroup("Shape");  
+            int GROUP_SHAPE = rightPanel.createVisiblityGroup("Shape");
             
             int GROUP_MATERIAL = rightPanel.createVisiblityGroup("Material");  
             rightPanel.add(GROUP_MATERIAL, this.materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
             rightPanel.add(GROUP_MATERIAL, this.translucencyPicker.setVerticalLayout(Layout.PROPORTIONAL));
+            rightPanel.add(GROUP_MATERIAL, this.brightnessSlider);
             rightPanel.setInnerMarginWidth(GuiControl.CONTROL_INTERNAL_MARGIN * 4);
             
             VisiblitySelector selector = new VisiblitySelector(rightPanel);
@@ -372,6 +382,7 @@ public class SuperGuiScreen extends GuiScreen
     {
         this.materialPicker.setBlock((SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block);
         
+        this.brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(this.itemPreview.previewItem));
         this.overlayToggle.setOn(this.modelState.isOverlayLayerEnabled());
         this.detailToggle.setOn(this.modelState.isDetailLayerEnabled());
         this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);

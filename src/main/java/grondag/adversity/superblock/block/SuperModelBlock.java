@@ -184,6 +184,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, SuperTileEntity niceTE)
     {
         niceTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
+        niceTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
     }
     
     // BLOCK PROPERTIES

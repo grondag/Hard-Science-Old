@@ -154,10 +154,15 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     {
 //        Adversity.log.info("OnDataPacket pos=" + pos.toString());
         ModelState oldModelState = modelState;
+        int oldLight = this.lightValue;
         SuperBlockNBTHelper.readFromNBT(pkt.getNbtCompound(), this);
         if(!oldModelState.equals(modelState) && this.world.isRemote)
         {
             this.updateClientRenderState();
+        }
+        if(oldLight != this.lightValue)
+        {
+            this.world.checkLight(this.pos);
         }
     }
 
@@ -240,7 +245,11 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         if(this.lightValue != lightValue)
         {
             this.lightValue = lightValue;
-            if(!this.world.isRemote) this.markDirty();
+            if(this.world.isRemote)
+                this.world.checkLight(this.pos);
+            else
+                this.markDirty();
+            
         }
     }
 }
