@@ -132,14 +132,14 @@ public class Color
     
     private static Color fromHCLSimple(double hue, double chroma, double luminance)
     {
-        return fromLab(luminance, Math.sin(Math.toRadians(hue)) * chroma, Math.cos(Math.toRadians(hue)) * chroma);
+        return fromLab(luminance, Math.cos(Math.toRadians(hue)) * chroma, Math.sin(Math.toRadians(hue)) * chroma);
     }
     
     public static Color fromRGB(int r, int g, int b)
     {
-        final double r0 = (r / 255);
-        final double g0 = (g / 255);
-        final double b0 = (b / 255);
+        final double r0 = r / 255.0;
+        final double g0 = g / 255.0;
+        final double b0 = b / 255.0;
         
         final double r1 = (( r0 > 0.04045 ) ? Math.pow((r0 + 0.055 ) / 1.055 , 2.4) : r0 / 12.92) * 100;
         final double g1 = (( g0 > 0.04045 ) ? Math.pow((g0 + 0.055 ) / 1.055 , 2.4) : g0 / 12.92) * 100;
@@ -154,7 +154,7 @@ public class Color
     
     public static Color fromRGB(int rgb)
     {
-        return new Color(rgb & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 16) & 0xFF);
+        return fromRGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF );
     }
     
     protected Color (double x, double y, double z)
@@ -275,7 +275,7 @@ public class Color
             this.LAB_A = (float) (500 * ( x1 - y1 ));
             this.LAB_B = (float) (200 * ( y1 - z1 ));
         }
-
+        
         // Convert to HCL
         {
             double h0 = Math.atan2(this.LAB_B, this.LAB_A);

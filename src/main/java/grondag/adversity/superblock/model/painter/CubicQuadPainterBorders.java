@@ -5,12 +5,10 @@ import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.model.FaceQuadInputs;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.Vertex;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
 
 public class CubicQuadPainterBorders extends CubicQuadPainter
 {

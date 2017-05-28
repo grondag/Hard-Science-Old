@@ -17,13 +17,13 @@ public enum TextureLayout
      * Separate files with naming convention same as SPLIT_X_8 except only the first 13 textures
      * out of every 16. Files won't exist or will be blank for 13-15.
      */       
-    BORDER_13 (STATE_FLAG_NEEDS_CORNER_JOIN),
+    BORDER_13 (STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SPECIES),
     
     /**
      * Separate files with naming convention same as SPLIT_X_8 except only the first 5 textures
      * out of every 8. Files won't exist or will be blank for 5-7.
      */ 
-    MASONRY_5 (STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN);
+    MASONRY_5 (STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN | STATE_FLAG_NEEDS_SPECIES);
     
     private TextureLayout( int stateFlags)
     {

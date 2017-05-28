@@ -45,4 +45,9 @@ public abstract class ShapeMeshGenerator
         this.surfaces = new ImmutableList.Builder<Surface>()
                 .add(surfaces).build();
     }
+    
+    public boolean canPlaceTorchOnTop(ModelState modelState)
+    {
+        return true;
+    }
 }

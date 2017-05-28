@@ -160,7 +160,6 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     // BLOCK PROPERTIES
     
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean canEntitySpawn(IBlockState state, Entity entityIn)
     {

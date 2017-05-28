@@ -9,10 +9,13 @@ public enum Translucency
     
     public final float alpha;
     public final int alphaARGB;
+    /** used by block method */
+    public final int blockLightOpacity;
     
     private Translucency(float alpha)
     {
         this.alpha = alpha;
+        this.blockLightOpacity = (int) Math.round((alpha - 0.2F) * 15);
         this.alphaARGB = ((int)Math.round(alpha * 255) << 24);
     }
 }

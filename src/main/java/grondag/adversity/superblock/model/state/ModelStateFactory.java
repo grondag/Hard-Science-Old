@@ -163,6 +163,8 @@ public class ModelStateFactory
         public static final int STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS = STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS << 1;
         public static final int STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS = STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS << 1;
         
+        public static final int STATE_FLAG_NEEDS_SPECIES = STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS << 1;
+        
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
         
@@ -290,6 +292,12 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
             return (this.stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == STATE_FLAG_NEEDS_MASONRY_JOIN;
+        }
+        
+        public boolean hasSpecies()
+        {
+            this.populateStateFlagsIfNeeded();
+            return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
         }
         
         public boolean isStatic() { return this.isStatic; }
@@ -697,21 +705,34 @@ public class ModelStateFactory
             invalidateHashCode();
         }
 
+        /**
+         * Will return 0 if model state does not include species.
+         * This is more convenient than checking each place species is used.
+         * @return
+         */
         public int getSpecies()
         {
+            this.populateStateFlagsIfNeeded();
+            
             if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("getSpecies on model state does not apply for shape");
             
-            return P3B_SPECIES.getValue(bits3);
+            return (this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES
+                    ? P3B_SPECIES.getValue(bits3) : 0;
         }
         
         public void setSpecies(int species)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+            this.populateStateFlagsIfNeeded();
+            
+            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (this.stateFlags & STATE_FLAG_NEEDS_SPECIES) != STATE_FLAG_NEEDS_SPECIES)
                 Output.getLog().warn("setSpecies on model state does not apply for shape");
             
-            bits3 = P3B_SPECIES.setValue(species, bits3);
-            invalidateHashCode();
+            if((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES)
+            {
+                bits3 = P3B_SPECIES.setValue(species, bits3);
+                invalidateHashCode();
+            }
         }
         
         public CornerJoinBlockState getCornerJoin()
@@ -848,6 +869,16 @@ public class ModelStateFactory
 
             bits3 = P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);
             invalidateHashCode();
+        }
+        
+        
+        ////////////////////////////////////////////////////
+        //  DERIVED CONVENIENCE METHODS
+        ////////////////////////////////////////////////////
+
+        public boolean canPlaceTorchOnTop()
+        {
+            return getShape().meshFactory().canPlaceTorchOnTop(this);
         }
         
     }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.Vertex;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.model.layout.PaintLayer;
@@ -13,7 +12,6 @@ import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.math.Vec3d;
 
 public abstract class QuadPainter
 {

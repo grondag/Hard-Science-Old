@@ -43,14 +43,6 @@ import net.minecraft.util.math.MathHelper;
 
 public class SuperGuiScreen extends GuiScreen
 {
-//    /** The X size of the window in pixels. */
-//    protected int xSize = 360;
-//    /** The Y size of the window in pixels. */
-//    protected int ySize = 46;
-    
-
-    private static final float MARGIN_FACTOR = 0.2F;
-
     
     private static final int BUTTON_ID_CANCEL = 0;
     private static final int BUTTON_ID_ACCEPT = 1;
