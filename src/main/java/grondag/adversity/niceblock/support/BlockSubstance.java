@@ -13,7 +13,7 @@ import net.minecraft.block.material.Material;
  * Similar to Minecraft Material. Didn't want to tie to that implementation.
  * Determines Minecraft material and other physical properties.
  */
-public enum BaseMaterial {
+public enum BlockSubstance {
 	FLEXSTONE("flexstone", Configurator.SUBSTANCES.flexstone, Material.ROCK, SoundType.STONE, 
 	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
@@ -59,8 +59,9 @@ public enum BaseMaterial {
 	public final int defaultColorMapID;
 	public final boolean isHyperMaterial;
 	public final boolean isTranslucent;
+	public final double walkSpeedFactor;
 	
-	BaseMaterial(String name, Substance substance, Material material, SoundType sound, int defaultColorMapID) 
+	BlockSubstance(String name, Substance substance, Material material, SoundType sound, int defaultColorMapID) 
 	{
 		this.materialName = name;
 		this.material = material;
@@ -69,9 +70,11 @@ public enum BaseMaterial {
 		this.defaultColorMapID = defaultColorMapID;
 		this.isTranslucent = this.material == Material.GLASS;
 
-		hardness = substance.hardness;
-		resistance = substance.resistance;
-		harvestTool = substance.harvestTool;
-		harvestLevel = substance.harvestLevel;
+		this.hardness = substance.hardness;
+		this.resistance = substance.resistance;
+		this.harvestTool = substance.harvestTool;
+		this.harvestLevel = substance.harvestLevel;
+		this.walkSpeedFactor = substance.walkSpeedFactor;
+		
 	}
 }

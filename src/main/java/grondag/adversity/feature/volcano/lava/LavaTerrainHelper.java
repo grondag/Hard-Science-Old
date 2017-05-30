@@ -12,7 +12,7 @@ import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -123,7 +123,7 @@ public class LavaTerrainHelper
     {
         Block block = state.getBlock();
         return block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
-                || (IFlowBlock.isFlowHeight(block) && ((NiceBlock)block).material == BaseMaterial.BASALT)
+                || (IFlowBlock.isFlowHeight(block) && ((NiceBlock)block).material == BlockSubstance.BASALT)
                 || LavaTerrainHelper.canLavaDisplace(state);
     }
     

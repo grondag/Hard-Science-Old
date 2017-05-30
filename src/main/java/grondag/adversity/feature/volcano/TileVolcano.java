@@ -22,7 +22,7 @@ import grondag.adversity.feature.volcano.lava.simulator.LavaCells;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 
@@ -367,7 +367,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             this.world.setBlockToAir(clearPos);
             if(clearPos.getY() < this.groundLevel && 
-                    !(block instanceof NiceBlock && ((NiceBlock)block).material == BaseMaterial.BASALT))
+                    !(block instanceof NiceBlock && ((NiceBlock)block).material == BlockSubstance.BASALT))
             {
                 buildMound();
             }
@@ -456,8 +456,8 @@ public class TileVolcano extends TileEntity implements ITickable{
     private boolean isVolcanoBlock(Block block)
     {
         if(!(block instanceof NiceBlock)) return false;
-        BaseMaterial material = ((NiceBlock)block).material;
-        return (material == BaseMaterial.BASALT || material == BaseMaterial.VOLCANIC_LAVA);
+        BlockSubstance material = ((NiceBlock)block).material;
+        return (material == BlockSubstance.BASALT || material == BlockSubstance.VOLCANIC_LAVA);
     }
 
     /**

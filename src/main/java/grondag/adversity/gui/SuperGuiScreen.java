@@ -16,7 +16,6 @@ import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
-import grondag.adversity.gui.control.Slider;
 import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.TranslucencyPicker;
@@ -103,9 +102,9 @@ public class SuperGuiScreen extends GuiScreen
             this.itemPreview.previewItem = newStack;
             this.hasUpdates = true;
             
-            this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
-            this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
-            this.translucencyPicker.setVisible(this.materialPicker.getBlock().material.isTranslucent);
+            this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
+            this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
+            this.translucencyPicker.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
         }
         
         if(this.brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(this.itemPreview.previewItem))
@@ -114,7 +113,7 @@ public class SuperGuiScreen extends GuiScreen
             this.hasUpdates = true;
         }
         
-        Translucency newTrans = this.materialPicker.getBlock().material.isTranslucent
+        Translucency newTrans = this.materialPicker.getBlock().substance.isTranslucent
                 ? this.translucencyPicker.getTranslucency()
                 : Translucency.CLEAR;
         if(newTrans == null) newTrans = Translucency.CLEAR;
@@ -388,10 +387,10 @@ public class SuperGuiScreen extends GuiScreen
         this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
         this.lampTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
 
-        this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
-        this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().material.isTranslucent);
+        this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
+        this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
         
-        this.translucencyPicker.setVisible(this.materialPicker.getBlock().material.isTranslucent);
+        this.translucencyPicker.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
         this.translucencyPicker.setTranslucency(this.modelState.getTranslucency());
         
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)

@@ -6,7 +6,7 @@ import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -85,7 +85,7 @@ public class NiceBlock extends Block implements IWailaProvider
     /**
      * Controls material-dependent properties
      */
-    public final BaseMaterial material;
+    public final BlockSubstance material;
     
     /** 
      * Combined with material name for localization and registration.
@@ -105,7 +105,7 @@ public class NiceBlock extends Block implements IWailaProvider
     /** Allow silk harvest. Defaults true. Use setAllowSilk to change */
     private boolean allowSilkHarvest = true;
     
-    public NiceBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
+    public NiceBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName)
     {
         super(material.material);
         this.material = material;

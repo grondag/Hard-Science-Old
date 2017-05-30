@@ -33,6 +33,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class ModelStateFactory
 {
@@ -873,12 +874,34 @@ public class ModelStateFactory
         
         
         ////////////////////////////////////////////////////
-        //  DERIVED CONVENIENCE METHODS
+        //  SHAPE-DEPENDENT CONVENIENCE METHODS
         ////////////////////////////////////////////////////
 
         public boolean canPlaceTorchOnTop()
         {
             return getShape().meshFactory().canPlaceTorchOnTop(this);
+        }
+
+        /** returns true if the side has a complete 1x1 face along block boundary */
+        public boolean isSideSolid(EnumFacing side)
+        {
+            return getShape().meshFactory().isSideSolid(this, side);
+        }
+
+        /** returns true if geometry is a full 1x1x1 cube. */
+        public boolean isCube()
+        {
+            return getShape().meshFactory().isCube(this);
+        }
+        
+        /** 
+         * Rotate this block around the given axis if possible, making necessary changes to world state.
+         * Return true if successful. 
+         * @param blockState 
+         */
+        public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block)
+        {
+            return getShape().meshFactory().rotateBlock(blockState, world, pos, axis, block, this);
         }
         
     }

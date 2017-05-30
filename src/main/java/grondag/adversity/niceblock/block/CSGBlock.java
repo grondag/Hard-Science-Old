@@ -2,7 +2,7 @@ package grondag.adversity.niceblock.block;
 
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +12,7 @@ import net.minecraft.world.IBlockAccess;
 public class CSGBlock extends NiceBlockPlus
 {
 
-    public CSGBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
+    public CSGBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName)
     {
         super(dispatcher, material, styleName);
     }

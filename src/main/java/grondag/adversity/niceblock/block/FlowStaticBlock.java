@@ -15,7 +15,7 @@ import grondag.adversity.niceblock.base.NiceTileEntity.ModelRefreshMode;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -34,7 +34,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     
     private FlowDynamicBlock dynamicVersion;
 
-    public FlowStaticBlock (ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller) {
+    public FlowStaticBlock (ModelDispatcher dispatcher, BlockSubstance material, String styleName, boolean isFiller) {
         super(dispatcher, material, styleName);
         this.isFiller = isFiller;
     }

@@ -188,7 +188,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
          * Used by dispatcher as nominal particle texture.
          * More important usage is by GUI texture picker.
          */
-        public String getDefaultParticleTexture() 
+        public String getSampleTextureName() 
         { 
             if(textureBaseName == null) return "";
             
@@ -206,10 +206,10 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             }
         }
         
-        /** used for GUI texture preview */
-        public TextureAtlasSprite getPreviewSprite()
+        /** used for GUI texture preview and particles */
+        public TextureAtlasSprite getSampleSprite()
         {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getDefaultParticleTexture());
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getSampleTextureName());
         }
         
         public TextureAtlasSprite getTextureSprite(int version)

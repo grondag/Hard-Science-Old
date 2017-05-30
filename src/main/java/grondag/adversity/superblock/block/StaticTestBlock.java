@@ -2,7 +2,7 @@ package grondag.adversity.superblock.block;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -12,29 +12,8 @@ import net.minecraft.util.BlockRenderLayer;
 
 public class StaticTestBlock extends SuperBlock
 {
-
-    /** 
-     * TODO
-     * 
-     * Make species dynamic at block level - for static blocks can use meta
-     * because render layers are hard-coded - indicate with property on the block
-     * 
-     * BigTex painter
-     * Border painter
-     * Masonry painter
-     * GUI
-     * SuperModelBlocks
-     * 
-     * Shape generators
-     * Add back volcano blocks
-     * Add various substance blocks
-     * 
-     * Block Former Tool
-     * Construction Guide Block
-     */
-
     
-    public StaticTestBlock(BaseMaterial material, String styleName)
+    public StaticTestBlock(BlockSubstance material, String styleName)
     {
         super(styleName, material);
     }

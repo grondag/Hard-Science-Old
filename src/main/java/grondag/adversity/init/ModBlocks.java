@@ -6,7 +6,7 @@ import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockVolcano;
 import grondag.adversity.niceblock.DummyColorHandler;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.block.StaticTestBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperDispatcher;
@@ -49,17 +49,17 @@ public class ModBlocks
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
-        event.getRegistry().register(new StaticTestBlock(BaseMaterial.FLEXSTONE, "test"));
+        event.getRegistry().register(new StaticTestBlock(BlockSubstance.FLEXSTONE, "test"));
         
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.FLEXSTONE));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.DURASTONE));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.HYPERSTONE));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.FLEXIGLASS));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.DURAGLASS));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.HYPERGLASS));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.FLEXWOOD));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.DURAWOOD));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BaseMaterial.HYPERWOOD));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.FLEXSTONE));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.DURASTONE));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.HYPERSTONE));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.FLEXIGLASS));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.DURAGLASS));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.HYPERGLASS));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.FLEXWOOD));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.DURAWOOD));
+        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.HYPERWOOD));
         
     }
     

@@ -13,12 +13,16 @@ import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.NoColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
 import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class CubeMeshFactory extends ShapeMeshGenerator
 {
@@ -69,5 +73,29 @@ public class CubeMeshFactory extends ShapeMeshGenerator
         builder.add(result.makeRawFace(EnumFacing.NORTH));
        
         return builder.build();
+    }
+
+    @Override
+    public boolean canPlaceTorchOnTop(ModelState modelState)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isSideSolid(ModelState modelState, EnumFacing side)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isCube(ModelState modelState)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState)
+    {
+        return false;
     }
 }

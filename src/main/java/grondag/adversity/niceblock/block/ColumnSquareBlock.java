@@ -11,7 +11,7 @@ import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,7 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ColumnSquareBlock extends NiceBlockPlus
 {
 
-    public ColumnSquareBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
+    public ColumnSquareBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName)
     {
         super(dispatcher, material, styleName);
     }

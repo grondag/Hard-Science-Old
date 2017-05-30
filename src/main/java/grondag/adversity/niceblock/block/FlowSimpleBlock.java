@@ -10,7 +10,7 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
 {
 
-    public FlowSimpleBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
+    public FlowSimpleBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName)
     {
         super(dispatcher, material, styleName);
     }

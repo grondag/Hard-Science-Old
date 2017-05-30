@@ -4,7 +4,7 @@ import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -25,7 +25,7 @@ import net.minecraft.world.World;
 
 public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAccessor
 {
-    public VolcanicLavaBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller)
+    public VolcanicLavaBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName, boolean isFiller)
     {
         super(dispatcher, material, styleName, isFiller);
         

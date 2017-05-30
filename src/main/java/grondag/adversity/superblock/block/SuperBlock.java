@@ -5,14 +5,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.init.ModModels;
 import grondag.adversity.library.Color;
@@ -25,7 +28,7 @@ import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.AbstractCollisionHandler;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
@@ -39,10 +42,6 @@ import grondag.adversity.superblock.model.state.Translucency;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.EnumPushReaction;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
@@ -54,8 +53,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving.SpawnPlacementType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -65,13 +64,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.Mirror;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.translation.I18n;
@@ -86,20 +82,20 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * Base class for Adversity building blocks. Should be instantiated and set up in NiceBlockRegistrar.
- *
- * Note that NiceBlock metadata is ONLY used to define meta variants. For blocks that require facing or other configuration that cannot be derived from neighboring blocks, a
- * different block instance is used. (Or a tile entity, if needed to avoid an impractical number of instances.) In contrast, vanilla and most mods use metadata for facing data on
- * stairs, slabs, etc.
- *
- * NiceBlocks does it this way beause Adversity has MANY building blocks with many variants and I wanted to avoid creating tile entities in most cases and to be fully efficient in
- * usage of metadata bits. If each NiceBlock instance has 16 meta variants then no metadata bits are wasted. Slabs, stairs, etc. do not necessarily consume four metadata bits and
- * this also system means all niceblocks can be fully consistent in the way they use metadata.
+ * Base class for Adversity building blocks.
  * 
- * NB: Vanilla Bug / Feature
- * If block getLightValue > 0 and lightOpacity > 0
- * then block stays lit when nearby light sources are removed.
+ * 
+ * TODO LIST
+ * 
+ * instance-level state info
+ *  2 opacity  
+ *  1 is full block
+ *  4 render shaded flags
+ *  4 render layer flags
+ *  4 materials
+ *  15 bits total = too damn many bits
  */
+@SuppressWarnings("deprecation")
 public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
 {
 
@@ -125,7 +121,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     /**
      * Controls material-dependent properties
      */
-    public final BaseMaterial material;
+    public final BlockSubstance substance;
     
     /** 
      * Combined with material name for localization and registration.
@@ -143,12 +139,15 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     // change in constructor to have fewer variants
     protected int metaCount = 16;
-
-    @SuppressWarnings("deprecation")
-    public SuperBlock(String styleName, BaseMaterial material)
+    
+    /** see {@link #isAssociatedBlock(Block)} */
+    protected Block associatedBlock;
+    
+    
+    public SuperBlock(String styleName, BlockSubstance material)
     {
         super(material.material);
-        this.material = material;
+        this.substance = material;
         this.styleName = styleName;
         setCreativeTab(Adversity.tabAdversity);
         this.setHarvestLevel(material.harvestTool, material.harvestLevel);
@@ -157,13 +156,14 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         setResistance(material.resistance);
         this.setRegistryName(styleName + "_" + material.materialName);
         this.setUnlocalizedName(this.getRegistryName().toString());
+        this.associatedBlock = this;
         
         // see getLightOpacity(IBlockState)
         this.lightOpacity = material.isTranslucent ? 0 : 255;
 
         ModelState defaultState = new ModelState();
         defaultState.setShape(ModelShape.CUBE);
-        BlockRenderLayer baseRenderLayer = this.material.isTranslucent
+        BlockRenderLayer baseRenderLayer = this.substance.isTranslucent
                 ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
         defaultState.setRenderLayer(PaintLayer.BASE, baseRenderLayer);
         defaultState.setRenderLayer(PaintLayer.CUT, baseRenderLayer);
@@ -171,7 +171,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         this.defaultModelStateBits = defaultState.getBitsIntArray();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
@@ -202,15 +201,110 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
     {
-        // TODO have to override this to get correct particle color/texture
-        return super.addDestroyEffects(world, pos, manager);
+        IBlockState blockState = world.getBlockState(pos);
+        if(blockState.getBlock() != this)
+        {
+            // somehow got called for a different block
+            if(blockState.getBlock() instanceof SuperBlock)
+            {
+                // if the block at given position is somehow also a SuperBlock, call particle handler for it
+                ((SuperBlock)(blockState.getBlock())).addDestroyEffects(world, pos, manager);
+            }
+            else
+            {
+                // handle as a vanilla block
+                return false;
+            }
+        }
+        
+        ModelState modelState = this.getModelState(world.getBlockState(pos), world, pos, false);
+
+        for (int j = 0; j < 4; ++j)
+        {
+            for (int k = 0; k < 4; ++k)
+            {
+                for (int l = 0; l < 4; ++l)
+                {
+                    double d0 = ((double)j + 0.5D) / 4.0D;
+                    double d1 = ((double)k + 0.5D) / 4.0D;
+                    double d2 = ((double)l + 0.5D) / 4.0D;
+                    manager.addEffect((new ParticleDiggingSuperBlock(world, (double)pos.getX() + d0, (double)pos.getY() + d1, (double)pos.getZ() + d2, d0 - 0.5D, d1 - 0.5D, d2 - 0.5D,
+                            blockState, modelState)).setBlockPos(pos));
+                }
+            }
+        }
+
+        return true;
     }
 
     @Override
-    public boolean addHitEffects(IBlockState state, World worldObj, RayTraceResult target, ParticleManager manager)
+    public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
     {
-        // TODO have to override this to get correct particle color/texture
-        return super.addHitEffects(state, worldObj, target, manager);
+        if(blockState.getBlock() != this)
+        {
+            // somehow got called for a different block
+            if(blockState.getBlock() instanceof SuperBlock)
+            {
+                // if the block at given position is somehow also a SuperBlock, call particle handler for it
+                ((SuperBlock)(blockState.getBlock())).addHitEffects(blockState, world, target, manager);
+            }
+            else
+            {
+                // handle as a vanilla block
+                return false;
+            }
+        }
+        
+        BlockPos pos = target.getBlockPos();
+        ModelState modelState = this.getModelState(world.getBlockState(pos), world, pos, false);
+        
+        EnumFacing side = target.sideHit;
+
+        if (blockState.getRenderType() != EnumBlockRenderType.INVISIBLE)
+        {
+            int i = pos.getX();
+            int j = pos.getY();
+            int k = pos.getZ();
+ 
+            AxisAlignedBB axisalignedbb = blockState.getBoundingBox(world, pos);
+            double d0 = (double)i + ThreadLocalRandom.current().nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - 0.20000000298023224D) + 0.10000000149011612D + axisalignedbb.minX;
+            double d1 = (double)j + ThreadLocalRandom.current().nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - 0.20000000298023224D) + 0.10000000149011612D + axisalignedbb.minY;
+            double d2 = (double)k + ThreadLocalRandom.current().nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - 0.20000000298023224D) + 0.10000000149011612D + axisalignedbb.minZ;
+
+            if (side == EnumFacing.DOWN)
+            {
+                d1 = (double)j + axisalignedbb.minY - 0.10000000149011612D;
+            }
+
+            if (side == EnumFacing.UP)
+            {
+                d1 = (double)j + axisalignedbb.maxY + 0.10000000149011612D;
+            }
+
+            if (side == EnumFacing.NORTH)
+            {
+                d2 = (double)k + axisalignedbb.minZ - 0.10000000149011612D;
+            }
+
+            if (side == EnumFacing.SOUTH)
+            {
+                d2 = (double)k + axisalignedbb.maxZ + 0.10000000149011612D;
+            }
+
+            if (side == EnumFacing.WEST)
+            {
+                d0 = (double)i + axisalignedbb.minX - 0.10000000149011612D;
+            }
+
+            if (side == EnumFacing.EAST)
+            {
+                d0 = (double)i + axisalignedbb.maxX + 0.10000000149011612D;
+            }
+
+            manager.addEffect((new ParticleDiggingSuperBlock(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockState, modelState)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
+        }
+
+        return true;
     }
 
     @Override
@@ -237,8 +331,11 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
             int numberOfParticles)
     {
-        // TODO have to override this to get correct particle color/texture
-        return super.addLandingEffects(state, worldObj, blockPosition, iblockstate, entity, numberOfParticles);
+        // This is server-side, so to get matching particle color/texture I'd have to create a custom particle type similar to ParticleBlockDust,
+        // register it and add a handler for it.  Light-colored quartz particles are fine IMO - is just kicking up dust, not breaking anything.
+        
+        worldObj.spawnParticle(EnumParticleTypes.BLOCK_DUST, entity.posX, entity.posY, entity.posZ, numberOfParticles, 0.0D, 0.0D, 0.0D, 0.15000000596046448D, new int[] {Block.getStateId(Blocks.QUARTZ_BLOCK.getDefaultState())});
+        return true;
     }
 
     @Override
@@ -304,7 +401,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, SpawnPlacementType type)
     {
-        return !this.material.isHyperMaterial && super.canCreatureSpawn(state, world, pos, type);
+        return !this.substance.isHyperMaterial && super.canCreatureSpawn(state, world, pos, type);
     }
 
     /** 
@@ -315,7 +412,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canDropFromExplosion(Explosion explosionIn)
     {
-        return !this.material.isHyperMaterial;
+        return !this.substance.isHyperMaterial;
     }
 
     @Override
@@ -331,11 +428,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * 
      * All superblocks allow spawning unless made of hypermatter.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public boolean canEntitySpawn(IBlockState state, Entity entityIn)
     {
-        return super.canEntitySpawn(state, entityIn) && !this.material.isHyperMaterial;
+        return super.canEntitySpawn(state, entityIn) && !this.substance.isHyperMaterial;
     }
 
     @Override
@@ -373,14 +469,16 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return this.canSilkHarvest();
     }
 
-      /** won't be called unless getCollisionHandler is overriden */
-    @SuppressWarnings("deprecation")
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
         if (this.getModelState(blockState, worldIn, pos, true).getShape().meshFactory().collisionHandler() == null)
         {
-            return super.collisionRayTrace(blockState, worldIn, pos, start, end);
+            // same as vanilla logic here, but avoiding call to rayTrace so can detected unsupported calls to it
+            Vec3d vec3d = start.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
+            Vec3d vec3d1 = end.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
+            RayTraceResult raytraceresult = this.getBoundingBox(blockState, worldIn, pos).calculateIntercept(vec3d, vec3d1);
+            return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.addVector((double)pos.getX(), (double)pos.getY(), (double)pos.getZ()), raytraceresult.sideHit, pos);
         }
         else
         {
@@ -423,15 +521,34 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        //TODO: need shape-dependent logic here also
-        return this.getModelState(state, world, pos, true).getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID;
+        ModelState modelState = this.getModelState(state, world, pos, true);
+        return modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID
+                && modelState.isSideSolid(face);
     }
-
-     @Override
-    @SuppressWarnings("deprecation")
+    
+    @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        // TODO look at profile results and consider caching modelstate in thread-local variable for getExtendedState
+        // Would save a call to getModelState in getExtendedState if we could simply
+        // add model state to the state instance returned here.
+        
+        // However this won't work because model lookup is done via an identity hash map
+        // and the state instance would not match the pre-defined, immutable state instances
+        // added by our block state mapper at load.
+        
+        // Experimented with thread-local cache - but overhead of that approach made it unworthwhile.
+        // Another approach would be to have multiple block instances with different shaded flags
+        // so that it isn't necessary to look up modelstate here.
+        
+        // TODO: state location for rendershadedflags
+        
+        
+        
+        
+        // BUG:
+        
+        
+        
         return super.getActualState(state, worldIn, pos)
                 .withProperty(SHADE_FLAGS, (int)this.getModelState(state, worldIn, pos, true).getRenderLayerShadedFlags());
     }
@@ -439,7 +556,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        if(this.material == BaseMaterial.VOLCANIC_LAVA) 
+        if(this.substance == BlockSubstance.VOLCANIC_LAVA) 
             return PathNodeType.LAVA;
         
         if(this.isBurning(world, pos))
@@ -451,7 +568,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public float[] getBeaconColorMultiplier(IBlockState state, World world, BlockPos pos, BlockPos beaconPos)
     {
-        if(this.material.isTranslucent)
+        if(this.substance.isTranslucent)
         {
             ModelState modelState = this.getModelState(state, world, pos, false);
             if(modelState != null)
@@ -490,7 +607,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * For example, seems to determine at what height rain falls.
      * In most cases is same as collision bounding box.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
@@ -505,7 +621,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
@@ -576,7 +691,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return this.material == BaseMaterial.FLEXWOOD ? 1 : 0;
+        return this.substance == BlockSubstance.FLEXWOOD ? 1 : 0;
     }
 
     @Override
@@ -602,10 +717,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     // TODO: Localize
-    @SuppressWarnings("deprecation")
     public String getItemStackDisplayName(ItemStack stack)
     {
-        return I18n.translateToLocal(this.material.materialName + "." + this.styleName); 
+        return I18n.translateToLocal(this.substance.materialName + "." + this.styleName); 
     }
 
     /**
@@ -620,7 +734,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * 
      * Chunk uses location-dependent version if the chunk is loaded.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public int getLightOpacity(IBlockState state)
     {
@@ -638,65 +751,28 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         //TODO: state location
         //Using model state but is used during lighting - may want to consider using blockID/meta depending on what else we do
         // also means shaded glass does not block sky light - which would be nices
-        return this.material.isTranslucent 
+        return this.substance.isTranslucent 
                 ? this.getModelState(state, world, pos, false).getTranslucency().blockLightOpacity 
                 : this.getLightOpacity(state);
 
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getLightValue(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getLightValue(state);
-    }
-
-    @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getLightValue(state, world, pos);
-    }
-
-    // LOCALIZATION
-    @SuppressWarnings("deprecation")
-    @Override
-    public MapColor getMapColor(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getMapColor(state);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public Material getMaterial(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getMaterial(state);
-    }
-
-    /** 
-     * For SuperBlock (without persisted state), species is stored in meta data.  
-     * For SuperModelBlock, meta indicates supported render layers
+     /** 
+     * For SuperBlock (without persisted state), meta stores species data.  
+     * For SuperModelBlock, meta indicates supported render layers.
      */
     public int getMetaFromModelState(ModelState modelState)
     {
         return modelState.getSpecies();
     }
 
+    /**
+     * Usage of meta is overloaded and dependent on other aspects of state, so just storing the raw value.
+     */
     @Override
     public int getMetaFromState(IBlockState state)
     {
         return state.getValue(META);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public EnumPushReaction getMobilityFlag(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getMobilityFlag(state);
     }
 
     /** 
@@ -716,29 +792,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelState(state, world, pos, true), side);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public Vec3d getOffset(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getOffset(state, worldIn, pos);
-    }
-
-    @Override
-    public EnumOffsetType getOffsetType()
-    {
-        // TODO Auto-generated method stub
-        return super.getOffsetType();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getPackedLightmapCoords(IBlockState state, IBlockAccess source, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getPackedLightmapCoords(state, source, pos);
-    }
-
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
@@ -749,31 +802,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
         return getStackFromBlock(goodState, world, pos);
     }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public float getPlayerRelativeBlockHardness(IBlockState state, EntityPlayer player, World worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getPlayerRelativeBlockHardness(state, player, worldIn, pos);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getRenderType(state);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getSelectedBoundingBox(state, worldIn, pos);
-    }
-
+   
     /**
      * Used by NiceBlockHighligher to know if custom hit box rendering is needed. Actual event handling is in that class. 
      * Won't be called unless custom collision handler is available.
@@ -797,48 +826,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         }
     }
 
-    @Override
-    protected ItemStack getSilkTouchDrop(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.getSilkTouchDrop(state);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public SoundType getSoundType()
-    {
-        // TODO Auto-generated method stub
-        return super.getSoundType();
-    }
-
-    @Override
-    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, Entity entity)
-    {
-        // TODO Auto-generated method stub
-        return super.getSoundType(state, world, pos, entity);
-    }
-
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return this.getSubItems().get(this.damageDropped(state));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta,
-            EntityLivingBase placer)
-    {
-        // TODO Auto-generated method stub
-        return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
-    }
-
-    @Override
-    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer,
-            EnumHand hand)
-    {
-        // TODO Auto-generated method stub
-        return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand);
     }
 
     @Override
@@ -847,15 +837,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return getDefaultState().withProperty(META, meta);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
-        // TODO Auto-generated method stub
-        return super.getStrongPower(blockState, blockAccess, pos, side);
-    }
-
-    public String getStyleName() {
+       public String getStyleName() {
         return styleName;
     }
 
@@ -880,53 +862,16 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
-    public boolean getTickRandomly()
-    {
-        // TODO Auto-generated method stub
-        return super.getTickRandomly();
-    }
-
-    @Override
-    public String getUnlocalizedName()
-    {
-        // TODO Auto-generated method stub
-        return super.getUnlocalizedName();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
     public boolean getUseNeighborBrightness(IBlockState state)
     {
-        // TODO Auto-generated method stub
+        // TODO state location - should be true if shape is not a full cube or fully transparent
         return super.getUseNeighborBrightness(state);
-    }
-
-    @Override
-    public EnumFacing[] getValidRotations(World world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getValidRotations(world, pos);
     }
 
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
     {
         return Collections.emptyList();
-    }
-
-    @Override
-    public boolean getWeakChanges(IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.getWeakChanges(world, pos);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
-        // TODO Auto-generated method stub
-        return super.getWeakPower(blockState, blockAccess, pos, side);
     }
 
     //overridden to allow for world-sensitive drops
@@ -971,77 +916,31 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return false;
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public boolean hasComparatorInputOverride(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.hasComparatorInputOverride(state);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public boolean hasCustomBreakingProgress(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.hasCustomBreakingProgress(state);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public boolean hasTileEntity()
-    {
-        // TODO Auto-generated method stub
-        return super.hasTileEntity();
-    }
-
-    @Override
-    public boolean hasTileEntity(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.hasTileEntity(state);
-    }
-
-    @Override
-    public Boolean isAABBInsideMaterial(World world, BlockPos pos, AxisAlignedBB boundingBox, Material materialIn)
-    {
-        // TODO Auto-generated method stub
-        return super.isAABBInsideMaterial(world, pos, boundingBox, materialIn);
-    }
-
-    @Override
-    public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isAir(state, world, pos);
-    }
-
+    /** 
+     * This is an egregious hack to avoids performance hit of instanceof.
+     * (Based on performance profile results.) <br> <br>
+     * 
+     * Default value of {@link #associatedBlock} is set to this instance in constructor.
+     * If not changed, will have same behavior as vanilla.
+     * Change it to a reference value to have this block be recognized as part of a group.
+     * Initially used for flow blocks so that they can be detected quickly.
+     */
     @Override
     public boolean isAssociatedBlock(Block other)
     {
-        // TODO Auto-generated method stub
-        return super.isAssociatedBlock(other);
+        return other == this.associatedBlock;
     }
 
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * In a rare and ironic nod to vanilla magical thinking, Hypermatter acts as a beacon base.
+     * I will almost certainly regret this.
+     */
     @Override
     public boolean isBeaconBase(IBlockAccess worldObj, BlockPos pos, BlockPos beacon)
     {
-        // TODO Auto-generated method stub
-        return super.isBeaconBase(worldObj, pos, beacon);
-    }
-
-    @Override
-    public boolean isBed(IBlockState state, IBlockAccess world, BlockPos pos, Entity player)
-    {
-        // TODO Auto-generated method stub
-        return super.isBed(state, world, pos, player);
-    }
-
-    @Override
-    public boolean isBedFoot(IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isBedFoot(world, pos);
+        return this.substance.isHyperMaterial || super.isBeaconBase(worldObj, pos, beacon);
     }
 
     /**
@@ -1049,7 +948,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * 
      * Determines result of {@link #getAmbientOcclusionLightValue(IBlockState)}
      */
-    @SuppressWarnings("deprecation")
     @Override
     public boolean isBlockNormalCube(IBlockState state)
     {
@@ -1057,54 +955,29 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return super.isBlockNormalCube(state);
     }
 
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * Same behavior as vanilla but faster implementation.
+     * Has nothing to do with block geometry but instead is based on material.
+     * Is used by fluid rendering to know if fluid should appear to flow into this block.
+     */
     @Override
     public boolean isBlockSolid(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
-        // TODO Auto-generated method stub
-        return super.isBlockSolid(worldIn, pos, side);
+        return this.substance.material.isSolid();
     }
 
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
     {
-        // TODO Auto-generated method stub
-        return super.isBurning(world, pos);
-    }
-
-    @Override
-    public boolean isCollidable()
-    {
-        // TODO Auto-generated method stub
-        return super.isCollidable();
-    }
-
-    @Override
-    public Boolean isEntityInsideMaterial(IBlockAccess world, BlockPos blockpos, IBlockState iblockstate, Entity entity, double yToTest, Material materialIn,
-            boolean testingHead)
-    {
-        // TODO Auto-generated method stub
-        return super.isEntityInsideMaterial(world, blockpos, iblockstate, entity, yToTest, materialIn, testingHead);
-    }
-
-    @Override
-    public boolean isFertile(World world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isFertile(world, pos);
-    }
-
-    @Override
-    public boolean isFireSource(World world, BlockPos pos, EnumFacing side)
-    {
-        // TODO Auto-generated method stub
-        return super.isFireSource(world, pos, side);
+        return this.substance == BlockSubstance.VOLCANIC_LAVA;
     }
 
     @Override
     public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        // TODO Auto-generated method stub
-        return super.isFlammable(world, pos, face);
+        return this.substance == BlockSubstance.FLEXWOOD;
     }
 
     /** 
@@ -1127,77 +1000,57 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return false;
     }
 
-    @Override
-    public boolean isFoliage(IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isFoliage(world, pos);
-    }
-
     /**
+     * {@inheritDoc} <br><br>
+     * 
      * Accessed via state implementation.
      * Used in AI pathfinding, explosions and occlusion culling.
-     * Has no actual or extended state properties when referenced.
+     * Has no actual or extended state properties when referenced. <br><br>
+     * 
+     * Vanilla implementation uses fullBlock instance variable,
+     * which is derived at construction from {@link #isOpaqueCube(IBlockState)}
      */
-    @SuppressWarnings("deprecation")
     @Override
     public boolean isFullBlock(IBlockState state)
     {
-        //TODO - state location
+        //TODO state location
+        // could handle by setting value of fullBlock in constructor 
         return super.isFullBlock(state);
     }
 
     /**
-     * Value stored in instance variable may be incorrect
-     * because we don't have material/shape info during constructor.
+     * Used many places in rendering and AI. 
+     * Input state provided has no extended properties.
+     * Result appears to be based on geometry - if block is a 
+     * full 1.0 cube return true, false otherwise.
+     * Also returns false if material is translucent. <br><br>
+     * 
+     * Is also used in derivation of {@link #isFullyOpaque(IBlockState)}
+     * and {@link #isNormalCube(IBlockState)}
      */
     @Override
     public boolean isFullCube(IBlockState state)
     {
-        //TODO: state location - need to also check shape somehow
-        return !this.material.isTranslucent;
+        return !this.substance.isTranslucent && this.isFullBlock(state);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public boolean isFullyOpaque(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.isFullyOpaque(state);
-    }
-
+    /** To be overridden by stackable plates or blocks with similar behavior. */
     public boolean isItemUsageAdditive(World worldIn, BlockPos pos, ItemStack stack)
     {
         return false;
     }
 
-    @Override
-    public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity)
-    {
-        // TODO Auto-generated method stub
-        return super.isLadder(state, world, pos, entity);
-    }
-
-    @Override
-    public boolean isLeaves(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isLeaves(state, world, pos);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public boolean isNormalCube(IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.isNormalCube(state);
-    }
-
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * Vanilla version will return false if material is not fully opaque.
+     * Ours is based solely on geometry && solidity.
+     * 
+     */
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        // TODO Auto-generated method stub
-        return super.isNormalCube(state, world, pos);
+        return this.getModelState(state, world, pos, true).isCube() && this.substance.material.isSolid();
     }
 
     /**
@@ -1211,279 +1064,83 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         // TODO state location
         // needs to account for shape also
-        return this.material == null || !this.material.isTranslucent;
-    }
-
-    @Override
-    public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isPassable(worldIn, pos);
-    }
-
-    @Override
-    public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isReplaceable(worldIn, pos);
-    }
-
-    @Override
-    public boolean isReplaceableOreGen(IBlockState state, IBlockAccess world, BlockPos pos, Predicate<IBlockState> target)
-    {
-        // TODO Auto-generated method stub
-        return super.isReplaceableOreGen(state, world, pos, target);
+        return this.substance == null || !this.substance.isTranslucent;
     }
 
     @Override
     public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        // TODO Auto-generated method stub
-        return super.isSideSolid(base_state, world, pos, side);
-    }
-
-    @Override
-    public boolean isToolEffective(String type, IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        return super.isToolEffective(type, state);
+        return this.getModelState(base_state, world, pos, true).isSideSolid(side);
     }
 
     @Override
     public boolean isTranslucent(IBlockState state)
     {
-        return this.material.isTranslucent;
-    }
-
-    // BASIC METADATA MECHANICS
-
-    @Override
-    public boolean isWood(IBlockAccess world, BlockPos pos)
-    {
-        // TODO Auto-generated method stub
-        return super.isWood(world, pos);
-    }
-
-    @Override
-    public Vec3d modifyAcceleration(World worldIn, BlockPos pos, Entity entityIn, Vec3d motion)
-    {
-        // TODO Auto-generated method stub
-        return super.modifyAcceleration(worldIn, pos, entityIn, motion);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
-    {
-        // TODO Auto-generated method stub
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
-    }
-
-    @Override
-    public void observedNeighborChange(IBlockState observerState, World world, BlockPos observerPos, Block changedBlock, BlockPos changedBlockPos)
-    {
-        // TODO Auto-generated method stub
-        super.observedNeighborChange(observerState, world, observerPos, changedBlock, changedBlockPos);
-    }
-
-    @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX,
-            float hitY, float hitZ)
-    {
-        // TODO Auto-generated method stub
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
-    }
-
-    @Override
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockAdded(worldIn, pos, state);
-    }
-
-    @Override
-    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockClicked(worldIn, pos, playerIn);
-    }
-
-    @Override
-    public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
-    }
-
-    @Override
-    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockDestroyedByPlayer(worldIn, pos, state);
-    }
-
-    // INTERACTION HANDLING
-
-    @Override
-    public void onBlockExploded(World world, BlockPos pos, Explosion explosion)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockExploded(world, pos, explosion);
-    }
-
-    @Override
-    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockHarvested(worldIn, pos, state, player);
-    }
-
-    @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
-    {
-        // TODO Auto-generated method stub
-        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-    }
-
-    @Override
-    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
-    {
-        // TODO Auto-generated method stub
-        super.onEntityCollidedWithBlock(worldIn, pos, state, entityIn);
+        return this.substance.isTranslucent;
     }
 
     @Override
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
-        // TODO Auto-generated method stub
-        super.onEntityWalk(worldIn, pos, entityIn);
-    }
-
-    @Override
-    public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance)
-    {
-        // TODO Auto-generated method stub
-        super.onFallenUpon(worldIn, pos, entityIn, fallDistance);
-    }
-
-    @Override
-    public void onLanded(World worldIn, Entity entityIn)
-    {
-        // TODO Auto-generated method stub
-        super.onLanded(worldIn, entityIn);
-    }
-
-    @Override
-    public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor)
-    {
-        // TODO Auto-generated method stub
-        super.onNeighborChange(world, pos, neighbor);
-    }
-
-    @Override
-    public void onPlantGrow(IBlockState state, World world, BlockPos pos, BlockPos source)
-    {
-        // TODO Auto-generated method stub
-        super.onPlantGrow(state, world, pos, source);
+        if (!entityIn.isSneaking() && this.substance.walkSpeedFactor != 0.0)
+        {
+            entityIn.motionX *= this.substance.walkSpeedFactor;
+            entityIn.motionZ *= this.substance.walkSpeedFactor;
+        }
     }
 
     /**
-     * Need a world-aware version because may need more than metadata
+     * World-aware version called from getDrops because logic may need more than metadata.
+     * Other versions (not overriden) should not be called.
      */
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
         return 1;
     }
 
+    /** should never be used */
     @Override
     public int quantityDropped(IBlockState state, int fortune, Random random)
     {
-        // TODO Auto-generated method stub
-        return super.quantityDropped(state, fortune, random);
+        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
+        return 0;
     }
 
-
-    // RENDERING-RELATED THINGS AND STUFF
-    // Note that some of the methods here are called server-side.
-    // (Ray tracing and collisions, mainly.)
-
-
+    /** should never be used */
     @Override
     public int quantityDropped(Random random)
     {
-        // TODO Auto-generated method stub
-        return super.quantityDropped(random);
+        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
+        return 0;
     }
 
-
-
+    /** should never be used */
     @Override
     public int quantityDroppedWithBonus(int fortune, Random random)
     {
-        // TODO Auto-generated method stub
-        return super.quantityDroppedWithBonus(fortune, random);
+        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
+        return 0;
     }
 
-    @Override
-    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
-    {
-        // TODO Auto-generated method stub
-        super.randomDisplayTick(stateIn, worldIn, pos, rand);
-    }
-
-    @Override
-    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
-    {
-        // TODO Auto-generated method stub
-        super.randomTick(worldIn, pos, state, random);
-    }
-
+    /** should never be used - all handled in {@link #collisionRayTrace(IBlockState, World, BlockPos, Vec3d, Vec3d)} */
     @Override
     protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox)
     {
-        // TODO Auto-generated method stub
+        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
         return super.rayTrace(pos, start, end, boundingBox);
-    }
-
-    @Override
-    public boolean recolorBlock(World world, BlockPos pos, EnumFacing side, EnumDyeColor color)
-    {
-        // TODO Auto-generated method stub
-        return super.recolorBlock(world, pos, side, color);
-    }
-
-    @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
-    {
-        // TODO Auto-generated method stub
-        return super.removedByPlayer(state, world, pos, player, willHarvest);
-    }
-
-    @Override
-    public boolean requiresUpdates()
-    {
-        // TODO Auto-generated method stub
-        return super.requiresUpdates();
     }
 
     @Override
     public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis)
     {
-        // TODO Auto-generated method stub
-        return super.rotateBlock(world, pos, axis);
+        IBlockState blockState = world.getBlockState(pos);
+        return this.getModelState(world.getBlockState(pos), world, pos, true).rotateBlock(blockState, world, pos, axis, this);
     }
 
     public SuperBlock setAllowSilkHarvest(boolean allow)
     {
         this.allowSilkHarvest = allow;
         return this;
-    }
-
-    @Override
-    public void setBedOccupied(IBlockAccess world, BlockPos pos, EntityPlayer player, boolean occupied)
-    {
-        // TODO Auto-generated method stub
-        super.setBedOccupied(world, pos, player, occupied);
     }
 
     /**
@@ -1496,17 +1153,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
-    public boolean shouldCheckWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
-    {
-        // TODO Auto-generated method stub
-        return super.shouldCheckWeakPower(state, world, pos, side);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        if(this.material.isTranslucent)
+        if(this.substance.isTranslucent)
         {
             BlockPos otherPos = pos.offset(side);
             IBlockState otherBlockState = blockAccess.getBlockState(otherPos);
@@ -1514,7 +1163,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             if(block instanceof SuperBlock)
             {
                 SuperBlock sBlock = (SuperBlock)block;
-                if(((SuperBlock) block).material.isTranslucent)
+                if(((SuperBlock) block).substance.isTranslucent)
                 {
                     ModelState myModelState = this.getModelState(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelState(otherBlockState, blockAccess, otherPos, false);
@@ -1527,20 +1176,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         }
 
         return super.shouldSideBeRendered(blockState, blockAccess, pos, side);
-    }
-
-    @Override
-    public int tickRate(World worldIn)
-    {
-        // TODO Auto-generated method stub
-        return super.tickRate(worldIn);
-    }
-
-    @Override
-    public String toString()
-    {
-        // TODO Auto-generated method stub
-        return super.toString();
     }
 
     /**
@@ -1634,30 +1269,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                     new PlacementValidatorCubic(shape & 0xFF, (shape >> 8) & 0xFF, (shape >> 16) & 0xFF));
 
             return placer.getSpeciesForPlacedStack(worldIn, posPlaced, facing, stack, this);
-
         }
-    }
-    
-    @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-    {
-        // TODO Auto-generated method stub
-        super.updateTick(worldIn, pos, state, rand);
-    }
-    
-    @SuppressWarnings("deprecation")
-    @Override
-    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
-    {
-        // TODO Auto-generated method stub
-        return super.withMirror(state, mirrorIn);
-    }
-    
-    @SuppressWarnings("deprecation")
-    @Override
-    public IBlockState withRotation(IBlockState state, Rotation rot)
-    {
-        // TODO Auto-generated method stub
-        return super.withRotation(state, rot);
     }
 }

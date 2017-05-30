@@ -29,7 +29,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
     {
-//        Adversity.log.info("shouldRefresh pos=" + pos.toString());
         if(oldState.getBlock() == newSate.getBlock())
         {
             return false;
@@ -44,7 +43,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public void onLoad() 
     {
-//        Adversity.log.info("onLoad");
         super.onLoad();
     }
 
@@ -52,8 +50,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @SideOnly(Side.CLIENT)
     public void updateClientRenderState()
     {
-//        Output.getLog().info("SuperTileEntity.updateClientRenderState  @" + pos.toString());
-
         this.isModelStateCacheDirty = true;
 
         invalidateClientCache(pos.up());
@@ -95,15 +91,12 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @SideOnly(Side.CLIENT)
     private void invalidateClientCache(BlockPos updatePos)
     {
-//        Adversity.log.info("invalidateClientCache thread=" + Thread.currentThread().getName() + " pos=" + pos.toString());
         TileEntity target = this.world.getTileEntity(updatePos);
         if(target != null && target instanceof SuperTileEntity)
         {
-            //          Adversity.log.info("updatify success @ " + updatePos.toString());
             ((SuperTileEntity)target).isModelStateCacheDirty = true;
         }
     }
-
 
     /**
      * Generate tag sent to client when block/chunk first loads.
@@ -112,7 +105,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public NBTTagCompound getUpdateTag()
     {
-//        Adversity.log.info("getUpdateTag pos=" + pos.toString());
         return SuperBlockNBTHelper.writeToNBT(super.getUpdateTag(), this.modelState, this.placementShape, this.lightValue);
     }
 
@@ -124,8 +116,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     {
         // The description packet often arrives after render state is first cached on client
         // so we need to refresh render state once we have the server-side info.
-//        Adversity.log.info("handleUpdateTag pos=" + pos.toString());
-
         ModelState oldModelState = modelState;
         super.handleUpdateTag(tag);
         if(!oldModelState.equals(modelState) && this.world.isRemote)
@@ -140,7 +130,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-//        Adversity.log.info("getUpdatePacket pos=" + pos.toString());
         NBTTagCompound nbtTagCompound = SuperBlockNBTHelper.writeToNBT(new NBTTagCompound(), this.modelState, this.placementShape, this.lightValue);
         int metadata = getBlockMetadata();
         return new SPacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
@@ -152,7 +141,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
     {
-//        Adversity.log.info("OnDataPacket pos=" + pos.toString());
         ModelState oldModelState = modelState;
         int oldLight = this.lightValue;
         SuperBlockNBTHelper.readFromNBT(pkt.getNbtCompound(), this);
@@ -169,9 +157,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
-//        Adversity.log.info("readFromNBT START pos=" + pos.toString());
         super.readFromNBT(compound);
-//        Adversity.log.info("readFromNBT POST-SUPER pos=" + pos.toString());
         SuperBlockNBTHelper.readFromNBT(compound, this);
         isLoaded = true;
     }
@@ -189,7 +175,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-//        Adversity.log.info("writeToNBT pos=" + pos.toString());
         SuperBlockNBTHelper.writeToNBT(compound, this.modelState, this.placementShape, this.lightValue);
         return super.writeToNBT(compound);
     }
@@ -203,8 +188,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         }
         if(this.isModelStateCacheDirty && refreshFromWorldIfNeeded)
         {
-//            Output.getLog().info("SuperTileEntity.getModelState world refresh  @" + pos.toString());
-
             this.modelState.refreshFromWorld(state, world, pos);
             this.isModelStateCacheDirty = false;
         }
@@ -213,8 +196,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     
     public void setModelState(ModelState modelState) 
     { 
-//        Adversity.log.info("setModelKey pos=" + pos.toString());
-//        Adversity.log.info("oldModelKey=" + this.modelKey + " newModelKey=" + modelKey );
         if(this.modelState == null || !this.modelState.equals(modelState))
         {
             this.modelState = modelState;
@@ -223,11 +204,13 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         }
     }
 
-    public int getPlacementShape() { return placementShape; }
+    public int getPlacementShape()
+    { 
+        return placementShape;
+    }
+    
     public void setPlacementShape( int placementShape)
     { 
-//        Adversity.log.info("setPlacementShape pos=" + pos.toString());
-
         if(this.placementShape != placementShape)
         {
             this.placementShape = placementShape;

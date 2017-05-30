@@ -14,7 +14,7 @@ import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.niceblock.support.NicePlacement;
 import net.minecraft.block.state.IBlockState;
@@ -32,7 +32,7 @@ public class BigBlock extends NiceBlockPlus
     private int defaultPlacementShape;
 
 
-    public BigBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, int placementShape)
+    public BigBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName, int placementShape)
     {
         super(dispatcher, material, styleName);
         defaultPlacementShape = placementShape;

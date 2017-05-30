@@ -6,7 +6,7 @@ import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.modelstate.ModelStateSet;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 public class HeightBlock extends NiceBlockPlus
 {
     
-    public HeightBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName)
+    public HeightBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName)
     {
         super(dispatcher, material, styleName);
     }

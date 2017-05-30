@@ -9,7 +9,7 @@ import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -25,7 +25,7 @@ public class CoolingBlock extends FlowDynamicBlock
     
     //TODO: register with simulator on placement
     
-    public CoolingBlock(ModelDispatcher dispatcher, BaseMaterial material, String styleName, boolean isFiller)
+    public CoolingBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName, boolean isFiller)
     {
         super(dispatcher, material, styleName, isFiller);
         this.setTickRandomly(true);

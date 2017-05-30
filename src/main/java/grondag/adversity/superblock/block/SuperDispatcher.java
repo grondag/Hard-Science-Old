@@ -239,9 +239,14 @@ public class SuperDispatcher
             BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
             
             // If no layer can be determined than probably getting request from block breaking
-            // In that case, return quads from all layers
+            // In that case, return quads from all layers with UV coordinates scaled to be within a 1 block boundary.
+            // This causes breaking textures to be scaled to normal size.
+            // If we didn't do this, bigtex block break textures would appear abnormal.
             if(layer == null)
             {
+
+                // TODO: Actually rescale the quad UVs per above note.   Look at BakedQuadRetextured for ideas
+                
                 ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
                 
                 for(QuadContainer qc : modelCache.get(modelState).getAll())

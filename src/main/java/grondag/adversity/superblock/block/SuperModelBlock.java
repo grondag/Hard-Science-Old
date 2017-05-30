@@ -10,7 +10,7 @@ import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -37,7 +37,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class SuperModelBlock extends SuperBlock implements ITileEntityProvider 
 {
     
-    public SuperModelBlock(String styleName, BaseMaterial material)
+    public SuperModelBlock(String styleName, BlockSubstance material)
     {
         super(styleName, material);
     }
@@ -195,7 +195,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     {
         // hyperstone blocks can be configured to prevent mob spawning
         
-        if(this.material.isHyperMaterial && !Configurator.HYPERSTONE.allowMobSpawning)
+        if(this.substance.isHyperMaterial && !Configurator.HYPERSTONE.allowMobSpawning)
         {
             return false;
         }
