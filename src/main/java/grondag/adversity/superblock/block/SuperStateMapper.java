@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -38,8 +39,19 @@ public class SuperStateMapper extends DefaultStateMapper
                {
                    IBlockState innerState = state.withProperty(SuperBlock.SHADE_FLAGS, j);
                    
-                   mapLocations.put(innerState,
-                           new ModelResourceLocation(dispatcher.getDelegateForShadedFlags(j).getModelResourceString()));
+                   if(block instanceof SuperModelBlock)
+                   {
+                       for(BlockSubstance substance : BlockSubstance.values())
+                       {
+                           mapLocations.put(innerState.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal()),
+                                   new ModelResourceLocation(dispatcher.getDelegateForShadedFlags(j).getModelResourceString()));
+                       }
+                   }
+                   else
+                   {
+                       mapLocations.put(innerState,
+                               new ModelResourceLocation(dispatcher.getDelegateForShadedFlags(j).getModelResourceString()));
+                   }
                }
            }
        }

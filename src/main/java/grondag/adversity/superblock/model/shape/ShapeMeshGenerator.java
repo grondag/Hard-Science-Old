@@ -60,4 +60,14 @@ public abstract class ShapeMeshGenerator
     public abstract boolean isCube(ModelState modelState);
 
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
+
+    /** 
+     * How much of the sky is occluded by the shape of this block?
+     * Based on geometry alone, not transparency.
+     * Returns 0 if no occlusion (unlikely result).
+     * 1-15 if some occlusion.
+     * 255 if fully occludes sky.
+     */
+    public abstract int geometricSkyOcclusion(ModelState modelState);
+    
 }

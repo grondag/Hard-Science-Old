@@ -301,7 +301,12 @@ public class ModelStateFactory
             return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
         }
         
+        /** 
+         * Persisted but not part of hash nor included in equals comparison.
+         * If true, refreshFromWorldState does nothing.
+         */
         public boolean isStatic() { return this.isStatic; }
+        
         public void setStatic(boolean isStatic) { this.isStatic = isStatic; }
         
         @Override
@@ -353,6 +358,11 @@ public class ModelStateFactory
                 
                 long b3 = bits3;
                 
+                if((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES)
+                {
+                    b3 = P3B_SPECIES.setValue(state.getValue(SuperBlock.META), b3);                  
+                }
+                
                 for(TextureScale scale : TextureScale.values())
                 {
                     if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
@@ -386,8 +396,6 @@ public class ModelStateFactory
                     NeighborTestResults masonryTests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockMasonryMatch((SuperBlock) state.getBlock(), this.getSpecies(), pos));
                     b3 = P3B_MASONRY_JOIN.setValue(SimpleJoin.getIndex(masonryTests), b3);
                 }
-
-
                 
                 bits3 = b3;
                 
@@ -902,6 +910,19 @@ public class ModelStateFactory
         public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block)
         {
             return getShape().meshFactory().rotateBlock(blockState, world, pos, axis, block, this);
+        }
+
+
+        /** 
+         * How much of the sky is occluded by the shape of this block?
+         * Based on geometry alone, not transparency.
+         * Returns 0 if no occlusion (unlikely result).
+         * 1-15 if some occlusion.
+         * 255 if fully occludes sky.
+         */
+        public int geometricSkyOcclusion()
+        {
+            return getShape().meshFactory().geometricSkyOcclusion(this);
         }
         
     }

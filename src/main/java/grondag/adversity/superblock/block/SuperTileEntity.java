@@ -1,5 +1,6 @@
 package grondag.adversity.superblock.block;
 
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,6 +23,8 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     /** non-zero if block emits light */
     private byte lightValue = 0;
 
+    private BlockSubstance substance = BlockSubstance.FLEXSTONE;
+    
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
     public boolean isLoaded = false;
@@ -105,7 +108,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public NBTTagCompound getUpdateTag()
     {
-        return SuperBlockNBTHelper.writeToNBT(super.getUpdateTag(), this.modelState, this.placementShape, this.lightValue);
+        return SuperBlockNBTHelper.writeToNBT(super.getUpdateTag(), this.modelState, this.placementShape, this.lightValue, this.substance);
     }
 
     /**
@@ -130,7 +133,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbtTagCompound = SuperBlockNBTHelper.writeToNBT(new NBTTagCompound(), this.modelState, this.placementShape, this.lightValue);
+        NBTTagCompound nbtTagCompound = SuperBlockNBTHelper.writeToNBT(new NBTTagCompound(), this.modelState, this.placementShape, this.lightValue, this.substance);
         int metadata = getBlockMetadata();
         return new SPacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
     }
@@ -163,19 +166,20 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     }
 
     @Override
-    public void handleNBTRead(ModelState modelState, int placementShape, byte lightValue)
+    public void handleNBTRead(ModelState modelState, int placementShape, byte lightValue, BlockSubstance substance)
     {
         this.modelState = (modelState == null)
                 ? ((SuperBlock)this.getBlockType()).getDefaultModelState()
                 : modelState;
         this.placementShape = placementShape;
         this.lightValue = lightValue;
+        this.substance = substance;
     }
    
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        SuperBlockNBTHelper.writeToNBT(compound, this.modelState, this.placementShape, this.lightValue);
+        SuperBlockNBTHelper.writeToNBT(compound, this.modelState, this.placementShape, this.lightValue, this.substance);
         return super.writeToNBT(compound);
     }
 
@@ -220,7 +224,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
 
     public byte getLightValue()
     {
-        return lightValue;
+        return this.lightValue;
     }
 
     public void setLightValue(byte lightValue)
@@ -233,6 +237,20 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
             else
                 this.markDirty();
             
+        }
+    }
+
+    public BlockSubstance getSubstance()
+    {
+        return this.substance;
+    }
+    
+    public void setSubstance(BlockSubstance substance)
+    {
+        if(this.substance != substance)
+        {
+            this.substance = substance;
+            if(!this.world.isRemote) this.markDirty();
         }
     }
 }

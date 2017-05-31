@@ -5,16 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Supplier;
-
 import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.init.ModModels;
@@ -31,7 +28,6 @@ import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.model.layout.PaintLayer;
-import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -42,6 +38,8 @@ import grondag.adversity.superblock.model.state.Translucency;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
@@ -70,7 +68,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -83,17 +80,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Base class for Adversity building blocks.
- * 
- * 
- * TODO LIST
- * 
- * instance-level state info
- *  2 opacity  
- *  1 is full block
- *  4 render shaded flags
- *  4 render layer flags
- *  4 materials
- *  15 bits total = too damn many bits
  */
 @SuppressWarnings("deprecation")
 public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
@@ -118,57 +104,42 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     public static final ModelStateProperty MODEL_STATE = new ModelStateProperty();
 
-    /**
-     * Controls material-dependent properties
-     */
-    public final BlockSubstance substance;
-    
-    /** 
-     * Combined with material name for localization and registration.
-     */
-    private final String styleName;
-
-    /** non-null if this drops something other than itself */
+     /** non-null if this drops something other than itself */
     private Item dropItem;
 
     /** Allow silk harvest. Defaults true. Use setAllowSilk to change */
     private boolean allowSilkHarvest = true;
 
-    // set in constructor to have different appearance
+    /** change in constructor to have different appearance */
     protected int[] defaultModelStateBits;
 
-    // change in constructor to have fewer variants
+    /** will be set based on default model state first time is needed */
+    protected int renderLayerFlags = -1;
+    
+    /** change in constructor to have fewer variants */
     protected int metaCount = 16;
     
     /** see {@link #isAssociatedBlock(Block)} */
     protected Block associatedBlock;
     
-    
-    public SuperBlock(String styleName, BlockSubstance material)
+    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState)
     {
-        super(material.material);
-        this.substance = material;
-        this.styleName = styleName;
+        super(defaultMaterial);
         setCreativeTab(Adversity.tabAdversity);
-        this.setHarvestLevel(material.harvestTool, material.harvestLevel);
-        setSoundType(material.stepSound);
-        setHardness(material.hardness);
-        setResistance(material.resistance);
-        this.setRegistryName(styleName + "_" + material.materialName);
+        
+        // these values are fail-safes - should never be used normally
+        this.setHarvestLevel("pickaxe", 1);
+        setSoundType(SoundType.STONE);
+        setHardness(2);
+        setResistance(50);
+        
+        this.setRegistryName(blockName);
         this.setUnlocalizedName(this.getRegistryName().toString());
         this.associatedBlock = this;
         
-        // see getLightOpacity(IBlockState)
-        this.lightOpacity = material.isTranslucent ? 0 : 255;
+        this.lightOpacity = 0;
 
-        ModelState defaultState = new ModelState();
-        defaultState.setShape(ModelShape.CUBE);
-        BlockRenderLayer baseRenderLayer = this.substance.isTranslucent
-                ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        defaultState.setRenderLayer(PaintLayer.BASE, baseRenderLayer);
-        defaultState.setRenderLayer(PaintLayer.CUT, baseRenderLayer);
-        defaultState.setRenderLayer(PaintLayer.LAMP, baseRenderLayer);
-        this.defaultModelStateBits = defaultState.getBitsIntArray();
+        this.defaultModelStateBits = defaultModelState.getBitsIntArray();
     }
 
     @Override
@@ -401,7 +372,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, SpawnPlacementType type)
     {
-        return !this.substance.isHyperMaterial && super.canCreatureSpawn(state, world, pos, type);
+        return !this.isHypermatter() && super.canCreatureSpawn(state, world, pos, type);
     }
 
     /** 
@@ -412,7 +383,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canDropFromExplosion(Explosion explosionIn)
     {
-        return !this.substance.isHyperMaterial;
+        return !this.isHypermatter();
     }
 
     @Override
@@ -431,7 +402,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canEntitySpawn(IBlockState state, Entity entityIn)
     {
-        return super.canEntitySpawn(state, entityIn) && !this.substance.isHyperMaterial;
+        return super.canEntitySpawn(state, entityIn) && Configurator.HYPERSTONE.allowMobSpawning || !this.isHypermatter() ;
     }
 
     @Override
@@ -442,20 +413,30 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     /**
      * This is queried before getActualState, which means it cannot be determined from world.
-     * There are three ways to handle that don't involve ASM: 
-     *   1) persist it in the block instance
-     *   2) hard-code it into the block subclass
-     *   3) store it in block meta
-     *   
-     *  The best approach depend on the type of block. 
-     *  SuperModelBlocks will use meta.
-     *  World-gen blocks will use one of the first two methods.
+     * 
+     * We only have a couple ways to get around this that don't involve ASM or switching to a TESR.
+     * 
+     * 1) We can persist it in the block instance somehow and set block states that have the
+     * right value for the model they represent.  This could force some block state changes in 
+     * the world however if model state changes - but those changes are not likely.
+     * Main drawback of this approach is that it consumes a lot of block ids.
+     * 
+     * 2) We can report that we render in all layers but return no quads.  However, this means RenderChunk
+     * does quite a bit of work asking us for stuff that isn't there. 
+     * 
+     * Default implementation derives it from default model state first time it is needed.
      */
     @Override
-    public abstract boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer);
-    //   {
-    //       return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, state.getValue(SHADE_FLAGS));
-    //   }
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
+    {
+        int layerFlags = this.renderLayerFlags;
+        if(layerFlags == -1)
+        {
+            layerFlags = this.getDefaultModelState().getCanRenderInLayerFlags();
+            this.renderLayerFlags = layerFlags;
+        }
+        return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, layerFlags);
+    }
 
     @Override
     public boolean canSilkHarvest()
@@ -517,7 +498,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         return state.getValue(META);
     }
-
+   
     @Override
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
@@ -540,23 +521,20 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         // Another approach would be to have multiple block instances with different shaded flags
         // so that it isn't necessary to look up modelstate here.
         
-        // TODO: state location for rendershadedflags
-        
-        
-        
-        
-        // BUG:
-        
-        
-        
+        // Another approach would be to have one model dispatcher that returns isAmbientOcclusion=true always.
+        // and instead have getLightValue() return a non-zero value for fullbright layers, which also forces disable of AO.
+        // When getLightValue() is called it passes in an extended state, so these flags same flags could be 
+        // populated in getExtendedState and if true for the current layer return 1 for the light value.
+        // Could also mean that all glowing blocks emit at least a tiny amount of light, except that actual 
+        // light calculations are done via the location-aware version of getLightValue(), so might be fine.
         return super.getActualState(state, worldIn, pos)
-                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, worldIn, pos, true).getRenderLayerShadedFlags());
+                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, worldIn, pos, false).getRenderLayerShadedFlags());
     }
 
     @Override
     public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        if(this.substance == BlockSubstance.VOLCANIC_LAVA) 
+        if(this.getSubstance(state, world, pos) == BlockSubstance.VOLCANIC_LAVA) 
             return PathNodeType.LAVA;
         
         if(this.isBurning(world, pos))
@@ -568,7 +546,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public float[] getBeaconColorMultiplier(IBlockState state, World world, BlockPos pos, BlockPos beaconPos)
     {
-        if(this.substance.isTranslucent)
+        if(this.getSubstance(state, world, pos).isTranslucent)
         {
             ModelState modelState = this.getModelState(state, world, pos, false);
             if(modelState != null)
@@ -691,7 +669,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return this.substance == BlockSubstance.FLEXWOOD ? 1 : 0;
+        return this.getSubstance(world, pos) == BlockSubstance.FLEXWOOD ? 1 : 0;
     }
 
     @Override
@@ -716,14 +694,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return super.getItemDropped(state, rand, fortune);
     }
 
-    // TODO: Localize
     public String getItemStackDisplayName(ItemStack stack)
     {
-        return I18n.translateToLocal(this.substance.materialName + "." + this.styleName); 
+        return this.getLocalizedName(); 
     }
 
     /**
-     * Accessed via state information.
      * Used by chunk for world lighting and to determine height map.
      * Blocks with 0 opacity are apparently ignored for height map generation.
      * 
@@ -733,33 +709,37 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * values 16-254 have no meaning
      * 
      * Chunk uses location-dependent version if the chunk is loaded.
+     * 
+     * We return a non-zero estimate here which forces this block to be considered in sky/height maps.
+     * Actual light value will generally be obtained via the location-dependent method.
      */
     @Override
     public int getLightOpacity(IBlockState state)
     {
-        // super implementation returns instance variable that we set based on material in constructor
-        return super.getLightOpacity(state);
+        return  this.worldLightOpacity(state).opacity;
     }
 
     /**
      * Location-dependent version of {@link #getLightOpacity(IBlockState)}
      * Gives more granular transparency information when chunk is loaded.
+     * 
+     * Any value over 0 prevents a block from seeing the sky.
      */
     @Override
     public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        //TODO: state location
-        //Using model state but is used during lighting - may want to consider using blockID/meta depending on what else we do
-        // also means shaded glass does not block sky light - which would be nices
-        return this.substance.isTranslucent 
-                ? this.getModelState(state, world, pos, false).getTranslucency().blockLightOpacity 
-                : this.getLightOpacity(state);
-
+        if(this.getSubstance(state, world, pos).isTranslucent)
+        {
+            return this.getModelState(state, world, pos, false).getTranslucency().blockLightOpacity;
+        }
+        else
+        {
+            return this.getModelState(state, world, pos, false).geometricSkyOcclusion();
+        }
     }
 
-     /** 
-     * For SuperBlock (without persisted state), meta stores species data.  
-     * For SuperModelBlock, meta indicates supported render layers.
+    /** 
+     * For SuperBlocks, meta stores species data.  
      */
     public int getMetaFromModelState(ModelState modelState)
     {
@@ -783,7 +763,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         ModelState result = refreshFromWorldIfNeeded ? this.getDefaultModelState().refreshFromWorld(state, world, pos) : this.getDefaultModelState();
-        result.setSpecies(state.getValue(META));
         return result;
     }
 
@@ -837,10 +816,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return getDefaultState().withProperty(META, meta);
     }
 
-       public String getStyleName() {
-        return styleName;
-    }
-
     //In most cases only display one item meta variant for item search
     @Override
     @SideOnly(Side.CLIENT)
@@ -860,12 +835,27 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         }
         return itemBuilder.build();
     }
+    
+    /**
+     * Controls material-dependent properties
+     */
+    public abstract BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos);
 
+    public BlockSubstance getSubstance(IBlockAccess world, BlockPos pos)
+    {
+        return this.getSubstance(world.getBlockState(pos), world, pos);
+    }
+
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * Should be true if shape is not a full cube or fully transparent.
+     */
     @Override
     public boolean getUseNeighborBrightness(IBlockState state)
     {
-        // TODO state location - should be true if shape is not a full cube or fully transparent
-        return super.getUseNeighborBrightness(state);
+        return this.worldLightOpacity(state) == WorldLightOpacity.TRANSPARENT
+                || !this.isGeometryFullCube(state);
     }
 
     @Override
@@ -940,7 +930,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isBeaconBase(IBlockAccess worldObj, BlockPos pos, BlockPos beacon)
     {
-        return this.substance.isHyperMaterial || super.isBeaconBase(worldObj, pos, beacon);
+        return this.isHypermatter() || super.isBeaconBase(worldObj, pos, beacon);
     }
 
     /**
@@ -951,33 +941,31 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isBlockNormalCube(IBlockState state)
     {
-        // TODO State location
-        return super.isBlockNormalCube(state);
+        return this.isGeometryFullCube(state) && this.worldLightOpacity(state) == WorldLightOpacity.SOLID;
     }
 
     /**
      * {@inheritDoc} <br><br>
      * 
-     * Same behavior as vanilla but faster implementation.
      * Has nothing to do with block geometry but instead is based on material.
      * Is used by fluid rendering to know if fluid should appear to flow into this block.
      */
     @Override
     public boolean isBlockSolid(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
-        return this.substance.material.isSolid();
+        return this.getSubstance(worldIn, pos).material.isSolid();
     }
 
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
     {
-        return this.substance == BlockSubstance.VOLCANIC_LAVA;
+        return this.getSubstance(world, pos) == BlockSubstance.VOLCANIC_LAVA;
     }
 
     @Override
     public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        return this.substance == BlockSubstance.FLEXWOOD;
+        return this.getSubstance(world, pos) == BlockSubstance.FLEXWOOD;
     }
 
     /** 
@@ -1001,7 +989,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     /**
-     * {@inheritDoc} <br><br>
+     * {@inheritDoc}
      * 
      * Accessed via state implementation.
      * Used in AI pathfinding, explosions and occlusion culling.
@@ -1013,17 +1001,15 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isFullBlock(IBlockState state)
     {
-        //TODO state location
-        // could handle by setting value of fullBlock in constructor 
-        return super.isFullBlock(state);
+        return this.isGeometryFullCube(state);
     }
 
     /**
      * Used many places in rendering and AI. 
+     * Must be true for block to cause suffocation.
      * Input state provided has no extended properties.
      * Result appears to be based on geometry - if block is a 
      * full 1.0 cube return true, false otherwise.
-     * Also returns false if material is translucent. <br><br>
      * 
      * Is also used in derivation of {@link #isFullyOpaque(IBlockState)}
      * and {@link #isNormalCube(IBlockState)}
@@ -1031,9 +1017,20 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isFullCube(IBlockState state)
     {
-        return !this.substance.isTranslucent && this.isFullBlock(state);
+        return this.isGeometryFullCube(state);
     }
 
+    /**
+     * With {@link #isSubstanceTranslucent(IBlockState)} makes all the block
+     * test methods work when full location information not available.
+     * 
+     * Only addresses geometry - does this block fully occupy a 1x1x1 cube?
+     * True if so. False otherwise.
+     */
+    public abstract boolean isGeometryFullCube(IBlockState state);
+    
+    public abstract boolean isHypermatter();
+    
     /** To be overridden by stackable plates or blocks with similar behavior. */
     public boolean isItemUsageAdditive(World worldIn, BlockPos pos, ItemStack stack)
     {
@@ -1050,21 +1047,20 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return this.getModelState(state, world, pos, true).isCube() && this.substance.material.isSolid();
+        return this.getModelState(state, world, pos, true).isCube() && this.getSubstance(state, world, pos).material.isSolid();
     }
 
     /**
      * {@inheritDoc} <br><br>
      * 
-     * Also used in Block constructor to determine if this is a full cube.
-     * So this.material may be null when it is called.
+     * Value given for the default state is also used 
+     * in Block constructor to determine value of fullBlock 
+     * which in turn is used to determine initial value of lightOpacity.
      */
     @Override
     public boolean isOpaqueCube(IBlockState state)
     {
-        // TODO state location
-        // needs to account for shape also
-        return this.substance == null || !this.substance.isTranslucent;
+        return this.isGeometryFullCube(state) && this.worldLightOpacity(state) == WorldLightOpacity.SOLID;
     }
 
     @Override
@@ -1072,20 +1068,22 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         return this.getModelState(base_state, world, pos, true).isSideSolid(side);
     }
-
+ 
     @Override
     public boolean isTranslucent(IBlockState state)
     {
-        return this.substance.isTranslucent;
+        return this.worldLightOpacity(state) != WorldLightOpacity.SOLID;
     }
 
+    
     @Override
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
-        if (!entityIn.isSneaking() && this.substance.walkSpeedFactor != 0.0)
+        BlockSubstance substance = this.getSubstance(worldIn, pos);
+        if (!entityIn.isSneaking() && substance.walkSpeedFactor != 0.0)
         {
-            entityIn.motionX *= this.substance.walkSpeedFactor;
-            entityIn.motionZ *= this.substance.walkSpeedFactor;
+            entityIn.motionX *= substance.walkSpeedFactor;
+            entityIn.motionZ *= substance.walkSpeedFactor;
         }
     }
 
@@ -1155,7 +1153,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        if(this.substance.isTranslucent)
+        if(this.getSubstance(blockState, blockAccess, pos).isTranslucent)
         {
             BlockPos otherPos = pos.offset(side);
             IBlockState otherBlockState = blockAccess.getBlockState(otherPos);
@@ -1163,12 +1161,13 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             if(block instanceof SuperBlock)
             {
                 SuperBlock sBlock = (SuperBlock)block;
-                if(((SuperBlock) block).substance.isTranslucent)
+                if(((SuperBlock) block).getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
                 {
                     ModelState myModelState = this.getModelState(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelState(otherBlockState, blockAccess, otherPos, false);
                     //TODO: need to check for color/texture/occlusion match
                     return myModelState.getSpecies() != otherModelState.getSpecies()
+                            || myModelState.getRenderLayer(PaintLayer.BASE) != otherModelState.getRenderLayer(PaintLayer.BASE)
                             || myModelState.getTranslucency() != otherModelState.getTranslucency()
                             || myModelState.getColorMap(PaintLayer.BASE) != otherModelState.getColorMap(PaintLayer.BASE);
                 }
@@ -1271,4 +1270,17 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             return placer.getSpeciesForPlacedStack(worldIn, posPlaced, facing, stack, this);
         }
     }
+    
+    /**
+     * Used in conjunction with {@link #isGeometryFullCube(IBlockState)} to
+     * make all the other full/normal/opaque/translucent methods work
+     * when they don't have full location information.
+     * NB: default vanilla implementation is simply this.translucent
+     * 
+     * 
+     * Should return true if the substance is not fully opaque.
+     * Has nothing to do with block geometry.
+     */
+    protected abstract WorldLightOpacity worldLightOpacity(IBlockState state);
+
 }

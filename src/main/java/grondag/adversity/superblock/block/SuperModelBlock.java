@@ -13,9 +13,14 @@ import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
+import grondag.adversity.superblock.model.state.ModelStateProperty;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -30,27 +35,61 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+/**
+ * User-configurable Adversity building blocks.
+ * 
+ * TODO LIST
+ * 
+ *  harvest tool / level
+ *   -- only get state but is called with Actual state, so could do TE lookup if needed
+ *   
+ */
 
 @SuppressWarnings("unused")
 public class SuperModelBlock extends SuperBlock implements ITileEntityProvider 
 {
+    /**
+     * Ordinal of the substance for this block. Set during getActualState
+     * so that harvest/tool methods can have access to location-dependent substance information.
+     */
+    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.values().length);
     
-    public SuperModelBlock(String styleName, BlockSubstance material)
+    protected final WorldLightOpacity worldLightOpacity;
+    
+    protected final boolean isHyperMatter;
+    
+    public final BlockRenderLayerSet renderLayerSet;
+    
+    /**
+     * 
+     * @param blockName
+     * @param defaultMaterial
+     * @param defaultModelState  Controls render layer visibility for this instance.
+     * @param worldLightOpacity
+     * @param isHyperMatter
+     * @param isGeometryFullCube        If true, blocks with this instance are expected to have a full block geometry
+     */
+    public SuperModelBlock(String blockName, Material defaultMaterial, BlockRenderLayerSet renderLayerSet, WorldLightOpacity worldLightOpacity, 
+                boolean isHyperMatter, boolean isGeometryFullCube)
     {
-        super(styleName, material);
+        super(blockName, defaultMaterial, new ModelState());
+        this.isHyperMatter = isHyperMatter;
+        this.fullBlock = isGeometryFullCube;
+        this.worldLightOpacity = worldLightOpacity;
+        this.renderLayerSet = renderLayerSet;
+        this.renderLayerFlags = renderLayerSet.blockRenderLayerFlags;
+        this.lightOpacity = worldLightOpacity.opacity;
     }
         
-    /**
-     * Because meta controls render layer visibility, default meta value
-     * must correspond to default model state.
-     */
     @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
+    protected BlockStateContainer createBlockState()
     {
-        list.add(getSubItems().get(ModelState.BENUMSET_RENDER_LAYER.getFlagForValue(BlockRenderLayer.SOLID)));
+        return new ExtendedBlockState(this, new IProperty[] { META, SHADE_FLAGS, SUBSTANCE }, new IUnlistedProperty[] { MODEL_STATE });
     }
     
     @Override
@@ -58,25 +97,34 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         return new SuperTileEntity();        
     }
     
-    /**
-     * Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
-     */
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
-        if (willHarvest) {
-            return true;
-        }
-        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        // Add substance for tool methods
+        return super.getActualState(state, worldIn, pos)
+                .withProperty(SUBSTANCE, this.getSubstance(state, worldIn, pos).ordinal());
     }
     
-    /**
-     * Need to destroy block here because did not do it during removedByPlayer.
+    /** 
+     * {@inheritDoc}  <br><br>
+     * relying on {@link #getActualState(IBlockState, IBlockAccess, BlockPos)} 
+     * to set {@link #SUBSTANCE} property
      */
     @Override
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 
+    public int getHarvestLevel(IBlockState state)
     {
-        super.harvestBlock(worldIn, player, pos, state, te, stack);
-        worldIn.setBlockToAir(pos);
+        return BlockSubstance.values()[state.getValue(SUBSTANCE)].harvestLevel;
+    }
+    
+    /** 
+     * {@inheritDoc}  <br><br>
+     * relying on {@link #getActualState(IBlockState, IBlockAccess, BlockPos)} 
+     * to set {@link #SUBSTANCE} property
+     */
+    @Override
+    @Nullable public String getHarvestTool(IBlockState state)
+    {
+        return BlockSubstance.values()[state.getValue(SUBSTANCE)].harvestTool;
     }
     
     /**
@@ -98,14 +146,18 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
                 : myTE.getLightValue();
     }
     
-    /**
-     * Set light level emitted by block.
-     * Inputs are masked to 0-15
-     */
-    public void setLightValue(IBlockState state, IBlockAccess world, BlockPos pos, int lightValue)
+    @Override
+    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
-        if(myTE != null) myTE.setLightValue((byte)(lightValue & 0xF));
+        if(myTE != null) 
+        {
+          return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
+        }
+        else
+        {
+            return this.getDefaultModelState();
+        }
     }
     
     @Override
@@ -117,6 +169,8 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         {
             int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : SuperPlacement.PLACEMENT_3x3x3;
             SuperItemBlock.setStackPlacementShape(stack, placementShape);
+            SuperItemBlock.setStackLightValue(stack, myTE.getLightValue());
+            SuperItemBlock.setStackSubstance(stack, myTE.getSubstance());
         }
         return stack;
     }
@@ -134,11 +188,23 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         return stack;
     }
     
-    //for tile-entity blocks, almost never use meta on items
     @Override
-    public int damageDropped(IBlockState state)
+    public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return 0;
+        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        return myTE == null
+                ? BlockSubstance.FLEXSTONE
+                : myTE.getSubstance();
+    }
+    
+    /**
+     * Need to destroy block here because did not do it during removedByPlayer.
+     */
+    @Override
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 
+    {
+        super.harvestBlock(worldIn, player, pos, state, te, stack);
+        worldIn.setBlockToAir(pos);
     }
     
     @Override
@@ -146,69 +212,59 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     {
         return true;
     }
-    
-    @Override
-    public ModelState getDefaultModelState()
-    {
-        ModelState modelState = new ModelState();
-        modelState.setShape(ModelShape.CUBE);
-        modelState.setStatic(false);
 
-        modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(539));
-        modelState.setLightingMode(PaintLayer.BASE, LightingMode.SHADED);
-        modelState.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.SOLID);
-        modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
-        return modelState;
-    }
-    
     @Override
-    public int getMetaFromModelState(ModelState modelState)
+    public boolean isGeometryFullCube(IBlockState state)
     {
-        return modelState.getCanRenderInLayerFlags();
+        return this.fullBlock;
     }
 
     @Override
-    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public boolean isHypermatter()
+    {
+        return this.isHyperMatter;
+    }
+    
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * SuperModelBlock: Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
+     */
+    @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) {
+            return true;
+        }
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+    
+    /**
+     * Set light level emitted by block.
+     * Inputs are masked to 0-15
+     */
+    public void setLightValue(IBlockState state, IBlockAccess world, BlockPos pos, int lightValue)
     {
         SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
-        if(myTE != null) 
-        {
-          return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
-        }
-        else
-        {
-            return this.getDefaultModelState();
-        }
+        if(myTE != null) myTE.setLightValue((byte)(lightValue & 0xF));
     }
-    
+
+    public void setSubstance(IBlockState state, IBlockAccess world, BlockPos pos, BlockSubstance substance)
+    {
+        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        if(myTE != null) myTE.setSubstance(substance);
+    }
+
     public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, SuperTileEntity niceTE)
     {
         niceTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
         niceTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
-    }
-    
-    // BLOCK PROPERTIES
-    
-
-    @Override
-    public boolean canEntitySpawn(IBlockState state, Entity entityIn)
-    {
-        // hyperstone blocks can be configured to prevent mob spawning
-        
-        if(this.substance.isHyperMaterial && !Configurator.HYPERSTONE.allowMobSpawning)
-        {
-            return false;
-        }
-        else
-        {
-            return super.canEntitySpawn(state, entityIn);
-        }
+        niceTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
     }
 
-    @Override
-    public  boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
+      @Override
+    protected WorldLightOpacity worldLightOpacity(IBlockState state)
     {
-        return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, state.getValue(META));
+        return this.worldLightOpacity;
     }
 }
 

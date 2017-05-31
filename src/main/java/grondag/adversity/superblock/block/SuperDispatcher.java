@@ -268,7 +268,7 @@ public class SuperDispatcher
                 return container.getQuads(side);
             }
         }
-    
+     
         @Override
         public boolean isAmbientOcclusion()
         {

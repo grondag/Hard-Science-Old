@@ -4,8 +4,7 @@ import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
 import grondag.adversity.gui.base.GuiControl;
-import grondag.adversity.init.ModBlocks;
-import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -17,7 +16,7 @@ import net.minecraft.item.ItemStack;
 public class MaterialPicker extends GuiControl
 {
     /** dimensions are material and toughness */
-    private static SuperBlock[][]blocks = new SuperBlock[3][3];
+    private static BlockSubstance[][]substances = new BlockSubstance[3][3];
     
     //TODO: localize
     private static final String MATERIAL_LABEL = "Material";
@@ -31,17 +30,17 @@ public class MaterialPicker extends GuiControl
 
     static
     {
-        blocks[0][0] = (SuperBlock) ModBlocks.supermodel_flexstone;
-        blocks[0][1] = (SuperBlock) ModBlocks.supermodel_durastone;
-        blocks[0][2] = (SuperBlock) ModBlocks.supermodel_hyperstone;
+        substances[0][0] = BlockSubstance.FLEXSTONE;
+        substances[0][1] = BlockSubstance.DURASTONE;
+        substances[0][2] = BlockSubstance.HYPERSTONE;
 
-        blocks[1][0] = (SuperBlock) ModBlocks.supermodel_flexiglass;
-        blocks[1][1] = (SuperBlock) ModBlocks.supermodel_duraglass;
-        blocks[1][2] = (SuperBlock) ModBlocks.supermodel_hyperglass;
+        substances[1][0] = BlockSubstance.FLEXIGLASS;
+        substances[1][1] = BlockSubstance.DURAGLASS;
+        substances[1][2] = BlockSubstance.HYPERGLASS;
         
-        blocks[2][0] = (SuperBlock) ModBlocks.supermodel_flexwood;
-        blocks[2][1] = (SuperBlock) ModBlocks.supermodel_durawood;
-        blocks[2][2] = (SuperBlock) ModBlocks.supermodel_hyperwood;
+        substances[2][0] = BlockSubstance.FLEXWOOD;
+        substances[2][1] = BlockSubstance.DURAWOOD;
+        substances[2][2] = BlockSubstance.HYPERWOOD;
     }
     
     public MaterialPicker()
@@ -49,7 +48,7 @@ public class MaterialPicker extends GuiControl
         this.setAspectRatio(2.0 / 7.0);
     }
     
-    public void setBlock(SuperBlock block)
+    public void setSubstance(BlockSubstance substance)
     {
         this.materialIndex = NO_SELECTION;
         this.toughnessIndex = NO_SELECTION;
@@ -58,7 +57,7 @@ public class MaterialPicker extends GuiControl
         {
             for(int j = 0; j < 3; j++)
             {
-                if(block == blocks[i][j])
+                if(substance == substances[i][j])
                 {
                     this.materialIndex = i;
                     this.toughnessIndex = j;
@@ -68,10 +67,10 @@ public class MaterialPicker extends GuiControl
         }
     }
     
-    public SuperBlock getBlock()
+    public BlockSubstance getSubstance()
     {
         if(this.materialIndex == NO_SELECTION || this.toughnessIndex == NO_SELECTION) return null;
-        return blocks[this.materialIndex][this.toughnessIndex];
+        return substances[this.materialIndex][this.toughnessIndex];
     }
     
     private int getMouseIndex(int mouseX, int mouseY)

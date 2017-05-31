@@ -7,13 +7,19 @@ import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockVolcano;
 import grondag.adversity.niceblock.DummyColorHandler;
 import grondag.adversity.niceblock.support.BlockSubstance;
-import grondag.adversity.superblock.block.StaticTestBlock;
+import grondag.adversity.superblock.block.BlockRenderLayerSet;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperDispatcher;
 import grondag.adversity.superblock.block.SuperModelBlock;
+import grondag.adversity.superblock.block.SuperSimpleBlock;
 import grondag.adversity.superblock.block.SuperStateMapper;
+import grondag.adversity.superblock.block.WorldLightOpacity;
+import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
@@ -34,33 +40,19 @@ import net.minecraftforge.fml.relauncher.Side;
 public class ModBlocks
 {
     private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
+    public static final Block test_block = null;
     
-    public static final Block supermodel_flexstone = null;
-    public static final Block supermodel_durastone = null;
-    public static final Block supermodel_hyperstone = null;
-    public static final Block supermodel_flexiglass = null;
-    public static final Block supermodel_duraglass = null;
-    public static final Block supermodel_hyperglass = null;
-    public static final Block supermodel_flexwood = null;
-    public static final Block supermodel_durawood = null;
-    public static final Block supermodel_hyperwood = null;
+
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
-        event.getRegistry().register(new StaticTestBlock(BlockSubstance.FLEXSTONE, "test"));
         
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.FLEXSTONE));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.DURASTONE));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.HYPERSTONE));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.FLEXIGLASS));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.DURAGLASS));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.HYPERGLASS));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.FLEXWOOD));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.DURAWOOD));
-        event.getRegistry().register(new SuperModelBlock("supermodel", BlockSubstance.HYPERWOOD));
-        
+        ModelState basaltModel = new ModelState();
+        basaltModel.setShape(ModelShape.CUBE);
+        basaltModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL);
+        event.getRegistry().register(new SuperSimpleBlock("test_block", BlockSubstance.BASALT, basaltModel));
     }
     
     @SubscribeEvent

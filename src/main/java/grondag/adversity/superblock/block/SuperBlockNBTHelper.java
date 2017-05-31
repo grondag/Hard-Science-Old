@@ -1,7 +1,9 @@
 package grondag.adversity.superblock.block;
 
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
 
 public class SuperBlockNBTHelper
 {
@@ -9,10 +11,11 @@ public class SuperBlockNBTHelper
     private static final String PLACEMENT_SHAPE_TAG = "APS";
     private static final String MODEL_STATE_TAG = "AMK";
     private static final String LIGHT_VALUE_TAG = "ALV";
+    private static final String SUBSTANCE_TAG = "ASB";
 
     public static interface NBTReadHandler
     {
-        public void handleNBTRead(ModelState modelState, int placementShape, byte lightValue);
+        public void handleNBTRead(ModelState modelState, int placementShape, byte lightValue, BlockSubstance substance);
     }
     
     public static void writeModelState(NBTTagCompound compound, ModelState modelState)
@@ -20,12 +23,12 @@ public class SuperBlockNBTHelper
         if(modelState == null) 
             compound.removeTag(MODEL_STATE_TAG);
         else
-            compound.setIntArray(SuperBlockNBTHelper.MODEL_STATE_TAG, modelState.getBitsIntArray());
+            compound.setIntArray(MODEL_STATE_TAG, modelState.getBitsIntArray());
     }
     
     public static ModelState readModelState(NBTTagCompound compound)
     {
-        int[] stateBits = compound.getIntArray(SuperBlockNBTHelper.MODEL_STATE_TAG);
+        int[] stateBits = compound.getIntArray(MODEL_STATE_TAG);
         return (stateBits == null || stateBits.length != 8)
                 ? null
                 : new ModelState(stateBits); 
@@ -34,14 +37,14 @@ public class SuperBlockNBTHelper
     public static void writePlacementShape(NBTTagCompound compound, int placementShape)
     {
         if(placementShape == 0)
-            compound.removeTag(SuperBlockNBTHelper.PLACEMENT_SHAPE_TAG);
+            compound.removeTag(PLACEMENT_SHAPE_TAG);
         else
-            compound.setInteger(SuperBlockNBTHelper.PLACEMENT_SHAPE_TAG, placementShape);
+            compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
     }
     
     public static int readPlacementShape(NBTTagCompound compound)
     {
-        return compound.getInteger(SuperBlockNBTHelper.PLACEMENT_SHAPE_TAG);
+        return compound.getInteger(PLACEMENT_SHAPE_TAG);
     }
     
     /** Inputs are masked to 0-15 */
@@ -50,19 +53,30 @@ public class SuperBlockNBTHelper
         if(lightValue == 0)
             compound.removeTag(LIGHT_VALUE_TAG);
         else
-            compound.setByte(SuperBlockNBTHelper.LIGHT_VALUE_TAG, (byte)(lightValue & 0xF));
+            compound.setByte(LIGHT_VALUE_TAG, (byte)(lightValue & 0xF));
     }
     
     public static byte readLightValue(NBTTagCompound compound)
     {
-        return compound.getByte(SuperBlockNBTHelper.LIGHT_VALUE_TAG);
+        return compound.getByte(LIGHT_VALUE_TAG);
     }
     
-    public static NBTTagCompound writeToNBT(NBTTagCompound compound, ModelState modelState, int placementShape, byte lightValue)
+    public static void writeSubstance(NBTTagCompound compound, BlockSubstance substance)
+    {
+        compound.setByte(SUBSTANCE_TAG, substance == null ? 0 : (byte)(substance.ordinal()));
+    }
+    
+    public static BlockSubstance readSubstance(NBTTagCompound compound)
+    {
+        return BlockSubstance.values()[MathHelper.clamp(compound.getByte(SUBSTANCE_TAG), 0, BlockSubstance.values().length)];
+    }
+    
+    public static NBTTagCompound writeToNBT(NBTTagCompound compound, ModelState modelState, int placementShape, byte lightValue, BlockSubstance substance)
     {
         writeModelState(compound, modelState);
         writePlacementShape(compound, placementShape);
         writeLightValue(compound, lightValue);
+        writeSubstance(compound, substance);
         return compound;
     }
     
@@ -70,7 +84,8 @@ public class SuperBlockNBTHelper
     {
         target.handleNBTRead(
                 readModelState(compound), 
-                compound.getInteger(SuperBlockNBTHelper.PLACEMENT_SHAPE_TAG), 
-                compound.getByte(SuperBlockNBTHelper.LIGHT_VALUE_TAG));
+                compound.getInteger(PLACEMENT_SHAPE_TAG), 
+                compound.getByte(LIGHT_VALUE_TAG),
+                readSubstance(compound));
     }
 }

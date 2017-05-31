@@ -98,4 +98,10 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     {
         return false;
     }
+
+    @Override
+    public int geometricSkyOcclusion(ModelState modelState)
+    {
+        return 255;
+    }
 }

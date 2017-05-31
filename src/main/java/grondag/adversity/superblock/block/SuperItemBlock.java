@@ -2,6 +2,7 @@ package grondag.adversity.superblock.block;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
+import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -234,6 +235,24 @@ public class SuperItemBlock extends ItemBlock
         return tag == null 
                 ? 0
                 : SuperBlockNBTHelper.readLightValue(tag);
+    }
+
+    public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
+        }
+        SuperBlockNBTHelper.writeSubstance(tag, substance);
+        stack.setTagCompound(tag);
+    }
+    
+    public static BlockSubstance getStackSubstance(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag == null 
+                ? BlockSubstance.FLEXSTONE
+                : SuperBlockNBTHelper.readSubstance(tag);
     }
     
 }

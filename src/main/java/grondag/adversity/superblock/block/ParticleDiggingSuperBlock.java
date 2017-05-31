@@ -7,7 +7,6 @@ import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
-import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.ParticleDigging;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -30,7 +29,7 @@ public class ParticleDiggingSuperBlock extends ParticleDigging
         this.particleBlue = (color & 0xFF) / 255f;
         
         SuperBlock block = (SuperBlock)state.getBlock();
-        this.particleAlpha = block.substance.isTranslucent ? modelState.getTranslucency().alpha : 1f;
+        this.particleAlpha = block.isTranslucent(state) ? modelState.getTranslucency().alpha : 1f;
         TexturePallette tex = modelState.getTexture(PaintLayer.BASE);
         this.particleTexture = tex.getSampleSprite();
         this.uvScale = 1f / tex.textureScale.sliceCount;

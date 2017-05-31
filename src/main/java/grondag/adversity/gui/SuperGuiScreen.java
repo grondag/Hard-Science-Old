@@ -21,6 +21,8 @@ import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.TranslucencyPicker;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
+import grondag.adversity.init.ModBlocks;
+import grondag.adversity.init.ModSuperModelBlocks;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketReplaceHeldItem;
@@ -91,29 +93,22 @@ public class SuperGuiScreen extends GuiScreen
         // abort on strangeness
         if(this.modelState == null) return;
 
-        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block;
-        SuperBlock newBlock = this.materialPicker.getBlock();
-        
-        if(currentBlock != newBlock && newBlock != null)
-        {
-            ItemStack newStack = new ItemStack(newBlock);
-            newStack.setItemDamage(this.itemPreview.previewItem.getItemDamage());
-            newStack.setTagCompound(this.itemPreview.previewItem.getTagCompound());
-            this.itemPreview.previewItem = newStack;
-            this.hasUpdates = true;
-            
-            this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
-            this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
-            this.translucencyPicker.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
-        }
-        
         if(this.brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(this.itemPreview.previewItem))
         {
             SuperItemBlock.setStackLightValue(this.itemPreview.previewItem, this.brightnessSlider.getBrightness());
             this.hasUpdates = true;
         }
         
-        Translucency newTrans = this.materialPicker.getBlock().substance.isTranslucent
+        if(this.materialPicker.getSubstance() != SuperItemBlock.getStackSubstance(this.itemPreview.previewItem))
+        {
+            SuperItemBlock.setStackSubstance(this.itemPreview.previewItem, this.materialPicker.getSubstance());
+            this.baseTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
+            this.lampTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
+            this.translucencyPicker.setVisible(this.materialPicker.getSubstance().isTranslucent);
+            this.hasUpdates = true;
+        }
+        
+        Translucency newTrans = this.materialPicker.getSubstance().isTranslucent
                 ? this.translucencyPicker.getTranslucency()
                 : Translucency.CLEAR;
         if(newTrans == null) newTrans = Translucency.CLEAR;
@@ -158,6 +153,18 @@ public class SuperGuiScreen extends GuiScreen
             this.hasUpdates = true;
         }
         
+        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block;
+        SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.materialPicker.getSubstance(), this.modelState);
+        
+        if(currentBlock != newBlock && newBlock != null)
+        {
+            ItemStack newStack = new ItemStack(newBlock);
+            newStack.setItemDamage(this.itemPreview.previewItem.getItemDamage());
+            newStack.setTagCompound(this.itemPreview.previewItem.getTagCompound());
+            this.itemPreview.previewItem = newStack;
+            this.hasUpdates = true;
+            
+        }
         if(this.hasUpdates)
         {
             // see notes in SuperBlock for canRenderInLayer()
@@ -379,18 +386,17 @@ public class SuperGuiScreen extends GuiScreen
     
     private void loadControlValuesFromModelState()
     {
-        this.materialPicker.setBlock((SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block);
-        
+        this.materialPicker.setSubstance(SuperItemBlock.getStackSubstance(this.itemPreview.previewItem));
         this.brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(this.itemPreview.previewItem));
         this.overlayToggle.setOn(this.modelState.isOverlayLayerEnabled());
         this.detailToggle.setOn(this.modelState.isDetailLayerEnabled());
         this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
         this.lampTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
 
-        this.baseTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
-        this.lampTranslucentToggle.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
+        this.baseTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
+        this.lampTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
         
-        this.translucencyPicker.setVisible(this.materialPicker.getBlock().substance.isTranslucent);
+        this.translucencyPicker.setVisible(this.materialPicker.getSubstance().isTranslucent);
         this.translucencyPicker.setTranslucency(this.modelState.getTranslucency());
         
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
