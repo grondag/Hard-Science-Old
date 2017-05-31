@@ -38,7 +38,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 @SuppressWarnings("unused")
-public class SuperDispatcher
+public class SuperDispatcher implements IBakedModel
 {
     private final String resourceName;
     private final SparseLayerMapBuilder[] layerMapBuilders;
@@ -46,8 +46,6 @@ public class SuperDispatcher
     //custom loading cache is at least 2X faster than guava LoadingCache for our use case
     private final ObjectSimpleLoadingCache<ModelState, SparseLayerMap> modelCache = new ObjectSimpleLoadingCache<ModelState, SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
     private final ObjectSimpleLoadingCache<ModelState, SimpleItemBlockModel> itemCache = new ObjectSimpleLoadingCache<ModelState, SimpleItemBlockModel>(new ItemCacheLoader(), 0xFFF);
-    
-    private final DispatcherDelegate[] delegates;
     
     private class BlockCacheLoader implements ObjectSimpleCacheLoader<ModelState, SparseLayerMap>
     {
@@ -101,13 +99,11 @@ public class SuperDispatcher
     {
         this.resourceName = resourceName;
 
-        this.delegates = new DispatcherDelegate[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
         this.layerMapBuilders = new SparseLayerMapBuilder[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
 
         for(int i = 0; i < ModelState.BENUMSET_RENDER_LAYER.combinationCount(); i++)
         {
             layerMapBuilders[i] = new SparseLayerMapBuilder(ModelState.BENUMSET_RENDER_LAYER.getValuesForSetFlags(i));
-            this.delegates[i] = new DispatcherDelegate(i);
         }
     }
         
@@ -189,119 +185,86 @@ public class SuperDispatcher
         ModelState key = SuperItemBlock.getModelState(stack);
         return itemCache.get(key);
     }
-    
-    public DispatcherDelegate getDelegateForShadedFlags(int shadedFlags)
+  
+    public String getModelResourceString()
     {
-        return this.delegates[shadedFlags];
+        return this.resourceName;
+    }
+        
+    @Override
+    public TextureAtlasSprite getParticleTexture()
+    {
+        // should not ever be used
+        return Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
+    }
+
+    @Override
+    public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)
+    {
+        if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
+
+        ModelState modelState = ((IExtendedBlockState)state).getValue(SuperBlock.MODEL_STATE);
+        
+        BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+        
+        // If no layer can be determined than probably getting request from block breaking
+        // In that case, return quads from all layers with UV coordinates scaled to be within a 1 block boundary.
+        // This causes breaking textures to be scaled to normal size.
+        // If we didn't do this, bigtex block break textures would appear abnormal.
+        if(layer == null)
+        {
+
+            // TODO: Actually rescale the quad UVs per above note.   Look at BakedQuadRetextured for ideas
+            
+            ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
+            
+            for(QuadContainer qc : modelCache.get(modelState).getAll())
+            {
+                builder.addAll(qc.getQuads(side));
+            }
+            
+            return builder.build();
+            
+        }
+        else
+        {
+            SparseLayerMap map = modelCache.get(modelState);
+            if(map == null) 
+                return QuadFactory.EMPTY_QUAD_LIST;
+            QuadContainer container = map.get(layer);
+            if(container == null)
+                    return QuadFactory.EMPTY_QUAD_LIST;
+            return container.getQuads(side);
+        }
+    }
+ 
+    @Override
+    public boolean isAmbientOcclusion()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isBuiltInRenderer()
+    {
+        return false;
     }
     
-    /**
-     * Delegates are needed to provide accurate results for isAmbientOcclusion().
-     * This determines which rendering path the model takes for the current render layer - AO vs flat.
-     * Wrong values may cause strange lighting artifacts when rending full-bright layers.
-     * 
-     * We get no state information in that method, so we instead provide a delegate 
-     * that is determined during getActualState based on the needs of current model state.
-     * 
-     */
-    public class DispatcherDelegate implements IBakedModel
+	@Override
+	public boolean isGui3d()
+	{
+		return true;
+	}
+
+	@Override
+	public ItemOverrideList getOverrides()
+	{
+		return new SuperModelItemOverrideList(this) ;
+	}
+
+	@Override
+    public ItemCameraTransforms getItemCameraTransforms()
     {
-        /** 
-         * Identifies which layers are shaded. See {@link ModelState#getRenderLayerShadedFlags()}
-         */
-        private final int layerShadedFlags;
-
-        
-        private DispatcherDelegate(int layerShadedFlags)
-        {
-            this.layerShadedFlags = layerShadedFlags;
-        }
-        
-        public String getModelResourceString()
-        {
-            return SuperDispatcher.this.resourceName + layerShadedFlags;
-        }
-        
-        @Override
-        public TextureAtlasSprite getParticleTexture()
-        {
-            // should not ever be used
-            return Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
-        }
-    
-        @Override
-        public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)
-        {
-            if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
-    
-            ModelState modelState = ((IExtendedBlockState)state).getValue(SuperBlock.MODEL_STATE);
-            
-            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-            
-            // If no layer can be determined than probably getting request from block breaking
-            // In that case, return quads from all layers with UV coordinates scaled to be within a 1 block boundary.
-            // This causes breaking textures to be scaled to normal size.
-            // If we didn't do this, bigtex block break textures would appear abnormal.
-            if(layer == null)
-            {
-
-                // TODO: Actually rescale the quad UVs per above note.   Look at BakedQuadRetextured for ideas
-                
-                ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-                
-                for(QuadContainer qc : modelCache.get(modelState).getAll())
-                {
-                    builder.addAll(qc.getQuads(side));
-                }
-                
-                return builder.build();
-                
-            }
-            else
-            {
-                SparseLayerMap map = modelCache.get(modelState);
-                if(map == null) 
-                    return QuadFactory.EMPTY_QUAD_LIST;
-                QuadContainer container = map.get(layer);
-                if(container == null)
-                        return QuadFactory.EMPTY_QUAD_LIST;
-                return container.getQuads(side);
-            }
-        }
-     
-        @Override
-        public boolean isAmbientOcclusion()
-        {
-            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-            // Render layer will be null for block damage rendering.
-            return layer == null 
-                ? true 
-                : ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, this.layerShadedFlags);
-        }
-    
-        @Override
-        public boolean isBuiltInRenderer()
-        {
-            return false;
-        }
-        
-    	@Override
-    	public boolean isGui3d()
-    	{
-    		return true;
-    	}
-	
-    	@Override
-    	public ItemOverrideList getOverrides()
-    	{
-    		return new SuperModelItemOverrideList(SuperDispatcher.this) ;
-    	}
-	
-    	@Override
-        public ItemCameraTransforms getItemCameraTransforms()
-        {
-            return ItemCameraTransforms.DEFAULT;
-        }
-
+        return ItemCameraTransforms.DEFAULT;
     }
 }

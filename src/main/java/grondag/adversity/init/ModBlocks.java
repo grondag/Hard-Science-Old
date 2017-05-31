@@ -1,29 +1,21 @@
 package grondag.adversity.init;
 
-import java.io.IOException;
 import java.util.Map;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockVolcano;
 import grondag.adversity.niceblock.DummyColorHandler;
 import grondag.adversity.niceblock.support.BlockSubstance;
-import grondag.adversity.superblock.block.BlockRenderLayerSet;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.block.SuperDispatcher;
-import grondag.adversity.superblock.block.SuperModelBlock;
 import grondag.adversity.superblock.block.SuperSimpleBlock;
 import grondag.adversity.superblock.block.SuperStateMapper;
-import grondag.adversity.superblock.block.WorldLightOpacity;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -42,8 +34,6 @@ public class ModBlocks
     private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
     public static final Block test_block = null;
     
-
-    
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
@@ -53,16 +43,6 @@ public class ModBlocks
         basaltModel.setShape(ModelShape.CUBE);
         basaltModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL);
         event.getRegistry().register(new SuperSimpleBlock("test_block", BlockSubstance.BASALT, basaltModel));
-    }
-    
-    @SubscribeEvent
-    public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
-    {
-        for (int i = 0; i < ModelState.BENUMSET_RENDER_LAYER.combinationCount(); i++)
-        {
-            SuperDispatcher.DispatcherDelegate delegate = ModModels.MODEL_DISPATCH.getDelegateForShadedFlags(i);
-            event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
-        }
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

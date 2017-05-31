@@ -21,7 +21,6 @@ import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.TranslucencyPicker;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
-import grondag.adversity.init.ModBlocks;
 import grondag.adversity.init.ModSuperModelBlocks;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.network.AdversityMessages;

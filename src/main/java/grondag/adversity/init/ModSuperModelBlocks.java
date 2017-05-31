@@ -1,15 +1,10 @@
 package grondag.adversity.init;
 
-import grondag.adversity.feature.volcano.BlockVolcano;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.block.BlockRenderLayerSet;
 import grondag.adversity.superblock.block.SuperModelBlock;
-import grondag.adversity.superblock.block.SuperSimpleBlock;
 import grondag.adversity.superblock.block.WorldLightOpacity;
-import grondag.adversity.superblock.model.layout.PaintLayer;
-import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.event.RegistryEvent;

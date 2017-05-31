@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import grondag.adversity.superblock.block.SuperDispatcher;
-import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
@@ -28,12 +27,7 @@ public class ModModels
         // }
         
         ModModels.MODEL_DISPATCH.clear();
-        
-        for (int i = 0; i < ModelState.BENUMSET_RENDER_LAYER.combinationCount(); i++)
-        {
-            SuperDispatcher.DispatcherDelegate delegate = ModModels.MODEL_DISPATCH.getDelegateForShadedFlags(i);
-            event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
-        }
+        event.getModelRegistry().putObject(new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()), ModModels.MODEL_DISPATCH);
     }
 
     /**

@@ -9,7 +9,6 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperItemBlock;
-import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -126,10 +125,8 @@ public class ModItems
                 {
                     for (ItemStack stack : ((SuperBlock)(((ItemBlock)item).getBlock())).getSubItems())
                     {
-                        ModelState modelState = SuperItemBlock.getModelState(stack);
-                    
                         event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                ModModels.MODEL_DISPATCH.getDelegateForShadedFlags(modelState.getRenderLayerShadedFlags()));
+                                ModModels.MODEL_DISPATCH);
                     }
                 }
                 else

@@ -4,8 +4,8 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import grondag.adversity.init.ModModels;
 import grondag.adversity.niceblock.support.BlockSubstance;
-import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -34,25 +34,21 @@ public class SuperStateMapper extends DefaultStateMapper
            SuperBlock superBlock = (SuperBlock) block;
            for (int i = 0; i < 16; i++) {
                IBlockState state = superBlock.getDefaultState().withProperty(SuperBlock.META, i);
-               
-               for(int j = 0; j < ModelState.BENUMSET_RENDER_LAYER.combinationCount(); j++)
-               {
-                   IBlockState innerState = state.withProperty(SuperBlock.SHADE_FLAGS, j);
                    
-                   if(block instanceof SuperModelBlock)
+               if(block instanceof SuperModelBlock)
+               {
+                   for(BlockSubstance substance : BlockSubstance.values())
                    {
-                       for(BlockSubstance substance : BlockSubstance.values())
-                       {
-                           mapLocations.put(innerState.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal()),
-                                   new ModelResourceLocation(dispatcher.getDelegateForShadedFlags(j).getModelResourceString()));
-                       }
-                   }
-                   else
-                   {
-                       mapLocations.put(innerState,
-                               new ModelResourceLocation(dispatcher.getDelegateForShadedFlags(j).getModelResourceString()));
+                       mapLocations.put(state.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal()),
+                               new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()));
                    }
                }
+               else
+               {
+                   mapLocations.put(state,
+                           new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()));
+               }
+
            }
        }
        return mapLocations;

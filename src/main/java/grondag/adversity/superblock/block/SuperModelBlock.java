@@ -42,12 +42,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * User-configurable Adversity building blocks.
- * 
- * TODO LIST
- * 
- *  harvest tool / level
- *   -- only get state but is called with Actual state, so could do TE lookup if needed
- *   
  */
 
 @SuppressWarnings("unused")
@@ -57,7 +51,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
      * Ordinal of the substance for this block. Set during getActualState
      * so that harvest/tool methods can have access to location-dependent substance information.
      */
-    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.values().length);
+    public static final PropertyInteger SUBSTANCE = PropertyInteger.create("substance", 0, BlockSubstance.values().length - 1);
     
     protected final WorldLightOpacity worldLightOpacity;
     
@@ -85,11 +79,11 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         this.renderLayerFlags = renderLayerSet.blockRenderLayerFlags;
         this.lightOpacity = worldLightOpacity.opacity;
     }
-        
+
     @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[] { META, SHADE_FLAGS, SUBSTANCE }, new IUnlistedProperty[] { MODEL_STATE });
+        return new ExtendedBlockState(this, new IProperty[] { META, SUBSTANCE }, new IUnlistedProperty[] { MODEL_STATE });
     }
     
     @Override

@@ -72,6 +72,7 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
@@ -90,13 +91,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * Didn't find the block state property abstraction layer particularly useful for my purposes.
      */
     public static final PropertyInteger META = PropertyInteger.create("meta", 0, 15);
-
-    /**
-     * Used to find the appropriate dispatcher delegate so that full-brightness render layers aren't rendered with AO shading.
-     * Needed after getBlockState and after getActualState but before getExtendedState, 
-     * so must be a regular property but is not saved to meta.
-     */
-    public static final PropertyInteger SHADE_FLAGS = PropertyInteger.create("shade_flags", 0, ModelState.BENUMSET_RENDER_LAYER.combinationCount() - 1);
 
     /**
      * Contains state passed from getExtendedState to handleBlockState. Using a custom unlisted property because we need large int values and the vanilla implementation enumerates
@@ -490,7 +484,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[] { META, SHADE_FLAGS }, new IUnlistedProperty[] { MODEL_STATE });
+        return new ExtendedBlockState(this, new IProperty[] { META }, new IUnlistedProperty[] { MODEL_STATE });
     }
 
     @Override
@@ -507,30 +501,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 && modelState.isSideSolid(face);
     }
     
-    @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        // Would save a call to getModelState in getExtendedState if we could simply
-        // add model state to the state instance returned here.
-        
-        // However this won't work because model lookup is done via an identity hash map
-        // and the state instance would not match the pre-defined, immutable state instances
-        // added by our block state mapper at load.
-        
-        // Experimented with thread-local cache - but overhead of that approach made it unworthwhile.
-        // Another approach would be to have multiple block instances with different shaded flags
-        // so that it isn't necessary to look up modelstate here.
-        
-        // Another approach would be to have one model dispatcher that returns isAmbientOcclusion=true always.
-        // and instead have getLightValue() return a non-zero value for fullbright layers, which also forces disable of AO.
-        // When getLightValue() is called it passes in an extended state, so these flags same flags could be 
-        // populated in getExtendedState and if true for the current layer return 1 for the light value.
-        // Could also mean that all glowing blocks emit at least a tiny amount of light, except that actual 
-        // light calculations are done via the location-aware version of getLightValue(), so might be fine.
-        return super.getActualState(state, worldIn, pos)
-                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, worldIn, pos, false).getRenderLayerShadedFlags());
-    }
-
     @Override
     public PathNodeType getAiPathNodeType(IBlockState state, IBlockAccess world, BlockPos pos)
     {
@@ -653,7 +623,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return ((IExtendedBlockState)state).withProperty(MODEL_STATE, getModelState(state, world, pos, true));
+        return ((IExtendedBlockState)state)
+                .withProperty(MODEL_STATE, getModelState(state, world, pos, true));
+//                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, world, pos, false).getRenderLayerShadedFlags());;
     }
 
     /**
@@ -697,6 +669,38 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public String getItemStackDisplayName(ItemStack stack)
     {
         return this.getLocalizedName(); 
+    }
+    
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * Model dispatcher always returns isAmbientOcclusion=true.
+     * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
+     * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
+     * populated in getExtendedState and if true for the current layer return 1 for the light value.
+     * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
+     * light calculations are done via the location-aware version of getLightValue(), so should be fine.
+     */
+
+    @Override
+    public int getLightValue(IBlockState state)
+    {
+        int min = 0;
+        
+        if(state instanceof IExtendedBlockState)
+        {
+            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+            if(layer != null)
+            {
+                ModelState modelState = ((IExtendedBlockState)state).getValue(MODEL_STATE);
+                if(modelState != null)
+                {
+                    if(!modelState.isLayerShaded(layer)) min = 1;
+                }
+            }
+        }
+        return Math.max(min, super.getLightValue(state));
     }
 
     /**
@@ -1165,7 +1169,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 {
                     ModelState myModelState = this.getModelState(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelState(otherBlockState, blockAccess, otherPos, false);
-                    //TODO: need to check for color/texture/occlusion match
+                    //TODO: need to check for texture/occlusion match
                     return myModelState.getSpecies() != otherModelState.getSpecies()
                             || myModelState.getRenderLayer(PaintLayer.BASE) != otherModelState.getRenderLayer(PaintLayer.BASE)
                             || myModelState.getTranslucency() != otherModelState.getTranslucency()
