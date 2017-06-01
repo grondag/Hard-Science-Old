@@ -24,10 +24,10 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.model.shape.ICollisionHandler;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -141,8 +141,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             Entity entityIn, boolean p_185477_7_)
     {
         ModelState modelState = this.getModelState(state, worldIn, pos, true);
-
-        AbstractCollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
+        ICollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
 
         if (collisionHandler == null)
         {
@@ -152,7 +151,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         {
             AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
 
-            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(state, worldIn, pos, modelState);
+            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(modelState);
 
             for (AxisAlignedBB aabb : bounds) {
                 if (localMask.intersectsWith(aabb)) 
@@ -558,28 +557,30 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos, true).getShape().meshFactory().collisionHandler();
+        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
             return super.getBoundingBox(state, worldIn, pos);
         }
         else
         {
-            return handler.getCollisionBoundingBox(state, worldIn, pos);
+            return handler.getCollisionBoundingBox(modelState);
         }
     }
 
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos, true).getShape().meshFactory().collisionHandler();
+        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
             return super.getCollisionBoundingBox(state, worldIn, pos);
         }
         else
         {
-            return handler.getCollisionBoundingBox(state, worldIn, pos);
+            return handler.getCollisionBoundingBox(modelState);
         }
     }
 
@@ -792,16 +793,17 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state)
     {
-        AbstractCollisionHandler handler = this.getModelState(state, worldIn, pos, true).getShape().meshFactory().collisionHandler();
+        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
-            return new ImmutableList.Builder<AxisAlignedBB>().add(this.getBoundingBox(state, worldIn, pos)).build();
+            return ImmutableList.of(this.getBoundingBox(state, worldIn, pos));
         }
         else
         {
             Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
 
-            for (AxisAlignedBB aabb : handler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos, true)))
+            for (AxisAlignedBB aabb : handler.getCollisionBoxes(modelState))
             {
                 builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
             }
@@ -1205,6 +1207,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         if(!modelState.hasSpecies()) return 0;
 
+        if(modelState.getShape().meshFactory().isSpeciesUsedForHeight()) return stack.getMetadata();
+        
         // If player is sneaking and placing on same block, force matching species.
         // Or, if player is sneaking and places on a block that cannot mate, force non-matching species
         if(player.isSneaking())

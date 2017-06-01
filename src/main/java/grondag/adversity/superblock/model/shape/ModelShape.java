@@ -1,13 +1,16 @@
 package grondag.adversity.superblock.model.shape;
 
+import java.util.List;
 import java.util.function.Supplier;
+
+import com.google.common.collect.ImmutableList;
 
 
 public enum ModelShape
 {
     CUBE(CubeMeshFactory::getShapeMeshFactory),
     COLUMN_SQUARE(CubeMeshFactory::getShapeMeshFactory),
-    HEIGHT(CubeMeshFactory::getShapeMeshFactory),
+    STACKED_PLATES(StackedPlatesMeshFactory::getShapeMeshFactory),
     BOX(CubeMeshFactory::getShapeMeshFactory),
     SPHERE(CubeMeshFactory::getShapeMeshFactory),
     DOME(CubeMeshFactory::getShapeMeshFactory),
@@ -72,6 +75,8 @@ public enum ModelShape
 
     private final Supplier<ShapeMeshGenerator> meshFactoryGetter;
     private ShapeMeshGenerator meshFactory;
+    
+    public static final List<ModelShape> AS_LIST = ImmutableList.copyOf(values());
 
     
     public ShapeMeshGenerator meshFactory()

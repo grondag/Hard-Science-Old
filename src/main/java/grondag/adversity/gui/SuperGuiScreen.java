@@ -16,6 +16,7 @@ import grondag.adversity.gui.control.ColorPicker;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
+import grondag.adversity.gui.control.ShapePicker;
 import grondag.adversity.gui.control.TexturePicker;
 import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.TranslucencyPicker;
@@ -62,6 +63,7 @@ public class SuperGuiScreen extends GuiScreen
     private TranslucencyPicker translucencyPicker;
     private ColorPicker[] colorPicker;
     private TexturePicker[] textureTabBar;
+    private ShapePicker shapePicker;
     private Toggle[] fullBrightToggle;
     private Toggle overlayToggle;
     private Toggle detailToggle;
@@ -92,6 +94,12 @@ public class SuperGuiScreen extends GuiScreen
         // abort on strangeness
         if(this.modelState == null) return;
 
+        if(this.shapePicker.getSelected() != this.modelState.getShape())
+        {
+            this.modelState.setShape(this.shapePicker.getSelected());
+            this.hasUpdates = true;
+        }
+        
         if(this.brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(this.itemPreview.previewItem))
         {
             SuperItemBlock.setStackLightValue(this.itemPreview.previewItem, this.brightnessSlider.getBrightness());
@@ -116,10 +124,6 @@ public class SuperGuiScreen extends GuiScreen
             this.modelState.setTranslucency(newTrans);
             this.hasUpdates = true;
         }
-        
-        // TODO - set shape first
-        
-        ModelShape shape = this.modelState.getShape();
         
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
@@ -284,6 +288,7 @@ public class SuperGuiScreen extends GuiScreen
         if(this.textureTabBar == null)
         {
             this.materialPicker = new MaterialPicker();
+            this.shapePicker = new ShapePicker();
             this.translucencyPicker = new TranslucencyPicker();
             this.textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
             this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
@@ -342,6 +347,7 @@ public class SuperGuiScreen extends GuiScreen
             rightPanel.addAll(GROUP_LAMP, tempH, this.textureTabBar[PaintLayer.LAMP.ordinal()]);
 
             int GROUP_SHAPE = rightPanel.createVisiblityGroup("Shape");
+            rightPanel.add(GROUP_SHAPE, this.shapePicker);
             
             int GROUP_MATERIAL = rightPanel.createVisiblityGroup("Material");  
             rightPanel.add(GROUP_MATERIAL, this.materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
@@ -386,6 +392,7 @@ public class SuperGuiScreen extends GuiScreen
     private void loadControlValuesFromModelState()
     {
         this.materialPicker.setSubstance(SuperItemBlock.getStackSubstance(this.itemPreview.previewItem));
+        this.shapePicker.setSelected(modelState.getShape());
         this.brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(this.itemPreview.previewItem));
         this.overlayToggle.setOn(this.modelState.isOverlayLayerEnabled());
         this.detailToggle.setOn(this.modelState.isDetailLayerEnabled());

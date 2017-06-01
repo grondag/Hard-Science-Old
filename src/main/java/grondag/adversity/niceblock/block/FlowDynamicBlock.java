@@ -4,7 +4,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.IFlowBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
@@ -19,7 +18,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -151,10 +149,11 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
         double volume = 0;
-        for(AxisAlignedBB box : this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoxes(state, world, pos, this.getModelState(state, world, pos)))
-        {
-            volume += Useful.AABBVolume(box);
-        }
+        //TODO: put back
+//        for(AxisAlignedBB box : this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoxes(state, world, pos, this.getModelState(state, world, pos)))
+//        {
+//            volume += Useful.AABBVolume(box);
+//        }
 
         return (int) Math.min(9, volume * 9);
     }

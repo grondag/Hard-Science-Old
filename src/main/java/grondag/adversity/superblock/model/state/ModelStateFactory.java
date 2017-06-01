@@ -912,7 +912,6 @@ public class ModelStateFactory
             return getShape().meshFactory().rotateBlock(blockState, world, pos, axis, block, this);
         }
 
-
         /** 
          * How much of the sky is occluded by the shape of this block?
          * Based on geometry alone, not transparency.
@@ -924,6 +923,5 @@ public class ModelStateFactory
         {
             return getShape().meshFactory().geometricSkyOcclusion(this);
         }
-        
     }
 }

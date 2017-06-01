@@ -7,7 +7,6 @@ import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.niceblock.modelstate.ModelKeyProperty;
 import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
 import grondag.adversity.niceblock.support.BlockSubstance;
-import grondag.adversity.niceblock.support.AbstractCollisionHandler;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
@@ -50,7 +49,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 
 /**
@@ -379,39 +377,39 @@ public class NiceBlock extends Block implements IWailaProvider
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {
-        AbstractCollisionHandler collisionHandler = this.dispatcher.getStateSet().shape.meshFactory().collisionHandler();
-        
-        if (collisionHandler == null)
-        {
+//        AbstractCollisionHandler collisionHandler = null; //this.dispatcher.getStateSet().shape.meshFactory().collisionHandler();
+//        
+//        if (collisionHandler == null)
+//        {
             super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185477_7_);
-        }
-        else
-        {
-            AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
-            
-            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos));
- 
-            for (AxisAlignedBB aabb : bounds) {
-                if (localMask.intersectsWith(aabb)) 
-                {
-                    collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
-                }
-            }        
-        }
+//        }
+//        else
+//        {
+//            AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
+//            
+//            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos));
+// 
+//            for (AxisAlignedBB aabb : bounds) {
+//                if (localMask.intersectsWith(aabb)) 
+//                {
+//                    collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
+//                }
+//            }        
+//        }
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
-        {
+//        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
+//        {
             return super.getCollisionBoundingBox(state, worldIn, pos);
-        }
-        else
-        {
-            return this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoundingBox(state, worldIn, pos);
-        }
+//        }
+//        else
+//        {
+//            return this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoundingBox(state, worldIn, pos);
+//        }
     }
     
     /** won't be called unless getCollisionHandler is overriden */
@@ -456,20 +454,20 @@ public class NiceBlock extends Block implements IWailaProvider
     @SuppressWarnings("deprecation")
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state) {
 
-        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
-        {
+//        if (this.dispatcher.getStateSet().shape.meshFactory().collisionHandler() == null)
+//        {
             return new ImmutableList.Builder<AxisAlignedBB>().add(this.getBoundingBox(state, worldIn, pos)).build();
-        }
-        else
-        {
-            Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
-    
-            for (AxisAlignedBB aabb : this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
-            {
-                builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
-            }
-            return builder.build();
-        }
+//        }
+//        else
+//        {
+//            Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
+//    
+//            for (AxisAlignedBB aabb : this.dispatcher.getStateSet().shape.meshFactory().collisionHandler().getCollisionBoxes(state, worldIn, pos, this.getModelState(state, worldIn, pos)))
+//            {
+//                builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
+//            }
+//            return builder.build();
+//        }
     }
 
 	public String getStyleName() {

@@ -156,11 +156,23 @@ public class SuperDispatcher implements IBakedModel
                 painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.BASE));
                 if(modelState.isDetailLayerEnabled())
                 {
-                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
+                    // don't render painters that interpret species as multi-block boundaries
+                    // if species is used for block height instead
+                    if(!mesher.isSpeciesUsedForHeight() 
+                            || (modelState.getTexture(PaintLayer.DETAIL).textureLayout.modelStateFlag & ModelState.STATE_FLAG_NEEDS_SPECIES) == 0)
+                    {
+                        painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
+                    }
                 }
                 if(modelState.isOverlayLayerEnabled())
                 {
-                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OVERLAY));
+                    // don't render painters that interpret species as multi-block boundaries
+                    // if species is used for block height instead
+                    if(!mesher.isSpeciesUsedForHeight() 
+                            || (modelState.getTexture(PaintLayer.OVERLAY).textureLayout.modelStateFlag & ModelState.STATE_FLAG_NEEDS_SPECIES) == 0)
+                    {
+                        painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OVERLAY));
+                    }
                 }
                 break;
 

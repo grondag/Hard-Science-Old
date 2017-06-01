@@ -17,6 +17,7 @@ import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -40,8 +41,7 @@ public abstract class ShapeMeshGenerator
     /**
      * CAN BE NULL! If non-null, blocks with this shape require special collision handling, typically because it is not a standard cube shape. 
      */
-    public AbstractCollisionHandler collisionHandler() { return null; };
-    public long getCollisionKeyFromModelState(ModelState modelState) { return 0; };
+    public ICollisionHandler collisionHandler() { return null; }
     
     protected ShapeMeshGenerator(StateFormat stateFormat, int stateFlags, Surface... surfaces)
     {
@@ -60,6 +60,13 @@ public abstract class ShapeMeshGenerator
     public abstract boolean isCube(ModelState modelState);
 
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
+    
+    /** 
+     * If true, will disable species selection on block placement. 
+     * Will also prevent rendering of textures with texture layouts that require species
+     * because those will expect species to demarcate multiblock boundaries.
+     */
+    public boolean isSpeciesUsedForHeight() { return false; }
 
     /** 
      * How much of the sky is occluded by the shape of this block?
