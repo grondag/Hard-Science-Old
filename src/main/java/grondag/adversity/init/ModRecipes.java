@@ -11,7 +11,7 @@ public class ModRecipes
     {
 
         // convert rubble to cobble
-        GameRegistry.addRecipe(new ItemStack(NiceBlockRegistrar.BASALT_COBBLE_BLOCK), new Object[]{
+        GameRegistry.addRecipe(new ItemStack(ModBlocks.basalt_cobble), new Object[]{
                 "CCC",
                 "CCC",
                 "CCC",
@@ -20,11 +20,11 @@ public class ModRecipes
         
         // convert cobble to rubble
         GameRegistry.addShapelessRecipe(new ItemStack(ModItems.basalt_rubble, 9), 
-                new Object[]{new ItemStack(NiceBlockRegistrar.BASALT_COBBLE_BLOCK, 1)}
+                new Object[]{new ItemStack(ModBlocks.basalt_cobble, 1)}
         );
         
         // smelt cobble to smooth basalt
-        GameRegistry.addSmelting(NiceBlockRegistrar.BASALT_COBBLE_BLOCK, new ItemStack(NiceBlockRegistrar.COOL_SQUARE_BASALT_ITEM, 1, 0), 0.1F);
+        GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(NiceBlockRegistrar.COOL_SQUARE_BASALT_ITEM, 1, 0), 0.1F);
 
     }
 }

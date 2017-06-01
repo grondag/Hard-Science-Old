@@ -5,6 +5,10 @@ import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.BlockVolcano;
 import grondag.adversity.niceblock.DummyColorHandler;
+import grondag.adversity.niceblock.color.BlockColorMapProvider;
+import grondag.adversity.niceblock.color.HueSet.Chroma;
+import grondag.adversity.niceblock.color.HueSet.Luminance;
+import grondag.adversity.niceblock.color.NiceHues.Hue;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperSimpleBlock;
@@ -32,17 +36,18 @@ import net.minecraftforge.fml.relauncher.Side;
 public class ModBlocks
 {
     private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
-    public static final Block test_block = null;
+    public static final Block basalt_cobble = null;
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
         
-        ModelState basaltModel = new ModelState();
-        basaltModel.setShape(ModelShape.CUBE);
-        basaltModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL);
-        event.getRegistry().register(new SuperSimpleBlock("test_block", BlockSubstance.BASALT, basaltModel));
+        ModelState workingModel = new ModelState();
+        workingModel.setShape(ModelShape.CUBE);
+        workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+        event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

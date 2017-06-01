@@ -10,25 +10,20 @@ import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
-import grondag.adversity.niceblock.block.BigBlock;
 import grondag.adversity.niceblock.block.CSGBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.block.HeightBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory;
-import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
-import grondag.adversity.niceblock.model.ColorModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory;
 import grondag.adversity.niceblock.model.HeightModelFactory;
-import grondag.adversity.niceblock.model.MasonryModelFactory;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.niceblock.support.NiceBlockStateMapper;
-import grondag.adversity.niceblock.support.NicePlacement;
 import java.io.IOException;
 import java.util.LinkedList;
 
@@ -72,51 +67,7 @@ public class NiceBlockRegistrar
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
 
     // DECLARE MODEL DISPATCH & BLOCK INSTANCES
-
-    private final static ModelHolder RAW_FLEXSTONE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION), 
-            TextureProviders.TEX_BLOCK_RAW_FLEXSTONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher RAW_FLEXSTONE_DISPATCH = new ModelDispatcher(RAW_FLEXSTONE_MODEL);
-    public static final NiceBlock RAW_FLEXSTONE_BLOCK = new NiceBlock(RAW_FLEXSTONE_DISPATCH, BlockSubstance.FLEXSTONE, "raw");
-    public static final NiceItemBlock RAW_FLEXSTONE_ITEM = new NiceItemBlock(RAW_FLEXSTONE_BLOCK);
-    
-    private final static ModelHolder RAW_DURASTONE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
-            TextureProviders.TEX_BLOCK_RAW_DURASTONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher RAW_DURASTONE_DISPATCH = new ModelDispatcher(RAW_DURASTONE_MODEL);
-    public static final NiceBlock RAW_DURASTONE_BLOCK = new NiceBlock(RAW_DURASTONE_DISPATCH, BlockSubstance.DURASTONE, "raw");
-    public static final NiceItemBlock RAW_DURASTONE_ITEM = new NiceItemBlock(RAW_DURASTONE_BLOCK);
-
-    private final static ModelHolder COLORED_STONE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
-            TextureProviders.TEX_BLOCK_COLORED_STONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher COLORED_STONE_DISPATCH = new ModelDispatcher(COLORED_STONE_MODEL);
-    public static final NiceBlockPlus COLORED_STONE_BLOCK = new NiceBlockPlus(COLORED_STONE_DISPATCH, BlockSubstance.FLEXSTONE, "colored");
-    public static final NiceItemBlock COLORED_STONE_ITEM = new NiceItemBlock(COLORED_STONE_BLOCK);
-    
-    private final static ModelHolder BIGTEX_MODEL = new ModelHolder(new BigTexModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.BIG_TEX_META_VARIED, ModelStateComponents.TEXTURE_1),
-            TextureProviders.TEX_BT_WEATHERED_STONE.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL);
-    public static final NiceBlockPlus BIGTEX_BLOCK = new NiceBlockPlus(BIGTEX_DISPATCH, BlockSubstance.FLEXSTONE, "bigtex");
-    public static final NiceItemBlock BIGTEX_ITEM = new NiceItemBlock(BIGTEX_BLOCK);
-
-    private final static ModelHolder BORDER_MODEL = new ModelHolder(new BorderModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1),
-            TextureProviders.TEX_BORDER_TEST.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.TRANSLUCENT));
-
-    private static final ModelDispatcher BORDER_BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL, BORDER_MODEL);
-    public static final BigBlock BORDER_BIGTEX_BLOCK = new BigBlock(BORDER_BIGTEX_DISPATCH, BlockSubstance.FLEXSTONE, "border", NicePlacement.PLACEMENT_3x3x3);
-    public static final NiceItemBlock BORDER_BIGTEX_ITEM = new NiceItemBlock(BORDER_BIGTEX_BLOCK);
-
-    private final static ModelHolder MASONRY_MODEL = new ModelHolder(new MasonryModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.MASONRY_JOIN, ModelStateComponents.TEXTURE_1),
-            TextureProviders.TEX_MASONRY_TEST.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED));
-
-    private static final ModelDispatcher MASONRY_BIGTEX_DISPATCH = new ModelDispatcher(BIGTEX_MODEL, MASONRY_MODEL);
-    public static final BigBlock MASONRY_BIGTEX_BLOCK = new BigBlock(MASONRY_BIGTEX_DISPATCH, BlockSubstance.FLEXSTONE, "bigbrick", NicePlacement.PLACEMENT_2x1x1);
-    public static final NiceItemBlock MASONRY_BIGTEX_ITEM = new NiceItemBlock(MASONRY_BIGTEX_BLOCK);
-
+ 
 //    private static final ModelAppearance COLUMN_INPUTS_BASE 
 //        = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
 //
@@ -293,46 +244,15 @@ public class NiceBlockRegistrar
            .setCoolingBlockInfo((FlowDynamicBlock) HOT_FLOWING_BASALT_3_FILLER_BLOCK, 4).setDropItem(ModItems.basalt_rubble).setAllowSilkHarvest(false);
    public static final NiceItemBlock HOT_STATIC_LAVA_FILLER_ITEM = new NiceItemBlock(HOT_STATIC_LAVA_FILLER_BLOCK);
    
-    
-    private final static ModelHolder BASALT_COBBLE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BASALT,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
-            TextureProviders.TEX_BLOCK_COBBLE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher BASALT_COBBLE_DISPATCH = new ModelDispatcher(BASALT_COBBLE_MODEL);
-    public static final NiceBlock BASALT_COBBLE_BLOCK = new NiceBlock(BASALT_COBBLE_DISPATCH, BlockSubstance.BASALT, "basalt_cobble");
-    public static final NiceItemBlock BASALT_COBBLE_ITEM = new NiceItemBlock(BASALT_COBBLE_BLOCK);
-
-    private final static ModelHolder COLORED_COBBLE_MODEL = new ModelHolder(new ColorModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
-            TextureProviders.TEX_BLOCK_COBBLE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher COLORED_COBBLE_DISPATCH = new ModelDispatcher(COLORED_COBBLE_MODEL);
-    public static final NiceBlock COBBLE_FLEXSTONE_BLOCK = new NiceBlockPlus(COLORED_COBBLE_DISPATCH, BlockSubstance.FLEXSTONE, "cobble");
-    public static final NiceItemBlock COBBLE_FLEXSTONE_ITEM = new NiceItemBlock(COBBLE_FLEXSTONE_BLOCK);
-
-    public static final NiceBlock COBBLE_DURASTONE_BLOCK = new NiceBlockPlus(COLORED_COBBLE_DISPATCH, BlockSubstance.DURASTONE, "cobble");
-    public static final NiceItemBlock COBBLE_DURASTONE_ITEM = new NiceItemBlock(COBBLE_DURASTONE_BLOCK);
-
-    
     private final static ModelHolder COOL_SQUARE_BASALT_MODEL 
         = new ModelHolder(new BigTexModelFactory(ModelStateComponents.COLORS_BASALT,
                 ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1),
                 TextureProviders.TEX_BT_BASALT_CUT.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
     private static final ModelDispatcher COOL_SQUARE_BASALT_DISPATCH = new ModelDispatcher(COOL_SQUARE_BASALT_MODEL);
     public static final NiceBlock COOL_SQUARE_BASALT_BLOCK = new FlowSimpleBlock(COOL_SQUARE_BASALT_DISPATCH, BlockSubstance.BASALT, "cool")
-            .setDropItem(BASALT_COBBLE_ITEM);
+            .setDropItem(ModItems.basalt_cobble);
     public static final NiceItemBlock COOL_SQUARE_BASALT_ITEM = new NiceItemBlock(COOL_SQUARE_BASALT_BLOCK);
     
-    private final static ModelHolder COLORED_BASALT_MODEL 
-        = new ModelHolder(new BigTexModelFactory(ModelStateComponents.COLORS_BLOCK,
-                ModelStateComponents.BIG_TEX_IGNORE_META, ModelStateComponents.TEXTURE_1),
-                TextureProviders.TEX_BT_BASALT_CUT.getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher COLORED_BASALT_DISPATCH = new ModelDispatcher(COLORED_BASALT_MODEL);
-    
-    public static final NiceBlock CUT_ROCK_FLEXSTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BlockSubstance.FLEXSTONE, "cut_rock");
-    public static final NiceItemBlock CUT_ROCK_FLEXSTONE_ITEM = new NiceItemBlock(CUT_ROCK_FLEXSTONE_BLOCK);
-    
-    public static final NiceBlock CUT_ROCK_DURASTONE_BLOCK = new NiceBlockPlus(COLORED_BASALT_DISPATCH, BlockSubstance.DURASTONE, "cut_rock");
-    public static final NiceItemBlock CUT_ROCK_DURASTONE_ITEM = new NiceItemBlock(CUT_ROCK_DURASTONE_BLOCK);
-
     private final static ModelHolder CSG_TEST_MODEL = new ModelHolder(new CSGModelFactory(ModelStateComponents.COLORS_BLOCK,
             ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION),
             TextureProviders.TEX_BLOCK_COLORED_STONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));

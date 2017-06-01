@@ -32,6 +32,9 @@ public class ModItems
 {
     public static final Item basalt_rubble = null;
 
+    // item blocks
+    public static final Item basalt_cobble = null;
+    
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
     {

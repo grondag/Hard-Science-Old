@@ -27,7 +27,8 @@ public class SuperStateMapper extends DefaultStateMapper
     }
 
    @Override
-   public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block) {
+   public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block) 
+   {
        Map<IBlockState, ModelResourceLocation> mapLocations = Maps.newLinkedHashMap();
 
        if (block instanceof SuperBlock) {
@@ -48,10 +49,8 @@ public class SuperStateMapper extends DefaultStateMapper
                    mapLocations.put(state,
                            new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()));
                }
-
            }
        }
        return mapLocations;
    }
-
 }
