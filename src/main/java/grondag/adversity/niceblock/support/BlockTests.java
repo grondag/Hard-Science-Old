@@ -182,7 +182,7 @@ public class BlockTests
         {
             this.block = ((SuperBlock)ibs.getBlock());
             //last param = false prevents recursion - we don't need the full model state (which depends on this logic)
-            this.matchSpecies = this.block.getModelState(ibs, world, pos, false).getSpecies();
+            this.matchSpecies = this.block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false).getSpecies();
         }
         
         @Override 
@@ -191,7 +191,7 @@ public class BlockTests
         @Override
         public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
         {
-            return testBlock(world, ibs, pos, this.block.getModelState(ibs, world, pos, false));
+            return testBlock(world, ibs, pos, this.block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false));
         }
         
         @Override
@@ -241,7 +241,7 @@ public class BlockTests
         @Override
         public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
         {
-            return testBlock(world, ibs, pos, this.block.getModelState(ibs, world, pos, false));
+            return testBlock(world, ibs, pos, this.block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false));
         }
         
         @Override

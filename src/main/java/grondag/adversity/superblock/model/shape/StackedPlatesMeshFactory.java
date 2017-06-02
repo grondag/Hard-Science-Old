@@ -46,7 +46,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         new AxisAlignedBB(0, 0, 0, 1, 9F/16F, 1),
         new AxisAlignedBB(0, 0, 0, 1, 10F/16F, 1),
         new AxisAlignedBB(0, 0, 0, 1, 11F/16F, 1),
-        new AxisAlignedBB(0, 0, 0, 1, 12F,16F),
+        new AxisAlignedBB(0, 0, 0, 1, 12F/16F, 1),
         
         new AxisAlignedBB(0, 0, 0, 1, 13F/16F, 1),
         new AxisAlignedBB(0, 0, 0, 1, 14F/16F, 1),

@@ -1,10 +1,11 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.placement;
 
 import grondag.adversity.library.NeighborBlocks;
 import grondag.adversity.library.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.support.BlockTests;
+import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -15,7 +16,7 @@ import net.minecraft.world.World;
  * Specialized onBlockPlaced event handlers to enable building of
  * decorative multiblocks with connected textures/geometry.
  */
-public abstract class SuperPlacement {
+public abstract class SpeciesGenerator {
     
     public static final int PLACEMENT_2x1x1 = (2 << 16) | (1 << 8) | 1;
     public static final int PLACEMENT_2x2x2 = (2 << 16) | (2 << 8) | 2;
@@ -29,7 +30,7 @@ public abstract class SuperPlacement {
 	 * Handles placement of blocks that join together in appearance and have
 	 * multiple block instances with the same meta.
 	 * */
-	public static class PlacementBigBlock extends SuperPlacement 
+	public static class PlacementBigBlock extends SpeciesGenerator 
 	{
 
 	    private final PlacementValidatorCubic shape;

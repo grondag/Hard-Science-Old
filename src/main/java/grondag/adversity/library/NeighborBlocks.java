@@ -126,7 +126,7 @@ public class NeighborBlocks {
             Block block = state.getBlock();
             if(block instanceof SuperBlock)
             {
-                modelStates[face.ordinal()] = ((SuperBlock)block).getModelState(state, this.world, pos.add(face.getDirectionVec()), this.refreshModelStateFromWorld);
+                modelStates[face.ordinal()] = ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, this.world, pos.add(face.getDirectionVec()), this.refreshModelStateFromWorld);
             }
         }
         return modelStates[face.ordinal()];
@@ -174,7 +174,7 @@ public class NeighborBlocks {
             Block block = state.getBlock();
             if(block instanceof SuperBlock)
             {
-                modelStates[corner.superOrdinal] = ((SuperBlock)block).getModelState(state, this.world, pos.add(corner.directionVector), this.refreshModelStateFromWorld);
+                modelStates[corner.superOrdinal] = ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, this.world, pos.add(corner.directionVector), this.refreshModelStateFromWorld);
             }
         }
         return modelStates[corner.superOrdinal];
@@ -194,7 +194,7 @@ public class NeighborBlocks {
             Block block = state.getBlock();
             if(block instanceof SuperBlock)
             {
-                modelStates[corner.superOrdinal] = ((SuperBlock)block).getModelState(state, this.world, pos.add(corner.directionVector), this.refreshModelStateFromWorld);
+                modelStates[corner.superOrdinal] = ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, this.world, pos.add(corner.directionVector), this.refreshModelStateFromWorld);
             }
         }
         return modelStates[corner.superOrdinal];

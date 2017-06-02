@@ -30,7 +30,6 @@ import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperItemBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
-import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;

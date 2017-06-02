@@ -12,13 +12,11 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.DefaultStateMapper;
 
 /**
-* SuperBlocks all use the same model underlying dispatcher.  
-* However, there are 16 delegates of it that are used for 
-* different shading combinations of each render layer.
+* SuperBlocks all use the same underlying dispatcher.  
 */
+@SuppressWarnings("unused")
 public class SuperStateMapper extends DefaultStateMapper 
 {
-    
     private final SuperDispatcher dispatcher;
     
     public SuperStateMapper(SuperDispatcher dispatcher)
@@ -41,13 +39,13 @@ public class SuperStateMapper extends DefaultStateMapper
                    for(BlockSubstance substance : BlockSubstance.values())
                    {
                        mapLocations.put(state.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal()),
-                               new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()));
+                               new ModelResourceLocation(dispatcher.getModelResourceString()));
                    }
                }
                else
                {
                    mapLocations.put(state,
-                           new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()));
+                           new ModelResourceLocation(dispatcher.getModelResourceString()));
                }
            }
        }

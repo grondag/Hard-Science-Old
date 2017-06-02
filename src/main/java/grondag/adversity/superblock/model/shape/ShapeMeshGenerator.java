@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Output;
@@ -38,10 +40,8 @@ public abstract class ShapeMeshGenerator
     
     // only necessary to override these two if something other than standard cube
     
-    /**
-     * CAN BE NULL! If non-null, blocks with this shape require special collision handling, typically because it is not a standard cube shape. 
-     */
-    public ICollisionHandler collisionHandler() { return null; }
+    @Nonnull
+    public abstract ICollisionHandler collisionHandler();
     
     protected ShapeMeshGenerator(StateFormat stateFormat, int stateFlags, Surface... surfaces)
     {

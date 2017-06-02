@@ -16,16 +16,10 @@ import grondag.adversity.Output;
 import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.init.ModModels;
 import grondag.adversity.library.Color;
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.library.Color.EnumHCLFailureMode;
-import grondag.adversity.library.NeighborBlocks.BlockCorner;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.niceblock.support.BlockSubstance;
-import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ICollisionHandler;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -55,7 +49,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
@@ -140,7 +133,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
     {
-        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ModelState modelState = this.getModelState(worldIn, pos, true);
         ICollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
 
         if (collisionHandler == null)
@@ -181,7 +174,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             }
         }
         
-        ModelState modelState = this.getModelState(world.getBlockState(pos), world, pos, false);
+        ModelState modelState = this.getModelStateAssumeStateIsCurrent(world.getBlockState(pos), world, pos, false);
 
         for (int j = 0; j < 4; ++j)
         {
@@ -220,7 +213,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         }
         
         BlockPos pos = target.getBlockPos();
-        ModelState modelState = this.getModelState(world.getBlockState(pos), world, pos, false);
+        ModelState modelState = this.getModelState(world, pos, false);
         
         EnumFacing side = target.sideHit;
 
@@ -305,7 +298,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        ModelState modelState = this.getModelState(blockState, world, data.getPos(), true);
+        ModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
         
         if(modelState != null)
         {
@@ -401,7 +394,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canPlaceTorchOnTop(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return this.getModelState(state, world, pos, true).canPlaceTorchOnTop();
+        return this.getModelStateAssumeStateIsStale(state, world, pos, true).canPlaceTorchOnTop();
     }
 
     /**
@@ -446,7 +439,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
-        if (this.getModelState(blockState, worldIn, pos, true).getShape().meshFactory().collisionHandler() == null)
+        if (this.getModelStateAssumeStateIsStale(blockState, worldIn, pos, true).getShape().meshFactory().collisionHandler() == null)
         {
             // same as vanilla logic here, but avoiding call to rayTrace so can detected unsupported calls to it
             Vec3d vec3d = start.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
@@ -495,7 +488,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
-        ModelState modelState = this.getModelState(state, world, pos, true);
+        ModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
         return modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID
                 && modelState.isSideSolid(face);
     }
@@ -517,7 +510,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         if(this.getSubstance(state, world, pos).isTranslucent)
         {
-            ModelState modelState = this.getModelState(state, world, pos, false);
+            ModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, false);
             if(modelState != null)
             {
                 ColorMap colorMap = modelState.getColorMap(PaintLayer.BASE);
@@ -557,7 +550,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
@@ -572,7 +565,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
@@ -619,13 +612,13 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
      /**
-     * Determines which model should be displayed via MODEL_KEY. 
+     * Determines which model should be displayed via MODEL_STATE. 
      */
     @Override
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return ((IExtendedBlockState)state)
-                .withProperty(MODEL_STATE, getModelState(state, world, pos, true));
+                .withProperty(MODEL_STATE, getModelStateAssumeStateIsCurrent(state, world, pos, true));
 //                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, world, pos, false).getRenderLayerShadedFlags());;
     }
 
@@ -735,20 +728,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         if(this.getSubstance(state, world, pos).isTranslucent)
         {
-            return this.getModelState(state, world, pos, false).getTranslucency().blockLightOpacity;
+            return this.getModelStateAssumeStateIsCurrent(state, world, pos, false).getTranslucency().blockLightOpacity;
         }
         else
         {
-            return this.getModelState(state, world, pos, false).geometricSkyOcclusion();
+            return this.getModelStateAssumeStateIsCurrent(state, world, pos, false).geometricSkyOcclusion();
         }
-    }
-
-    /** 
-     * For SuperBlocks, meta stores species data.  
-     */
-    public int getMetaFromModelState(ModelState modelState)
-    {
-        return modelState.getSpecies();
     }
 
     /**
@@ -764,16 +749,46 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * If last parameter is false, does not perform a refresh from world for world-dependent state attributes.
      * Use this option to prevent infinite recursion when need to reference some static state )
      * information in order to determine dynamic world state. Block tests are main use case for false.
+     * 
+     * 
      */
-    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public ModelState getModelState(IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
-        ModelState result = refreshFromWorldIfNeeded ? this.getDefaultModelState().refreshFromWorld(state, world, pos) : this.getDefaultModelState();
-        return result;
+        return getModelStateAssumeStateIsCurrent(world.getBlockState(pos), world, pos, refreshFromWorldIfNeeded);
     }
-
+    
+    /**
+     * At least one vanilla routine passes in a block state that does not match world.
+     * (After block updates, passes in previous state to detect collision box changes.)
+     * 
+     * We don't want to update our current state based on stale block state, so the TE
+     * refresh is coded to always use current world state.
+     * 
+     * However, we do want to honor the given world state if species is different than current.
+     * We do this by directly changing species, because that is only thing that can changed
+     * in model state based on block state, and also affects collision box.
+     * 
+     * TODO: there is probably still a bug here, because collision box can change based
+     * on other components of model state (axis, for example) and those changes may not be detected
+     * by path finding.
+     */
+    public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    {
+        // for mundane (non-TE) blocks don't need to worry about state being persisted, logic is same for old and current states
+        return refreshFromWorldIfNeeded ? this.getDefaultModelState().refreshFromWorld(state, world, pos) : this.getDefaultModelState();
+    }
+    
+    /** 
+     * Use when absolutely certain given block state is current.
+     */
+    public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    {
+        return getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
+    }
+ 
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        return ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelState(state, world, pos, true), side);
+        return ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
     }
 
     @Override
@@ -793,7 +808,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state)
     {
-        ModelState modelState = this.getModelState(state, worldIn, pos, true);
+        ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
         ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
         if (handler == null)
         {
@@ -1053,7 +1068,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return this.getModelState(state, world, pos, true).isCube() && this.getSubstance(state, world, pos).material.isSolid();
+        return this.getModelStateAssumeStateIsStale(state, world, pos, true).isCube() && this.getSubstance(state, world, pos).material.isSolid();
     }
 
     /**
@@ -1070,9 +1085,15 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
+    {
+        return this.getSubstance(worldIn, pos).material.isReplaceable();
+    }
+    
+    @Override
     public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        return this.getModelState(base_state, world, pos, true).isSideSolid(side);
+        return this.getModelStateAssumeStateIsStale(base_state, world, pos, true).isSideSolid(side);
     }
  
     @Override
@@ -1138,7 +1159,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis)
     {
         IBlockState blockState = world.getBlockState(pos);
-        return this.getModelState(world.getBlockState(pos), world, pos, true).rotateBlock(blockState, world, pos, axis, this);
+        return this.getModelStateAssumeStateIsCurrent(blockState, world, pos, true).rotateBlock(blockState, world, pos, axis, this);
     }
 
     public SuperBlock setAllowSilkHarvest(boolean allow)
@@ -1169,8 +1190,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 SuperBlock sBlock = (SuperBlock)block;
                 if(((SuperBlock) block).getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
                 {
-                    ModelState myModelState = this.getModelState(blockState, blockAccess, pos, false);
-                    ModelState otherModelState = sBlock.getModelState(otherBlockState, blockAccess, otherPos, false);
+                    ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
+                    ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
                     //TODO: need to check for texture/occlusion match
                     return myModelState.getSpecies() != otherModelState.getSpecies()
                             || myModelState.getRenderLayer(PaintLayer.BASE) != otherModelState.getRenderLayer(PaintLayer.BASE)
@@ -1182,103 +1203,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
         return super.shouldSideBeRendered(blockState, blockAccess, pos, side);
     }
-
-    /**
-     * Does not modify input stack. If the stack is modified, returns a copy.
-     */
-    public ItemStack updatedStackForPlacement(World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
-    {
-        ModelState modelState = SuperItemBlock.getModelState(stack);
-        int species = updatedStackForPlacementGetSpecies(modelState, worldIn, posPlaced, posOn, facing, stack, player);
-        if(species == modelState.getSpecies())
-        {
-            return stack;
-        }
-        else
-        {
-            ItemStack result = stack.copy();
-            modelState.setSpecies(species);
-            SuperItemBlock.setModelState(result, modelState);
-            return result;
-        }
-    }
-
-    private int updatedStackForPlacementGetSpecies(ModelState modelState, World worldIn, BlockPos posPlaced, BlockPos posOn, EnumFacing facing, ItemStack stack, EntityPlayer player)
-    {
-        if(!modelState.hasSpecies()) return 0;
-
-        if(modelState.getShape().meshFactory().isSpeciesUsedForHeight()) return stack.getMetadata();
-        
-        // If player is sneaking and placing on same block, force matching species.
-        // Or, if player is sneaking and places on a block that cannot mate, force non-matching species
-        if(player.isSneaking())
-        {
-            IBlockState placedOn = worldIn.getBlockState(posOn);
-            if(placedOn.getBlock() == this)
-            {
-                // Force match the metadata of the block on which we are placed
-                return ((SuperBlock)placedOn.getBlock()).getModelState(placedOn, worldIn, posOn, true).getSpecies();
-            }
-            else
-            {
-                // Force non-match of metadata for any neighboring blocks
-                int speciesInUseFlags = 0;
-                SuperBlock myBlock = (SuperBlock) (((SuperItemBlock)stack.getItem()).block);
-
-                NeighborBlocks neighbors = new NeighborBlocks(worldIn, posPlaced, false);
-                NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderCandidateMatch(myBlock));
-                
-                for(EnumFacing face : EnumFacing.VALUES)            
-                {
-                    if (results.result(face)) 
-                    {
-                        speciesInUseFlags |= (1 << neighbors.getModelState(face).getSpecies());
-                    }
-                }
-
-                // try to avoid corners also if picking a species that won't connect
-                for(BlockCorner corner : BlockCorner.values())
-                {
-                    if (results.result(corner)) 
-                    {
-                        speciesInUseFlags |= (1 << neighbors.getModelState(corner).getSpecies());
-                    }
-                }
-
-                // now randomly choose a species 
-                //that will not connect to what is surrounding
-                int salt = ThreadLocalRandom.current().nextInt(16);
-                for(int i = 0; i < 16; i++)
-                {
-                    int candidate = (i + salt) % 16;
-                    if((speciesInUseFlags & (1 << candidate)) == 0)
-                    {
-                        return candidate;
-                    }
-                }
-                
-                // give up
-                return 0;
-            }
-        }
-        // player not sneaking, so choose species based on placement shape
-        else
-        {
-            int shape = SuperPlacement.PLACEMENT_3x3x3;
-
-            NBTTagCompound tag = stack.getTagCompound();
-            if(tag != null && tag.hasKey(NiceTileEntity.PLACEMENT_SHAPE_TAG))
-            {
-                shape = tag.getInteger(NiceTileEntity.PLACEMENT_SHAPE_TAG);
-            }
-
-            SuperPlacement placer = new SuperPlacement.PlacementBigBlock(
-                    new PlacementValidatorCubic(shape & 0xFF, (shape >> 8) & 0xFF, (shape >> 16) & 0xFF));
-
-            return placer.getSpeciesForPlacedStack(worldIn, posPlaced, facing, stack, this);
-        }
-    }
-    
+   
     /**
      * Used in conjunction with {@link #isGeometryFullCube(IBlockState)} to
      * make all the other full/normal/opaque/translucent methods work

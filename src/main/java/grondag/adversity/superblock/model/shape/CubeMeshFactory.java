@@ -104,4 +104,10 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     {
         return 255;
     }
+
+    @Override
+    public ICollisionHandler collisionHandler()
+    {
+        return CubeCollisionHandler.INSTANCE;
+    }
 }

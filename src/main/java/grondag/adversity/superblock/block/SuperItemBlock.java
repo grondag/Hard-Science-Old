@@ -1,14 +1,18 @@
 package grondag.adversity.superblock.block;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.placement.IPlacementHandler;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -95,67 +99,48 @@ public class SuperItemBlock extends ItemBlock
     @Override
     public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
+        if(!playerIn.capabilities.allowEdit) return EnumActionResult.FAIL;
+        
         ItemStack stackIn = playerIn.getHeldItem(hand);
 
-        //TODO: always false, put back logic or remove
-        boolean isAdditive = false;
+        if (stackIn.isEmpty()) return EnumActionResult.FAIL;
         
-        BlockPos placedPos = worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) || (isAdditive = ((SuperBlock)block).isItemUsageAdditive(worldIn, pos, stackIn))
-                ? pos : pos.offset(facing);
+        ModelState modelState = getModelState(stackIn);
         
+        if(modelState == null) return EnumActionResult.FAIL;
         
-        if (stackIn.isEmpty())
-        {
-            return EnumActionResult.FAIL;
-        }       
+        IPlacementHandler placementHandler = modelState.getShape().getPlacementHandler();
         
-        if (!playerIn.canPlayerEdit(placedPos, facing, stackIn))
-        {
-            return EnumActionResult.FAIL;
-        }
-        
-        ItemStack stack = ((SuperBlock)this.block).updatedStackForPlacement(worldIn, placedPos, pos, facing, stackIn, playerIn);
-        int meta = ((SuperBlock)this.block).getMetaFromModelState(getModelState(stack));
-        
-        if (isAdditive)
-        {
-            IBlockState state = worldIn.getBlockState(pos);
-            AxisAlignedBB axisalignedbb = state.getSelectedBoundingBox(worldIn, placedPos);
-            if(!worldIn.checkNoEntityCollision(axisalignedbb.offset(pos), playerIn)) return EnumActionResult.FAIL;
-            IBlockState placedState = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn, hand);
-            if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, placedState))
-            {
-                SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, playerIn);
-                worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                stack.shrink(1);
-            }
+        //TODO:  all logic currently in SuperBlock.updatedStackForPlacementGetSpecies goes here
+        List<Pair<BlockPos, ItemStack>> placements = placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
 
-            return EnumActionResult.SUCCESS;
-        }
+        if(placements.isEmpty()) return EnumActionResult.FAIL;
         
-        else if (worldIn.mayPlace(this.block, placedPos, false, facing, (Entity)null))            
+        SoundType soundtype = SuperItemBlock.getStackSubstance(stackIn).soundType;
+        boolean didPlace = false;
+        
+        for(Pair<BlockPos, ItemStack> p : placements)
         {
-            IBlockState iblockstate1 = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, meta, playerIn, hand);
-            if (placeBlockAt(stack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, iblockstate1))
-            {
-                SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, playerIn);
-                worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-  
-                stack.shrink(1);
-                
-                return EnumActionResult.SUCCESS;
-            }
-            else
-            {
-                return EnumActionResult.FAIL;
-            }
+            ItemStack placedStack = p.getRight();
+            ModelState placedModelState = SuperItemBlock.getModelState(placedStack);
+            BlockPos placedPos = p.getLeft();
+            AxisAlignedBB axisalignedbb = placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
 
+            if(worldIn.checkNoEntityCollision(axisalignedbb.offset(placedPos)))
+            {
+                IBlockState placedState = this.block.getStateForPlacement(worldIn, placedPos, facing, hitX, hitY, hitZ, placedStack.getMetadata(), playerIn, hand);
+                if (placeBlockAt(placedStack, playerIn, worldIn, placedPos, facing, hitX, hitY, hitZ, placedState))
+                {
+                    didPlace = true;
+                    worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                    stackIn.shrink(1);
+                    if(stackIn.isEmpty()) break;
+                }
+            }
+        }
 
-        }
-        else
-        {
-            return EnumActionResult.FAIL;
-        }
+        return didPlace ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+     
     }
  
     /**
@@ -169,19 +154,23 @@ public class SuperItemBlock extends ItemBlock
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     { 
-        if (!world.setBlockState(pos, newState, 3)) return false;
+        // world.setBlockState returns false if the state was already the requested state
+        // this is OK normally, but if we need to update the TileEntity it is the opposite of OK
+        boolean wasUpdated = world.setBlockState(pos, newState, 3)
+                || world.getBlockState(pos) == newState;
+            
+        if(!wasUpdated) 
+            return false;
 
         if(newState.getBlock() instanceof SuperModelBlock)
         {
             SuperTileEntity niceTE = (SuperTileEntity)world.getTileEntity(pos);
             if (niceTE != null) 
             {
-//                Output.getLog().info("calling setModelKey from SuperItemBlock.placeBlockAt @" + pos.toString());
-
                 niceTE.setModelState(getModelState(stack));
-
-                //handle any block-specific transfer from stack to TE
-                ((SuperModelBlock)newState.getBlock()).updateTileEntityOnPlacedBlockFromStack(stack, player, world, pos, newState, niceTE);
+                niceTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
+                niceTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
+                niceTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
                 
                 if(world.isRemote)
                 {

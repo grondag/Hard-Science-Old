@@ -15,6 +15,7 @@ import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.placement.SpeciesGenerator;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -140,18 +141,61 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
                 : myTE.getLightValue();
     }
     
+    /**
+     * At least one vanilla routine passes in a block state that does not match world.
+     * (After block updates, passes in previous state to detect collision box changes.)
+     * 
+     * We don't want to update our current state based on stale block state, so the TE
+     * refresh is coded to always use current world state.
+     * 
+     * However, we do want to honor the given world state if species is different than current.
+     * We do this by directly changing species, because that is only thing that can changed
+     * in model state based on block state, and also affects collision box.
+     * 
+     * TODO: there is probably still a bug here, because collision box can change based
+     * on other components of model state (axis, for example) and those changes may not be detected
+     * by path finding.
+     */
     @Override
-    public ModelState getModelState(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
         SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
         if(myTE != null) 
         {
-          return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
+            IBlockState currentState = world.getBlockState(pos);
+            ModelState result = myTE.getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
+            
+            // honor passed in species if different
+            if(currentState.getValue(META) != state.getValue(META))
+            {
+                result = result.clone();
+                result.setSpecies(state.getValue(META));
+            }
+            return result;
         }
         else
         {
-            return this.getDefaultModelState();
+            return super.getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
         }
+    }
+    
+    /** 
+     * Use when absolutely certain given block state is current.
+     */
+    @Override
+    public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
+    {
+        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        if(myTE != null) 
+        {
+            return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
+            
+        }
+        else
+        {
+            return super.getModelStateAssumeStateIsCurrent(state, world, pos, refreshFromWorldIfNeeded);
+        }
+
     }
     
     @Override
@@ -161,7 +205,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
         if(myTE != null)
         {
-            int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : SuperPlacement.PLACEMENT_3x3x3;
+            int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : SpeciesGenerator.PLACEMENT_3x3x3;
             SuperItemBlock.setStackPlacementShape(stack, placementShape);
             SuperItemBlock.setStackLightValue(stack, myTE.getLightValue());
             SuperItemBlock.setStackSubstance(stack, myTE.getSubstance());
@@ -176,7 +220,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         
         if(stack != null)
         {
-            SuperItemBlock.setModelState(stack, this.getModelState(state, world, pos, true));
+            SuperItemBlock.setModelState(stack, this.getModelStateAssumeStateIsStale(state, world, pos, true));
         }
 
         return stack;
@@ -247,15 +291,8 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
         SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
         if(myTE != null) myTE.setSubstance(substance);
     }
-
-    public void updateTileEntityOnPlacedBlockFromStack(ItemStack stack, EntityPlayer player, World world, BlockPos pos, IBlockState newState, SuperTileEntity niceTE)
-    {
-        niceTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
-        niceTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
-        niceTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
-    }
-
-      @Override
+ 
+    @Override
     protected WorldLightOpacity worldLightOpacity(IBlockState state)
     {
         return this.worldLightOpacity;

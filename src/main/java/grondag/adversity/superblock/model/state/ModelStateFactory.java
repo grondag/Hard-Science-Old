@@ -29,6 +29,7 @@ import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -214,6 +215,11 @@ public class ModelStateFactory
             bits3 = b3;
         }
         
+        public ModelState clone()
+        {
+            return new ModelState(bits0, bits1, bits2, bits3);
+        }
+        
         public int[] getBitsIntArray() 
         {
             int[] result = new int[8];
@@ -360,6 +366,11 @@ public class ModelStateFactory
                 
                 if((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES)
                 {
+                    //TODO: remove
+                    if(Thread.currentThread().getName().equals("Server thread"))
+                    {
+                        Output.getLog().info("refresh from world oldSpecies = " + P3B_SPECIES.getValue(b3) + "  newSpecies = " + state.getValue(SuperBlock.META));
+                    }
                     b3 = P3B_SPECIES.setValue(state.getValue(SuperBlock.META), b3);                  
                 }
                 
@@ -725,7 +736,7 @@ public class ModelStateFactory
             
             if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 Output.getLog().warn("getSpecies on model state does not apply for shape");
-            
+
             return (this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES
                     ? P3B_SPECIES.getValue(bits3) : 0;
         }

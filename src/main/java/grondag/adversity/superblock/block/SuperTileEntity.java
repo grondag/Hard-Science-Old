@@ -1,5 +1,6 @@
 package grondag.adversity.superblock.block;
 
+import grondag.adversity.Output;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
@@ -189,12 +190,29 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         {
             this.modelState = ((SuperBlock)state.getBlock()).getDefaultModelState();
             this.isModelStateCacheDirty = true;
+            
+            // necessary for species
+            refreshFromWorldIfNeeded = true;
+            
+            //TODO: remove
+            if(!this.world.isRemote)
+            {
+                Output.getLog().info("getModelState new from default " + modelState.getSpecies());
+                
+            }
         }
+        
         if(this.isModelStateCacheDirty && refreshFromWorldIfNeeded)
         {
             this.modelState.refreshFromWorld(state, world, pos);
             this.isModelStateCacheDirty = false;
+            
+            //TODO: remove
+            if(!this.world.isRemote)
+                Output.getLog().info("getModelState refreshed from world " + modelState.getSpecies());
         }
+        
+        
         return this.modelState; 
     }
     
@@ -205,6 +223,10 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
             this.modelState = modelState;
             this.isModelStateCacheDirty = true;
             if(!this.world.isRemote) this.markDirty();
+            
+            //TODO: remove
+            if(!this.world.isRemote)
+                Output.getLog().info("setModelState, species=" + modelState.getSpecies());
         }
     }
 

@@ -50,7 +50,7 @@ public enum BlockSubstance {
     
 	public final String materialName;
 	public final Material material;
-	public final SoundType stepSound;
+	public final SoundType soundType;
 
 	public final int hardness;
 	public final int resistance;
@@ -66,7 +66,7 @@ public enum BlockSubstance {
 		this.materialName = name;
 		this.material = material;
 		this.isHyperMaterial = substance == Configurator.SUBSTANCES.hyperstone;
-		stepSound = sound;
+		soundType = sound;
 		this.defaultColorMapID = defaultColorMapID;
 		this.isTranslucent = this.material == Material.GLASS;
 

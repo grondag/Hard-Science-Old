@@ -9,7 +9,6 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 
 /**

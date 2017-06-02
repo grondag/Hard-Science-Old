@@ -12,5 +12,4 @@ public interface ICollisionHandler
     public AxisAlignedBB getCollisionBoundingBox(ModelState modelState);
     
     public AxisAlignedBB getRenderBoundingBox(ModelState modelState);
-     
 }
