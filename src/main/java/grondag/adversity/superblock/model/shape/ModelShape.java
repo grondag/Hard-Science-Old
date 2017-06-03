@@ -24,7 +24,7 @@ public enum ModelShape
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
         @Override
-        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+        public ShapeMeshGenerator meshFactory() { return SquareColumnMeshFactory.getShapeMeshFactory(); }
     },
     
     STACKED_PLATES()

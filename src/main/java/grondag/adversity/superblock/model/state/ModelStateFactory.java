@@ -25,11 +25,11 @@ import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
+import grondag.adversity.superblock.model.shape.SideShape;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -66,7 +66,7 @@ public class ModelStateFactory
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
-    private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.values().length];
+    private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.DYNAMIC_SIZE];
     @SuppressWarnings("unchecked")
     private static final EnumElement<LightingMode>[] P1_PAINT_LIGHT= new EnumElement[PaintLayer.DYNAMIC_SIZE];
 
@@ -92,16 +92,11 @@ public class ModelStateFactory
     
     static
     {
-        for(int i = 0; i < PaintLayer.STATIC_SIZE; i++)
-        {
-            // p0 reserve 7 bits for shape
-            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x5 = 48
-        }
-        
         for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
         {
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
-            P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x5 = 4
+            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
+            P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
         }
         
         for(TextureScale scale : TextureScale.values())
@@ -366,12 +361,7 @@ public class ModelStateFactory
                 
                 if((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES)
                 {
-                    //TODO: remove
-                    if(Thread.currentThread().getName().equals("Server thread"))
-                    {
-                        Output.getLog().info("refresh from world oldSpecies = " + P3B_SPECIES.getValue(b3) + "  newSpecies = " + state.getValue(SuperBlock.META));
-                    }
-                    b3 = P3B_SPECIES.setValue(state.getValue(SuperBlock.META), b3);                  
+                     b3 = P3B_SPECIES.setValue(state.getValue(SuperBlock.META), b3);                  
                 }
                 
                 for(TextureScale scale : TextureScale.values())
@@ -595,12 +585,12 @@ public class ModelStateFactory
         
         public TexturePallette getTexture(PaintLayer layer)
         {
-            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
+            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.dynamicIndex].getValue(bits1));
         }
         
         public void setTexture(PaintLayer layer, TexturePallette tex)
         {
-            bits1 = P1_PAINT_TEXTURE[layer.ordinal()].setValue(tex.ordinal, bits1);
+            bits1 = P1_PAINT_TEXTURE[layer.dynamicIndex].setValue(tex.ordinal, bits1);
             invalidateHashCode();
             clearStateFlags();
         }
@@ -896,17 +886,11 @@ public class ModelStateFactory
         //  SHAPE-DEPENDENT CONVENIENCE METHODS
         ////////////////////////////////////////////////////
 
-        public boolean canPlaceTorchOnTop()
+        public SideShape sideShape(EnumFacing side)
         {
-            return getShape().meshFactory().canPlaceTorchOnTop(this);
+            return getShape().meshFactory().sideShape(this, side);
         }
-
-        /** returns true if the side has a complete 1x1 face along block boundary */
-        public boolean isSideSolid(EnumFacing side)
-        {
-            return getShape().meshFactory().isSideSolid(this, side);
-        }
-
+      
         /** returns true if geometry is a full 1x1x1 cube. */
         public boolean isCube()
         {

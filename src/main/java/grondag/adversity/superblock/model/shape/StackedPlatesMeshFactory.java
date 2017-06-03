@@ -11,9 +11,6 @@ import grondag.adversity.Output;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.NoColorMapProvider;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
@@ -67,7 +64,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     
     private StackedPlatesMeshFactory()
     {
-        super(StateFormat.BLOCK, STATE_FLAG_NEEDS_SPECIES, new Surface(0, SurfaceType.MAIN, SurfaceTopology.CUBIC));
+        super(StateFormat.BLOCK, STATE_FLAG_NEEDS_SPECIES, new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC));
         this.populateQuads();
     }
 
@@ -84,8 +81,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         double height = (species + 1) / 16.0;
         
         RawQuad template = new RawQuad();
-        ColorMap colorMap = NoColorMapProvider.INSTANCE.getColorMap(0);
-        template.color = colorMap.getColor(EnumColorMap.BASE);
+        template.color = 0xFFFFFFFF;
         template.rotation = Rotation.ROTATE_NONE;
         template.lightingMode = LightingMode.SHADED;
         template.surface = this.surfaces.get(0);
@@ -126,18 +122,6 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     public Collection<RawQuad> getShapeQuads(ModelState modelState)
     {
         return this.cachedQuads[modelState.getSpecies()];
-    }
-
-    @Override
-    public boolean canPlaceTorchOnTop(ModelState modelState)
-    {
-        return modelState.getSpecies() == 15;
-    }
-
-    @Override
-    public boolean isSideSolid(ModelState modelState, EnumFacing side)
-    {
-        return side == EnumFacing.DOWN || modelState.getSpecies() == 15;
     }
 
     @Override
@@ -188,5 +172,34 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     public AxisAlignedBB getRenderBoundingBox(ModelState modelState)
     {
         return getCollisionBoundingBox(modelState);
+    }
+
+    @Override
+    public SideShape sideShape(ModelState modelState, EnumFacing side)
+    {
+        switch(side)
+        {
+        case DOWN:
+            return SideShape.SOLID;
+            
+        case UP:
+            return modelState.getSpecies() == 15 ? SideShape.SOLID : SideShape.MISSING;
+            
+        case EAST:
+        case NORTH:
+        case SOUTH:
+        case WEST:
+            
+            int species = modelState.getSpecies();
+            
+            if(species == 15) 
+                return SideShape.SOLID;
+            else
+                return species > 8 ? SideShape.PARTIAL : SideShape.MISSING;
+
+        default:
+                return SideShape.MISSING;
+        
+        }
     };
 }

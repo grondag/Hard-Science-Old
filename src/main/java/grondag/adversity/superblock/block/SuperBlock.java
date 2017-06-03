@@ -394,7 +394,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canPlaceTorchOnTop(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return this.getModelStateAssumeStateIsStale(state, world, pos, true).canPlaceTorchOnTop();
+        return this.getModelStateAssumeStateIsStale(state, world, pos, true).sideShape(EnumFacing.UP).holdsTorch;
     }
 
     /**
@@ -490,7 +490,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         ModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
         return modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID
-                && modelState.isSideSolid(face);
+                && modelState.sideShape(face).occludesOpposite;
     }
     
     @Override
@@ -1093,7 +1093,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        return this.getModelStateAssumeStateIsStale(base_state, world, pos, true).isSideSolid(side);
+        return this.getModelStateAssumeStateIsStale(base_state, world, pos, true).sideShape(side).holdsTorch;
     }
  
     @Override

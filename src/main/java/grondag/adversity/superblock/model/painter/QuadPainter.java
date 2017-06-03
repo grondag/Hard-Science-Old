@@ -66,7 +66,7 @@ public abstract class QuadPainter
             {
                 color = this.translucency.alphaARGB | (color & 0x00FFFFFF);
             }
-            result.recolor(color);
+            result.multiplyColor(color);
             result.lightingMode = this.lightingMode;
             result.renderLayer = this.renderLayer;
             

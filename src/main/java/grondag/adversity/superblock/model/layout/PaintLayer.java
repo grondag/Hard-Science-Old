@@ -41,8 +41,7 @@ public enum PaintLayer
     
     /**
      * Textures the CUT surface. 
-     * Set based on substance of block.
-     * Shares color of the base layer.
+     * Same texture and color as base layer but without any overlay or detail applied.
      * Must always be present.
      */
     CUT(0, SurfaceType.CUT);

@@ -10,9 +10,6 @@ import grondag.adversity.library.Rotation;
 import grondag.adversity.library.model.quadfactory.CubeInputs;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.NoColorMapProvider;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
@@ -39,7 +36,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     
     protected CubeMeshFactory()
     {
-        super(StateFormat.BLOCK, STATE_FLAG_NONE, new Surface(0, SurfaceType.MAIN, SurfaceTopology.CUBIC));
+        super(StateFormat.BLOCK, STATE_FLAG_NONE, new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC));
         this.cachedQuads = getCubeQuads();
     }
 
@@ -52,8 +49,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     private Collection<RawQuad> getCubeQuads()
     {
         CubeInputs result = new CubeInputs();
-        ColorMap colorMap = NoColorMapProvider.INSTANCE.getColorMap(0);
-        result.color = colorMap.getColor(EnumColorMap.BASE);
+        result.color = 0xFFFFFFFF;
         result.textureRotation = Rotation.ROTATE_NONE;
         result.lightingMode = LightingMode.SHADED;
         result.u0 = 0;
@@ -75,17 +71,6 @@ public class CubeMeshFactory extends ShapeMeshGenerator
         return builder.build();
     }
 
-    @Override
-    public boolean canPlaceTorchOnTop(ModelState modelState)
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isSideSolid(ModelState modelState, EnumFacing side)
-    {
-        return true;
-    }
 
     @Override
     public boolean isCube(ModelState modelState)
@@ -109,5 +94,11 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     public ICollisionHandler collisionHandler()
     {
         return CubeCollisionHandler.INSTANCE;
+    }
+
+    @Override
+    public SideShape sideShape(ModelState modelState, EnumFacing side)
+    {
+        return SideShape.SOLID;
     }
 }

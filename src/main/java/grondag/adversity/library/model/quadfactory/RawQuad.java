@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import grondag.adversity.Configurator;
+import grondag.adversity.Output;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import grondag.adversity.superblock.model.painter.surface.Surface;
@@ -466,12 +467,31 @@ public class RawQuad
     /**
      * Changes all vertices and quad color to new color and returns itself
      */
-    public RawQuad recolor(int color)
+    public RawQuad replaceColor(int color)
     {
         this.color = color;
         for(int i = 0; i < this.getVertexCount(); i++)
         {
             if(getVertex(i) != null) setVertex(i, getVertex(i).withColor(color));
+        }
+        return this;
+    }
+    
+
+    /**
+     * Multiplies all vertex color by given color and returns itself
+     */
+    public RawQuad multiplyColor(int color)
+    {
+        this.color = QuadFactory.multiplyColor(this.color, color);
+        for(int i = 0; i < this.getVertexCount(); i++)
+        {
+            Vertex v = this.getVertex(i);
+            if(v != null)
+            {
+                int vColor = QuadFactory.multiplyColor(color, v.color);
+                this.setVertex(i, v.withColor(vColor));
+            }
         }
         return this;
     }
@@ -776,6 +796,10 @@ public class RawQuad
 //            faceNormal[2] = 0;
 //        }
 
+        //TODO: remove
+        if(this.surface.isPreShaded)
+            Output.getLog().info("boop");
+        
         for(int v = 0; v < 4; v++)
         {
 
@@ -793,7 +817,7 @@ public class RawQuad
 
                 case COLOR:
                     float shade;
-                    if(this.lightingMode == LightingMode.SHADED)
+                    if(this.lightingMode == LightingMode.SHADED && Configurator.RENDER.enableCustomShading && !this.surface.isPreShaded)
                     {
                         Vec3d surfaceNormal = getVertex(v).hasNormal() ? getVertex(v).getNormal() : this.getFaceNormal();
                         shade = Configurator.RENDER.minAmbientLight + 
@@ -842,9 +866,12 @@ public class RawQuad
             }
         }
 
-      
+        boolean applyDiffuseLighting = this.lightingMode == LightingMode.SHADED
+                && !this.surface.isPreShaded  
+                && !Configurator.RENDER.enableCustomShading;
+        
         return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, color, this.face, textureSprite, 
-                lightingMode == LightingMode.SHADED && !Configurator.RENDER.enableCustomShading, format));
+                applyDiffuseLighting, format));
         
     }
     
