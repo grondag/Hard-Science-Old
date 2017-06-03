@@ -15,7 +15,7 @@ import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.PerformanceCollector;
 import grondag.adversity.library.PerformanceCounter;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.simulator.Simulator;
@@ -373,7 +373,7 @@ public class WorldStateBuffer implements IBlockAccess
         IBlockState baseState = realWorld.getBlockState(pos);
         if(baseState.getBlock() == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
         {
-            if( !IFlowBlock.shouldBeFullCube(baseState, realWorld, pos))
+            if( !TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
             {
                 realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
                 return true;
@@ -385,7 +385,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
         else if(baseState.getBlock() == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
         {
-            if(IFlowBlock.shouldBeFullCube(baseState, realWorld, pos))
+            if(TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
             {
                 realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
                 return true;
@@ -397,7 +397,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
         
         
-        IBlockState newState = IFlowBlock.adjustFillIfNeeded(realWorld, pos);
+        IBlockState newState = TerrainBlock.adjustFillIfNeeded(realWorld, pos);
         
         if(newState == null)
         {
@@ -436,11 +436,11 @@ public class WorldStateBuffer implements IBlockAccess
             {
                 // treat transition between small block and air as low priority for world update
                 // helps prevent large number of world block updates due to vertical instability
-                int newHeight = IFlowBlock.getFlowHeightFromState(newState);
+                int newHeight = TerrainBlock.getFlowHeightFromState(newState);
                 return newHeight > 2;
             }
             
-            int oldHeight = IFlowBlock.getFlowHeightFromState(expectedPriorState);
+            int oldHeight = TerrainBlock.getFlowHeightFromState(expectedPriorState);
             if(oldHeight > 0)
             {
                 if(newState.getMaterial() == Material.AIR)
@@ -454,7 +454,7 @@ public class WorldStateBuffer implements IBlockAccess
                     //if old and new are same flow blocks, defer small height changes
                     if(newState.getBlock() == expectedPriorState.getBlock())
                     {
-                        int newHeight = IFlowBlock.getFlowHeightFromState(newState);
+                        int newHeight = TerrainBlock.getFlowHeightFromState(newState);
                         return Math.abs(oldHeight - newHeight) > 2;
                     }
                     else
@@ -725,13 +725,13 @@ public class WorldStateBuffer implements IBlockAccess
                             int x = chunkStartX +  ((i >> 4) & 0xF);
                             int z = chunkStartZ + (i & 0xF);
                             
-                            if(IFlowBlock.isFlowHeight(bsb.newState.getBlock()))
+                            if(TerrainBlock.isFlowHeight(bsb.newState.getBlock()))
                             {
                                 tracker.setAdjustmentNeededAround(x, y, z);
                                 // set to height block so no need to look for filler
                                 tracker.excludeAdjustmentNeededAt(x, y, z);
                             }
-                            else if(IFlowBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
+                            else if(TerrainBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
                             {
                                 // difference here is simply that we allow fillers in the block being set
                                 tracker.setAdjustmentNeededAround(x, y, z);

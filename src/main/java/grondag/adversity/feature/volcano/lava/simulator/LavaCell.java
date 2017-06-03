@@ -11,7 +11,7 @@ import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleUnorderedArrayList;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.state.IBlockState;
@@ -1853,13 +1853,13 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                 {
                     
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible - currentSurfaceY * FlowHeightState.BLOCK_LEVELS_INT),
+                            TerrainBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible - currentSurfaceY * FlowHeightState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else if(hasLava && y < currentSurfaceY)
                 {
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            IFlowBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT),
+                            TerrainBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else

@@ -5,7 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
@@ -57,7 +57,7 @@ public class CoolingBlock extends FlowDynamicBlock
                 
                 if(this.nextCoolingBlock == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
                 {
-                    if( IFlowBlock.shouldBeFullCube(state, worldIn, pos))
+                    if( TerrainBlock.shouldBeFullCube(state, worldIn, pos))
                     {
                         worldIn.setBlockState(pos.getX(), pos.getY(), pos.getZ(), NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, state.getValue(NiceBlock.META)), state);
                     }
@@ -90,7 +90,7 @@ public class CoolingBlock extends FlowDynamicBlock
      * Occasionally can cool if only three are cooler. */
     public boolean canCool(WorldStateBuffer worldIn, BlockPos pos, IBlockState state)
     {
-        if(IFlowBlock.shouldBeFullCube(state, worldIn, pos)) return true;
+        if(TerrainBlock.shouldBeFullCube(state, worldIn, pos)) return true;
         
         int chances = 0;
         boolean awayFromLava = true;

@@ -4,7 +4,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -22,7 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
+public class FlowDynamicBlock extends NiceBlock
 {    
     private final boolean isFiller;
     private FlowStaticBlock staticVersion;
@@ -46,7 +46,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isAssociatedBlock(Block other)
     {
-        return other == IFlowBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+        return other == TerrainBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
     }
 
     public boolean isFlowFiller()
@@ -82,7 +82,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
 //        boolean result;
 //        long start = System.nanoTime();
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
-        if(Configurator.RENDER.enableFaceCullingOnFlowBlocks && IFlowBlock.isFlowBlock(neighborState.getBlock()))
+        if(Configurator.RENDER.enableFaceCullingOnFlowBlocks && TerrainBlock.isFlowBlock(neighborState.getBlock()))
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
@@ -176,13 +176,13 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return IFlowBlock.shouldBeFullCube(state, world, pos);
+        return TerrainBlock.shouldBeFullCube(state, world, pos);
     }
 
     @Override
     public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
     {
-        return IFlowBlock.isEmpty(worldIn.getBlockState(pos), worldIn, pos);
+        return TerrainBlock.isEmpty(worldIn.getBlockState(pos), worldIn, pos);
 
         //        return this.dispatcher.isEmpty(this.getModelStateKey(worldIn.getBlockState(pos), worldIn, pos));
     }
@@ -190,7 +190,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return IFlowBlock.isEmpty(state, world, pos);
+        return TerrainBlock.isEmpty(state, world, pos);
         //        return this.dispatcher.isEmpty(this.getModelStateKey(state, world, pos));
     }
 
@@ -203,7 +203,7 @@ public class FlowDynamicBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
-        IFlowBlock.freezeNeighbors(world, pos, state);
+        TerrainBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
 

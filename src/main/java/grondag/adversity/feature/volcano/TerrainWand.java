@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
@@ -122,7 +122,7 @@ public class TerrainWand extends Item
         IBlockState stateIn = worldIn.getBlockState(pos);
         Block blockIn = stateIn.getBlock();
 
-        if(IFlowBlock.isFlowBlock(blockIn))
+        if(TerrainBlock.isFlowBlock(blockIn))
         {
             
             if(blockIn == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK)
@@ -179,7 +179,7 @@ public class TerrainWand extends Item
                 BlockPos targetPos = new BlockPos(pos.getX() - 16 + x, currentY, pos.getZ() - 16 + z);
                 IBlockState currentState = worldIn.getBlockState(targetPos);
                 
-                if(IFlowBlock.isFlowHeight(currentState.getBlock()))
+                if(TerrainBlock.isFlowHeight(currentState.getBlock()))
                 {
                     if(avg > currentLevel)
                     {
@@ -188,12 +188,12 @@ public class TerrainWand extends Item
                         
                         if(newY == currentY)
                         {
-                            worldIn.setBlockState(targetPos, IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
                         }
                         else
                         {
-                            worldIn.setBlockState(targetPos, IFlowBlock.stateWithDiscreteFlowHeight(currentState, FlowHeightState.BLOCK_LEVELS_INT));
-                            worldIn.setBlockState(targetPos.up(), IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, FlowHeightState.BLOCK_LEVELS_INT));
+                            worldIn.setBlockState(targetPos.up(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
                         }
                     }
                     else if(avg < currentLevel)
@@ -203,12 +203,12 @@ public class TerrainWand extends Item
                         
                         if(newY == currentY)
                         {
-                            worldIn.setBlockState(targetPos, IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
                         }
                         else
                         {
                             worldIn.setBlockToAir(targetPos);
-                            worldIn.setBlockState(targetPos.down(), IFlowBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos.down(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
                         }
                     }
                 }
@@ -221,7 +221,7 @@ public class TerrainWand extends Item
     {
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState state = world.getBlockState(pos);
-        int h = IFlowBlock.getFlowHeightFromState(state);
+        int h = TerrainBlock.getFlowHeightFromState(state);
         
         if(h != 0) return y * FlowHeightState.BLOCK_LEVELS_INT + h;
         
@@ -231,12 +231,12 @@ public class TerrainWand extends Item
             int downCount = 1;
             state = world.getBlockState(pos.down(downCount));
             
-            while(y - downCount > 0 && (state.getMaterial().isReplaceable() || IFlowBlock.isFlowFiller(state.getBlock())))
+            while(y - downCount > 0 && (state.getMaterial().isReplaceable() || TerrainBlock.isFlowFiller(state.getBlock())))
             {
                 downCount++;
                 state = world.getBlockState(pos.down(downCount));
             }
-            h = IFlowBlock.getFlowHeightFromState(state);
+            h = TerrainBlock.getFlowHeightFromState(state);
             return (y - downCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
         }
         else
@@ -244,13 +244,13 @@ public class TerrainWand extends Item
             // go up
             int upCount = 1;
             state = world.getBlockState(pos.up(upCount));
-            h = IFlowBlock.getFlowHeightFromState(state);
+            h = TerrainBlock.getFlowHeightFromState(state);
             
-            while(h == 0 && y + upCount < 255 && !(state.getMaterial().isReplaceable() || IFlowBlock.isFlowFiller(state.getBlock())))
+            while(h == 0 && y + upCount < 255 && !(state.getMaterial().isReplaceable() || TerrainBlock.isFlowFiller(state.getBlock())))
             {
                 upCount++;
                 state = world.getBlockState(pos.up(upCount));
-                h = IFlowBlock.getFlowHeightFromState(state);
+                h = TerrainBlock.getFlowHeightFromState(state);
             }
             return (y + upCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
         }
@@ -260,7 +260,7 @@ public class TerrainWand extends Item
     public EnumActionResult handleUseHeightMode(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos)
     {
 
-        if(IFlowBlock.isFlowHeight(worldIn.getBlockState(pos.up()).getBlock()))
+        if(TerrainBlock.isFlowHeight(worldIn.getBlockState(pos.up()).getBlock()))
         {
             return handleUseHeightMode(stack, playerIn, worldIn, pos.up());
         }
@@ -271,7 +271,7 @@ public class TerrainWand extends Item
         IBlockState targetState = null;
         BlockPos targetPos = null;
 
-        int level = IFlowBlock.getFlowHeightFromState(stateIn);
+        int level = TerrainBlock.getFlowHeightFromState(stateIn);
         if(level > 0)
         {
             if(playerIn.isSneaking())
@@ -279,11 +279,11 @@ public class TerrainWand extends Item
                 if(level > 1)
                 {	
                     targetPos = pos;
-                    targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, level - 1);
+                    targetState = TerrainBlock.stateWithDiscreteFlowHeight(stateIn, level - 1);
                     playerIn.sendMessage(new TextComponentString("Level " + (level - 1)));
 
                 }
-                else if(IFlowBlock.isFlowHeight(worldIn.getBlockState(pos.down()).getBlock()))
+                else if(TerrainBlock.isFlowHeight(worldIn.getBlockState(pos.down()).getBlock()))
                 {
                     targetPos = pos;
                     targetState = Blocks.AIR.getDefaultState();
@@ -300,14 +300,14 @@ public class TerrainWand extends Item
                 if(level < FlowHeightState.BLOCK_LEVELS_INT)
                 {
                     targetPos = pos;
-                    targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, level + 1);
+                    targetState = TerrainBlock.stateWithDiscreteFlowHeight(stateIn, level + 1);
                     playerIn.sendMessage(new TextComponentString("Level " + (level + 1)));
                 }
                 else if(worldIn.getBlockState(pos.up()).getBlock().isReplaceable(worldIn, pos.up())
-                        || IFlowBlock.isFlowFiller(worldIn.getBlockState(pos.up()).getBlock()))
+                        || TerrainBlock.isFlowFiller(worldIn.getBlockState(pos.up()).getBlock()))
                 {
                     targetPos = pos.up();
-                    targetState = IFlowBlock.stateWithDiscreteFlowHeight(stateIn, 1);
+                    targetState = TerrainBlock.stateWithDiscreteFlowHeight(stateIn, 1);
                     playerIn.sendMessage(new TextComponentString("Level 1 (added new block)"));
                 }
                 else
@@ -382,8 +382,8 @@ public class TerrainWand extends Item
              * Otherwise should be air.
              */
             IBlockState stateBelow = worldObj.getBlockState(basePos.down());
-            if(IFlowBlock.isFlowHeight(stateBelow.getBlock()) 
-                    && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
+            if(TerrainBlock.isFlowHeight(stateBelow.getBlock()) 
+                    && TerrainBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
             {
                 targetMeta = 0;
                 fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
@@ -391,15 +391,15 @@ public class TerrainWand extends Item
             else 
             {
                 IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
-                if((IFlowBlock.isFlowHeight(stateTwoBelow.getBlock()) 
-                        && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
+                if((TerrainBlock.isFlowHeight(stateTwoBelow.getBlock()) 
+                        && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
                 {
                     targetMeta = 1;
                     fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
                 }
             }
 
-            if(IFlowBlock.isFlowFiller(baseBlock))
+            if(TerrainBlock.isFlowFiller(baseBlock))
             {
 
                 if(targetMeta == SHOULD_BE_AIR)

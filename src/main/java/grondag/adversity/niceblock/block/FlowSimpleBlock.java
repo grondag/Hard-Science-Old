@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceItemBlock;
@@ -21,7 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
+public class FlowSimpleBlock extends NiceBlock
 {
 
     public FlowSimpleBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName)
@@ -37,7 +37,7 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean isAssociatedBlock(Block other)
     {
-        return other == IFlowBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+        return other == TerrainBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
     }
     public boolean isFlowFiller()
     {
@@ -85,7 +85,7 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
-        IFlowBlock.freezeNeighbors(world, pos, state);
+        TerrainBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
 
@@ -104,7 +104,7 @@ public class FlowSimpleBlock extends NiceBlock implements IFlowBlock
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        IFlowBlock.freezeNeighbors(worldIn, pos, state);
+        TerrainBlock.freezeNeighbors(worldIn, pos, state);
     }
 
 }

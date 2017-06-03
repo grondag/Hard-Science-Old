@@ -22,7 +22,7 @@ import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.library.model.quadfactory.QuadCache;
 import grondag.adversity.library.Job;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
@@ -305,7 +305,7 @@ public class LavaSimulator extends SimulationNode
         // ignore fillers
         if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, -IFlowBlock.getFlowHeightFromState(state));
+            this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlock.getFlowHeightFromState(state));
             this.setSaveDirty(true);
         }
     }
@@ -323,7 +323,7 @@ public class LavaSimulator extends SimulationNode
         // ignore fillers - they have no effect on simulation
         if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, IFlowBlock.getFlowHeightFromState(state));
+            this.lavaBlockPlacementEvents.addEvent(pos, TerrainBlock.getFlowHeightFromState(state));
             
             // remove blocks placed by player so that simulation can place lava in the appropriate place
             this.itMe = true;

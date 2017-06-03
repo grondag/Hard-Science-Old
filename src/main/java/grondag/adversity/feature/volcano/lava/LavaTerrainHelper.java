@@ -10,7 +10,7 @@ import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import net.minecraft.block.Block;
@@ -123,7 +123,7 @@ public class LavaTerrainHelper
     {
         Block block = state.getBlock();
         return block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
-                || (IFlowBlock.isFlowHeight(block) && ((NiceBlock)block).material == BlockSubstance.BASALT)
+                || (TerrainBlock.isFlowHeight(block) && ((NiceBlock)block).material == BlockSubstance.BASALT)
                 || LavaTerrainHelper.canLavaDisplace(state);
     }
     
@@ -337,9 +337,9 @@ public class LavaTerrainHelper
     {
         Block block = state.getBlock();
         
-        if (IFlowBlock.isFlowFiller(block)) return true;
+        if (TerrainBlock.isFlowFiller(block)) return true;
 
-        if (IFlowBlock.isFlowHeight(block)) return false;
+        if (TerrainBlock.isFlowHeight(block)) return false;
         
         //TODO: make material list configurable
    

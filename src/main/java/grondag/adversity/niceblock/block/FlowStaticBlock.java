@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
@@ -26,7 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
+public class FlowStaticBlock extends NiceBlockPlus
 {    
     private final boolean isFiller;
     
@@ -50,7 +50,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     @Override
     public boolean isAssociatedBlock(Block other)
     {
-        return other == IFlowBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
+        return other == TerrainBlock.FLOW_BLOCK_INDICATOR || super.isAssociatedBlock(other);
     }
 
     public boolean isFlowFiller()
@@ -68,7 +68,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     {
         
         IBlockState neighborState = blockAccess.getBlockState(pos.offset(side));
-        if(IFlowBlock.isFlowBlock(neighborState.getBlock()))
+        if(TerrainBlock.isFlowBlock(neighborState.getBlock()))
         {
             int myOcclusionKey = this.getOcclusionKey(blockState, blockAccess, pos, side);
             int otherOcclusionKey = ((NiceBlock)neighborState.getBlock()).getOcclusionKey(neighborState, blockAccess, pos.offset(side), side.getOpposite());
@@ -194,7 +194,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
-        IFlowBlock.freezeNeighbors(world, pos, state);
+        TerrainBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
     
@@ -207,7 +207,7 @@ public class FlowStaticBlock extends NiceBlockPlus implements IFlowBlock
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-        IFlowBlock.freezeNeighbors(worldIn, pos, state);
+        TerrainBlock.freezeNeighbors(worldIn, pos, state);
     }
 
     /**

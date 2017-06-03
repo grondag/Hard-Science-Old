@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public interface IFlowBlock 
+public class TerrainBlock 
 {
     public static final Block FLOW_BLOCK_INDICATOR = new Block(Material.AIR);
     
@@ -88,7 +88,7 @@ public interface IFlowBlock
     public static int topFillerNeeded(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
     {
         Block block = blockState.getBlock();
-        if(!IFlowBlock.isFlowHeight(block)) return 0;
+        if(!TerrainBlock.isFlowHeight(block)) return 0;
 //        if(block instanceof FlowSimpleBlock) return 0;
         FlowHeightState flowState = ModelFlowJoinComponent.getFlowState((NiceBlock) block, blockState, blockAccess, pos);
         return flowState.topFillerNeeded();
@@ -104,7 +104,7 @@ public interface IFlowBlock
         final IBlockState baseState = worldObj.getBlockState(basePos);
         final Block baseBlock = baseState.getBlock();
         
-        if(IFlowBlock.isFlowHeight(baseBlock) || !LavaTerrainHelper.canLavaDisplace(baseState)) return null;
+        if(TerrainBlock.isFlowHeight(baseBlock) || !LavaTerrainHelper.canLavaDisplace(baseState)) return null;
         
         final int SHOULD_BE_AIR = -1;
         
@@ -124,8 +124,8 @@ public interface IFlowBlock
          * Otherwise should be air.
          */
         final IBlockState stateBelow = worldObj.getBlockState(basePos.down());
-        if(IFlowBlock.isFlowHeight(stateBelow.getBlock()) 
-                && IFlowBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
+        if(TerrainBlock.isFlowHeight(stateBelow.getBlock()) 
+                && TerrainBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
         {
             targetMeta = 0;
             fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
@@ -133,15 +133,15 @@ public interface IFlowBlock
         else 
         {
             final IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
-            if((IFlowBlock.isFlowHeight(stateTwoBelow.getBlock()) 
-                    && IFlowBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
+            if((TerrainBlock.isFlowHeight(stateTwoBelow.getBlock()) 
+                    && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
             {
                 targetMeta = 1;
                 fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
             }
         }
 
-        if(IFlowBlock.isFlowFiller(baseBlock))
+        if(TerrainBlock.isFlowFiller(baseBlock))
         {
 
             if(targetMeta == SHOULD_BE_AIR)

@@ -3,7 +3,7 @@ package grondag.adversity.niceblock.modelstate;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.state.IBlockState;
@@ -432,11 +432,11 @@ public class FlowHeightState
     
         if(isFlowFiller)
         {
-            int offset = IFlowBlock.getYOffsetFromState(state);
+            int offset = TerrainBlock.getYOffsetFromState(state);
             yOrigin -= offset;
             yOffset = offset;
             originState = world.getBlockState(pos.down(offset));
-            if(!IFlowBlock.isFlowHeight(originState.getBlock()))
+            if(!TerrainBlock.isFlowHeight(originState.getBlock()))
             {
                 return EMPTY_BLOCK_STATE_KEY;
             }
@@ -449,7 +449,7 @@ public class FlowHeightState
     
             // try to use block above as height origin
             originState = world.getBlockState(pos.up().up());
-            if(IFlowBlock.isFlowHeight(originState.getBlock()))
+            if(TerrainBlock.isFlowHeight(originState.getBlock()))
             {
                 yOrigin += 2;
                 yOffset = -2;
@@ -458,7 +458,7 @@ public class FlowHeightState
             else
             {
                 originState = world.getBlockState(pos.up());
-                if(IFlowBlock.isFlowHeight(originState.getBlock()))
+                if(TerrainBlock.isFlowHeight(originState.getBlock()))
                 {
                     yOrigin += 1;
                     yOffset = -1;
@@ -474,7 +474,7 @@ public class FlowHeightState
         }
     
         int[][] neighborHeight = new int[3][3];
-        neighborHeight[1][1] = IFlowBlock.getFlowHeightFromState(originState);
+        neighborHeight[1][1] = TerrainBlock.getFlowHeightFromState(originState);
     
         MutableBlockPos mutablePos = new MutableBlockPos();
         for(int x = 0; x < 3; x++)
@@ -514,27 +514,27 @@ public class FlowHeightState
     {
         pos.setY(pos.getY() + 2);;
         IBlockState state = world.getBlockState(pos);
-        int h = IFlowBlock.getFlowHeightFromState(state);
+        int h = TerrainBlock.getFlowHeightFromState(state);
         if(h > 0) return 2 * BLOCK_LEVELS_INT + h;
     
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
-        h = IFlowBlock.getFlowHeightFromState(state);
+        h = TerrainBlock.getFlowHeightFromState(state);
         if(h > 0) return BLOCK_LEVELS_INT + h;
     
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
-        h = IFlowBlock.getFlowHeightFromState(state);
+        h = TerrainBlock.getFlowHeightFromState(state);
         if(h > 0) return h;
     
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
-        h = IFlowBlock.getFlowHeightFromState(state);
+        h = TerrainBlock.getFlowHeightFromState(state);
         if(h > 0) return -BLOCK_LEVELS_INT + h;
     
         pos.setY(pos.getY() - 1);
         state = world.getBlockState(pos);
-        h = IFlowBlock.getFlowHeightFromState(state);
+        h = TerrainBlock.getFlowHeightFromState(state);
         if(h > 0) return -2 * BLOCK_LEVELS_INT + h;
     
         return NO_BLOCK;
