@@ -56,6 +56,13 @@ public class VisibilityPanel extends Panel
         this.isDirty = true;
         return this;
     }
+    
+    public VisibilityPanel remove(int visibilityIndex, int controlindex)
+    {
+        this.groups.get(visibilityIndex).remove(controlindex);
+        this.isDirty = true;
+        return this;
+    }
 
     public String getLabel(int visiblityIndex)
     {

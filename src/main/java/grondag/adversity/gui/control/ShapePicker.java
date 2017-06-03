@@ -31,6 +31,7 @@ public class ShapePicker extends TabBar<ModelShape>
     public ShapePicker()
     {
         super(ModelShape.AS_LIST);
+        this.setItemsPerRow(8);
     }
 
     @Override

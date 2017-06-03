@@ -3,11 +3,14 @@ package grondag.adversity.superblock.model.shape;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.gui.shape.GuiShape;
+import grondag.adversity.gui.shape.GuiSimpleShape;
+import grondag.adversity.gui.shape.GuiSquareColumn;
 import grondag.adversity.superblock.placement.AdditivePlacementHandler;
 import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.placement.SimplePlacementHandler;
-import grondag.adversity.superblock.placement.SpeciesMultiBlockPlacement;
+import net.minecraft.client.Minecraft;
 
 
 public enum ModelShape
@@ -26,6 +29,8 @@ public enum ModelShape
         public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return SquareColumnMeshFactory.getShapeMeshFactory(); }
+        @Override
+        public GuiShape guiSettingsControl(Minecraft mc) { return new GuiSquareColumn(mc); }
     },
     
     STACKED_PLATES()
@@ -144,4 +149,8 @@ public enum ModelShape
     
     public abstract ShapeMeshGenerator meshFactory();
     public abstract IPlacementHandler getPlacementHandler();
+    public GuiShape guiSettingsControl(Minecraft mc)
+    {
+        return new GuiSimpleShape(false);
+    }
 }

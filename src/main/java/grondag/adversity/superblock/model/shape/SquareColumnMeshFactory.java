@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 public class SquareColumnMeshFactory extends ShapeMeshGenerator
 {
     public static final int MIN_CUTS = 1;
-    public static final int MAX_CUTS = 5;
+    public static final int MAX_CUTS = 3;
     
     private static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     private static final Surface SURFACE_LAMP = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);

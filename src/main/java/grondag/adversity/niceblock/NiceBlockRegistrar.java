@@ -7,18 +7,15 @@ import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.ModelHolder;
 import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.block.CSGBlock;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.block.FlowStaticBlock;
-import grondag.adversity.niceblock.block.HeightBlock;
 import grondag.adversity.niceblock.model.BigTexModelFactory;
 import grondag.adversity.niceblock.model.CSGModelFactory;
 import grondag.adversity.niceblock.model.FlowModelFactory;
-import grondag.adversity.niceblock.model.HeightModelFactory;
 import grondag.adversity.niceblock.model.texture.TextureProviders;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.niceblock.support.BlockSubstance;
@@ -65,89 +62,6 @@ public class NiceBlockRegistrar
      * Model dispatchers add themselves here for handling during model bake and texture stitch
      */
     public static LinkedList<ModelDispatcher> allDispatchers = new LinkedList<ModelDispatcher>();
-
-    // DECLARE MODEL DISPATCH & BLOCK INSTANCES
- 
-//    private static final ModelAppearance COLUMN_INPUTS_BASE 
-//        = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.SOLID);
-//
-//    private static final ModelAppearance COLUMN_INPUTS_LAMP 
-//    = new ModelAppearance("colored_stone", LightingMode.FULLBRIGHT, BlockRenderLayer.SOLID);
-//
-//    // need overlay on a separate layer to keep it out of AO lighting
-//    private static final ModelAppearance COLUMN_INPUTS_OVERLAY 
-//    = new ModelAppearance("colored_stone", LightingMode.SHADED, BlockRenderLayer.CUTOUT_MIPPED);
-//    
-//    
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_INNER 
-//         = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 2, true, ColumnSquareModelFactory.ModelType.LAMP_BASE);
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_2_OUTER 
-//    = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 2, true, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
-//
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_2_INNER 
-//        = new ColumnSquareModelFactory(COLUMN_INPUTS_2_INNER, ModelStateComponents.COLORS_BLOCK,
-//            ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_2_OUTER 
-//        = new ColumnSquareModelFactory(COLUMN_INPUTS_2_OUTER, ModelStateComponents.COLORS_BLOCK,
-//        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    
-//    private static final ModelDispatcher COLUMN_2_DISPATCH = new ModelDispatcher(COLUMN_MODEL_2_INNER , COLUMN_MODEL_2_OUTER);
-//    public static final ColumnSquareBlock COLUMN_2_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_2_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_2");
-//    public static final NiceItemBlock COLUMN_2_ITEM = new NiceItemBlock(COLUMN_2_BLOCK);
-//
-//    
-//    
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_3 
-//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_BASE, 3, true, ColumnSquareModelFactory.ModelType.NORMAL);
-//  
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_3
-//        = new ColumnSquareModelFactory(COLUMN_INPUTS_3, ModelStateComponents.COLORS_BLOCK,
-//        ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    
-//    private static final ModelDispatcher COLUMN_3_DISPATCH = new ModelDispatcher(COLUMN_MODEL_3);
-//    public static final ColumnSquareBlock COLUMN_3_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_3_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_3");
-//    public static final NiceItemBlock COLUMN_3_ITEM = new NiceItemBlock(COLUMN_3_BLOCK);
-//
-//    
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_4_INNER 
-//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 4, false, ColumnSquareModelFactory.ModelType.LAMP_BASE);
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_4_OUTER 
-//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 4, false, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
-//    
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_4_INNER 
-//       = new ColumnSquareModelFactory(COLUMN_INPUTS_4_INNER, ModelStateComponents.COLORS_BLOCK,
-//           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_4_OUTER 
-//       = new ColumnSquareModelFactory(COLUMN_INPUTS_4_OUTER, ModelStateComponents.COLORS_BLOCK,
-//       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    
-//    private static final ModelDispatcher COLUMN_4_DISPATCH = new ModelDispatcher(COLUMN_MODEL_4_INNER, COLUMN_MODEL_4_OUTER);
-//    public static final ColumnSquareBlock COLUMN_4_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_4_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_4");
-//    public static final NiceItemBlock COLUMN_4_ITEM = new NiceItemBlock(COLUMN_4_BLOCK);
-//
-//    
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_5_INNER 
-//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_LAMP, 5, false, ColumnSquareModelFactory.ModelType.LAMP_BASE);
-//    private static final ColumnSquareModelFactory.ColumnSquareInputs COLUMN_INPUTS_5_OUTER 
-//        = new ColumnSquareModelFactory.ColumnSquareInputs(COLUMN_INPUTS_OVERLAY, 5, false, ColumnSquareModelFactory.ModelType.LAMP_OVERLAY);
-//    
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_5_INNER 
-//       = new ColumnSquareModelFactory(COLUMN_INPUTS_5_INNER, ModelStateComponents.COLORS_BLOCK,
-//           ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    private final static ColumnSquareModelFactory COLUMN_MODEL_5_OUTER 
-//       = new ColumnSquareModelFactory(COLUMN_INPUTS_5_OUTER, ModelStateComponents.COLORS_BLOCK,
-//       ModelStateComponents.CORNER_JOIN, ModelStateComponents.TEXTURE_1, ModelStateComponents.AXIS);
-//    
-//    private static final ModelDispatcher COLUMN_5_DISPATCH = new ModelDispatcher(COLUMN_MODEL_5_INNER, COLUMN_MODEL_5_OUTER);
-//    public static final ColumnSquareBlock COLUMN_5_BLOCK = (ColumnSquareBlock) new ColumnSquareBlock(COLUMN_5_DISPATCH, BaseMaterial.FLEXSTONE, "column_square_5");
-//    public static final NiceItemBlock COLUMN_5_ITEM = new NiceItemBlock(COLUMN_5_BLOCK);
-
-    private final static ModelHolder HEIGHT_STONE_MODEL = new ModelHolder(new HeightModelFactory(ModelStateComponents.COLORS_BLOCK,
-            ModelStateComponents.TEXTURE_4, ModelStateComponents.ROTATION, ModelStateComponents.SPECIES_16),
-            TextureProviders.TEX_BLOCK_COLORED_STONE.getTextureState(true, LightingMode.SHADED, BlockRenderLayer.SOLID));
-    private static final ModelDispatcher HEIGHT_STONE_DISPATCH = new ModelDispatcher(HEIGHT_STONE_MODEL);
-    public static final NiceBlockPlus HEIGHT_STONE_BLOCK = new HeightBlock(HEIGHT_STONE_DISPATCH, BlockSubstance.FLEXSTONE, "stacked");
-    public static final NiceItemBlock HEIGHT_STONE_ITEM = new NiceItemBlock(HEIGHT_STONE_BLOCK);
 
     //TODO: move all these to volcano package
     private final static ModelHolder HOT_FLOWING_LAVA_MODEL = new ModelHolder(new FlowModelFactory(true, ModelStateComponents.FLOW_JOIN,

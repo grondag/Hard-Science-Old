@@ -1,6 +1,5 @@
 package grondag.adversity.gui.control;
 
-import grondag.adversity.Output;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;

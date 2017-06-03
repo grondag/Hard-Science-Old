@@ -1,7 +1,8 @@
 package grondag.adversity.gui;
 
 
-import static grondag.adversity.gui.base.GuiControl.*;
+import static grondag.adversity.gui.base.GuiControl.CONTROL_EXTERNAL_MARGIN;
+import static grondag.adversity.gui.base.GuiControl.CONTROL_INTERNAL_MARGIN;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.gui.control.TranslucencyPicker;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
+import grondag.adversity.gui.shape.GuiShape;
 import grondag.adversity.init.ModSuperModelBlocks;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.network.AdversityMessages;
@@ -45,14 +47,14 @@ import net.minecraft.util.math.MathHelper;
 
 public class SuperGuiScreen extends GuiScreen
 {
-    
+
     private static final int BUTTON_ID_CANCEL = 0;
     private static final int BUTTON_ID_ACCEPT = 1;
-    
+
     //TODO: localize
     private static final String STR_ACCEPT = "Accept";
     private static final String STR_CANCEL = "Cancel";
-    
+
     private int xStart;
     private int yStart;
     private int xSize;
@@ -69,19 +71,27 @@ public class SuperGuiScreen extends GuiScreen
     private Toggle baseTranslucentToggle;
     private Toggle lampTranslucentToggle;
     private BrightnessSlider brightnessSlider;
-    
+    private GuiShape shapeGui;
+
     private ItemPreview itemPreview;
-    
-//    private int meta = 0;
+
+    //    private int meta = 0;
     private ModelState modelState = null;
-    
+
     private boolean hasUpdates = false;
-    
+
     private int buttonWidth;
     private int buttonHeight;
-    
+
     private Panel mainPanel;
-    
+    private int group_base;
+    private int group_border;
+    private int group_deco;
+    private int group_lamp;
+    private int group_shape;
+    private int group_material;
+    private VisibilityPanel rightPanel;
+
     @Override
     public boolean doesGuiPauseGame()
     {
@@ -91,271 +101,293 @@ public class SuperGuiScreen extends GuiScreen
     private void updateItemPreviewState()
     {
         // abort on strangeness
-        if(this.modelState == null) return;
-
-        if(this.shapePicker.getSelected() != this.modelState.getShape())
+        if(modelState == null)
         {
-            this.modelState.setShape(this.shapePicker.getSelected());
-            this.hasUpdates = true;
-        }
-        
-        if(this.brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(this.itemPreview.previewItem))
-        {
-            SuperItemBlock.setStackLightValue(this.itemPreview.previewItem, this.brightnessSlider.getBrightness());
-            this.hasUpdates = true;
-        }
-        
-        if(this.materialPicker.getSubstance() != SuperItemBlock.getStackSubstance(this.itemPreview.previewItem))
-        {
-            SuperItemBlock.setStackSubstance(this.itemPreview.previewItem, this.materialPicker.getSubstance());
-            this.baseTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
-            this.lampTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
-            this.translucencyPicker.setVisible(this.materialPicker.getSubstance().isTranslucent);
-            this.hasUpdates = true;
-        }
-        
-        Translucency newTrans = this.materialPicker.getSubstance().isTranslucent
-                ? this.translucencyPicker.getTranslucency()
-                : Translucency.CLEAR;
-        if(newTrans == null) newTrans = Translucency.CLEAR;
-        if(newTrans != this.modelState.getTranslucency() )
-        {
-            this.modelState.setTranslucency(newTrans);
-            this.hasUpdates = true;
-        }
-        
-        for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
-        {
-            updateItemPreviewSub(layer);
-        }
-        
-        if(this.overlayToggle.isOn() != this.modelState.isOverlayLayerEnabled())
-        {
-            this.modelState.setOverlayLayerEnabled(this.overlayToggle.isOn());
-            this.hasUpdates = true;
+            return;
         }
 
-        if(this.detailToggle.isOn() != this.modelState.isDetailLayerEnabled())
+        if(shapePicker.getSelected() != modelState.getShape())
         {
-            this.modelState.setDetailLayerEnabled(this.detailToggle.isOn());
-            this.hasUpdates = true;
+            modelState.setShape(shapePicker.getSelected());
+            rightPanel.remove(group_shape, 1);
+            shapeGui = modelState.getShape().guiSettingsControl(mc);
+            rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
+            // display shape defaults if any
+            shapeGui.loadSettings(modelState);
+            hasUpdates = true;
+        }
+        else
+        {
+            //shape is the same, so can check for shape-specific updates
+            hasUpdates = shapeGui.saveSettings(modelState) || hasUpdates;
         }
 
-        BlockRenderLayer renderLayer = this.baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        if(renderLayer != this.modelState.getRenderLayer(PaintLayer.BASE))
+        if(brightnessSlider.getBrightness() != SuperItemBlock.getStackLightValue(itemPreview.previewItem))
         {
-            this.modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
-            this.hasUpdates = true;
+            SuperItemBlock.setStackLightValue(itemPreview.previewItem, brightnessSlider.getBrightness());
+            hasUpdates = true;
         }
-        
-        renderLayer = this.lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        if(renderLayer != this.modelState.getRenderLayer(PaintLayer.LAMP))
+
+        if(materialPicker.getSubstance() != SuperItemBlock.getStackSubstance(itemPreview.previewItem))
         {
-            this.modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
-            this.hasUpdates = true;
+            SuperItemBlock.setStackSubstance(itemPreview.previewItem, materialPicker.getSubstance());
+            baseTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
+            lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
+            translucencyPicker.setVisible(materialPicker.getSubstance().isTranslucent);
+            hasUpdates = true;
         }
-        
-        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(this.itemPreview.previewItem.getItem())).block;
-        SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.materialPicker.getSubstance(), this.modelState);
-        
-        if(currentBlock != newBlock && newBlock != null)
-        {
-            ItemStack newStack = new ItemStack(newBlock);
-            newStack.setItemDamage(this.itemPreview.previewItem.getItemDamage());
-            newStack.setTagCompound(this.itemPreview.previewItem.getTagCompound());
-            this.itemPreview.previewItem = newStack;
-            this.hasUpdates = true;
+
+        Translucency newTrans = materialPicker.getSubstance().isTranslucent
+                ? translucencyPicker.getTranslucency()
+                        : Translucency.CLEAR;
+            if(newTrans == null)
+            {
+                newTrans = Translucency.CLEAR;
+            }
+            if(newTrans != modelState.getTranslucency() )
+            {
+                modelState.setTranslucency(newTrans);
+                hasUpdates = true;
+            }
+
+            for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
+            {
+                updateItemPreviewSub(layer);
+            }
+
+            if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
+            {
+                modelState.setOverlayLayerEnabled(overlayToggle.isOn());
+                hasUpdates = true;
+            }
+
+            if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
+            {
+                modelState.setDetailLayerEnabled(detailToggle.isOn());
+                hasUpdates = true;
+            }
+
+            BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+            if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
+            {
+                modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
+                hasUpdates = true;
+            }
+
+            renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+            if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
+            {
+                modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+                hasUpdates = true;
+            }
+
+            SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
+            SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
+
+            if(currentBlock != newBlock && newBlock != null)
+            {
+                ItemStack newStack = new ItemStack(newBlock);
+                newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
+                newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
+                itemPreview.previewItem = newStack;
+                hasUpdates = true;
+
+            }
             
-        }
-        if(this.hasUpdates)
-        {
-            // see notes in SuperBlock for canRenderInLayer()
-//            this.meta = this.modelState.getCanRenderInLayerFlags();
-            
-//            this.itemPreview.previewItem.setItemDamage(this.meta);
-            SuperItemBlock.setModelState(this.itemPreview.previewItem, this.modelState);
-        }
+            if(hasUpdates)
+            {
+                // see notes in SuperBlock for canRenderInLayer()
+                //            this.meta = this.modelState.getCanRenderInLayerFlags();
+
+                //            this.itemPreview.previewItem.setItemDamage(this.meta);
+                SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
+            }
     }
-    
+
     private void updateItemPreviewSub(PaintLayer layer)
     {
-        if(this.modelState.getColorMap(layer).ordinal != colorPicker[layer.dynamicIndex].getColorMapID())
+        if(modelState.getColorMap(layer).ordinal != colorPicker[layer.dynamicIndex].getColorMapID())
         {
-            this.modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
-            this.textureTabBar[layer.dynamicIndex].colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID());
-            this.hasUpdates = true;
+            modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
+            textureTabBar[layer.dynamicIndex].colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID());
+            hasUpdates = true;
         }
-        
-        TexturePallette tex = this.textureTabBar[layer.dynamicIndex].getSelected();
-        if(this.modelState.getTexture(layer) != tex)
+
+        TexturePallette tex = textureTabBar[layer.dynamicIndex].getSelected();
+        if(modelState.getTexture(layer) != tex)
         {
-            this.modelState.setTexture(layer, tex);
-            this.hasUpdates = true;
+            modelState.setTexture(layer, tex);
+            hasUpdates = true;
         }
-        
-        if(!((this.modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && this.fullBrightToggle[layer.dynamicIndex].isOn()))
+
+        if(!((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && fullBrightToggle[layer.dynamicIndex].isOn()))
         {
-            this.modelState.setLightingMode(layer, this.fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
-            this.hasUpdates = true;
+            modelState.setLightingMode(layer, fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
+            hasUpdates = true;
         }
     }
-    
+
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        this.mainPanel.mouseClick(mc, mouseX, mouseY);
-//        colorPicker.mouseClick(this.mc, mouseX, mouseY);
-//        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
+        mainPanel.mouseClick(mc, mouseX, mouseY);
+        //        colorPicker.mouseClick(this.mc, mouseX, mouseY);
+        //        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
-    
+
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        this.mainPanel.mouseDrag(mc, mouseX, mouseY);
-//        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
-//        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
+        mainPanel.mouseDrag(mc, mouseX, mouseY);
+        //        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
+        //        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
         updateItemPreviewState();
     }
-    
-//    @Override
-//    protected void mouseReleased(int mouseX, int mouseY, int state) 
-//    {
-//        super.mouseReleased(mouseX, mouseY, state);
-//
-//        updateItemPreviewState();
-//    }
+
+    //    @Override
+    //    protected void mouseReleased(int mouseX, int mouseY, int state)
+    //    {
+    //        super.mouseReleased(mouseX, mouseY, state);
+    //
+    //        updateItemPreviewState();
+    //    }
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException
     {
-        if(this.hasUpdates && button.id == BUTTON_ID_ACCEPT)
+        if(hasUpdates && button.id == BUTTON_ID_ACCEPT)
         {
-            AdversityMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(this.itemPreview.previewItem));
-            this.hasUpdates = false;
+            AdversityMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(itemPreview.previewItem));
+            hasUpdates = false;
         }
-        this.mc.displayGuiScreen((GuiScreen)null);
+        mc.displayGuiScreen((GuiScreen)null);
     }
-    
+
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
         super.keyTyped(typedChar, keyCode);
     }
-    
+
     @Override
     public void initGui()
     {
         super.initGui();
-        
-        
-        ySize = MathHelper.clamp(this.height * 3 / 5, this.fontRenderer.FONT_HEIGHT * 28, this.height);
-        this.yStart = (this.height - ySize) / 2;
-        this.xSize = (int) (this.ySize * GuiUtil.GOLDEN_RATIO);
-        this.xStart = (this.width - this.xSize) / 2;
-        
-        FontRenderer fr = this.mc.fontRenderer;
-        this.buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
-        this.buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
-        
-        int buttonTop = this.yStart + this.ySize - this.buttonHeight - CONTROL_EXTERNAL_MARGIN;
-        int buttonLeft = this.xStart + this.xSize - CONTROL_EXTERNAL_MARGIN * 2 - this.buttonWidth * 2;
-       
+
+
+        ySize = MathHelper.clamp(height * 3 / 5, fontRenderer.FONT_HEIGHT * 28, height);
+        yStart = (height - ySize) / 2;
+        xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
+        xStart = (width - xSize) / 2;
+
+        FontRenderer fr = mc.fontRenderer;
+        buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+
+        int buttonTop = yStart + ySize - buttonHeight - CONTROL_EXTERNAL_MARGIN;
+        int buttonLeft = xStart + xSize - CONTROL_EXTERNAL_MARGIN * 2 - buttonWidth * 2;
+
         // buttons are cleared by super each time
-        this.addButton(new Button(BUTTON_ID_ACCEPT, buttonLeft, buttonTop, this.buttonWidth, this.buttonHeight, STR_ACCEPT));
-        this.addButton(new Button(BUTTON_ID_CANCEL, buttonLeft + CONTROL_EXTERNAL_MARGIN + this.buttonWidth, buttonTop, this.buttonWidth, this.buttonHeight, STR_CANCEL));
-        
-        if(this.itemPreview == null)
+        this.addButton(new Button(BUTTON_ID_ACCEPT, buttonLeft, buttonTop, buttonWidth, buttonHeight, STR_ACCEPT));
+        this.addButton(new Button(BUTTON_ID_CANCEL, buttonLeft + CONTROL_EXTERNAL_MARGIN + buttonWidth, buttonTop, buttonWidth, buttonHeight, STR_CANCEL));
+
+        if(itemPreview == null)
         {
-            this.itemPreview = new ItemPreview();
-            this.itemPreview.previewItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
-            
-            if (this.itemPreview.previewItem == null || !(this.itemPreview.previewItem.getItem() instanceof SuperItemBlock)) 
+            itemPreview = new ItemPreview();
+            itemPreview.previewItem = mc.player.getHeldItem(EnumHand.MAIN_HAND).copy();
+
+            if (itemPreview.previewItem == null || !(itemPreview.previewItem.getItem() instanceof SuperItemBlock))
             {
                 // Abort on strangeness
                 return;
             }
-//            this.meta = this.itemPreview.previewItem.getMetadata();
-            this.modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
+            //            this.meta = this.itemPreview.previewItem.getMetadata();
+            modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
         }
-    
+
         // abort on strangeness
-        if(this.modelState == null) return;
-        
-        if(this.textureTabBar == null)
+        if(modelState == null)
         {
-            this.materialPicker = new MaterialPicker();
-            this.shapePicker = new ShapePicker();
-            this.translucencyPicker = new TranslucencyPicker();
-            this.textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
-            this.colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
-            
-            this.overlayToggle = new Toggle().setLabel("Enabled");
-            this.detailToggle = new Toggle().setLabel("Enabled");
-            this.baseTranslucentToggle = new Toggle().setLabel("Translucent");
-            this.lampTranslucentToggle = new Toggle().setLabel("Translucent");
-            this.fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
-            this.brightnessSlider = new BrightnessSlider(this.mc);
-            
+            return;
+        }
+
+        if(textureTabBar == null)
+        {
+            materialPicker = new MaterialPicker();
+            shapePicker = new ShapePicker();
+            translucencyPicker = new TranslucencyPicker();
+            textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
+            colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
+
+            overlayToggle = new Toggle().setLabel("Enabled");
+            detailToggle = new Toggle().setLabel("Enabled");
+            baseTranslucentToggle = new Toggle().setLabel("Translucent");
+            lampTranslucentToggle = new Toggle().setLabel("Translucent");
+            fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
+            brightnessSlider = new BrightnessSlider(mc);
+
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
             {
-                TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<TexturePallette>(), this.xStart + CONTROL_EXTERNAL_MARGIN, this.yStart + 100).setVerticalWeight(5);
-                this.textureTabBar[i] = t;
-                
-                this.colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
-            
-                this.fullBrightToggle[i] = new Toggle().setLabel("Glowing");
+                TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<TexturePallette>(), xStart + CONTROL_EXTERNAL_MARGIN, yStart + 100).setVerticalWeight(5);
+                textureTabBar[i] = t;
+
+                colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
+
+                fullBrightToggle[i] = new Toggle().setLabel("Glowing");
             }
         }
-        
-        if(this.mainPanel == null)
+
+        if(mainPanel == null)
         {
-            
-            VisibilityPanel rightPanel = (VisibilityPanel) new VisibilityPanel(true)
+
+            rightPanel = (VisibilityPanel) new VisibilityPanel(true)
                     .setOuterMarginWidth(CONTROL_EXTERNAL_MARGIN)
                     .setInnerMarginWidth(CONTROL_EXTERNAL_MARGIN)
                     .setHorizontalWeight(5)
                     .setBackgroundColor(GuiControl.CONTROL_BACKGROUND);
-            
+
             //TODO: localize
-            int GROUP_BASE = rightPanel.createVisiblityGroup("Base Layer");
-            GuiControl tempV = new Panel(true).addAll(this.fullBrightToggle[PaintLayer.BASE.ordinal()], this.baseTranslucentToggle)
+            group_base = rightPanel.createVisiblityGroup("Base Layer");
+            GuiControl tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
                     .setHorizontalWeight(2);
-            GuiControl tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(GROUP_BASE, tempH, this.textureTabBar[PaintLayer.BASE.ordinal()]);
-            rightPanel.setVisiblityIndex(GROUP_BASE);
-            
-            int GROUP_BORDER = rightPanel.createVisiblityGroup("Overlay"); 
-            tempV = new Panel(true).addAll(this.overlayToggle, this.fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
-                    .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(GROUP_BORDER, tempH,this.textureTabBar[PaintLayer.OVERLAY.ordinal()]);
+            GuiControl tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_base, tempH, textureTabBar[PaintLayer.BASE.ordinal()]);
+            rightPanel.setVisiblityIndex(group_base);
 
-            int GROUP_DECO = rightPanel.createVisiblityGroup("Decoration");
-            tempV = new Panel(true).addAll(this.detailToggle, this.fullBrightToggle[PaintLayer.DETAIL.ordinal()])
+            group_border = rightPanel.createVisiblityGroup("Overlay");
+            tempV = new Panel(true).addAll(overlayToggle, fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
                     .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(GROUP_DECO, tempH, this.textureTabBar[PaintLayer.DETAIL.ordinal()]);
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_border, tempH,textureTabBar[PaintLayer.OVERLAY.ordinal()]);
 
-            int GROUP_LAMP = rightPanel.createVisiblityGroup("Lamp");            
-            tempV = new Panel(true).addAll(this.fullBrightToggle[PaintLayer.LAMP.ordinal()], this.lampTranslucentToggle)
+            group_deco = rightPanel.createVisiblityGroup("Decoration");
+            tempV = new Panel(true).addAll(detailToggle, fullBrightToggle[PaintLayer.DETAIL.ordinal()])
                     .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, this.colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(GROUP_LAMP, tempH, this.textureTabBar[PaintLayer.LAMP.ordinal()]);
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_deco, tempH, textureTabBar[PaintLayer.DETAIL.ordinal()]);
 
-            int GROUP_SHAPE = rightPanel.createVisiblityGroup("Shape");
-            rightPanel.add(GROUP_SHAPE, this.shapePicker);
-            
-            int GROUP_MATERIAL = rightPanel.createVisiblityGroup("Material");  
-            rightPanel.add(GROUP_MATERIAL, this.materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
-            rightPanel.add(GROUP_MATERIAL, this.translucencyPicker.setVerticalLayout(Layout.PROPORTIONAL));
-            rightPanel.add(GROUP_MATERIAL, this.brightnessSlider);
+            group_lamp = rightPanel.createVisiblityGroup("Lamp");
+            tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.LAMP.ordinal()], lampTranslucentToggle)
+                    .setHorizontalWeight(2);
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_lamp, tempH, textureTabBar[PaintLayer.LAMP.ordinal()]);
+
+            group_shape = rightPanel.createVisiblityGroup("Shape");
+            rightPanel.add(group_shape, shapePicker.setVerticalWeight(5));
+            shapeGui = modelState.getShape().guiSettingsControl(mc);
+            rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
+
+            group_material = rightPanel.createVisiblityGroup("Material");
+            rightPanel.add(group_material, materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
+            rightPanel.add(group_material, translucencyPicker.setVerticalLayout(Layout.PROPORTIONAL));
+            rightPanel.add(group_material, brightnessSlider);
             rightPanel.setInnerMarginWidth(GuiControl.CONTROL_INTERNAL_MARGIN * 4);
-            
+
             VisiblitySelector selector = new VisiblitySelector(rightPanel);
-            
+
             Panel leftPanel = (Panel) new Panel(true)
                     .setInnerMarginWidth(CONTROL_EXTERNAL_MARGIN)
                     .add(new Panel(true)
@@ -369,100 +401,102 @@ public class SuperGuiScreen extends GuiScreen
                             .setVerticalWeight(3))
                     .setWidth(100)
                     .setHorizontalLayout(Layout.FIXED)
-                    .resize(0, 0, (this.xSize - CONTROL_EXTERNAL_MARGIN) * 2.0 / 7.0, 1);
+                    .resize(0, 0, (xSize - CONTROL_EXTERNAL_MARGIN) * 2.0 / 7.0, 1);
 
-            this.mainPanel = (Panel) new Panel(false)
+            mainPanel = (Panel) new Panel(false)
                     .setOuterMarginWidth(0)
                     .setInnerMarginWidth(CONTROL_EXTERNAL_MARGIN)
-                    .resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, this.xSize - CONTROL_EXTERNAL_MARGIN * 2, this.ySize - CONTROL_EXTERNAL_MARGIN * 3 - this.buttonHeight);
-            
-            this.mainPanel.addAll(leftPanel, rightPanel);
-            
+                    .resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, xSize - CONTROL_EXTERNAL_MARGIN * 2, ySize - CONTROL_EXTERNAL_MARGIN * 3 - buttonHeight);
+
+            mainPanel.addAll(leftPanel, rightPanel);
+
             loadControlValuesFromModelState();
 
         }
         else
         {
-            ((Panel)this.mainPanel.get(0)).resize( 0, 0, (this.xSize - CONTROL_EXTERNAL_MARGIN) * 2.0 / 7.0, 1);
-            this.mainPanel.resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, this.xSize - CONTROL_EXTERNAL_MARGIN * 2, this.ySize - CONTROL_EXTERNAL_MARGIN * 3 - this.buttonHeight);
+            ((Panel)mainPanel.get(0)).resize( 0, 0, (xSize - CONTROL_EXTERNAL_MARGIN) * 2.0 / 7.0, 1);
+            mainPanel.resize(xStart + CONTROL_EXTERNAL_MARGIN, yStart + CONTROL_EXTERNAL_MARGIN, xSize - CONTROL_EXTERNAL_MARGIN * 2, ySize - CONTROL_EXTERNAL_MARGIN * 3 - buttonHeight);
         }
     }
-    
+
     private void loadControlValuesFromModelState()
     {
-        this.materialPicker.setSubstance(SuperItemBlock.getStackSubstance(this.itemPreview.previewItem));
-        this.shapePicker.setSelected(modelState.getShape());
-        this.brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(this.itemPreview.previewItem));
-        this.overlayToggle.setOn(this.modelState.isOverlayLayerEnabled());
-        this.detailToggle.setOn(this.modelState.isDetailLayerEnabled());
-        this.baseTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
-        this.lampTranslucentToggle.setOn(this.modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
+        materialPicker.setSubstance(SuperItemBlock.getStackSubstance(itemPreview.previewItem));
+        shapePicker.setSelected(modelState.getShape());
+        brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(itemPreview.previewItem));
+        overlayToggle.setOn(modelState.isOverlayLayerEnabled());
+        detailToggle.setOn(modelState.isDetailLayerEnabled());
+        baseTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
+        lampTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
 
-        this.baseTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
-        this.lampTranslucentToggle.setVisible(this.materialPicker.getSubstance().isTranslucent);
-        
-        this.translucencyPicker.setVisible(this.materialPicker.getSubstance().isTranslucent);
-        this.translucencyPicker.setTranslucency(this.modelState.getTranslucency());
+        baseTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
+        lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
+
+        translucencyPicker.setVisible(materialPicker.getSubstance().isTranslucent);
+        translucencyPicker.setTranslucency(modelState.getTranslucency());
+
+        shapeGui.loadSettings(modelState);
         
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
-            TexturePicker t = this.textureTabBar[layer.dynamicIndex];
-            
+            TexturePicker t = textureTabBar[layer.dynamicIndex];
+
             t.clear();
             t.addAll(Textures.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
-            t.setSelected(this.modelState.getTexture(layer));
+            t.setSelected(modelState.getTexture(layer));
             t.showSelected();
-            t.colorMap = this.modelState.getColorMap(layer);
-            
-            ColorPicker c = this.colorPicker[layer.dynamicIndex];
-            c.setColorMapID(this.modelState.getColorMap(layer).ordinal);
-            
-            this.fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
+            t.colorMap = modelState.getColorMap(layer);
+
+            ColorPicker c = colorPicker[layer.dynamicIndex];
+            c.setColorMapID(modelState.getColorMap(layer).ordinal);
+
+            fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
         }
     }
-    
+
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
 
-        this.drawGradientRect(this.xStart, this.yStart, this.xStart + this.xSize, this.yStart + this.ySize, -1072689136, -804253680);
+        drawGradientRect(xStart, yStart, xStart + xSize, yStart + ySize, -1072689136, -804253680);
 
-        this.mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
-        
+        mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
+
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
     @Override
     public void drawBackground(int tint)
     {
-//        GlStateManager.disableLighting();
-//        GlStateManager.disableFog();
-//        Tessellator tessellator = Tessellator.getInstance();
-//        VertexBuffer vertexbuffer = tessellator.getBuffer();
-//        this.mc.getTextureManager().bindTexture(OPTIONS_BACKGROUND);
-//        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-////        float f = 32.0F;
-//        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-//        vertexbuffer.pos(0.0D, (double)this.height, 0.0D).tex(0.0D, (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
-//        vertexbuffer.pos((double)this.width, (double)this.height, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
-//        vertexbuffer.pos((double)this.width, 0.0D, 0.0D).tex((double)((float)this.width / 32.0F), (double)tint).color(64, 64, 64, 255).endVertex();
-//        vertexbuffer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, (double)tint).color(64, 64, 64, 255).endVertex();
-//        tessellator.draw();
+        //        GlStateManager.disableLighting();
+        //        GlStateManager.disableFog();
+        //        Tessellator tessellator = Tessellator.getInstance();
+        //        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        //        this.mc.getTextureManager().bindTexture(OPTIONS_BACKGROUND);
+        //        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        ////        float f = 32.0F;
+        //        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        //        vertexbuffer.pos(0.0D, (double)this.height, 0.0D).tex(0.0D, (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
+        //        vertexbuffer.pos((double)this.width, (double)this.height, 0.0D).tex((double)((float)this.width / 32.0F), (double)((float)this.height / 32.0F + (float)tint)).color(64, 64, 64, 255).endVertex();
+        //        vertexbuffer.pos((double)this.width, 0.0D, 0.0D).tex((double)((float)this.width / 32.0F), (double)tint).color(64, 64, 64, 255).endVertex();
+        //        vertexbuffer.pos(0.0D, 0.0D, 0.0D).tex(0.0D, (double)tint).color(64, 64, 64, 255).endVertex();
+        //        tessellator.draw();
     }
 
     @Override
     public void handleMouseInput() throws IOException
     {
         super.handleMouseInput();
-        int i = Mouse.getEventX() * this.width / this.mc.displayWidth;
-        int j = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+        int i = Mouse.getEventX() * width / mc.displayWidth;
+        int j = height - Mouse.getEventY() * height / mc.displayHeight - 1;
         int scrollAmount = Mouse.getEventDWheel();
         if(scrollAmount != 0)
         {
             System.out.println(scrollAmount);
-            this.mainPanel.mouseScroll(i, j, scrollAmount);
-            this.updateItemPreviewState();
+            mainPanel.mouseScroll(i, j, scrollAmount);
+            updateItemPreviewState();
         }
-        
+
     }
 }

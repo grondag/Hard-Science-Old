@@ -124,7 +124,7 @@ public class BitPacker
             
             private IntElement(int minValue, int maxValue)
             {
-                super(maxValue - minValue);
+                super(maxValue - minValue + 1);
                 this.minValue = minValue;
             }
             
@@ -154,7 +154,7 @@ public class BitPacker
             
             private LongElement(long minValue, long maxValue)
             {
-                super(maxValue - minValue);
+                super(maxValue - minValue + 1);
                 this.minValue = minValue;
             }
             

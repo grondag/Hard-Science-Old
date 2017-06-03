@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import grondag.adversity.superblock.model.painter.surface.Surface;
