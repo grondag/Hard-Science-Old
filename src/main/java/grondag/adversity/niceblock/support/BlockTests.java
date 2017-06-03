@@ -2,6 +2,7 @@ package grondag.adversity.niceblock.support;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import grondag.adversity.library.IBlockTest;
@@ -10,10 +11,13 @@ import grondag.adversity.niceblock.base.ModelDispatcher;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.base.NiceBlockPlus;
 import grondag.adversity.niceblock.base.NiceTileEntity;
+import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.modelstate.ModelColorMapComponent;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperModelBlock;
+import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 
 @SuppressWarnings("unused")
 public class BlockTests
@@ -168,21 +172,24 @@ public class BlockTests
     public static class SuperBlockBorderMatch implements IBlockTest
     {
         private final SuperBlock block;
-        private final int matchSpecies;
+        private final ModelState matchModelState;
+        private final boolean isSpeciesPartOfMatch;
         
         /** pass in the info for the block you want to match */
-        public SuperBlockBorderMatch(SuperBlock block, int matchSpecies)
+        public SuperBlockBorderMatch(SuperBlock block, ModelState modelState, boolean isSpeciesPartOfMatch)
         {
             this.block = block;
-            this.matchSpecies = matchSpecies;
+            this.matchModelState = modelState;
+            this.isSpeciesPartOfMatch = isSpeciesPartOfMatch;
         }
         
         /** assumes you want to match block at given position */
-        public SuperBlockBorderMatch(IBlockAccess world, IBlockState ibs, BlockPos pos)
+        public SuperBlockBorderMatch(IBlockAccess world, IBlockState ibs, BlockPos pos, boolean isSpeciesPartOfMatch)
         {
             this.block = ((SuperBlock)ibs.getBlock());
             //last param = false prevents recursion - we don't need the full model state (which depends on this logic)
-            this.matchSpecies = this.block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false).getSpecies();
+            this.matchModelState = this.block.getModelStateAssumeStateIsCurrent(ibs, world, pos, false);
+            this.isSpeciesPartOfMatch = isSpeciesPartOfMatch;
         }
         
         @Override 
@@ -197,26 +204,10 @@ public class BlockTests
         @Override
         public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
         {
-            return ibs.getBlock() == this.block && this.matchSpecies == modelState.getSpecies();
+            return ibs.getBlock() == this.block 
+                    && this.matchModelState.doesAppearanceMatch(modelState)
+                    && (!this.isSpeciesPartOfMatch || !modelState.hasSpecies() || (this.matchModelState.getSpecies() == modelState.getSpecies()));
         }
-    }
-
-    
-    public static class SuperBlockBorderCandidateMatch implements IBlockTest
-    {
-        private final SuperBlock block;
-        
-        /** pass in the info for the block you want to match */
-        public SuperBlockBorderCandidateMatch(SuperBlock block)
-        {
-            this.block = block;
-        }
-        
-        @Override
-        public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos)
-        {
-            return ibs.getBlock() == block; 
-        }       
     }
     
     /** returns true if NO border should be displayed */

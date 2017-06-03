@@ -112,12 +112,6 @@ public class ColorPicker extends GuiControl
             HueSet.Chroma currentChroma = this.selectedChroma;
             HueSet.Luminance currentLuminance = currentMap.luminance;
 
-            //TODO: remove
-            if(newHue == null || currentChroma == null || currentLuminance == null)
-            {
-                Output.getLog().info("boop");
-            }
-            
             ColorMap newMap = BlockColorMapProvider.INSTANCE.getColorMap(
                     newHue, currentChroma, currentLuminance);
 

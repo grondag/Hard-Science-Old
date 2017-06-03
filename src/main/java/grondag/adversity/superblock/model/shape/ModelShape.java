@@ -4,6 +4,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.superblock.placement.AdditivePlacementHandler;
+import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.placement.SimplePlacementHandler;
 import grondag.adversity.superblock.placement.SpeciesMultiBlockPlacement;
@@ -14,7 +15,7 @@ public enum ModelShape
     CUBE() 
     {
         @Override
-        public IPlacementHandler getPlacementHandler() { return SpeciesMultiBlockPlacement.INSTANCE; }
+        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
@@ -22,7 +23,7 @@ public enum ModelShape
     COLUMN_SQUARE()
     {
         @Override
-        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return SquareColumnMeshFactory.getShapeMeshFactory(); }
     },

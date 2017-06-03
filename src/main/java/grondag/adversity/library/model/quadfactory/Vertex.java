@@ -33,12 +33,12 @@ public class Vertex extends Vec3d
         this.normal = normal;
     }
 
-    protected Vertex withNormal(Vec3d normalIn)
+    public Vertex withNormal(Vec3d normalIn)
     {
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, normalIn);
     }
 
-    protected Vertex withColor(int colorIn)
+    public Vertex withColor(int colorIn)
     {
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, colorIn, this.normal);
     }

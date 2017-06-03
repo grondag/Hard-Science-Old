@@ -89,14 +89,27 @@ public class ModelStateFactory
     static final BitPacker PACKER_3_FLOW = new BitPacker();
     private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
 
+    /** used to compare states quickly for border joins  */
+    private static final long P0_APPEARANCE_COMPARISON_MASK;
+    private static final long P1_APPEARANCE_COMPARISON_MASK;
+    private static final long P2_APPEARANCE_COMPARISON_MASK;
+   
+
     
     static
     {
+        long borderMask0 = 0;
+        long borderMask1 = 0;
         for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
         {
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
             P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
             P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
+            
+            borderMask0 |= P0_PAINT_COLOR[i].comparisonMask();
+            borderMask1 |= P1_PAINT_TEXTURE[i].comparisonMask();
+            borderMask1 |= P1_PAINT_LIGHT[i].comparisonMask();
+            
         }
         
         for(TextureScale scale : TextureScale.values())
@@ -106,6 +119,20 @@ public class ModelStateFactory
             P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
             P3B_BLOCK_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
         }
+        
+        P0_APPEARANCE_COMPARISON_MASK = borderMask0
+                | P0_SHAPE.comparisonMask() 
+                | P0_AXIS.comparisonMask()
+                | P0_AXIS_INVERTED.comparisonMask()
+                | P0_RENDER_LAYER_BASE.comparisonMask() 
+                | P0_RENDER_LAYER_LAMP.comparisonMask()
+                | P0_LAYER_ENABLED_OVERLAY.comparisonMask()
+                | P0_LAYER_ENABLED_DETAIL.comparisonMask()
+                | P0_TRANSLUCENCY.comparisonMask();
+        
+        P1_APPEARANCE_COMPARISON_MASK = borderMask1;
+        P2_APPEARANCE_COMPARISON_MASK = P2_STATIC_SHAPE_BITS.comparisonMask();
+        
     }
     
     //hide constructor
@@ -161,6 +188,8 @@ public class ModelStateFactory
         public static final int STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS = STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS << 1;
         
         public static final int STATE_FLAG_NEEDS_SPECIES = STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS << 1;
+        
+        public static final int STATE_FLAG_HAS_AXIS = STATE_FLAG_NEEDS_SPECIES << 1;
         
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
@@ -290,6 +319,12 @@ public class ModelStateFactory
             }
         }
         
+        public boolean hasAxis()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_HAS_AXIS) == STATE_FLAG_HAS_AXIS;
+        }
+        
         public boolean hasMasonryJoin()
         {
             this.populateStateFlagsIfNeeded();
@@ -379,7 +414,7 @@ public class ModelStateFactory
                 {
 //                    Output.getLog().info("ModelState.refreshFromWorld corner join refresh @" + pos.toString());
                     neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this.getSpecies()));
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this, true));
                     
                     
                     b3 = P3B_BLOCK_JOIN.setValue(CornerJoinBlockStateSelector.findIndex(tests), b3);
@@ -387,7 +422,7 @@ public class ModelStateFactory
                 else if ((STATE_FLAG_NEEDS_SIMPLE_JOIN & stateFlags) == STATE_FLAG_NEEDS_SIMPLE_JOIN)
                 {
                     neighbors = new NeighborBlocks(world, pos, false);
-                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this.getSpecies()));
+                    NeighborTestResults tests = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch((SuperBlock) state.getBlock(), this, true));
                     b3 = P3B_BLOCK_JOIN.setValue(SimpleJoin.getIndex(tests), b3);
                 }
            
@@ -444,11 +479,19 @@ public class ModelStateFactory
             return P0_SHAPE.getValue(bits0);
         }
         
+        /**
+         * Also resets shape-specific bits to default for the given shape.
+         * Does nothing if shape is the same as existing.
+         */
         public void setShape(ModelShape shape)
         {
-            bits0 = P0_SHAPE.setValue(shape, bits0);
-            invalidateHashCode();
-            clearStateFlags();
+            if(shape != P0_SHAPE.getValue(bits0))
+            {
+                bits0 = P0_SHAPE.setValue(shape, bits0);
+                bits2 = P2_STATIC_SHAPE_BITS.setValue(shape.meshFactory().defaultShapeStateBits, bits2);
+                invalidateHashCode();
+                clearStateFlags();
+            }
         }
         
         public ColorMap getColorMap(PaintLayer layer)
@@ -917,6 +960,18 @@ public class ModelStateFactory
         public int geometricSkyOcclusion()
         {
             return getShape().meshFactory().geometricSkyOcclusion(this);
+        }
+        
+        /** 
+         * Returns true if visual elements match.
+         * Does not consider species in matching.
+         * Used to determine if blocks/borders should join together.
+         */
+        public boolean doesAppearanceMatch(ModelState other)
+        {
+            return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK)
+                    && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK)
+                    && (this.bits2 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits2 & P2_APPEARANCE_COMPARISON_MASK);
         }
     }
 }

@@ -445,7 +445,7 @@ public class FlowModelFactory extends ModelFactory
 
         // don't count quads as face quads unless actually on the face
         // will be useful for face culling
-        rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getFace()) ? quad.getFace() : null));        
+        rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getNominalFace()) ? quad.getNominalFace() : null));        
 
         // Removed: if we end up with an empty list, default to standard cube
         // Removed because block now behaves like air if this happens somehow.

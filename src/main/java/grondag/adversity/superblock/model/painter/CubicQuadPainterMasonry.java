@@ -29,7 +29,7 @@ public class CubicQuadPainterMasonry extends CubicQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
-        EnumFacing face = quad.getFace();
+        EnumFacing face = quad.getNominalFace();
         if(face == null) return null;
         
         SimpleJoinFaceState fjs = SimpleJoinFaceState.find(face, this.bjs);

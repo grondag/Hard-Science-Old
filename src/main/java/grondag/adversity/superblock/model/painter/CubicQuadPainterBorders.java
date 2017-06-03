@@ -43,7 +43,7 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
-        EnumFacing face = quad.getFace();
+        EnumFacing face = quad.getNominalFace();
         if(face == null) return null;
 
         FaceQuadInputs inputs = FACE_INPUTS[face.ordinal()][ bjs.getFaceJoinState(face).ordinal()];

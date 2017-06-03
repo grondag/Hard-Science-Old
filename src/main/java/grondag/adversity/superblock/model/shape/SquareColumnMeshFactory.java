@@ -10,9 +10,12 @@ import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.joinstate.FaceSide;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
-import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
+import grondag.adversity.library.BitPacker;
+import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.library.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.Color;
 import grondag.adversity.library.Useful;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.painter.surface.Surface;
@@ -24,15 +27,20 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public class SquareColumnMeshFactory extends ShapeMeshGenerator
 {
-
+    public static final int MIN_CUTS = 1;
+    public static final int MAX_CUTS = 5;
+    
     private static final Surface SURFACE_MAIN = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     private static final Surface SURFACE_LAMP = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
     private static final Surface SURFACE_CUT = new Surface(SurfaceType.CUT, SurfaceTopology.CUBIC, true);
     
+    private static final BitPacker STATE_PACKER = new BitPacker();
+    private static final BooleanElement STATE_ARE_CUTS_ON_EDGE = STATE_PACKER.createBooleanElement();
+    private static final IntElement STATE_CUT_COUNT = STATE_PACKER.createIntElement(MIN_CUTS, MAX_CUTS);
+
     private static ShapeMeshGenerator instance;
     
     private static class FaceSpec
@@ -74,16 +82,18 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
     
     protected SquareColumnMeshFactory()
     {
-        super(StateFormat.BLOCK, ModelState.STATE_FLAG_NEEDS_CORNER_JOIN, SURFACE_MAIN, SURFACE_LAMP, SURFACE_CUT);
+        super(
+                StateFormat.BLOCK, 
+                ModelState.STATE_FLAG_NEEDS_CORNER_JOIN | ModelState.STATE_FLAG_HAS_AXIS, 
+                STATE_CUT_COUNT.setValue(3, STATE_ARE_CUTS_ON_EDGE.setValue(true, 0)), 
+                SURFACE_MAIN, SURFACE_LAMP, SURFACE_CUT
+        );
     }
 
     @Override
     public Collection<RawQuad> getShapeQuads(ModelState modelState)
     {
-        //TODO: get from modelstate
-        int cutCount = 4;
-        boolean areCutsOnEdge = false;
-        FaceSpec spec = new FaceSpec(cutCount, areCutsOnEdge);
+        FaceSpec spec = new FaceSpec(getCutCount(modelState), areCutsOnEdge(modelState));
         
         ImmutableList.Builder<RawQuad> general = new ImmutableList.Builder<RawQuad>();
         for(EnumFacing face : EnumFacing.VALUES)
@@ -140,7 +150,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 //        {
         
         RawQuad quadInputs = new RawQuad();
-        quadInputs.color = WHITE;
+        quadInputs.color = Color.WHITE;
         quadInputs.lockUV = true;
 
 
@@ -561,12 +571,47 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
     private void setupCutSideQuad(RawQuad qi, SimpleQuadBounds qb)
     {
-        int cutSideColor = QuadFactory.shadeColor(WHITE, (LightUtil.diffuseLight(qb.face) + 2) / 3, false);
         qi.setupFaceQuad(qb.face,
-                new FaceVertex.Colored(qb.x0, qb.y0, qb.depth, cutSideColor),
-                new FaceVertex.Colored(qb.x1, qb.y0, qb.depth, cutSideColor),
-                new FaceVertex.Colored(qb.x1, qb.y1, qb.depth, WHITE),
-                new FaceVertex.Colored(qb.x0, qb.y1, qb.depth, WHITE), 
+                new FaceVertex.Colored(qb.x0, qb.y0, qb.depth, Color.WHITE),
+                new FaceVertex.Colored(qb.x1, qb.y0, qb.depth, Color.WHITE),
+                new FaceVertex.Colored(qb.x1, qb.y1, qb.depth, Color.BLACK),
+                new FaceVertex.Colored(qb.x0, qb.y1, qb.depth, Color.BLACK), 
                 qb.topFace);
+    }
+    
+    /** 
+     * If true, cuts in shape are on the block boundary.
+     * Reads value from static shape bits in model state 
+     */
+    public static boolean areCutsOnEdge(ModelState modelState)
+    {
+        return STATE_ARE_CUTS_ON_EDGE.getValue(modelState.getStaticShapeBits());
+    }
+
+    /** 
+     * If true, cuts in shape are on the block boundary.
+     * Saves value in static shape bits in model state 
+     */
+    public static void setCutsOnEdge(boolean areCutsOnEdge, ModelState modelState)
+    {
+        modelState.setStaticShapeBits(STATE_ARE_CUTS_ON_EDGE.setValue(areCutsOnEdge, modelState.getStaticShapeBits()));
+    }
+    
+    /** 
+     * Number of cuts that appear on each face of model.
+     * Reads value from static shape bits in model state 
+     */
+    public static int getCutCount(ModelState modelState)
+    {
+        return STATE_CUT_COUNT.getValue(modelState.getStaticShapeBits());
+    }
+
+    /** 
+     * Number of cuts that appear on each face of model.
+     * Saves value in static shape bits in model state 
+     */
+    public static void setCutCount(int cutCount, ModelState modelState)
+    {
+        modelState.setStaticShapeBits(STATE_CUT_COUNT.setValue(cutCount, modelState.getStaticShapeBits()));
     }
 }

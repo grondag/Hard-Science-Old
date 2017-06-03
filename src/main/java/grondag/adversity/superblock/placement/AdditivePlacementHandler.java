@@ -50,10 +50,6 @@ public class AdditivePlacementHandler implements IPlacementHandler
         int species = (onModelState.getSpecies() + 1) & 0xF;
         BlockPos posPlaced = species == 0 ? posOn.offset(facing) : posOn;
 
-        //TODO: remove 
-        if(!worldIn.isRemote)
-            Output.getLog().info(species);
-
         ModelState modelState = SuperItemBlock.getModelState(stack);
       
         ItemStack result = stack.copy();

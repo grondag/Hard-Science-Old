@@ -6,6 +6,8 @@ import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.library.PlacementValidatorCubic;
 import grondag.adversity.niceblock.support.BlockTests;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.SuperItemBlock;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -57,16 +59,18 @@ public abstract class SpeciesGenerator {
         {
             int speciesInUseFlags = 0;
             
+            ModelState stackModelState = SuperItemBlock.getModelState(stack);
             NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos, false);
-            NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderCandidateMatch(block));
+            NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(block, stackModelState, false));
             
             for(EnumFacing face : PLACEMENT_ORDER)            
             {
                  if (results.result(face)) 
                  {
-                     int species = neighbors.getModelState(face).getSpecies();
+                     ModelState modelState = neighbors.getModelState(face);
+                     int species = modelState.getSpecies();
                      speciesInUseFlags |= (1 << species);
-                     if (shape.isValidShape(worldIn, pos, new BlockTests.SuperBlockBorderMatch(block, species))) 
+                     if (shape.isValidShape(worldIn, pos, new BlockTests.SuperBlockBorderMatch(block, modelState, true))) 
                      {
                          return species;
                      }

@@ -36,6 +36,10 @@ public class Color
     /** Can this be displayed on an sRGB display? */
     public final boolean IS_VISIBLE;
 
+
+    public static final int WHITE = 0xFFFFFFFF;
+    public static final int BLACK = 0xFF000000;
+
     /** CIE D65  noon daylight standard illuminant - appropriate for sRBG color space */
     private static final float D65X = (float) 95.047;
     private static final float D65Y = (float) 100.000;

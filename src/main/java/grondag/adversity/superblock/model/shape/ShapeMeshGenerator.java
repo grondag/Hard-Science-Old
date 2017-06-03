@@ -20,9 +20,6 @@ import net.minecraft.world.World;
 
 public abstract class ShapeMeshGenerator
 {
-    /** use this color for all quads generated, unless pre-shaded */
-    protected static final int WHITE = 0xFFFFFFFF;
-    
     /** used by ModelState to know why type of state representation is needed by this shape */
     public final StateFormat stateFormat;
     
@@ -32,35 +29,29 @@ public abstract class ShapeMeshGenerator
     /** Surfaces that compose the model. */
     public List<Surface> surfaces;
     
-    public abstract Collection<RawQuad> getShapeQuads(ModelState modelState);
-    
-    // only necessary to override these two if something other than standard cube
-    
-    @Nonnull
-    public abstract ICollisionHandler collisionHandler();
+    /**
+     * When shape is changed on ModelState, the per-shape bits will be
+     * set to this value.  Only need to change if shape needs some preset state.
+     */
+    public final long defaultShapeStateBits;
     
     protected ShapeMeshGenerator(StateFormat stateFormat, int stateFlags, Surface... surfaces)
+    {
+        this(stateFormat, stateFlags, 0L, surfaces);
+    }
+    
+    protected ShapeMeshGenerator(StateFormat stateFormat, int stateFlags, long defaultShapeStateBits, Surface... surfaces)
     {
         this.stateFormat = stateFormat;
         this.stateFlags = stateFlags;
         this.surfaces = new ImmutableList.Builder<Surface>()
                 .add(surfaces).build();
+        this.defaultShapeStateBits = defaultShapeStateBits;
     }
-
-    public abstract SideShape sideShape(ModelState modelState, EnumFacing side);
-
-    /** Returns true if geometry is a full 1x1x1 cube. */
-    public abstract boolean isCube(ModelState modelState);
-
-    public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
     
-    /** 
-     * If true, will disable species selection on block placement. 
-     * Will also prevent rendering of textures with texture layouts that require species
-     * because those will expect species to demarcate multiblock boundaries.
-     */
-    public boolean isSpeciesUsedForHeight() { return false; }
-
+    @Nonnull
+    public abstract ICollisionHandler collisionHandler();
+    
     /** 
      * How much of the sky is occluded by the shape of this block?
      * Based on geometry alone, not transparency.
@@ -69,5 +60,21 @@ public abstract class ShapeMeshGenerator
      * 255 if fully occludes sky.
      */
     public abstract int geometricSkyOcclusion(ModelState modelState);
+
+    public abstract Collection<RawQuad> getShapeQuads(ModelState modelState);
+
+    /** Returns true if geometry is a full 1x1x1 cube. */
+    public abstract boolean isCube(ModelState modelState);
+
+    /** 
+     * If true, will disable species selection on block placement. 
+     * Will also prevent rendering of textures with texture layouts that require species
+     * because those will expect species to demarcate multiblock boundaries.
+     */
+    public boolean isSpeciesUsedForHeight() { return false; }
+    
+    public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
+
+    public abstract SideShape sideShape(ModelState modelState, EnumFacing side);
     
 }

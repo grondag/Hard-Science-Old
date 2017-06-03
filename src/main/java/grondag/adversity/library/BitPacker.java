@@ -82,6 +82,15 @@ public class BitPacker
             this.mask = Useful.longBitMask(this.bitLength);
         }
         
+        /** 
+         * Mask that isolates bits for this element. 
+         * Useful to compare this and other elements simultaneously 
+         */
+        public long comparisonMask()
+        {
+            return this.shiftedMask;
+        }
+        
         public static class EnumElement<T extends Enum<?>> extends BitElement
         {
             private T[] values;

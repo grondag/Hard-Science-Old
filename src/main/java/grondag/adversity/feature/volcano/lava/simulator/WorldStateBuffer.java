@@ -128,12 +128,6 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
-//        Adversity.log.info("blockstate buffer update @" + x + ", " + y + ", " + z + " = " + 
-//                newState.toString() + " from " + expectedPriorState.toString());
-//        
-//        if(x==478 && y == 9 && z == -1231)
-//            Adversity.log.info("boop");
-        
         if(Output.DEBUG_MODE) this.stateSetCount++;
         
         getChunkBuffer(x, z).setBlockState(x, y, z, newState, expectedPriorState);
@@ -376,8 +370,6 @@ public class WorldStateBuffer implements IBlockAccess
     /** returns true an update occured */
     private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
-//        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
-//            Adversity.log.info("boop");
         IBlockState baseState = realWorld.getBlockState(pos);
         if(baseState.getBlock() == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
         {
@@ -744,13 +736,6 @@ public class WorldStateBuffer implements IBlockAccess
                                 // difference here is simply that we allow fillers in the block being set
                                 tracker.setAdjustmentNeededAround(x, y, z);
                             }
-                            
-                            
-//                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
-//                                    bsb.newState.toString());
-//                            
-//                            if(x==59 && (y == 69 || y == 70) && z == 129)
-//                                Adversity.log.info("boop");
                       
                             realWorld.setBlockState(new BlockPos( x, y, z), bsb.newState, 3);
                             

@@ -27,7 +27,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
     public RawQuad paintQuad(RawQuad quad)
     {
         
-        EnumFacing face = quad.getFace() == null ? EnumFacing.UP : quad.getFace();
+        EnumFacing face = quad.getNominalFace() == null ? EnumFacing.UP : quad.getNominalFace();
         
         // represents position within a 32x32x32 volume, with x, y representing position on the surface
         // qnd z representing depth into the surface

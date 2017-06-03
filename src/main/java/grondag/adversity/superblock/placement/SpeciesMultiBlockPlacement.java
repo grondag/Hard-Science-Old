@@ -82,7 +82,7 @@ public class SpeciesMultiBlockPlacement implements IPlacementHandler
                 SuperBlock myBlock = (SuperBlock) (((SuperItemBlock)stack.getItem()).block);
 
                 NeighborBlocks neighbors = new NeighborBlocks(worldIn, posPlaced, false);
-                NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderCandidateMatch(myBlock));
+                NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(myBlock, modelState, false));
                 
                 for(EnumFacing face : EnumFacing.VALUES)            
                 {

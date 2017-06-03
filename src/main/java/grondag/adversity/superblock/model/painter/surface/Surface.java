@@ -5,10 +5,14 @@ public class Surface
     public final SurfaceType surfaceType;
     public final SurfaceTopology topology;
     
-    /** if true, generator will pre-shade the quads on this surface.
-     * Baked quads will be emitted with applyDiffuseLighting = false;
+    /** 
+     * If true, generator will assign colors to vertexes to indicate proximity to lamp surface.
+     * Vertices next to lamp have color WHITE and those away have color BLACK.
+     * If the lighting mode for the surface is shaded, then quad bake should color
+     * vertices to form a gradient.  
+     * If the surface is full-brightness, need to re-color all vertices to white.
      */
-    public final boolean isPreShaded;
+    public final boolean isLampGradient;
     
     public Surface(SurfaceType paintType, SurfaceTopology topology)
     {
@@ -19,6 +23,6 @@ public class Surface
     {
         this.surfaceType = paintType;
         this.topology = topology;
-        this.isPreShaded = isPreShaded;
+        this.isLampGradient = isPreShaded;
     }
 }
