@@ -382,7 +382,7 @@ public class LavaConnection implements ISimpleListItem
         int flow = fluidFrom - newFluidFrom;
 
         if(flow < 0)
-            Output.getLog().debug("derp!");
+            Output.debug("derp!");
         return flow;
     }
     

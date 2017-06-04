@@ -89,7 +89,7 @@ public class WorldStateBuffer implements IBlockAccess
         {            
             if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
             {
-                Output.getLog().warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
             }
             
             // prevent concurrent access to MC world
@@ -319,7 +319,7 @@ public class WorldStateBuffer implements IBlockAccess
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Output.getLog().warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
+            Output.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
             return;
         }
 
@@ -334,7 +334,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
 //        this.isLoading = false;
 
-        Output.getLog().info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
+        Output.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
@@ -345,7 +345,7 @@ public class WorldStateBuffer implements IBlockAccess
             recordCount+= chunk.size();
         }
         
-        Output.getLog().info("Saving " + recordCount + " world updates.");
+        Output.info("Saving " + recordCount + " world updates.");
         
         int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;
@@ -617,7 +617,7 @@ public class WorldStateBuffer implements IBlockAccess
                 
                 if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
                 {
-                    Output.getLog().warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                    Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
                 if(this.worldChunk == null || !this.worldChunk.isLoaded())

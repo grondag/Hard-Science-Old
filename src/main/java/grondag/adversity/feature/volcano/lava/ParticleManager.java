@@ -124,7 +124,7 @@ public class ParticleManager
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Output.getLog().warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
+            Output.warn("Invalid save data loading lava entity state buffer. Lava entities may have been lost.");
             return;
         }
 
@@ -141,12 +141,12 @@ public class ParticleManager
             }
         }
 
-        Output.getLog().info("Loaded " + map.size() + " lava entities.");
+        Output.info("Loaded " + map.size() + " lava entities.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Output.getLog().info("Saving " + map.size() + " lava entities.");
+        Output.info("Saving " + map.size() + " lava entities.");
         
         int[] saveData = new int[map.size() * NBT_SAVE_DATA_WIDTH];
         int i = 0;

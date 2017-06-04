@@ -299,7 +299,7 @@ public class CellChunk implements ISimpleListItem
                 if(entryCell == null)
                 {
                     if(Output.DEBUG_MODE)
-                        Output.getLog().warn("Null entry cell in chunk being unloaded.");
+                        Output.warn("Null entry cell in chunk being unloaded.");
                     continue;
                 }
                 
@@ -307,7 +307,7 @@ public class CellChunk implements ISimpleListItem
                 if(firstCell == null)
                 {
                     if(Output.DEBUG_MODE)
-                        Output.getLog().warn("First cell in entry cell is null in chunk being unloaded.");
+                        Output.warn("First cell in entry cell is null in chunk being unloaded.");
                     
                     // strange case - do our best
                     entryCell.setDeleted();
@@ -317,7 +317,7 @@ public class CellChunk implements ISimpleListItem
                 entryCell = firstCell;
                 
                 if(Output.DEBUG_MODE && entryCell.belowCell() != null)
-                    Output.getLog().warn("First cell is not actually the first cell.");
+                    Output.warn("First cell is not actually the first cell.");
                     
                 do
                 {
@@ -344,13 +344,13 @@ public class CellChunk implements ISimpleListItem
     LavaCell getEntryCell(int x, int z)
     {
         if(Output.DEBUG_MODE && this.isUnloaded)
-            Output.getLog().warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
+            Output.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
         
         if(Output.DEBUG_MODE)
         {
             LavaCell result = this.entryCells[getIndex(x, z)];
             if(result != null && result.isDeleted())
-                Output.getLog().warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
+                Output.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
             return result;
         }
         else

@@ -87,7 +87,7 @@ public class BlockEventList
             }
         }
         
-        Output.getLog().info("Saving " + i / BlockEvent.NBT_WIDTH + " Block Events with tag " + this.nbtTagName);
+        Output.info("Saving " + i / BlockEvent.NBT_WIDTH + " Block Events with tag " + this.nbtTagName);
         
         nbt.setIntArray(this.nbtTagName, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -101,7 +101,7 @@ public class BlockEventList
         //confirm correct size
         if(saveData == null || saveData.length % BlockEvent.NBT_WIDTH != 0)
         {
-            Output.getLog().warn("Invalid save data loading block events with tag " + nbtTagName + ". Lava blocks may not be updated properly.");
+            Output.warn("Invalid save data loading block events with tag " + nbtTagName + ". Lava blocks may not be updated properly.");
         }
         else
         {
@@ -114,7 +114,7 @@ public class BlockEventList
                 i += BlockEvent.NBT_WIDTH;
             }
           
-            Output.getLog().info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
+            Output.info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
         }
     }
     
@@ -146,7 +146,7 @@ public class BlockEventList
             {
                 //exceeded max retries - give up
                 if(Output.DEBUG_MODE)
-                    Output.getLog().info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
+                    Output.info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
                 retryCount = IS_COMPLETE;
             }
         }

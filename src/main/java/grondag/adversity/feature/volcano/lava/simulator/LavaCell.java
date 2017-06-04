@@ -971,7 +971,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     //handle strangeness that should never occur
                     if(remaining <= 0)
                     {
-                        if(Output.DEBUG_MODE) Output.getLog().debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
+                        if(Output.DEBUG_MODE) Output.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
                         
                         break;
                     }
@@ -1174,10 +1174,10 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                         if(Output.DEBUG_MODE)
                         {
                             if(newCell.intersectsWith(newCell.above) || newCell.isVerticallyAdjacentTo(newCell.above))
-                                Output.getLog().warn("Added cell intersects with cell above. Should never happen.");
+                                Output.warn("Added cell intersects with cell above. Should never happen.");
                             
                             if(newCell.intersectsWith(newCell.below) || newCell.isVerticallyAdjacentTo(newCell.below))
-                                Output.getLog().warn("Added cell intersects with cell below. Should never happen.");
+                                Output.warn("Added cell intersects with cell below. Should never happen.");
                         }
                         
                         return;
@@ -1186,7 +1186,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                     upperCell = lowerCell.above;
                     
                     if(Output.DEBUG_MODE && lowerCell == upperCell)
-                        Output.getLog().info("Strangeness in lava cell NBT load.");
+                        Output.info("Strangeness in lava cell NBT load.");
                 }
                 
                 // if we get to here, new cell is the uppermost
@@ -1531,7 +1531,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
     private int getFlowFloorRawRetentionDepth()
     {
         if(Output.DEBUG_MODE && !this.isBottomFlow()) 
-            Output.getLog().warn("Flow floor retention depth computed for non-flow-floor cell.");
+            Output.warn("Flow floor retention depth computed for non-flow-floor cell.");
         
         int myFloor = this.floorUnits();
         
@@ -1732,7 +1732,7 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
         if(this.locator == null)
         {
             if(Output.DEBUG_MODE)
-                Output.getLog().warn("Missing cell locator object.");
+                Output.warn("Missing cell locator object.");
             return this;
         }
         

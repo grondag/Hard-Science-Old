@@ -2,7 +2,7 @@ package grondag.adversity.superblock.model.shape;
 
 import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_NONE;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
@@ -32,7 +32,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     };
     
     /** never changes so may as well save it */
-    private final Collection<RawQuad> cachedQuads;
+    private final List<RawQuad> cachedQuads;
     
     protected CubeMeshFactory()
     {
@@ -41,12 +41,12 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     }
 
     @Override
-    public Collection<RawQuad> getShapeQuads(ModelState modelState)
+    public List<RawQuad> getShapeQuads(ModelState modelState)
     {
         return cachedQuads;
     }
     
-    private Collection<RawQuad> getCubeQuads()
+    private List<RawQuad> getCubeQuads()
     {
         CubeInputs result = new CubeInputs();
         result.color = 0xFFFFFFFF;

@@ -6,6 +6,8 @@ import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.model.shape.ModelShape;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
@@ -31,13 +33,13 @@ public class FlowHeightState
     
     // Use these insted of magic number for filler block meta values
     /** This value is for a height block two below another height block, offset of 2 added to vertex heights*/
-    public final static int FILL_META_DOWN2 = 0;
-    public final static int FILL_META_DOWN1 = 1;
+//    public final static int FILL_META_DOWN2 = 0;
+//    public final static int FILL_META_DOWN1 = 1;
     
     /** This value indicates a top height block, means no offset, no effect on vertex calculations*/
-    public final static int FILL_META_LEVEL = 2;
-    public final static int FILL_META_UP1 = 3;
-    public final static int FILL_META_UP2 = 4;
+//    public final static int FILL_META_LEVEL = 2;
+//    public final static int FILL_META_UP1 = 3;
+//    public final static int FILL_META_UP2 = 4;
     
 
 //    /**
@@ -113,6 +115,10 @@ public class FlowHeightState
         return stateKey;
     }
     
+    public FlowHeightState(int centerHeightIn, int[] sideHeightIn, int[] cornerHeightIn, int yOffsetIn)
+    {
+        this(computeStateKey(centerHeightIn, sideHeightIn, cornerHeightIn, yOffsetIn));
+    }
 
     public FlowHeightState(long stateKey)
     {
@@ -130,16 +136,11 @@ public class FlowHeightState
         }        
     }
     
-   
-    // Rendering height of center block ranges from 1 to 12
-    // and is stored in state key as values 0-11.
 
-//    public void setCenterHeight(int height)
-//    {
-//        this.centerHeight = (byte)height;
-//        vertexCalcsDone = false;
-//    }
-
+    /**
+     * Rendering height of center block ranges from 1 to 12
+     * and is stored in state key as values 0-11.
+     */
     public int getCenterHeight()
     {
         return this.centerHeight;
@@ -254,6 +255,28 @@ public class FlowHeightState
             if(this.midCornerHeight[i] > bottom) return false;
         }
         return true;
+    }
+    
+    /** 
+     * how much sky light is blocked by this shape. 
+     * 0 = none, 14 = most, 255 = all
+     */
+    public int verticalOcclusion()
+    {
+        refreshVertexCalculationsIfNeeded();
+        double bottom = 0.0 + yOffset;
+        
+        int aboveCount = 0;
+        
+        for(int i = 0; i < 4; i++)
+        {
+            if(this.midSideHeight[i] > bottom) aboveCount++;
+            if(this.midCornerHeight[i] > bottom) aboveCount++;
+        }        
+        
+        if(getCenterVertexHeight() > bottom) aboveCount *= 2;
+        
+        return aboveCount >= 16 ? 255 : aboveCount;
     }
     
     /**
@@ -413,9 +436,9 @@ public class FlowHeightState
         return getBitsFromWorldStatically(block.isFlowFiller(), state, world, pos);
     }
     
-    public static long getBitsFromWorldStatically(SuperBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public static long getBitsFromWorldStatically(ModelState modelState, SuperBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        return getBitsFromWorldStatically(block.isFlowFiller(), state, world, pos);
+        return getBitsFromWorldStatically(modelState.getShape() == ModelShape.TERRAIN_FILLER, state, world, pos);
     }
     
     private static long getBitsFromWorldStatically(boolean isFlowFiller, IBlockState state, IBlockAccess world, BlockPos pos)

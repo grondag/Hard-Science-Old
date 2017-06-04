@@ -36,7 +36,7 @@ public class WailaDataProvider implements IWailaDataProvider
 
     public static void load(IWailaRegistrar registrar) {
         if (!registered){
-            Output.getLog().error("Unable to load Waila data provider.  Registration method not called prior to load.");
+            Output.error("Unable to load Waila data provider.  Registration method not called prior to load.");
             return;
         }
         if (!loaded) {

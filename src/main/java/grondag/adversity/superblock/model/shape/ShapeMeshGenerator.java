@@ -1,6 +1,5 @@
 package grondag.adversity.superblock.model.shape;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -61,7 +60,7 @@ public abstract class ShapeMeshGenerator
      */
     public abstract int geometricSkyOcclusion(ModelState modelState);
 
-    public abstract Collection<RawQuad> getShapeQuads(ModelState modelState);
+    public abstract List<RawQuad> getShapeQuads(ModelState modelState);
 
     /** Returns true if geometry is a full 1x1x1 cube. */
     public abstract boolean isCube(ModelState modelState);

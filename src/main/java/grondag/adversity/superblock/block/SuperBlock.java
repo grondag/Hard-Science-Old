@@ -851,7 +851,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         for(int i = 0; i < this.metaCount; i++)
         {
             ItemStack stack = new ItemStack(this, 1, i);
-            SuperItemBlock.setModelState(stack, this.getDefaultModelState());
+            ModelState modelState = this.getDefaultModelState();
+            if(modelState.hasSpecies())
+            {
+                modelState.setSpecies(i);
+            }
+            SuperItemBlock.setModelState(stack, modelState);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();
@@ -928,7 +933,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     /** 
-     * This is an egregious hack to avoids performance hit of instanceof.
+     * This is an egregious hack to avoid performance hit of instanceof.
      * (Based on performance profile results.) <br> <br>
      * 
      * Default value of {@link #associatedBlock} is set to this instance in constructor.
@@ -1127,7 +1132,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDropped(IBlockState state, int fortune, Random random)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
         return 0;
     }
 
@@ -1135,7 +1140,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDropped(Random random)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
         return 0;
     }
 
@@ -1143,7 +1148,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDroppedWithBonus(int fortune, Random random)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
         return 0;
     }
 
@@ -1151,7 +1156,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
         return super.rayTrace(pos, start, end, boundingBox);
     }
 

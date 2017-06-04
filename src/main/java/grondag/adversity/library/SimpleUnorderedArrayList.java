@@ -66,7 +66,7 @@ public class SimpleUnorderedArrayList<T>
     {
         if(Output.DEBUG_MODE && this.isEmpty())
         {
-            Output.getLog().warn("SimpleUnoderedArrayList detected attempt to remove item from empty list.");
+            Output.warn("SimpleUnoderedArrayList detected attempt to remove item from empty list.");
         }
         
         this.size--;

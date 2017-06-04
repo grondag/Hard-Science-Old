@@ -39,7 +39,7 @@ public class CommonEventHandler
         }
         catch(Exception e)
         {
-            Output.getLog().warn("Unable to parse localized denial messages. Using default.");
+            Output.warn("Unable to parse localized denial messages. Using default.");
         }
         DENIALS = denials;
     }

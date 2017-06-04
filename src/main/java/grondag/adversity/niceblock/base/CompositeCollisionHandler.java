@@ -41,7 +41,7 @@ public class CompositeCollisionHandler extends AbstractCollisionHandler
         
         if(this.keyBitLength > 64) 
         {
-            Output.getLog().warn("Composite collision handler bit length exceeded.  Collision boxes may be borked.");
+            Output.warn("Composite collision handler bit length exceeded.  Collision boxes may be borked.");
         }
     }
     

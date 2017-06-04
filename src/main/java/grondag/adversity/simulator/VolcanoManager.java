@@ -149,13 +149,13 @@ public class VolcanoManager extends SimulationNodeRunnable
     {
         if(nodes == null)
         {
-            Output.getLog().warn("Volcano simulation manager not properly initialized."
+            Output.warn("Volcano simulation manager not properly initialized."
                     + " Volcano simulation state will be invalid.");
             return null;
         }
         if(nodeID < 0 || nodeID >= nodes.length)
         {
-            Output.getLog().warn("Invalid volcano node id: " + nodeID
+            Output.warn("Invalid volcano node id: " + nodeID
                     + ". Volcano simulation state will be invalid.");
             return null;
         }
@@ -166,7 +166,7 @@ public class VolcanoManager extends SimulationNodeRunnable
     {
         if(nodes == null)
         {
-            Output.getLog().warn("Volcano simulation manager not properly initialized."
+            Output.warn("Volcano simulation manager not properly initialized."
                     + " Volcano simulation state will be invalid.");
             return null;
         }
@@ -359,7 +359,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         {
             if(this.isActive && this.keepAlive + 2048L < Simulator.INSTANCE.getWorld().getTotalWorldTime())
             {
-                Output.getLog().warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
+                Output.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
                 + " has not reported in. Deactivating volcano simulation node.");
                 this.deActivate();
             }

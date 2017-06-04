@@ -17,6 +17,7 @@ import grondag.adversity.superblock.model.state.ModelStateProperty;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.placement.SpeciesGenerator;
 import grondag.adversity.superblock.texture.Textures;
+import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -250,8 +251,8 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     {
         return true;
     }
-
-    @Override
+    
+     @Override
     public boolean isGeometryFullCube(IBlockState state)
     {
         return this.fullBlock;

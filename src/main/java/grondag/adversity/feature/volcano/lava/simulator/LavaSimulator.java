@@ -177,7 +177,7 @@ public class LavaSimulator extends SimulationNode
                     // event not complete until we can tell cell to add lava
                     // retry - maybe validation needs to catch up
                     if(event.retryCount() >= 8)
-                        Output.getLog().info("wut?");
+                        Output.info("wut?");
                     return false;
                 }
                 else
@@ -190,7 +190,7 @@ public class LavaSimulator extends SimulationNode
             
             // would have to be an unhandled event type
             if(Output.DEBUG_MODE)
-                Output.getLog().warn("Detected unhandled block event type in event processing");
+                Output.warn("Detected unhandled block event type in event processing");
             
             return true;
         }
@@ -438,7 +438,7 @@ public class LavaSimulator extends SimulationNode
 
         // SAVE BASALT BLOCKS
         {
-            Output.getLog().info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            Output.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
             int[] saveData = new int[basaltBlocks.size() * BASALT_BLOCKS_NBT_WIDTH];
             int i = 0;
             for(AgedBlockPos apos: basaltBlocks)
@@ -469,7 +469,7 @@ public class LavaSimulator extends SimulationNode
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
         {
-            Output.getLog().warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
+            Output.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
         }
         else
         {
@@ -478,7 +478,7 @@ public class LavaSimulator extends SimulationNode
             {
                 this.basaltBlocks.add(new AgedBlockPos(((long)saveData[i++] << 32) | (long)saveData[i++], saveData[i++]));
             }
-            Output.getLog().info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
+            Output.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
 
     }
@@ -744,7 +744,7 @@ public class LavaSimulator extends SimulationNode
             {
                 for(int i = 0; i < 8; i++)
                 {
-                    Output.getLog().info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
+                    Output.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
                     this.flowTotals[i] = 0;
                     this.flowCounts[i] = 0;
                 }
@@ -752,12 +752,12 @@ public class LavaSimulator extends SimulationNode
 
             if(ENABLE_PERFORMANCE_COUNTING) 
             {
-                Output.getLog().info("totalCells=" + this.getCellCount() 
+                Output.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
                 
-                Output.getLog().info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
+                Output.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
 
-                Output.getLog().info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+                Output.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
                 this.worldBuffer.clearStatistics();
             }
                
@@ -765,7 +765,7 @@ public class LavaSimulator extends SimulationNode
             this.nextStatTime = now + PERFORMANCE_INTERVAL_MILLIS;
 
             //TODO: doesn't belong here
-            Output.getLog().info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+            Output.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
         
 //                this.cells.logDebugInfo();
         }

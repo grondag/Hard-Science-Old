@@ -43,7 +43,7 @@ public class ModelStateSet
         for(ModelStateSet s : sets)
         {
             if(s.shape != newShape && Output.DEBUG_MODE)
-                Output.getLog().warn("Mixed shapes in model state construction. Unexpected behaviour could occur.");
+                Output.warn("Mixed shapes in model state construction. Unexpected behaviour could occur.");
             
             for(ModelStateComponent<?,?> c : s.includedTypes)
             {
@@ -265,7 +265,7 @@ public class ModelStateSet
         ModelStateSetValue result = valueCache.get(key);
         if(Output.DEBUG_MODE && result == null)
         {
-            Output.getLog().info("Unable to retrieve model state set value. Should never happen.");
+            Output.info("Unable to retrieve model state set value. Should never happen.");
         }
         return result;
     }

@@ -13,6 +13,7 @@ import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperSimpleBlock;
 import grondag.adversity.superblock.block.SuperStateMapper;
+import grondag.adversity.superblock.block.TerrainFlowingBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -37,6 +38,7 @@ public class ModBlocks
 {
     private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
     public static final Block basalt_cobble = null;
+    public static final Block terrain_test = null;
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
@@ -48,6 +50,14 @@ public class ModBlocks
         workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
         workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         event.getRegistry().register(new SuperSimpleBlock("basalt_cobble", BlockSubstance.BASALT, workingModel));
+        
+        workingModel = new ModelState();
+        workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
+        workingModel.setTexture(PaintLayer.LAMP, Textures.BIGTEX_TEST5);
+        workingModel.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_LIGHT));
+        workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_TEST2);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.LIGHT));
+        event.getRegistry().register(new TerrainFlowingBlock("terrain_test", BlockSubstance.BASALT, workingModel, false));
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

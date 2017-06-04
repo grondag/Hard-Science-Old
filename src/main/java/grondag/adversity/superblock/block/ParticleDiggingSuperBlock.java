@@ -55,7 +55,7 @@ public class ParticleDiggingSuperBlock extends ParticleDigging
         if (this.particleTexture == null)
         {
             if(Output.DEBUG_MODE)
-                Output.getLog().warn("Missing particle texture in ParticleDiggingSuperBlock.renderParticle");
+                Output.warn("Missing particle texture in ParticleDiggingSuperBlock.renderParticle");
         }
         else
         {
@@ -66,7 +66,7 @@ public class ParticleDiggingSuperBlock extends ParticleDigging
             
             if(Output.DEBUG_MODE && (f < this.particleTexture.getMinU() || f1 > this.particleTexture.getMaxU() || f2 < this.particleTexture.getMinV() || f3 > this.particleTexture.getMaxV()))
             {
-                Output.getLog().warn("UV out of range in ParticleDiggingSuperBlock.renderParticle");
+                Output.warn("UV out of range in ParticleDiggingSuperBlock.renderParticle");
             }
         }
 

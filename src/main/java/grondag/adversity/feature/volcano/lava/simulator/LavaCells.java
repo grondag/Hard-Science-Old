@@ -418,7 +418,7 @@ public class LavaCells
             }
         }
         
-        Output.getLog().info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
+        Output.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
         nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -433,7 +433,7 @@ public class LavaCells
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)
         {
-            Output.getLog().warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
+            Output.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
         }
         else
         {
@@ -488,19 +488,18 @@ public class LavaCells
             // Make sure other stuff is up to date
             this.updateStuffJob.runOn(this.sim.LAVA_THREAD_POOL);
             
-            Output.getLog().info("Loaded " + this.cellList.size() + " lava cells.");
+            Output.info("Loaded " + this.cellList.size() + " lava cells.");
         }
     }
     
     public void logDebugInfo()
     {
-        Output.getLog().info(this.cellChunks.size() + " loaded cell chunks");
+        Output.info(this.cellChunks.size() + " loaded cell chunks");
         for(CellChunk chunk : this.cellChunks.values())
         {
-            Output.getLog().info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
+            Output.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
                 + " zStart=" + PackedBlockPos.getChunkZStart(chunk.packedChunkPos)
-                + " activeCount=" + chunk.getActiveCount() + " entryCount=" + chunk.getEntryCount()
-                    );
+                + " activeCount=" + chunk.getActiveCount() + " entryCount=" + chunk.getEntryCount());
             
         }
     }

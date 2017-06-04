@@ -15,11 +15,11 @@ import net.minecraft.item.ItemStack;
 public class ShapePicker extends TabBar<ModelShape>
 {
 
-    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.AS_LIST.size()];
+    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.GUI_AVAILABLE_SHAPES.size()];
     
     static
     {
-        for(ModelShape shape : ModelShape.AS_LIST)
+        for(ModelShape shape : ModelShape.GUI_AVAILABLE_SHAPES)
         {
             ModelState modelState = new ModelState();
             modelState.setShape(shape);
@@ -28,9 +28,10 @@ public class ShapePicker extends TabBar<ModelShape>
             ITEMS[shape.ordinal()] = stack;
         }
     }
+    
     public ShapePicker()
     {
-        super(ModelShape.AS_LIST);
+        super(ModelShape.GUI_AVAILABLE_SHAPES);
         this.setItemsPerRow(8);
     }
 

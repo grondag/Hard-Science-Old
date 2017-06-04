@@ -7,6 +7,7 @@ import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
 import grondag.adversity.niceblock.modelstate.ModelStateComponents;
+import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -32,7 +33,7 @@ public class TerrainBlock
      */
     public static boolean isFlowFiller(Block block)
     {
-        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR) && ((NiceBlock)block).isFlowFiller();
+        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR) && ((SuperBlock)block).isFlowFiller();
     }
     
     /**
@@ -40,7 +41,7 @@ public class TerrainBlock
      */
     public static boolean isFlowHeight(Block block)
     {
-        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR) && ((NiceBlock)block).isFlowHeight();
+        return block.isAssociatedBlock(FLOW_BLOCK_INDICATOR) && ((SuperBlock)block).isFlowHeight();
     }
     
     /**
@@ -52,7 +53,7 @@ public class TerrainBlock
     {
         if(isFlowHeight(state.getBlock()))
         {
-            return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(NiceBlock.META));
+            return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(SuperBlock.META));
         }
         else
         {
@@ -72,7 +73,7 @@ public class TerrainBlock
      */
     public static IBlockState stateWithDiscreteFlowHeight(IBlockState state, int value)
     {
-        return state.withProperty(NiceBlock.META, Math.min(FlowHeightState.BLOCK_LEVELS_INT - 1, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
+        return state.withProperty(SuperBlock.META, Math.min(FlowHeightState.BLOCK_LEVELS_INT - 1, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
     }
 
     public static IBlockState stateWithFlowHeight(IBlockState state, float value)
@@ -90,8 +91,8 @@ public class TerrainBlock
         Block block = blockState.getBlock();
         if(!TerrainBlock.isFlowHeight(block)) return 0;
 //        if(block instanceof FlowSimpleBlock) return 0;
-        FlowHeightState flowState = ModelFlowJoinComponent.getFlowState((NiceBlock) block, blockState, blockAccess, pos);
-        return flowState.topFillerNeeded();
+        
+        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState().topFillerNeeded();
     }
     
     /**
@@ -108,7 +109,7 @@ public class TerrainBlock
         
         final int SHOULD_BE_AIR = -1;
         
-        NiceBlock fillBlock = null;
+        SuperBlock fillBlock = null;
 
         IBlockState update = null; 
                 
@@ -128,6 +129,7 @@ public class TerrainBlock
                 && TerrainBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
         {
             targetMeta = 0;
+
             fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
         }
         else 
@@ -173,7 +175,7 @@ public class TerrainBlock
     {
         Block block = blockState.getBlock();
         if(!isFlowBlock(block)) return false;
-        return ModelFlowJoinComponent.getFlowState((NiceBlock)block, blockState, blockAccess, pos).isFullCube();
+        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState().isFullCube();
     }
     
     /**
@@ -184,7 +186,7 @@ public class TerrainBlock
     {
         Block block = blockState.getBlock();
         if(!isFlowBlock(block)) return null;
-        return ModelFlowJoinComponent.getFlowState((NiceBlock)block, blockState, blockAccess, pos);
+        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState();
     }
     
     /** 
@@ -195,10 +197,7 @@ public class TerrainBlock
     {
         Block block = blockState.getBlock();
         if(!isFlowBlock(block)) return false;
-        if(block instanceof FlowSimpleBlock) return true;
-        FlowHeightState flowState = ((NiceBlock)block).getModelState(blockState, blockAccess, pos)
-                .getValue(ModelStateComponents.FLOW_JOIN);
-        return flowState.isEmpty();
+        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState().isEmpty();
     }
     
     /**
@@ -207,7 +206,7 @@ public class TerrainBlock
      */
     public static int getYOffsetFromState(IBlockState state)
     {
-        return state.getValue(NiceBlock.META) + 1;
+        return state.getValue(SuperBlock.META) + 1;
     }
     
     /**
@@ -216,7 +215,7 @@ public class TerrainBlock
      */
     public static IBlockState stateWithYOffset(IBlockState state, int value)
     {
-        return state.withProperty(NiceBlock.META, Math.min(1, Math.max(0, value - 1)));
+        return state.withProperty(SuperBlock.META, Math.min(1, Math.max(0, value - 1)));
     }
     
     /** 

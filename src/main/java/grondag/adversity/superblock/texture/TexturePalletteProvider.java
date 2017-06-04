@@ -7,6 +7,7 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.niceblock.model.BorderModelFactory;
 import grondag.adversity.niceblock.model.MasonryModelFactory;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
@@ -125,7 +126,8 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             this.renderLayer = renderLayer;
             this.textureGroup = textureGroup;
   
-            this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag;
+            this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag 
+                    | (allowRotation ? ModelState.STATE_FLAG_NEEDS_ROTATION : 0);
         }
         
         /**

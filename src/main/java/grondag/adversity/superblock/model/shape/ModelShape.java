@@ -137,16 +137,44 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
     
-    FLOWING_TERRAIN()
+    TERRAIN_HEIGHT(false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
         @Override
-        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+        public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getHeightFactory(); }
+    },
+    
+    TERRAIN_FILLER(false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getFillerFactory(); }
     };
 
-    public static final List<ModelShape> AS_LIST = ImmutableList.copyOf(values());
+    public final boolean isAvailableInGui;
     
+    private ModelShape(boolean isAvailableInGui)
+    {
+        this.isAvailableInGui = isAvailableInGui;
+    }
+    
+    private ModelShape()
+    {
+        this(true);
+    }
+    public static final List<ModelShape> GUI_AVAILABLE_SHAPES;
+    
+    static
+    {
+        ImmutableList.Builder<ModelShape> builder = ImmutableList.builder();
+        for(ModelShape shape : values())
+        {
+            if(shape.isAvailableInGui) builder.add(shape);
+        }
+        GUI_AVAILABLE_SHAPES = builder.build();
+    }
     public abstract ShapeMeshGenerator meshFactory();
     public abstract IPlacementHandler getPlacementHandler();
     public GuiShape guiSettingsControl(Minecraft mc)

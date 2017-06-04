@@ -1,55 +1,50 @@
-package grondag.adversity.niceblock.model;
+package grondag.adversity.superblock.model.shape;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Output;
+import grondag.adversity.library.Color;
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.library.model.QuadContainer;
 import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
-import grondag.adversity.library.model.quadfactory.LightingMode;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.niceblock.base.ModelFactory;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.model.texture.TextureProviders;
-import grondag.adversity.niceblock.model.texture.TextureProvider.Texture.TextureState;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent;
-import grondag.adversity.niceblock.modelstate.ModelFlowTexComponent.FlowTexValue;
-import grondag.adversity.niceblock.modelstate.ModelStateComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateComponents;
-import grondag.adversity.niceblock.modelstate.ModelStateSet.ModelStateSetValue;
-import grondag.adversity.niceblock.support.SimpleCollisionHandler;
-import grondag.adversity.superblock.model.shape.ModelShape;
+import grondag.adversity.niceblock.support.CollisionBoxGenerator;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
+import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
-public class FlowModelFactory extends ModelFactory
+public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
+    private static final Surface SURFACE_TOP = new Surface(SurfaceType.LAMP, SurfaceTopology.TILED);
+    private static final Surface SURFACE_SIDE = new Surface(SurfaceType.MAIN, SurfaceTopology.TILED);
     
-    //TODO: should eventually be removed
-    private static TextureState DEFAULT_TEXTURE_STATE 
-        = TextureProviders.BIG_TEX.get(0).getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID);
+    private static ShapeMeshGenerator filler_instance;
+    private static ShapeMeshGenerator height_instnace;
     
-    public static SimpleCollisionHandler makeCollisionHandler()
+    public static ShapeMeshGenerator getFillerFactory()
     {
-        //main diff is lack of species
-        FlowModelFactory factory = new FlowModelFactory(true, ModelStateComponents.FLOW_JOIN,
-               ModelStateComponents.TEXTURE_1, ModelStateComponents.ROTATION_NONE, ModelStateComponents.COLORS_WHITE);
-        return new SimpleCollisionHandler(factory);
+        if(filler_instance == null) filler_instance = new TerrainMeshFactory(true);
+        return filler_instance; 
+    }
+    
+    public static ShapeMeshGenerator getHeightFactory()
+    {
+        if(height_instnace == null) height_instnace = new TerrainMeshFactory(false);
+        return height_instnace; 
     }
     
     private static final AxisAlignedBB[] COLLISION_BOUNDS =
@@ -76,12 +71,34 @@ public class FlowModelFactory extends ModelFactory
         new AxisAlignedBB(0, 0, 0, 1, 1, 1)
     };
     
-    public FlowModelFactory(boolean enableCollision, ModelStateComponent<?,?>... components) 
+    private final boolean isFiller;
+    
+    protected TerrainMeshFactory(boolean isFiller)
     {
-        super(ModelShape.TERRAIN_HEIGHT, components);
+        super(  StateFormat.FLOW, 
+                ModelState.STATE_FLAG_NEEDS_POS, 
+                SURFACE_TOP, SURFACE_SIDE);
+        this.isFiller = isFiller;
     }
 
-   
+    @Override
+    public ICollisionHandler collisionHandler()
+    {
+        return this;
+    }
+
+    @Override
+    public boolean isSpeciesUsedForHeight()
+    {
+        return true;
+    }
+    
+    @Override
+    public int geometricSkyOcclusion(ModelState modelState)
+    {
+        return modelState.getFlowState().verticalOcclusion();
+    }
+
     /**
      * Flowing terrain tends to appear washed out due to simplistic lighting model.
      * Not hacking the lighter, but can scale horizontal component of vertex normals
@@ -93,53 +110,19 @@ public class FlowModelFactory extends ModelFactory
     }
 
     @Override
-    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
-    {
-        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
-
-        return QuadContainer.fromRawQuads(this.makeRawQuads(texState, state));
-    }
-
-    @Override
-    public List<BakedQuad> getItemQuads(TextureState texState, ModelStateSetValue state)
-    {
-        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        for(RawQuad quad : this.makeRawQuads(texState, state))
-        {
-
-            builder.add(quad.createBakedQuad());
-
-        }   
-        return builder.build();
-    }
-
-
-    public List<RawQuad> makeRawQuads(TextureState texState, ModelStateSetValue state)
+    public List<RawQuad> getShapeQuads(ModelState modelState)
     {
         CSGShape rawQuads = new CSGShape();
         RawQuad template = new RawQuad();
 
-        template.color = state.getValue(this.colorComponent).getColor(EnumColorMap.BASE);
+        template.color = Color.WHITE;
         template.lockUV = true;
-        //        template.rotation = state.getValue(this.rotationComponent);
-        template.textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(
-                texState.buildTextureName());
-        template.lightingMode = texState.lightingMode;
+        template.surface = SURFACE_TOP;
         // default - need to change for sides and bottom
         template.setFace(EnumFacing.UP);
-        
-       
-        // collision variant never visible & doesn't have flow texture in state
-        ModelFlowTexComponent.FlowTexValue flowTex = this.flowTexComponent == null
-                ? ModelStateComponents.FLOW_TEX.dummyValue
-                : state.getValue(this.flowTexComponent);
 
-        template.minU = flowTex.getX() * 2;
-        template.maxU = template.minU + 2;
-        template.minV = flowTex.getZ() * 2;
-        template.maxV = template.minV + 2;
 
-        FlowHeightState flowState = state.getValue(ModelStateComponents.FLOW_JOIN);
+        FlowHeightState flowState = modelState.getFlowState();
 
         // center vertex setup
         FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0 - flowState.getCenterVertexHeight() + flowState.getYOffset());
@@ -354,8 +337,9 @@ public class FlowModelFactory extends ModelFactory
 
                 // side
                 RawQuad qSide = new RawQuad(template);
+                qSide.surface = SURFACE_SIDE;
                 qSide.setFace(side.face);
-                setupUVForSide(qSide, flowTex, side.face);
+                setupUVForSide(qSide, side.face);
 
                 qSide.setupFaceQuad(
                         new FaceVertex(0, bottom, 0),
@@ -387,8 +371,9 @@ public class FlowModelFactory extends ModelFactory
 
                 //Sides
                 RawQuad qSide = new RawQuad(template);
+                qSide.surface = SURFACE_SIDE;
                 qSide.setFace(side.face);
-                setupUVForSide(qSide, flowTex, side.face);
+                setupUVForSide(qSide, side.face);
 
                 qSide.setupFaceQuad(
                         new FaceVertex(0, bottom, 0),
@@ -399,6 +384,7 @@ public class FlowModelFactory extends ModelFactory
                 rawQuads.add(qSide);
 
                 qSide = new RawQuad(qSide);
+                qSide.surface = SURFACE_SIDE;
                 qSide.setFace(side.face);
                 qSide.setupFaceQuad(
                         new FaceVertex(0.5, bottom, 0),
@@ -413,8 +399,9 @@ public class FlowModelFactory extends ModelFactory
         // Bottom face
         RawQuad qBottom = new RawQuad(template);
         //flip X-axis texture on bottom face
-        qBottom.minU = 14 - qBottom.minU;
-        qBottom.maxU = qBottom.minU + 2;
+//        qBottom.minU = 14 - qBottom.minU;
+//        qBottom.maxU = qBottom.minU + 2;
+        qBottom.surface = SURFACE_SIDE;
         qBottom.setFace(EnumFacing.DOWN);        
         qBottom.setupFaceQuad(0, 0, 1, 1, bottom, EnumFacing.NORTH);
         rawQuads.add(qBottom);
@@ -422,24 +409,20 @@ public class FlowModelFactory extends ModelFactory
 
 
         CSGShape cubeQuads = new CSGShape();
-        cubeQuads.add(template.clone().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+        cubeQuads.add(template.clone().setSurface(SURFACE_SIDE).setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
         RawQuad faceQuad = template.clone();
         
         //flip X-axis texture on bottom face
-        faceQuad.minU = 14 - faceQuad.minU;
-        faceQuad.maxU = faceQuad.minU + 2;
+//        faceQuad.minU = 14 - faceQuad.minU;
+//        faceQuad.maxU = faceQuad.minU + 2;
         
-        cubeQuads.add(faceQuad.clone().setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
+        cubeQuads.add(faceQuad.clone().setSurface(SURFACE_SIDE).setupFaceQuad(EnumFacing.DOWN, 0, 0, 1, 1, 0, EnumFacing.NORTH));
 
-        setupUVForSide(faceQuad, flowTex, EnumFacing.NORTH);
-        cubeQuads.add(faceQuad.clone().setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
-        setupUVForSide(faceQuad, flowTex, EnumFacing.SOUTH);
-        cubeQuads.add(faceQuad.clone().setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
         
-        setupUVForSide(faceQuad, flowTex, EnumFacing.EAST);
-        cubeQuads.add(faceQuad.clone().setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
-        setupUVForSide(faceQuad, flowTex, EnumFacing.WEST);
-        cubeQuads.add(faceQuad.clone().setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.NORTH).setSurface(SURFACE_SIDE).setupFaceQuad(EnumFacing.NORTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.SOUTH).setSurface(SURFACE_SIDE).setupFaceQuad(EnumFacing.SOUTH, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.EAST).setSurface(SURFACE_SIDE).setupFaceQuad(EnumFacing.EAST, 0, 0, 1, 1, 0, EnumFacing.UP));
+        cubeQuads.add(setupUVForSide(faceQuad.clone(), EnumFacing.WEST).setSurface(SURFACE_SIDE).setupFaceQuad(EnumFacing.WEST, 0, 0, 1, 1, 0, EnumFacing.UP));
 
         rawQuads = rawQuads.intersect(cubeQuads);
 
@@ -447,6 +430,76 @@ public class FlowModelFactory extends ModelFactory
         // will be useful for face culling
         rawQuads.forEach((quad) -> quad.setFace(quad.isOnFace(quad.getNominalFace()) ? quad.getNominalFace() : null));        
 
+        
+        // scale all quads UVs according to position to match what surface painter expects
+        // Any quads with a null face are assumed to be part of the top face
+        
+        // We want top face textures to always join irrespective of Y.
+        // Other face can vary based on orthogonal dimension to break up appearance of layers.
+        for(RawQuad quad : rawQuads)
+        {
+            EnumFacing face = quad.getNominalFace();
+            if(face == null) face = EnumFacing.UP;
+            
+            switch(face)
+            {
+                case NORTH:
+                {
+                    int zHash = MathHelper.hash(modelState.getPosZ());
+                    quad.minU = 255 - ((modelState.getPosX() + (zHash >> 16)) & 0xFF);
+                    quad.maxU = quad.minU +  1;
+                    quad.minV = 255 - ((modelState.getPosY() + zHash) & 0xFF);
+                    quad.maxV = quad.minV + 1;
+                    break;
+                }
+                case SOUTH:
+                {
+                    int zHash = MathHelper.hash(modelState.getPosZ());
+                    quad.minU = (modelState.getPosX() + (zHash >> 16)) & 0xFF;
+                    quad.maxU = quad.minU +  1;
+                    quad.minV = 255 - ((modelState.getPosY() + zHash) & 0xFF);
+                    quad.maxV = quad.minV + 1;
+                    break;
+                }
+                case EAST:
+                {
+                    int xHash = MathHelper.hash(modelState.getPosX());
+                    quad.minU = 255 - ((modelState.getPosZ() + (xHash >> 16)) & 0xFF);
+                    quad.maxU = quad.minU +  1;
+                    quad.minV = 255 - ((modelState.getPosY() + xHash) & 0xFF);
+                    quad.maxV = quad.minV + 1;
+                    break;
+                }
+                case WEST:
+                {
+                    int xHash = MathHelper.hash(modelState.getPosX());
+                    quad.minU = (modelState.getPosZ() + (xHash >> 16)) & 0xFF;
+                    quad.maxU = quad.minU +  1;
+                    quad.minV = 255 - ((modelState.getPosY() + xHash) & 0xFF);
+                    quad.maxV = quad.minV + 1;
+                    break;
+                } 
+                case DOWN:
+                {
+                    int yHash = MathHelper.hash(modelState.getPosY());
+                    quad.minU = 255 - ((modelState.getPosX() + (yHash >> 16)) & 0xFF);
+                    quad.maxU = quad.minU +  1;
+                    quad.minV = (modelState.getPosZ() + (yHash >> 16)) & 0xFF;
+                    quad.maxV = quad.minV + 1;
+                    break;
+                }
+                case UP:
+                default:
+                {
+                    quad.minU = modelState.getPosX();
+                    quad.maxU = quad.minU +  1;
+                    quad.minV = modelState.getPosZ();
+                    quad.maxV = quad.minV + 1;
+                    break;
+                }
+            }
+        }
+        
         // Removed: if we end up with an empty list, default to standard cube
         // Removed because block now behaves like air if this happens somehow.
         //        if(rawQuads.isEmpty())
@@ -462,41 +515,71 @@ public class FlowModelFactory extends ModelFactory
         return rawQuads;
     }
 
-    private void setupUVForSide(RawQuad quad, FlowTexValue flowTex, EnumFacing face)
+   
+    private RawQuad setupUVForSide(RawQuad quad, EnumFacing face)
     {
-        quad.minU = (face.getAxis() == Axis.X ? flowTex.getZ() : flowTex.getX()) * 2;
+        
+//        quad.minU = (face.getAxis() == Axis.X ? flowTex.getZ() : flowTex.getX()) * 2;
         // need to flip U on these side faces so that textures align properly
-        if(face == EnumFacing.EAST || face == EnumFacing.NORTH) quad.minU = 14 - quad.minU;
-        quad.maxU = quad.minU + 2;
-        quad.minV = 14 - flowTex.getY() * 2;
-        quad.maxV = quad.minV + 2;
+        if(face == EnumFacing.EAST || face == EnumFacing.NORTH) 
+        {
+            quad.minU = 16;
+            quad.maxU = 0;
+        }
+        else
+        {
+            quad.minU = 0;
+            quad.maxU = 16;
+        }
+        return quad;
+//         quad.maxU = quad.minU + 2;
+//        quad.minV = 14 - flowTex.getY() * 2;
+//        quad.maxV = quad.minV + 2;
     }
     
-//    @Override
-//    public AbstractCollisionHandler getCollisionHandler(ModelDispatcher dispatcher)
-//    {
-//        return COLLISION_HANDLER;
-//    }
-
     @Override
-    public List<RawQuad> getCollisionQuads(ModelStateSetValue state)
+    public boolean isCube(ModelState modelState)
     {
-        return this.makeRawQuads(DEFAULT_TEXTURE_STATE, state);
+        return modelState.getFlowState().isFullCube();
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    public boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState)
+    {
+        return false;
+    }
+
+    @Override
+    public SideShape sideShape(ModelState modelState, EnumFacing side)
+    {
+        return modelState.getFlowState().isFullCube() ? SideShape.SOLID : SideShape.MISSING;
+    }
+
+    @Override
+    public List<AxisAlignedBB> getCollisionBoxes(ModelState modelState)
+    {
+        //TODO: caching - very slow to regenerate each time
+        return CollisionBoxGenerator.makeCollisionBoxList(getShapeQuads(modelState));
+    }
+
+    @Override
+    public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
     {
         try
         {
-            return COLLISION_BOUNDS[state.getValue(NiceBlock.META)];
+            return COLLISION_BOUNDS[modelState.getFlowState().getCenterHeight() - 1];
         }
         catch (Exception ex)
         {
-            Output.info("FlowModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Output.info("TerrainMeshFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }
-  
-    
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox(ModelState modelState)
+    {
+        return getCollisionBoundingBox(modelState);
+    }
+
 }

@@ -65,7 +65,7 @@ public class ZoomTextureSprite extends TextureAtlasSprite
     public int[][] getFrameTextureData(int index)
     {
         // not really supported - won't be properly zoomed
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: getFrameTextureData");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: getFrameTextureData");
         return source.getFrameTextureData(index);
     }
 
@@ -84,61 +84,61 @@ public class ZoomTextureSprite extends TextureAtlasSprite
     @Override
     public void setIconWidth(int newWidth)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: setIconWidth");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: setIconWidth");
     }
     
     @Override
     public void setIconHeight(int newHeight)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: setIconHeight");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: setIconHeight");
     }
     
     @Override
     public void initSprite(int inX, int inY, int originInX, int originInY, boolean rotatedIn)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: initSprite");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: initSprite");
     }
 
     @Override
     public void copyFrom(TextureAtlasSprite atlasSpirit)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: copyFrom");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: copyFrom");
     }
 
     @Override
     public void updateAnimation()
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: updateAnimation");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: updateAnimation");
     }
 
     @Override
     public void loadSprite(PngSizeInfo sizeInfo, boolean p_188538_2_) throws IOException
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: loadSprite");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: loadSprite");
     }
 
     @Override
     public void loadSpriteFrames(IResource resource, int mipmaplevels) throws IOException
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: loadSpriteFrames");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: loadSpriteFrames");
     }
 
     @Override
     public void generateMipmaps(int level)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: generateMipmaps");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: generateMipmaps");
     }
 
     @Override
     public void clearFramesTextureData()
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: clearFramesTextureData");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: clearFramesTextureData");
     }
 
     @Override
     public void setFramesTextureData(List<int[][]> newFramesTextureData)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: setFramesTextureData");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: setFramesTextureData");
     }
 
     @Override
@@ -150,7 +150,7 @@ public class ZoomTextureSprite extends TextureAtlasSprite
     @Override
     public boolean load(IResourceManager manager, ResourceLocation location)
     {
-        if(Output.DEBUG_MODE) Output.getLog().warn("Unsupported operation on zoomed sprite: load");
+        if(Output.DEBUG_MODE) Output.warn("Unsupported operation on zoomed sprite: load");
         return false;
     }
 

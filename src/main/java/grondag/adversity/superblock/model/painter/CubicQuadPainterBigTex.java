@@ -1,5 +1,6 @@
 package grondag.adversity.superblock.model.painter;
 
+import grondag.adversity.Output;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.superblock.model.layout.PaintLayer;
@@ -33,8 +34,8 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         // qnd z representing depth into the surface
         Vec3i surfaceVec = getFacePerspective(this.pos, face, this.texture.textureScale);
 
-        int key = Math.abs(MathHelper.hash((surfaceVec.getZ() << 4) | this.species));
-
+//        int key = Math.abs(MathHelper.hash((surfaceVec.getZ() << 4) | this.species));
+        int key = 0;
         
         // Determine what type of randomizations to apply so that we have a different
         // appearance based on depth and species.

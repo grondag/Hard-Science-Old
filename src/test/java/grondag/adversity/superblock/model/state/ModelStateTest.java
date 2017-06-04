@@ -21,12 +21,12 @@ public class ModelStateTest
     @Test
     public void test()
     {
-        Output.getLog().info("bits0 length = "  + ModelStateFactory.PACKER_0.bitLength());
-        Output.getLog().info("bits1 length = "  + ModelStateFactory.PACKER_1.bitLength());
-        Output.getLog().info("bits2 length = "  + ModelStateFactory.PACKER_2.bitLength());
+        Output.info("bits0 length = "  + ModelStateFactory.PACKER_0.bitLength());
+        Output.info("bits1 length = "  + ModelStateFactory.PACKER_1.bitLength());
+        Output.info("bits2 length = "  + ModelStateFactory.PACKER_2.bitLength());
         
-        Output.getLog().info("bits3 block length = "  + ModelStateFactory.PACKER_3_BLOCK.bitLength());
-        Output.getLog().info("bits3 flow length = "  + ModelStateFactory.PACKER_3_FLOW.bitLength());
+        Output.info("bits3 block length = "  + ModelStateFactory.PACKER_3_BLOCK.bitLength());
+        Output.info("bits3 flow length = "  + ModelStateFactory.PACKER_3_FLOW.bitLength());
         
         ModelState state = new ModelState();
         

@@ -59,7 +59,7 @@ public class SimpleItemBlockModel implements IBakedModel, IPerspectiveAwareModel
     @Override
     public TextureAtlasSprite getParticleTexture()
     {
-        Output.getLog().warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
+        Output.warn("Unsupported method call: SimpleItemModel.getParticleTexture()");
         return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelManager().getMissingModel().getParticleTexture();
     }
 

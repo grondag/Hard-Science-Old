@@ -19,10 +19,10 @@ public class Surface
         this(paintType, topology, false);
     }
     
-    public Surface(SurfaceType paintType, SurfaceTopology topology, boolean isPreShaded)
+    public Surface(SurfaceType paintType, SurfaceTopology topology, boolean isLampGradient)
     {
         this.surfaceType = paintType;
         this.topology = topology;
-        this.isLampGradient = isPreShaded;
+        this.isLampGradient = isLampGradient;
     }
 }

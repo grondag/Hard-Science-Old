@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import grondag.adversity.Configurator;
+import grondag.adversity.library.Color;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import grondag.adversity.superblock.model.painter.surface.Surface;
@@ -34,7 +35,7 @@ public class RawQuad
     // if true, rotates texture by swaping uv on vertices
     // Needed for big-tex blocks, but does only works well for regular sqare quads.
     public boolean useSimpleRotation = false;
-    public int color;
+    public int color = Color.WHITE;
     public LightingMode lightingMode = LightingMode.SHADED;
     public boolean lockUV = false;
 //    public boolean isItem = false;
@@ -754,7 +755,18 @@ public class RawQuad
             }
         }
     }
-
+    
+     /**
+      * Multiplies uvMin/Max by the given factors.
+      */
+    public void scaleQuadUV(double uScale, double vScale)
+    {
+        this.minU *= uScale;
+        this.maxU *= uScale;
+        this.minV *= vScale;
+        this.maxV *= vScale;
+    }
+    
     public BakedQuad createBakedQuad()
     {
 
@@ -1059,5 +1071,12 @@ public class RawQuad
     {
         this.face = face;
         return face;
+    }
+    
+    /** convenience method - sets surface value and returns self */
+    public RawQuad setSurface(Surface surface)
+    {
+        this.surface = surface;
+        return this;
     }
 }

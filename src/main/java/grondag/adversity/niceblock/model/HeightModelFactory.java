@@ -178,7 +178,7 @@ public class HeightModelFactory extends ColorModelFactory
         }
         catch (Exception ex)
         {
-            Output.getLog().info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Output.info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }

@@ -224,7 +224,7 @@ public class EntityLavaParticle extends Entity
         
         if(this.ticksExisted > 600)
         {
-            Output.getLog().info("Ancient lava particle died of old age.");
+            Output.info("Ancient lava particle died of old age.");
             this.setDead();
             return;
         }

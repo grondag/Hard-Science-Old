@@ -2,7 +2,6 @@ package grondag.adversity.superblock.model.shape;
 
 import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelState.*;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -54,7 +53,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     
     /** never change so may as well save em */
     @SuppressWarnings("unchecked")
-    private final Collection<RawQuad>[] cachedQuads = new Collection[16];
+    private final List<RawQuad>[] cachedQuads = new List[16];
     
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
@@ -76,7 +75,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         }
     }
  
-    private Collection<RawQuad> makeQuads(int species)
+    private List<RawQuad> makeQuads(int species)
     {
         double height = (species + 1) / 16.0;
         
@@ -119,7 +118,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     }
 
     @Override
-    public Collection<RawQuad> getShapeQuads(ModelState modelState)
+    public List<RawQuad> getShapeQuads(ModelState modelState)
     {
         return this.cachedQuads[modelState.getSpecies()];
     }
@@ -163,7 +162,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         }
         catch (Exception ex)
         {
-            Output.getLog().info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Output.info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }
