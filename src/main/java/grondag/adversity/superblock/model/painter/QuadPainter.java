@@ -13,6 +13,7 @@ import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.Translucency;
+import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
@@ -47,7 +48,8 @@ public abstract class QuadPainter
         this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
         this.renderLayer = modelState.getRenderLayer(paintLayer);
         this.lightingMode = modelState.getLightingMode(paintLayer);
-        this.texture = modelState.getTexture(paintLayer);
+        TexturePallette tex = modelState.getTexture(paintLayer);
+        this.texture = tex == Textures.USE_BASE ? modelState.getTexture(PaintLayer.BASE) : tex;
         this.translucency = modelState.getTranslucency();
     }
     

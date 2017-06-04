@@ -28,8 +28,8 @@ import net.minecraft.world.World;
 
 public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
-    private static final Surface SURFACE_TOP = new Surface(SurfaceType.LAMP, SurfaceTopology.TILED);
-    private static final Surface SURFACE_SIDE = new Surface(SurfaceType.MAIN, SurfaceTopology.TILED);
+    private static final Surface SURFACE_TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.TILED);
+    private static final Surface SURFACE_SIDE = new Surface(SurfaceType.CUT, SurfaceTopology.TILED);
     
     private static ShapeMeshGenerator filler_instance;
     private static ShapeMeshGenerator height_instnace;

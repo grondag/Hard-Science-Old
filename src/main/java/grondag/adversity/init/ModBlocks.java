@@ -39,7 +39,10 @@ public class ModBlocks
 {
     private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
     public static final Block basalt_cobble = null;
-    public static final Block terrain_test = null;
+    public static final Block basalt_cool_dynamic_height = null;
+    public static final Block basalt_cool_dynamic_filler = null;
+    public static final Block basalt_cool_static_height = null;
+    public static final Block basalt_cool_static_filler = null;
     
     public static TerrainBlockRegistry TERRAIN_STATE_REGISTRY;
     
@@ -58,11 +61,16 @@ public class ModBlocks
         
         workingModel = new ModelState();
         workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
-        workingModel.setTexture(PaintLayer.LAMP, Textures.BIGTEX_TEST5);
-        workingModel.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_LIGHT));
-        workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_TEST2);
-        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.LIGHT));
-        event.getRegistry().register(new TerrainFlowingBlock("terrain_test", BlockSubstance.BASALT, workingModel, false));
+        workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL_ZOOM);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_LIGHT));
+        workingModel.setTexture(PaintLayer.CUT, Textures.BIGTEX_BASALT_CUT);
+        workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.LIGHT));
+        
+        Block dynamicBasaltHeight = new TerrainFlowingBlock("basalt_cool_dynamic_height", BlockSubstance.BASALT, workingModel, false);
+        Block dynamicBasaltFiller = new TerrainFlowingBlock("basalt_cool_dynamic_filler", BlockSubstance.BASALT, workingModel, true);
+        event.getRegistry().register(dynamicBasaltHeight);
+        event.getRegistry().register(dynamicBasaltFiller);
+        TERRAIN_STATE_REGISTRY.registerFiller(dynamicBasaltHeight, dynamicBasaltFiller);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

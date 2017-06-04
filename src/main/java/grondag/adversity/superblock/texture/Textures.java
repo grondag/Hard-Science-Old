@@ -21,7 +21,13 @@ public class Textures
     
     
     public static final int MAX_TEXTURES = 4096;
-      
+    
+    /**
+     * Important that this come first so that it is the default value returned by modelState.
+     * Is not meant for user selection - means that CUT paint layer should use same texture as base layer. 
+     */
+    public static final TexturePallette USE_BASE = ALL_TEXTURES.addTexturePallette("raw_durastone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, BlockRenderLayer.SOLID, TextureGroup.HIDDEN_SYSTEM);
+    
     public static final TexturePallette BLOCK_COBBLE = ALL_TEXTURES.addTexturePallette("cobble", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
     public static final TexturePallette BLOCK_COBBLE_ZOOM = ALL_TEXTURES.addZoomedPallete(BLOCK_COBBLE);
    

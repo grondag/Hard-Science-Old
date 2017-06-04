@@ -66,7 +66,7 @@ public class ModelStateFactory
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
-    private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.DYNAMIC_SIZE];
+    private static final IntElement[] P1_PAINT_TEXTURE = new IntElement[PaintLayer.STATIC_SIZE];
     @SuppressWarnings("unchecked")
     private static final EnumElement<LightingMode>[] P1_PAINT_LIGHT= new EnumElement[PaintLayer.DYNAMIC_SIZE];
 
@@ -100,10 +100,14 @@ public class ModelStateFactory
     {
         long borderMask0 = 0;
         long borderMask1 = 0;
+        for(int i = 0; i < PaintLayer.STATIC_SIZE; i++)
+        {
+            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
+        }
+        
         for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
         {
             P0_PAINT_COLOR[i] = PACKER_0.createIntElement(BlockColorMapProvider.INSTANCE.getColorMapCount());  // 11 bits each x4 = 44
-            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
             P1_PAINT_LIGHT[i] = PACKER_1.createEnumElement(LightingMode.class); // 1 bit each x4 = 4
             
             borderMask0 |= P0_PAINT_COLOR[i].comparisonMask();
@@ -659,12 +663,12 @@ public class ModelStateFactory
         
         public TexturePallette getTexture(PaintLayer layer)
         {
-            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.dynamicIndex].getValue(bits1));
+            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
         }
         
         public void setTexture(PaintLayer layer, TexturePallette tex)
         {
-            bits1 = P1_PAINT_TEXTURE[layer.dynamicIndex].setValue(tex.ordinal, bits1);
+            bits1 = P1_PAINT_TEXTURE[layer.ordinal()].setValue(tex.ordinal, bits1);
             invalidateHashCode();
             clearStateFlags();
         }
@@ -1001,7 +1005,7 @@ public class ModelStateFactory
         {
             return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK)
                     && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK)
-                    && (this.bits2 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits2 & P2_APPEARANCE_COMPARISON_MASK);
+                    && (this.bits2 & P2_APPEARANCE_COMPARISON_MASK) == (other.bits2 & P2_APPEARANCE_COMPARISON_MASK);
         }
     }
 }

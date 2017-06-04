@@ -10,7 +10,8 @@ public enum TextureGroup
     DYNAMIC_TILES,
     DYNAMIC_BORDERS,
     DYNAMIC_DETAILS,
-    DYNAMIC_SPECIAL;
+    DYNAMIC_SPECIAL,
+    HIDDEN_SYSTEM;
     
     /** used as a fast way to filter textures from a list */
     public final int bitFlag;
