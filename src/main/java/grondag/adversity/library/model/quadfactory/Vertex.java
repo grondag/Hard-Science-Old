@@ -43,6 +43,10 @@ public class Vertex extends Vec3d
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, colorIn, this.normal);
     }
 
+    public Vertex withUV(double uNew, double vNew)
+    {
+        return new Vertex(this.xCoord, this.yCoord, this.zCoord, uNew, vNew, this.color, this.normal);
+    }
     public boolean hasNormal()
     {
         return this.normal != null;

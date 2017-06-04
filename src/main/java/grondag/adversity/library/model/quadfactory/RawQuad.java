@@ -33,8 +33,8 @@ public class RawQuad
     public TextureAtlasSprite textureSprite;
     public Rotation rotation = Rotation.ROTATE_NONE;
     // if true, rotates texture by swaping uv on vertices
-    // Needed for big-tex blocks, but does only works well for regular sqare quads.
-    public boolean useSimpleRotation = false;
+    // Needed for big-tex painter, but does not work well for regular square quads.
+    public boolean useVertexUVRotation = false;
     public int color = Color.WHITE;
     public LightingMode lightingMode = LightingMode.SHADED;
     public boolean lockUV = false;
@@ -120,7 +120,6 @@ public class RawQuad
         this.faceNormal = fromObject.faceNormal;
 //        this.tag = fromObject.tag;
         this.shouldContractUVs = fromObject.shouldContractUVs;
-        this.useSimpleRotation = fromObject.useSimpleRotation;
         this.minU = fromObject.minU;
         this.maxU = fromObject.maxU;
         this.minV = fromObject.minV;
@@ -729,32 +728,49 @@ public class RawQuad
      */
      public void rotateQuadUV()
     {
-        if(this.useSimpleRotation)
+        if(this.useVertexUVRotation)
         {
-            double swapU = this.getVertex(0).u;
-            double swapV = this.getVertex(0).v;
-            
-            for(int i = 0; i < this.getVertexCount() - 1; i++)
-            {
-                Vertex vOld = getVertex(i);
-                Vertex vNext = getVertex(i + 1);
-                Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
-                setVertex(i, vNew);
-            } 
-            Vertex vOld = getVertex(this.getVertexCount() - 1);
-            Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
-            setVertex(this.getVertexCount() - 1, vNew);
+            this.rotateQuadUVSwapVertex();
         }
         else
         {
-            for(int i = 0; i < this.getVertexCount(); i++)
-            {
-                Vertex vOld = getVertex(i);
-                Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vOld.v, 16 - vOld.u, vOld.color, vOld.normal);
-                setVertex(i, vNew);
-            }
+            this.rotateQuadUVMoveTexture();
         }
     }
+     
+     /**
+     * Transforms UV coords so that face texture appears to rotate 90deg clockwise.
+     */
+     public void rotateQuadUVMoveTexture()
+     {
+         for(int i = 0; i < this.getVertexCount(); i++)
+         {
+             Vertex vOld = getVertex(i);
+             setVertex(i, vOld.withUV(vOld.v, 16 - vOld.u));
+         }
+     }
+     
+     
+     /**
+      * Used by BigTex painter, moves the UV coordinates around the edges of the quad
+      * so that texture appears to rotate 90deg clockwise.
+      */
+     public void rotateQuadUVSwapVertex()
+     {
+         double swapU = this.getVertex(0).u;
+         double swapV = this.getVertex(0).v;
+         
+         for(int i = 0; i < this.getVertexCount() - 1; i++)
+         {
+             Vertex vOld = getVertex(i);
+             Vertex vNext = getVertex(i + 1);
+             Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
+             setVertex(i, vNew);
+         } 
+         Vertex vOld = getVertex(this.getVertexCount() - 1);
+         Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
+         setVertex(this.getVertexCount() - 1, vNew);
+     }
     
      /**
       * Multiplies uvMin/Max by the given factors.

@@ -54,7 +54,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             // single texture, so do rotation, uv flip and offset
             quad.textureSprite = this.texture.getTextureSprite(this.blockVersion);
             
-            quad.useSimpleRotation = true;
+            quad.useVertexUVRotation = true;
             quad.rotation = Rotation.values()[key & 3];
 
             surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
@@ -87,7 +87,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             // multiple texture versions, so do rotation and alternation
             quad.textureSprite = this.texture.getTextureSprite((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
             
-            quad.useSimpleRotation = true;
+            quad.useVertexUVRotation = true;
             quad.rotation = Rotation.values()[(this.texture.allowRotation ? key + this.rotation.ordinal() : key) & 3];
 
             surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
