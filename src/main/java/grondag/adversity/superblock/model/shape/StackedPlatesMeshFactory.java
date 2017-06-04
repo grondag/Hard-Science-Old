@@ -200,5 +200,5 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
                 return SideShape.MISSING;
         
         }
-    };
+    }
 }

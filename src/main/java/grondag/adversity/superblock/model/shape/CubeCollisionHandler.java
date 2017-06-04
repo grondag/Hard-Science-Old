@@ -32,5 +32,4 @@ public class CubeCollisionHandler implements ICollisionHandler
     {
         return Block.FULL_BLOCK_AABB;
     }
-    
 }

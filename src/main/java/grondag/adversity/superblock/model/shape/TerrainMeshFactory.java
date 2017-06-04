@@ -558,8 +558,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public List<AxisAlignedBB> getCollisionBoxes(ModelState modelState)
     {
-        //TODO: caching - very slow to regenerate each time
-        return CollisionBoxGenerator.makeCollisionBoxList(getShapeQuads(modelState));
+        return CollisionBoxDispatcher.INSTANCE.getCollisionBoxes(modelState);
     }
 
     @Override
@@ -581,5 +580,10 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         return getCollisionBoundingBox(modelState);
     }
-
+    
+    @Override
+    public long collisionKey(ModelState modelState)
+    {
+        return modelState.getFlowState().getStateKey();
+    }
 }
