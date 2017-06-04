@@ -1,12 +1,9 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
-import grondag.adversity.niceblock.block.FlowSimpleBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.modelstate.ModelFlowJoinComponent;
-import grondag.adversity.niceblock.modelstate.ModelStateComponents;
 import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -130,7 +127,7 @@ public class TerrainBlock
         {
             targetMeta = 0;
 
-            fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
+            fillBlock = (SuperBlock) ModBlocks.TERRAIN_STATE_REGISTRY.getFillerBlock(stateBelow.getBlock());
         }
         else 
         {
@@ -139,7 +136,7 @@ public class TerrainBlock
                     && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
             {
                 targetMeta = 1;
-                fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
+                fillBlock = (SuperBlock) ModBlocks.TERRAIN_STATE_REGISTRY.getFillerBlock(stateTwoBelow.getBlock());
             }
         }
 

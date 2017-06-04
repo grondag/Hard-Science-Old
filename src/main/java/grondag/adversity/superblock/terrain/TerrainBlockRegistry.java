@@ -1,0 +1,42 @@
+package grondag.adversity.superblock.terrain;
+
+import com.google.common.collect.HashBiMap;
+
+import net.minecraft.block.Block;
+
+/** tracks which terrain blocks can be frozen or thawed from each other */
+public class TerrainBlockRegistry
+{
+    private HashBiMap<Block, Block> stateMap = HashBiMap.create(16);
+    private HashBiMap<Block, Block> fillerMap = HashBiMap.create(16);
+    
+    public void registerStateTransition(Block dynamicBlock, Block staticBlock)
+    {
+        stateMap.put(dynamicBlock, staticBlock);
+    }
+    
+    public Block getStaticBlock(Block dynamicBlock)
+    {
+        return this.stateMap.get(dynamicBlock);
+    }
+    
+    public Block getDynamicBlock(Block staticBlock)
+    {
+        return this.stateMap.inverse().get(staticBlock);
+    }
+    
+    public void registerFiller(Block heightBlock, Block fillerBlock)
+    {
+        fillerMap.put(heightBlock, fillerBlock);
+    }
+    
+    public Block getFillerBlock(Block hieghtBlock)
+    {
+        return this.fillerMap.get(hieghtBlock);
+    }
+    
+    public Block getHeightBlock(Block fillerBlock)
+    {
+        return this.fillerMap.inverse().get(fillerBlock);
+    }
+}

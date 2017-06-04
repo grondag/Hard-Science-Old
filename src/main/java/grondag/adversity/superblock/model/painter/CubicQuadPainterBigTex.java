@@ -1,6 +1,5 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.Output;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.superblock.model.layout.PaintLayer;
@@ -8,7 +7,6 @@ import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 
 public class CubicQuadPainterBigTex extends CubicQuadPainter

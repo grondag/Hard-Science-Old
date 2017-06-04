@@ -4,7 +4,6 @@ import grondag.adversity.library.Rotation;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 
 public abstract class CubicQuadPainter extends QuadPainter
 {

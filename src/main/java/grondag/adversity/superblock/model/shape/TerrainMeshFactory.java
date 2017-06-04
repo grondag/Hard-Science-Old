@@ -11,7 +11,6 @@ import grondag.adversity.library.model.quadfactory.CSGShape;
 import grondag.adversity.library.model.quadfactory.FaceVertex;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.support.CollisionBoxGenerator;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;

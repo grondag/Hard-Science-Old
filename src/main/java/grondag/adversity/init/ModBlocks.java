@@ -17,6 +17,7 @@ import grondag.adversity.superblock.block.TerrainFlowingBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -40,10 +41,14 @@ public class ModBlocks
     public static final Block basalt_cobble = null;
     public static final Block terrain_test = null;
     
+    public static TerrainBlockRegistry TERRAIN_STATE_REGISTRY;
+    
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
+        
+        TERRAIN_STATE_REGISTRY = new TerrainBlockRegistry();
         
         ModelState workingModel = new ModelState();
         workingModel.setShape(ModelShape.CUBE);
