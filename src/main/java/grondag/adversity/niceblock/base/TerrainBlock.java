@@ -5,6 +5,7 @@ import grondag.adversity.init.ModBlocks;
 import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.TerrainDynamicBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -238,9 +239,9 @@ public class TerrainBlock
                         BlockPos targetPos = pos.add(x, y, z);
                         targetState = worldIn.getBlockState(targetPos);
                         targetBlock = targetState.getBlock();
-                        if(targetBlock instanceof FlowDynamicBlock)
+                        if(targetBlock instanceof TerrainDynamicBlock)
                         {
-                            ((FlowDynamicBlock)targetBlock).makeStatic(targetState, worldIn, targetPos);
+                            ((TerrainDynamicBlock)targetBlock).makeStatic(targetState, worldIn, targetPos);
                         }
                     }
                 }

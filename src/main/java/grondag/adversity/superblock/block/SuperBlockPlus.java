@@ -1,9 +1,13 @@
 package grondag.adversity.superblock.block;
 
+import javax.annotation.Nullable;
+
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -77,5 +81,52 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
             return super.getModelStateAssumeStateIsCurrent(state, world, pos, refreshFromWorldIfNeeded);
         }
 
+    }
+    
+    @Override
+    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        ItemStack stack = super.getStackFromBlock(state, world, pos);
+        
+        if(stack != null)
+        {
+            SuperItemBlock.setModelState(stack, this.getModelStateAssumeStateIsStale(state, world, pos, true));
+        }
+
+        return stack;
+    }
+    
+    /**
+     * Need to destroy block here because did not do it during removedByPlayer.
+     */
+    @Override
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 
+    {
+        super.harvestBlock(worldIn, player, pos, state, te, stack);
+        worldIn.setBlockToAir(pos);
+    }
+    
+    
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * SuperModelBlock: Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
+     */
+    @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) 
+    {
+        if (willHarvest) {
+            return true;
+        }
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+    
+    public void setModelState(World world, BlockPos pos, ModelState modelState)
+    {
+        SuperModelTileEntity blockTE = (SuperModelTileEntity)world.getTileEntity(pos);
+        if (blockTE != null) 
+        {
+            blockTE.setModelState(modelState);
+        }
     }
 }

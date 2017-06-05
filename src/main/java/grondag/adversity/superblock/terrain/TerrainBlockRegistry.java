@@ -1,5 +1,7 @@
 package grondag.adversity.superblock.terrain;
 
+import java.util.HashMap;
+
 import com.google.common.collect.HashBiMap;
 
 import net.minecraft.block.Block;
@@ -9,6 +11,8 @@ public class TerrainBlockRegistry
 {
     private HashBiMap<Block, Block> stateMap = HashBiMap.create(16);
     private HashBiMap<Block, Block> fillerMap = HashBiMap.create(16);
+    private HashMap<Block, Block> cubicMap = new HashMap<Block, Block>(16);
+    
     
     public void registerStateTransition(Block dynamicBlock, Block staticBlock)
     {
@@ -38,5 +42,15 @@ public class TerrainBlockRegistry
     public Block getHeightBlock(Block fillerBlock)
     {
         return this.fillerMap.inverse().get(fillerBlock);
+    }
+    
+    public void registerCubic(Block flowBlock, Block cubicBlock)
+    {
+        this.cubicMap.put(flowBlock, cubicBlock);
+    }
+    
+    public Block getCubicBlock(Block flowBlock)
+    {
+        return this.cubicMap.get(flowBlock);
     }
 }

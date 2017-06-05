@@ -13,7 +13,8 @@ import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperSimpleBlock;
 import grondag.adversity.superblock.block.SuperStateMapper;
-import grondag.adversity.superblock.block.TerrainFlowingBlock;
+import grondag.adversity.superblock.block.TerrainCubicBlock;
+import grondag.adversity.superblock.block.TerrainDynamicBlock;
 import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -43,15 +44,14 @@ public class ModBlocks
     public static final Block basalt_cool_dynamic_filler = null;
     public static final Block basalt_cool_static_height = null;
     public static final Block basalt_cool_static_filler = null;
+    public static final Block basalt_cut = null;
     
-    public static TerrainBlockRegistry TERRAIN_STATE_REGISTRY;
+    public static final TerrainBlockRegistry TERRAIN_STATE_REGISTRY = new TerrainBlockRegistry();
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         event.getRegistry().register(new BlockVolcano());
-        
-        TERRAIN_STATE_REGISTRY = new TerrainBlockRegistry();
         
         ModelState workingModel = new ModelState();
         workingModel.setShape(ModelShape.CUBE);
@@ -66,11 +66,34 @@ public class ModBlocks
         workingModel.setTexture(PaintLayer.CUT, Textures.BIGTEX_BASALT_CUT);
         workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.LIGHT));
         
-        Block dynamicBasaltHeight = new TerrainFlowingBlock("basalt_cool_dynamic_height", BlockSubstance.BASALT, workingModel, false);
-        Block dynamicBasaltFiller = new TerrainFlowingBlock("basalt_cool_dynamic_filler", BlockSubstance.BASALT, workingModel, true);
+        Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", BlockSubstance.BASALT, workingModel, false);
+        Block dynamicBasaltFiller = new TerrainDynamicBlock("basalt_cool_dynamic_filler", BlockSubstance.BASALT, workingModel, true);
         event.getRegistry().register(dynamicBasaltHeight);
         event.getRegistry().register(dynamicBasaltFiller);
         TERRAIN_STATE_REGISTRY.registerFiller(dynamicBasaltHeight, dynamicBasaltFiller);
+        
+        Block staticBasaltHeight = new TerrainDynamicBlock("basalt_cool_static_height", BlockSubstance.BASALT, workingModel, false);
+        Block staticBasaltFiller = new TerrainDynamicBlock("basalt_cool_static_filler", BlockSubstance.BASALT, workingModel, true);
+        event.getRegistry().register(staticBasaltHeight);
+        event.getRegistry().register(staticBasaltFiller);
+        TERRAIN_STATE_REGISTRY.registerFiller(staticBasaltHeight, staticBasaltFiller);
+        
+        TERRAIN_STATE_REGISTRY.registerStateTransition(dynamicBasaltHeight, staticBasaltHeight);
+        TERRAIN_STATE_REGISTRY.registerStateTransition(dynamicBasaltFiller, staticBasaltFiller);
+        
+        workingModel = new ModelState();
+        workingModel.setShape(ModelShape.CUBE);
+        workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_CUT_ZOOM);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+        Block cubicBasalt  = new TerrainCubicBlock("basalt_cut", BlockSubstance.BASALT, workingModel);
+        event.getRegistry().register(cubicBasalt);
+        
+        TERRAIN_STATE_REGISTRY.registerCubic(dynamicBasaltHeight, cubicBasalt);
+        TERRAIN_STATE_REGISTRY.registerCubic(dynamicBasaltFiller, cubicBasalt);
+        TERRAIN_STATE_REGISTRY.registerCubic(staticBasaltHeight, cubicBasalt);
+        TERRAIN_STATE_REGISTRY.registerCubic(staticBasaltFiller, cubicBasalt);
+        
+        
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

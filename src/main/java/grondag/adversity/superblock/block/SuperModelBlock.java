@@ -157,19 +157,7 @@ public class SuperModelBlock extends SuperBlockPlus
         }
         return stack;
     }
-    
-    @Override
-    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        ItemStack stack = super.getStackFromBlock(state, world, pos);
-        
-        if(stack != null)
-        {
-            SuperItemBlock.setModelState(stack, this.getModelStateAssumeStateIsStale(state, world, pos, true));
-        }
-
-        return stack;
-    }
+  
     
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -178,16 +166,6 @@ public class SuperModelBlock extends SuperBlockPlus
         return myTE == null
                 ? BlockSubstance.FLEXSTONE
                 : myTE.getSubstance();
-    }
-    
-    /**
-     * Need to destroy block here because did not do it during removedByPlayer.
-     */
-    @Override
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 
-    {
-        super.harvestBlock(worldIn, player, pos, state, te, stack);
-        worldIn.setBlockToAir(pos);
     }
     
     @Override
@@ -206,19 +184,6 @@ public class SuperModelBlock extends SuperBlockPlus
     public boolean isHypermatter()
     {
         return this.isHyperMatter;
-    }
-    
-    /**
-     * {@inheritDoc} <br><br>
-     * 
-     * SuperModelBlock: Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
-     */
-    @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
-        if (willHarvest) {
-            return true;
-        }
-        return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
     
     /**

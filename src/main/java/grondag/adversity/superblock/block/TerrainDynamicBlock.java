@@ -3,6 +3,7 @@ package grondag.adversity.superblock.block;
 import java.util.List;
 
 import grondag.adversity.Configurator;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
@@ -19,11 +20,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class TerrainFlowingBlock extends SuperSimpleBlock
+public class TerrainDynamicBlock extends SuperSimpleBlock
 {
     private final boolean isFiller;
     
-    public TerrainFlowingBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
+    public TerrainDynamicBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
     {
         super(blockName, substance, defaultModelState);
         this.isFiller = isFiller;
@@ -92,6 +93,21 @@ public class TerrainFlowingBlock extends SuperSimpleBlock
         return items;
     }
 
+    /**
+     * Convert this block to a static version of itself if a static version was given.
+     */
+    public void makeStatic(IBlockState state, World world, BlockPos pos)
+    {
+        Block staticVersion = ModBlocks.TERRAIN_STATE_REGISTRY.getStaticBlock(this);
+        if(staticVersion == null || state.getBlock() != this) return;
+
+        ModelState myModelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
+        myModelState.setStatic(true);
+        world.setBlockState(pos, staticVersion.getDefaultState()
+                .withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), 7);
+        ((TerrainStaticBlock)staticVersion).setModelState(world, pos, myModelState);
+    }
+    
     @Override
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {

@@ -31,19 +31,13 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     private static final Surface SURFACE_TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.TILED);
     private static final Surface SURFACE_SIDE = new Surface(SurfaceType.CUT, SurfaceTopology.TILED);
     
-    private static ShapeMeshGenerator filler_instance;
-    private static ShapeMeshGenerator height_instnace;
+    private static ShapeMeshGenerator instance;
+ 
     
-    public static ShapeMeshGenerator getFillerFactory()
+    public static ShapeMeshGenerator getMeshFactory()
     {
-        if(filler_instance == null) filler_instance = new TerrainMeshFactory(true);
-        return filler_instance; 
-    }
-    
-    public static ShapeMeshGenerator getHeightFactory()
-    {
-        if(height_instnace == null) height_instnace = new TerrainMeshFactory(false);
-        return height_instnace; 
+        if(instance == null) instance = new TerrainMeshFactory();
+        return instance; 
     }
     
     private static final AxisAlignedBB[] COLLISION_BOUNDS =
@@ -70,14 +64,11 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         new AxisAlignedBB(0, 0, 0, 1, 1, 1)
     };
     
-    private final boolean isFiller;
-    
-    protected TerrainMeshFactory(boolean isFiller)
+    protected TerrainMeshFactory()
     {
         super(  StateFormat.FLOW, 
                 ModelState.STATE_FLAG_NEEDS_POS, 
                 SURFACE_TOP, SURFACE_SIDE);
-        this.isFiller = isFiller;
     }
 
     @Override

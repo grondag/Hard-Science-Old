@@ -847,6 +847,11 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     public List<ItemStack> getSubItems()
     {
+        return this.getSubItemsBasic();
+    }
+    
+    protected List<ItemStack> getSubItemsBasic()
+    {
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
         for(int i = 0; i < this.metaCount; i++)
         {

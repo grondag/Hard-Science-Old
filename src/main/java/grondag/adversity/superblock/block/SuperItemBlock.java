@@ -167,8 +167,6 @@ public class SuperItemBlock extends ItemBlock
             SuperModelTileEntity blockTE = (SuperModelTileEntity)world.getTileEntity(pos);
             if (blockTE != null) 
             {
-                blockTE.setModelState(getModelState(stack));
-            
                 if(blockTE instanceof SuperModelTileEntity)
                 {
                     SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
@@ -176,11 +174,8 @@ public class SuperItemBlock extends ItemBlock
                     superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
                     superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
                 }
-                
-                if(world.isRemote)
-                {
-                    blockTE.updateClientRenderState();
-                }
+
+                blockTE.setModelState(getModelState(stack));
             }
         }
         

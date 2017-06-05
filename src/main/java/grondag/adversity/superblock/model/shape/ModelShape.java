@@ -142,7 +142,7 @@ public enum ModelShape
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
         @Override
-        public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getHeightFactory(); }
+        public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getMeshFactory(); }
     },
     
     TERRAIN_FILLER(false)
@@ -150,7 +150,7 @@ public enum ModelShape
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
         @Override
-        public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getFillerFactory(); }
+        public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getMeshFactory(); }
     };
 
     public final boolean isAvailableInGui;

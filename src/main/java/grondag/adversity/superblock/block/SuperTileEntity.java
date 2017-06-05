@@ -180,7 +180,14 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         {
             this.modelState = modelState;
             this.isModelStateCacheDirty = true;
-            if(!this.world.isRemote) this.markDirty();
+            if(this.world.isRemote)
+            {
+                this.updateClientRenderState();
+            }
+            else
+            {
+                this.markDirty();
+            }
         }
     }
 
