@@ -2,7 +2,6 @@ package grondag.adversity.superblock.model.shape;
 
 import java.util.List;
 
-import grondag.adversity.Output;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
@@ -61,8 +60,6 @@ public class CollisionBoxDispatcher
         @Override
         public List<AxisAlignedBB> load(CollisionKey key)
         {
-            //TODO: remove
-            Output.info("generating boxes");
             return CollisionBoxGenerator.makeCollisionBoxList(key.modelState.getShape().meshFactory().getShapeQuads(key.modelState));
         }
     }

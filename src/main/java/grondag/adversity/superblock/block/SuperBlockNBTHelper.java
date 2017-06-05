@@ -15,9 +15,14 @@ public class SuperBlockNBTHelper
 
     public static interface NBTReadHandler
     {
-        public void handleNBTRead(ModelState modelState, int placementShape, byte lightValue, BlockSubstance substance);
+        public void handleNBTRead(ModelState modelState);
     }
     
+    public static interface SuperModelNBTReadHandler
+    {
+        public void handleNBTRead(int placementShape, byte lightValue, BlockSubstance substance);
+    }
+
     public static void writeModelState(NBTTagCompound compound, ModelState modelState)
     {
         if(modelState == null) 
@@ -71,21 +76,33 @@ public class SuperBlockNBTHelper
         return BlockSubstance.values()[MathHelper.clamp(compound.getByte(SUBSTANCE_TAG), 0, BlockSubstance.values().length)];
     }
     
-    public static NBTTagCompound writeToNBT(NBTTagCompound compound, ModelState modelState, int placementShape, byte lightValue, BlockSubstance substance)
+    /** extra attributes for supermodel blocks */
+    public static NBTTagCompound writeToNBT(NBTTagCompound compound, int placementShape, byte lightValue, BlockSubstance substance)
     {
-        writeModelState(compound, modelState);
         writePlacementShape(compound, placementShape);
         writeLightValue(compound, lightValue);
         writeSubstance(compound, substance);
         return compound;
     }
     
+    public static NBTTagCompound writeToNBT(NBTTagCompound compound, ModelState modelState)
+    {
+        writeModelState(compound, modelState);
+        return compound;
+    }
+    
     public static void readFromNBT(NBTTagCompound compound, NBTReadHandler target)
     {
         target.handleNBTRead(
-                readModelState(compound), 
+                readModelState(compound));
+    }
+    
+    public static void superModelReadFromNBT(NBTTagCompound compound, SuperModelNBTReadHandler target)
+    {
+        target.handleNBTRead(
                 compound.getInteger(PLACEMENT_SHAPE_TAG), 
                 compound.getByte(LIGHT_VALUE_TAG),
                 readSubstance(compound));
     }
+    
 }

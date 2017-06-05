@@ -162,19 +162,24 @@ public class SuperItemBlock extends ItemBlock
         if(!wasUpdated) 
             return false;
 
-        if(newState.getBlock() instanceof SuperModelBlock)
+        if(newState.getBlock() instanceof SuperBlockPlus)
         {
-            SuperTileEntity niceTE = (SuperTileEntity)world.getTileEntity(pos);
-            if (niceTE != null) 
+            SuperModelTileEntity blockTE = (SuperModelTileEntity)world.getTileEntity(pos);
+            if (blockTE != null) 
             {
-                niceTE.setModelState(getModelState(stack));
-                niceTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
-                niceTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
-                niceTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
+                blockTE.setModelState(getModelState(stack));
+            
+                if(blockTE instanceof SuperModelTileEntity)
+                {
+                    SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
+                    superTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
+                    superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
+                    superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
+                }
                 
                 if(world.isRemote)
                 {
-                    niceTE.updateClientRenderState();
+                    blockTE.updateClientRenderState();
                 }
             }
         }

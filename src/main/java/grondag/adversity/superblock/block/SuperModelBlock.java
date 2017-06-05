@@ -47,7 +47,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 
 @SuppressWarnings("unused")
-public class SuperModelBlock extends SuperBlock implements ITileEntityProvider 
+public class SuperModelBlock extends SuperBlockPlus  
 {
     /**
      * Ordinal of the substance for this block. Set during getActualState
@@ -83,16 +83,17 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     }
 
     @Override
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
+        return new SuperModelTileEntity();        
+    }
+    
+    @Override
     protected BlockStateContainer createBlockState()
     {
         return new ExtendedBlockState(this, new IProperty[] { META, SUBSTANCE }, new IUnlistedProperty[] { MODEL_STATE });
     }
     
-    @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new SuperTileEntity();        
-    }
-    
+    @SuppressWarnings("deprecation")
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
@@ -136,74 +137,17 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     @Override
     public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
         return myTE == null
                 ? 0
                 : myTE.getLightValue();
-    }
-    
-    /**
-     * At least one vanilla routine passes in a block state that does not match world.
-     * (After block updates, passes in previous state to detect collision box changes.)
-     * 
-     * We don't want to update our current state based on stale block state, so the TE
-     * refresh is coded to always use current world state.
-     * 
-     * However, we do want to honor the given world state if species is different than current.
-     * We do this by directly changing species, because that is only thing that can changed
-     * in model state based on block state, and also affects collision box.
-     * 
-     * TODO: there is probably still a bug here, because collision box can change based
-     * on other components of model state (axis, for example) and those changes may not be detected
-     * by path finding.
-     */
-    @Override
-    public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
-    {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
-        if(myTE != null) 
-        {
-            IBlockState currentState = world.getBlockState(pos);
-            ModelState result = myTE.getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
-            
-            // honor passed in species if different
-            if(currentState.getValue(META) != state.getValue(META))
-            {
-                result = result.clone();
-                result.setSpecies(state.getValue(META));
-            }
-            return result;
-        }
-        else
-        {
-            return super.getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
-        }
-    }
-    
-    /** 
-     * Use when absolutely certain given block state is current.
-     */
-    @Override
-    public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
-    {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
-        if(myTE != null) 
-        {
-            return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
-            
-        }
-        else
-        {
-            return super.getModelStateAssumeStateIsCurrent(state, world, pos, refreshFromWorldIfNeeded);
-        }
-
     }
     
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
         if(myTE != null)
         {
             int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : SpeciesGenerator.PLACEMENT_3x3x3;
@@ -230,7 +174,7 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
         return myTE == null
                 ? BlockSubstance.FLEXSTONE
                 : myTE.getSubstance();
@@ -283,13 +227,13 @@ public class SuperModelBlock extends SuperBlock implements ITileEntityProvider
      */
     public void setLightValue(IBlockState state, IBlockAccess world, BlockPos pos, int lightValue)
     {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
         if(myTE != null) myTE.setLightValue((byte)(lightValue & 0xF));
     }
 
     public void setSubstance(IBlockState state, IBlockAccess world, BlockPos pos, BlockSubstance substance)
     {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
+        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
         if(myTE != null) myTE.setSubstance(substance);
     }
  
