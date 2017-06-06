@@ -150,9 +150,30 @@ public class TerrainStaticBlock extends SuperStaticBlock
                 .withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), 3);
     }
     
+    // setting to false drops AO light value
+    @Override
+    public boolean isFullCube(IBlockState state)
+    {
+        // don't have enough information without world access or extended state
+        // to determine if is full cube.
+        return false;    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        // don't have enough information without world access or extended state
+        // to determine if is full cube.
+        return false;
+    }
+    
     @Override
     public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return TerrainBlock.shouldBeFullCube(state, world, pos);
+    }
+    
+    public boolean getUseNeighborBrightness(IBlockState state)
+    {
+        return true;
     }
 }

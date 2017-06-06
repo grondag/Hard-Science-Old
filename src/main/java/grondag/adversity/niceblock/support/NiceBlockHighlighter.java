@@ -15,16 +15,15 @@ import grondag.adversity.superblock.block.SuperBlock;
  * Common event handler for NiceBlocks for things that don't belong in a block instance.
  * Currently the only thing we need to handle is the block highlight.
  */
-public class NiceBlockHighlighter {
-
-	public static final NiceBlockHighlighter instance = new NiceBlockHighlighter();
+public class NiceBlockHighlighter 
+{
 
 	/**
-	 * Check for niceblocks that need a custom block highlight and draw if found.
+	 * Check for blocks that need a custom block highlight and draw if found.
 	 * Adapted from the vanilla highlight code.
 	 */
-	@SubscribeEvent
-	public void onDrawBlockHighlightEvent(DrawBlockHighlightEvent event) {
+	public static void handleDrawBlockHighlightEvent(DrawBlockHighlightEvent event) 
+	{
 	    
         BlockPos pos = event.getTarget().getBlockPos();
         if(pos != null && event.getPlayer() != null)

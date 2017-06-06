@@ -170,7 +170,7 @@ public class ModBlocks
         model.setTexture(PaintLayer.DETAIL, tex);
         model.setDetailLayerEnabled(true);
         
-        return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, false).setAllowSilkHarvest(false);
+        return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, isFiller).setAllowSilkHarvest(false);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

@@ -161,4 +161,9 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
     {
         return TerrainBlock.shouldBeFullCube(state, world, pos);
     }
+    
+    public boolean getUseNeighborBrightness(IBlockState state)
+    {
+        return true;
+    }
 }

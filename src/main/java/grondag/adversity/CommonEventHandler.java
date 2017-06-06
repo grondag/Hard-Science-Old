@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.google.gson.Gson;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.block.LavaBlock;
 import net.minecraft.block.state.IBlockState;
@@ -12,6 +13,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.config.Config.Type;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
@@ -77,6 +79,16 @@ public class CommonEventHandler
             ConfigManager.sync(Adversity.MODID, Type.INSTANCE);
             Configurator.recalcDervied();
         }
+    }
+    
+    /**
+     * Check for blocks that need a custom block highlight and draw if found.
+     * Adapted from the vanilla highlight code.
+     */
+    @SubscribeEvent
+    public void onDrawBlockHighlightEvent(DrawBlockHighlightEvent event) 
+    {
+        NiceBlockHighlighter.handleDrawBlockHighlightEvent(event);
     }
     
     @SubscribeEvent
