@@ -10,15 +10,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import grondag.adversity.Output;
-import grondag.adversity.feature.volcano.lava.CoolingBlock;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.PerformanceCollector;
 import grondag.adversity.library.PerformanceCounter;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.block.CoolingBasaltBlock;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.TerrainStaticBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -371,11 +371,11 @@ public class WorldStateBuffer implements IBlockAccess
     private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
         IBlockState baseState = realWorld.getBlockState(pos);
-        if(baseState.getBlock() == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
+        if(baseState.getBlock() == ModBlocks.basalt_cut)
         {
             if( !TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
             {
-                realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
+                realWorld.setBlockState(pos, ModBlocks.basalt_cool_dynamic_height.getDefaultState().withProperty(SuperBlock.META, baseState.getValue(SuperBlock.META)));
                 return true;
             }
             else
@@ -383,11 +383,11 @@ public class WorldStateBuffer implements IBlockAccess
                 return false;
             }
         }
-        else if(baseState.getBlock() == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+        else if(baseState.getBlock() == ModBlocks.basalt_cool_dynamic_height)
         {
             if(TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
             {
-                realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
+                realWorld.setBlockState(pos, ModBlocks.basalt_cut.getDefaultState().withProperty(SuperBlock.META, baseState.getValue(SuperBlock.META)));
                 return true;
             }
             else
@@ -402,9 +402,9 @@ public class WorldStateBuffer implements IBlockAccess
         if(newState == null)
         {
             // replace static flow height blocks with dynamic version
-            if(baseState.getBlock() instanceof FlowStaticBlock)
+            if(baseState.getBlock() instanceof TerrainStaticBlock)
             {
-                ((FlowStaticBlock)baseState.getBlock()).makeDynamic(baseState, realWorld, pos);
+                ((TerrainStaticBlock)baseState.getBlock()).makeDynamic(baseState, realWorld, pos);
                 return true;
             }
             else
@@ -413,7 +413,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        if(newState.getBlock() instanceof CoolingBlock)
+        if(newState.getBlock() instanceof CoolingBasaltBlock)
         {
             sim.trackCoolingBlock(pos);
         }

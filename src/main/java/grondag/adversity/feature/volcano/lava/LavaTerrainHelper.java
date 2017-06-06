@@ -7,12 +7,11 @@ import java.util.Iterator;
 
 import gnu.trove.list.TLongList;
 import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BlockSubstance;
+import grondag.adversity.superblock.block.CoolingBasaltBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -110,7 +109,7 @@ public class LavaTerrainHelper
      */
     public boolean isLavaSpace(IBlockState state)
     {
-        return state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || LavaTerrainHelper.canLavaDisplace(state);
+        return state.getBlock() == ModBlocks.lava_dynamic_height || LavaTerrainHelper.canLavaDisplace(state);
         
     }
     
@@ -121,9 +120,13 @@ public class LavaTerrainHelper
      */
     public boolean isOpenTerrainSpace(IBlockState state)
     {
+
         Block block = state.getBlock();
-        return block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
-                || (TerrainBlock.isFlowHeight(block) && ((NiceBlock)block).material == BlockSubstance.BASALT)
+        return block == ModBlocks.lava_dynamic_height
+                || block == ModBlocks.basalt_cool_dynamic_height
+                || block == ModBlocks.basalt_cool_static_height
+                || block == ModBlocks.basalt_cut
+                || (block instanceof CoolingBasaltBlock && TerrainBlock.isFlowHeight(block))
                 || LavaTerrainHelper.canLavaDisplace(state);
     }
     

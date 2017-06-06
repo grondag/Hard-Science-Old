@@ -1,11 +1,10 @@
 package grondag.adversity.niceblock.base;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.init.ModBlocks;
-import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.TerrainDynamicBlock;
+import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -90,7 +89,8 @@ public class TerrainBlock
         if(!TerrainBlock.isFlowHeight(block)) return 0;
 //        if(block instanceof FlowSimpleBlock) return 0;
         
-        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState().topFillerNeeded();
+     // don't use block model state because cubic blocks don't have it
+        return new FlowHeightState(FlowHeightState.getBitsFromWorldStatically((SuperBlock)block, blockState, blockAccess, pos)).topFillerNeeded();
     }
     
     /**
@@ -128,7 +128,7 @@ public class TerrainBlock
         {
             targetMeta = 0;
 
-            fillBlock = (SuperBlock) ModBlocks.TERRAIN_STATE_REGISTRY.getFillerBlock(stateBelow.getBlock());
+            fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateBelow.getBlock());
         }
         else 
         {
@@ -137,7 +137,7 @@ public class TerrainBlock
                     && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
             {
                 targetMeta = 1;
-                fillBlock = (SuperBlock) ModBlocks.TERRAIN_STATE_REGISTRY.getFillerBlock(stateTwoBelow.getBlock());
+                fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateTwoBelow.getBlock());
             }
         }
 
@@ -149,16 +149,16 @@ public class TerrainBlock
                 update = Blocks.AIR.getDefaultState();
                 worldObj.setBlockState(basePos, update);
             }
-            else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
+            else if(baseState.getValue(SuperBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
             {
-                update = fillBlock.getDefaultState().withProperty(NiceBlock.META, targetMeta);
+                update = fillBlock.getDefaultState().withProperty(SuperBlock.META, targetMeta);
                 worldObj.setBlockState(basePos, update);
             }
             //confirm filler needed and adjust/remove if needed
         }
         else if(targetMeta != SHOULD_BE_AIR && fillBlock != null)
         {
-            update = fillBlock.getDefaultState().withProperty(NiceBlock.META, targetMeta);
+            update = fillBlock.getDefaultState().withProperty(SuperBlock.META, targetMeta);
             worldObj.setBlockState(basePos, update);
         }
         
@@ -173,19 +173,20 @@ public class TerrainBlock
     {
         Block block = blockState.getBlock();
         if(!isFlowBlock(block)) return false;
-        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState().isFullCube();
+        // don't use block model state because cubic blocks don't have it
+        return new FlowHeightState(FlowHeightState.getBitsFromWorldStatically((SuperBlock)block, blockState, blockAccess, pos)).isFullCube();
     }
     
     /**
      * Access to the flow state of the block at the given position.
      * Returns null if not a flow block.
      */
-    public static FlowHeightState getFlowState(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
-    {
-        Block block = blockState.getBlock();
-        if(!isFlowBlock(block)) return null;
-        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState();
-    }
+//    public static FlowHeightState getFlowState(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos)
+//    {
+//        Block block = blockState.getBlock();
+//        if(!isFlowBlock(block)) return null;
+//        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState();
+//    }
     
     /** 
      * Returns true if geometry of flow block has nothing in it.

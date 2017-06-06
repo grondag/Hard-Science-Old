@@ -123,7 +123,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     
     public void setModelState(World world, BlockPos pos, ModelState modelState)
     {
-        SuperModelTileEntity blockTE = (SuperModelTileEntity)world.getTileEntity(pos);
+        SuperTileEntity blockTE = (SuperTileEntity)world.getTileEntity(pos);
         if (blockTE != null) 
         {
             blockTE.setModelState(modelState);

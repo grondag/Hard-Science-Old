@@ -101,7 +101,15 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     protected int[] defaultModelStateBits;
 
     /** will be set based on default model state first time is needed */
-    protected int renderLayerFlags = -1;
+    protected int renderLayerEnabledFlags = -1;
+    
+    /** 
+     * Used by dispatcher to known if shading should be enabled for the given render layer.
+     * Will be set based on default model state first time is needed unless
+     * changed to value other than -1 in constructor.
+     */
+    /** will be set based on default model state first time is needed */
+    protected int renderLayerShadedFlags = -1;
     
     /** change in constructor to have fewer variants */
     protected int metaCount = 16;
@@ -415,13 +423,25 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-        int layerFlags = this.renderLayerFlags;
+        int layerFlags = this.renderLayerEnabledFlags;
         if(layerFlags == -1)
         {
             layerFlags = this.getDefaultModelState().getCanRenderInLayerFlags();
-            this.renderLayerFlags = layerFlags;
+            this.renderLayerEnabledFlags = layerFlags;
         }
         return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, layerFlags);
+    }
+    
+    /** used by dispatcher to control AO shading by render layer */
+    public int renderLayerShadedFlags()
+    {
+        int layerFlags = this.renderLayerShadedFlags;
+        if(layerFlags == -1)
+        {
+            layerFlags = this.getDefaultModelState().getRenderLayerShadedFlags();
+            this.renderLayerShadedFlags = layerFlags;
+        }
+        return layerFlags;
     }
 
     @Override
@@ -666,37 +686,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
     
     
-    /**
-     * {@inheritDoc}
-     * 
-     * Model dispatcher always returns isAmbientOcclusion=true.
-     * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
-     * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
-     * populated in getExtendedState and if true for the current layer return 1 for the light value.
-     * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
-     * light calculations are done via the location-aware version of getLightValue(), so should be fine.
-     */
-
-    @Override
-    public int getLightValue(IBlockState state)
-    {
-        int min = 0;
-        
-        if(state instanceof IExtendedBlockState)
-        {
-            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-            if(layer != null)
-            {
-                ModelState modelState = ((IExtendedBlockState)state).getValue(MODEL_STATE);
-                if(modelState != null)
-                {
-                    if(!modelState.isLayerShaded(layer)) min = 1;
-                }
-            }
-        }
-        return Math.max(min, super.getLightValue(state));
-    }
-
     /**
      * Used by chunk for world lighting and to determine height map.
      * Blocks with 0 opacity are apparently ignored for height map generation.

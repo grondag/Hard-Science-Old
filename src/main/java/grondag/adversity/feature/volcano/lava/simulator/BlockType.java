@@ -1,7 +1,7 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -81,7 +81,7 @@ public enum BlockType
         }
         else
         {
-            return block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK 
+            return block == ModBlocks.lava_dynamic_height 
                     ? LAVA_STATES[height]
                     : SOLID_FLOW_STATES[height];
         }

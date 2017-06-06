@@ -1,14 +1,12 @@
-package grondag.adversity.feature.volcano.lava;
+package grondag.adversity.superblock.block;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
-import grondag.adversity.niceblock.base.ModelDispatcher;
-import grondag.adversity.niceblock.block.FlowDynamicBlock;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
-import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
@@ -23,12 +21,12 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAccessor
+public class LavaBlock extends TerrainDynamicBlock
 {
-    public VolcanicLavaBlock(ModelDispatcher dispatcher, BlockSubstance material, String styleName, boolean isFiller)
+
+    public LavaBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
     {
-        super(dispatcher, material, styleName, isFiller);
-        
+        super(blockName, substance, defaultModelState, isFiller);
         //TODO: provide config to turn this on - default off, can affect framerate
         //        this.setLightLevel(4F/15F);
         
@@ -37,7 +35,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
 //        this.setResistance(2000F);
         this.setTickRandomly(true);
     }
-
+    
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
     {
@@ -121,6 +119,7 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
+        super.addProbeInfo(mode, probeInfo, player, world, blockState, data);
         if(Simulator.INSTANCE.getFluidTracker() instanceof LavaSimulator)
         {
             LavaSimulator sim = (LavaSimulator)Simulator.INSTANCE.getFluidTracker();
@@ -143,5 +142,6 @@ public class VolcanicLavaBlock extends FlowDynamicBlock implements IProbeInfoAcc
             }
         }
     }
+
 
 }

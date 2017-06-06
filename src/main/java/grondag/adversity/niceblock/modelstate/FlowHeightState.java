@@ -4,7 +4,6 @@ import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -431,7 +430,7 @@ public class FlowHeightState
         return retval;
     }
 
-    public static long getBitsFromWorldStatically(NiceBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
+    public static long getBitsFromWorldStatically(SuperBlock block, IBlockState state, IBlockAccess world, BlockPos pos)
     {
         return getBitsFromWorldStatically(block.isFlowFiller(), state, world, pos);
     }

@@ -5,8 +5,6 @@ import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.TerrainWand;
 import grondag.adversity.feature.volcano.lava.LavaBlobItem;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceItemBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperItemBlock;
 import net.minecraft.block.Block;
@@ -34,6 +32,7 @@ public class ModItems
 
     // item blocks
     public static final Item basalt_cobble = null;
+    public static final Item basalt_cut = null;
     
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
@@ -57,11 +56,7 @@ public class ModItems
             if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
             {
                 Block block = entry.getValue();
-                if(block instanceof NiceBlock)
-                {
-                    // SKIP
-                }
-                else if(block instanceof SuperBlock)
+                if(block instanceof SuperBlock)
                 {
                     SuperBlock superBlock = (SuperBlock)block;
                     SuperItemBlock itemBlock = new SuperItemBlock(superBlock);
@@ -89,11 +84,7 @@ public class ModItems
                 if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
                 {
                     Item item = entry.getValue();
-                    if(item instanceof NiceItemBlock)
-                    {
-                        //SKIP
-                    }
-                    else if(item instanceof SuperItemBlock)
+                    if(item instanceof SuperItemBlock)
                     {
                         for (ItemStack stack : ((SuperBlock)(((ItemBlock)item).getBlock())).getSubItems())
                         {
@@ -120,16 +111,13 @@ public class ModItems
             if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
             {
                 Item item = entry.getValue();
-                if(item instanceof NiceItemBlock)
+                if(item instanceof SuperItemBlock)
                 {
-                    //SKIP
-                }
-                else if(item instanceof SuperItemBlock)
-                {
-                    for (ItemStack stack : ((SuperBlock)(((ItemBlock)item).getBlock())).getSubItems())
+                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
+                    for (ItemStack stack : block.getSubItems())
                     {
                         event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                ModModels.MODEL_DISPATCH);
+                                ModModels.MODEL_DISPATCH.getDelegate(block));
                     }
                 }
                 else

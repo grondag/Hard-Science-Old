@@ -61,6 +61,8 @@ public class ModelStateFactory
     private static final EnumElement<EnumFacing.Axis> P0_AXIS = PACKER_0.createEnumElement(EnumFacing.Axis.class);
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_BASE = PACKER_0.createEnumElement(BlockRenderLayer.class);
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
+    
+    // TODO: can save a couple bits and simplify semantics if create a NONE texture that disables layer when selected
     private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
     private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
@@ -379,6 +381,11 @@ public class ModelStateFactory
         
         public void setStatic(boolean isStatic) { this.isStatic = isStatic; }
         
+        /**
+         * Does NOT consider isStatic in comparison. <br><br>
+         * 
+         * {@inheritDoc}
+         */
         @Override
         public boolean equals(Object obj)
         {
@@ -391,6 +398,23 @@ public class ModelStateFactory
                         && this.bits1 == other.bits1
                         && this.bits2 == other.bits2
                         && this.bits3 == other.bits3;
+            }
+            
+            return false;
+        }
+        
+        public boolean equalsIncludeStatic(Object obj)
+        {
+            if(this == obj) return true;
+            
+            if(obj instanceof ModelState && obj != null)
+            {
+                ModelState other = (ModelState)obj;
+                return this.bits0 == other.bits0
+                        && this.bits1 == other.bits1
+                        && this.bits2 == other.bits2
+                        && this.bits3 == other.bits3
+                        && this.isStatic == other.isStatic;
             }
             
             return false;

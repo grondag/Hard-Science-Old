@@ -3,13 +3,13 @@ package grondag.adversity.superblock.block;
 import java.util.List;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -143,10 +143,16 @@ public class TerrainStaticBlock extends SuperStaticBlock
      */
     public void makeDynamic(IBlockState state, World world, BlockPos pos)
     {
-        Block dynamicVersion = ModBlocks.TERRAIN_STATE_REGISTRY.getDynamicBlock(this);
+        Block dynamicVersion = TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getDynamicBlock(this);
         if(dynamicVersion == null || state.getBlock() != this) return;
 
         world.setBlockState(pos, dynamicVersion.getDefaultState()
                 .withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), 3);
+    }
+    
+    @Override
+    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return TerrainBlock.shouldBeFullCube(state, world, pos);
     }
 }

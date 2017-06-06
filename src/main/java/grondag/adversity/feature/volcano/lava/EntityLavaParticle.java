@@ -4,7 +4,7 @@ import java.util.List;
 
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.simulator.Simulator;
 import net.minecraft.block.Block;
@@ -235,7 +235,7 @@ public class EntityLavaParticle extends Entity
 //        {
             Block block = this.world.getBlockState(this.getPosition()).getBlock();
             
-            if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK )
+            if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler )
             {
                 this.land();
                 return;

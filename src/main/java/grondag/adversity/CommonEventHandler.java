@@ -4,9 +4,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
 
-import grondag.adversity.feature.volcano.lava.VolcanicLavaBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.block.LavaBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
@@ -22,6 +22,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SuppressWarnings("deprecation")
 public class CommonEventHandler 
 {
     public static final CommonEventHandler INSTANCE = new CommonEventHandler();
@@ -33,7 +34,6 @@ public class CommonEventHandler
         try
         {
             Gson g = new Gson();
-            @SuppressWarnings("deprecation")
             String json = I18n.translateToLocal("misc.denials");
             denials = g.fromJson(json, String[].class);
         }
@@ -59,7 +59,7 @@ public class CommonEventHandler
                 if(target.getBlockPos() != null)
                 {
                     IBlockState state = event.getWorld().getBlockState(target.getBlockPos());
-                    if(state.getBlock() instanceof VolcanicLavaBlock)
+                    if(state.getBlock() instanceof LavaBlock)
                     {
                         event.getEntityPlayer().sendMessage(new TextComponentString(DENIALS[ThreadLocalRandom.current().nextInt(DENIALS.length)]));
                         event.setCanceled(true);
@@ -84,7 +84,7 @@ public class CommonEventHandler
     public void onBlockBreak(BlockEvent.BreakEvent event) 
     {
         // Lava blocks have their own handling
-        if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof VolcanicLavaBlock))
+        if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
             Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
@@ -95,7 +95,7 @@ public class CommonEventHandler
     public void onBlockPlaced(BlockEvent.PlaceEvent event)
     {
         // Lava blocks have their own handling
-        if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof VolcanicLavaBlock))
+        if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
             Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
         }
@@ -110,7 +110,7 @@ public class CommonEventHandler
         LavaSimulator sim = Simulator.INSTANCE.getFluidTracker();
         for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
         {
-            if(!(snap.getCurrentBlock() instanceof VolcanicLavaBlock))
+            if(!(snap.getCurrentBlock() instanceof LavaBlock))
             {
                 sim.notifyBlockChange(event.getWorld(), snap.getPos());
             }

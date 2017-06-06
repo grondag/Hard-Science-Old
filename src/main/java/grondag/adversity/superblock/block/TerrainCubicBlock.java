@@ -21,7 +21,6 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
         super(blockName, substance, defaultModelState, false);
         
         ModelState modelState = defaultModelState.clone();
-        modelState.setStatic(true);
         modelState.setFlowState(new FlowHeightState(FlowHeightState.FULL_BLOCK_STATE_KEY));
         this.defaultModelStateBits = modelState.getBitsIntArray();
 

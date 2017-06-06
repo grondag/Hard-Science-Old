@@ -4,7 +4,7 @@ package grondag.adversity.external;
 import java.util.List;
 
 import grondag.adversity.Output;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -41,7 +41,7 @@ public class WailaDataProvider implements IWailaDataProvider
         }
         if (!loaded) {
 //            registrar.registerHeadProvider(INSTANCE, NiceBlock.class);
-            registrar.registerBodyProvider(INSTANCE, NiceBlock.class);
+            registrar.registerBodyProvider(INSTANCE, SuperBlock.class);
 //            registrar.registerTailProvider(INSTANCE, NiceBlock.class);
             loaded = true;
         }

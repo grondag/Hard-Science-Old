@@ -5,7 +5,6 @@ import java.util.concurrent.Executor;
 
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
-import grondag.adversity.feature.volcano.lava.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.ParticleManager;
@@ -13,6 +12,7 @@ import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEventHandler;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.PerformanceCollector;
@@ -21,13 +21,13 @@ import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.library.model.quadfactory.QuadCache;
 import grondag.adversity.library.Job;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
+import grondag.adversity.superblock.block.CoolingBasaltBlock;
+import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -90,9 +90,9 @@ public class LavaSimulator extends SimulationNode
             {
                 IBlockState state = worldBuffer.getBlockState(operand.packedBlockPos);
                 Block block = state.getBlock();
-                if(block instanceof CoolingBlock)
+                if(block instanceof CoolingBasaltBlock)
                 {
-                    switch(((CoolingBlock)block).tryCooling(worldBuffer, PackedBlockPos.unpack(operand.packedBlockPos), state))
+                    switch(((CoolingBasaltBlock)block).tryCooling(worldBuffer, PackedBlockPos.unpack(operand.packedBlockPos), state))
                     {
                         case PARTIAL:
                             // will be ready to cool again after delay
@@ -303,7 +303,7 @@ public class LavaSimulator extends SimulationNode
         this.worldBuffer.clearBlockState(pos);
         
         // ignore fillers
-        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
             this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlock.getFlowHeightFromState(state));
             this.setSaveDirty(true);
@@ -321,7 +321,7 @@ public class LavaSimulator extends SimulationNode
         
         
         // ignore fillers - they have no effect on simulation
-        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
             this.lavaBlockPlacementEvents.addEvent(pos, TerrainBlock.getFlowHeightFromState(state));
             
@@ -375,7 +375,7 @@ public class LavaSimulator extends SimulationNode
         
         Block block = worldBuffer.getBlockState(pos).getBlock();
         
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler)
         {
             int hotNeighborCount = 0;
             BlockPos.MutableBlockPos nPos = new BlockPos.MutableBlockPos();
@@ -386,7 +386,7 @@ public class LavaSimulator extends SimulationNode
                 nPos.setPos(pos.getX() + vec.getX(), pos.getY() + vec.getY(), pos.getZ() + vec.getZ());
                 
                 block = worldBuffer.getBlockState(nPos).getBlock();
-                if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+                if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler)
                 {
                     // don't allow top to cool until bottom does
                     if(face == EnumFacing.DOWN) return false;
@@ -408,14 +408,14 @@ public class LavaSimulator extends SimulationNode
     {
         final IBlockState priorState = this.worldBuffer.getBlockState(packedBlockPos);
         Block currentBlock = priorState.getBlock();
-        NiceBlock newBlock = null;
-        if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        SuperBlock newBlock = null;
+        if(currentBlock == ModBlocks.lava_dynamic_filler)
         {
-            newBlock = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK;
+            newBlock = (SuperBlock) ModBlocks.basalt_dynamic_very_hot_filler;
         }
-        else if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        else if(currentBlock == ModBlocks.lava_dynamic_height)
         {
-            newBlock = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK;
+            newBlock = (SuperBlock) ModBlocks.basalt_dynamic_very_hot_height;
         }
 
         if(newBlock != null)
@@ -423,7 +423,7 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("Cooling lava @" + pos.toString());
             //should not need these any more due to world buffer
 //            this.itMe = true;
-            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
+            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(SuperBlock.META, priorState.getValue(SuperBlock.META)), priorState);
 //            this.itMe = false;
             this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.INSTANCE.getTick()));
         }

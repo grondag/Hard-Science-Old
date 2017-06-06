@@ -7,10 +7,10 @@ import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleUnorderedArrayList;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
@@ -1853,19 +1853,19 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
                 {
                     
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            TerrainBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), currentVisible - currentSurfaceY * FlowHeightState.BLOCK_LEVELS_INT),
+                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), currentVisible - currentSurfaceY * FlowHeightState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else if(hasLava && y < currentSurfaceY)
                 {
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            TerrainBlock.stateWithDiscreteFlowHeight(NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT),
+                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else
                 {
                     // don't want to clear non-air blocks if they did not contain lava - let falling particles do that
-                    if(priorState.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+                    if(priorState.getBlock() == ModBlocks.lava_dynamic_height)
                     {
                         sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, Blocks.AIR.getDefaultState(), priorState);
                     }

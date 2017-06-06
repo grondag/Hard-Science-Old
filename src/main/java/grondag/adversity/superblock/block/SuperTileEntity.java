@@ -176,21 +176,46 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     
     public void setModelState(ModelState modelState) 
     { 
-        if(this.modelState == null || !this.modelState.equals(modelState))
+        if(this.modelState == null)
         {
-            this.modelState = modelState;
-            this.isModelStateCacheDirty = true;
-            if(this.world.isRemote)
+            this.setModelStateInner(modelState);
+        }
+        else if(this.modelState.equals(modelState))
+        {
+            if(this.modelState.isStatic() != modelState.isStatic())
             {
-                this.updateClientRenderState();
+                if(modelState.isStatic())
+                {
+                    // if making existing appearance static, just mark to save if on server
+                    this.modelState = modelState;
+                    if(!this.world.isRemote) this.markDirty();
+                }
+                else
+                {
+                    // if going from static to dynamic, force refresh
+                    this.setModelStateInner(modelState);
+                }
             }
-            else
-            {
-                this.markDirty();
-            }
+        }
+        else
+        {
+            this.setModelStateInner(modelState);
         }
     }
 
+    private void setModelStateInner(ModelState modelState)
+    {
+        this.modelState = modelState;
+        this.isModelStateCacheDirty = true;
+        if(this.world.isRemote)
+        {
+            this.updateClientRenderState();
+        }
+        else
+        {
+            this.markDirty();
+        }
+    }
  
 
     @Override

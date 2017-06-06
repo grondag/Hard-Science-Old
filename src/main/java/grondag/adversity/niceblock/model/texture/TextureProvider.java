@@ -7,8 +7,8 @@ import java.util.List;
 import grondag.adversity.library.BitPacker;
 import grondag.adversity.library.BitPacker.BitElement;
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.model.BorderModelFactory;
-import grondag.adversity.niceblock.model.MasonryModelFactory;
+import grondag.adversity.superblock.model.painter.CubicQuadPainterBorders;
+import grondag.adversity.superblock.model.painter.CubicQuadPainterMasonry;
 import grondag.adversity.superblock.texture.TextureLayout;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.BlockRenderLayer;
@@ -144,9 +144,9 @@ public class TextureProvider
             case BORDER_13:
                 for(int i = 0; i < this.textureVersionCount; i++)
                 {
-                    for(int j = 0; j < BorderModelFactory.TEXTURE_COUNT; j++)
+                    for(int j = 0; j < CubicQuadPainterBorders.TEXTURE_COUNT; j++)
                     {
-                        textureList.add(buildTextureName_X_8(i * BorderModelFactory.TEXTURE_BLOCK_SIZE + j));
+                        textureList.add(buildTextureName_X_8(i * CubicQuadPainterBorders.TEXTURE_BLOCK_SIZE + j));
                     }
                 }
                 break;
@@ -154,9 +154,9 @@ public class TextureProvider
             case MASONRY_5:
                 for(int i = 0; i < this.textureVersionCount; i++)
                 {
-                    for(int j = 0; j < MasonryModelFactory.TEXTURE_COUNT; j++)
+                    for(int j = 0; j < CubicQuadPainterMasonry.TEXTURE_COUNT; j++)
                     {
-                        textureList.add(buildTextureName_X_8(i * MasonryModelFactory.TEXTURE_BLOCK_SIZE + j));
+                        textureList.add(buildTextureName_X_8(i * CubicQuadPainterMasonry.TEXTURE_BLOCK_SIZE + j));
                     }
                 }
                 
@@ -250,10 +250,10 @@ public class TextureProvider
                 switch(textureLayout)
                 {
                 case MASONRY_5:
-                    return buildTextureName_X_8(version * MasonryModelFactory.TEXTURE_BLOCK_SIZE + index);
+                    return buildTextureName_X_8(version * CubicQuadPainterMasonry.TEXTURE_BLOCK_SIZE + index);
                     
                 case BORDER_13:
-                    return buildTextureName_X_8(version * BorderModelFactory.TEXTURE_BLOCK_SIZE + index);
+                    return buildTextureName_X_8(version * CubicQuadPainterBorders.TEXTURE_BLOCK_SIZE + index);
                     
                 default:
                     return buildTextureName_X_8(index);

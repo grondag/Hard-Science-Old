@@ -17,14 +17,14 @@ import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCells;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.NiceBlock;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
+import grondag.adversity.superblock.block.SuperBlock;
 
 //FIX/TEST
 
@@ -356,7 +356,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             return;
         }
         
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if(block == ModBlocks.lava_dynamic_height)
         {
             LavaCell cell = Simulator.INSTANCE.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             if(cell != null) cell.setCoolingDisabled(true);
@@ -367,7 +367,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             this.world.setBlockToAir(clearPos);
             if(clearPos.getY() < this.groundLevel && 
-                    !(block instanceof NiceBlock && ((NiceBlock)block).material == BlockSubstance.BASALT))
+                    !(block instanceof SuperBlock && ((SuperBlock)block).getSubstance(this.world, clearPos) == BlockSubstance.BASALT))
             {
                 buildMound();
             }
@@ -455,9 +455,26 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private boolean isVolcanoBlock(Block block)
     {
-        if(!(block instanceof NiceBlock)) return false;
-        BlockSubstance material = ((NiceBlock)block).material;
-        return (material == BlockSubstance.BASALT || material == BlockSubstance.VOLCANIC_LAVA);
+        if(!(block instanceof SuperBlock)) return false;
+        
+        return block == ModBlocks.basalt_cool_dynamic_height
+                || block == ModBlocks.basalt_cool_dynamic_filler
+                || block == ModBlocks.basalt_cool_static_height
+                || block == ModBlocks.basalt_cool_static_filler
+                || block == ModBlocks.basalt_cut
+                
+                || block == ModBlocks.basalt_dynamic_cooling_height
+                || block == ModBlocks.basalt_dynamic_cooling_filler
+                || block == ModBlocks.basalt_dynamic_warm_height
+                || block == ModBlocks.basalt_dynamic_warm_filler
+        
+                || block == ModBlocks.basalt_dynamic_hot_height
+                || block == ModBlocks.basalt_dynamic_hot_filler
+                || block == ModBlocks.basalt_dynamic_very_hot_height
+                || block == ModBlocks.basalt_dynamic_very_hot_filler
+                || block == ModBlocks.lava_dynamic_height
+                || block == ModBlocks.lava_dynamic_filler;
+
     }
 
     /**

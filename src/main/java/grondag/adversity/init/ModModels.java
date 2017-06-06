@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import grondag.adversity.superblock.block.SuperDispatcher;
+import grondag.adversity.superblock.block.SuperDispatcher.DispatchDelegate;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
@@ -27,7 +28,10 @@ public class ModModels
         // }
         
         ModModels.MODEL_DISPATCH.clear();
-        event.getModelRegistry().putObject(new ModelResourceLocation(ModModels.MODEL_DISPATCH.getModelResourceString()), ModModels.MODEL_DISPATCH);
+        for(DispatchDelegate delegate : ModModels.MODEL_DISPATCH.delegates)
+        {
+            event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
+        }
     }
 
     /**

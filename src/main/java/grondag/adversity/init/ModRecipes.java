@@ -1,6 +1,5 @@
 package grondag.adversity.init;
 
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -24,7 +23,7 @@ public class ModRecipes
         );
         
         // smelt cobble to smooth basalt
-        GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(NiceBlockRegistrar.COOL_SQUARE_BASALT_ITEM, 1, 0), 0.1F);
+        GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(ModItems.basalt_cut, 1, 0), 0.1F);
 
     }
 }

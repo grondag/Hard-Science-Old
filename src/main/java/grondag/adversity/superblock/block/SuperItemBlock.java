@@ -164,7 +164,7 @@ public class SuperItemBlock extends ItemBlock
 
         if(newState.getBlock() instanceof SuperBlockPlus)
         {
-            SuperModelTileEntity blockTE = (SuperModelTileEntity)world.getTileEntity(pos);
+            SuperTileEntity blockTE = (SuperTileEntity)world.getTileEntity(pos);
             if (blockTE != null) 
             {
                 if(blockTE instanceof SuperModelTileEntity)

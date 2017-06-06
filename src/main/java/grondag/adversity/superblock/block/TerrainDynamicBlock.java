@@ -3,13 +3,13 @@ package grondag.adversity.superblock.block;
 import java.util.List;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.Useful;
 import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -98,7 +98,7 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
      */
     public void makeStatic(IBlockState state, World world, BlockPos pos)
     {
-        Block staticVersion = ModBlocks.TERRAIN_STATE_REGISTRY.getStaticBlock(this);
+        Block staticVersion = TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getStaticBlock(this);
         if(staticVersion == null || state.getBlock() != this) return;
 
         ModelState myModelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
@@ -138,5 +138,27 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
     {
         TerrainBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+    
+    // setting to false drops AO light value
+    @Override
+    public boolean isFullCube(IBlockState state)
+    {
+        // don't have enough information without world access or extended state
+        // to determine if is full cube.
+        return false;    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        // don't have enough information without world access or extended state
+        // to determine if is full cube.
+        return false;
+    }
+    
+    @Override
+    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return TerrainBlock.shouldBeFullCube(state, world, pos);
     }
 }

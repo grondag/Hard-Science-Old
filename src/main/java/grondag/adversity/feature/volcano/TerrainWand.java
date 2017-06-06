@@ -1,12 +1,13 @@
 package grondag.adversity.feature.volcano;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.block.FlowDynamicBlock;
-import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.TerrainDynamicBlock;
+import grondag.adversity.superblock.block.TerrainStaticBlock;
+import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -125,26 +126,26 @@ public class TerrainWand extends Item
         if(TerrainBlock.isFlowBlock(blockIn))
         {
             
-            if(blockIn == NiceBlockRegistrar.COOL_STATIC_BASALT_HEIGHT_BLOCK)
+            if(blockIn == ModBlocks.basalt_cool_static_height)
             {
-                IBlockState targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, stateIn.getValue(NiceBlock.META));
+                IBlockState targetState = ModBlocks.lava_dynamic_height.getDefaultState()
+                        .withProperty(SuperBlock.META, stateIn.getValue(SuperBlock.META));
                 worldIn.setBlockState(pos, targetState);
              
             }
-            else if(blockIn == NiceBlockRegistrar.COOL_STATIC_BASALT_FILLER_BLOCK)
+            else if(blockIn == ModBlocks.basalt_cool_static_filler)
             {
-                IBlockState targetState = NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK.getDefaultState()
-                        .withProperty(NiceBlock.META, stateIn.getValue(NiceBlock.META));
+                IBlockState targetState = ModBlocks.lava_dynamic_filler.getDefaultState()
+                        .withProperty(SuperBlock.META, stateIn.getValue(SuperBlock.META));
                 worldIn.setBlockState(pos, targetState);
             }
-            else if(blockIn instanceof FlowDynamicBlock)
+            else if(blockIn instanceof TerrainDynamicBlock)
             {
-                ((FlowDynamicBlock)blockIn).makeStatic(stateIn, worldIn, pos);
+                ((TerrainDynamicBlock)blockIn).makeStatic(stateIn, worldIn, pos);
             }
-            else if(blockIn instanceof FlowStaticBlock)
+            else if(blockIn instanceof TerrainStaticBlock)
             {
-                ((FlowStaticBlock)blockIn).makeDynamic(stateIn, worldIn, pos);
+                ((TerrainStaticBlock)blockIn).makeDynamic(stateIn, worldIn, pos);
             }
         }
         
@@ -257,6 +258,7 @@ public class TerrainWand extends Item
             
     }
     
+    @SuppressWarnings("deprecation")
     public EnumActionResult handleUseHeightMode(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos)
     {
 
@@ -364,10 +366,10 @@ public class TerrainWand extends Item
 
             IBlockState baseState = worldObj.getBlockState(basePos);
             Block baseBlock = baseState.getBlock();
-            NiceBlock fillBlock = null;
+            SuperBlock fillBlock = null;
             
             //don't adjust static blocks
-            if(baseBlock instanceof FlowStaticBlock) continue;
+            if(baseBlock instanceof TerrainStaticBlock) continue;
             
             int targetMeta = SHOULD_BE_AIR;
 
@@ -386,7 +388,7 @@ public class TerrainWand extends Item
                     && TerrainBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
             {
                 targetMeta = 0;
-                fillBlock = NiceBlockRegistrar.getFillerBlock(stateBelow.getBlock());
+                fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateBelow.getBlock());
             }
             else 
             {
@@ -395,7 +397,7 @@ public class TerrainWand extends Item
                         && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
                 {
                     targetMeta = 1;
-                    fillBlock = NiceBlockRegistrar.getFillerBlock(stateTwoBelow.getBlock());
+                    fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateTwoBelow.getBlock());
                 }
             }
 
@@ -406,11 +408,11 @@ public class TerrainWand extends Item
                 {
                     worldObj.setBlockToAir(basePos);
                 }
-                else if(baseState.getValue(NiceBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
+                else if(baseState.getValue(SuperBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
                 {
 
                     worldObj.setBlockState(basePos, fillBlock.getDefaultState()
-                            .withProperty(NiceBlock.META, targetMeta));
+                            .withProperty(SuperBlock.META, targetMeta));
 
                 }
 
@@ -418,7 +420,7 @@ public class TerrainWand extends Item
             else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
             {
                 worldObj.setBlockState(basePos, fillBlock.getDefaultState()
-                        .withProperty(NiceBlock.META, targetMeta));
+                        .withProperty(SuperBlock.META, targetMeta));
 
             }
         }

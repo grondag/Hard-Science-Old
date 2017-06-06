@@ -12,6 +12,7 @@ public class TerrainBlockRegistry
     private HashBiMap<Block, Block> stateMap = HashBiMap.create(16);
     private HashBiMap<Block, Block> fillerMap = HashBiMap.create(16);
     private HashMap<Block, Block> cubicMap = new HashMap<Block, Block>(16);
+    public static final TerrainBlockRegistry TERRAIN_STATE_REGISTRY = new TerrainBlockRegistry();
     
     
     public void registerStateTransition(Block dynamicBlock, Block staticBlock)

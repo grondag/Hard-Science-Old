@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.model.BorderModelFactory;
-import grondag.adversity.niceblock.model.MasonryModelFactory;
+import grondag.adversity.superblock.model.painter.CubicQuadPainterBorders;
+import grondag.adversity.superblock.model.painter.CubicQuadPainterMasonry;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -150,9 +150,9 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             case BORDER_13:
                 for(int i = 0; i < this.textureVersionCount; i++)
                 {
-                    for(int j = 0; j < BorderModelFactory.TEXTURE_COUNT; j++)
+                    for(int j = 0; j < CubicQuadPainterBorders.TEXTURE_COUNT; j++)
                     {
-                        textureList.add(buildTextureName_X_8(i * BorderModelFactory.TEXTURE_BLOCK_SIZE + j));
+                        textureList.add(buildTextureName_X_8(i * CubicQuadPainterBorders.TEXTURE_BLOCK_SIZE + j));
                     }
                 }
                 break;
@@ -160,9 +160,9 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             case MASONRY_5:
                 for(int i = 0; i < this.textureVersionCount; i++)
                 {
-                    for(int j = 0; j < MasonryModelFactory.TEXTURE_COUNT; j++)
+                    for(int j = 0; j < CubicQuadPainterMasonry.TEXTURE_COUNT; j++)
                     {
-                        textureList.add(buildTextureName_X_8(i * MasonryModelFactory.TEXTURE_BLOCK_SIZE + j));
+                        textureList.add(buildTextureName_X_8(i * CubicQuadPainterMasonry.TEXTURE_BLOCK_SIZE + j));
                     }
                 }
                 
@@ -239,10 +239,10 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             switch(textureLayout)
             {
             case MASONRY_5:
-                return buildTextureName_X_8(version * MasonryModelFactory.TEXTURE_BLOCK_SIZE + index);
+                return buildTextureName_X_8(version * CubicQuadPainterMasonry.TEXTURE_BLOCK_SIZE + index);
                 
             case BORDER_13:
-                return buildTextureName_X_8(version * BorderModelFactory.TEXTURE_BLOCK_SIZE + index);
+                return buildTextureName_X_8(version * CubicQuadPainterBorders.TEXTURE_BLOCK_SIZE + index);
                 
             default:
                 return buildTextureName_X_8(index);

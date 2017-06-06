@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.base.NiceTileEntity;
 import grondag.adversity.niceblock.color.BlockColorMapProvider;
 import grondag.adversity.niceblock.color.ColorMap;
 import grondag.adversity.niceblock.support.BlockSubstance;
@@ -37,7 +36,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -78,8 +79,12 @@ public class SuperModelBlock extends SuperBlockPlus
         this.fullBlock = isGeometryFullCube;
         this.worldLightOpacity = worldLightOpacity;
         this.renderLayerSet = renderLayerSet;
-        this.renderLayerFlags = renderLayerSet.blockRenderLayerFlags;
+        this.renderLayerEnabledFlags = renderLayerSet.blockRenderLayerFlags;
         this.lightOpacity = worldLightOpacity.opacity;
+        
+        // dispatcher reports always reports shading enabled for supermodel blocks
+        // light level is used for fullbright rendering instead
+        this.renderLayerShadedFlags = ModelState.BENUMSET_RENDER_LAYER.getFlagsForIncludedValues(BlockRenderLayer.CUTOUT, BlockRenderLayer.CUTOUT_MIPPED, BlockRenderLayer.SOLID, BlockRenderLayer.TRANSLUCENT);
     }
 
     @Override
@@ -141,6 +146,37 @@ public class SuperModelBlock extends SuperBlockPlus
         return myTE == null
                 ? 0
                 : myTE.getLightValue();
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * Model dispatcher always returns isAmbientOcclusion=true for SuperModelBlocks.
+     * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
+     * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
+     * populated in getExtendedState and if true for the current layer return 1 for the light value.
+     * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
+     * light calculations are done via the location-aware version of getLightValue(), so should be fine.
+     */
+
+    @Override
+    public int getLightValue(IBlockState state)
+    {
+        int min = 0;
+        
+        if(state instanceof IExtendedBlockState)
+        {
+            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+            if(layer != null)
+            {
+                ModelState modelState = ((IExtendedBlockState)state).getValue(MODEL_STATE);
+                if(modelState != null)
+                {
+                    if(!modelState.isLayerShaded(layer)) min = 1;
+                }
+            }
+        }
+        return Math.max(min, super.getLightValue(state));
     }
     
     @Override
