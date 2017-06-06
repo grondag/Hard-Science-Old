@@ -8,7 +8,7 @@ import grondag.adversity.niceblock.color.HueSet.Chroma;
 import grondag.adversity.niceblock.color.HueSet.Luminance;
 import grondag.adversity.niceblock.color.NiceHues.Hue;
 
-public class BlockColorMapProvider implements IColorMapProvider
+public class BlockColorMapProvider
 {
     public static final BlockColorMapProvider INSTANCE = new BlockColorMapProvider();
     // note: can't be static because must come after Hue static initializaiton
@@ -41,14 +41,12 @@ public class BlockColorMapProvider implements IColorMapProvider
         this.validColors = colorMaps.toArray(new ColorMap[0]);
     }
   
-    
-    @Override
+   
     public int getColorMapCount()
     {
         return validColors.length;
     }
 
-    @Override
     public ColorMap getColorMap(int colorIndex)
     {
         return validColors[Math.max(0, Math.min(validColors.length-1, colorIndex))];
