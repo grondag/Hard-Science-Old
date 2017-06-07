@@ -2,14 +2,14 @@ package grondag.adversity.gui.control;
 
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.base.GuiControl;
-import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.niceblock.color.HueSet;
-import grondag.adversity.niceblock.color.NiceHues;
-import grondag.adversity.niceblock.color.HueSet.Chroma;
-import grondag.adversity.niceblock.color.HueSet.Luminance;
-import grondag.adversity.niceblock.color.NiceHues.Hue;
+import grondag.adversity.superblock.color.BlockColorMapProvider;
+import grondag.adversity.superblock.color.ColorMap;
+import grondag.adversity.superblock.color.HueSet;
+import grondag.adversity.superblock.color.NiceHues;
+import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.superblock.color.HueSet.Chroma;
+import grondag.adversity.superblock.color.HueSet.Luminance;
+import grondag.adversity.superblock.color.NiceHues.Hue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 

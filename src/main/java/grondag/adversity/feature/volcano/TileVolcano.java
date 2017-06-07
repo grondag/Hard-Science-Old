@@ -21,10 +21,10 @@ import grondag.adversity.init.ModBlocks;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCells;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.support.BlockSubstance;
 
 //FIX/TEST
 

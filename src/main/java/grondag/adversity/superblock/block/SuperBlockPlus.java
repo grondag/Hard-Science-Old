@@ -2,6 +2,7 @@ package grondag.adversity.superblock.block;
 
 import javax.annotation.Nullable;
 
+import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;

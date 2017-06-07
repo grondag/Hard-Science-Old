@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.superblock.items;
 
 import net.minecraft.item.Item;
 

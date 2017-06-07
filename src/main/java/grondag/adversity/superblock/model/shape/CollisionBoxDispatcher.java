@@ -5,8 +5,8 @@ import java.util.List;
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
 import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
-import grondag.adversity.niceblock.support.CollisionBoxGenerator;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.support.CollisionBoxGenerator;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public class CollisionBoxDispatcher

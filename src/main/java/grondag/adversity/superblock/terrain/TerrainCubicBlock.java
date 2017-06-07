@@ -1,10 +1,10 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.terrain;
 
 import java.util.List;
 
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.support.BlockSubstance;
+import grondag.adversity.superblock.model.state.FlowHeightState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

@@ -1,3 +1,4 @@
+package grondag.adversity.superblock.block;
 //package grondag.adversity.niceblock.block;
 //
 //import grondag.adversity.niceblock.base.ModelDispatcher;

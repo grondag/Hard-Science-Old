@@ -1,12 +1,12 @@
-package grondag.adversity.niceblock.modelstate;
+package grondag.adversity.superblock.model.state;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.niceblock.base.TerrainBlock;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;

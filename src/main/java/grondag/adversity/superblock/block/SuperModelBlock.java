@@ -7,14 +7,15 @@ import javax.annotation.Nullable;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.support.BlockSubstance;
-import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.color.BlockColorMapProvider;
+import grondag.adversity.superblock.color.ColorMap;
+import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
+import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.placement.SpeciesGenerator;
+import grondag.adversity.superblock.support.BlockSubstance;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -159,6 +160,7 @@ public class SuperModelBlock extends SuperBlockPlus
      * light calculations are done via the location-aware version of getLightValue(), so should be fine.
      */
 
+    @SuppressWarnings("deprecation")
     @Override
     public int getLightValue(IBlockState state)
     {

@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.support;
+package grondag.adversity.superblock.support;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
@@ -6,8 +6,6 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 import grondag.adversity.Configurator;
 import grondag.adversity.superblock.block.SuperBlock;
 

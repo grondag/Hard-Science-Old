@@ -1,7 +1,7 @@
 package grondag.adversity.superblock.block;
 
-import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.block.SuperBlockNBTHelper.SuperModelNBTReadHandler;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SuperModelTileEntity extends SuperTileEntity implements SuperModelNBTReadHandler

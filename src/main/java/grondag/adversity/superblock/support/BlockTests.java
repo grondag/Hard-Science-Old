@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.support;
+package grondag.adversity.superblock.support;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;

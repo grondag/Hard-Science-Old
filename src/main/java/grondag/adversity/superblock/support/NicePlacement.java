@@ -1,3 +1,4 @@
+package grondag.adversity.superblock.support;
 //package grondag.adversity.niceblock.support;
 //
 //import java.util.concurrent.ThreadLocalRandom;

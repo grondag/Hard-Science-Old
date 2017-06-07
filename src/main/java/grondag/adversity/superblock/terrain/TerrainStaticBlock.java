@@ -1,17 +1,19 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.terrain;
 
 import java.util.List;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
-import grondag.adversity.niceblock.support.BlockSubstance;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.SuperStaticBlock;
+import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
+import grondag.adversity.superblock.model.state.FlowHeightState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -20,11 +22,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class TerrainDynamicBlock extends SuperSimpleBlock
+public class TerrainStaticBlock extends SuperStaticBlock
 {
     private final boolean isFiller;
     
-    public TerrainDynamicBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
+    public TerrainStaticBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
     {
         super(blockName, substance, defaultModelState);
         this.isFiller = isFiller;
@@ -33,7 +35,6 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
         modelState.setShape(this.isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
-        modelState.setStatic(false);
         this.defaultModelStateBits = modelState.getBitsIntArray();
     }
     
@@ -93,21 +94,6 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         return items;
     }
 
-    /**
-     * Convert this block to a static version of itself if a static version was given.
-     */
-    public void makeStatic(IBlockState state, World world, BlockPos pos)
-    {
-        Block staticVersion = TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getStaticBlock(this);
-        if(staticVersion == null || state.getBlock() != this) return;
-
-        ModelState myModelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
-        myModelState.setStatic(true);
-        world.setBlockState(pos, staticVersion.getDefaultState()
-                .withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), 7);
-        ((TerrainStaticBlock)staticVersion).setModelState(world, pos, myModelState);
-    }
-    
     @Override
     public int quantityDropped(IBlockAccess world, BlockPos pos, IBlockState state)
     {
@@ -132,12 +118,37 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
     {
         return TerrainBlock.isEmpty(state, world, pos);
     }
-
+    
+    /**
+     * Prevent neighboring dynamic blocks from updating geometry by making them static.
+     */
     @Override
     public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest)
     {
         TerrainBlock.freezeNeighbors(world, pos, state);
         return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+    
+    /**
+     * Prevent neighboring dynamic blocks from updating geometry by making them static.
+     */
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        TerrainBlock.freezeNeighbors(worldIn, pos, state);
+    }
+
+    /**
+     * Convert this block to a dynamic version of itself if one is known.
+     */
+    public void makeDynamic(IBlockState state, World world, BlockPos pos)
+    {
+        Block dynamicVersion = TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getDynamicBlock(this);
+        if(dynamicVersion == null || state.getBlock() != this) return;
+
+        world.setBlockState(pos, dynamicVersion.getDefaultState()
+                .withProperty(SuperBlock.META, state.getValue(SuperBlock.META)), 3);
     }
     
     // setting to false drops AO light value

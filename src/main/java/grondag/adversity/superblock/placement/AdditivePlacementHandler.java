@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.block.SuperItemBlock;
+import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

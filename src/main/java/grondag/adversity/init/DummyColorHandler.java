@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock;
+package grondag.adversity.init;
 
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.item.ItemStack;

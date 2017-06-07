@@ -3,7 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Output;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
+import grondag.adversity.superblock.model.state.FlowHeightState;
 
 public abstract class AbstractLavaCell
 {

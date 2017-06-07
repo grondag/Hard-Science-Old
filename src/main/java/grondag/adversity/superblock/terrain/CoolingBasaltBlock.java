@@ -1,14 +1,14 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.terrain;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;

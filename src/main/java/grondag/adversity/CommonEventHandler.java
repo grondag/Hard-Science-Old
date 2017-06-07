@@ -5,9 +5,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.google.gson.Gson;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
-import grondag.adversity.niceblock.support.NiceBlockHighlighter;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.superblock.block.LavaBlock;
+import grondag.adversity.superblock.support.NiceBlockHighlighter;
+import grondag.adversity.superblock.terrain.LavaBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;

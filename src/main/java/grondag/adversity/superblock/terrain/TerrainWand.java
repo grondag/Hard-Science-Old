@@ -1,13 +1,9 @@
-package grondag.adversity.feature.volcano;
+package grondag.adversity.superblock.terrain;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.niceblock.base.TerrainBlock;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.block.TerrainDynamicBlock;
-import grondag.adversity.superblock.block.TerrainStaticBlock;
-import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
+import grondag.adversity.superblock.model.state.FlowHeightState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;

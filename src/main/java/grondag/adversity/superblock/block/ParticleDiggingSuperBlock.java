@@ -3,8 +3,8 @@ package grondag.adversity.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.adversity.Output;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
+import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.block.state.IBlockState;

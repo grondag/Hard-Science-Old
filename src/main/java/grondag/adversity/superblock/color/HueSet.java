@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.color;
+package grondag.adversity.superblock.color;
 
 public class HueSet
    {

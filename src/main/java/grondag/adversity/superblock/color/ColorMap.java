@@ -1,11 +1,11 @@
-package grondag.adversity.niceblock.color;
+package grondag.adversity.superblock.color;
 
 import grondag.adversity.Output;
 import grondag.adversity.library.Color;
 import grondag.adversity.library.Color.EnumHCLFailureMode;
-import grondag.adversity.niceblock.color.HueSet.Chroma;
-import grondag.adversity.niceblock.color.HueSet.Luminance;
-import grondag.adversity.niceblock.color.NiceHues.Hue;
+import grondag.adversity.superblock.color.HueSet.Chroma;
+import grondag.adversity.superblock.color.HueSet.Luminance;
+import grondag.adversity.superblock.color.NiceHues.Hue;
 
 public class ColorMap
 {

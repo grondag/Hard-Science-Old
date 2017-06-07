@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.support;
+package grondag.adversity.superblock.support;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.Vertex;
-import grondag.adversity.niceblock.support.VoxelBitField.VoxelBox;
+import grondag.adversity.superblock.support.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;

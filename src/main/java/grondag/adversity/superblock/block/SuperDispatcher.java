@@ -9,12 +9,14 @@ import grondag.adversity.library.model.SparseLayerMapBuilder;
 import grondag.adversity.library.model.SparseLayerMapBuilder.SparseLayerMap;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.items.SuperItemBlock;
+import grondag.adversity.superblock.items.SuperModelItemOverrideList;
 import grondag.adversity.superblock.model.painter.QuadPainter;
 import grondag.adversity.superblock.model.painter.QuadPainterFactory;
 import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import grondag.adversity.superblock.model.shape.ShapeMeshGenerator;
+import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 import java.util.ArrayList;

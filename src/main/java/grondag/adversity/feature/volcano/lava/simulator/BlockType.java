@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.niceblock.base.TerrainBlock;
+import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 

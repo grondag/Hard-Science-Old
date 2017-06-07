@@ -1,7 +1,8 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.items;
 
 import com.google.common.collect.Lists;
 
+import grondag.adversity.superblock.block.SuperDispatcher;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;

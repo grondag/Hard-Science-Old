@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.Configurator.Substances.Substance;
 import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.superblock.model.layout.PaintLayer;
+import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
 

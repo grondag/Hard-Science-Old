@@ -1,4 +1,4 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.items;
 
 import java.util.List;
 
@@ -6,9 +6,14 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
-import grondag.adversity.niceblock.support.BlockSubstance;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.block.SuperBlockNBTHelper;
+import grondag.adversity.superblock.block.SuperBlockPlus;
+import grondag.adversity.superblock.block.SuperModelTileEntity;
+import grondag.adversity.superblock.block.SuperTileEntity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.placement.IPlacementHandler;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;

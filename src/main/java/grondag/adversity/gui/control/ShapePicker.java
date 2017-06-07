@@ -1,12 +1,12 @@
 package grondag.adversity.gui.control;
 
-import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.base.TabBar;
 import grondag.adversity.init.ModSuperModelBlocks;
-import grondag.adversity.superblock.block.SuperItemBlock;
+import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;

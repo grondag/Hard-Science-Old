@@ -5,8 +5,8 @@ import grondag.adversity.library.joinstate.CornerJoinBlockState;
 import grondag.adversity.library.joinstate.CornerJoinFaceState;
 import grondag.adversity.library.model.FaceQuadInputs;
 import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.layout.PaintLayer;
 import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
 

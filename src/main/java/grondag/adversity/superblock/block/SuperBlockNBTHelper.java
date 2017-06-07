@@ -1,7 +1,7 @@
 package grondag.adversity.superblock.block;
 
-import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 

@@ -1,10 +1,10 @@
-package grondag.adversity.superblock.block;
+package grondag.adversity.superblock.terrain;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
-import grondag.adversity.niceblock.support.BlockSubstance;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.adversity.superblock.support.BlockSubstance;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;

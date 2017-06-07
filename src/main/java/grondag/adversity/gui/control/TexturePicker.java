@@ -2,10 +2,10 @@ package grondag.adversity.gui.control;
 
 import java.util.List;
 
-import grondag.adversity.niceblock.color.ColorMap;
-import grondag.adversity.niceblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.base.TabBar;
+import grondag.adversity.superblock.color.ColorMap;
+import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;

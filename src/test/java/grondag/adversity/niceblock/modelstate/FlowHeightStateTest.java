@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.NeighborBlocks.HorizontalFace;
+import grondag.adversity.superblock.model.state.FlowHeightState;
 
 public class FlowHeightStateTest
 {

@@ -4,7 +4,7 @@ import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
 import grondag.adversity.gui.base.GuiControl;
-import grondag.adversity.niceblock.support.BlockSubstance;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;

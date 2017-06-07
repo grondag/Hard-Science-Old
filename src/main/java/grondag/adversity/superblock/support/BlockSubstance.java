@@ -1,11 +1,11 @@
-package grondag.adversity.niceblock.support;
+package grondag.adversity.superblock.support;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.Configurator.Substances.Substance;
-import grondag.adversity.niceblock.color.BlockColorMapProvider;
-import grondag.adversity.niceblock.color.HueSet.Chroma;
-import grondag.adversity.niceblock.color.HueSet.Luminance;
-import grondag.adversity.niceblock.color.NiceHues.Hue;
+import grondag.adversity.superblock.color.BlockColorMapProvider;
+import grondag.adversity.superblock.color.HueSet.Chroma;
+import grondag.adversity.superblock.color.HueSet.Luminance;
+import grondag.adversity.superblock.color.NiceHues.Hue;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 

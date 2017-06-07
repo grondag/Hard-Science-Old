@@ -1,4 +1,4 @@
-package grondag.adversity.niceblock.color;
+package grondag.adversity.superblock.color;
 
 import grondag.adversity.library.Color;
 

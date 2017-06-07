@@ -5,7 +5,7 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import grondag.adversity.init.ModModels;
-import grondag.adversity.niceblock.support.BlockSubstance;
+import grondag.adversity.superblock.support.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
