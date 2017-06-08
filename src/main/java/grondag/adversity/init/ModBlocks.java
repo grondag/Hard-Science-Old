@@ -77,9 +77,9 @@ public class ModBlocks
         workingModel = new ModelState();
         workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
         workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_BASALT_COOL_ZOOM);
-        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_LIGHT));
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         workingModel.setTexture(PaintLayer.CUT, Textures.BIGTEX_BASALT_CUT);
-        workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.LIGHT));
+        workingModel.setColorMap(PaintLayer.CUT, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         
         Block dynamicBasaltHeight = new TerrainDynamicBlock("basalt_cool_dynamic_height", BlockSubstance.BASALT, workingModel.clone(), false);
         Block staticBasaltHeight = new TerrainStaticBlock("basalt_cool_static_height", BlockSubstance.BASALT, workingModel.clone(), false);
@@ -118,6 +118,7 @@ public class ModBlocks
         workingModel = new ModelState();
         workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
         workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.INFRARED, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
         workingModel.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
         Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
         
@@ -164,8 +165,10 @@ public class ModBlocks
         ModelState model = new ModelState();
         model.setShape(isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
         model.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
+        model.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.TORCH, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
         model.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
         model.setTexture(PaintLayer.DETAIL, tex);
+        model.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         model.setDetailLayerEnabled(true);
         
         return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, isFiller).setAllowSilkHarvest(false);

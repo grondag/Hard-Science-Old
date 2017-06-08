@@ -2,40 +2,6 @@ package grondag.adversity.superblock.color;
 
 public class HueSet
    {
-//
-//       private final ColorSet[] colorSets = new ColorSet[HuePosition.values().length];
-//       
-//       public HueSet(double hue)
-//       {
-//           for(HuePosition hp : HuePosition.values())
-//           {
-//               colorSets[hp.ordinal()] = new ColorSet(hue + hp.hueOffset);
-//           }
-//       }
-
-//       public ColorSet getColorSetForHue(HuePosition offset)
-//       {
-//           return colorSets[offset.ordinal()];
-//       }
-//       
-//       public class ColorSet
-//       {
-//           private final int[] colors = new int[Tint.values().length];
-//
-//           protected ColorSet(double hue)
-//           {
-//               for(Tint tint : Tint.values())
-//               {
-//                   colors[tint.ordinal()] = Color.fromHCL(hue, tint.chroma, tint.luminance).RGB_int | 0xFF000000;
-//               }
-//           }
-//           
-//           public int getColor(Tint tint)
-//           {
-//               return colors[tint.ordinal()];
-//           }
-//       }
-       
        public static enum HuePosition
        {
            FAR_LEFT("Far Left", -120),
@@ -57,6 +23,7 @@ public class HueSet
        
        public static enum Chroma
        {
+           PURE_NETURAL("Pure Neutral", 0),
            WHITE("Faint", 2.5),
            GREY("Subtle", 5),
            NEUTRAL("Neutral", 10),
@@ -81,12 +48,15 @@ public class HueSet
        
        public static enum Luminance
        {
-           EXTRA_BRIGHT("Extra Bright", 90),
-           BRIGHT("Bright", 82),
-           LIGHT("Light", 67.75),
-           MEDIUM_LIGHT("Medium Light", 53.5),
-           MEDIUM_DARK("Medium Dark", 39.25),
-           DARK("Dark", 25);
+           BRILLIANT("Brilliant", 90),
+           EXTRA_BRIGHT("Extra Bright", 81),
+           BRIGHT("Bright", 72),
+           EXTRA_LIGHT("Extra Light", 63),
+           LIGHT("Light", 54),
+           MEDIUM_LIGHT("Medium Light", 45),
+           MEDIUM_DARK("Medium Dark", 36),
+           DARK("Dark", 27),
+           EXTRA_DARK("Extra Dark", 18);
            
            public final String name;
            public final double value;

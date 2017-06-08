@@ -2,6 +2,7 @@ package grondag.adversity.superblock.color;
 
 import java.util.ArrayList;
 
+import grondag.adversity.Output;
 import grondag.adversity.library.Color;
 import grondag.adversity.library.Color.EnumHCLFailureMode;
 import grondag.adversity.superblock.color.HueSet.Chroma;
@@ -27,17 +28,38 @@ public class BlockColorMapProvider
             {
                 for(Chroma chroma : Chroma.values())
                 {
-                    Color testColor = Color.fromHCL(hue.hueDegrees(), chroma.value, luminance.value, EnumHCLFailureMode.REDUCE_CHROMA);
-                    
-                    if(testColor.IS_VISIBLE && testColor.HCL_C > chroma.value - 6)
+                    if(chroma != Chroma.PURE_NETURAL)
                     {
-                        ColorMap newMap = ColorMap.makeColorMap(hue, chroma, luminance, i++);
-                        colorMaps.add(newMap);
-                        allColors[hue.ordinal()][chroma.ordinal()][luminance.ordinal()] = newMap;
+                        Color testColor = Color.fromHCL(hue.hueDegrees(), chroma.value, luminance.value, EnumHCLFailureMode.REDUCE_CHROMA);
+                        
+                        if(testColor.IS_VISIBLE && testColor.HCL_C > chroma.value - 6)
+                        {
+                            ColorMap newMap = ColorMap.makeColorMap(hue, chroma, luminance, i++);
+                            colorMaps.add(newMap);
+                            allColors[hue.ordinal()][chroma.ordinal()][luminance.ordinal()] = newMap;
+                        }
                     }
                 }
             }
         }
+        
+        // pure neutrals
+        for(Luminance luminance : Luminance.values())
+        {
+            Color testColor = Color.fromHCL(Hue.BLUE.hueDegrees(), Chroma.PURE_NETURAL.value, luminance.value, EnumHCLFailureMode.REDUCE_CHROMA);
+            
+            if(testColor.IS_VISIBLE)
+            {
+                ColorMap newMap = ColorMap.makeColorMap(Hue.BLUE, Chroma.PURE_NETURAL, luminance, i++);
+                colorMaps.add(newMap);
+
+                for(Hue hue: Hue.values())
+                {
+                    allColors[hue.ordinal()][Chroma.PURE_NETURAL.ordinal()][luminance.ordinal()] = newMap;
+                }
+            }
+        }
+        
         this.validColors = colorMaps.toArray(new ColorMap[0]);
     }
   

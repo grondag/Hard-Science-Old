@@ -39,7 +39,10 @@ public class ColorMap
     
     public static ColorMap makeColorMap(Hue hue, Chroma chromaIn, Luminance luminanceIn, int ordinal)
     {
-        String mapName =  luminanceIn.name + " " + chromaIn.name + " " + hue.hueName();
+        //TODO: localize
+        String mapName =  chromaIn == Chroma.PURE_NETURAL
+                ? "Pure Neutral " + luminanceIn.name 
+                : luminanceIn.name + " " + chromaIn.name + " " + hue.hueName();
                 
         ColorMap newColorMap = new ColorMap(mapName, hue, chromaIn, luminanceIn, ordinal);
     

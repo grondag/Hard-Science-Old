@@ -25,7 +25,7 @@ public class ColorPicker extends GuiControl
     private double centerY;
     private double radiusInner;
     private double radiusOuter;
-    private double arc = 360 / NiceHues.Hue.values().length;
+    private double arc = 360.0 / NiceHues.Hue.values().length;
 
     private double gridLeft;
     private double gridTop;

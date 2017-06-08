@@ -15,31 +15,31 @@ import net.minecraft.block.material.Material;
  */
 public enum BlockSubstance {
 	FLEXSTONE("flexstone", Configurator.SUBSTANCES.flexstone, Material.ROCK, SoundType.STONE, 
-	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT).ordinal),
+	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
 	DURASTONE("durastone", Configurator.SUBSTANCES.durastone, Material.ROCK, SoundType.STONE, 
 	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
 	HYPERSTONE("hyperstone", Configurator.SUBSTANCES.hyperstone, Material.ROCK, SoundType.STONE,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.ULTRAMARINE, Chroma.WHITE, Luminance.LIGHT).ordinal),
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.INDIGO, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
 	FLEXIGLASS("flexiglass", Configurator.SUBSTANCES.flexiglass, Material.GLASS, SoundType.GLASS, 
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.YELLOW, Chroma.WHITE, Luminance.LIGHT).ordinal),
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.APATITE, Chroma.WHITE, Luminance.LIGHT).ordinal),
     
     DURAGLASS("duraglass", Configurator.SUBSTANCES.durastone, Material.GLASS, SoundType.GLASS, 
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BERYL, Chroma.WHITE, Luminance.LIGHT).ordinal),
     
     HYPERGLASS("hyperglass", Configurator.SUBSTANCES.hyperstone, Material.GLASS, SoundType.GLASS,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.ULTRAMARINE, Chroma.WHITE, Luminance.LIGHT).ordinal),
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.ICE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	FLEXWOOD("flexwood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BURGUNDY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+	FLEXWOOD("flexwood", Configurator.SUBSTANCES.flexwood, Material.WOOD, SoundType.WOOD,
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHEDDAR, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	
-    DURAWOOD("durawood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BURGUNDY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+    DURAWOOD("durawood", Configurator.SUBSTANCES.durawood, Material.WOOD, SoundType.WOOD,
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.EMBER, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 
     HYPERWOOD("hyperwood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BURGUNDY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+            BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHERRY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 
     
 	BASALT("basalt", Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE,

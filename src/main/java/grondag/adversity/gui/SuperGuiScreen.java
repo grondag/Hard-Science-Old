@@ -493,7 +493,6 @@ public class SuperGuiScreen extends GuiScreen
         int scrollAmount = Mouse.getEventDWheel();
         if(scrollAmount != 0)
         {
-            System.out.println(scrollAmount);
             mainPanel.mouseScroll(i, j, scrollAmount);
             updateItemPreviewState();
         }
