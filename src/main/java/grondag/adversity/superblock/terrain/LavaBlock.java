@@ -27,12 +27,6 @@ public class LavaBlock extends TerrainDynamicBlock
     public LavaBlock(String blockName, BlockSubstance substance, ModelState defaultModelState, boolean isFiller)
     {
         super(blockName, substance, defaultModelState, isFiller);
-        //TODO: provide config to turn this on - default off, can affect framerate
-        //        this.setLightLevel(4F/15F);
-        
-        //TODO: add configs for these also
-//        this.setBlockUnbreakable();
-//        this.setResistance(2000F);
         this.setTickRandomly(true);
     }
     

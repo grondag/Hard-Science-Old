@@ -9,6 +9,7 @@ import grondag.adversity.superblock.color.HueSet.Chroma;
 import grondag.adversity.superblock.color.HueSet.Luminance;
 import grondag.adversity.superblock.color.NiceHues.Hue;
 
+@SuppressWarnings("unused")
 public class BlockColorMapProvider
 {
     public static final BlockColorMapProvider INSTANCE = new BlockColorMapProvider();

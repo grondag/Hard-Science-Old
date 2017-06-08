@@ -7,11 +7,11 @@ import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 
 public class CubicQuadPainterBigTex extends CubicQuadPainter
 {
-
     private final Vec3i pos;
     private final int species;
     
@@ -32,8 +32,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         // qnd z representing depth into the surface
         Vec3i surfaceVec = getFacePerspective(this.pos, face, this.texture.textureScale);
 
-//        int key = Math.abs(MathHelper.hash((surfaceVec.getZ() << 4) | this.species));
-        int key = 0;
+        int key = Math.abs(MathHelper.hash((surfaceVec.getZ() << 4) | this.species));
         
         // Determine what type of randomizations to apply so that we have a different
         // appearance based on depth and species.
