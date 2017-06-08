@@ -1,16 +1,19 @@
 package grondag.adversity.init;
 
+import java.io.IOException;
 import java.util.Map;
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.TerrainWand;
 import grondag.adversity.feature.volcano.lava.LavaBlobItem;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.base.NiceItemBlock;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.items.SuperItemBlock;
+import grondag.adversity.superblock.terrain.TerrainWand;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -27,6 +30,10 @@ public class ModItems
 {
     public static final Item basalt_rubble = null;
 
+    // item blocks
+    public static final Item basalt_cobble = null;
+    public static final Item basalt_cut = null;
+    
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
     {
@@ -48,20 +55,24 @@ public class ModItems
         {
             if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
             {
-                Block b = entry.getValue();
-                if(b instanceof NiceBlock)
+                Block block = entry.getValue();
+                if(block instanceof SuperBlock)
                 {
-                    //TODO
+                    SuperBlock superBlock = (SuperBlock)block;
+                    SuperItemBlock itemBlock = new SuperItemBlock(superBlock);
+                    itemBlock.setRegistryName(superBlock.getRegistryName());
+                    itemReg.register(itemBlock);
                 }
                 else
                 {
-                    ItemBlock i = new ItemBlock(b);
-                    i.setRegistryName(b.getRegistryName());
-                    itemReg.register(i);
+                    ItemBlock itemBlock = new ItemBlock(block);
+                    itemBlock.setRegistryName(block.getRegistryName());
+                    itemReg.register(itemBlock);
                 }
             }
         }
     }
+    
     public static void preInit(FMLPreInitializationEvent event) 
     {
         if(event.getSide() == Side.CLIENT)
@@ -72,15 +83,46 @@ public class ModItems
             {
                 if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
                 {
-                    Item i = entry.getValue();
-                    if(i instanceof NiceItemBlock)
+                    Item item = entry.getValue();
+                    if(item instanceof SuperItemBlock)
                     {
-                        //TODO
+                        for (ItemStack stack : ((SuperBlock)(((ItemBlock)item).getBlock())).getSubItems())
+                        {
+                            ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory");
+                            ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), itemModelResourceLocation);
+                        }
                     }
                     else
                     {
-                        ModelLoader.setCustomModelResourceLocation(i, 0, new ModelResourceLocation(i.getRegistryName(), "inventory"));
+                        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
                     }
+                }
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
+    {
+        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
+        
+        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
+        {
+            if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
+            {
+                Item item = entry.getValue();
+                if(item instanceof SuperItemBlock)
+                {
+                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
+                    for (ItemStack stack : block.getSubItems())
+                    {
+                        event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
+                                ModModels.MODEL_DISPATCH.getDelegate(block));
+                    }
+                }
+                else
+                {
+                    // Not needed - will look for json files for normal items;
                 }
             }
         }

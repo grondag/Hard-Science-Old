@@ -3,9 +3,8 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
-import grondag.adversity.feature.volcano.lava.CoolingBlock;
 import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.ParticleManager;
@@ -13,6 +12,7 @@ import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEventHandler;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.PerformanceCollector;
@@ -21,13 +21,13 @@ import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.CountedJob.CountedJobTask;
 import grondag.adversity.library.model.quadfactory.QuadCache;
 import grondag.adversity.library.Job;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.modelstate.FlowHeightState;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.model.state.FlowHeightState;
+import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
+import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -90,9 +90,9 @@ public class LavaSimulator extends SimulationNode
             {
                 IBlockState state = worldBuffer.getBlockState(operand.packedBlockPos);
                 Block block = state.getBlock();
-                if(block instanceof CoolingBlock)
+                if(block instanceof CoolingBasaltBlock)
                 {
-                    switch(((CoolingBlock)block).tryCooling(worldBuffer, PackedBlockPos.unpack(operand.packedBlockPos), state))
+                    switch(((CoolingBasaltBlock)block).tryCooling(worldBuffer, PackedBlockPos.unpack(operand.packedBlockPos), state))
                     {
                         case PARTIAL:
                             // will be ready to cool again after delay
@@ -177,7 +177,7 @@ public class LavaSimulator extends SimulationNode
                     // event not complete until we can tell cell to add lava
                     // retry - maybe validation needs to catch up
                     if(event.retryCount() >= 8)
-                        Adversity.LOG.info("wut?");
+                        Output.info("wut?");
                     return false;
                 }
                 else
@@ -189,8 +189,8 @@ public class LavaSimulator extends SimulationNode
             }
             
             // would have to be an unhandled event type
-            if(Adversity.DEBUG_MODE)
-                Adversity.LOG.warn("Detected unhandled block event type in event processing");
+            if(Output.DEBUG_MODE)
+                Output.warn("Detected unhandled block event type in event processing");
             
             return true;
         }
@@ -303,9 +303,9 @@ public class LavaSimulator extends SimulationNode
         this.worldBuffer.clearBlockState(pos);
         
         // ignore fillers
-        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, -IFlowBlock.getFlowHeightFromState(state));
+            this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlock.getFlowHeightFromState(state));
             this.setSaveDirty(true);
         }
     }
@@ -321,9 +321,9 @@ public class LavaSimulator extends SimulationNode
         
         
         // ignore fillers - they have no effect on simulation
-        if(state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
-            this.lavaBlockPlacementEvents.addEvent(pos, IFlowBlock.getFlowHeightFromState(state));
+            this.lavaBlockPlacementEvents.addEvent(pos, TerrainBlock.getFlowHeightFromState(state));
             
             // remove blocks placed by player so that simulation can place lava in the appropriate place
             this.itMe = true;
@@ -375,7 +375,7 @@ public class LavaSimulator extends SimulationNode
         
         Block block = worldBuffer.getBlockState(pos).getBlock();
         
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler)
         {
             int hotNeighborCount = 0;
             BlockPos.MutableBlockPos nPos = new BlockPos.MutableBlockPos();
@@ -386,7 +386,7 @@ public class LavaSimulator extends SimulationNode
                 nPos.setPos(pos.getX() + vec.getX(), pos.getY() + vec.getY(), pos.getZ() + vec.getZ());
                 
                 block = worldBuffer.getBlockState(nPos).getBlock();
-                if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+                if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler)
                 {
                     // don't allow top to cool until bottom does
                     if(face == EnumFacing.DOWN) return false;
@@ -408,14 +408,14 @@ public class LavaSimulator extends SimulationNode
     {
         final IBlockState priorState = this.worldBuffer.getBlockState(packedBlockPos);
         Block currentBlock = priorState.getBlock();
-        NiceBlock newBlock = null;
-        if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK)
+        SuperBlock newBlock = null;
+        if(currentBlock == ModBlocks.lava_dynamic_filler)
         {
-            newBlock = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_FILLER_BLOCK;
+            newBlock = (SuperBlock) ModBlocks.basalt_dynamic_very_hot_filler;
         }
-        else if(currentBlock == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        else if(currentBlock == ModBlocks.lava_dynamic_height)
         {
-            newBlock = NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_BLOCK;
+            newBlock = (SuperBlock) ModBlocks.basalt_dynamic_very_hot_height;
         }
 
         if(newBlock != null)
@@ -423,7 +423,7 @@ public class LavaSimulator extends SimulationNode
 //            Adversity.log.info("Cooling lava @" + pos.toString());
             //should not need these any more due to world buffer
 //            this.itMe = true;
-            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(NiceBlock.META, priorState.getValue(NiceBlock.META)), priorState);
+            this.worldBuffer.setBlockState(packedBlockPos, newBlock.getDefaultState().withProperty(SuperBlock.META, priorState.getValue(SuperBlock.META)), priorState);
 //            this.itMe = false;
             this.basaltBlocks.add(new AgedBlockPos(packedBlockPos, Simulator.INSTANCE.getTick()));
         }
@@ -438,7 +438,7 @@ public class LavaSimulator extends SimulationNode
 
         // SAVE BASALT BLOCKS
         {
-            Adversity.LOG.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            Output.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
             int[] saveData = new int[basaltBlocks.size() * BASALT_BLOCKS_NBT_WIDTH];
             int i = 0;
             for(AgedBlockPos apos: basaltBlocks)
@@ -469,7 +469,7 @@ public class LavaSimulator extends SimulationNode
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
         {
-            Adversity.LOG.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
+            Output.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
         }
         else
         {
@@ -478,7 +478,7 @@ public class LavaSimulator extends SimulationNode
             {
                 this.basaltBlocks.add(new AgedBlockPos(((long)saveData[i++] << 32) | (long)saveData[i++], saveData[i++]));
             }
-            Adversity.LOG.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
+            Output.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
 
     }
@@ -531,7 +531,8 @@ public class LavaSimulator extends SimulationNode
      */
     public void doOnTick()
     {
-        this.doStats();
+        //TODO: put back
+//        this.doStats();
         perfOnTick.startRun();
         
         // Enable detection of improper world access 
@@ -743,7 +744,7 @@ public class LavaSimulator extends SimulationNode
             {
                 for(int i = 0; i < 8; i++)
                 {
-                    Adversity.LOG.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
+                    Output.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
                     this.flowTotals[i] = 0;
                     this.flowCounts[i] = 0;
                 }
@@ -751,12 +752,12 @@ public class LavaSimulator extends SimulationNode
 
             if(ENABLE_PERFORMANCE_COUNTING) 
             {
-                Adversity.LOG.info("totalCells=" + this.getCellCount() 
+                Output.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
                 
-                Adversity.LOG.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
+                Output.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
 
-                Adversity.LOG.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+                Output.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
                 this.worldBuffer.clearStatistics();
             }
                
@@ -764,7 +765,7 @@ public class LavaSimulator extends SimulationNode
             this.nextStatTime = now + PERFORMANCE_INTERVAL_MILLIS;
 
             //TODO: doesn't belong here
-            Adversity.LOG.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+            Output.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
         
 //                this.cells.logDebugInfo();
         }

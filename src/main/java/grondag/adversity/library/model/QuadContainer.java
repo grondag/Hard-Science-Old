@@ -20,6 +20,12 @@ public class QuadContainer
 {
 	public static final QuadContainer EMPTY_CONTAINER;
 	
+	// TODO: for memory efficiency (and possibly improved LOR
+	// look at storing this as a single array with offsets to the
+	// start of each section of quads - maybe within sparselayermap also?
+	
+	// would need flyweight list objects on top of it to avoid copying array into a new allocation
+	
 	static
 	{
 		QuadContainerBuilder builder = new QuadContainerBuilder();

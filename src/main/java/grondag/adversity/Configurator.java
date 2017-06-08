@@ -24,17 +24,28 @@ public class Configurator
     
     public static class Substances
     {
-        public Substance flexstone = new Substance(2, "pickaxe", 1, 10);
+        public Substance flexstone = new Substance(2, "pickaxe", 1, 10, 1.0);
         
-        public Substance durastone = new Substance(4, "pickaxe", 2, 50);
+        public Substance durastone = new Substance(4, "pickaxe", 2, 50, 1.15);
 
-        public Substance hyperstone = new Substance(10, "pickaxe", 3, 200);
+        public Substance hyperstone = new Substance(10, "pickaxe", 3, 200, 1.3);
         
-        public Substance basalt = new Substance(2, "pickaxe", 1, 10);
+        public Substance flexiglass = new Substance(2, "pickaxe", 1, 10, 1.0);
+        
+        public Substance duraglass = new Substance(4, "pickaxe", 2, 50, 1.15);
 
-        public Substance volcanicLava = new Substance(-1, "shovel", 3, 2000);
+        public Substance hyperglass = new Substance(10, "pickaxe", 3, 200, 1.3);
         
-        public Substance superwood = new Substance(2, "axe", 1, 10);
+        public Substance flexwood = new Substance(2, "axe", 1, 10, 1.0);
+
+        public Substance durawood = new Substance(4, "axe", 2, 50, 1.15);
+        
+        public Substance hyperwood = new Substance(10, "axe", 3, 200, 1.3);
+        
+        public Substance basalt = new Substance(2, "pickaxe", 1, 10, 1.0);
+
+        public Substance volcanicLava = new Substance(-1, "shovel", 3, 2000, 0.75);
+        
         
         public static class Substance
         {
@@ -56,13 +67,19 @@ public class Configurator
             @Comment("Material explosion resistance")
             @RangeInt(min = 1, max = 2000)
             public int resistance;
+
+            @RequiresMcRestart
+            @Comment("Material speed modifier for entities walking on its surface.")
+            @RangeDouble(min = 0.25, max = 2.0)
+            public double walkSpeedFactor;
             
-            public Substance(int hardness, String harvestTool, int harvestLevel, int resistance)
+            public Substance(int hardness, String harvestTool, int harvestLevel, int resistance, double walkSpeedFactor)
             {
                 this.hardness = hardness;
                 this.harvestTool = harvestTool;
                 this.harvestLevel = harvestLevel;
                 this.resistance = resistance;
+                this.walkSpeedFactor = walkSpeedFactor;
             }
         }
     }    

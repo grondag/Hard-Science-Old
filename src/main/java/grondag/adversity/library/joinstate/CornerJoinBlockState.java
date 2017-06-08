@@ -6,11 +6,15 @@ public class CornerJoinBlockState
 {
     private final int index;
     
+    /** join state considering only direct neighbors */
+    public final SimpleJoin simpleJoin;
+    
     private byte faceJoinIndex[] = new byte[EnumFacing.values().length];
     
-    CornerJoinBlockState(int index)
+    CornerJoinBlockState(int index, SimpleJoin simpleJoin)
     {
         this.index = index;
+        this.simpleJoin = simpleJoin;
     }
     
     public int getIndex()

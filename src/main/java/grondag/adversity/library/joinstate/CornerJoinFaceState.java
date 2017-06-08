@@ -69,6 +69,10 @@ public enum CornerJoinFaceState
     ALL_TR_BL_BR(FaceSide.TOP.bitFlag | FaceSide.BOTTOM.bitFlag | FaceSide.LEFT.bitFlag | FaceSide.RIGHT.bitFlag, FaceCorner.BOTTOM_RIGHT.bitFlag | FaceCorner.BOTTOM_LEFT.bitFlag | FaceCorner.TOP_RIGHT.bitFlag),
     ALL_TL_TR_BL_BR(FaceSide.TOP.bitFlag | FaceSide.BOTTOM.bitFlag | FaceSide.LEFT.bitFlag | FaceSide.RIGHT.bitFlag, FaceCorner.BOTTOM_RIGHT.bitFlag | FaceCorner.BOTTOM_LEFT.bitFlag | FaceCorner.TOP_RIGHT.bitFlag | FaceCorner.TOP_LEFT.bitFlag);
     
+    /**
+     * Sparsely populated - only meaningful states are non-null.  
+     * For example, cannot also have corners on side with a border.
+     */
     private static final CornerJoinFaceState[] LOOKUP = new CornerJoinFaceState[256];
 
     private final int bitFlags;
@@ -111,6 +115,16 @@ public enum CornerJoinFaceState
     {
         return LOOKUP[(faceBits & 15) | ((cornerBits & 15) << 4)];
     }
+    
+//    private int getCornerBits()
+//    {
+//        return (this.bitFlags >> 4) & 15;
+//    }
+//    
+//    private int getFaceBits()
+//    {
+//        return this.bitFlags & 15;
+//    }
     
     public static CornerJoinFaceState find(EnumFacing face, SimpleJoin join)
     {
@@ -177,6 +191,39 @@ public enum CornerJoinFaceState
         }
         return fjs;
     }
+
+
+//    /** 
+//     * Finds the face that should be used if blocks that are "true"
+//     * in the given join state should not have a border. 
+//     * Used to render mortar-style borders where border is not displayed
+//     * for side adjacent to air or other non-solid blocks.
+//     * 
+//     * Must know what side of block this face is on - in face paramter.
+//     * 
+//     * Removed: unfortunately doesn't work well unless blocks are all placed in 
+//     * a very simple pattern. Get strange corners and border misalingment.
+//     */
+//    public CornerJoinFaceState mortarfy(EnumFacing face, SimpleJoin mortarJoin)
+//    {
+//        int faceFlags = this.getFaceBits();
+//        int cornerFlags = this.getCornerBits();
+//        
+//        for(FaceSide fside : FaceSide.values())
+//        {
+//            EnumFacing joinFace = fside.getRelativeFace(face);
+//            if(mortarJoin.isJoined(joinFace))
+//            {
+//                /** setting to true means side is joined and no border should be displayed */
+//                faceFlags |= fside.bitFlag;
+//                
+//                cornerFlags &= ~(FaceCorner.find(fside.getClockwise(), fside).bitFlag);
+//                cornerFlags &= ~(FaceCorner.find(fside.getCounterClockwise(), fside).bitFlag);
+//            }
+//        }
+//        
+//        return find(faceFlags, cornerFlags);
+//    }
     
     private boolean hasCornerTests()
     {

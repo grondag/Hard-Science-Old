@@ -10,6 +10,7 @@ public class CornerJoinBlockStateSelector
     private static final CornerJoinBlockState BLOCK_JOIN_STATES[] = new CornerJoinBlockState[BLOCK_JOIN_STATE_COUNT];
     private static final CornerJoinBlockStateSelector BLOCK_JOIN_SELECTOR[] = new CornerJoinBlockStateSelector[64];
     
+    
     static
     {
         int firstIndex = 0;
@@ -42,12 +43,14 @@ public class CornerJoinBlockStateSelector
     // STATIC MEMBERS END
     
     private final int firstIndex;
+    private final SimpleJoin simpleJoin;
     
     private CornerJoinFaceSelector faceSelector[] = new CornerJoinFaceSelector[EnumFacing.values().length];
     
     private CornerJoinBlockStateSelector(SimpleJoin baseJoinState, int firstIndex)
     {
         this.firstIndex = firstIndex;
+        this.simpleJoin = baseJoinState;
         for(EnumFacing face : EnumFacing.values())
         {
             faceSelector[face.ordinal()] = new CornerJoinFaceSelector(face, baseJoinState);
@@ -84,7 +87,7 @@ public class CornerJoinBlockStateSelector
         int shift = 1;
         int localIndex = index - firstIndex;
         
-        CornerJoinBlockState retVal = new CornerJoinBlockState(index);
+        CornerJoinBlockState retVal = new CornerJoinBlockState(index, simpleJoin);
         
         for(EnumFacing face : EnumFacing.values())
         {

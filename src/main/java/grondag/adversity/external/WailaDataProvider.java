@@ -3,8 +3,8 @@ package grondag.adversity.external;
 
 import java.util.List;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.niceblock.base.NiceBlock;
+import grondag.adversity.Output;
+import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -36,12 +36,12 @@ public class WailaDataProvider implements IWailaDataProvider
 
     public static void load(IWailaRegistrar registrar) {
         if (!registered){
-            Adversity.LOG.error("Unable to load Waila data provider.  Registration method not called prior to load.");
+            Output.error("Unable to load Waila data provider.  Registration method not called prior to load.");
             return;
         }
         if (!loaded) {
 //            registrar.registerHeadProvider(INSTANCE, NiceBlock.class);
-            registrar.registerBodyProvider(INSTANCE, NiceBlock.class);
+            registrar.registerBodyProvider(INSTANCE, SuperBlock.class);
 //            registrar.registerTailProvider(INSTANCE, NiceBlock.class);
             loaded = true;
         }

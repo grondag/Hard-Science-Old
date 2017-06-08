@@ -9,16 +9,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.lava.CoolingBlock;
+import grondag.adversity.Output;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.PerformanceCollector;
 import grondag.adversity.library.PerformanceCounter;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.block.FlowStaticBlock;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
+import grondag.adversity.superblock.terrain.TerrainBlock;
+import grondag.adversity.superblock.terrain.TerrainStaticBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -87,9 +87,9 @@ public class WorldStateBuffer implements IBlockAccess
         
         if(chunk == null) 
         {            
-            if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
+            if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
             {
-                Adversity.LOG.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
             }
             
             // prevent concurrent access to MC world
@@ -128,13 +128,7 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
-//        Adversity.log.info("blockstate buffer update @" + x + ", " + y + ", " + z + " = " + 
-//                newState.toString() + " from " + expectedPriorState.toString());
-//        
-//        if(x==478 && y == 9 && z == -1231)
-//            Adversity.log.info("boop");
-        
-        if(Adversity.DEBUG_MODE) this.stateSetCount++;
+        if(Output.DEBUG_MODE) this.stateSetCount++;
         
         getChunkBuffer(x, z).setBlockState(x, y, z, newState, expectedPriorState);
     }
@@ -325,7 +319,7 @@ public class WorldStateBuffer implements IBlockAccess
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Adversity.LOG.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
+            Output.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
             return;
         }
 
@@ -340,7 +334,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
 //        this.isLoading = false;
 
-        Adversity.LOG.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
+        Output.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
@@ -351,7 +345,7 @@ public class WorldStateBuffer implements IBlockAccess
             recordCount+= chunk.size();
         }
         
-        Adversity.LOG.info("Saving " + recordCount + " world updates.");
+        Output.info("Saving " + recordCount + " world updates.");
         
         int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;
@@ -376,14 +370,12 @@ public class WorldStateBuffer implements IBlockAccess
     /** returns true an update occured */
     private boolean adjustFillIfNeeded(BlockPos pos, LavaSimulator sim)
     {
-//        if(pos.getX()==59 && (pos.getY() == 69 || pos.getY() == 70) && pos.getZ() == 129)
-//            Adversity.log.info("boop");
         IBlockState baseState = realWorld.getBlockState(pos);
-        if(baseState.getBlock() == NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK)
+        if(baseState.getBlock() == ModBlocks.basalt_cut)
         {
-            if( !IFlowBlock.shouldBeFullCube(baseState, realWorld, pos))
+            if( !TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
             {
-                realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
+                realWorld.setBlockState(pos, ModBlocks.basalt_cool_dynamic_height.getDefaultState().withProperty(SuperBlock.META, baseState.getValue(SuperBlock.META)));
                 return true;
             }
             else
@@ -391,11 +383,11 @@ public class WorldStateBuffer implements IBlockAccess
                 return false;
             }
         }
-        else if(baseState.getBlock() == NiceBlockRegistrar.COOL_FLOWING_BASALT_HEIGHT_BLOCK)
+        else if(baseState.getBlock() == ModBlocks.basalt_cool_dynamic_height)
         {
-            if(IFlowBlock.shouldBeFullCube(baseState, realWorld, pos))
+            if(TerrainBlock.shouldBeFullCube(baseState, realWorld, pos))
             {
-                realWorld.setBlockState(pos, NiceBlockRegistrar.COOL_SQUARE_BASALT_BLOCK.getDefaultState().withProperty(NiceBlock.META, baseState.getValue(NiceBlock.META)));
+                realWorld.setBlockState(pos, ModBlocks.basalt_cut.getDefaultState().withProperty(SuperBlock.META, baseState.getValue(SuperBlock.META)));
                 return true;
             }
             else
@@ -405,14 +397,14 @@ public class WorldStateBuffer implements IBlockAccess
         }
         
         
-        IBlockState newState = IFlowBlock.adjustFillIfNeeded(realWorld, pos);
+        IBlockState newState = TerrainBlock.adjustFillIfNeeded(realWorld, pos);
         
         if(newState == null)
         {
             // replace static flow height blocks with dynamic version
-            if(baseState.getBlock() instanceof FlowStaticBlock)
+            if(baseState.getBlock() instanceof TerrainStaticBlock)
             {
-                ((FlowStaticBlock)baseState.getBlock()).makeDynamic(baseState, realWorld, pos);
+                ((TerrainStaticBlock)baseState.getBlock()).makeDynamic(baseState, realWorld, pos);
                 return true;
             }
             else
@@ -421,7 +413,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        if(newState.getBlock() instanceof CoolingBlock)
+        if(newState.getBlock() instanceof CoolingBasaltBlock)
         {
             sim.trackCoolingBlock(pos);
         }
@@ -444,11 +436,11 @@ public class WorldStateBuffer implements IBlockAccess
             {
                 // treat transition between small block and air as low priority for world update
                 // helps prevent large number of world block updates due to vertical instability
-                int newHeight = IFlowBlock.getFlowHeightFromState(newState);
+                int newHeight = TerrainBlock.getFlowHeightFromState(newState);
                 return newHeight > 2;
             }
             
-            int oldHeight = IFlowBlock.getFlowHeightFromState(expectedPriorState);
+            int oldHeight = TerrainBlock.getFlowHeightFromState(expectedPriorState);
             if(oldHeight > 0)
             {
                 if(newState.getMaterial() == Material.AIR)
@@ -462,7 +454,7 @@ public class WorldStateBuffer implements IBlockAccess
                     //if old and new are same flow blocks, defer small height changes
                     if(newState.getBlock() == expectedPriorState.getBlock())
                     {
-                        int newHeight = IFlowBlock.getFlowHeightFromState(newState);
+                        int newHeight = TerrainBlock.getFlowHeightFromState(newState);
                         return Math.abs(oldHeight - newHeight) > 2;
                     }
                     else
@@ -623,9 +615,9 @@ public class WorldStateBuffer implements IBlockAccess
 //                Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
 //                        realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
                 
-                if(Adversity.DEBUG_MODE && !isMCWorldAccessAppropriate)
+                if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
                 {
-                    Adversity.LOG.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                    Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
                 if(this.worldChunk == null || !this.worldChunk.isLoaded())
@@ -733,24 +725,17 @@ public class WorldStateBuffer implements IBlockAccess
                             int x = chunkStartX +  ((i >> 4) & 0xF);
                             int z = chunkStartZ + (i & 0xF);
                             
-                            if(IFlowBlock.isFlowHeight(bsb.newState.getBlock()))
+                            if(TerrainBlock.isFlowHeight(bsb.newState.getBlock()))
                             {
                                 tracker.setAdjustmentNeededAround(x, y, z);
                                 // set to height block so no need to look for filler
                                 tracker.excludeAdjustmentNeededAt(x, y, z);
                             }
-                            else if(IFlowBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
+                            else if(TerrainBlock.isFlowHeight(bsb.expectedPriorState.getBlock()))
                             {
                                 // difference here is simply that we allow fillers in the block being set
                                 tracker.setAdjustmentNeededAround(x, y, z);
                             }
-                            
-                            
-//                            Adversity.log.info("applying blockstate to world @" + x + ", " + y + ", " + z + " = " + 
-//                                    bsb.newState.toString());
-//                            
-//                            if(x==59 && (y == 69 || y == 70) && z == 129)
-//                                Adversity.log.info("boop");
                       
                             realWorld.setBlockState(new BlockPos( x, y, z), bsb.newState, 3);
                             

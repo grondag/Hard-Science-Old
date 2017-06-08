@@ -2,7 +2,6 @@ package grondag.adversity;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -16,10 +15,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.logging.log4j.Logger;
-
-import grondag.adversity.niceblock.NiceBlockRegistrar;
+import grondag.adversity.init.ModItems;
 
 
 @Mod(modid = Adversity.MODID, name = Adversity.MODNAME, acceptedMinecraftVersions = "[1.11.2]")
@@ -27,21 +23,15 @@ public class Adversity {
 	public static final String MODID = "adversity";
 	public static final String MODNAME = "Adversity";
 
-	public static final boolean DEBUG_MODE = true;
-	
-	public static Logger LOG;
-
 	public static WorldType adversityWorld;
 	
-	public WorldSavedData thing;
-
 	public static CreativeTabs tabAdversity = new CreativeTabs("Adversity") 
 	{
 		@Override
 		@SideOnly(Side.CLIENT)
 		public ItemStack getTabIconItem() 
 		{
-			return NiceBlockRegistrar.HOT_FLOWING_BASALT_3_HEIGHT_ITEM.getDefaultInstance();
+			return ModItems.basalt_cobble.getDefaultInstance();
 		}
 	};
 

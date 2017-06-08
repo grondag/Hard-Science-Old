@@ -16,10 +16,17 @@ import net.minecraft.util.math.BlockPos;
  * textures aren't noisy enough for repeating patterns to be visible when far
  * enough away to see 32 blocks repeat. The interface hides the implementation,
  * so we can change this later if it becomes a problem.
+ * 
+ * If the optional blockSize parameter is provided and > 0, then the random values
+ * generated are the same for cubes of the given size within the 32x32x32 volume.
+ * The blockSize value is an exponent of 2 in the range 0 through 5, giving possible
+ * sub-cube dimensions of 1, 2, 4, 8, 16 and 32.
+ * For example, if blockSize is 4, then all positions in a 16x16x16 chunk will have
+ * the same random value and will repeat in 32x16 blocks in each direction.
  */
 public class Alternator implements IAlternator  {
 
-	private final byte[][][] mix = new byte[32][32][32];
+	protected final byte[][][] mix = new byte[32][32][32];
 	private final int alternateCount;
 
 	/** lightweight, special-case handler for 0 alternates */
@@ -28,17 +35,26 @@ public class Alternator implements IAlternator  {
 	/**
 	 * Convenience factory method.
 	 */
-	public static IAlternator getAlternator(int alternateCount, int seed) {
-		if (alternateCount == 1) 
-		{
-			return noAlternative;
-		} 
-		else 
-		{
-		    return new Alternator(alternateCount, seed);
-		}
+	public static IAlternator getAlternator(int alternateCount, int seed) 
+	{
+	    return getAlternator(alternateCount, seed, 0);
 	}
 
+   public static IAlternator getAlternator(int alternateCount, int seed, int blockSize) {
+        if (alternateCount == 1) 
+        {
+            return noAlternative;
+        } 
+        else if(blockSize > 0)
+        {
+            return new MultiBlockAlternator(alternateCount, seed, blockSize);
+        }
+        else 
+        {
+            return new Alternator(alternateCount, seed);
+        }
+    }
+	   
 	/**
 	 * Creates new alternator that returns uniformly distributed integer (byte)
 	 * values between 0 and alternateCount - 1. Do not call directly. Use
@@ -80,6 +96,21 @@ public class Alternator implements IAlternator  {
 	public int getAlternateCount()
 	{
 	    return this.alternateCount;
+	}
+	
+	private static class MultiBlockAlternator extends Alternator
+	{
+	    private final int blockSize;
+	    private MultiBlockAlternator(int alternateCount, int seed, int blockSize)
+	    {
+	        super(alternateCount, seed);
+	        this.blockSize = Useful.clamp(blockSize, 0, 5);
+	    }
+	    
+	    @Override
+	    public int getAlternate(BlockPos pos) {
+	        return mix[(pos.getX() >> blockSize) & 31][(pos.getY() >> blockSize) & 31][(pos.getZ() >> blockSize) & 31];
+	    }
 	}
 
 	/**

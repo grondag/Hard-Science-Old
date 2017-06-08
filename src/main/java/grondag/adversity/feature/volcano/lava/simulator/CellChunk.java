@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 /**
@@ -298,16 +298,16 @@ public class CellChunk implements ISimpleListItem
 
                 if(entryCell == null)
                 {
-                    if(Adversity.DEBUG_MODE)
-                        Adversity.LOG.warn("Null entry cell in chunk being unloaded.");
+                    if(Output.DEBUG_MODE)
+                        Output.warn("Null entry cell in chunk being unloaded.");
                     continue;
                 }
                 
                 LavaCell firstCell = entryCell.firstCell();
                 if(firstCell == null)
                 {
-                    if(Adversity.DEBUG_MODE)
-                        Adversity.LOG.warn("First cell in entry cell is null in chunk being unloaded.");
+                    if(Output.DEBUG_MODE)
+                        Output.warn("First cell in entry cell is null in chunk being unloaded.");
                     
                     // strange case - do our best
                     entryCell.setDeleted();
@@ -316,8 +316,8 @@ public class CellChunk implements ISimpleListItem
                 }
                 entryCell = firstCell;
                 
-                if(Adversity.DEBUG_MODE && entryCell.belowCell() != null)
-                    Adversity.LOG.warn("First cell is not actually the first cell.");
+                if(Output.DEBUG_MODE && entryCell.belowCell() != null)
+                    Output.warn("First cell is not actually the first cell.");
                     
                 do
                 {
@@ -343,14 +343,14 @@ public class CellChunk implements ISimpleListItem
      */
     LavaCell getEntryCell(int x, int z)
     {
-        if(Adversity.DEBUG_MODE && this.isUnloaded)
-            Adversity.LOG.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
+        if(Output.DEBUG_MODE && this.isUnloaded)
+            Output.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
         
-        if(Adversity.DEBUG_MODE)
+        if(Output.DEBUG_MODE)
         {
             LavaCell result = this.entryCells[getIndex(x, z)];
             if(result != null && result.isDeleted())
-                Adversity.LOG.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
+                Output.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
             return result;
         }
         else

@@ -59,7 +59,40 @@ public enum FaceSide
     
     public final int bitFlag;
     
-
+    public FaceSide getClockwise()
+    {
+        switch(this)
+        {
+        case BOTTOM:
+            return LEFT;
+        case LEFT:
+            return TOP;
+        case RIGHT:
+            return BOTTOM;
+        case TOP:
+            return RIGHT;
+        default:
+            return null;
+        }
+    }
+    
+    public FaceSide getCounterClockwise()
+    {
+        switch(this)
+        {
+        case BOTTOM:
+            return RIGHT;
+        case LEFT:
+            return BOTTOM;
+        case RIGHT:
+            return TOP;
+        case TOP:
+            return LEFT;
+        default:
+            return null;
+        }
+    }
+    
     /**
      * Returns the face that is at the side identified by this enum 
      * on the given face.

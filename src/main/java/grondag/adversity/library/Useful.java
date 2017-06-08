@@ -14,6 +14,7 @@ import gnu.trove.list.array.TLongArrayList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.util.EnumFacing;
 
@@ -23,6 +24,8 @@ import net.minecraft.util.EnumFacing;
  */
 public class Useful {
 	
+    //TODO: use methods in MathHelper instead
+    
     /** clamps the input value to the given range, inclusive */
     public static int clamp(int input, int min, int max)
     {
@@ -72,6 +75,16 @@ public class Useful {
             if(i > result) result = i;
         }
         return result;
+    }
+    
+    /** 
+     * Returns the maximum absolute magnitude of the three axis for the given vector.
+     * Mainly useful when you know that only one of the axis has a non-zero value
+     * and you want to retrieve it while avoiding the need for expendisive square root.
+     */
+    public static int maxAxisLength(Vec3i vec)
+    {
+        return Math.max(Math.max(Math.abs(vec.getX()), Math.abs(vec.getY())), Math.abs(vec.getZ()));
     }
     
     public static double linearInterpolate(double value1, double value2, double location)
@@ -524,6 +537,7 @@ public class Useful {
     */
    public static int bitLength(int maxValue)
    {
+       if(maxValue == 0) return 0;
        return Integer.SIZE - Integer.numberOfLeadingZeros(maxValue - 1);
    }
    
