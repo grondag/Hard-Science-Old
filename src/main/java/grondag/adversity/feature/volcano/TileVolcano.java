@@ -13,18 +13,18 @@ import net.minecraft.util.math.Vec3i;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCell;
 import grondag.adversity.feature.volcano.lava.simulator.LavaCells;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BaseMaterial;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.VolcanoManager.VolcanoNode;
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.support.BlockSubstance;
 
 //FIX/TEST
 
@@ -151,7 +151,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 
                 if(node == null)
                 {
-                    Adversity.LOG.info("Setting up new Volcano Node @" + this.pos.toString());
+                    Output.info("Setting up new Volcano Node @" + this.pos.toString());
                     this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
                     this.nodeId = node.getID();
                     this.node.setLocation(this.pos,this.world.provider.getDimension());
@@ -159,7 +159,7 @@ public class TileVolcano extends TileEntity implements ITickable{
                 }
                 else
                 {
-                    Adversity.LOG.info("Recovered Volcano Node @" + this.pos.toString());
+                    Output.info("Recovered Volcano Node @" + this.pos.toString());
                     this.nodeId = node.getID();
                     this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
                 }
@@ -170,12 +170,12 @@ public class TileVolcano extends TileEntity implements ITickable{
             }
             else
             {
-                Adversity.LOG.info("retrieving Volcano node @" + this.pos.toString());
+                Output.info("retrieving Volcano node @" + this.pos.toString());
 
                 this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.nodeId);
                 if(this.node == null)
                 {
-                    Adversity.LOG.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
+                    Output.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
                     + ". Created new simulation node.  Simulation state was lost.");
                     this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
                     this.node.setLocation(this.pos,this.world.provider.getDimension());
@@ -356,7 +356,7 @@ public class TileVolcano extends TileEntity implements ITickable{
             return;
         }
         
-        if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK)
+        if(block == ModBlocks.lava_dynamic_height)
         {
             LavaCell cell = Simulator.INSTANCE.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             if(cell != null) cell.setCoolingDisabled(true);
@@ -367,7 +367,7 @@ public class TileVolcano extends TileEntity implements ITickable{
         {
             this.world.setBlockToAir(clearPos);
             if(clearPos.getY() < this.groundLevel && 
-                    !(block instanceof NiceBlock && ((NiceBlock)block).material == BaseMaterial.BASALT))
+                    !(block instanceof SuperBlock && ((SuperBlock)block).getSubstance(this.world, clearPos) == BlockSubstance.BASALT))
             {
                 buildMound();
             }
@@ -455,9 +455,26 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     private boolean isVolcanoBlock(Block block)
     {
-        if(!(block instanceof NiceBlock)) return false;
-        BaseMaterial material = ((NiceBlock)block).material;
-        return (material == BaseMaterial.BASALT || material == BaseMaterial.VOLCANIC_LAVA);
+        if(!(block instanceof SuperBlock)) return false;
+        
+        return block == ModBlocks.basalt_cool_dynamic_height
+                || block == ModBlocks.basalt_cool_dynamic_filler
+                || block == ModBlocks.basalt_cool_static_height
+                || block == ModBlocks.basalt_cool_static_filler
+                || block == ModBlocks.basalt_cut
+                
+                || block == ModBlocks.basalt_dynamic_cooling_height
+                || block == ModBlocks.basalt_dynamic_cooling_filler
+                || block == ModBlocks.basalt_dynamic_warm_height
+                || block == ModBlocks.basalt_dynamic_warm_filler
+        
+                || block == ModBlocks.basalt_dynamic_hot_height
+                || block == ModBlocks.basalt_dynamic_hot_filler
+                || block == ModBlocks.basalt_dynamic_very_hot_height
+                || block == ModBlocks.basalt_dynamic_very_hot_filler
+                || block == ModBlocks.lava_dynamic_height
+                || block == ModBlocks.lava_dynamic_filler;
+
     }
 
     /**

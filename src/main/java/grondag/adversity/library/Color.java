@@ -34,6 +34,10 @@ public class Color
     /** Can this be displayed on an sRGB display? */
     public final boolean IS_VISIBLE;
 
+
+    public static final int WHITE = 0xFFFFFFFF;
+    public static final int BLACK = 0xFF000000;
+
     /** CIE D65  noon daylight standard illuminant - appropriate for sRBG color space */
     private static final float D65X = (float) 95.047;
     private static final float D65Y = (float) 100.000;
@@ -89,7 +93,7 @@ public class Color
         }
         
         if(luminance == HCL_MAX){
-            for (double trial = 100; trial > 20; trial-= 0.1)
+            for (double trial = 100; trial > 0; trial-= 0.1)
             {
                 Color temp = fromHCLSimple(hue, chroma, trial);
                 if(temp.IS_VISIBLE)
@@ -101,7 +105,7 @@ public class Color
         }
         
         if(chroma == HCL_MAX){
-            for (double trial = 100; trial > 30; trial-= 0.1)
+            for (double trial = 100; trial > 0; trial-= 0.1)
             {
                 Color temp = fromHCLSimple(hue, trial, luminance);
                 if(temp.IS_VISIBLE)
@@ -127,14 +131,14 @@ public class Color
     
     private static Color fromHCLSimple(double hue, double chroma, double luminance)
     {
-        return fromLab(luminance, Math.sin(Math.toRadians(hue)) * chroma, Math.cos(Math.toRadians(hue)) * chroma);
+        return fromLab(luminance, Math.cos(Math.toRadians(hue)) * chroma, Math.sin(Math.toRadians(hue)) * chroma);
     }
     
     public static Color fromRGB(int r, int g, int b)
     {
-        final double r0 = (r / 255);
-        final double g0 = (g / 255);
-        final double b0 = (b / 255);
+        final double r0 = r / 255.0;
+        final double g0 = g / 255.0;
+        final double b0 = b / 255.0;
         
         final double r1 = (( r0 > 0.04045 ) ? Math.pow((r0 + 0.055 ) / 1.055 , 2.4) : r0 / 12.92) * 100;
         final double g1 = (( g0 > 0.04045 ) ? Math.pow((g0 + 0.055 ) / 1.055 , 2.4) : g0 / 12.92) * 100;
@@ -149,7 +153,7 @@ public class Color
     
     public static Color fromRGB(int rgb)
     {
-        return new Color(rgb & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 16) & 0xFF);
+        return fromRGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF );
     }
     
     protected Color (double x, double y, double z)
@@ -270,7 +274,7 @@ public class Color
             this.LAB_A = (float) (500 * ( x1 - y1 ));
             this.LAB_B = (float) (200 * ( y1 - z1 ));
         }
-
+        
         // Convert to HCL
         {
             double h0 = Math.atan2(this.LAB_B, this.LAB_A);

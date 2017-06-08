@@ -100,7 +100,7 @@ public class CSGShape extends ArrayList<RawQuad>
             quadStream = this.stream();
         }
 
-        quadStream.forEach((RawQuad quad) -> quad.recolor((ThreadLocalRandom.current().nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000));
+        quadStream.forEach((RawQuad quad) -> quad.replaceColor((ThreadLocalRandom.current().nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000));
     }
     
     

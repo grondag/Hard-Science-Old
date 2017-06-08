@@ -1,5 +1,8 @@
 package grondag.adversity.library;
 
+import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -16,21 +19,35 @@ public class NeighborBlocks {
 
     public final static int[] FACE_FLAGS = new int[]{1, 2, 4, 8, 16, 32};
 
-    private IBlockState blockStates[] = new IBlockState[EnumFacing.values().length];
-    private IBlockState cornerStates[] = new IBlockState[BlockCorner.values().length];
-    private IBlockState farCornerStates[] = new IBlockState[FarCorner.values().length];
+    // EnumFacing.values().length + BlockCorner.values().length + FarCorner.values().length = 6 + 
+    private final static int STATE_COUNT = 6 + 12 + 8;
+    
+    private IBlockState blockStates[] = new IBlockState[STATE_COUNT];
+    private ModelState modelStates[] = new ModelState[STATE_COUNT];
+
 
     private final IBlockAccess world;
     private final BlockPos pos;
+    private final boolean refreshModelStateFromWorld;
 
     /**
      * Gathers blockstates for adjacent positions as needed.
      */
-    public NeighborBlocks(IBlockAccess worldIn, BlockPos pos) {
-        this.world = worldIn;
-        this.pos = pos;
+    public NeighborBlocks(IBlockAccess worldIn, BlockPos pos) 
+    {
+        this(worldIn, pos, false);
     }
 
+    public NeighborBlocks(IBlockAccess worldIn, BlockPos pos, boolean refreshModelStateFromWorld) 
+    {
+        this.world = worldIn;
+        this.pos = pos;
+        this.refreshModelStateFromWorld = refreshModelStateFromWorld;
+    }
+    
+    //////////////////////////////
+    // BLOCK STATE
+    //////////////////////////////
     public IBlockState getBlockState(EnumFacing face)
     {
         if(blockStates[face.ordinal()] == null)
@@ -76,11 +93,11 @@ public class NeighborBlocks {
     }
     public IBlockState getBlockState(BlockCorner corner)
     {
-        if(cornerStates[corner.ordinal()] == null)
+        if(blockStates[corner.superOrdinal] == null)
         {
-            cornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.directionVector));
+            blockStates[corner.superOrdinal] = world.getBlockState(pos.add(corner.directionVector));
         }
-        return cornerStates[corner.ordinal()];
+        return blockStates[corner.superOrdinal];
     }
 
     public IBlockState getBlockState(EnumFacing face1, EnumFacing face2, EnumFacing face3)
@@ -91,13 +108,102 @@ public class NeighborBlocks {
 
     public IBlockState getBlockState(FarCorner corner)
     {
-        if(farCornerStates[corner.ordinal()] == null)
+        if(blockStates[corner.superOrdinal] == null)
         {
-            farCornerStates[corner.ordinal()] = world.getBlockState(pos.add(corner.directionVector));
+            blockStates[corner.superOrdinal] = world.getBlockState(pos.add(corner.directionVector));
         }
-        return farCornerStates[corner.ordinal()];
+        return blockStates[corner.superOrdinal];
+    }
+    
+    //////////////////////////////
+    // MODEL STATE
+    //////////////////////////////
+    public ModelState getModelState(EnumFacing face)
+    {
+        if(modelStates[face.ordinal()] == null)
+        {
+            IBlockState state = this.getBlockState(face);
+            Block block = state.getBlock();
+            if(block instanceof SuperBlock)
+            {
+                modelStates[face.ordinal()] = ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, this.world, pos.add(face.getDirectionVec()), this.refreshModelStateFromWorld);
+            }
+        }
+        return modelStates[face.ordinal()];
     }
 
+    public ModelState getModelState(HorizontalFace face)
+    {
+        return getModelState(face.face);
+    }
+
+    public ModelState getModelStateUp(HorizontalFace face)
+    {
+        return getModelState(face.face, EnumFacing.UP);
+    }
+
+    public ModelState getModelStateDown(HorizontalFace face)
+    {
+        return getModelState(face.face, EnumFacing.DOWN);
+    }
+    public ModelState getModelState(EnumFacing face1, EnumFacing face2)
+    {
+        BlockCorner corner = BlockCorner.find(face1, face2);
+        return getModelState(corner);
+    }
+
+    public ModelState getModelState(HorizontalCorner corner)
+    {
+        return getModelState(corner.face1.face, corner.face2.face);
+    }
+
+    public ModelState getModelStateUp(HorizontalCorner corner)
+    {
+        return getModelState(corner.face1.face, corner.face2.face, EnumFacing.UP);
+    }
+
+    public ModelState getModelStateDown(HorizontalCorner corner)
+    {
+        return getModelState(corner.face1.face, corner.face2.face, EnumFacing.DOWN);
+    }
+    public ModelState getModelState(BlockCorner corner)
+    {
+        if(modelStates[corner.superOrdinal] == null)
+        {
+            IBlockState state = this.getBlockState(corner);
+            Block block = state.getBlock();
+            if(block instanceof SuperBlock)
+            {
+                modelStates[corner.superOrdinal] = ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, this.world, pos.add(corner.directionVector), this.refreshModelStateFromWorld);
+            }
+        }
+        return modelStates[corner.superOrdinal];
+    }
+
+    public ModelState getModelState(EnumFacing face1, EnumFacing face2, EnumFacing face3)
+    {
+        FarCorner corner = FarCorner.find(face1, face2, face3);
+        return getModelState(corner);
+    }
+
+    public ModelState getModelState(FarCorner corner)
+    {
+        if(modelStates[corner.superOrdinal] == null)
+        {
+            IBlockState state = this.getBlockState(corner);
+            Block block = state.getBlock();
+            if(block instanceof SuperBlock)
+            {
+                modelStates[corner.superOrdinal] = ((SuperBlock)block).getModelStateAssumeStateIsCurrent(state, this.world, pos.add(corner.directionVector), this.refreshModelStateFromWorld);
+            }
+        }
+        return modelStates[corner.superOrdinal];
+    }
+
+    //////////////////////////////
+    // TESTS AND OTHER STUFF
+    //////////////////////////////
+    
     /**
      * Apply given test to neighboring block states.
      */
@@ -105,6 +211,13 @@ public class NeighborBlocks {
         return new NeighborTestResults(test);
     }
 
+    /**
+     * For testing
+     */
+    public NeighborTestResults getFakeNeighborTestResults(int faceFlags) {
+        return new NeighborTestResults(faceFlags);
+    }
+    
     /**
      * Convenient data structure for returning test results.
      */
@@ -114,21 +227,80 @@ public class NeighborBlocks {
         private int resultFlags = 0;
         private final IBlockTest test;
 
-        protected NeighborTestResults(IBlockTest test) {
+        private NeighborTestResults(IBlockTest test) {
             this.test = test;
         }
 
+        // for testing
+        private NeighborTestResults(int faceFlags)
+        {
+            this.test = null;
+            this.resultFlags = faceFlags;
+            this.completionFlags = Useful.intBitMask(26);
+        }
+        
+        private boolean doTest(EnumFacing face)
+        {
+            if(test.wantsModelState())
+            {
+                return test.testBlock(world, getBlockState(face), pos.add(face.getDirectionVec()), getModelState(face));
+            }
+            else
+            {
+                return test.testBlock(world, getBlockState(face), pos.add(face.getDirectionVec()));
+            }
+        }
+        
+        private boolean doTest(BlockCorner corner)
+        {
+            if(test.wantsModelState())
+            {
+                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector), getModelState(corner));
+            }
+            else
+            {
+                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector));
+            }
+        }
+        
+        private boolean doTest(FarCorner corner)
+        {
+            if(test.wantsModelState())
+            {
+                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector), getModelState(corner));
+            }
+            else
+            {
+                return test.testBlock(world, getBlockState(corner), pos.add(corner.directionVector));
+            }
+        }
+        
         public boolean result(EnumFacing face)
         {
             int bitFlag = FACE_FLAGS[face.ordinal()];
             if((completionFlags & bitFlag) != bitFlag) {
-                if(test.testBlock(world, NeighborBlocks.this.getBlockState(face), pos.add(face.getDirectionVec())))
+                if(doTest(face))
                 {
                     resultFlags |= bitFlag;
                 }
                 completionFlags |= bitFlag;
             }
             return (resultFlags & bitFlag) == bitFlag;
+        }
+        
+        /** use this to override world results */
+        public void override(EnumFacing face, boolean override)
+        {
+            int bitFlag = FACE_FLAGS[face.ordinal()];
+            completionFlags |= bitFlag;
+            if(override)
+            {
+                resultFlags |= bitFlag;
+            }
+            else
+            {
+                resultFlags &= ~bitFlag;
+            }
         }
 
         public boolean result(HorizontalFace face)
@@ -175,7 +347,7 @@ public class NeighborBlocks {
         public boolean result(BlockCorner corner)
         {
             if((completionFlags & corner.bitFlag) != corner.bitFlag) {
-                if(test.testBlock(world, NeighborBlocks.this.getBlockState(corner), pos.add(corner.directionVector)))
+                if(doTest(corner))
                 {
                     resultFlags |= corner.bitFlag;
                 }
@@ -203,7 +375,7 @@ public class NeighborBlocks {
         public boolean result(FarCorner corner)
         {
             if((completionFlags & corner.bitFlag) != corner.bitFlag) {
-                if(test.testBlock(world, NeighborBlocks.this.getBlockState(corner), pos.add(corner.directionVector)))
+                if(doTest(corner))
                 {
                     resultFlags |= corner.bitFlag;
                 }
@@ -266,12 +438,18 @@ public class NeighborBlocks {
         public final EnumFacing.Axis axis;
         public final int bitFlag;
         public final Vec3i directionVector;
+        /** 
+         * Ordinal sequence that includes all faces, corner and far corners.
+         * Use to index them in a mixed array.
+         */
+        public final int superOrdinal;
 
         private BlockCorner(EnumFacing face1, EnumFacing face2)
         {
             this.face1 = face1;
             this.face2 = face2;
             this.bitFlag = 1 << (FACE_FLAGS.length + this.ordinal());
+            this.superOrdinal = EnumFacing.values().length + this.ordinal();
             boolean hasX = (face1.getAxis() == EnumFacing.Axis.X || face2.getAxis() == EnumFacing.Axis.X);
             boolean hasY = (face1.getAxis() == EnumFacing.Axis.Y || face2.getAxis() == EnumFacing.Axis.Y);
             this.axis = hasX && hasY ? EnumFacing.Axis.Z : hasX ? EnumFacing.Axis.Y : EnumFacing.Axis.X;
@@ -391,7 +569,11 @@ public class NeighborBlocks {
         public final EnumFacing face3;
         public final int bitFlag;
         public final Vec3i directionVector;
-
+        /** 
+         * Ordinal sequence that includes all faces, corner and far corners.
+         * Use to index them in a mixed array.
+         */
+        public final int superOrdinal;
 
         private FarCorner(EnumFacing face1, EnumFacing face2, EnumFacing face3)
         {
@@ -399,6 +581,7 @@ public class NeighborBlocks {
             this.face2 = face2;
             this.face3 = face3;
             this.bitFlag = 1 << (FACE_FLAGS.length + BlockCorner.values().length + this.ordinal());
+            this.superOrdinal = this.ordinal() + EnumFacing.values().length + BlockCorner.values().length;
 
             FAR_CORNER_LOOKUP[face1.ordinal()][face2.ordinal()][face3.ordinal()] = this;
             FAR_CORNER_LOOKUP[face1.ordinal()][face3.ordinal()][face2.ordinal()] = this;

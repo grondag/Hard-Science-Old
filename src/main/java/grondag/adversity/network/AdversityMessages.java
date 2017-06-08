@@ -14,7 +14,7 @@ public class AdversityMessages
     {
 
         // Server side
-        INSTANCE.registerMessage(PacketUpdateNiceItemBlock.Handler.class, PacketUpdateNiceItemBlock.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketReplaceHeldItem.Handler.class, PacketReplaceHeldItem.class, packetID++, Side.SERVER);
         
 
         // Client side        

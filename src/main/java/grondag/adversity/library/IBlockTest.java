@@ -1,5 +1,6 @@
 package grondag.adversity.library;
 
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -11,4 +12,11 @@ import net.minecraft.world.IBlockAccess;
 public interface IBlockTest
 {
 	public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos);
+	
+	public default boolean wantsModelState() { return false; }
+	
+	public default boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
+	{
+	    return testBlock(world, ibs, pos);
+	}
 }

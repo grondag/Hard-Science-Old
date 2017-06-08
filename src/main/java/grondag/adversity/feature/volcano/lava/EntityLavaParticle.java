@@ -2,11 +2,11 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.List;
 
-import grondag.adversity.Adversity;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.simulator.Simulator;
+import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -224,7 +224,7 @@ public class EntityLavaParticle extends Entity
         
         if(this.ticksExisted > 600)
         {
-            Adversity.LOG.info("Ancient lava particle died of old age.");
+            Output.info("Ancient lava particle died of old age.");
             this.setDead();
             return;
         }
@@ -235,7 +235,7 @@ public class EntityLavaParticle extends Entity
 //        {
             Block block = this.world.getBlockState(this.getPosition()).getBlock();
             
-            if(block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || block == NiceBlockRegistrar.HOT_FLOWING_LAVA_FILLER_BLOCK )
+            if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler )
             {
                 this.land();
                 return;
@@ -349,7 +349,7 @@ public class EntityLavaParticle extends Entity
         int i5 = MathHelper.floor(this.posZ);
         BlockPos blockpos = new BlockPos(j4, l4, i5);
         IBlockState iblockstate = this.world.getBlockState(blockpos);
-        this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || IFlowBlock.isFlowFiller(iblockstate.getBlock());
+        this.onGround = this.isCollidedVertically && !LavaTerrainHelper.canLavaDisplace(iblockstate) || TerrainBlock.isFlowFiller(iblockstate.getBlock());
 
         //this is very crude, but if we are vertically collided but not resting on top of the ground
         //re-center on our block pos so that we have a better chance to fall down
@@ -438,7 +438,7 @@ public class EntityLavaParticle extends Entity
                     blockpos$pooledmutableblockpos.setPos(k1, l1, i2);
                     IBlockState state = this.world.getBlockState(blockpos$pooledmutableblockpos);
                     if(!(state.getMaterial() == Material.AIR || state.getMaterial().isLiquid()) 
-                             && LavaTerrainHelper.canLavaDisplace(state) && !IFlowBlock.isFlowFiller(state.getBlock()))
+                             && LavaTerrainHelper.canLavaDisplace(state) && !TerrainBlock.isFlowFiller(state.getBlock()))
                     {
                         this.world.destroyBlock(blockpos$pooledmutableblockpos.toImmutable(), true);
                     }

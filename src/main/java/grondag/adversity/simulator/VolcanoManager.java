@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
+import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.TileVolcano.VolcanoStage;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
@@ -148,13 +149,13 @@ public class VolcanoManager extends SimulationNodeRunnable
     {
         if(nodes == null)
         {
-            Adversity.LOG.warn("Volcano simulation manager not properly initialized."
+            Output.warn("Volcano simulation manager not properly initialized."
                     + " Volcano simulation state will be invalid.");
             return null;
         }
         if(nodeID < 0 || nodeID >= nodes.length)
         {
-            Adversity.LOG.warn("Invalid volcano node id: " + nodeID
+            Output.warn("Invalid volcano node id: " + nodeID
                     + ". Volcano simulation state will be invalid.");
             return null;
         }
@@ -165,7 +166,7 @@ public class VolcanoManager extends SimulationNodeRunnable
     {
         if(nodes == null)
         {
-            Adversity.LOG.warn("Volcano simulation manager not properly initialized."
+            Output.warn("Volcano simulation manager not properly initialized."
                     + " Volcano simulation state will be invalid.");
             return null;
         }
@@ -358,7 +359,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         {
             if(this.isActive && this.keepAlive + 2048L < Simulator.INSTANCE.getWorld().getTotalWorldTime())
             {
-                Adversity.LOG.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
+                Output.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
                 + " has not reported in. Deactivating volcano simulation node.");
                 this.deActivate();
             }

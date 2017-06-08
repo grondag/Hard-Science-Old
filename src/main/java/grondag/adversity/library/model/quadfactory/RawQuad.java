@@ -6,11 +6,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import grondag.adversity.Configurator;
+import grondag.adversity.library.Color;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
+import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
+import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -18,6 +23,8 @@ import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public class RawQuad
 {
+    private static final Surface NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    
     private Vertex[] vertices;
     private Vec3d faceNormal = null;
     private final int vertexCount;
@@ -26,14 +33,17 @@ public class RawQuad
     public TextureAtlasSprite textureSprite;
     public Rotation rotation = Rotation.ROTATE_NONE;
     // if true, rotates texture by swaping uv on vertices
-    // Needed for big-tex blocks, but does only works well for regular sqare quads.
-    public boolean useSimpleRotation = false;
-    public int color;
+    // Needed for big-tex painter, but does not work well for regular square quads.
+    public boolean useVertexUVRotation = false;
+    public int color = Color.WHITE;
     public LightingMode lightingMode = LightingMode.SHADED;
     public boolean lockUV = false;
 //    public boolean isItem = false;
 //    public String tag = "";
     public boolean shouldContractUVs = true;
+    
+    public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
+    public Surface surface = NO_SURFACE;
     
     public float minU = 0;
     public float maxU = 16;
@@ -98,7 +108,7 @@ public class RawQuad
 
     private void copyProperties(RawQuad fromObject)
     {
-        this.setFace(fromObject.getFace());
+        this.setFace(fromObject.getNominalFace());
         this.textureSprite = fromObject.textureSprite;
         this.rotation = fromObject.rotation;
         this.color = fromObject.color;
@@ -110,11 +120,12 @@ public class RawQuad
         this.faceNormal = fromObject.faceNormal;
 //        this.tag = fromObject.tag;
         this.shouldContractUVs = fromObject.shouldContractUVs;
-        this.useSimpleRotation = fromObject.useSimpleRotation;
         this.minU = fromObject.minU;
         this.maxU = fromObject.maxU;
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
+        this.renderLayer = fromObject.renderLayer;
+        this.surface = fromObject.surface;
     }
 
     public List<RawQuad> toQuads()
@@ -291,7 +302,7 @@ public class RawQuad
     public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
     {
 
-        EnumFacing defaultTop = Useful.defaultTopOf(this.getFace());
+        EnumFacing defaultTop = Useful.defaultTopOf(this.getNominalFace());
         FaceVertex rv0;
         FaceVertex rv1;
         FaceVertex rv2;
@@ -305,7 +316,7 @@ public class RawQuad
             rv2 = vertexIn2.clone();
             rv3 = vertexIn3.clone();
         }
-        else if(topFace == Useful.rightOf(this.getFace(), defaultTop))
+        else if(topFace == Useful.rightOf(this.getNominalFace(), defaultTop))
         {
             rv0 = new FaceVertex.Colored(vertexIn0.y, 1.0 - vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
             rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -313,7 +324,7 @@ public class RawQuad
             rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
             uvRotationCount = lockUV ? 0 : 1;
         }
-        else if(topFace == Useful.bottomOf(this.getFace(), defaultTop))
+        else if(topFace == Useful.bottomOf(this.getNominalFace(), defaultTop))
         {
             rv0 = new FaceVertex.Colored(1.0 - vertexIn0.x, 1.0 - vertexIn0.y, vertexIn0.depth, vertexIn0.getColor(this.color));
             rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -338,7 +349,7 @@ public class RawQuad
             vertexIn3 = rv3;
         }
         
-        switch(this.getFace())
+        switch(this.getNominalFace())
         {
         case UP:
             setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
@@ -459,12 +470,31 @@ public class RawQuad
     /**
      * Changes all vertices and quad color to new color and returns itself
      */
-    public RawQuad recolor(int color)
+    public RawQuad replaceColor(int color)
     {
         this.color = color;
         for(int i = 0; i < this.getVertexCount(); i++)
         {
             if(getVertex(i) != null) setVertex(i, getVertex(i).withColor(color));
+        }
+        return this;
+    }
+    
+
+    /**
+     * Multiplies all vertex color by given color and returns itself
+     */
+    public RawQuad multiplyColor(int color)
+    {
+        this.color = QuadFactory.multiplyColor(this.color, color);
+        for(int i = 0; i < this.getVertexCount(); i++)
+        {
+            Vertex v = this.getVertex(i);
+            if(v != null)
+            {
+                int vColor = QuadFactory.multiplyColor(color, v.color);
+                this.setVertex(i, v.withColor(vColor));
+            }
         }
         return this;
     }
@@ -698,33 +728,61 @@ public class RawQuad
      */
      public void rotateQuadUV()
     {
-        if(this.useSimpleRotation)
+        if(this.useVertexUVRotation)
         {
-            double swapU = this.getVertex(0).u;
-            double swapV = this.getVertex(0).v;
-            
-            for(int i = 0; i < this.getVertexCount() - 1; i++)
-            {
-                Vertex vOld = getVertex(i);
-                Vertex vNext = getVertex(i + 1);
-                Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
-                setVertex(i, vNew);
-            } 
-            Vertex vOld = getVertex(this.getVertexCount() - 1);
-            Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
-            setVertex(this.getVertexCount() - 1, vNew);
+            this.rotateQuadUVSwapVertex();
         }
         else
         {
-            for(int i = 0; i < this.getVertexCount(); i++)
-            {
-                Vertex vOld = getVertex(i);
-                Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vOld.v, 16 - vOld.u, vOld.color, vOld.normal);
-                setVertex(i, vNew);
-            }
+            this.rotateQuadUVMoveTexture();
         }
     }
-
+     
+     /**
+     * Transforms UV coords so that face texture appears to rotate 90deg clockwise.
+     */
+     public void rotateQuadUVMoveTexture()
+     {
+         for(int i = 0; i < this.getVertexCount(); i++)
+         {
+             Vertex vOld = getVertex(i);
+             setVertex(i, vOld.withUV(vOld.v, 16 - vOld.u));
+         }
+     }
+     
+     
+     /**
+      * Used by BigTex painter, moves the UV coordinates around the edges of the quad
+      * so that texture appears to rotate 90deg clockwise.
+      */
+     public void rotateQuadUVSwapVertex()
+     {
+         double swapU = this.getVertex(0).u;
+         double swapV = this.getVertex(0).v;
+         
+         for(int i = 0; i < this.getVertexCount() - 1; i++)
+         {
+             Vertex vOld = getVertex(i);
+             Vertex vNext = getVertex(i + 1);
+             Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
+             setVertex(i, vNew);
+         } 
+         Vertex vOld = getVertex(this.getVertexCount() - 1);
+         Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
+         setVertex(this.getVertexCount() - 1, vNew);
+     }
+    
+     /**
+      * Multiplies uvMin/Max by the given factors.
+      */
+    public void scaleQuadUV(double uScale, double vScale)
+    {
+        this.minU *= uScale;
+        this.maxU *= uScale;
+        this.minV *= vScale;
+        this.maxV *= vScale;
+    }
+    
     public BakedQuad createBakedQuad()
     {
 
@@ -768,7 +826,7 @@ public class RawQuad
 //            faceNormal[1] = 1;
 //            faceNormal[2] = 0;
 //        }
-
+        
         for(int v = 0; v < 4; v++)
         {
 
@@ -786,7 +844,7 @@ public class RawQuad
 
                 case COLOR:
                     float shade;
-                    if(this.lightingMode == LightingMode.SHADED)
+                    if(this.lightingMode == LightingMode.SHADED && Configurator.RENDER.enableCustomShading && !this.surface.isLampGradient)
                     {
                         Vec3d surfaceNormal = getVertex(v).hasNormal() ? getVertex(v).getNormal() : this.getFaceNormal();
                         shade = Configurator.RENDER.minAmbientLight + 
@@ -835,9 +893,12 @@ public class RawQuad
             }
         }
 
-      
+        boolean applyDiffuseLighting = this.lightingMode == LightingMode.SHADED
+                && !this.surface.isLampGradient  
+                && !Configurator.RENDER.enableCustomShading;
+        
         return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, color, this.face, textureSprite, 
-                lightingMode == LightingMode.SHADED && !Configurator.RENDER.enableCustomShading, format));
+                applyDiffuseLighting, format));
         
     }
     
@@ -899,9 +960,14 @@ public class RawQuad
     {
         if(faceNormal == null && getVertex(0) != null && getVertex(1) != null && getVertex(2) != null && getVertex(3) != null)
         {
-            faceNormal = getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).normalize();
+            faceNormal = computeFaceNormal();
         }
         return faceNormal;
+    }
+    
+    public Vec3d computeFaceNormal()
+    {
+        return getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).normalize();
     }
 
     public void setFaceNormal(Vec3d faceNormal)
@@ -946,7 +1012,7 @@ public class RawQuad
     @Override
     public String toString()
     {
-        String result = "id: " + this.quadID + " face: " + this.getFace();
+        String result = "id: " + this.quadID + " face: " + this.getNominalFace();
         for(int i = 0; i < getVertexCount(); i++)
         {
             result += " v" + i + ": " + this.getVertex(i).toString();
@@ -959,11 +1025,45 @@ public class RawQuad
      * Gets the face to be used for setupFace semantics.  
      * Is a general facing but does NOT mean poly is actually on that face.
      */
-    public EnumFacing getFace()
+    public EnumFacing getNominalFace()
     {
         return face;
     }
 
+    /** 
+     * Face to use for shading testing.
+     * Based on which way face points. 
+     * Never null
+     */
+    public EnumFacing getNormalFace()
+    {
+        Vec3d myNormal = this.getFaceNormal();
+        EnumFacing result = null;
+        
+        double minDiff = 0.0F;
+
+        for (EnumFacing f : EnumFacing.values())
+        {
+            Vec3d faceNormal = new Vec3d(f.getDirectionVec());
+            double diff = myNormal.dotProduct(faceNormal);
+
+            if (diff >= 0.0 && diff > minDiff)
+            {
+                minDiff = diff;
+                result = f;
+            }
+        }
+
+        if (result == null)
+        {
+            return EnumFacing.UP;
+        }
+        else
+        {
+            return result;
+        }
+    }
+    
     /** 
      * Face to use for occlusion testing.
      * Null if not fully on one of the faces.
@@ -987,5 +1087,12 @@ public class RawQuad
     {
         this.face = face;
         return face;
+    }
+    
+    /** convenience method - sets surface value and returns self */
+    public RawQuad setSurface(Surface surface)
+    {
+        this.surface = surface;
+        return this;
     }
 }

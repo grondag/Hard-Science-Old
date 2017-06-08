@@ -7,12 +7,11 @@ import java.util.Iterator;
 
 import gnu.trove.list.TLongList;
 import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
+import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.Useful;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
-import grondag.adversity.niceblock.base.IFlowBlock;
-import grondag.adversity.niceblock.base.NiceBlock;
-import grondag.adversity.niceblock.support.BaseMaterial;
+import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
+import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -110,7 +109,7 @@ public class LavaTerrainHelper
      */
     public boolean isLavaSpace(IBlockState state)
     {
-        return state.getBlock() == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK || LavaTerrainHelper.canLavaDisplace(state);
+        return state.getBlock() == ModBlocks.lava_dynamic_height || LavaTerrainHelper.canLavaDisplace(state);
         
     }
     
@@ -121,9 +120,13 @@ public class LavaTerrainHelper
      */
     public boolean isOpenTerrainSpace(IBlockState state)
     {
+
         Block block = state.getBlock();
-        return block == NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK
-                || (IFlowBlock.isFlowHeight(block) && ((NiceBlock)block).material == BaseMaterial.BASALT)
+        return block == ModBlocks.lava_dynamic_height
+                || block == ModBlocks.basalt_cool_dynamic_height
+                || block == ModBlocks.basalt_cool_static_height
+                || block == ModBlocks.basalt_cut
+                || (block instanceof CoolingBasaltBlock && TerrainBlock.isFlowHeight(block))
                 || LavaTerrainHelper.canLavaDisplace(state);
     }
     
@@ -337,9 +340,9 @@ public class LavaTerrainHelper
     {
         Block block = state.getBlock();
         
-        if (IFlowBlock.isFlowFiller(block)) return true;
+        if (TerrainBlock.isFlowFiller(block)) return true;
 
-        if (IFlowBlock.isFlowHeight(block)) return false;
+        if (TerrainBlock.isFlowHeight(block)) return false;
         
         //TODO: make material list configurable
    

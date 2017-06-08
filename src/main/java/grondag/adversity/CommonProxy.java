@@ -9,7 +9,6 @@ import grondag.adversity.init.ModItems;
 import grondag.adversity.init.ModRecipes;
 import grondag.adversity.init.ModTileEntities;
 import grondag.adversity.network.AdversityMessages;
-import grondag.adversity.niceblock.NiceBlockRegistrar;
 import grondag.adversity.simulator.Simulator;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,11 +24,10 @@ public class CommonProxy
 {
 	public void preInit(FMLPreInitializationEvent event) 
 	{
-		Adversity.LOG = event.getModLog();
+		Output.setLog(event.getModLog());
 		
         AdversityMessages.registerNetworkMessages();
 
-        NiceBlockRegistrar.preInit(event);
         ModBlocks.preInit(event);
 		ModItems.preInit(event);
 		ModTileEntities.preInit(event);
@@ -50,7 +48,7 @@ public class CommonProxy
 	    Configurator.recalcDervied();
 	    NetworkRegistry.INSTANCE.registerGuiHandler(Adversity.INSTANCE, new AdversityGuiHandler());
 		ModRecipes.init(event);
-        NiceBlockRegistrar.init(event);
+		ModBlocks.init(event);
 	}
 
 	public void postInit(FMLPostInitializationEvent event) 
