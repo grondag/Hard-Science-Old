@@ -69,7 +69,6 @@ public class LavaConnections
         ONE_TO_TWO, TWO_TO_ONE, NONE
     }
 
-    // TODO: make configurable?
     private static final int BATCH_SIZE = 4096;
     
     private final Job sortJob;

@@ -1,10 +1,11 @@
 package grondag.adversity.library.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
 import com.google.common.collect.ImmutableList;
-
 import grondag.adversity.library.Useful;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
@@ -16,107 +17,116 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
+import static net.minecraft.util.EnumFacing.*;
+
 public class QuadContainer
 {
-	public static final QuadContainer EMPTY_CONTAINER;
-	
-	// TODO: for memory efficiency (and possibly improved LOR
-	// look at storing this as a single array with offsets to the
-	// start of each section of quads - maybe within sparselayermap also?
-	
-	// would need flyweight list objects on top of it to avoid copying array into a new allocation
-	
-	static
-	{
-		QuadContainerBuilder builder = new QuadContainerBuilder();
-		
-		builder.setQuads(null, QuadFactory.EMPTY_QUAD_LIST);
-		for(EnumFacing face : EnumFacing.values())
-		{
-			builder.setQuads(face, QuadFactory.EMPTY_QUAD_LIST);
-		}
-		EMPTY_CONTAINER = builder.build();
-	}
-	
-	private final List<BakedQuad>[] quads;
-	private int[] occlusionHash;
- 
-	private QuadContainer(List<BakedQuad>[] quads)
+    public static final QuadContainer EMPTY_CONTAINER = new QuadContainer(Collections.emptyList());
+
+    // Heavy usage, many instances, so using sublists of a single immutable list to improve LOR
+    // and using instance variables to avoid memory overhead of another array. 
+    // I didn't profile this to make sure it's worthwhile - don't tell Knuth.
+     
+    private final List<BakedQuad> up;
+    private final List<BakedQuad> down;
+    private final List<BakedQuad> east;
+    private final List<BakedQuad> west;
+    private final List<BakedQuad> north;
+    private final List<BakedQuad> south;
+    private final List<BakedQuad> general;
+    private int[] occlusionHash;
+
+    public static QuadContainer fromRawQuads(List<RawQuad> rawQuads)
     {
-        this.quads = quads;
+        if(rawQuads.isEmpty()) return EMPTY_CONTAINER;
+
+        return new QuadContainer(rawQuads);
     }
-	
-	/** bakes quads and sorts into appropriate face */
-	public static QuadContainer fromRawQuads(List<RawQuad> rawQuads)
-	{
-	    @SuppressWarnings("unchecked")
-        ImmutableList.Builder<BakedQuad>[] faces = new ImmutableList.Builder[6];
-        for(EnumFacing face : EnumFacing.values())
+
+    private QuadContainer(List<RawQuad> rawQuads)
+    {
+
+        @SuppressWarnings("unchecked")
+        ArrayList<BakedQuad>[] buckets = new ArrayList[7];
+
+        for(int i = 0; i < 7; i++)
         {
-            faces[face.ordinal()] = new ImmutableList.Builder<BakedQuad>();
+            buckets[i] = new ArrayList<BakedQuad>();
         }
-        ImmutableList.Builder<BakedQuad> general = new ImmutableList.Builder<BakedQuad>();
-        
-        for(RawQuad quad : rawQuads)
+
+        for(RawQuad r : rawQuads)
         {
-            if(quad.getActualFace() == null)
+            EnumFacing facing = r.getActualFace();
+            if(facing == null)
             {
-                general.add(quad.createBakedQuad());
+                buckets[6].add(r.createBakedQuad());
             }
             else
             {
-                faces[quad.getActualFace().ordinal()].add(quad.createBakedQuad());
+                buckets[facing.ordinal()].add(r.createBakedQuad());
             }
-        }  
-  
-        QuadContainer.QuadContainerBuilder containerBuilder = new QuadContainer.QuadContainerBuilder();
-        containerBuilder.setQuads(null, general.build());
-        for(EnumFacing face : EnumFacing.values())
-        {
-            containerBuilder.setQuads(face, faces[face.ordinal()].build());
         }
-        return containerBuilder.build();
-	}
 
-	public static QuadContainer merge(List<QuadContainer> inputs)
-	{
-		@SuppressWarnings("unchecked")
-		List<BakedQuad>[] newQuads = (List<BakedQuad>[]) new List[7];
-		
-		for(int i = 0; i < 7; i++)
-		{
-			ImmutableList.Builder<BakedQuad>  builder = new ImmutableList.Builder<>();
-			for(QuadContainer qc : inputs)
-			{
-				if(qc.quads[i] != null) builder.addAll(qc.quads[i]);
-			}
-			newQuads[i] = builder.build();
-		}
-		return new QuadContainer(newQuads);
-	}
-	
+        ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
+
+        if(!buckets[UP.ordinal()].isEmpty()) builder.addAll(buckets[UP.ordinal()]);
+        if(!buckets[DOWN.ordinal()].isEmpty()) builder.addAll(buckets[DOWN.ordinal()]);
+        if(!buckets[EAST.ordinal()].isEmpty()) builder.addAll(buckets[EAST.ordinal()]);
+        if(!buckets[WEST.ordinal()].isEmpty()) builder.addAll(buckets[WEST.ordinal()]);
+        if(!buckets[NORTH.ordinal()].isEmpty()) builder.addAll(buckets[NORTH.ordinal()]);
+        if(!buckets[SOUTH.ordinal()].isEmpty()) builder.addAll(buckets[SOUTH.ordinal()]);
+        if(!buckets[6].isEmpty()) builder.addAll(buckets[6]);
+        
+        ImmutableList<BakedQuad> quads = builder.build();
+
+        int first = 0;
+        
+        this.up = quads.subList(first, first + buckets[UP.ordinal()].size());
+        first +=  buckets[UP.ordinal()].size();
+
+        this.down = quads.subList(first, first + buckets[DOWN.ordinal()].size());
+        first +=  buckets[DOWN.ordinal()].size();
+       
+        this.east = quads.subList(first, first + buckets[EAST.ordinal()].size());
+        first +=  buckets[EAST.ordinal()].size();
+        
+        this.west = quads.subList(first, first + buckets[WEST.ordinal()].size());
+        first +=  buckets[WEST.ordinal()].size();
+        
+        this.north = quads.subList(first, first + buckets[NORTH.ordinal()].size());
+        first +=  buckets[NORTH.ordinal()].size();
+        
+        this.south = quads.subList(first, first + buckets[SOUTH.ordinal()].size());
+        first +=  buckets[SOUTH.ordinal()].size();
+        
+        this.general = quads.subList(first, first + buckets[6].size());
+        
+    }
+
     public List<BakedQuad> getQuads(EnumFacing face)
     {
-    	if(face !=null)
-    	{
-    		return quads[face.ordinal()];
-    	}
-    	else
-		{
-			return quads[6];
-		}
+        if(face ==null) return this.general;
+
+        switch(face)
+        {
+        case DOWN:
+            return this.down;
+        case EAST:
+            return this.east;
+        case NORTH:
+            return this.north;
+        case SOUTH:
+            return this.south;
+        case UP:
+            return this.up;
+        case WEST:
+            return this.west;
+        default:
+            return QuadFactory.EMPTY_QUAD_LIST;
+
+        }
     }
-    
-//    public boolean isEmpty()
-//    {
-//        boolean result = true;
-//        for(int i = 0; i < 7; i++)
-//        {
-//            result = result && quads[i].isEmpty();
-//        }
-//        return result;
-//    }
-    
+
     public int getOcclusionHash(EnumFacing face)
     {
         if(this.occlusionHash == null)
@@ -127,12 +137,12 @@ public class QuadContainer
                 this.occlusionHash[f.ordinal()] = computeOcclusionHash(f);
             }
         }
-        
+
         if(face == null) return 0;
-        
+
         return this.occlusionHash[face.ordinal()];
     }
-    
+
     private int computeOcclusionHash(EnumFacing face)
     {
         List<BakedQuad> quads = getQuads(face);
@@ -143,29 +153,7 @@ public class QuadContainer
         }
         return keyBuilder.getQuadListKey();
     }
-    
-    public static class QuadContainerBuilder
-    {
-        @SuppressWarnings("unchecked")
-		private final List<BakedQuad>[] quads = (List<BakedQuad>[]) new List[7];
 
-        public void setQuads(EnumFacing face, List<BakedQuad> quads)
-        {
-        	if(face !=null)
-        	{
-        		this.quads[face.ordinal()] = quads;
-        	}
-        	else
-    		{
-    			this.quads[6] = quads;
-    		}
-        }
-        
-        public QuadContainer build()
-        {
-        	return new QuadContainer(this.quads);
-        }
-    }
 
     private static class QuadListKeyBuilder implements IVertexConsumer
     {
@@ -173,7 +161,7 @@ public class QuadContainer
         private final int axis1;
 
         private TreeSet<Long> vertexKeys = new TreeSet<Long>();
-        
+
         private QuadListKeyBuilder(EnumFacing face)
         {
             switch(face.getAxis())
@@ -193,42 +181,42 @@ public class QuadContainer
                 break;
             }
         }
-        
+
         /** call after piping vertices into this instance */
         private int getQuadListKey()
         {
             long key = 0L;
             for(Long vk : vertexKeys)
             {
-               key += Useful.longHash(vk); 
+                key += Useful.longHash(vk); 
             }
             return (int)(key & 0xFFFFFFFF);     
         }
-        
+
         @Override
         public VertexFormat getVertexFormat()
         {
             return DefaultVertexFormats.POSITION;
         }
-    
+
         @Override
         public void setQuadTint(int tint)
         {
             //NOOP - not used
         }
-    
+
         @Override
         public void setQuadOrientation(EnumFacing orientation)
         {
             //NOOP - not used
         }
-    
+
         @Override
         public void setApplyDiffuseLighting(boolean diffuse)
         {
             //NOOP - not used
         }
-    
+
         @Override
         public void put(int element, float... data)
         {
@@ -242,4 +230,6 @@ public class QuadContainer
             //NOOP - not used
         }
     }
+
+
 }

@@ -16,7 +16,6 @@ public class SurfaceQuadPainterCylinder extends SurfaceQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
-        // TODO Auto-generated method stub
         return null;
     }
 }

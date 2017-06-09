@@ -72,8 +72,6 @@ public class Textures
     
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {
-        //TODO: temporary hack
-        
         int searchFlags = 0;
         switch(layer)
         {

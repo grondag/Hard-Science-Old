@@ -116,7 +116,6 @@ public class SuperItemBlock extends ItemBlock
         
         IPlacementHandler placementHandler = modelState.getShape().getPlacementHandler();
         
-        //TODO:  all logic currently in SuperBlock.updatedStackForPlacementGetSpecies goes here
         List<Pair<BlockPos, ItemStack>> placements = placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
 
         if(placements.isEmpty()) return EnumActionResult.FAIL;

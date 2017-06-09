@@ -23,9 +23,10 @@ import grondag.adversity.init.ModItems;
  * Vary color slightly with species, if user-selected
  * BlockFormer item
  * Shading/lighting on terrain blocks
- * 
- * 
- *
+ * MultiBlockSubState implementation
+ * MultiBlock Shapes
+ * Torus surface painter
+ * Cylinder surface painter
  */
 
 

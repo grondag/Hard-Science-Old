@@ -9,7 +9,7 @@ import net.minecraftforge.common.config.Config.*;
 public class Configurator
 {
     
-    public static void recalcDervied()
+    public static void recalcDerived()
     {
         Render.recalcDerived();
         Volcano.recalcDerived();
@@ -177,6 +177,11 @@ public class Configurator
         @RangeInt(min = 20, max = 24000000)
         public int maxDormantTicks = 200;
       
+        @Comment({"Number of ticks needed for lava or basalt to cool from one stage to another.",
+        "Should be larger than minDormantTicks"})
+        @RangeInt(min = 200, max = 200000)
+        public int basaltCoolingTicks = 200;
+        
         private static void recalcDerived()
         {
             if(VOLCANO.maxDormantTicks <= VOLCANO.minDormantTicks)

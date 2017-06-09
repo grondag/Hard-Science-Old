@@ -5,7 +5,6 @@ import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
 import grondag.adversity.library.BitPacker.BitElement.IntElement;
 
 /**
- * TODO
  * Putting here for now - should probably be part of parent class for multiblock shapes
  * @author grondag
  *

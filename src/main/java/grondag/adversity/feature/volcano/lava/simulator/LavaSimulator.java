@@ -74,7 +74,6 @@ public class LavaSimulator extends SimulationNode
     public final ParticleManager particleManager;
     
     /** Basalt blocks that are awaiting cooling */
-//    private final Set<AgedBlockPos> basaltBlocks = ConcurrentHashMap.newKeySet();
     private final SimpleConcurrentList<AgedBlockPos> basaltBlocks = SimpleConcurrentList.create(ENABLE_PERFORMANCE_COUNTING, "Basalt Blocks", perfCollectorOnTick);
     private int lastEligibleBasaltCoolingTick;
     
@@ -531,8 +530,7 @@ public class LavaSimulator extends SimulationNode
      */
     public void doOnTick()
     {
-        //TODO: put back
-//        this.doStats();
+        this.doStats();
         perfOnTick.startRun();
         
         // Enable detection of improper world access 

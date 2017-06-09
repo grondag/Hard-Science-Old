@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.google.common.collect.ComparisonChain;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.init.ModBlocks;
@@ -1391,8 +1392,8 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
      */
     public boolean canCool(int simTickIndex)
     {
-        //TODO: make ticks to cool configurable
-        if(this.isCoolingDisabled || this.isDeleted || this.fluidUnits() == 0 || simTickIndex - this.lastTickIndex < 200) return false;
+        if(this.isCoolingDisabled || this.isDeleted || this.fluidUnits() == 0 
+                || simTickIndex - this.lastTickIndex < Configurator.VOLCANO.basaltCoolingTicks) return false;
         
         if(this.connections.size() < 4) return true;
         

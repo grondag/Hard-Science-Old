@@ -123,7 +123,6 @@ public class LavaCells
         }    
     };
 
-    //TODO: make configurable
     private final static int BATCH_SIZE = 4096;
     
     public final Job provideBlockUpdateJob;   

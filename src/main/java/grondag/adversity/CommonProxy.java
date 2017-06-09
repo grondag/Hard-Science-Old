@@ -45,7 +45,7 @@ public class CommonProxy
 
 	public void init(FMLInitializationEvent event) 
 	{
-	    Configurator.recalcDervied();
+	    Configurator.recalcDerived();
 	    NetworkRegistry.INSTANCE.registerGuiHandler(Adversity.INSTANCE, new AdversityGuiHandler());
 		ModRecipes.init(event);
 		ModBlocks.init(event);

@@ -77,7 +77,7 @@ public class CommonEventHandler
         if (event.getModID().equals(Adversity.MODID))
         {
             ConfigManager.sync(Adversity.MODID, Type.INSTANCE);
-            Configurator.recalcDervied();
+            Configurator.recalcDerived();
         }
     }
     
