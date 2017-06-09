@@ -5,7 +5,6 @@ import grondag.adversity.gui.Layout;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
 import grondag.adversity.gui.base.GuiControl;
-import grondag.adversity.library.Useful;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
@@ -159,7 +158,7 @@ public class Slider extends GuiControl
         else
         {
             this.currentMouseLocation = MouseLocation.TAB;
-            this.currentMouseIndex = Useful.clamp((int) ((mouseX - this.choiceRight - TAB_WIDTH - ITEM_SPACING / 2) / (this.scrollWidth) * this.size), 0, this.size - 1);
+            this.currentMouseIndex = MathHelper.clamp((int) ((mouseX - this.choiceRight - TAB_WIDTH - ITEM_SPACING / 2) / (this.scrollWidth) * this.size), 0, this.size - 1);
         }
     }
     
@@ -233,7 +232,7 @@ public class Slider extends GuiControl
     {
         this.selectedTabIndex = this.size == 0
                 ? NO_SELECTION 
-                : Useful.clamp(index, 0, this.size - 1);
+                : MathHelper.clamp(index, 0, this.size - 1);
     }
     
     public int getSelectedIndex()

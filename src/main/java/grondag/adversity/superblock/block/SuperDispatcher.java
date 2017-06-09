@@ -76,8 +76,8 @@ public class SuperDispatcher
 			{
 			    if(key.canRenderInLayer(layer))
 			    {
-			        if(Output.DEBUG_MODE && containers[layer.ordinal()].isEmpty())
-			            Output.warn("SuperDispatcher BlockCacheLoader: Empty quads on enabled render layer.");
+//			        if(Output.DEBUG_MODE && containers[layer.ordinal()].isEmpty())
+//			            Output.warn("SuperDispatcher BlockCacheLoader: Empty quads on enabled render layer.");
 			        result.set(layer, QuadContainer.fromRawQuads(containers[layer.ordinal()]));
 			    }
 			}

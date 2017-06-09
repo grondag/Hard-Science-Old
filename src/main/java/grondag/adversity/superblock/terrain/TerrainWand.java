@@ -1,6 +1,5 @@
 package grondag.adversity.superblock.terrain;
 
-import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.init.ModBlocks;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.state.FlowHeightState;

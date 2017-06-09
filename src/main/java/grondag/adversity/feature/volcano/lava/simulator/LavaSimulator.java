@@ -545,7 +545,7 @@ public class LavaSimulator extends SimulationNode
         
         
         this.itMe = true;
-        this.worldBuffer.applyBlockUpdates(1, this);
+        this.worldBuffer.applyBlockUpdates(this);
         this.itMe = false;
         
         // For chunks that require a minority of cells to be validated, 

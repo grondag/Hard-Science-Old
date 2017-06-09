@@ -182,6 +182,22 @@ public class Configurator
         @RangeInt(min = 200, max = 200000)
         public int basaltCoolingTicks = 200;
         
+        @Comment({"Block updates are buffered for at least this many ticks before applied to world.",
+        "Higher numbers can be better for performance but may cause block updates to appear strangely."})
+        @RangeInt(min = 0, max = 20)
+        public int minBlockUpdateBufferTicks = 3;
+        
+        @Comment({"Block updates are considered high priority after this many ticks.",
+        "Higher numbers can be better for performance but may cause block updates to appear strangely."})
+        @RangeInt(min = 10, max = 40)
+        public int maxBlockUpdateBufferTicks = 20;
+        
+        @Comment({"Maximum number of chunk updates applied to world each tick.",
+        "The actual number of chunk render updates can be higher due to effects on neighboring chunks.",
+        "Higher numbers provide more realism but can negatively affect performance."})
+        @RangeInt(min = 1, max = 10)
+        public int maxChunkUpdatesPerTick = 2;
+        
         private static void recalcDerived()
         {
             if(VOLCANO.maxDormantTicks <= VOLCANO.minDormantTicks)

@@ -156,7 +156,7 @@ public abstract class TabBar<T> extends GuiControl
             else
             {
                 this.currentMouseLocation = MouseLocation.TAB;
-                this.currentMouseIndex = Useful.clamp((int) ((mouseY - this.top - TAB_WIDTH - ITEM_SPACING / 2) / (this.scrollHeight) * this.tabCount), 0, this.tabCount - 1);
+                this.currentMouseIndex = MathHelper.clamp((int) ((mouseY - this.top - TAB_WIDTH - ITEM_SPACING / 2) / (this.scrollHeight) * this.tabCount), 0, this.tabCount - 1);
 //                this.currentMouseIndex = (int) ((mouseX - this.left - TAB_WIDTH - this.actualItemMargin / 2) / (this.tabWidth + this.tabMargin));
             }
         }
@@ -339,7 +339,7 @@ public abstract class TabBar<T> extends GuiControl
     public void setSelectedIndex(int index)
     {
         if(items == null) return;
-        this.selectedItemIndex = Useful.clamp(index, 0, this.items.size() - 1);
+        this.selectedItemIndex = MathHelper.clamp(index, 0, this.items.size() - 1);
         this.showSelected();
     }
     

@@ -13,6 +13,7 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -24,39 +25,6 @@ import net.minecraft.util.EnumFacing;
  */
 public class Useful {
 	
-    //TODO: use methods in MathHelper instead
-    
-    /** clamps the input value to the given range, inclusive */
-    public static int clamp(int input, int min, int max)
-    {
-        if(input < min)
-            return min;
-        else if(input > max)
-            return max;
-        else
-            return input;
-    }
-
-    public static double clamp(double input, double min, double max)
-    {
-        if(input < min)
-            return min;
-        else if(input > max)
-            return max;
-        else
-            return input;
-    }
-    
-    public static float clamp(float input, float min, float max)
-    {
-        if(input < min)
-            return min;
-        else if(input > max)
-            return max;
-        else
-            return input;
-    }
-    
     public static int min(int... input)
     {
         int result = Integer.MAX_VALUE;
@@ -546,7 +514,7 @@ public class Useful {
     */
    public static long longBitMask(int bitLength)
    {
-       bitLength = clamp(bitLength, 0, Long.SIZE);
+       bitLength = MathHelper.clamp(bitLength, 0, Long.SIZE);
 
        // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
        long mask = 0L;
@@ -562,7 +530,7 @@ public class Useful {
     */
    public static int intBitMask(int bitLength)
    {
-       bitLength = clamp(bitLength, 0, Integer.SIZE);
+       bitLength = MathHelper.clamp(bitLength, 0, Integer.SIZE);
 
        // note: can't use mask = (1L << (bitLength+1)) - 1 here due to overflow & signed values
        int mask = 0;

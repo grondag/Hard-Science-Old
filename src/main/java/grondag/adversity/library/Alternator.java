@@ -3,6 +3,7 @@ package grondag.adversity.library;
 import java.util.Random;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 
 /**
@@ -104,7 +105,7 @@ public class Alternator implements IAlternator  {
 	    private MultiBlockAlternator(int alternateCount, int seed, int blockSize)
 	    {
 	        super(alternateCount, seed);
-	        this.blockSize = Useful.clamp(blockSize, 0, 5);
+	        this.blockSize = MathHelper.clamp(blockSize, 0, 5);
 	    }
 	    
 	    @Override
