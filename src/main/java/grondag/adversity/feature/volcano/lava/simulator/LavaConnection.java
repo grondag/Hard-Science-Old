@@ -2,13 +2,23 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+
 import grondag.adversity.Configurator;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
-import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.simulator.Simulator;
 
-public class LavaConnection implements ISimpleListItem
+public class LavaConnection
 {
+   
+    public static final Predicate<LavaConnection> REMOVAL_PREDICATE = new Predicate<LavaConnection>()
+    {
+        @Override
+        public boolean test(LavaConnection t)
+        {
+            return t.isDeleted;
+        }
+    };
     
     protected static int nextConnectionID = 0;
     
@@ -577,8 +587,7 @@ public class LavaConnection implements ISimpleListItem
     {
         this.isDeleted = true;
     }
-    
-    @Override
+
     public boolean isDeleted()
     {
         return this.isDeleted;
@@ -634,12 +643,17 @@ public class LavaConnection implements ISimpleListItem
         }
     }
     
-    //TODO: use this to reduce sorting overhead or eliminate it and next method
+    /**
+     * Used to avoid resorting from one bucket to another. 
+     */
     public SortBucket getLastSortBucket()
     {
         return this.lastSortBucket;
     }
-    
+
+    /**
+     * Call when sorted into the current bucket. 
+     */
     public void clearLastSortBucket()
     {
         this.lastSortBucket = this.sortBucket;

@@ -2,12 +2,12 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.Arrays;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
-import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.PackedBlockPos;
@@ -67,7 +67,7 @@ public class BlockEventList
         synchronized(this)
         {
             processJob.runOn(executor);
-            this.eventList.removeDeletedItems();
+            this.eventList.removeSomeDeletedItems(EVENT_REMOVAL_PREDICATE);
         }
     }
     
@@ -125,8 +125,18 @@ public class BlockEventList
         public abstract boolean handleEvent(BlockEvent event);
     }
     
-    public class BlockEvent implements ISimpleListItem
+    private static final Predicate<BlockEvent> EVENT_REMOVAL_PREDICATE = new Predicate<BlockEvent>()
     {
+        @Override
+        public boolean test(BlockEvent t)
+        {
+            return t.isDeleted();
+        }
+    };
+    
+    public class BlockEvent
+    {
+        
         public final int x;
         public final int y;
         public final int z;
@@ -160,7 +170,6 @@ public class BlockEventList
             this.amount = amount;
         }
         
-        @Override
         public boolean isDeleted()
         {
             return retryCount == IS_COMPLETE;

@@ -2,7 +2,6 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.Collection;
 import java.util.concurrent.Executor;
-
 import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
@@ -342,8 +341,7 @@ public class LavaSimulator extends SimulationNode
         this.lastEligibleBasaltCoolingTick = Simulator.INSTANCE.getTick() - BLOCK_COOLING_DELAY_TICKS;
 
         this.basaltCoolingJob.runOn(LAVA_THREAD_POOL);
-        this.basaltBlocks.removeDeletedItems();
-      
+        this.basaltBlocks.removeSomeDeletedItems(AgedBlockPos.REMOVAL_PREDICATE);
     }
 
     

@@ -7,28 +7,16 @@ import org.junit.Test;
 
 public class SimpleConcurrentListTest
 {
-    private class TestItem implements ISimpleListItem
+    private class TestItem
     {
         @SuppressWarnings("unused")
         private final int value;
-        private boolean isDeleted = false;
         
         private TestItem(int value)
         {
             this.value = value;
         }
         
-        @SuppressWarnings("unused")
-        private void delete()
-        {
-            this.isDeleted = true;
-        }
-        
-        @Override
-        public boolean isDeleted()
-        {
-            return isDeleted;
-        }
     }
 
     @Test

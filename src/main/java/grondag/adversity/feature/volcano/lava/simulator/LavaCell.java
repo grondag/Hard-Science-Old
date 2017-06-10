@@ -3,13 +3,14 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+
 import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.library.PackedBlockPos;
 import grondag.adversity.library.SimpleUnorderedArrayList;
 import grondag.adversity.simulator.Simulator;
@@ -19,8 +20,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 
-public class LavaCell extends AbstractLavaCell implements ISimpleListItem
+public class LavaCell extends AbstractLavaCell
 {
+    public static final Predicate<LavaCell> REMOVAL_PREDICATE = new Predicate<LavaCell>()
+    {
+        @Override
+        public boolean test(LavaCell t)
+        {
+            return t.isDeleted;
+        }
+    };
     
     /**
      * True if locked for update via {@link #tryLock()}
@@ -241,7 +250,6 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
         this.locator.setValidationNeeded(isNeeded);
     }    
     
-    @Override
     public boolean isDeleted()
     {
 //        if(Adversity.DEBUG_MODE && !this.isDeleted && this.locator.cellChunk.isUnloaded())

@@ -2,6 +2,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 import grondag.adversity.Configurator;
 import grondag.adversity.library.CountedJob;
@@ -44,8 +45,15 @@ public class LavaConnections
         @Override
         public void doJobTask(LavaConnection operand)
         {
-            SortBucket b = operand.getSortBucket();
-            if(b != null) sort[b.ordinal()].add(operand);
+            if(operand != null)
+            {
+                SortBucket b = operand.getSortBucket();
+                if(b != null && b != operand.getLastSortBucket())
+                {
+                    operand.clearLastSortBucket();
+                    sort[b.ordinal()].add(operand);
+                }
+            }
         }
     };
     
@@ -176,7 +184,7 @@ public class LavaConnections
     
     public void removeDeletedItems()
     {
-        this.connectionList.removeDeletedItems();
+        this.connectionList.removeSomeDeletedItems(LavaConnection.REMOVAL_PREDICATE);
     }
     
     public int size()
@@ -189,15 +197,27 @@ public class LavaConnections
         this.isSortCurrent = false;
     }
     
+    private static final Predicate<LavaConnection> SORT_BUCKET_PREDICATE = new Predicate<LavaConnection>()
+    {
+        @Override
+        public boolean test(LavaConnection t)
+        {
+            return t.isDeleted() || t.getLastSortBucket() != t.getSortBucket();
+        }
+    };
+    
     public void refreshSortBucketsIfNeeded(Executor executor)
     {
         if(this.isSortCurrent) return;
         
 //        sortRefreshPerf.startRun();
         
+        // Remove bucket entries if the connection is no longer valid
+        // or if belongs in a different bucket.
+        // The sort job that follows will put connections in the right bucket.
         for(SimpleConcurrentList<LavaConnection> bucket : this.sort)
         {
-            bucket.clear();
+            bucket.removeAllDeletedItems(SORT_BUCKET_PREDICATE);
         }
         
         this.sortJob.runOn(executor);

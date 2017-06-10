@@ -3,6 +3,7 @@ package grondag.adversity.library;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -15,22 +16,19 @@ import grondag.adversity.library.CountedJob.CountedJobProviderBacker;
  * Intended for use where insertion and indexing are parallel but other housekeeping tasks will 
  * only occur on a single thread, while nothing else is being done.
  * Iteration is as for an array (access to the array is provided) but not intended to happen concurrently with adds
- * because memory consistency is not guaranteed while adds are ongoing.
+ * because memory consistency is not guaranteed while adds are ongoing.<br><br>
  *  
  * It has *significant* limitations:
  *  1) Items can be added only at the end of the list, and only individually. Adding items is non-blocking. 
- *  2) No operation is provided to remove individual items. Items must implement ISimpleListItem to enable batch deletes. 
- *  3) The clean() method will remove items that are deleted.  
- *  4) clean() is NOT thread-safe.  Caller must ensure other methods are not called while clean() is in progress. 
- *  5) List capacity is dynamic but not automatically so - it can be changed with resize().
- *  6) resize() is NOT thread-safe.  Caller must ensure other methods are not called while resize() is in progress. 
- *  7) Insertion order is NOT maintained if items are deleted.
+ *  2) Items can be removed only by providing a predicate function to do so.
+ *  3) Removal methods are NOT thread-safe.  Caller must ensure other methods are not called while removal is in progress. 
+ *  4) Insertion order is NOT maintained if items are removed.
  *   
  *   * @author grondag
  *
  */
 
-public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable<T>, CountedJobProviderBacker<T>
+public class SimpleConcurrentList<T> implements Iterable<T>, CountedJobProviderBacker<T>
 {
     protected Object[]  items; 
     private volatile int capacity;
@@ -40,12 +38,12 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     
     private static final int DELETION_BATCH_SIZE = 1024;
     
-    public static <V extends ISimpleListItem> SimpleConcurrentList<V> create(boolean enablePerformanceCounting, String listName, PerformanceCollector perfCollector)
+    public static <V> SimpleConcurrentList<V> create(boolean enablePerformanceCounting, String listName, PerformanceCollector perfCollector)
     {
         return enablePerformanceCounting ? new Instrumented<V>(listName, perfCollector) : new SimpleConcurrentList<V>();
     }
     
-    public static <V extends ISimpleListItem> SimpleConcurrentList<V> create(PerformanceCounter perfCounter)
+    public static <V> SimpleConcurrentList<V> create(PerformanceCounter perfCounter)
     {
         return perfCounter == null ? new SimpleConcurrentList<V>() : new Instrumented<V>(perfCounter);
     }
@@ -72,26 +70,9 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     }
     
     /**
-     * @return current capacity of the list
-     */
-    public int capacity()
-    {
-        return this.capacity;
-    }
-    
-    /**
-     * @return count of items that can be added to the list before it is full
-     */
-    public int availableCapacity()
-    {
-        return this.capacity - this.size.get();
-    }
-    
-    /**
      * Adds item at end of list.
      * Safe for concurrent use with other adds.
      * Not safe for concurrent use with other operations.
-     * Will generate an array out of bounds exception if list is full.
      * @param item Thing to add
      */
     public void add(T item)
@@ -120,7 +101,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     }
     
     @SuppressWarnings("unchecked")
-    public T getItem(int index)
+    public T get(int index)
     {
         return (T) items[index];
     }
@@ -138,7 +119,8 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
      * NOT THREAD SAFE
      * Caller must ensure no other methods are called while this method is ongoing.
      */
-    public void removeDeletedItems()
+    @SuppressWarnings("unchecked")
+    public void removeSomeDeletedItems(Predicate<T> trueIfDeleted)
     {
         if(this.size.get() == 0) return;
         
@@ -174,14 +156,11 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
                 end = newSize;
             }
 
-            for(int i = start; i < end; i++)
+            for(int i = start; i < newSize; i++)
             {
-                if(i >= newSize) break;
-
-                @SuppressWarnings("unchecked")
-                T item =  (T) this.items[i];
-                
-                if(item != null && item.isDeleted())
+                Object item =  this.items[i];
+        
+                if(trueIfDeleted.test((T)item))
                 {
                     items[i] = items[--newSize];
                     items[newSize] = null;
@@ -195,6 +174,43 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
         }
     }
     
+    /**
+     * Removes *all* deleted items in the list and compacts storage.
+     * Use when you can't have nulls in an operation about to happen.
+     * ORDER OF ITEMS MAY CHANGE.
+     * NOT THREAD SAFE
+     * Caller must ensure no other methods are called while this method is ongoing.
+     */
+    @SuppressWarnings("unchecked")
+    public void removeAllDeletedItems(Predicate<T> trueIfDeleted)
+    {
+        if(this.size.get() == 0) return;
+        
+        // note - will not prevent add or iteration
+        // so does not, by itself, ensure thread safety
+        synchronized(this)
+        {
+            this.isMaintaining = true;
+            
+            int newSize = this.size();
+            
+            for(int i = 0; i < newSize; i++)
+            {
+                Object item =  this.items[i];
+        
+                if(trueIfDeleted.test((T)item))
+                {
+                    items[i] = items[--newSize];
+                    items[newSize] = null;
+                }
+            }
+            
+            this.size.set(newSize);
+            
+            this.isMaintaining = false;
+
+        }
+    }
     /**
      * Removes all items in the list, ensuring no references are held.
      * NOT THREAD SAFE
@@ -234,7 +250,7 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
     }
 
     
-    private static class Instrumented<T extends ISimpleListItem> extends SimpleConcurrentList<T>
+    private static class Instrumented<T> extends SimpleConcurrentList<T>
     {
         private final PerformanceCounter removalPerfCounter;
         
@@ -252,11 +268,11 @@ public class SimpleConcurrentList<T extends ISimpleListItem> implements Iterable
         public PerformanceCounter removalPerfCounter() { return this.removalPerfCounter; }
         
         @Override 
-        public void removeDeletedItems()
+        public void removeSomeDeletedItems(Predicate<T> trueIfDeleted)
         {
             int startCount = this.size();
             this.removalPerfCounter.startRun();
-            super.removeDeletedItems();
+            super.removeSomeDeletedItems(trueIfDeleted);
             this.removalPerfCounter.endRun();
             this.removalPerfCounter.addCount(startCount - this.size());
         }

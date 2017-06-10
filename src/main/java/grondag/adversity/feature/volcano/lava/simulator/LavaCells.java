@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
-
 import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob;
@@ -372,7 +371,7 @@ public class LavaCells
      */
     public void removeDeletedItems()
     {
-        this.cellList.removeDeletedItems();
+        this.cellList.removeSomeDeletedItems(LavaCell.REMOVAL_PREDICATE);
     }
     
     /**
