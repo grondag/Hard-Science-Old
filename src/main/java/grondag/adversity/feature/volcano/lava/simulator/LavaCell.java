@@ -1288,7 +1288,10 @@ public class LavaCell extends AbstractLavaCell implements ISimpleListItem
         }
     }
     
-    /** prevent massive garbage collection each tick */
+    /** 
+     * Working variable used during connection prioritization / sorting.
+     * Maintained as a static threadlocal to conserve memory and prevent massive garbage collection each tick.
+     */
     private static ThreadLocal<ArrayList<LavaConnection>> sorter = new ThreadLocal<ArrayList<LavaConnection>>() 
     {
         @Override
