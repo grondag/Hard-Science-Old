@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import gnu.trove.list.TLongList;
+import grondag.adversity.Configurator;
 import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer;
 import grondag.adversity.init.ModBlocks;
 import grondag.adversity.library.PackedBlockPos;
@@ -15,6 +16,7 @@ import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 
 public class LavaTerrainHelper
 {
@@ -98,8 +100,6 @@ public class LavaTerrainHelper
     public LavaTerrainHelper(WorldStateBuffer worldBuffer)
     {
         this.worldBuffer = worldBuffer;
-        //        this.riseCallBack = new ClosestRiseCallBack();
-        //        this.fallCallBack = new ClosestFallCallBack();
     }
 
     /**
@@ -224,30 +224,21 @@ public class LavaTerrainHelper
         if (TerrainBlock.isFlowFiller(block)) return true;
 
         if (TerrainBlock.isFlowHeight(block)) return false;
-
-        //TODO: make material list configurable
+        
+        if(block == Blocks.AIR) return true;
 
         Material material = state.getMaterial();
-
-        if(material.isReplaceable()) return true;
-
-        if(material == Material.AIR) return true;
-        if (material == Material.GRASS ) return false;
-        if (material == Material.GROUND ) return false;
-        if (material == Material.SAND ) return false;
-        if (material == Material.ROCK ) return false;
-        if (material == Material.CLAY) return false;
-        if (material == Material.DRAGON_EGG ) return false;
-        if (material == Material.IRON ) return false;
-        if (material == Material.PORTAL ) return false;
-        if (material == Material.ANVIL ) return false;
-
-        //TODO: remove, is for testing
-        if (material == Material.GLASS) return false;
-
-
-        // Volcanic lava don't give no shits about your stuff.
-        return true;        
+        
+        if(material.isReplaceable() || !material.blocksMovement() || !material.isSolid() || material.isLiquid() || material.getCanBurn())
+        {
+            // confirm can be destroyed
+            return !Configurator.Volcano.blocksSafeFromLava.containsKey(block);
+        }
+        else
+        {
+            // safe unless specifically identified in config
+            return Configurator.Volcano.blocksDestroyedByLava.containsKey(block);
+        }
     }
 
     public static String[] generateDefaultDisplaceableList()

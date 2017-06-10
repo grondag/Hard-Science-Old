@@ -16,7 +16,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
@@ -165,8 +164,8 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    this.lastTickFuture = null;
 	}
 	
-    @SubscribeEvent
-    public void onServerTick(ServerTickEvent event) {
+    public void onServerTick(ServerTickEvent event) 
+    {
         
         // thought it might offer more determinism if we run after block/entity ticks
         if(event.phase == TickEvent.Phase.END && this.isRunning)

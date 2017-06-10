@@ -2,15 +2,11 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import grondag.adversity.Output;
-import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.FlowDirection;
+import grondag.adversity.Configurator;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.library.ISimpleListItem;
 import grondag.adversity.simulator.Simulator;
 
-@SuppressWarnings("unused")
 public class LavaConnection implements ISimpleListItem
 {
     
@@ -32,32 +28,97 @@ public class LavaConnection implements ISimpleListItem
     
     private SortBucket lastSortBucket;
     
+    /**
+     * True if connection should flow.
+     * Will be false if connection is deleted, fluid is equalized or not enough fluid to flow.
+     * Maintained during {@link #setupTick()}.
+     */
     private boolean isFlowEnabled = false;
     
-    /** if true, flow is from 1 to 2, if false, is from 2 to 1 */
+    /** 
+     * If true, flow is from 1 to 2, if false, is from 2 to 1. 
+     * Only valid if {@link #isFlowEnabled} is true.
+     * Maintained during {@link #setupTick()} 
+     */
     private boolean isDirectionOneToTwo = true;
     
-    private int flowReversalTick = 0;
-    
+    /**
+     * True if flow occurred during the last step.
+     * Maintained by {@link #doStepWork()}.
+     * Connection will skip processing after first step if false.
+     * Ignored during first step.
+     */
     private boolean flowedLastStep = false;
     
+    /**
+     * True if this connection has been marked for removal.
+     * Connection should not be processed or considered valid if true.
+     */
     private boolean isDeleted = false;
  
+    /**
+     * Fluid units that can flow through this connection during this tick.
+     * Initialized each tick in {@link #setFlowLimitsThisTick(LavaCell, LavaCell, int, int, boolean)}
+     * which is called by {@link #setupTick()}.
+     * Based on the size of the open intersection of cells on this connection.
+     * Flow amounts are deducted each time flow is successful.
+     */
     private int flowRemainingThisTick;
+    
+    /**
+     * Fluid units that can low through this connection during a single step.
+     * Is simply 1/4 of the initial value of {@link #flowRemainingThisTick} at the start of the tick.
+     * Necessary so that fluid has a chance to flow in more than one direction. 
+     * If we did not limit flow per step, then flow would usually always go across a single
+     * connection, even if the vertical drop is the same.
+     */
     private int maxFlowPerStep;
     
+    /**
+     * Floor of the "from" cell, in fluid units. 
+     * Maintained during {@link #setupTick()}.
+     */
     private int floorUnitsFrom;
+    
+    /**
+     * Floor of the "to" cell, in fluid units. 
+     * Maintained during {@link #setupTick()}.
+     */
     private int floorUnitsTo;
+    
+    /**
+     * Total volume of the "from" cell, in fluid units. 
+     * Maintained during {@link #setupTick()}.
+     */
     private int volumeUnitsFrom;
+    
+    /**
+     * Total volume of the "to" cell, in fluid units. 
+     * Maintained during {@link #setupTick()}.
+     */
     private int volumeUnitsTo;
+    
+    /** 
+     * True if ceiling of "to" cell is lower than ceiling of "from" cell. 
+     * Only valid if {@link #isFlowEnabled} is true.
+     * Maintained during {@link #setupTick()} 
+     */
     private boolean isToLowerThanFrom;
+    
+    /** 
+     * When total fluid in both cells is above this amount, 
+     * both cells will be under pressure at equilibrium.
+     * Maintained via {@link #setPressureThresholds()} during {@link #setupTick()}. 
+     */
     private int dualPressureThreshold;
+    
+    /** 
+     * When total fluid in both cells is above this amount, 
+     * at least one cell will be under pressure at equilibrium.
+     * Maintained via {@link #setPressureThresholds()} during {@link #setupTick()}. 
+     */
     private int singlePressureThreshold;
     
-    
-//    public static ConcurrentPerformanceCounter perfFocus = new ConcurrentPerformanceCounter();
-    
-    public static final boolean ENABLE_FLOW_TRACKING = true;
     public static AtomicInteger totalFlow = new AtomicInteger(0);
 
     public LavaConnection(LavaCell firstCell, LavaCell secondCell)
@@ -118,7 +179,7 @@ public class LavaConnection implements ISimpleListItem
         
         else if(surface1 > surface2)
         {
-            if(this.shouldFlowThisTick(this.firstCell, this.secondCell, surface1, surface2, this.isDirectionOneToTwo))
+            if(this.setFlowLimitsThisTick(this.firstCell, this.secondCell, surface1, surface2, this.isDirectionOneToTwo))
             {
                 this.isDirectionOneToTwo = true;
                 this.isFlowEnabled = true;
@@ -135,7 +196,7 @@ public class LavaConnection implements ISimpleListItem
         }
         else
         {
-            if(this.shouldFlowThisTick(this.secondCell, this.firstCell, surface2, surface1, !this.isDirectionOneToTwo))
+            if(this.setFlowLimitsThisTick(this.secondCell, this.firstCell, surface2, surface1, !this.isDirectionOneToTwo))
             {
                 this.isDirectionOneToTwo = false;
                 this.isFlowEnabled = true;
@@ -173,9 +234,10 @@ public class LavaConnection implements ISimpleListItem
     }
     
     /**
-     * Returns true if connectio should be allowed to flow from high to low
+     * Returns true if connection should be allowed to flow from high to low.
+     * Also updates {@link #flowRemainingThisTick} and {@link #maxFlowPerStep}
      */
-    private boolean shouldFlowThisTick(LavaCell cellHigh, LavaCell cellLow, int surfaceHigh, int surfaceLow, boolean sameDirection)
+    private boolean setFlowLimitsThisTick(LavaCell cellHigh, LavaCell cellLow, int surfaceHigh, int surfaceLow, boolean sameDirection)
     {
         int min = sameDirection ? 2 : LavaSimulator.FLUID_UNITS_PER_LEVEL;
         int diff = surfaceHigh - surfaceLow;
@@ -200,17 +262,9 @@ public class LavaConnection implements ISimpleListItem
     }
     
     /**
-     * Core flow computation for equalizing surface level of adjacent cells.
-     * The "high" cell should have fluid in it.  
-     * "Low" cell may be empty or have fluid, 
-     * but should (per the name) have a lower surface level than the high cell.
-     * 
-     * Constrains flow by the retention level of the high cell but does NOT constrain by the amount available fluid. 
-     * (It doesn't know how many fluid units are in the cell, only the surface and retention level.)
-     * Retention level serves to mimic adhesion of lava to horizontal surfaces.
-     * 
-     *  
-     * @return Number of fluid units that should flow from high to low cell.
+     * Constrains flow by available units, max flow per step and flow remaining this tick.
+     * Assumes flow is a positive number. 
+     * @return Fluid units that should flow from high to low cell.
      */
     private int getConstrainedFlow(int availableFluidUnits, int flow)
     {    
@@ -378,12 +432,8 @@ public class LavaConnection implements ISimpleListItem
             
         }
         
-        //TODO: clean up
-        int flow = fluidFrom - newFluidFrom;
+        return fluidFrom - newFluidFrom;
 
-        if(flow < 0)
-            Output.debug("derp!");
-        return flow;
     }
     
     /** 
@@ -454,12 +504,12 @@ public class LavaConnection implements ISimpleListItem
     {        
         // Assigning "from" cell to subscript a in formula.
         // Adding 1 to round up without floating point math
-        // This ensure "from cell" does not flow to level 1 below to cell.
+        // This ensure "from" cell does not flow to level below "to" cell.
         return fluidFrom - (this.floorUnitsTo - this.floorUnitsFrom + fluidTotal + 1) / 2;
     }
     
     /** 
-     * Return true if complete, false if should retry.
+     * Return true if complete, false if should retry next step.
      * True does NOT mean there was a flow, only that retry isn't needed.
      */
     private boolean tryFlow(LavaCell cellFrom, LavaCell cellTo, int fluidFrom, int availableFluidUnits)
@@ -482,8 +532,6 @@ public class LavaConnection implements ISimpleListItem
             }
             else
             {
-                // TODO: can't use diff of surfaces here because may include pressure units in total
-                // have to instead subtract volume below lowest common floor and then split remainder
                 flow = this.getConstrainedFlow(availableFluidUnits, this.freeFlow(fluidTo, fluidFrom, fluidTotal));
             }
 
@@ -500,7 +548,7 @@ public class LavaConnection implements ISimpleListItem
                     {                        
                         if(!this.flowedLastStep) this.flowedLastStep = true;
                         this.flowRemainingThisTick -= flow;
-                        if(ENABLE_FLOW_TRACKING) totalFlow.addAndGet(flow);
+                        if(Configurator.VOLCANO.enableFlowTracking) totalFlow.addAndGet(flow);
                         return true;
                     }
                     else

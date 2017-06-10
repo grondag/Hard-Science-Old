@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.Executor;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.Job;
 import grondag.adversity.library.SimpleConcurrentList;
@@ -80,15 +81,15 @@ public class LavaConnections
     public LavaConnections(LavaSimulator sim)
     {
         super();
-        connectionList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Connections", sim.perfCollectorOffTick);
+        connectionList = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, "Lava Connections", sim.perfCollectorOffTick);
         
-        this.sort[SortBucket.A.ordinal()] = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Sort Bucket", sim.perfCollectorOffTick);
+        this.sort[SortBucket.A.ordinal()] = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, "Sort Bucket", sim.perfCollectorOffTick);
         this.sort[SortBucket.B.ordinal()] = SimpleConcurrentList.create(this.sort[SortBucket.A.ordinal()].removalPerfCounter());
         this.sort[SortBucket.C.ordinal()] = SimpleConcurrentList.create(this.sort[SortBucket.A.ordinal()].removalPerfCounter());
         this.sort[SortBucket.D.ordinal()] = SimpleConcurrentList.create(this.sort[SortBucket.A.ordinal()].removalPerfCounter());
         
         this.firstStepJob[SortBucket.A.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.A.ordinal()] , firstStepTask, BATCH_SIZE,
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "First Flow Step", sim.perfCollectorOffTick);  
+                Configurator.VOLCANO.enablePerformanceLogging, "First Flow Step", sim.perfCollectorOffTick);  
         this.firstStepJob[SortBucket.B.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.B.ordinal()] , firstStepTask, BATCH_SIZE,
                 this.firstStepJob[SortBucket.A.ordinal()].perfCounter); 
         this.firstStepJob[SortBucket.C.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.C.ordinal()] , firstStepTask, BATCH_SIZE,
@@ -97,7 +98,7 @@ public class LavaConnections
                 this.firstStepJob[SortBucket.A.ordinal()].perfCounter); 
         
         this.stepJob[SortBucket.A.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.A.ordinal()] , stepTask, BATCH_SIZE,
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Flow Step", sim.perfCollectorOffTick);  
+                Configurator.VOLCANO.enablePerformanceLogging, "Flow Step", sim.perfCollectorOffTick);  
         this.stepJob[SortBucket.B.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.B.ordinal()] , stepTask, BATCH_SIZE,
                 this.stepJob[SortBucket.A.ordinal()].perfCounter); 
         this.stepJob[SortBucket.C.ordinal()] = new CountedJob<LavaConnection>(this.sort[SortBucket.C.ordinal()] , stepTask, BATCH_SIZE,
@@ -106,10 +107,10 @@ public class LavaConnections
                 this.stepJob[SortBucket.A.ordinal()].perfCounter); 
         
         sortJob = new CountedJob<LavaConnection>(this.connectionList, sortTask, BATCH_SIZE,
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Sorting", sim.perfCollectorOffTick);    
+                Configurator.VOLCANO.enablePerformanceLogging, "Connection Sorting", sim.perfCollectorOffTick);    
 
         setupTickJob = new CountedJob<LavaConnection>(this.connectionList, setupTickTask, BATCH_SIZE,
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Tick Setup", sim.perfCollectorOffTick);    
+                Configurator.VOLCANO.enablePerformanceLogging, "Tick Setup", sim.perfCollectorOffTick);    
         
         this.isSortCurrent = false;
         

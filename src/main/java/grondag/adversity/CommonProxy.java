@@ -39,7 +39,6 @@ public class CommonProxy
         }
         
         ForgeChunkManager.setForcedChunkLoadingCallback(Adversity.INSTANCE, Simulator.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(Simulator.INSTANCE);
         MinecraftForge.EVENT_BUS.register(CommonEventHandler.INSTANCE);
 	}
 

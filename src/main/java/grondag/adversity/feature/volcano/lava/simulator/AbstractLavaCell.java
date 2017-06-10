@@ -361,6 +361,8 @@ public abstract class AbstractLavaCell
     }
     
     /**
+     * When total fluid in both cells is above this amount, 
+     * at least one cell will be under pressure at equilibrium.
      * Floor order does not matter but ceiling must be min of both cells. 
      */
     public static int singlePressureThreshold(int floor1, int floor2, int ceilingMin)

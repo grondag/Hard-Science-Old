@@ -74,11 +74,6 @@ public class TileVolcano extends TileEntity implements ITickable{
 
     /** simulation delegate */
     private VolcanoNode             node;
-    /** 
-     * id for VolcanoNode 
-     * Set during ReadNBT so it can be obtained from simulation after ticks have started
-     */
-    private int nodeId = -1;
 
     private boolean wasBoreFlowEnabled = false;
     
@@ -145,42 +140,25 @@ public class TileVolcano extends TileEntity implements ITickable{
 
             if(this.stage == VolcanoStage.NEW)
             {
-                // Try to find a simulation node already at this location
-                
-                this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.pos);
-                
-                if(node == null)
-                {
-                    Output.info("Setting up new Volcano Node @" + this.pos.toString());
-                    this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
-                    this.nodeId = node.getID();
-                    this.node.setLocation(this.pos,this.world.provider.getDimension());
-                    this.stage = VolcanoStage.DORMANT;
-                }
-                else
-                {
-                    Output.info("Recovered Volcano Node @" + this.pos.toString());
-                    this.nodeId = node.getID();
-                    this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
-                }
-
                 this.level = this.pos.getY() + 10;
                 int moundRadius = Configurator.VOLCANO.moundRadius;
                 this.groundLevel = Useful.getAvgHeight(this.world, this.pos, moundRadius, moundRadius * moundRadius / 10);
             }
+                
+            this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.pos, this.world.provider.getDimension());
+            
+            if(node == null)
+            {
+                Output.info("Setting up new Volcano Node @" + this.pos.toString());
+                this.node = Simulator.INSTANCE.getVolcanoManager().createNode(this.pos,this.world.provider.getDimension());
+                this.stage = VolcanoStage.DORMANT;
+            }
             else
             {
-                Output.info("retrieving Volcano node @" + this.pos.toString());
-
-                this.node = Simulator.INSTANCE.getVolcanoManager().findNode(this.nodeId);
-                if(this.node == null)
-                {
-                    Output.warn("Unable to load volcano simulation node for volcano at " + this.pos.toString()
-                    + ". Created new simulation node.  Simulation state was lost.");
-                    this.node = Simulator.INSTANCE.getVolcanoManager().createNode();
-                    this.node.setLocation(this.pos,this.world.provider.getDimension());
-                }
+                Output.info("Recovered Volcano Node @" + this.pos.toString());
+                this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
             }
+
             // no need to markDirty here - will be prompted by isNodeUpdateNeeded
             isNodeUpdateNeeded = true;
             
@@ -503,8 +481,6 @@ public class TileVolcano extends TileEntity implements ITickable{
         this.clearingLevel = tagCompound.getInteger("clearingLevel");
         this.lavaCounter = tagCompound.getInteger("lavaCounter");
         this.lavaCooldownTicks = tagCompound.getInteger("cooldownTicks");
-
-        this.nodeId = tagCompound.getInteger("nodeId");
     }
 
     @Override

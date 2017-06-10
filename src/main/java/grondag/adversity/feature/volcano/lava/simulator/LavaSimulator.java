@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
 import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
@@ -19,7 +20,6 @@ import grondag.adversity.library.PerformanceCollector;
 import grondag.adversity.library.PerformanceCounter;
 import grondag.adversity.library.SimpleConcurrentList;
 import grondag.adversity.library.CountedJob.CountedJobTask;
-import grondag.adversity.library.model.quadfactory.QuadCache;
 import grondag.adversity.library.Job;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.simulator.base.NodeRoots;
@@ -42,13 +42,12 @@ public class LavaSimulator extends SimulationNode
 {
     public final Executor LAVA_THREAD_POOL;
     
-    public static final boolean ENABLE_PERFORMANCE_COUNTING = true;
     public final PerformanceCollector perfCollectorAllTick = new PerformanceCollector("Lava Simulator Whole tick");
     public final PerformanceCollector perfCollectorOnTick = new PerformanceCollector("Lava Simulator On tick");
     public final PerformanceCollector perfCollectorOffTick = new PerformanceCollector("Lava Simulator Off tick");
-    private PerformanceCounter perfOnTick = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "On-Tick", perfCollectorAllTick);
-    private PerformanceCounter perfOffTick = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "Off-Tick", perfCollectorAllTick);
-    private PerformanceCounter perfParticles = PerformanceCounter.create(ENABLE_PERFORMANCE_COUNTING, "Particle Spawning", perfCollectorOnTick);
+    private PerformanceCounter perfOnTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "On-Tick", perfCollectorAllTick);
+    private PerformanceCounter perfOffTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Off-Tick", perfCollectorAllTick);
+    private PerformanceCounter perfParticles = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Particle Spawning", perfCollectorOnTick);
     
     public static final byte LEVELS_PER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT;
     public static final byte LEVELS_PER_QUARTER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 4;
@@ -74,7 +73,7 @@ public class LavaSimulator extends SimulationNode
     public final ParticleManager particleManager;
     
     /** Basalt blocks that are awaiting cooling */
-    private final SimpleConcurrentList<AgedBlockPos> basaltBlocks = SimpleConcurrentList.create(ENABLE_PERFORMANCE_COUNTING, "Basalt Blocks", perfCollectorOnTick);
+    private final SimpleConcurrentList<AgedBlockPos> basaltBlocks = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, "Basalt Blocks", perfCollectorOnTick);
     private int lastEligibleBasaltCoolingTick;
     
     private final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
@@ -226,12 +225,12 @@ public class LavaSimulator extends SimulationNode
     public LavaSimulator(World world)
     {
         super(NodeRoots.LAVA_SIMULATOR.ordinal());
-        this.worldBuffer = new WorldStateBuffer(world, ENABLE_PERFORMANCE_COUNTING, perfCollectorOnTick);
+        this.worldBuffer = new WorldStateBuffer(world, Configurator.VOLCANO.enablePerformanceLogging, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
         this.particleManager = new ParticleManager();
         this.LAVA_THREAD_POOL = Simulator.executor;
         this.basaltCoolingJob = new CountedJob<AgedBlockPos>(this.basaltBlocks, this.basaltCoolingTask, 1024, 
-                ENABLE_PERFORMANCE_COUNTING, "Basalt Cooling", perfCollectorOnTick);    
+                Configurator.VOLCANO.enablePerformanceLogging, "Basalt Cooling", perfCollectorOnTick);    
     }
  
     
@@ -587,7 +586,7 @@ public class LavaSimulator extends SimulationNode
     
     public void doOffTick()
     {
-       if(ENABLE_PERFORMANCE_COUNTING) perfOffTick.startRun();
+       if(Configurator.VOLCANO.enablePerformanceLogging) perfOffTick.startRun();
        
        this.cells.updateSmoothedRetentionJob.runOn(LAVA_THREAD_POOL);
      
@@ -657,7 +656,7 @@ public class LavaSimulator extends SimulationNode
         
         this.setSaveDirty(true);
         
-        if(ENABLE_PERFORMANCE_COUNTING)
+        if(Configurator.VOLCANO.enablePerformanceLogging)
         {
             perfOffTick.endRun();
             perfOffTick.addCount(1);
@@ -668,8 +667,7 @@ public class LavaSimulator extends SimulationNode
     {
         perfParticles.startRun();
         
-        //TODO: make particle limit configurable
-        int capacity =  10 - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
+        int capacity =  Configurator.VOLCANO.maxLavaEntities - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
         
         if(capacity <= 0) return;
         
@@ -709,12 +707,6 @@ public class LavaSimulator extends SimulationNode
         perfParticles.endRun();
     }
     
-    private static final int PERFORMANCE_INTERVAL_MILLIS = 10000;
-    private static final long PERFORMANCE_INTERVAL_NANOS = (long)PERFORMANCE_INTERVAL_MILLIS * 1000000;
-    //TODO: make configurable, put in reasonable defaults
-    private static final long PERF_ON_TICK_BUDGET_NANOS =  PERFORMANCE_INTERVAL_NANOS / 10;
-    private static final long PERF_TOTAL_TICK_BUDGET_NANOS =  PERFORMANCE_INTERVAL_NANOS / 5;
-    
     public void doStats()
     {
         long now = System.currentTimeMillis();
@@ -722,11 +714,11 @@ public class LavaSimulator extends SimulationNode
         if(now >= this.nextStatTime)
         {
 
-            float onTickLoad = (float)this.perfOnTick.runTime() / PERF_ON_TICK_BUDGET_NANOS;
-            float totalTickLoad = ((float)this.perfOnTick.runTime() + this.perfOffTick.runTime()) / PERF_TOTAL_TICK_BUDGET_NANOS;
+            float onTickLoad = (float)this.perfOnTick.runTime() / Configurator.Volcano.performanceBudgetOnTickNanos;
+            float totalTickLoad = ((float)this.perfOnTick.runTime() + this.perfOffTick.runTime()) / Configurator.Volcano.performanceBudgetTotalNanos;
             this.loadFactor = Math.max(onTickLoad, totalTickLoad);
             
-            if(ENABLE_PERFORMANCE_COUNTING) 
+            if(Configurator.VOLCANO.enablePerformanceLogging) 
             {
                 perfCollectorOnTick.outputStats();
                 perfCollectorOffTick.outputStats();
@@ -738,7 +730,7 @@ public class LavaSimulator extends SimulationNode
             // this one is always maintained in order to compute load factor
             perfCollectorAllTick.clearStats();
 
-            if(LavaConnection.ENABLE_FLOW_TRACKING)
+            if(Configurator.VOLCANO.enableFlowTracking)
             {
                 for(int i = 0; i < 8; i++)
                 {
@@ -748,24 +740,21 @@ public class LavaSimulator extends SimulationNode
                 }
             }
 
-            if(ENABLE_PERFORMANCE_COUNTING) 
+            if(Configurator.VOLCANO.enablePerformanceLogging) 
             {
                 Output.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
                 
-                Output.info(String.format("Time elapsed = %1$.3fs", (10.0 + (now - nextStatTime) / PERFORMANCE_INTERVAL_MILLIS)));
+                Output.info(String.format("Time elapsed = %1$.3fs", ((float)Configurator.VOLCANO.performanceSampleInterval 
+                        + (now - nextStatTime) / Configurator.Volcano.performanceSampleIntervalMillis)));
 
                 Output.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
                 this.worldBuffer.clearStatistics();
             }
                
+            if(Configurator.VOLCANO.outputLavaCellDebugSummaries) this.cells.logDebugInfo();
             
-            this.nextStatTime = now + PERFORMANCE_INTERVAL_MILLIS;
-
-            //TODO: doesn't belong here
-            Output.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
-        
-//                this.cells.logDebugInfo();
+            this.nextStatTime = now + Configurator.Volcano.performanceSampleIntervalMillis;
         }
     }
 
@@ -773,8 +762,8 @@ public class LavaSimulator extends SimulationNode
     {
         this.stepIndex = 0;
         
-        int startingCount;
-        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        int startingCount = 0;
+        if(Configurator.VOLCANO.enableFlowTracking)
         {  
             // all bucket jobs share the same perf counter, so simply use the first reference
             startingCount = this.connections.firstStepJob[0].perfCounter.runCount();
@@ -785,7 +774,7 @@ public class LavaSimulator extends SimulationNode
             this.connections.firstStepJob[bucket.ordinal()].runOn(LAVA_THREAD_POOL);
         }
         
-        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        if(Configurator.VOLCANO.enableFlowTracking)
         { 
             this.flowCounts[0] += (this.connections.firstStepJob[0].perfCounter.runCount() - startingCount);
             this.flowTotals[0] += LavaConnection.totalFlow.get();
@@ -797,8 +786,8 @@ public class LavaSimulator extends SimulationNode
     {
         this.stepIndex++;
         
-        int startingCount;
-        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        int startingCount = 0;
+        if(Configurator.VOLCANO.enableFlowTracking)
         {    
             // all bucket jobs share the same perf counter, so simply use the first reference
             startingCount = this.connections.stepJob[0].perfCounter.runCount();
@@ -809,7 +798,7 @@ public class LavaSimulator extends SimulationNode
             this.connections.stepJob[bucket.ordinal()].runOn(LAVA_THREAD_POOL);
         }
         
-        if(LavaConnection.ENABLE_FLOW_TRACKING)
+        if(Configurator.VOLCANO.enableFlowTracking)
         { 
             this.flowCounts[stepIndex] += (this.connections.stepJob[0].perfCounter.runCount() - startingCount);
             this.flowTotals[stepIndex] += LavaConnection.totalFlow.get();

@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.google.gson.Gson;
 
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
+import grondag.adversity.library.model.quadfactory.QuadCache;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.support.NiceBlockHighlighter;
 import grondag.adversity.superblock.terrain.LavaBlock;
@@ -21,6 +22,9 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -128,6 +132,26 @@ public class CommonEventHandler
             }
         }
     }
+    
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent event) 
+    {
+        Simulator.INSTANCE.onServerTick(event);
+    }
+    
+    private int clientStatCounter = Configurator.RENDER.quadCacheStatReportingInterval * 20;
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent event) 
+    {
+        if (event.phase == TickEvent.Phase.END
+                && Configurator.RENDER.enableQuadCacheStatistics
+                && --clientStatCounter == 0) 
+        {
+            clientStatCounter = Configurator.RENDER.quadCacheStatReportingInterval * 20;
+            Output.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+        }
+    }
+
     
 //
 //	@SubscribeEvent

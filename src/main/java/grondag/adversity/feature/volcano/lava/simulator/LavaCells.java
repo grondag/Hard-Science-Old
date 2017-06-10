@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
@@ -30,8 +31,6 @@ public class LavaCells
      * Reference to the simulation in which this cells collection lives.
      */
     public final LavaSimulator sim;
-    
-    // TODO: consider combining on-tick/off-tick jobs once optimization is complete
   
     // on-tick tasks
     private final CountedJobTask<LavaCell> provideBlockUpdateTask =  new CountedJobTask<LavaCell>() 
@@ -82,7 +81,7 @@ public class LavaCells
         }    
     };
             
-    // off-tick tasksan
+    // off-tick tasks
     private final CountedJobTask<LavaCell> updateStuffTask = new CountedJobTask<LavaCell>()
     {
         @Override
@@ -137,7 +136,7 @@ public class LavaCells
     
    private static final int MAX_CHUNKS_PER_TICK = 4;
     
-   // performance counting for removal disabled because list is cleared each passed
+   // performance counting for removal disabled because list is cleared each pass
    private SimpleConcurrentList<CellChunk> processChunks = SimpleConcurrentList.create(false, "", null);
    
    PerformanceCounter perfCounterValidationPrep;
@@ -145,32 +144,32 @@ public class LavaCells
     public LavaCells(LavaSimulator sim)
     {
         this.sim = sim;
-        cellList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cells", sim.perfCollectorOffTick);
+        cellList = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, "Lava Cells", sim.perfCollectorOffTick);
 
-        perfCounterValidationPrep = PerformanceCounter.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Chunk validation prep", sim.perfCollectorOnTick);
+        perfCounterValidationPrep = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Chunk validation prep", sim.perfCollectorOnTick);
         
         // on-tick jobs
         provideBlockUpdateJob = new CountedJob<LavaCell>(this.cellList, provideBlockUpdateTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Block Update Provision", sim.perfCollectorOnTick);    
+                Configurator.VOLCANO.enablePerformanceLogging, "Block Update Provision", sim.perfCollectorOnTick);    
         
         updateRetentionJob = new CountedJob<LavaCell>(this.cellList, updateRetentionTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Raw Retention Update", sim.perfCollectorOnTick);   
+                Configurator.VOLCANO.enablePerformanceLogging, "Raw Retention Update", sim.perfCollectorOnTick);   
         
         doCoolingJob = new CountedJob<LavaCell>(this.cellList, doCoolingTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Lava Cell Cooling", sim.perfCollectorOnTick);  
+                Configurator.VOLCANO.enablePerformanceLogging, "Lava Cell Cooling", sim.perfCollectorOnTick);  
         
        validateChunksJob = new CountedJob<CellChunk>(processChunks, doChunkValidationTask, 1, 
-               LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Chunk Validation", sim.perfCollectorOnTick); 
+               Configurator.VOLCANO.enablePerformanceLogging, "Chunk Validation", sim.perfCollectorOnTick); 
         
         // off-tick jobs
         updateSmoothedRetentionJob = new CountedJob<LavaCell>(this.cellList, updateSmoothedRetentionTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Smoothed Retention Update", sim.perfCollectorOffTick);   
+                Configurator.VOLCANO.enablePerformanceLogging, "Smoothed Retention Update", sim.perfCollectorOffTick);   
         
         updateStuffJob = new CountedJob<LavaCell>(this.cellList, updateStuffTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Cell Upkeep", sim.perfCollectorOffTick);
+                Configurator.VOLCANO.enablePerformanceLogging, "Cell Upkeep", sim.perfCollectorOffTick);
         
         prioritizeConnectionsJob = new CountedJob<LavaCell>(this.cellList, prioritizeConnectionsTask, BATCH_SIZE, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, "Connection Prioritization", sim.perfCollectorOffTick);
+                Configurator.VOLCANO.enablePerformanceLogging, "Connection Prioritization", sim.perfCollectorOffTick);
    }
 
    public void validateOrBufferChunks(Executor executor)

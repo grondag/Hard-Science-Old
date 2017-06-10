@@ -1,15 +1,14 @@
 package grondag.adversity.simulator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.TileVolcano.VolcanoStage;
+import grondag.adversity.library.UniversalPos;
 import grondag.adversity.simulator.base.NodeRoots;
 import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.simulator.base.SimulationNodeRunnable;
@@ -23,18 +22,14 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class VolcanoManager extends SimulationNodeRunnable
 {
-
-    private static int MAX_NODES = 1024;
+    private int nextNodeID = 0;
     
-    private AtomicInteger maxIdInUse = new AtomicInteger(-1);
+    private HashMap<UniversalPos, VolcanoNode> nodes = new HashMap<UniversalPos, VolcanoNode>();
     
-    private volatile VolcanoNode[] nodes = new VolcanoNode[MAX_NODES];
-    
-    private static final int NO_ACTIVE_INDEX = -1;
-    private volatile int activeIndex = NO_ACTIVE_INDEX;
+    private VolcanoNode activeNode = null; 
     
     private LinkedList<Ticket> tickets = new LinkedList<Ticket>();
-    private  AtomicBoolean isChunkloadingDirty = new AtomicBoolean(true);
+    private  boolean isChunkloadingDirty = true;
     
     protected VolcanoManager()
     {
@@ -48,21 +43,23 @@ public class VolcanoManager extends SimulationNodeRunnable
     public void doOnTick()
     {
 
-            if(!this.isChunkloadingDirty.compareAndSet(true, false)) return;
-    
+        if(this.isChunkloadingDirty)
+        {
+            this.isChunkloadingDirty = false;
+            
             for(Ticket oldTicket : this.tickets)
             {
                 ForgeChunkManager.releaseTicket(oldTicket);
             } 
             tickets.clear();
             
-            if(this.activeIndex == NO_ACTIVE_INDEX) return;
+            VolcanoNode node = this.activeNode;
             
-            VolcanoNode node = nodes[activeIndex];
+            if(node == null) return;
            
             int centerX = node.getX() >> 4;
             int centerZ = node.getZ() >> 4;
-            World worldObj = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(node.dimension);
+            World worldObj = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(node.getDimension());
             
             Ticket chunkTicket = null;
             int chunksUsedThisTicket = 0;
@@ -86,7 +83,7 @@ public class VolcanoManager extends SimulationNodeRunnable
                     }
                 }
             }
-        
+        }
     }
     
     /**
@@ -97,13 +94,16 @@ public class VolcanoManager extends SimulationNodeRunnable
     public void doOffTick()
     {
         
-        if(this.activeIndex == NO_ACTIVE_INDEX)
+        VolcanoNode active = this.activeNode;
+        
+        if(active == null)
         {
-            ArrayList<VolcanoNode> candidates = new ArrayList<VolcanoNode>(MAX_NODES);
             long totalWeight = 0;
             
-            for ( int i = 0; i <= maxIdInUse.get(); i++) {
-                VolcanoNode node = nodes[i];
+            ArrayList<VolcanoNode> candidates = new ArrayList<VolcanoNode>(this.nodes.size());
+            
+            for ( VolcanoNode node : this.nodes.values()) 
+            {
                 if(node != null 
                         && node.getWeight() > 0
                         && node.wantsToActivate())
@@ -131,21 +131,11 @@ public class VolcanoManager extends SimulationNodeRunnable
         }
         else
         {
-            
-            VolcanoNode active = nodes[this.activeIndex];
-            if(active==null)
-            {
-                // Should never happen, but handle just in case
-                this.activeIndex = NO_ACTIVE_INDEX;
-            }
-            else
-            {
-                active.update();
-            }
+            active.update();
         }
     }
 
-    public VolcanoNode findNode(int nodeID)
+    public VolcanoNode findNode(BlockPos pos, int dimensionID)
     {
         if(nodes == null)
         {
@@ -153,48 +143,15 @@ public class VolcanoManager extends SimulationNodeRunnable
                     + " Volcano simulation state will be invalid.");
             return null;
         }
-        if(nodeID < 0 || nodeID >= nodes.length)
-        {
-            Output.warn("Invalid volcano node id: " + nodeID
-                    + ". Volcano simulation state will be invalid.");
-            return null;
-        }
-        return nodes[nodeID];
+        return this.nodes.get(new UniversalPos(pos, dimensionID));
     }
     
-    public VolcanoNode findNode(BlockPos pos)
+    public VolcanoNode createNode(BlockPos pos, int dimensionID)
     {
-        if(nodes == null)
-        {
-            Output.warn("Volcano simulation manager not properly initialized."
-                    + " Volcano simulation state will be invalid.");
-            return null;
-        }
-        for(int nodeID = 0; nodeID < this.maxIdInUse.get(); nodeID++)
-        {
-            VolcanoNode node = nodes[nodeID];
-            if(node != null && node.getX() == pos.getX() && node.getY() == pos.getY() && node.getZ() == pos.getZ())
-            {   
-                return node;
-            }
-        }
-        return null;
-    }
-    
-    public VolcanoNode createNode()
-    {
-        // TODO: expand array or switch to a concurrent structure
-        
-        int nodeID = maxIdInUse.incrementAndGet();
-
-        if(nodeID >= MAX_NODES) return null;
-  
-        synchronized(nodes)
-        {
-            nodes[nodeID] = new VolcanoNode(nodeID);
-        }
+        VolcanoNode result = new VolcanoNode(this.nextNodeID++, new UniversalPos(pos, dimensionID));
+        this.nodes.put(new UniversalPos(pos, dimensionID), result);
         this.setSaveDirty(true);
-        return nodes[nodeID];
+        return result;
     }
     
     /**
@@ -204,14 +161,11 @@ public class VolcanoManager extends SimulationNodeRunnable
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
-        
-//        Adversity.log.info("readNBT volcanoManager");
-        
         nbtVolcanoManager = nbt.getCompoundTag(NodeRoots.VOLCANO_MANAGER.getTagKey());
         NBTTagCompound nbtSubNodes;
-        this.maxIdInUse.set(-1);
-        this.activeIndex = NO_ACTIVE_INDEX;
-        nodes = new VolcanoNode[MAX_NODES];
+        this.nextNodeID = 0;
+        this.activeNode = null;
+        nodes = new HashMap<UniversalPos, VolcanoNode>();
         
         if(nbtVolcanoManager == null)
         {
@@ -232,13 +186,10 @@ public class VolcanoManager extends SimulationNodeRunnable
             for(String key : nbtSubNodes.getKeySet())
             {
                 // note that totalWeights is updated by individual nodes during readFromNBT
-                VolcanoNode node = new VolcanoNode(getNodeIdFromTagKey(key));
+                VolcanoNode node = new VolcanoNode(getNodeIdFromTagKey(key), null);
                 node.readFromNBT(nbtSubNodes.getCompoundTag(key));
-                nodes[node.getID()] = node;
-                // no need to synchonize here - readNBT always single threaded
-                this.maxIdInUse.set(Math.max(this.maxIdInUse.get(), node.getID()));
-                //simNodes.put(node.getID(), node);
-                //saveNodes.put(node.getID(), node);   
+                nodes.put(node.getUniversalPos(), node);
+                this.nextNodeID = (Math.max(this.nextNodeID, node.getID() + 1));
             }   
         }
 
@@ -251,17 +202,14 @@ public class VolcanoManager extends SimulationNodeRunnable
         this.setSaveDirty(false);
 
         // nothing to do if no nodes
-        if(maxIdInUse.get() == -1) return;
+        if(this.nodes.isEmpty()) return;
         
         NBTTagCompound nbtSubNodes = nbtVolcanoManager.getCompoundTag(NodeRoots.SUBNODES_TAG);
         if(nbtSubNodes == null) nbtSubNodes = new NBTTagCompound();
         
-        VolcanoNode node;
-        
-        for (int i = 0; i <= maxIdInUse.get(); i++)
+        for (VolcanoNode node : this.nodes.values())
         {
-            node = nodes[i];
-            if(node != null && node.isSaveDirty())
+            if(node.isSaveDirty())
             {
                 NBTTagCompound nodeTag = new NBTTagCompound();
                 node.writeToNBT(nodeTag);
@@ -290,16 +238,9 @@ public class VolcanoManager extends SimulationNodeRunnable
         private int height = 0;
         private static final String TAG_HEIGHT = "h";
         
-        private volatile int x;
         private static final String TAG_X = "x";
-        
-        private volatile int y;
         private static final String TAG_Y = "y";
-        
-        private volatile int z;
         private static final String TAG_Z= "z";
-        
-        private volatile int dimension;
         private static final String TAG_DIMENSION = "d";
         
         private volatile boolean isActive = false;
@@ -307,6 +248,8 @@ public class VolcanoManager extends SimulationNodeRunnable
         
         /** stores total world time of last TE update */
         private volatile long keepAlive;
+        
+        private UniversalPos uPos;
         
         /** 
          * Last time (sim ticks) this volcano became active.
@@ -316,9 +259,10 @@ public class VolcanoManager extends SimulationNodeRunnable
         private volatile int lastActivationTick;
         private static final String TAG_LAST_ACTIVATION_TICK = "t";
         
-        public VolcanoNode(int nodeID)
+        public VolcanoNode(int nodeID, UniversalPos uPos)
         {
             super(nodeID);
+            this.uPos = uPos;
         }
         
         /** want to set Parent dirty also, if dirty*/
@@ -359,7 +303,7 @@ public class VolcanoManager extends SimulationNodeRunnable
         {
             if(this.isActive && this.keepAlive + 2048L < Simulator.INSTANCE.getWorld().getTotalWorldTime())
             {
-                Output.warn("Active volcano tile entity at " + this.x + ", " + this.y + ", " + this.z 
+                Output.warn("Active volcano tile entity at " + this.uPos.pos.toString()
                 + " has not reported in. Deactivating volcano simulation node.");
                 this.deActivate();
             }
@@ -371,10 +315,11 @@ public class VolcanoManager extends SimulationNodeRunnable
             this.weight = nbt.getInteger(TAG_WEIGHT);                  
             this.height = nbt.getInteger(TAG_HEIGHT);
             this.stage = VolcanoStage.values()[nbt.getInteger(TAG_STAGE)];
-            this.x = nbt.getInteger(TAG_X);
-            this.y = nbt.getInteger(TAG_Y);
-            this.z = nbt.getInteger(TAG_Z);
-            this.dimension = nbt.getInteger(TAG_DIMENSION);
+            int x = nbt.getInteger(TAG_X);
+            int y = nbt.getInteger(TAG_Y);
+            int z = nbt.getInteger(TAG_Z);
+            int dimensionID = nbt.getInteger(TAG_DIMENSION);
+            this.setLocation(new BlockPos(x, y, z), dimensionID);
             this.isActive = nbt.getBoolean(TAG_ACTIVE);
             this.lastActivationTick = nbt.getInteger(TAG_LAST_ACTIVATION_TICK);
         }
@@ -388,23 +333,20 @@ public class VolcanoManager extends SimulationNodeRunnable
                 nbt.setInteger(TAG_WEIGHT, this.weight);
                 nbt.setInteger(TAG_HEIGHT, this.height);
                 nbt.setInteger(TAG_STAGE, this.stage.ordinal());
-                nbt.setInteger(TAG_X, this.x);
-                nbt.setInteger(TAG_Y, this.y);
-                nbt.setInteger(TAG_Z, this.z);
-                nbt.setInteger(TAG_DIMENSION, this.dimension);
+                nbt.setInteger(TAG_X, this.getX());
+                nbt.setInteger(TAG_Y, this.getY());
+                nbt.setInteger(TAG_Z, this.getZ());
+                nbt.setInteger(TAG_DIMENSION, this.getDimension());
                 nbt.setBoolean(TAG_ACTIVE, this.isActive);
                 nbt.setInteger(TAG_LAST_ACTIVATION_TICK, this.lastActivationTick);
             }
         }
 
-        public void setLocation(BlockPos pos, int dimension) 
+        public void setLocation(BlockPos pos, int dimensionID) 
         { 
             synchronized(this)
             {
-                this.x = pos.getX();
-                this.y = pos.getY();
-                this.z = pos.getZ();
-                this.dimension = dimension; 
+                this.uPos = new UniversalPos(pos, dimensionID);
                 this.setSaveDirty(true);
             }
         }
@@ -427,9 +369,9 @@ public class VolcanoManager extends SimulationNodeRunnable
         public void activate()
         {
             // should really be handled by caller but in case not
-            if(VolcanoManager.this.activeIndex != NO_ACTIVE_INDEX && VolcanoManager.this.activeIndex != this.nodeID)
+            if(VolcanoManager.this.activeNode != this)
             {
-                VolcanoNode oldActive = VolcanoManager.this.nodes[VolcanoManager.this.activeIndex];
+                VolcanoNode oldActive = VolcanoManager.this.activeNode;
                 if(oldActive != null)
                 {
                     oldActive.deActivate();
@@ -443,8 +385,8 @@ public class VolcanoManager extends SimulationNodeRunnable
                     this.isActive = true;
                     this.lastActivationTick = Simulator.INSTANCE.getTick();
                     this.setSaveDirty(true);
-                    VolcanoManager.this.activeIndex = this.nodeID;
-                    VolcanoManager.this.isChunkloadingDirty.set(true);
+                    VolcanoManager.this.activeNode = this;
+                    VolcanoManager.this.isChunkloadingDirty = true;
                     this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
                 }
             }
@@ -458,16 +400,17 @@ public class VolcanoManager extends SimulationNodeRunnable
                 {
                     this.isActive = false;
                     this.setSaveDirty(true);
-                    VolcanoManager.this.activeIndex = NO_ACTIVE_INDEX;
-                    VolcanoManager.this.isChunkloadingDirty.set(true);
+                    VolcanoManager.this.activeNode = null;
+                    VolcanoManager.this.isChunkloadingDirty = true;
                 }
             }
         }
         
-        public int getX() { return this.x; }
-        public int getY() { return this.y; }
-        public int getZ() { return this.z; }
-        public int getDimension() { return this.dimension; }
+        public int getX() { return this.uPos.pos.getX(); }
+        public int getY() { return this.uPos.pos.getY(); }
+        public int getZ() { return this.uPos.pos.getZ(); }
+        public int getDimension() { return this.uPos.dimensionID; }
+        public UniversalPos getUniversalPos() { return this.uPos; }
         public int getWeight() { return this.weight; }
         public boolean isActive() { return this.isActive; }
         public int getLastActivationTick() { return this.lastActivationTick; }

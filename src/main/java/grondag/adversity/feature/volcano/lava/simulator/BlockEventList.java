@@ -3,6 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.library.CountedJob;
 import grondag.adversity.library.CountedJob.CountedJobTask;
@@ -35,10 +36,10 @@ public class BlockEventList
     
     public BlockEventList(int maxRetries, String nbtTagName, BlockEventHandler eventHandler, PerformanceCollector perfCollector)
     {
-        eventList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Block Events", perfCollector);
+        eventList = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, nbtTagName + " Block Events", perfCollector);
         
         processJob = new CountedJob<BlockEventList.BlockEvent>(this.eventList, processTask, 64, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Event Processing", perfCollector);
+                Configurator.VOLCANO.enablePerformanceLogging, nbtTagName + " Event Processing", perfCollector);
         
         this.maxRetries = maxRetries;
         this.nbtTagName = nbtTagName;
