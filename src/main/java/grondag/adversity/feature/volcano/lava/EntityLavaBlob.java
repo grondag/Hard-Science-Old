@@ -32,7 +32,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class EntityLavaParticle extends Entity
+public class EntityLavaBlob extends Entity
 {
     private static int nextParticleID;
 
@@ -47,7 +47,7 @@ public class EntityLavaParticle extends Entity
     private static int liveParticleLastServerTick = 0;
     private static int liveParticleCount = 0;
 
-    private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.<Integer>createKey(EntityLavaParticle.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> FLUID_AMOUNT = EntityDataManager.<Integer>createKey(EntityLavaBlob.class, DataSerializers.VARINT);
 
     @Override
     public int hashCode()
@@ -64,7 +64,7 @@ public class EntityLavaParticle extends Entity
         return liveParticleLastServerTick + 2 > server.getTickCounter() ? liveParticleCount: 0;
     }
     
-    public EntityLavaParticle(World world, int amount, Vec3d position, Vec3d velocity)
+    public EntityLavaBlob(World world, int amount, Vec3d position, Vec3d velocity)
     {
         this(world, amount);
 //        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
@@ -77,13 +77,13 @@ public class EntityLavaParticle extends Entity
 
     }
 
-    public EntityLavaParticle(World world)
+    public EntityLavaBlob(World world)
     {
         this(world, LavaSimulator.FLUID_UNITS_PER_BLOCK);
 //        if(!world.isRemote) Adversity.log.info("EntityLavaParticle no params");
     }
 
-    public EntityLavaParticle(World world, int amount)
+    public EntityLavaBlob(World world, int amount)
     {
         super(world);
 //        if(!world.isRemote) Adversity.log.info("EntityLavaParticle amount=" + amount);

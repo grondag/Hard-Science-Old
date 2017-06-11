@@ -5,6 +5,8 @@ import java.util.List;
 import grondag.adversity.library.model.quadfactory.QuadFactory;
 import grondag.adversity.library.model.quadfactory.RawQuad;
 import grondag.adversity.library.model.quadfactory.Vertex;
+import net.minecraft.client.model.ModelBox;
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -19,23 +21,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 @SideOnly(Side.CLIENT)
-public class RenderFluidParticle extends Render<EntityLavaParticle>
+public class RenderLavaBlob extends Render<EntityLavaBlob>
 {
-    
-      public RenderFluidParticle(RenderManager renderManagerIn)
+
+    /** The GL display list index - 0 indicates not yet created b/c GL returns non-zero indices */
+    private static int displayList = 0;
+
+    public RenderLavaBlob(RenderManager renderManagerIn)
     {
         super(renderManagerIn);
     }
-      
-      private static final ResourceLocation TEXTURE = new ResourceLocation("adversity:textures/entity/lava.png");
-      
-      private static final List<RawQuad> quads = QuadFactory.makeIcosahedron(new Vec3d(0,0,0), 0.5, new RawQuad());
 
+    private static final ResourceLocation TEXTURE = new ResourceLocation("adversity:textures/entity/lava.png");
 
-    /**
-     * Renders the desired {@code T} type Entity.
-     */
-    public void doRender(EntityLavaParticle entity, double x, double y, double z, float entityYaw, float partialTicks)
+    private static final List<RawQuad> quads = QuadFactory.makeIcosahedron(new Vec3d(0,0,0), 0.5, new RawQuad());
+
+    public void doRender(EntityLavaBlob entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         GlStateManager.pushMatrix();
         GlStateManager.disableLighting();
@@ -44,12 +45,6 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
         GlStateManager.enableRescaleNormal();
         float scale = entity.getScale();
         GlStateManager.scale(scale, scale, scale);
-        Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
-
-//            float f4 = 1.0F;
-//            float f5 = 0.5F;
-//            float f6 = 0.25F;
         GlStateManager.rotate(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate((float)(this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * -this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
 
@@ -59,22 +54,9 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
             GlStateManager.enableOutlineMode(this.getTeamColor(entity));
         }
 
-        //TODO: use display lists or AddVertexData
-        //TODO: prebake quad or at least convert normals to floats
-        
-        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
-        
-        for(RawQuad q : quads)
-        {
-            for(int i = 0; i < 4; i++)
-            {
-                Vertex v = q.getVertex(i);
-                Vec3d n = v.getNormal();
-                vertexbuffer.pos(v.xCoord, v.yCoord, v.zCoord).tex(v.u, v.v).normal((float)n.xCoord, (float)n.yCoord, (float)n.zCoord).endVertex();
-            }
-        }
-        
-        tessellator.draw();
+        if(displayList == 0) compileDisplayList();
+
+        GlStateManager.callList(displayList);
 
         if (this.renderOutlines)
         {
@@ -91,14 +73,40 @@ public class RenderFluidParticle extends Render<EntityLavaParticle>
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
      */
-    protected ResourceLocation getEntityTexture(EntityLavaParticle entity)
+    protected ResourceLocation getEntityTexture(EntityLavaBlob entity)
     {
         return TEXTURE;
     }
 
-    public static IRenderFactory<EntityLavaParticle> factory() {
-        return manager -> new RenderFluidParticle(manager);
+    public static IRenderFactory<EntityLavaBlob> factory() {
+        return manager -> new RenderLavaBlob(manager);
     }
-    
-   
+
+    @SideOnly(Side.CLIENT)
+    private static void compileDisplayList()
+    {
+        displayList = GLAllocation.generateDisplayLists(1);
+        GlStateManager.glNewList(displayList, 4864);
+        VertexBuffer vertexbuffer = Tessellator.getInstance().getBuffer();
+
+        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
+
+        for(RawQuad q : quads)
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                Vertex v = q.getVertex(i);
+                Vec3d n = v.getNormal();
+                vertexbuffer.pos(v.xCoord, v.yCoord, v.zCoord).tex(v.u, v.v).normal((float)n.xCoord, (float)n.yCoord, (float)n.zCoord).endVertex();
+            }
+        }
+
+        Tessellator.getInstance().draw();
+
+        GlStateManager.glEndList();
+
+
+
+    }
+
 }

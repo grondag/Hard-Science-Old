@@ -37,7 +37,7 @@ public class LavaBlobItem extends Item
 
             if (!worldIn.isRemote)
             {
-                EntityLavaParticle blob = new EntityLavaParticle(worldIn, LavaSimulator.FLUID_UNITS_PER_BLOCK, new Vec3d(playerIn.posX, playerIn.posY + (double)playerIn.getEyeHeight() - 0.10000000149011612D, playerIn.posZ), Vec3d.ZERO);
+                EntityLavaBlob blob = new EntityLavaBlob(worldIn, LavaSimulator.FLUID_UNITS_PER_BLOCK, new Vec3d(playerIn.posX, playerIn.posY + (double)playerIn.getEyeHeight() - 0.10000000149011612D, playerIn.posZ), Vec3d.ZERO);
                 blob.setHeadingFromThrower(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, 1.5F, 0.0F);
                 worldIn.spawnEntity(blob);
             }

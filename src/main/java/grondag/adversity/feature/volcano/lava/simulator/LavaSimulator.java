@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 import grondag.adversity.Configurator;
 import grondag.adversity.Output;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
-import grondag.adversity.feature.volcano.lava.EntityLavaParticle;
+import grondag.adversity.feature.volcano.lava.EntityLavaBlob;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.feature.volcano.lava.ParticleManager;
 import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
@@ -665,7 +665,7 @@ public class LavaSimulator extends SimulationNode
     {
         perfParticles.startRun();
         
-        int capacity =  Configurator.VOLCANO.maxLavaEntities - EntityLavaParticle.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
+        int capacity =  Configurator.VOLCANO.maxLavaEntities - EntityLavaBlob.getLiveParticleCount(this.worldBuffer.realWorld.getMinecraftServer());
         
         if(capacity <= 0) return;
         
@@ -685,7 +685,7 @@ public class LavaSimulator extends SimulationNode
                     // Spawn in world, discarding particles that have aged out and aren't big enough to form a visible lava block
                     if(p.getFluidUnits() >= FLUID_UNITS_PER_LEVEL)
                     {
-                        EntityLavaParticle elp = new EntityLavaParticle(this.worldBuffer.realWorld, p.getFluidUnits(), 
+                        EntityLavaBlob elp = new EntityLavaBlob(this.worldBuffer.realWorld, p.getFluidUnits(), 
                               new Vec3d(
                                       PackedBlockPos.getX(p.packedBlockPos) + 0.5, 
                                       PackedBlockPos.getY(p.packedBlockPos) + 0.4, 
