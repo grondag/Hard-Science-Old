@@ -765,16 +765,16 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     
     /**
      * At least one vanilla routine passes in a block state that does not match world.
-     * (After block updates, passes in previous state to detect collision box changes.)
+     * (After block updates, passes in previous state to detect collision box changes.) <br><br>
      * 
-     * We don't want to update our current state based on stale block state, so the TE
-     * refresh is coded to always use current world state.
+     * We don't want to update our current state based on stale block state, so for TE
+     * blocks the refresh must be coded so we don't inject bad (stale) modelState into TE. <br><br>
      * 
      * However, we do want to honor the given world state if species is different than current.
      * We do this by directly changing species, because that is only thing that can changed
-     * in model state based on block state, and also affects collision box.
+     * in model state based on block state, and also affects collision box. <br><br>
      * 
-     * TODO: there is probably still a bug here, because collision box can change based
+     * NOTE: there is probably still a bug here, because collision box can change based
      * on other components of model state (axis, for example) and those changes may not be detected
      * by path finding.
      */
@@ -1213,11 +1213,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 {
                     ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
-                    //TODO: need to check for texture/occlusion match
+                    // for transparent blocks, want blocks with same apperance and species to join
                     return myModelState.getSpecies() != otherModelState.getSpecies()
-                            || myModelState.getRenderLayer(PaintLayer.BASE) != otherModelState.getRenderLayer(PaintLayer.BASE)
-                            || myModelState.getTranslucency() != otherModelState.getTranslucency()
-                            || myModelState.getColorMap(PaintLayer.BASE) != otherModelState.getColorMap(PaintLayer.BASE);
+                            || !myModelState.doesAppearanceMatch(otherModelState);
+
                 }
             }
         }

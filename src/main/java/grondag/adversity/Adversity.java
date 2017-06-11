@@ -30,6 +30,7 @@ import grondag.adversity.init.ModItems;
  * FIXME: BUGS
  * 
  * Shading/lighting on terrain blocks
+ * Item rendering for columns
  */
 
 
