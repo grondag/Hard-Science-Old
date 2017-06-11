@@ -174,7 +174,6 @@ public class SuperItemBlock extends ItemBlock
                 if(blockTE instanceof SuperModelTileEntity)
                 {
                     SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
-                    superTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
                     superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
                     superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
                 }
@@ -192,26 +191,7 @@ public class SuperItemBlock extends ItemBlock
     {
         return ((SuperBlock)this.block).getItemStackDisplayName(stack);
     }
-    
-    
-    public static void setStackPlacementShape(ItemStack stack, int placementShape)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null){
-            tag = new NBTTagCompound();
-        }
-        SuperBlockNBTHelper.writePlacementShape(tag, placementShape);
-        stack.setTagCompound(tag);
-    }
-    
-    public static int getStackPlacementShape(ItemStack stack)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null 
-                ? 0
-                : SuperBlockNBTHelper.readPlacementShape(tag);
-    }
-    
+
     public static void setStackLightValue(ItemStack stack, int lightValue)
     {
         NBTTagCompound tag = stack.getTagCompound();

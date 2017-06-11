@@ -7,8 +7,6 @@ import net.minecraft.util.math.MathHelper;
 
 public class SuperBlockNBTHelper
 {
-
-    private static final String PLACEMENT_SHAPE_TAG = "APS";
     private static final String MODEL_STATE_TAG = "AMK";
     private static final String LIGHT_VALUE_TAG = "ALV";
     private static final String SUBSTANCE_TAG = "ASB";
@@ -20,7 +18,7 @@ public class SuperBlockNBTHelper
     
     public static interface SuperModelNBTReadHandler
     {
-        public void handleNBTRead(int placementShape, byte lightValue, BlockSubstance substance);
+        public void handleNBTRead(byte lightValue, BlockSubstance substance);
     }
 
     public static void writeModelState(NBTTagCompound compound, ModelState modelState)
@@ -37,19 +35,6 @@ public class SuperBlockNBTHelper
         return (stateBits == null || stateBits.length != 8)
                 ? null
                 : new ModelState(stateBits); 
-    }
-    
-    public static void writePlacementShape(NBTTagCompound compound, int placementShape)
-    {
-        if(placementShape == 0)
-            compound.removeTag(PLACEMENT_SHAPE_TAG);
-        else
-            compound.setInteger(PLACEMENT_SHAPE_TAG, placementShape);
-    }
-    
-    public static int readPlacementShape(NBTTagCompound compound)
-    {
-        return compound.getInteger(PLACEMENT_SHAPE_TAG);
     }
     
     /** Inputs are masked to 0-15 */
@@ -77,9 +62,8 @@ public class SuperBlockNBTHelper
     }
     
     /** extra attributes for supermodel blocks */
-    public static NBTTagCompound writeToNBT(NBTTagCompound compound, int placementShape, byte lightValue, BlockSubstance substance)
+    public static NBTTagCompound writeToNBT(NBTTagCompound compound, byte lightValue, BlockSubstance substance)
     {
-        writePlacementShape(compound, placementShape);
         writeLightValue(compound, lightValue);
         writeSubstance(compound, substance);
         return compound;
@@ -100,8 +84,7 @@ public class SuperBlockNBTHelper
     public static void superModelReadFromNBT(NBTTagCompound compound, SuperModelNBTReadHandler target)
     {
         target.handleNBTRead(
-                compound.getInteger(PLACEMENT_SHAPE_TAG), 
-                compound.getByte(LIGHT_VALUE_TAG),
+                compound.getByte(LIGHT_VALUE_TAG), 
                 readSubstance(compound));
     }
     

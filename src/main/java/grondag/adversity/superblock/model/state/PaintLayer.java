@@ -1,6 +1,7 @@
 package grondag.adversity.superblock.model.state;
 
 import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import net.minecraft.util.text.translation.I18n;
 
 public enum PaintLayer
 {
@@ -85,6 +86,12 @@ public enum PaintLayer
     {
         this.dynamicIndex = colorIndex;
         this.surfaceType = surfaceType;
+    }
+    
+    @SuppressWarnings("deprecation")
+    public String localizedName()
+    {
+        return I18n.translateToLocal("paintlayer." + this.name().toLowerCase());
     }
     
 }

@@ -8,47 +8,37 @@ import grondag.adversity.superblock.color.HueSet.Luminance;
 import grondag.adversity.superblock.color.NiceHues.Hue;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.util.text.translation.I18n;
 
 /**
  * Similar to Minecraft Material. Didn't want to tie to that implementation.
  * Determines Minecraft material and other physical properties.
  */
 public enum BlockSubstance {
-	FLEXSTONE("flexstone", Configurator.SUBSTANCES.flexstone, Material.ROCK, SoundType.STONE, 
-	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.LIGHT).ordinal),
+	FLEXSTONE(Configurator.SUBSTANCES.flexstone, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	DURASTONE("durastone", Configurator.SUBSTANCES.durastone, Material.ROCK, SoundType.STONE, 
-	        BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
+	DURASTONE(Configurator.SUBSTANCES.durastone, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	HYPERSTONE("hyperstone", Configurator.SUBSTANCES.hyperstone, Material.ROCK, SoundType.STONE,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.INDIGO, Chroma.WHITE, Luminance.LIGHT).ordinal),
+	HYPERSTONE(Configurator.SUBSTANCES.hyperstone, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.INDIGO, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	FLEXIGLASS("flexiglass", Configurator.SUBSTANCES.flexiglass, Material.GLASS, SoundType.GLASS, 
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.APATITE, Chroma.WHITE, Luminance.LIGHT).ordinal),
+	FLEXIGLASS(Configurator.SUBSTANCES.flexiglass, Material.GLASS, SoundType.GLASS, BlockColorMapProvider.INSTANCE.getColorMap(Hue.APATITE, Chroma.WHITE, Luminance.LIGHT).ordinal),
     
-    DURAGLASS("duraglass", Configurator.SUBSTANCES.durastone, Material.GLASS, SoundType.GLASS, 
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.BERYL, Chroma.WHITE, Luminance.LIGHT).ordinal),
+    DURAGLASS(Configurator.SUBSTANCES.durastone, Material.GLASS, SoundType.GLASS, BlockColorMapProvider.INSTANCE.getColorMap(Hue.BERYL, Chroma.WHITE, Luminance.LIGHT).ordinal),
     
-    HYPERGLASS("hyperglass", Configurator.SUBSTANCES.hyperstone, Material.GLASS, SoundType.GLASS,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.ICE, Chroma.WHITE, Luminance.LIGHT).ordinal),
+    HYPERGLASS(Configurator.SUBSTANCES.hyperstone, Material.GLASS, SoundType.GLASS, BlockColorMapProvider.INSTANCE.getColorMap(Hue.ICE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
-	FLEXWOOD("flexwood", Configurator.SUBSTANCES.flexwood, Material.WOOD, SoundType.WOOD,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHEDDAR, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+	FLEXWOOD(Configurator.SUBSTANCES.flexwood, Material.WOOD, SoundType.WOOD, BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHEDDAR, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	
-    DURAWOOD("durawood", Configurator.SUBSTANCES.durawood, Material.WOOD, SoundType.WOOD,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.EMBER, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+    DURAWOOD(Configurator.SUBSTANCES.durawood, Material.WOOD, SoundType.WOOD, BlockColorMapProvider.INSTANCE.getColorMap(Hue.EMBER, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 
-    HYPERWOOD("hyperwood", Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHERRY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+    HYPERWOOD(Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD, BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHERRY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 
     
-	BASALT("basalt", Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE,
-            BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
+	BASALT(Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	
 	//can't use lava as material here - confuses the lava fluid renderer
-    VOLCANIC_LAVA("volcanicLava", Configurator.SUBSTANCES.volcanicLava, Material.ROCK, SoundType.STONE, 0);
+    VOLCANIC_LAVA(Configurator.SUBSTANCES.volcanicLava, Material.ROCK, SoundType.STONE, 0);
     
-	public final String materialName;
 	public final Material material;
 	public final SoundType soundType;
 
@@ -61,9 +51,8 @@ public enum BlockSubstance {
 	public final boolean isTranslucent;
 	public final double walkSpeedFactor;
 	
-	BlockSubstance(String name, Substance substance, Material material, SoundType sound, int defaultColorMapID) 
+	BlockSubstance(Substance substance, Material material, SoundType sound, int defaultColorMapID) 
 	{
-		this.materialName = name;
 		this.material = material;
 		this.isHyperMaterial = substance == Configurator.SUBSTANCES.hyperstone;
 		soundType = sound;
@@ -77,4 +66,10 @@ public enum BlockSubstance {
 		this.walkSpeedFactor = substance.walkSpeedFactor;
 		
 	}
+
+    @SuppressWarnings("deprecation")
+    public String localizedName()
+    {
+        return I18n.translateToLocal("material." + this.name().toLowerCase());
+    }
 }

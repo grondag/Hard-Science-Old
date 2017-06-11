@@ -6,9 +6,6 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class SuperModelTileEntity extends SuperTileEntity implements SuperModelNBTReadHandler
 {
-    /** used by big blocks */
-    private int placementShape;
-    
     /** non-zero if block emits light */
     private byte lightValue = 0;
 
@@ -17,13 +14,12 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        return SuperBlockNBTHelper.writeToNBT(super.writeToNBT(compound), this.placementShape, this.lightValue, this.substance);
+        return SuperBlockNBTHelper.writeToNBT(super.writeToNBT(compound), this.lightValue, this.substance);
     }
 
     @Override
-    public void handleNBTRead(int placementShape, byte lightValue, BlockSubstance substance)
+    public void handleNBTRead(byte lightValue, BlockSubstance substance)
     {
-        this.placementShape = placementShape;
         this.lightValue = lightValue;
         this.substance = substance;
     }
@@ -50,20 +46,6 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
         super.readFromNBT(compound);
         SuperBlockNBTHelper.superModelReadFromNBT(compound, this);
         isLoaded = true;
-    }
-    
-    public int getPlacementShape()
-    { 
-        return placementShape;
-    }
-    
-    public void setPlacementShape( int placementShape)
-    { 
-        if(this.placementShape != placementShape)
-        {
-            this.placementShape = placementShape;
-            if(!this.world.isRemote) this.markDirty();
-        }
     }
 
     public byte getLightValue()

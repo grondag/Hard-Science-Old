@@ -44,6 +44,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.translation.I18n;
 
 public class SuperGuiScreen extends GuiScreen
 {
@@ -51,9 +52,10 @@ public class SuperGuiScreen extends GuiScreen
     private static final int BUTTON_ID_CANCEL = 0;
     private static final int BUTTON_ID_ACCEPT = 1;
 
-    //TODO: localize
-    private static final String STR_ACCEPT = "Accept";
-    private static final String STR_CANCEL = "Cancel";
+    @SuppressWarnings("deprecation")
+    private final String STR_ACCEPT = I18n.translateToLocal("label.accept");
+    @SuppressWarnings("deprecation")
+    private final String STR_CANCEL = I18n.translateToLocal("label.cancel");
 
     private int xStart;
     private int yStart;
@@ -272,6 +274,7 @@ public class SuperGuiScreen extends GuiScreen
         super.keyTyped(typedChar, keyCode);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void initGui()
     {
@@ -349,38 +352,37 @@ public class SuperGuiScreen extends GuiScreen
                     .setHorizontalWeight(5)
                     .setBackgroundColor(GuiControl.CONTROL_BACKGROUND);
 
-            //TODO: localize
-            group_base = rightPanel.createVisiblityGroup("Base Layer");
+            group_base = rightPanel.createVisiblityGroup(PaintLayer.BASE.localizedName());
             GuiControl tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
                     .setHorizontalWeight(2);
             GuiControl tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_base, tempH, textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(group_base);
 
-            group_border = rightPanel.createVisiblityGroup("Overlay");
+            group_border = rightPanel.createVisiblityGroup(PaintLayer.OVERLAY.localizedName());
             tempV = new Panel(true).addAll(overlayToggle, fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_border, tempH,textureTabBar[PaintLayer.OVERLAY.ordinal()]);
 
-            group_deco = rightPanel.createVisiblityGroup("Decoration");
+            group_deco = rightPanel.createVisiblityGroup(PaintLayer.DETAIL.localizedName());
             tempV = new Panel(true).addAll(detailToggle, fullBrightToggle[PaintLayer.DETAIL.ordinal()])
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_deco, tempH, textureTabBar[PaintLayer.DETAIL.ordinal()]);
 
-            group_lamp = rightPanel.createVisiblityGroup("Lamp");
+            group_lamp = rightPanel.createVisiblityGroup(PaintLayer.LAMP.localizedName());
             tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.LAMP.ordinal()], lampTranslucentToggle)
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_lamp, tempH, textureTabBar[PaintLayer.LAMP.ordinal()]);
 
-            group_shape = rightPanel.createVisiblityGroup("Shape");
+            group_shape = rightPanel.createVisiblityGroup(I18n.translateToLocal("label.shape"));
             rightPanel.add(group_shape, shapePicker.setVerticalWeight(5));
             shapeGui = modelState.getShape().guiSettingsControl(mc);
             rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
 
-            group_material = rightPanel.createVisiblityGroup("Material");
+            group_material = rightPanel.createVisiblityGroup(I18n.translateToLocal("label.material"));
             rightPanel.add(group_material, materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
             rightPanel.add(group_material, translucencyPicker.setVerticalLayout(Layout.PROPORTIONAL));
             rightPanel.add(group_material, brightnessSlider);

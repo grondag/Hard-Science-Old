@@ -18,15 +18,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import grondag.adversity.init.ModItems;
 
 /**
- * TODO: FEATURES & BUGS
+ * TODO: FEATURES
  * 
  * Vary color slightly with species, if user-selected
  * BlockFormer item
- * Shading/lighting on terrain blocks
  * MultiBlockSubState implementation
  * MultiBlock Shapes
  * Torus surface painter
  * Cylinder surface painter
+ * 
+ * FIXME: BUGS
+ * 
+ * Shading/lighting on terrain blocks
  */
 
 

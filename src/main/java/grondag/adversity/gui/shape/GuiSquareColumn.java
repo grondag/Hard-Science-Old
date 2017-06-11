@@ -5,6 +5,7 @@ import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.superblock.model.shape.SquareColumnMeshFactory;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.translation.I18n;
 
 public class GuiSquareColumn extends GuiShape
 {
@@ -13,12 +14,12 @@ public class GuiSquareColumn extends GuiShape
     private Slider cutCount;
     private static final int cutCountSize = SquareColumnMeshFactory.MAX_CUTS - SquareColumnMeshFactory.MIN_CUTS + 1;
     
+    @SuppressWarnings("deprecation")
     public GuiSquareColumn(Minecraft mc)
     {
         super(true);
-        //TODO: localize
-        this.areCutsOnEdge = new Toggle().setLabel("Cuts On Edge");
-        this.cutCount = new Slider(mc, cutCountSize,"Cuts", 0.2);
+        this.areCutsOnEdge = new Toggle().setLabel(I18n.translateToLocal("label.cuts_on_edge"));
+        this.cutCount = new Slider(mc, cutCountSize, I18n.translateToLocal("label.cuts_count"), 0.2);
         this.add(areCutsOnEdge);
         this.add(cutCount);
     }

@@ -45,9 +45,18 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * User-configurable Adversity building blocks.
+ * User-configurable Adversity building blocks.<br><br>
+ * 
+ * While most attributes are stored in stack/tile entity NBT
+ * some important methods are called without reference to a location or stack.
+ * For these, we have multiple instances of this block and use a different instance
+ * depending on the combination of attributes needed.<br><br>
+ * 
+ * The choice of which block to deploy is made by the item/creative stack that places the block
+ * by calling {@link grondag.adversity.init.ModSuperModelBlocks#findAppropriateSuperModelBlock(BlockSubstance substance, ModelState modelState)} <br><br>
+ * 
+ * The specific dimensions by which the block instances vary are: {@link #renderLayerSet}, {@link #worldLightOpacity}, Block.fullBlock and {@link #isHypermatter()}.
  */
-
 @SuppressWarnings("unused")
 public class SuperModelBlock extends SuperBlockPlus  
 {
@@ -76,6 +85,8 @@ public class SuperModelBlock extends SuperBlockPlus
                 boolean isHyperMatter, boolean isGeometryFullCube)
     {
         super(blockName, defaultMaterial, new ModelState());
+        //all superblocks have same display name
+        this.setUnlocalizedName("super_model_block");
         this.isHyperMatter = isHyperMatter;
         this.fullBlock = isGeometryFullCube;
         this.worldLightOpacity = worldLightOpacity;
@@ -188,15 +199,27 @@ public class SuperModelBlock extends SuperBlockPlus
         SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
         if(myTE != null)
         {
-            int placementShape = myTE.getPlacementShape() != 0 ? myTE.getPlacementShape() : SpeciesGenerator.PLACEMENT_3x3x3;
-            SuperItemBlock.setStackPlacementShape(stack, placementShape);
             SuperItemBlock.setStackLightValue(stack, myTE.getLightValue());
             SuperItemBlock.setStackSubstance(stack, myTE.getSubstance());
         }
         return stack;
     }
   
-    
+    @Override
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
+    {
+        // We only want to show one item for supermodelblocks
+        // Otherwise will spam creative search / JEI
+        // All do the same thing in the end.
+        if(this.worldLightOpacity == WorldLightOpacity.SOLID 
+                && this.renderLayerSet == BlockRenderLayerSet.ALL 
+                && this.fullBlock 
+                && !this.isHyperMatter)
+        {
+            list.add(this.getSubItems().get(0));
+        }
+    }
+
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {

@@ -8,17 +8,17 @@ import grondag.adversity.superblock.model.state.Translucency;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.translation.I18n;
 
 public class TranslucencyPicker extends GuiControl
 {
-    
     private Translucency translucency = null;
     
     private double spacing;
     private double firstBoxLeft;
 
-    //TODO: localize
-    private static final String LABEL = "Translucency";
+    @SuppressWarnings("deprecation")
+    private final String LABEL = I18n.translateToLocal("label.translucency");
     
     public TranslucencyPicker()
     {

@@ -11,6 +11,7 @@ import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.placement.SimplePlacementHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.translation.I18n;
 
 
 public enum ModelShape
@@ -180,5 +181,11 @@ public enum ModelShape
     public GuiShape guiSettingsControl(Minecraft mc)
     {
         return new GuiSimpleShape(false);
+    }
+    
+    @SuppressWarnings("deprecation")
+    public String localizedName()
+    {
+        return I18n.translateToLocal("shape." + this.name().toLowerCase());
     }
 }

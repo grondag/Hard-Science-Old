@@ -62,6 +62,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -129,7 +130,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         setResistance(50);
         
         this.setRegistryName(blockName);
-        this.setUnlocalizedName(this.getRegistryName().toString());
+        this.setUnlocalizedName(blockName);
         this.associatedBlock = this;
         
         this.lightOpacity = 0;
@@ -278,18 +279,27 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         super.addInformation(stack, playerIn, tooltip, advanced);
         ModelState modelState = SuperItemBlock.getModelState(stack);
         
-        ColorMap colorMap = modelState.getColorMap(PaintLayer.BASE);
-        if(colorMap != null)
+        if(modelState != null)
         {
-            tooltip.add("Color: " + colorMap.colorMapName);
+            tooltip.add(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
+            tooltip.add(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
+            tooltip.add(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
+            if(modelState.isOverlayLayerEnabled())
+            {
+                tooltip.add(I18n.translateToLocal("label.overlay_color") + ": " + modelState.getColorMap(PaintLayer.OVERLAY).localizedName());
+                tooltip.add(I18n.translateToLocal("label.overlay_texture") + ": " + modelState.getTexture(PaintLayer.OVERLAY).localizedName());
+            }
+            if(modelState.isDetailLayerEnabled())
+            {
+                tooltip.add(I18n.translateToLocal("label.detail_color") + ": " + modelState.getColorMap(PaintLayer.DETAIL).localizedName());
+                tooltip.add(I18n.translateToLocal("label.detail_texture") + ": " + modelState.getTexture(PaintLayer.DETAIL).localizedName());
+            }
+            if(modelState.hasSpecies()) 
+            {
+                tooltip.add(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
+            }
         }
-        
-        int placementShape = SuperItemBlock.getStackPlacementShape(stack);
-        if(placementShape != 0)
-        {
-            tooltip.add(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));
-        }
-        
+        tooltip.add(I18n.translateToLocal("label.material") + ": " + SuperItemBlock.getStackSubstance(stack).localizedName());
     }
 
     @Override
@@ -310,18 +320,25 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         
         if(modelState != null)
         {
-            probeInfo.text("Shape: " + modelState.getShape());
-            probeInfo.text("Base Color: " + modelState.getColorMap(PaintLayer.BASE).colorMapName);
+            probeInfo.text(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
+            probeInfo.text(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
+            probeInfo.text(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
+            if(modelState.isOverlayLayerEnabled())
+            {
+                probeInfo.text(I18n.translateToLocal("label.overlay_color") + ": " + modelState.getColorMap(PaintLayer.OVERLAY).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.overlay_texture") + ": " + modelState.getTexture(PaintLayer.OVERLAY).localizedName());
+            }
+            if(modelState.isDetailLayerEnabled())
+            {
+                probeInfo.text(I18n.translateToLocal("label.detail_color") + ": " + modelState.getColorMap(PaintLayer.DETAIL).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.detail_texture") + ": " + modelState.getTexture(PaintLayer.DETAIL).localizedName());
+            }
             if(modelState.hasSpecies()) 
             {
-                probeInfo.text("Species: " + modelState.getSpecies());
-                int placementShape = SuperItemBlock.getStackPlacementShape(this.getStackFromBlock(blockState, world, data.getPos()));
-                if(placementShape != 0)
-                {
-                    probeInfo.text(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));
-                }
+                probeInfo.text(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
             }
         }
+        probeInfo.text(I18n.translateToLocal("label.material") + ": " + this.getSubstance(blockState, world, data.getPos()).localizedName());
     }
 
     /**
@@ -826,12 +843,17 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return getDefaultState().withProperty(META, meta);
     }
 
-    //In most cases only display one item meta variant for item search
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * Confusingly named because is really the back end for Item.getSubItems.
+     * Used by Creative and JEI to show a list of blocks.
+     */
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
     {
-        list.add(getSubItems().get(0));
+        list.addAll(getSubItems());
     }
 
     public List<ItemStack> getSubItems()

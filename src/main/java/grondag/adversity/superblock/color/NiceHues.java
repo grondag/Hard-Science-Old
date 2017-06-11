@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import grondag.adversity.Output;
 import grondag.adversity.library.Color;
 import grondag.adversity.superblock.color.HueSet.HuePosition;
+import net.minecraft.util.text.translation.I18n;
 
 @SuppressWarnings("unused")
 public class NiceHues 
@@ -17,71 +18,69 @@ public class NiceHues
 
     public static enum Hue
     {
-        INFRARED("Infrared"),
-        CHERRY("Cherry"),
-        ROSE("Rose"),
-        POMEGRANATE("Pomegranate"),
-        CRIMSON("Crimson"),
-        SCARLET("Scarlet"),
-        RED("Red"),
-        VERMILLION("Vermillion"),
-        TANGERINE("Tangerine"),
-        ORANGE("Orange"),
-        EMBER("Ember"),
-        SUNSET("Sunset"),
-        PUMPKIN("Pumpkin"),
-        CHEDDAR("Cheddar"),
-        MANGO("Mango"),
-        SUNFLOWER("Sunflower"),
-        GOLD("Gold"),
-        TORCH("Torch"),
-        YELLOW("Yellow"),
-        LEMON("Lemon"),
-        LIME("Lime"),
-        PERIDOT("Peridot"),
-        CHARTREUSE("Chartreuse"),
-        CACTUS("Cactus"),
-        GREEN("Green"),
-        FOLIAGE("Foliage"),
-        MINT("Mint"),
-        SAGE("Sage"),
-        JUNIPER("Juniper"),
-        CELADON("Celadon"),
-        EMERALD("Emerald"),
-        VERDIGRIS("Verdigris"),
-        TURQUOISE("Turquoise"),
-        SEA_FOAM("Sea Foam"),
-        CYAN("Cyan"),
-        ICE("Ice"),
-        BERYL("Beryl"),
-        APATITE("Apatite"),
-        MARINE("Marine"),
-        AQUA("Aqua"),
-        ROBIN_EGG("Robin Egg"),
-        MORNING("Morning"),
-        CERULEAN("Cerulean"),
-        TOPAZ("Topaz"),
-        SKY("Sky"),
-        SAPPHIRE("Sapphire"),
-        PERIWINKLE("Periwinkle"),
-        TWILIGHT("Twilight"),
-        AZURE("Azure"),
-        OCEAN("Ocean"),
-        COBALT("Cobalt"),
-        BLUE("Blue"),
-        LAPIS("Lapis"),
-        INDIGO("Indigo"),
-        VIOLET("Violet"),
-        PURPLE("Purple"),
-        AMETHYST("Amethyst"),
-        LILAC("Lilac"),
-        MAGENTA("Magenta"),
-        FUSCHIA("Fuschia"),
-        TULIP("Tulip"),
-        PINK("Pink"),
-        PEONY("Peony");
-
-        private final String hueName;
+        INFRARED,
+        CHERRY,
+        ROSE,
+        POMEGRANATE,
+        CRIMSON,
+        SCARLET,
+        RED,
+        VERMILLION,
+        TANGERINE,
+        ORANGE,
+        EMBER,
+        SUNSET,
+        PUMPKIN,
+        CHEDDAR,
+        MANGO,
+        SUNFLOWER,
+        GOLD,
+        TORCH,
+        YELLOW,
+        LEMON,
+        LIME,
+        PERIDOT,
+        CHARTREUSE,
+        CACTUS,
+        GREEN,
+        FOLIAGE,
+        MINT,
+        SAGE,
+        JUNIPER,
+        CELADON,
+        EMERALD,
+        VERDIGRIS,
+        TURQUOISE,
+        SEA_FOAM,
+        CYAN,
+        ICE,
+        BERYL,
+        APATITE,
+        MARINE,
+        AQUA,
+        ROBIN_EGG,
+        MORNING,
+        CERULEAN,
+        TOPAZ,
+        SKY,
+        SAPPHIRE,
+        PERIWINKLE,
+        TWILIGHT,
+        AZURE,
+        OCEAN,
+        COBALT,
+        BLUE,
+        LAPIS,
+        INDIGO,
+        VIOLET,
+        PURPLE,
+        AMETHYST,
+        LILAC,
+        MAGENTA,
+        FUSCHIA,
+        TULIP,
+        PINK,
+        PEONY;
 
         /**
          * Rotate our color cylinder by this many degrees
@@ -91,17 +90,7 @@ public class NiceHues
         private static final double HUE_SALT = 0;
 
         private int hueSample = 0;
-
-        Hue(String hueName)
-        {
-            this.hueName = hueName;
-        }
-
-        public String hueName()
-        {
-            return hueName;
-        }
-
+     
         public double hueDegrees()
         {
             return this.ordinal() * 360.0 / Hue.values().length + HUE_SALT;
@@ -118,6 +107,12 @@ public class NiceHues
                 this.hueSample = Color.fromHCL(this.hueDegrees(), Color.HCL_MAX, Color.HCL_MAX).RGB_int | 0xFF000000;
             }
             return this.hueSample;
+        }
+
+        @SuppressWarnings("deprecation")
+        public String localizedName()
+        {
+            return I18n.translateToLocal("color.hue." + this.name().toLowerCase());
         }
     }
 
@@ -164,7 +159,7 @@ public class NiceHues
                 buffer.write("<tr>");
 
                 int color = h.hueSample & 0xFFFFFF;
-                buffer.write(String.format("<td style=\"background:#%1$06X\">" + h.hueName + "</td>", color));
+                buffer.write(String.format("<td style=\"background:#%1$06X\">" + h.localizedName() + "</td>", color));
 
                 buffer.write(String.format("<td style=\"background:#%1$06X\">" + Integer.toHexString(color) + "</td>", color));
 

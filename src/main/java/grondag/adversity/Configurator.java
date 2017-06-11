@@ -152,6 +152,19 @@ public class Configurator
     }
     
     ////////////////////////////////////////////////////        
+    // BLOCKS
+    ////////////////////////////////////////////////////
+    @LangKey("adversity.config.blocks")
+    @Comment("Settings for blocks.")
+    public static BlockSettings BLOCKS = new BlockSettings();
+    
+    public static class BlockSettings
+    {
+        @Comment("Allow user selection of hidden textures in SuperModel Block GUI. Generally only useful for testing.")
+        public boolean showHiddenTextures = false;
+    }
+    
+    ////////////////////////////////////////////////////        
     // VOLCANO
     ////////////////////////////////////////////////////
     @LangKey("adversity.config.volcano")

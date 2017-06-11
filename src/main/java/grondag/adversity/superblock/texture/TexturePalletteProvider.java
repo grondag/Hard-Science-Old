@@ -11,6 +11,7 @@ import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.text.translation.I18n;
 
 public class TexturePalletteProvider implements Iterable<TexturePalletteProvider.TexturePallette>
 {
@@ -31,7 +32,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
     public TexturePallette addZoomedPallete(TexturePallette source)
     {
         TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, source.textureVersionCount, source.textureScale.zoom(), source.textureLayout, source.allowRotation, 
-                    source.lightingModeFlags, source.renderLayer, source.textureGroup);
+                    source.lightingModeFlags, source.renderLayer, source.textureGroup, source.zoomLevel + 1);
         texturePallettes.add(result);
         return result;
     }
@@ -70,6 +71,12 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
         
         public final TextureScale textureScale;
         public final TextureLayout textureLayout;
+        
+        /** 
+         * Used to display appropriate label for texture.
+         * 0 = no zoom, 1 = 2x zoom, 2 = 4x zoom
+         */
+        public final int zoomLevel;
         
         /**
          * Masks the version number provided by consumers - alternators that
@@ -115,6 +122,11 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
         
         private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, BlockRenderLayer renderLayer, TextureGroup textureGroup)
         {
+            this(ordinal, textureBaseName, textureVersionCount, textureScale, layout, allowRotation, 
+                    lightingModeFlags, renderLayer, textureGroup, 0);
+        }
+        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, boolean allowRotation, int lightingModeFlags, BlockRenderLayer renderLayer, TextureGroup textureGroup, int zoomLevel)
+        {
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
             this.textureVersionCount = textureVersionCount;
@@ -125,6 +137,7 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             this.lightingModeFlags = lightingModeFlags;
             this.renderLayer = renderLayer;
             this.textureGroup = textureGroup;
+            this.zoomLevel = zoomLevel;
   
             this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag 
                     | (allowRotation ? ModelState.STATE_FLAG_NEEDS_ROTATION : 0);
@@ -249,5 +262,19 @@ public class TexturePalletteProvider implements Iterable<TexturePalletteProvider
             }
         }
         
+        @SuppressWarnings("deprecation")
+        public String localizedName()
+        {
+            String texName = I18n.translateToLocal("texture." + this.textureBaseName.toLowerCase());
+            switch(this.zoomLevel)
+            {
+                case 1:
+                    return I18n.translateToLocalFormatted("texture.zoom2x_format", texName);
+                case 2:
+                    return I18n.translateToLocalFormatted("texture.zoom4x_format", texName);
+                default:
+                    return texName;
+            }
+        }
     }
 }
