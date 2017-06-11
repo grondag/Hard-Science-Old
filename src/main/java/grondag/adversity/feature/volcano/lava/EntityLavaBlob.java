@@ -7,6 +7,7 @@ import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.init.ModBlocks;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.terrain.TerrainBlock;
+import grondag.adversity.superblock.terrain.TerrainState;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -17,6 +18,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -27,6 +29,7 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -183,14 +186,10 @@ public class EntityLavaBlob extends Entity
     
     public void setFluidAmount(int amount)
     {
-//        Adversity.log.info("particle setFluidAmount id=" + this.id + " amount=" + this.cachedAmount +" @"+ this.getPosition().toString());
-
         this.cachedAmount = amount;
         this.dataManager.set(FLUID_AMOUNT, amount);
         this.updateAmountDependentData();
-
-    }
-    
+    }    
     
     @Override
     public void onEntityUpdate()
@@ -198,6 +197,13 @@ public class EntityLavaBlob extends Entity
         // None of the normal stuff applies
     }
 
+    // for fun
+    @Override
+    public boolean isBurning()
+    {
+        return true;
+    }
+    
     @Override
     public boolean isEntityInvulnerable(DamageSource source)
     {
@@ -231,19 +237,18 @@ public class EntityLavaBlob extends Entity
         
         // If inside lava, release to lava simulator.
         // This can happen somewhat frequently because another particle landed or lava flowed around us.
-//        if(!this.world.isRemote) 
-//        {
-            Block block = this.world.getBlockState(this.getPosition()).getBlock();
-            
-            if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler )
-            {
-                this.land();
-                return;
-            }
-//        }
+        Block block = this.world.getBlockState(this.getPosition()).getBlock();
+        
+        if(block == ModBlocks.lava_dynamic_height || block == ModBlocks.lava_dynamic_filler )
+        {
+            this.land();
+            return;
+        }
         
         super.onUpdate();
-
+        
+        this.impactNearbyEntities();
+        
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
@@ -307,8 +312,6 @@ public class EntityLavaBlob extends Entity
 
         List<AxisAlignedBB> blockCollisions = this.world.getCollisionBoxes(null, targetBox);
 
-        //TODO: entity collisions and damage
-        //            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
         int i = 0;
 
         for (int j = blockCollisions.size(); i < j; ++i)
@@ -372,7 +375,6 @@ public class EntityLavaBlob extends Entity
             }
         }
 
-        //TODO: use it or get rid of it?
         this.updateFallState(y, this.onGround, iblockstate, blockpos);
 
         //because lava is sticky, want to stop all horizontal motion once collided
@@ -382,18 +384,6 @@ public class EntityLavaBlob extends Entity
             this.motionZ = 0.0D;
         }
 
-        //        if (startingX != x)
-        //        {
-        //            this.motionX = 0.0D;
-        //        }
-        //
-        //        if (startingZ != z)
-        //        {
-        //            this.motionZ = 0.0D;
-        //        }
-
-
-
         Block block = iblockstate.getBlock();
 
         if (startingY != y)
@@ -401,7 +391,6 @@ public class EntityLavaBlob extends Entity
             block.onLanded(this.world, this);
         }
 
-        //TODO: is needed?
         try
         {
             this.doBlockCollisions();
@@ -448,6 +437,51 @@ public class EntityLavaBlob extends Entity
         blockpos$pooledmutableblockpos.release();
     }
 
+    /**
+     * Move entities and hurt them.
+     */
+    private void impactNearbyEntities()
+    {
+        // wait until have been live a short time in case throw in creative mode
+        if(this.ticksExisted > 2)
+        {
+            Vec3d posCurrent = new Vec3d(this.posX, this.posY, this.posZ);
+            Vec3d posNext = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+    
+            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D));
+    
+            if(!list.isEmpty())
+            {
+                Vec3d myVelocity = new Vec3d(this.motionX, this.motionY, this.motionZ);
+                
+                for (int i = 0; i < list.size(); ++i)
+                {
+                    Entity victim = (Entity)list.get(i);
+        
+                    if (victim.canBeCollidedWith())
+                    {
+                        
+                        AxisAlignedBB axisalignedbb = victim.getEntityBoundingBox().expandXyz(0.30000001192092896D);
+                        RayTraceResult intercept = axisalignedbb.calculateIntercept(posCurrent, posNext);
+        
+                        if (intercept != null)
+                        {
+                            // Modeled as a 2-body perfectly elastic collision where the victim is assumed to have no mass.
+                            // This means the lava blob is unstoppable by entities.
+                            // (-V1 dot D) / ||D||^2 * D where  D = X2-X1
+                            Vec3d posEntity = victim.getPositionVector();
+                            Vec3d centerDistance = posEntity.subtract(posCurrent);
+                            double pushMagnitude = myVelocity.dotProduct(centerDistance) / centerDistance.lengthSquared();
+                            Vec3d pushVector = centerDistance.scale(pushMagnitude);
+                            victim.addVelocity(pushVector.xCoord, pushVector.yCoord, pushVector.zCoord);
+                            victim.attackEntityFrom(DamageSource.FALLING_BLOCK, this.getFluidAmount() / TerrainState.BLOCK_LEVELS_INT);
+                            victim.setFire(5);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
