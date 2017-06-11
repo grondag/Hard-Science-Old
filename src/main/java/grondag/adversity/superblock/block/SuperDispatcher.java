@@ -14,9 +14,11 @@ import grondag.adversity.superblock.items.SuperModelItemOverrideList;
 import grondag.adversity.superblock.model.painter.QuadPainter;
 import grondag.adversity.superblock.model.painter.QuadPainterFactory;
 import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
 import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import grondag.adversity.superblock.model.shape.ShapeMeshGenerator;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 import java.util.ArrayList;
@@ -50,6 +52,8 @@ public class SuperDispatcher
     //custom loading cache is at least 2X faster than guava LoadingCache for our use case
     private final ObjectSimpleLoadingCache<ModelState, SparseLayerMap> modelCache = new ObjectSimpleLoadingCache<ModelState, SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
     private final ObjectSimpleLoadingCache<ModelState, SimpleItemBlockModel> itemCache = new ObjectSimpleLoadingCache<ModelState, SimpleItemBlockModel>(new ItemCacheLoader(), 0xFFF);
+    /** contains quads for use by block damage rendering based on shape only and with appropriate UV mapping*/
+    private final ObjectSimpleLoadingCache<ModelState, QuadContainer> damageCache = new ObjectSimpleLoadingCache<ModelState, QuadContainer>(new DamageCacheLoader(), 0x4FF);
     
     private class BlockCacheLoader implements ObjectSimpleCacheLoader<ModelState, SparseLayerMap>
     {
@@ -97,6 +101,34 @@ public class SuperDispatcher
 	    	}
 			return new SimpleItemBlockModel(builder.build(), key.getRenderLayerShadedFlags() != 0);
 		}       
+    }
+    
+    private class DamageCacheLoader implements ObjectSimpleCacheLoader<ModelState, QuadContainer>
+    {
+        @Override
+        public QuadContainer load(ModelState key) 
+        {
+            List<RawQuad> quads = key.getShape().meshFactory().getShapeQuads(key);
+            if(quads.isEmpty()) return QuadContainer.EMPTY_CONTAINER;
+            for(RawQuad q : quads)
+            {
+                // arbitrary choice - just needs to be a simple non-null texture
+                q.textureSprite = Textures.BLOCK_COBBLE.getSampleSprite();
+             
+                // Need to scale UV on non-cubic surfaces to be within a 1 block boundary.
+                // This causes breaking textures to be scaled to normal size.
+                // If we didn't do this, bigtex block break textures would appear abnormal.
+                if(q.surfaceInstance.topology() == SurfaceTopology.TILED)
+                {
+                    // This is simple for tiled surface because UV scale is always 1.0
+                    q.minU = 0;
+                    q.maxU = 16;
+                    q.minV = 0;
+                    q.maxV = 16;
+                }
+            }
+            return QuadContainer.fromRawQuads(quads);
+        }       
     }
     
     public SuperDispatcher(String resourceName)
@@ -199,7 +231,7 @@ public class SuperDispatcher
         
         for(RawQuad shapeQuad : modelState.getShape().meshFactory().getShapeQuads(modelState))
         {
-            Surface qSurface = shapeQuad.surface;
+            Surface qSurface = shapeQuad.surfaceInstance.surface();
             for(QuadPainter p : painters)
             {
                 if(qSurface == p.surface) p.addPaintedQuadToList(shapeQuad, result);
@@ -250,24 +282,13 @@ public class SuperDispatcher
             
             BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
             
-            // If no layer can be determined than probably getting request from block breaking
-            // In that case, return quads from all layers with UV coordinates scaled to be within a 1 block boundary.
-            // This causes breaking textures to be scaled to normal size.
-            // If we didn't do this, bigtex block break textures would appear abnormal.
+            // If no renderLayer set then probably getting request from block breaking
             if(layer == null)
             {
-    
-                // TODO: Actually rescale the quad UVs per above note.   Look at BakedQuadRetextured for ideas
-                
-                ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-                
-                for(QuadContainer qc : modelCache.get(modelState).getAll())
-                {
-                    builder.addAll(qc.getQuads(side));
-                }
-                
-                return builder.build();
-                
+                QuadContainer qc = damageCache.get(modelState.geometricState());
+                if(qc == null) 
+                    return QuadFactory.EMPTY_QUAD_LIST;
+                return qc.getQuads(side);
             }
             else
             {
@@ -284,7 +305,8 @@ public class SuperDispatcher
         @Override
         public boolean isAmbientOcclusion()
         {
-            return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(MinecraftForgeClient.getRenderLayer(), this.renderLayerShadedFlags);
+            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+            return layer == null ? true : ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, this.renderLayerShadedFlags);
         }
     
         @Override

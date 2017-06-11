@@ -10,6 +10,7 @@ import net.minecraft.util.math.MathHelper;
  * Paints unconstrained, non-wrapping 2d surface.
  * Expects that UV coordinates on incoming quads have the following properties:
  * A UV distance of 1 represents one block in world.
+ * (UV scale on the surface instance will be 1.0)
  * UV values range from 0 through 256 and then repeat.
  * This means applied textures repeat every 256 blocks in both directions of the plane.
  * 

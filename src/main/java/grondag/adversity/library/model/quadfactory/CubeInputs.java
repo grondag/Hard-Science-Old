@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.Rotation;
 import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.painter.surface.Surface.SurfaceInstance;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
@@ -22,7 +23,7 @@ public class CubeInputs{
     public boolean isOverlay = false;
     public boolean isItem = false;
     public LightingMode lightingMode = LightingMode.SHADED;
-    public Surface surface;
+    public SurfaceInstance surfaceInstance;
     
     public CubeInputs()
     {
@@ -53,7 +54,7 @@ public class CubeInputs{
         qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
         qi.textureSprite = this.textureSprite;
-        qi.surface = this.surface;
+        qi.surfaceInstance = this.surfaceInstance;
 
         double minBound = this.isOverlay ? -0.0002 : 0.0;
         double maxBound = this.isOverlay ? 1.0002 : 1.0;

@@ -60,10 +60,17 @@ public abstract class ShapeMeshGenerator
      */
     public abstract int geometricSkyOcclusion(ModelState modelState);
 
+    @Nonnull
     public abstract List<RawQuad> getShapeQuads(ModelState modelState);
 
     /** Returns true if geometry is a full 1x1x1 cube. */
     public abstract boolean isCube(ModelState modelState);
+    
+    /** 
+     * Returns a copy of the given model state with only the attributes that affect geometry.
+     * Used as a lookup key for block breaking models.
+     */
+    public abstract ModelState geometricModelState(ModelState modelState);
 
     /** 
      * If true, will disable species selection on block placement. 

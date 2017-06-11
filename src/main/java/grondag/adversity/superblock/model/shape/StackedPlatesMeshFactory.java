@@ -83,7 +83,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         template.color = 0xFFFFFFFF;
         template.rotation = Rotation.ROTATE_NONE;
         template.lightingMode = LightingMode.SHADED;
-        template.surface = this.surfaces.get(0);
+        template.surfaceInstance = this.surfaces.get(0).unitInstance;
         template.lockUV = true;
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
@@ -200,5 +200,14 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
                 return SideShape.MISSING;
         
         }
+    }
+    
+    @Override
+    public ModelState geometricModelState(ModelState modelState)
+    {
+        ModelState result = new ModelState();
+        result.setShape(modelState.getShape());
+        result.setSpecies(modelState.getSpecies());
+        return result;
     }
 }

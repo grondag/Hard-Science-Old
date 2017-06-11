@@ -10,6 +10,7 @@ import grondag.adversity.library.Color;
 import grondag.adversity.library.Rotation;
 import grondag.adversity.library.Useful;
 import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.painter.surface.Surface.SurfaceInstance;
 import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
 import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -23,7 +24,7 @@ import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public class RawQuad
 {
-    private static final Surface NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static final SurfaceInstance NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance;
     
     private Vertex[] vertices;
     private Vec3d faceNormal = null;
@@ -43,7 +44,7 @@ public class RawQuad
     public boolean shouldContractUVs = true;
     
     public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
-    public Surface surface = NO_SURFACE;
+    public SurfaceInstance surfaceInstance = NO_SURFACE;
     
     public float minU = 0;
     public float maxU = 16;
@@ -125,7 +126,7 @@ public class RawQuad
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
         this.renderLayer = fromObject.renderLayer;
-        this.surface = fromObject.surface;
+        this.surfaceInstance = fromObject.surfaceInstance;
     }
 
     public List<RawQuad> toQuads()
@@ -844,7 +845,7 @@ public class RawQuad
 
                 case COLOR:
                     float shade;
-                    if(this.lightingMode == LightingMode.SHADED && Configurator.RENDER.enableCustomShading && !this.surface.isLampGradient)
+                    if(this.lightingMode == LightingMode.SHADED && Configurator.RENDER.enableCustomShading && !this.surfaceInstance.isLampGradient())
                     {
                         Vec3d surfaceNormal = getVertex(v).hasNormal() ? getVertex(v).getNormal() : this.getFaceNormal();
                         shade = Configurator.RENDER.minAmbientLight + 
@@ -894,7 +895,7 @@ public class RawQuad
         }
 
         boolean applyDiffuseLighting = this.lightingMode == LightingMode.SHADED
-                && !this.surface.isLampGradient  
+                && !this.surfaceInstance.isLampGradient()  
                 && !Configurator.RENDER.enableCustomShading;
         
         return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, color, this.face, textureSprite, 
@@ -1090,9 +1091,9 @@ public class RawQuad
     }
     
     /** convenience method - sets surface value and returns self */
-    public RawQuad setSurface(Surface surface)
+    public RawQuad setSurfaceInstance(SurfaceInstance surfaceInstance)
     {
-        this.surface = surface;
+        this.surfaceInstance = surfaceInstance;
         return this;
     }
 }

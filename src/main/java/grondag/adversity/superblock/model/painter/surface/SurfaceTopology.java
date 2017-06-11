@@ -9,6 +9,8 @@ public enum SurfaceTopology
      * Surface represents six faces of a single block.
      * Each quad in this surface will be tagged with a side
      * and will have raw UV values in the range 0 - 1.
+     * 
+     * UV scale will always be 1.0
      */
     CUBIC,
     
@@ -16,10 +18,14 @@ public enum SurfaceTopology
      * Surface represents a continuous surface that is sliced into
      * quads that are each one block high and wide.
      * Quads tile in both dimensions and can extend for any distance.
-     * Raw UV values can be any positive or negative value, with 
-     * integers representing block edges.  
-     * For example, a quad with UV box of -1, -1, 2, 2 would represent
-     * a 3x3 tiled surface and should generate at least 9 painted quads.
+     * 
+     * A UV distance of 1 represents one block in world.
+     * (UV scale on the surface instance will be 1.0)
+     * UV values range from 0 through 256 and then repeat.
+     * This means applied textures repeat every 256 blocks in both directions of the plane.
+     *
+     * Texture rotation and alternation is driven by relative position of UV coordinates
+     * within the 256 x 256 block plane.
      */
     TILED,
  

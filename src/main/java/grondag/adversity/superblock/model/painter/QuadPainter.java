@@ -68,7 +68,7 @@ public abstract class QuadPainter
 
     public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
     {
-        if(inputQuad.surface == this.surface)
+        if(inputQuad.surfaceInstance.surface() == this.surface)
         {
             RawQuad result = inputQuad.clone();
             recolorQuad(result);

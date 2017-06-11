@@ -23,6 +23,7 @@ import grondag.adversity.superblock.color.BlockColorMapProvider;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.shape.SideShape;
+import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.support.BlockTests;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
@@ -1028,6 +1029,16 @@ public class ModelStateFactory
             return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK)
                     && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK)
                     && (this.bits2 & P2_APPEARANCE_COMPARISON_MASK) == (other.bits2 & P2_APPEARANCE_COMPARISON_MASK);
+        }
+
+
+        /** 
+         * Returns a copy of this model state with only the bits that matter for geometry.
+         * Used as lookup key for block damage models.
+         */
+        public ModelState geometricState()
+        {
+            return this.getShape().meshFactory().geometricModelState(this);
         }
     }
 }
