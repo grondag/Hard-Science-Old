@@ -3,7 +3,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import grondag.adversity.feature.volcano.lava.simulator.WorldStateBuffer.ChunkBuffer;
-import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.world.PackedBlockPos;
 import net.minecraft.world.chunk.Chunk;
 /**
  * Manages snapshots of chunk data to be used for creating and updating lava cells.

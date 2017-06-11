@@ -3,7 +3,7 @@ package grondag.adversity.external;
 
 import java.util.List;
 
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 import grondag.adversity.superblock.block.SuperBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,7 +36,7 @@ public class WailaDataProvider implements IWailaDataProvider
 
     public static void load(IWailaRegistrar registrar) {
         if (!registered){
-            Output.error("Unable to load Waila data provider.  Registration method not called prior to load.");
+            Log.error("Unable to load Waila data provider.  Registration method not called prior to load.");
             return;
         }
         if (!loaded) {

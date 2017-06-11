@@ -4,7 +4,6 @@ import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.Layout;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
-import grondag.adversity.gui.base.GuiControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;

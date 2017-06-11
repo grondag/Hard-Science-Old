@@ -5,14 +5,14 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
-import grondag.adversity.library.CountedJob;
-import grondag.adversity.library.CountedJob.CountedJobTask;
+import grondag.adversity.Log;
+import grondag.adversity.library.concurrency.CountedJob;
+import grondag.adversity.library.concurrency.Job;
+import grondag.adversity.library.concurrency.PerformanceCounter;
+import grondag.adversity.library.concurrency.SimpleConcurrentList;
+import grondag.adversity.library.concurrency.CountedJob.CountedJobTask;
+import grondag.adversity.library.world.PackedBlockPos;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.library.Job;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.PerformanceCounter;
-import grondag.adversity.library.SimpleConcurrentList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
@@ -415,7 +415,7 @@ public class LavaCells
             }
         }
         
-        Output.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
+        Log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
         nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -430,7 +430,7 @@ public class LavaCells
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)
         {
-            Output.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
+            Log.warn("Invalid save data loading lava simulator. Lava blocks may not be updated properly.");
         }
         else
         {
@@ -485,16 +485,16 @@ public class LavaCells
             // Make sure other stuff is up to date
             this.updateStuffJob.runOn(this.sim.LAVA_THREAD_POOL);
             
-            Output.info("Loaded " + this.cellList.size() + " lava cells.");
+            Log.info("Loaded " + this.cellList.size() + " lava cells.");
         }
     }
     
     public void logDebugInfo()
     {
-        Output.info(this.cellChunks.size() + " loaded cell chunks");
+        Log.info(this.cellChunks.size() + " loaded cell chunks");
         for(CellChunk chunk : this.cellChunks.values())
         {
-            Output.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
+            Log.info("xStart=" + PackedBlockPos.getChunkXStart(chunk.packedChunkPos)
                 + " zStart=" + PackedBlockPos.getChunkZStart(chunk.packedChunkPos)
                 + " activeCount=" + chunk.getActiveCount() + " entryCount=" + chunk.getEntryCount());
             

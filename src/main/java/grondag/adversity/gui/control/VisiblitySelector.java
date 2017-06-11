@@ -1,7 +1,6 @@
 package grondag.adversity.gui.control;
 
 import grondag.adversity.gui.GuiUtil;
-import grondag.adversity.gui.base.GuiControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderItem;

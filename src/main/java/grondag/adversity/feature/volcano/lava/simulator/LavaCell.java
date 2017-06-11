@@ -8,13 +8,13 @@ import java.util.function.Predicate;
 import com.google.common.collect.ComparisonChain;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.SimpleUnorderedArrayList;
+import grondag.adversity.library.varia.SimpleUnorderedArrayList;
+import grondag.adversity.library.world.PackedBlockPos;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.superblock.model.state.FlowHeightState;
+import grondag.adversity.superblock.terrain.TerrainState;
 import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -828,7 +828,7 @@ public class LavaCell extends AbstractLavaCell
                 if(this.isEmpty())
                 {
                     // if cell is empty, can use the floor given 
-                    this.setFloorLevel(y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
+                    this.setFloorLevel(y * TerrainState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
                 }
                 
                 // if cell has lava, don't want to lose the floor information for a solid
@@ -850,14 +850,14 @@ public class LavaCell extends AbstractLavaCell
             // Note this has to be done before changing the floor, otherwise worldSurfaceY will be the new value.
             this.setRefreshRange(y, this.worldSurfaceY());
             
-            this.setFloorLevel(y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
+            this.setFloorLevel(y * TerrainState.BLOCK_LEVELS_INT + floorHeight, isFlowFloor);
             return this.checkForMergeDown();
         }
         
         // space is one above, expand up
         else if(y == myTop + 1)
         {
-            this.setCeilingLevel((y + 1) * FlowHeightState.BLOCK_LEVELS_INT);
+            this.setCeilingLevel((y + 1) * TerrainState.BLOCK_LEVELS_INT);
             return this.checkForMergeUp();
         }
         
@@ -871,7 +871,7 @@ public class LavaCell extends AbstractLavaCell
         // if we get here, this is the closest cell and Y is not adjacent
         // therefore the space represents a new cell.
         
-        LavaCell newCell = new LavaCell(this, y * FlowHeightState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * FlowHeightState.BLOCK_LEVELS_INT, isFlowFloor);
+        LavaCell newCell = new LavaCell(this, y * TerrainState.BLOCK_LEVELS_INT + floorHeight, (y + 1) * TerrainState.BLOCK_LEVELS_INT, isFlowFloor);
         
         if(y > myTop)
         {
@@ -980,7 +980,7 @@ public class LavaCell extends AbstractLavaCell
                     //handle strangeness that should never occur
                     if(remaining <= 0)
                     {
-                        if(Output.DEBUG_MODE) Output.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
+                        if(Log.DEBUG_MODE) Log.debug("Strange: Upper cell being merged at hieght ran out of lava before it reached fluid surface.");
                         
                         break;
                     }
@@ -1180,13 +1180,13 @@ public class LavaCell extends AbstractLavaCell
                         newCell.above = upperCell;
                         upperCell.below = newCell;
                         
-                        if(Output.DEBUG_MODE)
+                        if(Log.DEBUG_MODE)
                         {
                             if(newCell.intersectsWith(newCell.above) || newCell.isVerticallyAdjacentTo(newCell.above))
-                                Output.warn("Added cell intersects with cell above. Should never happen.");
+                                Log.warn("Added cell intersects with cell above. Should never happen.");
                             
                             if(newCell.intersectsWith(newCell.below) || newCell.isVerticallyAdjacentTo(newCell.below))
-                                Output.warn("Added cell intersects with cell below. Should never happen.");
+                                Log.warn("Added cell intersects with cell below. Should never happen.");
                         }
                         
                         return;
@@ -1194,8 +1194,8 @@ public class LavaCell extends AbstractLavaCell
                     lowerCell = upperCell;
                     upperCell = lowerCell.above;
                     
-                    if(Output.DEBUG_MODE && lowerCell == upperCell)
-                        Output.info("Strangeness in lava cell NBT load.");
+                    if(Log.DEBUG_MODE && lowerCell == upperCell)
+                        Log.info("Strangeness in lava cell NBT load.");
                 }
                 
                 // if we get to here, new cell is the uppermost
@@ -1542,8 +1542,8 @@ public class LavaCell extends AbstractLavaCell
      */
     private int getFlowFloorRawRetentionDepth()
     {
-        if(Output.DEBUG_MODE && !this.isBottomFlow()) 
-            Output.warn("Flow floor retention depth computed for non-flow-floor cell.");
+        if(Log.DEBUG_MODE && !this.isBottomFlow()) 
+            Log.warn("Flow floor retention depth computed for non-flow-floor cell.");
         
         int myFloor = this.floorUnits();
         
@@ -1743,8 +1743,8 @@ public class LavaCell extends AbstractLavaCell
     {
         if(this.locator == null)
         {
-            if(Output.DEBUG_MODE)
-                Output.warn("Missing cell locator object.");
+            if(Log.DEBUG_MODE)
+                Log.warn("Missing cell locator object.");
             return this;
         }
         
@@ -1865,13 +1865,13 @@ public class LavaCell extends AbstractLavaCell
                 {
                     
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), currentVisible - currentSurfaceY * FlowHeightState.BLOCK_LEVELS_INT),
+                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), currentVisible - currentSurfaceY * TerrainState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else if(hasLava && y < currentSurfaceY)
                 {
                     sim.worldBuffer.setBlockState(this.locator.x, y, this.locator.z, 
-                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), FlowHeightState.BLOCK_LEVELS_INT),
+                            TerrainBlock.stateWithDiscreteFlowHeight(ModBlocks.lava_dynamic_height.getDefaultState(), TerrainState.BLOCK_LEVELS_INT),
                             priorState);
                 }
                 else

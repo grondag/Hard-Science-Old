@@ -3,9 +3,9 @@ package grondag.adversity.init;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import grondag.adversity.superblock.block.SuperDispatcher;
-import grondag.adversity.superblock.block.SuperDispatcher.DispatchDelegate;
 import grondag.adversity.superblock.texture.Textures;
+import grondag.adversity.superblock.varia.SuperDispatcher;
+import grondag.adversity.superblock.varia.SuperDispatcher.DispatchDelegate;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -43,7 +43,7 @@ public class ModModels
     {
         ArrayList<String> textureList = new ArrayList<String>();
         
-        Textures.ALL_TEXTURES.addTexturesForPrestich(textureList);
+        Textures.REGISTRY.addTexturesForPrestich(textureList);
         
         for(String s : textureList)
         {

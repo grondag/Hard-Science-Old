@@ -12,17 +12,18 @@ import com.google.common.collect.ImmutableList.Builder;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 import grondag.adversity.external.IWailaProvider;
 import grondag.adversity.init.ModModels;
-import grondag.adversity.library.Color;
-import grondag.adversity.library.Color.EnumHCLFailureMode;
+import grondag.adversity.library.varia.Color;
+import grondag.adversity.library.varia.Color.EnumHCLFailureMode;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ICollisionHandler;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
+import grondag.adversity.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
@@ -30,6 +31,7 @@ import mcjty.theoneprobe.api.ProbeMode;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Translucency;
+import grondag.adversity.superblock.model.state.WorldLightOpacity;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
@@ -1148,7 +1150,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDropped(IBlockState state, int fortune, Random random)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
         return 0;
     }
 
@@ -1156,7 +1158,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDropped(Random random)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
         return 0;
     }
 
@@ -1164,7 +1166,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDroppedWithBonus(int fortune, Random random)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
         return 0;
     }
 
@@ -1172,7 +1174,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
         return super.rayTrace(pos, start, end, boundingBox);
     }
 

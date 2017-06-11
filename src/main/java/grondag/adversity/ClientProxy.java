@@ -1,6 +1,6 @@
 package grondag.adversity;
 
-import grondag.adversity.superblock.color.NiceHues;
+import grondag.adversity.superblock.color.BlockColorMapProvider;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -12,9 +12,9 @@ public class ClientProxy extends CommonProxy {
 	{
 		super.preInit(event);
 		
-		if(Output.DEBUG_MODE)
+		if(Log.DEBUG_MODE)
 		{
-		    NiceHues.INSTANCE.writeColorAtlas(event.getModConfigurationDirectory());
+		    BlockColorMapProvider.writeColorAtlas(event.getModConfigurationDirectory());
 		}
 	}
 

@@ -6,9 +6,9 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 import net.minecraft.block.state.IBlockState;

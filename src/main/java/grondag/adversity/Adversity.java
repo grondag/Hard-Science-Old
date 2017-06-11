@@ -33,6 +33,26 @@ import grondag.adversity.init.ModItems;
  * Item rendering for columns
  */
 
+//VOLCANO STFF
+
+//FEATURES
+//simulation integration & control from simulation
+//volcano wand
+//detection item
+//world gen
+
+//biome
+//smoke
+//haze
+//ash
+
+//create falling-block explosion w/ configurable crater radius
+//explosion of mound
+//ignite surrounding blocks
+//sound effects for volcano
+//sound for lava
+//water rendering
+
 
 @Mod(modid = Adversity.MODID, name = Adversity.MODNAME, acceptedMinecraftVersions = "[1.11.2]")
 public class Adversity {

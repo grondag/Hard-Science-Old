@@ -2,7 +2,6 @@ package grondag.adversity.superblock.terrain;
 
 import grondag.adversity.init.ModBlocks;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.state.FlowHeightState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -171,7 +170,7 @@ public class TerrainWand extends Item
                 int currentLevel = height[x][z];
                 
 
-                int currentY = (int) Math.floor((currentLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                int currentY = (int) Math.floor((currentLevel - 1) / TerrainState.BLOCK_LEVELS_FLOAT);
                 BlockPos targetPos = new BlockPos(pos.getX() - 16 + x, currentY, pos.getZ() - 16 + z);
                 IBlockState currentState = worldIn.getBlockState(targetPos);
                 
@@ -179,32 +178,32 @@ public class TerrainWand extends Item
                 {
                     if(avg > currentLevel)
                     {
-                        int newLevel = Math.min(currentLevel + FlowHeightState.BLOCK_LEVELS_INT, avg);
-                        int newY = (int) Math.floor((newLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                        int newLevel = Math.min(currentLevel + TerrainState.BLOCK_LEVELS_INT, avg);
+                        int newY = (int) Math.floor((newLevel - 1) / TerrainState.BLOCK_LEVELS_FLOAT);
                         
                         if(newY == currentY)
                         {
-                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                         else
                         {
-                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, FlowHeightState.BLOCK_LEVELS_INT));
-                            worldIn.setBlockState(targetPos.up(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, TerrainState.BLOCK_LEVELS_INT));
+                            worldIn.setBlockState(targetPos.up(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                     }
                     else if(avg < currentLevel)
                     {
-                        int newLevel = Math.max(currentLevel - FlowHeightState.BLOCK_LEVELS_INT, avg);
-                        int newY = (int) Math.floor((newLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                        int newLevel = Math.max(currentLevel - TerrainState.BLOCK_LEVELS_INT, avg);
+                        int newY = (int) Math.floor((newLevel - 1) / TerrainState.BLOCK_LEVELS_FLOAT);
                         
                         if(newY == currentY)
                         {
-                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                         else
                         {
                             worldIn.setBlockToAir(targetPos);
-                            worldIn.setBlockState(targetPos.down(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos.down(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                     }
                 }
@@ -219,7 +218,7 @@ public class TerrainWand extends Item
         IBlockState state = world.getBlockState(pos);
         int h = TerrainBlock.getFlowHeightFromState(state);
         
-        if(h != 0) return y * FlowHeightState.BLOCK_LEVELS_INT + h;
+        if(h != 0) return y * TerrainState.BLOCK_LEVELS_INT + h;
         
         if(state.getMaterial().isReplaceable())
         {
@@ -233,7 +232,7 @@ public class TerrainWand extends Item
                 state = world.getBlockState(pos.down(downCount));
             }
             h = TerrainBlock.getFlowHeightFromState(state);
-            return (y - downCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
+            return (y - downCount) * TerrainState.BLOCK_LEVELS_INT + h;
         }
         else
         {
@@ -248,7 +247,7 @@ public class TerrainWand extends Item
                 state = world.getBlockState(pos.up(upCount));
                 h = TerrainBlock.getFlowHeightFromState(state);
             }
-            return (y + upCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
+            return (y + upCount) * TerrainState.BLOCK_LEVELS_INT + h;
         }
             
     }
@@ -294,7 +293,7 @@ public class TerrainWand extends Item
             }
             else
             {
-                if(level < FlowHeightState.BLOCK_LEVELS_INT)
+                if(level < TerrainState.BLOCK_LEVELS_INT)
                 {
                     targetPos = pos;
                     targetState = TerrainBlock.stateWithDiscreteFlowHeight(stateIn, level + 1);

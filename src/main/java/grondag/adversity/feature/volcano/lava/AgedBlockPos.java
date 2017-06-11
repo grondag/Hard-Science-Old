@@ -3,8 +3,8 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.function.Predicate;
 
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.Useful;
+import grondag.adversity.library.varia.Useful;
+import grondag.adversity.library.world.PackedBlockPos;
 import net.minecraft.util.math.BlockPos;
 
 /**

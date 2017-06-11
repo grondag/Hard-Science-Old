@@ -1,10 +1,10 @@
 package grondag.adversity.init;
 
-import grondag.adversity.superblock.block.BlockRenderLayerSet;
 import grondag.adversity.superblock.block.SuperModelBlock;
-import grondag.adversity.superblock.block.WorldLightOpacity;
+import grondag.adversity.superblock.model.state.BlockRenderLayerSet;
+import grondag.adversity.superblock.model.state.WorldLightOpacity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.event.RegistryEvent;

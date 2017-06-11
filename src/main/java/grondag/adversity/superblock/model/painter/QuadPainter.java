@@ -2,19 +2,19 @@ package grondag.adversity.superblock.model.painter;
 
 import java.util.List;
 
-import grondag.adversity.library.Color;
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.Vertex;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.render.QuadFactory;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.render.Vertex;
+import grondag.adversity.library.varia.Color;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.texture.Textures;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 

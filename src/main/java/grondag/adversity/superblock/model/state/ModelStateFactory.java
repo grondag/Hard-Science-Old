@@ -1,32 +1,32 @@
 package grondag.adversity.superblock.model.state;
 
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Alternator;
-import grondag.adversity.library.BinaryEnumSet;
-import grondag.adversity.library.BitPacker;
-import grondag.adversity.library.IAlternator;
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.Useful;
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.library.BitPacker.BitElement.EnumElement;
-import grondag.adversity.library.BitPacker.BitElement.IntElement;
-import grondag.adversity.library.BitPacker.BitElement.LongElement;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.library.joinstate.CornerJoinBlockState;
-import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-import grondag.adversity.library.joinstate.SimpleJoin;
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.Log;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.varia.BinaryEnumSet;
+import grondag.adversity.library.varia.BitPacker;
+import grondag.adversity.library.varia.Useful;
+import grondag.adversity.library.varia.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.EnumElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.LongElement;
+import grondag.adversity.library.world.Alternator;
+import grondag.adversity.library.world.CornerJoinBlockState;
+import grondag.adversity.library.world.CornerJoinBlockStateSelector;
+import grondag.adversity.library.world.IAlternator;
+import grondag.adversity.library.world.NeighborBlocks;
+import grondag.adversity.library.world.Rotation;
+import grondag.adversity.library.world.SimpleJoin;
+import grondag.adversity.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.color.BlockColorMapProvider;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.shape.SideShape;
-import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockTests;
+import grondag.adversity.superblock.terrain.TerrainState;
 import grondag.adversity.superblock.texture.Textures;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.adversity.superblock.varia.BlockTests;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
@@ -88,7 +88,7 @@ public class ModelStateFactory
     private static final IntElement P3B_MASONRY_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
     
     static final BitPacker PACKER_3_FLOW = new BitPacker();
-    private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
+    private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(TerrainState.STATE_BIT_MASK + 1);
 
     /** used to compare states quickly for border joins  */
     private static final long P0_APPEARANCE_COMPARISON_MASK;
@@ -499,7 +499,7 @@ public class ModelStateFactory
                 // terrain blocks need larger position space to drive texture randomization because doesn't have per-block rotation or version
                 if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 255);
 
-                bits3 = P3F_FLOW_JOIN.setValue(FlowHeightState.getBitsFromWorldStatically(this, (SuperBlock)state.getBlock(), state, world, pos), bits3);
+                bits3 = P3F_FLOW_JOIN.setValue(TerrainState.getBitsFromWorldStatically(this, (SuperBlock)state.getBlock(), state, world, pos), bits3);
                 break;
             
             case MULTIBLOCK:
@@ -612,8 +612,8 @@ public class ModelStateFactory
             case DETAIL:
             case OVERLAY:
             default:
-                if(Output.DEBUG_MODE)
-                    Output.warn("setRenderLayer on model state does not apply for given paint layer.");
+                if(Log.DEBUG_MODE)
+                    Log.warn("setRenderLayer on model state does not apply for given paint layer.");
                 return;
 
             case LAMP:
@@ -686,7 +686,7 @@ public class ModelStateFactory
         
         public TexturePallette getTexture(PaintLayer layer)
         {
-            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
+            return Textures.REGISTRY.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
         }
         
         public void setTexture(PaintLayer layer, TexturePallette tex)
@@ -782,8 +782,8 @@ public class ModelStateFactory
         
         public Rotation getRotation(TextureScale scale)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("getRotation on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                Log.warn("getRotation on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
             return P3B_BLOCK_ROTATION[scale.ordinal()].getValue(bits3);
@@ -791,8 +791,8 @@ public class ModelStateFactory
         
         public void setRotation(Rotation rotation, TextureScale scale)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("setRotation on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                Log.warn("setRotation on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
             bits3 = P3B_BLOCK_ROTATION[scale.ordinal()].setValue(rotation, bits3);
@@ -801,16 +801,16 @@ public class ModelStateFactory
 
         public int getBlockVersion(TextureScale scale)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("getBlockVersion on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                Log.warn("getBlockVersion on model state does not apply for shape");
             
             return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
         }
         
         public void setBlockVersion(int version, TextureScale scale)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("setBlockVersion on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                Log.warn("setBlockVersion on model state does not apply for shape");
             
             bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
             invalidateHashCode();
@@ -825,8 +825,8 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
             
-            if(Output.DEBUG_MODE && !this.hasSpecies())
-                Output.warn("getSpecies on model state does not apply for shape");
+            if(Log.DEBUG_MODE && !this.hasSpecies())
+                Log.warn("getSpecies on model state does not apply for shape");
 
             return this.hasSpecies() ? P3B_SPECIES.getValue(bits3) : 0;
         }
@@ -835,8 +835,8 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
             
-            if(Output.DEBUG_MODE && !this.hasSpecies())
-                Output.warn("setSpecies on model state does not apply for shape");
+            if(Log.DEBUG_MODE && !this.hasSpecies())
+                Log.warn("setSpecies on model state does not apply for shape");
             
             if(this.hasSpecies())
             {
@@ -847,11 +847,11 @@ public class ModelStateFactory
         
         public CornerJoinBlockState getCornerJoin()
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                    Output.warn("getCornerJoin on model state does not apply for shape");
+                    Log.warn("getCornerJoin on model state does not apply for shape");
             }
             
             return CornerJoinBlockStateSelector.getJoinState(P3B_BLOCK_JOIN.getValue(bits3));
@@ -859,11 +859,11 @@ public class ModelStateFactory
         
         public void setCornerJoin(CornerJoinBlockState join)
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                    Output.warn("setCornerJoin on model state does not apply for shape");
+                    Log.warn("setCornerJoin on model state does not apply for shape");
             }
             
             bits3 = P3B_BLOCK_JOIN.setValue(join.getIndex(), bits3);
@@ -872,8 +872,8 @@ public class ModelStateFactory
         
         public SimpleJoin getSimpleJoin()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("getSimpleJoin on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                Log.warn("getSimpleJoin on model state does not apply for shape");
             
             
             // If this state is using corner join, join index is for a corner join
@@ -886,18 +886,18 @@ public class ModelStateFactory
         
         public void setSimpleJoin(SimpleJoin join)
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 {
-                    Output.warn("Ignored setSimpleJoin on model state that does not apply for shape");
+                    Log.warn("Ignored setSimpleJoin on model state that does not apply for shape");
                     return;
                 }
                 
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) != 0)
                 {
-                    Output.warn("Ignored setSimpleJoin on model state that uses corner join instead");
+                    Log.warn("Ignored setSimpleJoin on model state that uses corner join instead");
                     return;
                 }
             }
@@ -908,8 +908,8 @@ public class ModelStateFactory
         
         public SimpleJoin getMasonryJoin()
         {
-            if(Output.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
-                Output.warn("getMasonryJoin on model state does not apply for shape");
+            if(Log.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
+                Log.warn("getMasonryJoin on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
             return new SimpleJoin(P3B_MASONRY_JOIN.getValue(bits3));
@@ -917,18 +917,18 @@ public class ModelStateFactory
         
         public void setMasonryJoin(SimpleJoin join)
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 {
-                    Output.warn("Ignored setMasonryJoin on model state that does not apply for shape");
+                    Log.warn("Ignored setMasonryJoin on model state that does not apply for shape");
                     return;
                 }
                 
                 populateStateFlagsIfNeeded();
                 if(((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
                 {
-                    Output.warn("Ignored setMasonryJoin on model state for which it does not apply");
+                    Log.warn("Ignored setMasonryJoin on model state for which it does not apply");
                     return;
                 }
             }
@@ -944,8 +944,8 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public long getMultiBlockBits()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
-                Output.warn("getMultiBlockBits on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+                Log.warn("getMultiBlockBits on model state does not apply for shape");
             
             return bits3;
         }
@@ -953,8 +953,8 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public void setMultiBlockBits(long bits)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
-                Output.warn("setMultiBlockBits on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+                Log.warn("setMultiBlockBits on model state does not apply for shape");
             
             bits3 = bits;
             invalidateHashCode();
@@ -964,18 +964,18 @@ public class ModelStateFactory
         //  PACKER 3 ATTRIBUTES  (FLOWING TERRAIN FORMAT)
         ////////////////////////////////////////////////////
         
-        public FlowHeightState getFlowState()
+        public TerrainState getTerrainState()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
-                Output.warn("getFlowState on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+                Log.warn("getFlowState on model state does not apply for shape");
                 
-            return new FlowHeightState(P3F_FLOW_JOIN.getValue(bits3));
+            return new TerrainState(P3F_FLOW_JOIN.getValue(bits3));
         }
         
-        public void setFlowState(FlowHeightState flowState)
+        public void setTerrainState(TerrainState flowState)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
-                Output.warn("setFlowState on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+                Log.warn("setFlowState on model state does not apply for shape");
 
             bits3 = P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);
             invalidateHashCode();

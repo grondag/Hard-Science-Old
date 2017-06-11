@@ -3,8 +3,6 @@ package grondag.adversity.gui.control;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import grondag.adversity.gui.base.GuiControl;
-
 public class VisibilityPanel extends Panel
 {
 

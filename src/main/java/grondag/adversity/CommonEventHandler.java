@@ -4,11 +4,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
 
+import grondag.adversity.feature.volcano.lava.LavaBlock;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
-import grondag.adversity.library.model.quadfactory.QuadCache;
+import grondag.adversity.library.render.QuadCache;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.superblock.support.NiceBlockHighlighter;
-import grondag.adversity.superblock.terrain.LavaBlock;
+import grondag.adversity.superblock.varia.BlockHighlighter;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
@@ -45,7 +45,7 @@ public class CommonEventHandler
         }
         catch(Exception e)
         {
-            Output.warn("Unable to parse localized denial messages. Using default.");
+            Log.warn("Unable to parse localized denial messages. Using default.");
         }
         DENIALS = denials;
     }
@@ -92,7 +92,7 @@ public class CommonEventHandler
     @SubscribeEvent
     public void onDrawBlockHighlightEvent(DrawBlockHighlightEvent event) 
     {
-        NiceBlockHighlighter.handleDrawBlockHighlightEvent(event);
+        BlockHighlighter.handleDrawBlockHighlightEvent(event);
     }
     
     @SubscribeEvent
@@ -148,7 +148,7 @@ public class CommonEventHandler
                 && --clientStatCounter == 0) 
         {
             clientStatCounter = Configurator.RENDER.quadCacheStatReportingInterval * 20;
-            Output.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+            Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
         }
     }
 

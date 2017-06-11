@@ -2,11 +2,11 @@ package grondag.adversity.superblock.model.shape;
 
 import java.util.List;
 
-import grondag.adversity.library.Useful;
-import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
-import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
+import grondag.adversity.library.cache.ObjectSimpleCacheLoader;
+import grondag.adversity.library.cache.ObjectSimpleLoadingCache;
+import grondag.adversity.library.varia.Useful;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.CollisionBoxGenerator;
+import grondag.adversity.superblock.varia.CollisionBoxGenerator;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public class CollisionBoxDispatcher

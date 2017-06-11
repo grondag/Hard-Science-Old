@@ -1,13 +1,13 @@
 package grondag.adversity.superblock.placement;
 
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.BlockCorner;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.library.PlacementValidatorCubic;
+import grondag.adversity.library.world.NeighborBlocks;
+import grondag.adversity.library.world.PlacementValidatorCubic;
+import grondag.adversity.library.world.NeighborBlocks.BlockCorner;
+import grondag.adversity.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockTests;
+import grondag.adversity.superblock.varia.BlockTests;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;

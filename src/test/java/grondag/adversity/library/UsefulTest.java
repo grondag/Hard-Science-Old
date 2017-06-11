@@ -3,6 +3,8 @@ package grondag.adversity.library;
 import org.junit.Test;
 
 import gnu.trove.list.TLongList;
+import grondag.adversity.library.varia.Useful;
+import grondag.adversity.library.world.PackedBlockPos;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 

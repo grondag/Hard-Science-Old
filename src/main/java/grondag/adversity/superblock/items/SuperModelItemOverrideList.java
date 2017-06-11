@@ -2,7 +2,7 @@ package grondag.adversity.superblock.items;
 
 import com.google.common.collect.Lists;
 
-import grondag.adversity.superblock.block.SuperDispatcher;
+import grondag.adversity.superblock.varia.SuperDispatcher;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;

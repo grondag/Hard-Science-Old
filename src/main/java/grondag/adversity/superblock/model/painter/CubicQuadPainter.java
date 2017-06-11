@@ -1,8 +1,8 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.library.Rotation;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 public abstract class CubicQuadPainter extends QuadPainter

@@ -1,10 +1,10 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureScale;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 
 public class QuadPainterFactory
 {

@@ -3,20 +3,20 @@ package grondag.adversity.superblock.model.shape;
 import java.util.ArrayList;
 import java.util.List;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Color;
-import grondag.adversity.library.NeighborBlocks.HorizontalCorner;
-import grondag.adversity.library.NeighborBlocks.HorizontalFace;
-import grondag.adversity.library.model.quadfactory.CSGShape;
-import grondag.adversity.library.model.quadfactory.FaceVertex;
-import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.Log;
+import grondag.adversity.library.render.CSGShape;
+import grondag.adversity.library.render.FaceVertex;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.varia.Color;
+import grondag.adversity.library.world.NeighborBlocks.HorizontalCorner;
+import grondag.adversity.library.world.NeighborBlocks.HorizontalFace;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.surface.Surface;
-import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
-import grondag.adversity.superblock.model.painter.surface.SurfaceType;
-import grondag.adversity.superblock.model.state.FlowHeightState;
+import grondag.adversity.superblock.model.state.Surface;
+import grondag.adversity.superblock.model.state.SurfaceTopology;
+import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import grondag.adversity.superblock.terrain.TerrainState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -86,7 +86,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public int geometricSkyOcclusion(ModelState modelState)
     {
-        return modelState.getFlowState().verticalOcclusion();
+        return modelState.getTerrainState().verticalOcclusion();
     }
 
     /**
@@ -112,7 +112,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         template.setFace(EnumFacing.UP);
 
 
-        FlowHeightState flowState = modelState.getFlowState();
+        TerrainState flowState = modelState.getTerrainState();
 
         // center vertex setup
         FaceVertex fvCenter = new FaceVertex(0.5, 0.5, 1.0 - flowState.getCenterVertexHeight() + flowState.getYOffset());
@@ -513,7 +513,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public boolean isCube(ModelState modelState)
     {
-        return modelState.getFlowState().isFullCube();
+        return modelState.getTerrainState().isFullCube();
     }
 
     @Override
@@ -525,7 +525,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {
-        return modelState.getFlowState().isFullCube() ? SideShape.SOLID : SideShape.MISSING;
+        return modelState.getTerrainState().isFullCube() ? SideShape.SOLID : SideShape.MISSING;
     }
 
     @Override
@@ -539,11 +539,11 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         try
         {
-            return COLLISION_BOUNDS[modelState.getFlowState().getCenterHeight() - 1];
+            return COLLISION_BOUNDS[modelState.getTerrainState().getCenterHeight() - 1];
         }
         catch (Exception ex)
         {
-            Output.info("TerrainMeshFactory recevied Collision Bounding Box check for a foreign block.");
+            Log.info("TerrainMeshFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }
@@ -557,7 +557,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public long collisionKey(ModelState modelState)
     {
-        return modelState.getFlowState().getStateKey();
+        return modelState.getTerrainState().getStateKey();
     }
     
     @Override
@@ -565,7 +565,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         ModelState result = new ModelState();
         result.setShape(modelState.getShape());
-        result.setFlowState(modelState.getFlowState());
+        result.setTerrainState(modelState.getTerrainState());
         return result;
     }
 }

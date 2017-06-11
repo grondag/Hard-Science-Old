@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
+import grondag.adversity.Log;
+import grondag.adversity.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.PerformanceCollector;
-import grondag.adversity.library.PerformanceCounter;
+import grondag.adversity.library.concurrency.PerformanceCollector;
+import grondag.adversity.library.concurrency.PerformanceCounter;
+import grondag.adversity.library.world.PackedBlockPos;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
 import grondag.adversity.superblock.terrain.TerrainBlock;
 import grondag.adversity.superblock.terrain.TerrainStaticBlock;
 import net.minecraft.block.Block;
@@ -91,9 +91,9 @@ public class WorldStateBuffer implements IBlockAccess
         
         if(chunk == null) 
         {            
-            if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
+            if(Log.DEBUG_MODE && !isMCWorldAccessAppropriate)
             {
-                Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                Log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
             }
             
             // prevent concurrent access to MC world
@@ -132,7 +132,7 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
-        if(Output.DEBUG_MODE) this.stateSetCount++;
+        if(Log.DEBUG_MODE) this.stateSetCount++;
         
         getChunkBuffer(x, z).setBlockState(x, y, z, newState, expectedPriorState);
     }
@@ -298,7 +298,7 @@ public class WorldStateBuffer implements IBlockAccess
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Output.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
+            Log.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
             return;
         }
 
@@ -313,7 +313,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
 //        this.isLoading = false;
 
-        Output.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
+        Log.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
@@ -324,7 +324,7 @@ public class WorldStateBuffer implements IBlockAccess
             recordCount+= chunk.size();
         }
         
-        Output.info("Saving " + recordCount + " world updates.");
+        Log.info("Saving " + recordCount + " world updates.");
         
         int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;
@@ -600,9 +600,9 @@ public class WorldStateBuffer implements IBlockAccess
 //                Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
 //                        realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
                 
-                if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
+                if(Log.DEBUG_MODE && !isMCWorldAccessAppropriate)
                 {
-                    Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                    Log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
                 if(this.worldChunk == null || !this.worldChunk.isLoaded())

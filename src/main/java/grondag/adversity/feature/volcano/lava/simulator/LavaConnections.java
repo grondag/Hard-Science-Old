@@ -5,10 +5,10 @@ import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.library.CountedJob;
-import grondag.adversity.library.Job;
-import grondag.adversity.library.SimpleConcurrentList;
-import grondag.adversity.library.CountedJob.CountedJobTask;
+import grondag.adversity.library.concurrency.CountedJob;
+import grondag.adversity.library.concurrency.Job;
+import grondag.adversity.library.concurrency.SimpleConcurrentList;
+import grondag.adversity.library.concurrency.CountedJob.CountedJobTask;
 import grondag.adversity.simulator.Simulator;
 
 @SuppressWarnings("unused")

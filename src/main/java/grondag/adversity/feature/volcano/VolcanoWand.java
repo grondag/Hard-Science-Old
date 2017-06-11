@@ -34,7 +34,7 @@ public class VolcanoWand extends Item
             Map<BlockPos, TileEntity> map = worldIn.getChunkFromBlockCoords(playerIn.getPosition()).getTileEntityMap();
             for(Map.Entry<BlockPos, TileEntity> entry : map.entrySet())
             {
-                if(entry.getValue() instanceof TileVolcano)
+                if(entry.getValue() instanceof VolcanoTileEntity)
                 {
                     targetPos = entry.getKey();
                     break;

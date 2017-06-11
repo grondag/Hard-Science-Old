@@ -8,13 +8,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.BlockCorner;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.library.world.NeighborBlocks;
+import grondag.adversity.library.world.NeighborBlocks.BlockCorner;
+import grondag.adversity.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockTests;
+import grondag.adversity.superblock.varia.BlockTests;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

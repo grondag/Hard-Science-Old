@@ -3,14 +3,13 @@ package grondag.adversity.superblock.terrain;
 import java.util.List;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.library.Useful;
+import grondag.adversity.library.varia.Useful;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperSimpleBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
-import grondag.adversity.superblock.model.state.FlowHeightState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +28,7 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
     {
         super(blockName, substance, defaultModelState);
         this.isFiller = isFiller;
-        this.metaCount = this.isFiller ? 2 : FlowHeightState.BLOCK_LEVELS_INT;
+        this.metaCount = this.isFiller ? 2 : TerrainState.BLOCK_LEVELS_INT;
         
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
@@ -85,10 +84,10 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         {
             int meta = stack.getMetadata();
             ModelState modelState = SuperItemBlock.getModelState(stack);
-            int level = this.isFiller ? FlowHeightState.BLOCK_LEVELS_INT - 1 : FlowHeightState.BLOCK_LEVELS_INT - meta;
+            int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
-            FlowHeightState flowState = new FlowHeightState(level, quadrants, quadrants, 0);
-            modelState.setFlowState(flowState);
+            TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);
+            modelState.setTerrainState(flowState);
             SuperItemBlock.setModelState(stack, modelState);
         }
         return items;

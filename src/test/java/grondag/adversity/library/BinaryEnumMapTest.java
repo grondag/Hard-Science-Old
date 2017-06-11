@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import grondag.adversity.library.BinaryEnumSet;
+import grondag.adversity.library.varia.BinaryEnumSet;
 import net.minecraft.util.BlockRenderLayer;
 
 public class BinaryEnumMapTest

@@ -1,8 +1,8 @@
 package grondag.adversity.gui;
 
 
-import static grondag.adversity.gui.base.GuiControl.CONTROL_EXTERNAL_MARGIN;
-import static grondag.adversity.gui.base.GuiControl.CONTROL_INTERNAL_MARGIN;
+import static grondag.adversity.gui.control.GuiControl.CONTROL_EXTERNAL_MARGIN;
+import static grondag.adversity.gui.control.GuiControl.CONTROL_INTERNAL_MARGIN;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import org.lwjgl.input.Mouse;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.gui.control.BrightnessSlider;
 import grondag.adversity.gui.control.Button;
 import grondag.adversity.gui.control.ColorPicker;
+import grondag.adversity.gui.control.GuiControl;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
@@ -25,7 +25,7 @@ import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
 import grondag.adversity.gui.shape.GuiShape;
 import grondag.adversity.init.ModSuperModelBlocks;
-import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.library.render.LightingMode;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketReplaceHeldItem;
 import grondag.adversity.superblock.block.SuperBlock;
@@ -34,7 +34,7 @@ import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Translucency;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;

@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.List;
 
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.init.ModBlocks;
 import grondag.adversity.simulator.Simulator;
@@ -224,7 +224,7 @@ public class EntityLavaBlob extends Entity
         
         if(this.ticksExisted > 600)
         {
-            Output.info("Ancient lava particle died of old age.");
+            Log.info("Ancient lava particle died of old age.");
             this.setDead();
             return;
         }

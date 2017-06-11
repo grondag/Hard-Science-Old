@@ -2,7 +2,6 @@ package grondag.adversity.superblock.terrain;
 
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.state.FlowHeightState;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -48,7 +47,7 @@ public class TerrainBlock
     {
         if(isFlowHeight(state.getBlock()))
         {
-            return Math.max(1, FlowHeightState.BLOCK_LEVELS_INT - state.getValue(SuperBlock.META));
+            return Math.max(1, TerrainState.BLOCK_LEVELS_INT - state.getValue(SuperBlock.META));
         }
         else
         {
@@ -68,12 +67,12 @@ public class TerrainBlock
      */
     public static IBlockState stateWithDiscreteFlowHeight(IBlockState state, int value)
     {
-        return state.withProperty(SuperBlock.META, Math.min(FlowHeightState.BLOCK_LEVELS_INT - 1, Math.max(0, FlowHeightState.BLOCK_LEVELS_INT - value)));
+        return state.withProperty(SuperBlock.META, Math.min(TerrainState.BLOCK_LEVELS_INT - 1, Math.max(0, TerrainState.BLOCK_LEVELS_INT - value)));
     }
 
     public static IBlockState stateWithFlowHeight(IBlockState state, float value)
     {
-        return stateWithDiscreteFlowHeight(state, (int) Math.round(value * FlowHeightState.BLOCK_LEVELS_INT));
+        return stateWithDiscreteFlowHeight(state, (int) Math.round(value * TerrainState.BLOCK_LEVELS_INT));
     }
 
     /**
@@ -88,7 +87,7 @@ public class TerrainBlock
 //        if(block instanceof FlowSimpleBlock) return 0;
         
      // don't use block model state because cubic blocks don't have it
-        return new FlowHeightState(FlowHeightState.getBitsFromWorldStatically((SuperBlock)block, blockState, blockAccess, pos)).topFillerNeeded();
+        return new TerrainState(TerrainState.getBitsFromWorldStatically((SuperBlock)block, blockState, blockAccess, pos)).topFillerNeeded();
     }
     
     /**
@@ -172,7 +171,7 @@ public class TerrainBlock
         Block block = blockState.getBlock();
         if(!isFlowBlock(block)) return false;
         // don't use block model state because cubic blocks don't have it
-        return new FlowHeightState(FlowHeightState.getBitsFromWorldStatically((SuperBlock)block, blockState, blockAccess, pos)).isFullCube();
+        return new TerrainState(TerrainState.getBitsFromWorldStatically((SuperBlock)block, blockState, blockAccess, pos)).isFullCube();
     }
     
     /**
@@ -194,7 +193,7 @@ public class TerrainBlock
     {
         Block block = blockState.getBlock();
         if(!isFlowBlock(block)) return false;
-        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getFlowState().isEmpty();
+        return ((SuperBlock)block).getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, true).getTerrainState().isEmpty();
     }
     
     /**

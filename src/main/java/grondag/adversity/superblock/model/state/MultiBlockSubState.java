@@ -1,8 +1,8 @@
 package grondag.adversity.superblock.model.state;
 
-import grondag.adversity.library.BitPacker;
-import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
-import grondag.adversity.library.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.varia.BitPacker;
+import grondag.adversity.library.varia.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.IntElement;
 
 /**
  * Putting here for now - should probably be part of parent class for multiblock shapes

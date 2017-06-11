@@ -3,29 +3,29 @@ package grondag.adversity.feature.volcano.lava.simulator;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 import grondag.adversity.feature.volcano.lava.AgedBlockPos;
+import grondag.adversity.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.adversity.feature.volcano.lava.EntityLavaBlob;
 import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
-import grondag.adversity.feature.volcano.lava.ParticleManager;
-import grondag.adversity.feature.volcano.lava.ParticleManager.ParticleInfo;
+import grondag.adversity.feature.volcano.lava.LavaBlobManager;
+import grondag.adversity.feature.volcano.lava.LavaBlobManager.ParticleInfo;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEvent;
 import grondag.adversity.feature.volcano.lava.simulator.BlockEventList.BlockEventHandler;
 import grondag.adversity.feature.volcano.lava.simulator.LavaConnections.SortBucket;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.library.CountedJob;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.PerformanceCollector;
-import grondag.adversity.library.PerformanceCounter;
-import grondag.adversity.library.SimpleConcurrentList;
-import grondag.adversity.library.CountedJob.CountedJobTask;
-import grondag.adversity.library.Job;
+import grondag.adversity.library.concurrency.CountedJob;
+import grondag.adversity.library.concurrency.Job;
+import grondag.adversity.library.concurrency.PerformanceCollector;
+import grondag.adversity.library.concurrency.PerformanceCounter;
+import grondag.adversity.library.concurrency.SimpleConcurrentList;
+import grondag.adversity.library.concurrency.CountedJob.CountedJobTask;
+import grondag.adversity.library.world.PackedBlockPos;
+import grondag.adversity.simulator.NodeRoots;
+import grondag.adversity.simulator.SimulationNode;
 import grondag.adversity.simulator.Simulator;
-import grondag.adversity.simulator.base.NodeRoots;
-import grondag.adversity.simulator.base.SimulationNode;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.state.FlowHeightState;
-import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
+import grondag.adversity.superblock.terrain.TerrainState;
 import grondag.adversity.superblock.terrain.TerrainBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -48,9 +48,9 @@ public class LavaSimulator extends SimulationNode
     private PerformanceCounter perfOffTick = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Off-Tick", perfCollectorAllTick);
     private PerformanceCounter perfParticles = PerformanceCounter.create(Configurator.VOLCANO.enablePerformanceLogging, "Particle Spawning", perfCollectorOnTick);
     
-    public static final byte LEVELS_PER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT;
-    public static final byte LEVELS_PER_QUARTER_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 4;
-    public static final byte LEVELS_PER_HALF_BLOCK = FlowHeightState.BLOCK_LEVELS_INT / 2;
+    public static final byte LEVELS_PER_BLOCK = TerrainState.BLOCK_LEVELS_INT;
+    public static final byte LEVELS_PER_QUARTER_BLOCK = TerrainState.BLOCK_LEVELS_INT / 4;
+    public static final byte LEVELS_PER_HALF_BLOCK = TerrainState.BLOCK_LEVELS_INT / 2;
     public static final byte LEVELS_PER_BLOCK_AND_A_QUARTER = LEVELS_PER_BLOCK + LEVELS_PER_QUARTER_BLOCK;
     public static final byte LEVELS_PER_BLOCK_AND_A_HALF = LEVELS_PER_BLOCK + LEVELS_PER_HALF_BLOCK;
     public static final byte LEVELS_PER_TWO_BLOCKS = LEVELS_PER_BLOCK * 2;
@@ -69,7 +69,7 @@ public class LavaSimulator extends SimulationNode
 
     public final WorldStateBuffer worldBuffer;
     public final LavaTerrainHelper terrainHelper;
-    public final ParticleManager particleManager;
+    public final LavaBlobManager particleManager;
     
     /** Basalt blocks that are awaiting cooling */
     private final SimpleConcurrentList<AgedBlockPos> basaltBlocks = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, "Basalt Blocks", perfCollectorOnTick);
@@ -174,7 +174,7 @@ public class LavaSimulator extends SimulationNode
                     // event not complete until we can tell cell to add lava
                     // retry - maybe validation needs to catch up
                     if(event.retryCount() >= 8)
-                        Output.info("wut?");
+                        Log.info("wut?");
                     return false;
                 }
                 else
@@ -186,8 +186,8 @@ public class LavaSimulator extends SimulationNode
             }
             
             // would have to be an unhandled event type
-            if(Output.DEBUG_MODE)
-                Output.warn("Detected unhandled block event type in event processing");
+            if(Log.DEBUG_MODE)
+                Log.warn("Detected unhandled block event type in event processing");
             
             return true;
         }
@@ -226,7 +226,7 @@ public class LavaSimulator extends SimulationNode
         super(NodeRoots.LAVA_SIMULATOR.ordinal());
         this.worldBuffer = new WorldStateBuffer(world, Configurator.VOLCANO.enablePerformanceLogging, perfCollectorOnTick);
         this.terrainHelper = new LavaTerrainHelper(worldBuffer);
-        this.particleManager = new ParticleManager();
+        this.particleManager = new LavaBlobManager();
         this.LAVA_THREAD_POOL = Simulator.executor;
         this.basaltCoolingJob = new CountedJob<AgedBlockPos>(this.basaltBlocks, this.basaltCoolingTask, 1024, 
                 Configurator.VOLCANO.enablePerformanceLogging, "Basalt Cooling", perfCollectorOnTick);    
@@ -434,7 +434,7 @@ public class LavaSimulator extends SimulationNode
 
         // SAVE BASALT BLOCKS
         {
-            Output.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            Log.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
             int[] saveData = new int[basaltBlocks.size() * BASALT_BLOCKS_NBT_WIDTH];
             int i = 0;
             for(AgedBlockPos apos: basaltBlocks)
@@ -465,7 +465,7 @@ public class LavaSimulator extends SimulationNode
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
         {
-            Output.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
+            Log.warn("Invalid save data loading lava simulator. Cooling basalt blocks may not be updated properly.");
         }
         else
         {
@@ -474,7 +474,7 @@ public class LavaSimulator extends SimulationNode
             {
                 this.basaltBlocks.add(new AgedBlockPos(((long)saveData[i++] << 32) | (long)saveData[i++], saveData[i++]));
             }
-            Output.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
+            Log.info("Loaded " + basaltBlocks.size() + " cooling basalt blocks.");
         }
 
     }
@@ -732,7 +732,7 @@ public class LavaSimulator extends SimulationNode
             {
                 for(int i = 0; i < 8; i++)
                 {
-                    Output.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
+                    Log.info(String.format("Flow total for step %1$d = %2$,d with %3$,d connections", i, this.flowTotals[i], this.flowCounts[i]));
                     this.flowTotals[i] = 0;
                     this.flowCounts[i] = 0;
                 }
@@ -740,13 +740,13 @@ public class LavaSimulator extends SimulationNode
 
             if(Configurator.VOLCANO.enablePerformanceLogging) 
             {
-                Output.info("totalCells=" + this.getCellCount() 
+                Log.info("totalCells=" + this.getCellCount() 
                         + " connections=" + this.getConnectionCount() + " basaltBlocks=" + this.basaltBlocks.size() + " loadFactor=" + this.loadFactor());
                 
-                Output.info(String.format("Time elapsed = %1$.3fs", ((float)Configurator.VOLCANO.performanceSampleInterval 
+                Log.info(String.format("Time elapsed = %1$.3fs", ((float)Configurator.VOLCANO.performanceSampleInterval 
                         + (now - nextStatTime) / Configurator.Volcano.performanceSampleIntervalMillis)));
 
-                Output.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
+                Log.info("WorldBuffer state sets this sample = " + this.worldBuffer.stateSetCount());
                 this.worldBuffer.clearStatistics();
             }
                

@@ -3,7 +3,10 @@ package grondag.adversity.library.joinstate;
 
 import org.junit.Test;
 
-import grondag.adversity.library.NeighborBlocks;
+import grondag.adversity.library.world.CornerJoinBlockState;
+import grondag.adversity.library.world.CornerJoinBlockStateSelector;
+import grondag.adversity.library.world.NeighborBlocks;
+import grondag.adversity.library.world.SimpleJoin;
 
 public class CornerJoinBlockStateTest
 {

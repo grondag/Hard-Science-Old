@@ -1,22 +1,19 @@
 package grondag.adversity.gui.control;
 
 import grondag.adversity.gui.GuiUtil;
-import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.superblock.color.BlockColorMapProvider;
+import grondag.adversity.superblock.color.Chroma;
 import grondag.adversity.superblock.color.ColorMap;
-import grondag.adversity.superblock.color.HueSet;
-import grondag.adversity.superblock.color.NiceHues;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.superblock.color.HueSet.Chroma;
-import grondag.adversity.superblock.color.HueSet.Luminance;
-import grondag.adversity.superblock.color.NiceHues.Hue;
+import grondag.adversity.superblock.color.Hue;
+import grondag.adversity.superblock.color.Luminance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 
 public class ColorPicker extends GuiControl
 {
-    private Hue selectedHue = NiceHues.Hue.AZURE;
-    private HueSet.Chroma selectedChroma = null;
+    private Hue selectedHue = Hue.AZURE;
+    private Chroma selectedChroma = null;
 
     private int colorMapID = 0;
 
@@ -25,7 +22,7 @@ public class ColorPicker extends GuiControl
     private double centerY;
     private double radiusInner;
     private double radiusOuter;
-    private double arc = 360.0 / NiceHues.Hue.values().length;
+    private double arc = 360.0 / Hue.values().length;
 
     private double gridLeft;
     private double gridTop;
@@ -108,15 +105,15 @@ public class ColorPicker extends GuiControl
             this.selectedHue = newHue;
 
             ColorMap currentMap = BlockColorMapProvider.INSTANCE.getColorMap(this.colorMapID);
-            HueSet.Chroma currentChroma = this.selectedChroma;
-            HueSet.Luminance currentLuminance = currentMap.luminance;
+            Chroma currentChroma = this.selectedChroma;
+            Luminance currentLuminance = currentMap.luminance;
 
             ColorMap newMap = BlockColorMapProvider.INSTANCE.getColorMap(
                     newHue, currentChroma, currentLuminance);
 
             while(newMap == null)
             {
-                currentChroma = HueSet.Chroma.values()[currentChroma.ordinal() - 1];
+                currentChroma = Chroma.values()[currentChroma.ordinal() - 1];
                 newMap = BlockColorMapProvider.INSTANCE.getColorMap(
                         newHue, currentChroma, currentLuminance);
             }
@@ -146,13 +143,13 @@ public class ColorPicker extends GuiControl
             int l = (int) Math.floor((mouseY - this.gridTop) / this.gridIncrementY);
             int c = (int) Math.floor((mouseX - this.gridLeft) / this.gridIncrementX);
 
-            if(l >= 0 && l <  HueSet.Luminance.values().length 
-                    && c >= 0 && c < HueSet.Chroma.values().length )
+            if(l >= 0 && l <  Luminance.values().length 
+                    && c >= 0 && c < Chroma.values().length )
             {
                 ColorMap testMap = BlockColorMapProvider.INSTANCE.getColorMap(
                         this.selectedHue, 
-                        HueSet.Chroma.values()[c], 
-                        HueSet.Luminance.values()[l]);
+                        Chroma.values()[c], 
+                        Luminance.values()[l]);
 
                 if(testMap != null)
                 {

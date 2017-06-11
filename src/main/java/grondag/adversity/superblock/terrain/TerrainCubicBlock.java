@@ -2,9 +2,8 @@ package grondag.adversity.superblock.terrain;
 
 import java.util.List;
 
-import grondag.adversity.superblock.model.state.FlowHeightState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -21,7 +20,7 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
         super(blockName, substance, defaultModelState, false);
         
         ModelState modelState = defaultModelState.clone();
-        modelState.setFlowState(new FlowHeightState(FlowHeightState.FULL_BLOCK_STATE_KEY));
+        modelState.setTerrainState(new TerrainState(TerrainState.FULL_BLOCK_STATE_KEY));
         this.defaultModelStateBits = modelState.getBitsIntArray();
 
     }

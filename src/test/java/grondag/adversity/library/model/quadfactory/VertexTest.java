@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import grondag.adversity.library.render.Vertex;
 import net.minecraft.util.math.Vec3d;
 
 public class VertexTest

@@ -2,10 +2,11 @@ package grondag.adversity.library;
 
 import org.junit.Test;
 
-import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
-import grondag.adversity.library.BitPacker.BitElement.EnumElement;
-import grondag.adversity.library.BitPacker.BitElement.IntElement;
-import grondag.adversity.library.BitPacker.BitElement.LongElement;
+import grondag.adversity.library.varia.BitPacker;
+import grondag.adversity.library.varia.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.EnumElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.LongElement;
 
 public class BitPackerTest
 {

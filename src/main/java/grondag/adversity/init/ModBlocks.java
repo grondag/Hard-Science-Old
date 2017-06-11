@@ -3,26 +3,26 @@ package grondag.adversity.init;
 import java.util.Map;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.feature.volcano.BlockVolcano;
-import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.feature.volcano.VolcanoBlock;
+import grondag.adversity.feature.volcano.lava.CoolingBasaltBlock;
+import grondag.adversity.feature.volcano.lava.LavaBlock;
+import grondag.adversity.library.render.LightingMode;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperSimpleBlock;
-import grondag.adversity.superblock.block.SuperStateMapper;
 import grondag.adversity.superblock.color.BlockColorMapProvider;
-import grondag.adversity.superblock.color.HueSet.Chroma;
-import grondag.adversity.superblock.color.HueSet.Luminance;
-import grondag.adversity.superblock.color.NiceHues.Hue;
+import grondag.adversity.superblock.color.Chroma;
+import grondag.adversity.superblock.color.Hue;
+import grondag.adversity.superblock.color.Luminance;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
-import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
-import grondag.adversity.superblock.terrain.LavaBlock;
 import grondag.adversity.superblock.terrain.TerrainBlockRegistry;
 import grondag.adversity.superblock.terrain.TerrainCubicBlock;
 import grondag.adversity.superblock.terrain.TerrainDynamicBlock;
 import grondag.adversity.superblock.terrain.TerrainStaticBlock;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.adversity.superblock.varia.BlockSubstance;
+import grondag.adversity.superblock.varia.SuperStateMapper;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -66,7 +66,7 @@ public class ModBlocks
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
-        event.getRegistry().register(new BlockVolcano());
+        event.getRegistry().register(new VolcanoBlock());
         
         ModelState workingModel = new ModelState();
         workingModel.setShape(ModelShape.CUBE);

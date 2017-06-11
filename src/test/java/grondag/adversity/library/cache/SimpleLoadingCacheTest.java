@@ -12,13 +12,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import grondag.adversity.library.cache.longKey.LongSimpleCacheLoader;
-import grondag.adversity.library.cache.longKey.LongSimpleLoadingCache;
-import grondag.adversity.library.cache.objectKey.ObjectSimpleCacheLoader;
-import grondag.adversity.library.cache.objectKey.ObjectSimpleLoadingCache;
-import grondag.adversity.library.cache.wideKey.WideSimpleCacheLoader;
-import grondag.adversity.library.cache.wideKey.WideSimpleLoadingCache;
-import grondag.adversity.library.cache.longKey.LongAtomicLoadingCache;
 import io.netty.util.internal.ThreadLocalRandom;
 
 public class SimpleLoadingCacheTest

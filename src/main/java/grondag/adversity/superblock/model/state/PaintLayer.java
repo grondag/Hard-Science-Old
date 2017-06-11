@@ -1,6 +1,5 @@
 package grondag.adversity.superblock.model.state;
 
-import grondag.adversity.superblock.model.painter.surface.SurfaceType;
 import net.minecraft.util.text.translation.I18n;
 
 public enum PaintLayer

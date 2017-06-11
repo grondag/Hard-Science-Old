@@ -2,10 +2,9 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.List;
 
-import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.Vertex;
-import net.minecraft.client.model.ModelBox;
+import grondag.adversity.library.render.QuadFactory;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.render.Vertex;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;

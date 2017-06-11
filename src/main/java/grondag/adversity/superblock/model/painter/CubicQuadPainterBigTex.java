@@ -1,9 +1,9 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.util.EnumFacing;

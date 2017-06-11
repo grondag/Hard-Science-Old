@@ -5,21 +5,21 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.joinstate.CornerJoinBlockState;
-import grondag.adversity.library.joinstate.CornerJoinFaceState;
-import grondag.adversity.library.joinstate.FaceSide;
-import grondag.adversity.library.model.quadfactory.FaceVertex;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.SimpleQuadBounds;
-import grondag.adversity.library.BitPacker;
-import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
-import grondag.adversity.library.BitPacker.BitElement.IntElement;
-import grondag.adversity.library.Color;
-import grondag.adversity.library.Useful;
+import grondag.adversity.library.render.FaceVertex;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.render.SimpleQuadBounds;
+import grondag.adversity.library.varia.BitPacker;
+import grondag.adversity.library.varia.Color;
+import grondag.adversity.library.varia.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.world.CornerJoinBlockState;
+import grondag.adversity.library.world.CornerJoinFaceState;
+import grondag.adversity.library.world.FaceSide;
+import grondag.adversity.library.world.WorldHelper;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.surface.Surface;
-import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
-import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import grondag.adversity.superblock.model.state.Surface;
+import grondag.adversity.superblock.model.state.SurfaceTopology;
+import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 import net.minecraft.block.state.IBlockState;
@@ -174,10 +174,10 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
         
-        EnumFacing topFace = Useful.getAxisTop(axis);
+        EnumFacing topFace = WorldHelper.getAxisTop(axis);
         EnumFacing bottomFace = topFace.getOpposite();
-        EnumFacing leftFace = Useful.leftOf(face, topFace);
-        EnumFacing rightFace = Useful.rightOf(face, topFace);
+        EnumFacing leftFace = WorldHelper.leftOf(face, topFace);
+        EnumFacing rightFace = WorldHelper.rightOf(face, topFace);
 
         int actualCutCount = spec.cutCount;
 
@@ -430,13 +430,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                 {
                     RawQuad quad = template.clone();
                     quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                    setupCutSideQuad(quad, new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -spec.baseMarginWidth, 1.0 -spec.cutDepth, 1.0, 1, 1.0 -spec.baseMarginWidth, face));
+                    setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.rightOf(face, side), 1.0 -spec.baseMarginWidth, 1.0 -spec.cutDepth, 1.0, 1, 1.0 -spec.baseMarginWidth, face));
                     builder.add(quad);
                 }
                 {
                     RawQuad quad = template.clone();
                     quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                    setupCutSideQuad(quad, new SimpleQuadBounds(Useful.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, spec.baseMarginWidth, 1, 1.0 -spec.baseMarginWidth, face));
+                    setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, spec.baseMarginWidth, 1, 1.0 -spec.baseMarginWidth, face));
                     builder.add(quad);
                 }
 
@@ -478,13 +478,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(Useful.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xLeft, 1.0, xLeft, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xLeft, 1.0, xLeft, face));
                             builder.add(quad);
                         }
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -xLeft, 1.0 -spec.cutDepth, 1.0, 1.0, xLeft, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.rightOf(face, side), 1.0 -xLeft, 1.0 -spec.cutDepth, 1.0, 1.0, xLeft, face));
                             builder.add(quad);
                         }
                     }
@@ -493,13 +493,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(Useful.rightOf(face, side), 1.0 -xRight, 1.0 -spec.cutDepth, 1.0, 1.0, 1.0 -xRight, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.rightOf(face, side), 1.0 -xRight, 1.0 -spec.cutDepth, 1.0, 1.0, 1.0 -xRight, face));
                             builder.add(quad);
                         }
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(Useful.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xRight, 1.0, 1.0 -xRight, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xRight, 1.0, 1.0 -xRight, face));
                             builder.add(quad);
                         }
                     }

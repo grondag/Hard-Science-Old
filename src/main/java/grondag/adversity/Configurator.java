@@ -342,7 +342,7 @@ public class Configurator
                 }
                 else
                 {
-                    Output.warn("Did not find block " + s + " configured to be destroyed by volcanic lava. Confirm block name is correct." );
+                    Log.warn("Did not find block " + s + " configured to be destroyed by volcanic lava. Confirm block name is correct." );
                 }
             }
 
@@ -357,7 +357,7 @@ public class Configurator
                 }
                 else
                 {
-                    Output.warn("Did not find block " + s + " configured to be safe from volcanic lava. Confirm block name is correct." );
+                    Log.warn("Did not find block " + s + " configured to be safe from volcanic lava. Confirm block name is correct." );
                 }
             }
         }

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import grondag.adversity.library.concurrency.SimpleConcurrentList;
+
 public class SimpleConcurrentListTest
 {
     private class TestItem

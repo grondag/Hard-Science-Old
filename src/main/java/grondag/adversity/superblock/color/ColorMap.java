@@ -1,11 +1,8 @@
 package grondag.adversity.superblock.color;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Color;
-import grondag.adversity.library.Color.EnumHCLFailureMode;
-import grondag.adversity.superblock.color.HueSet.Chroma;
-import grondag.adversity.superblock.color.HueSet.Luminance;
-import grondag.adversity.superblock.color.NiceHues.Hue;
+import grondag.adversity.Log;
+import grondag.adversity.library.varia.Color;
+import grondag.adversity.library.varia.Color.EnumHCLFailureMode;
 import net.minecraft.util.text.translation.I18n;
 
 public class ColorMap
@@ -63,7 +60,7 @@ public class ColorMap
                 EnumHCLFailureMode.REDUCE_CHROMA);
         if(!whichColor.IS_VISIBLE)
         {
-            Output.debug("makeColorMap produced invisible border color for " + newColorMap.localizedName());
+            Log.debug("makeColorMap produced invisible border color for " + newColorMap.localizedName());
         }
         newColorMap.setColor(EnumColorMap.BORDER, whichColor.RGB_int | 0xFF000000);
     
@@ -73,7 +70,7 @@ public class ColorMap
         Color lampColor = Color.fromHCL(hue.hueDegrees(), baseColor.HCL_C, Color.HCL_MAX, EnumHCLFailureMode.NORMAL);
         if(lampColor.RGB_int == 0)
         {
-            Output.info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);
+            Log.info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);
         }
         newColorMap.setColor(EnumColorMap.LAMP, lampColor.RGB_int | 0xFF000000);
     

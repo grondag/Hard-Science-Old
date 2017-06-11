@@ -6,14 +6,14 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.Log;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.surface.Surface;
-import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
-import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import grondag.adversity.superblock.model.state.Surface;
+import grondag.adversity.superblock.model.state.SurfaceTopology;
+import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 import net.minecraft.block.Block;
@@ -162,7 +162,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         }
         catch (Exception ex)
         {
-            Output.info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
+            Log.info("HeightModelFactory recevied Collision Bounding Box check for a foreign block.");
             return Block.FULL_BLOCK_AABB;
         }
     }
