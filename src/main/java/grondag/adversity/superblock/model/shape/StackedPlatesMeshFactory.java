@@ -23,10 +23,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-
-// TODO: GUI option for default height - means these can act like slabs
 // TODO: Borders on top face
-// TODO: Per-Axis Placement
 
 public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
@@ -117,7 +114,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     
     
     @Override
-    public boolean isSpeciesUsedForHeight()
+    public boolean isSpeciesUsedForShape()
     {
         return true;
     }

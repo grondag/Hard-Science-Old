@@ -1,5 +1,6 @@
 package grondag.adversity.superblock.placement;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,21 +42,46 @@ public class AdditivePlacementHandler implements IPlacementHandler
             onModelState = onBlock.getModelStateAssumeStateIsCurrent(onBlockState, worldIn, posOn, true);
         }
         
-        if(!(onBlock != null && onBlock == myBlock && onModelState.getShape() == myModelState.getShape()))
+        // TODO: Per-Axis Placement
+        
+        if(!(onBlock != null 
+                && onBlock == myBlock 
+                && onModelState.getShape() == myModelState.getShape()
+                )) //&& onModelState.getAxis() == facing.getAxis()
+            //FIXME: only handle as additive if adding on top of the target block's axis
+            //FIXME: handle case of click on side next to additive block
         {
             return SimplePlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
         }
         
-        int species = (onModelState.getSpecies() + 1) & 0xF;
-        BlockPos posPlaced = species == 0 ? posOn.offset(facing) : posOn;
-
-        ModelState modelState = SuperItemBlock.getModelState(stack);
-      
-        ItemStack result = stack.copy();
-        result.setItemDamage(species);
-        modelState.setSpecies(species);
-        SuperItemBlock.setModelState(result, modelState);
-        return ImmutableList.of(Pair.of(posPlaced, result));
+        int species = (onModelState.getSpecies() + myModelState.getSpecies());
+        ArrayList<Pair<BlockPos, ItemStack>> result = new ArrayList<Pair<BlockPos, ItemStack>>(2);
+  
         
+        // add to or top off existing block
+        if(onModelState.getSpecies() < 0xF)
+        {
+            int targetSpecies = Math.min(species, 0xF);
+            ModelState modelState = SuperItemBlock.getModelState(stack);
+            ItemStack newStack = stack.copy();
+            newStack.setItemDamage(targetSpecies);
+            modelState.setSpecies(targetSpecies);
+            SuperItemBlock.setModelState(newStack, modelState);
+            result.add(Pair.of(posOn, newStack));
+        }
+        
+        // add another block if we added more than one block worth
+        if(species > 0xF)
+        {
+            int targetSpecies = species & 0xF;
+            ModelState modelState = SuperItemBlock.getModelState(stack);
+            ItemStack newStack = stack.copy();
+            newStack.setItemDamage(targetSpecies);
+            modelState.setSpecies(targetSpecies);
+            SuperItemBlock.setModelState(newStack, modelState);
+            result.add(Pair.of(posOn.offset(facing), newStack));
+        }
+        
+        return result;
     }
 }

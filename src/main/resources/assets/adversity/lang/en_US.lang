@@ -4,21 +4,23 @@ misc.denials=["Absolutely not.","Nope.","Not happening","Doctor No sends his reg
 misc.mode_set=Mode set to %s
 
 #UI LABELS
-label.color=Color
-label.cuts_on_edge=Cuts on Edge
-label.cuts_count=Cuts
-label.material=Material
-label.toughness=Toughness
-label.shape=Shape
+label.accept=Accept
 label.base_color=Base Color
 label.base_texture=Base Texture
-label.overlay_color=Border Color
-label.overlay_texture=Border Texture
+label.cancel=Cancel
+label.color=Color
+label.cuts_count=Cuts
+label.cuts_on_edge=Cuts on Edge
 label.detail_color=Decoration Color
 label.detail_texture=Decoration Texture
+label.half_slab=Half Slab
+label.material=Material
+label.overlay_color=Border Color
+label.overlay_texture=Border Texture
+label.shape=Shape
 label.species=Species
-label.accept=Accept
-label.cancel=Cancel
+label.thickness=Thickness
+label.toughness=Toughness
 label.translucency=Translucency
 
 #ITEMS

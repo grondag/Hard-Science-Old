@@ -19,7 +19,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
     {
         super(modelState, surface, paintLayer);
         this.pos = new Vec3i(modelState.getPosX(), modelState.getPosY(), modelState.getPosZ());
-        this.species = modelState.hasSpecies() ? modelState.getSpecies() : 0;
+        this.species = modelState.hasSpecies() && !modelState.isSpeciesUsedForShape() ? modelState.getSpecies() : 0;
     }
 
     @Override

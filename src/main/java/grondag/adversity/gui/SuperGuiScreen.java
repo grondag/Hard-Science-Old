@@ -77,7 +77,6 @@ public class SuperGuiScreen extends GuiScreen
 
     private ItemPreview itemPreview;
 
-    //    private int meta = 0;
     private ModelState modelState = null;
 
     private boolean hasUpdates = false;
@@ -142,68 +141,65 @@ public class SuperGuiScreen extends GuiScreen
         Translucency newTrans = materialPicker.getSubstance().isTranslucent
                 ? translucencyPicker.getTranslucency()
                         : Translucency.CLEAR;
-            if(newTrans == null)
-            {
-                newTrans = Translucency.CLEAR;
-            }
-            if(newTrans != modelState.getTranslucency() )
-            {
-                modelState.setTranslucency(newTrans);
-                hasUpdates = true;
-            }
+        if(newTrans == null)
+        {
+            newTrans = Translucency.CLEAR;
+        }
+        if(newTrans != modelState.getTranslucency() )
+        {
+            modelState.setTranslucency(newTrans);
+            hasUpdates = true;
+        }
 
-            for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
-            {
-                updateItemPreviewSub(layer);
-            }
+        for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
+        {
+            updateItemPreviewSub(layer);
+        }
 
-            if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
-            {
-                modelState.setOverlayLayerEnabled(overlayToggle.isOn());
-                hasUpdates = true;
-            }
+        if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
+        {
+            modelState.setOverlayLayerEnabled(overlayToggle.isOn());
+            hasUpdates = true;
+        }
 
-            if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
-            {
-                modelState.setDetailLayerEnabled(detailToggle.isOn());
-                hasUpdates = true;
-            }
+        if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
+        {
+            modelState.setDetailLayerEnabled(detailToggle.isOn());
+            hasUpdates = true;
+        }
 
-            BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-            if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
-            {
-                modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
-                hasUpdates = true;
-            }
+        BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
+        {
+            modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
+            hasUpdates = true;
+        }
 
-            renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-            if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
-            {
-                modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
-                hasUpdates = true;
-            }
+        renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
+        {
+            modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+            hasUpdates = true;
+        }
 
-            SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
-            SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
+        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
+        SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
 
-            if(currentBlock != newBlock && newBlock != null)
-            {
-                ItemStack newStack = new ItemStack(newBlock);
-                newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
-                newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
-                itemPreview.previewItem = newStack;
-                hasUpdates = true;
+        if(currentBlock != newBlock && newBlock != null)
+        {
+            ItemStack newStack = new ItemStack(newBlock);
+            newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
+            newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
+            itemPreview.previewItem = newStack;
+            hasUpdates = true;
 
-            }
-            
-            if(hasUpdates)
-            {
-                // see notes in SuperBlock for canRenderInLayer()
-                //            this.meta = this.modelState.getCanRenderInLayerFlags();
-
-                //            this.itemPreview.previewItem.setItemDamage(this.meta);
-                SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
-            }
+        }
+        
+        if(hasUpdates)
+        {
+            this.itemPreview.previewItem.setItemDamage(this.modelState.getSpecies());
+            SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
+        }
     }
 
     private void updateItemPreviewSub(PaintLayer layer)

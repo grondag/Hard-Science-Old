@@ -78,7 +78,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     }
 
     @Override
-    public boolean isSpeciesUsedForHeight()
+    public boolean isSpeciesUsedForShape()
     {
         return true;
     }

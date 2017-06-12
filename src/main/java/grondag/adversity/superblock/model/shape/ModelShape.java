@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.adversity.gui.shape.GuiShape;
 import grondag.adversity.gui.shape.GuiSimpleShape;
 import grondag.adversity.gui.shape.GuiSquareColumn;
+import grondag.adversity.gui.shape.GuiStackedPlates;
 import grondag.adversity.superblock.placement.AdditivePlacementHandler;
 import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
@@ -39,6 +40,8 @@ public enum ModelShape
         public IPlacementHandler getPlacementHandler() { return AdditivePlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return StackedPlatesMeshFactory.getShapeMeshFactory(); }
+        @Override
+        public GuiShape guiSettingsControl(Minecraft mc) { return new GuiStackedPlates(mc); }
     },
     
     //TODO: ROUND COLUMN

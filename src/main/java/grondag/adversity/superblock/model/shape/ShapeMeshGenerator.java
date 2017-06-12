@@ -77,7 +77,7 @@ public abstract class ShapeMeshGenerator
      * Will also prevent rendering of textures with texture layouts that require species
      * because those will expect species to demarcate multiblock boundaries.
      */
-    public boolean isSpeciesUsedForHeight() { return false; }
+    public boolean isSpeciesUsedForShape() { return false; }
     
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
 

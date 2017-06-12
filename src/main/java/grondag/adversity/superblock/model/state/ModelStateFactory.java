@@ -372,6 +372,11 @@ public class ModelStateFactory
             return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
         }
         
+        public boolean isSpeciesUsedForShape()
+        {
+            return this.getShape().meshFactory().isSpeciesUsedForShape();
+        }
+        
         /** 
          * Persisted but not part of hash nor included in equals comparison.
          * If true, refreshFromWorldState does nothing.
