@@ -532,6 +532,11 @@ public class RawQuad
         return this.lineID[index];
     }
 
+    public long getQuadID()
+    {
+        return this.quadID;
+    }
+    
     public static int LINE_NOT_FOUND = -1;
     /**
      * Returns the index of the edge with the given line ID.
@@ -648,28 +653,47 @@ public class RawQuad
         return retVal;
     }
 
-    public boolean intersectsWithRay(Vec3d origin, Vec3d direction)
+    /** 
+     * Returns intersection point of given ray with the plane of this quad.
+     * Return null if parallel or facing away.
+     */
+    public Vec3d intersectionOfRayWithPlane(Vec3d origin, Vec3d direction)
     {
-        
-        //TODO: this method is very expensive and gets called frequently by collision box generator
-        
         Vec3d normal = this.getFaceNormal();
 
         double directionDotNormal = normal.dotProduct(direction);
         if (Math.abs(directionDotNormal) < QuadFactory.EPSILON) 
         { 
             // parallel
-            return false;
+            return null;
         }
 
         double distanceToPlane = -normal.dotProduct((origin.subtract(getVertex(0)))) / directionDotNormal;
         // facing away from plane
-        if(distanceToPlane < -QuadFactory.EPSILON) return false;
+        if(distanceToPlane < -QuadFactory.EPSILON) return null;
 
-        Vec3d intersection = origin.add(direction.scale(distanceToPlane));
+        return origin.add(direction.scale(distanceToPlane));
+    }
+    
+    /**
+     * Keeping for convenience in case discover any problems with the fast version.
+     * Unit tests indicate identical results.
+     */
+    public boolean intersectsWithRaySlow(Vec3d origin, Vec3d direction)
+    {
+        Vec3d intersection = this.intersectionOfRayWithPlane(origin, direction);
+        
+        // now we just need to test if point is inside this polygon
+        return intersection == null ? false : containsPointSlow(intersection);
+        
+    }
+
+    public boolean intersectsWithRay(Vec3d origin, Vec3d direction)
+    {
+        Vec3d intersection = this.intersectionOfRayWithPlane(origin, direction);
 
         // now we just need to test if point is inside this polygon
-        return containsPoint(intersection);
+        return intersection == null ? false : containsPoint(intersection);
     }
 
     /**
@@ -683,7 +707,16 @@ public class RawQuad
      */
     public boolean containsPoint(Vec3d point)
     {
+        return PointInPolygonTest.isPointInRawQuad(point, this);
+    }
+    
 
+    /**
+     * Keeping for convenience in case discover any problems with the fast version.
+     * Unit tests indicate identical results.
+     */
+    public boolean containsPointSlow(Vec3d point)
+    {
         double lastSignum = 0;
         Vec3d faceNormal = this.getFaceNormal();
 
