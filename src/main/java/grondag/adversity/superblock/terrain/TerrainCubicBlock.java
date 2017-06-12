@@ -18,12 +18,7 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
     public TerrainCubicBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
     {
         super(blockName, substance, defaultModelState, false);
-        
-        ModelState modelState = defaultModelState.clone();
-        modelState.setTerrainState(new TerrainState(TerrainState.FULL_BLOCK_STATE_KEY));
-        this.defaultModelStateBits = modelState.getBitsIntArray();
-
-    }
+     }
    
     //allow mined blocks to stack - consistent with appearance of a full-height block
     @Override

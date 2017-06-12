@@ -967,7 +967,7 @@ public class ModelStateFactory
         public TerrainState getTerrainState()
         {
             if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
-                Log.warn("getFlowState on model state does not apply for shape");
+                Log.warn("getTerrainState on model state does not apply for shape");
                 
             return new TerrainState(P3F_FLOW_JOIN.getValue(bits3));
         }
@@ -975,7 +975,7 @@ public class ModelStateFactory
         public void setTerrainState(TerrainState flowState)
         {
             if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
-                Log.warn("setFlowState on model state does not apply for shape");
+                Log.warn("setTerrainState on model state does not apply for shape");
 
             bits3 = P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);
             invalidateHashCode();
