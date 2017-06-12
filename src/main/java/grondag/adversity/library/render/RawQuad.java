@@ -286,8 +286,6 @@ public class RawQuad
         return this;
     }
 
-    //TODO: make the setupFaceQuad methods safer if accidentally call on poly with mismatched number of vertices
-
     /** 
      * Sets up a quad with human-friendly semantics.  
      * 
@@ -302,7 +300,6 @@ public class RawQuad
      */
     public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
     {
-
         EnumFacing defaultTop = WorldHelper.defaultTopOf(this.getNominalFace());
         FaceVertex rv0;
         FaceVertex rv1;
@@ -407,6 +404,7 @@ public class RawQuad
 
     public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
     {
+        assert(this.getVertexCount() == 4);
         this.setFace(side);
         return this.setupFaceQuad(tv0, tv1, tv2, tv3, topFace);
     }
@@ -423,19 +421,20 @@ public class RawQuad
      */
     public RawQuad setupFaceQuad(double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
     {
+        assert(this.getVertexCount() == 4);
         this.setupFaceQuad(
                 new FaceVertex(x0, y0, depth),
                 new FaceVertex(x1, y0, depth),
                 new FaceVertex(x1, y1, depth),
                 new FaceVertex(x0, y1, depth), 
                 topFace);
-
         return this;
     }
 
 
     public RawQuad setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
     {
+        assert(this.getVertexCount() == 4);
         this.setFace(face);
         return this.setupFaceQuad(x0, y0, x1, y1, depth, topFace);
     }
@@ -445,6 +444,7 @@ public class RawQuad
      */
     public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
     {
+        assert(this.getVertexCount() == 3);
         this.setFace(side);
         return this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
     }
@@ -454,6 +454,7 @@ public class RawQuad
      */
     public RawQuad setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
     {
+        assert(this.getVertexCount() == 3);
         return this.setupFaceQuad(tv0, tv1, tv2, tv2, topFace);
     }
 
@@ -817,15 +818,32 @@ public class RawQuad
         this.maxV *= vScale;
     }
     
+    /**
+     * Creates a baked quad - does not (permanently) mutate this instance.
+     */
     public BakedQuad createBakedQuad()
     {
-
-        //TODO: make this consistent with immutable interface - will break if createBakedQuad called again
-        for (int r = 0; r < this.rotation.ordinal(); r++)
+        // this is an egregious hack, but ensure we don't mutate this instance if UVs need to be rotated
+        if(this.rotation == Rotation.ROTATE_NONE)
         {
-            rotateQuadUV();
+            return this.createBakedQuadInner();
         }
-
+        else
+        {
+            RawQuad workQuad = this.clone();
+            for (int r = 0; r < this.rotation.ordinal(); r++)
+            {
+                workQuad.rotateQuadUV();
+            }
+            return workQuad.createBakedQuadInner();
+        }
+    }
+    
+    /**
+     * Does not do rotation because it mutates this instance.
+     */
+    private BakedQuad createBakedQuadInner()
+    {    
         float spanU = this.maxU - this.minU;
         float spanV = this.maxV - this.minV;
         

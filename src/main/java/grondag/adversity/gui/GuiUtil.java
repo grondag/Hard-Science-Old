@@ -1,15 +1,20 @@
 package grondag.adversity.gui;
 
+import org.lwjgl.opengl.GL11;
+
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -171,6 +176,10 @@ public class GuiUtil
      
         double maxV = textureSprite.getMinV() + (textureSprite.getMaxV() - textureSprite.getMinV())  / scale.sliceCount;
         
+        TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+        textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         GlStateManager.enableBlend();
@@ -192,6 +201,11 @@ public class GuiUtil
             .tex((double)textureSprite.getMinU(), (double)textureSprite.getMinV())
             .color(red, green, blue, alpha).endVertex();
         tessellator.draw();
+        GlStateManager.disableBlend();
+        
+        textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+        
     }
     
     public static void playPressedSound(Minecraft mc)
@@ -205,30 +219,28 @@ public class GuiUtil
      */
     public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, double x, double y, double contentSize)
     {
-        GlStateManager.color(1F, 1F, 1F);
-        
         boolean rc = false;
 
         if (itm != null && itm.getItem() != null) {
             rc = true;
+            
+            RenderHelper.enableGUIStandardItemLighting();
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, 0);
             GlStateManager.scale(1 / 16f, 1 / 16f, 1 / 16f);
             GlStateManager.scale(contentSize, contentSize, contentSize);
-            
-            GlStateManager.color(1F, 1F, 1F, 1F);
+
             GlStateManager.enableRescaleNormal();
-            GlStateManager.enableLighting();
-            short short1 = 240;
-            short short2 = 240;
-            net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
-            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, short1 / 1.0F, short2 / 1.0F);
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+ 
             itemRender.renderItemAndEffectIntoGUI(itm, 0, 0);
-//            renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt, txt.length() - 2);
-//            itemRender.renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt);
+
             GlStateManager.popMatrix();
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.disableLighting();
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepth();
+            RenderHelper.disableStandardItemLighting();
+//            RenderHelper.enableStandardItemLighting();
         }
 
         return rc;

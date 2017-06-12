@@ -146,7 +146,6 @@ public class MaterialPicker extends GuiControl
 
         
         mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
         
         double x = this.left + 1;
         double y = yMiddle + 1;

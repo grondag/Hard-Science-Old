@@ -37,10 +37,6 @@ public class ShapePicker extends TabBar<ModelShape>
     @Override
     protected void drawItem(ModelShape item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
     {
-      
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-        
         GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, ITEMS[item.ordinal()], left, top, (int)this.actualItemSize());
     }
 }

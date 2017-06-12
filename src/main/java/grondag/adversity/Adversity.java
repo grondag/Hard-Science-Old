@@ -31,6 +31,7 @@ import grondag.adversity.init.ModItems;
  * 
  * Shading/lighting on terrain blocks
  * Item rendering for columns
+ * Column lamp cuts are not shaded if lamp not glowing
  */
 
 //VOLCANO STFF
