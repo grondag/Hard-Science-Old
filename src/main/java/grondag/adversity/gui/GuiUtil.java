@@ -1,7 +1,5 @@
 package grondag.adversity.gui;
 
-import org.lwjgl.opengl.GL11;
-
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;

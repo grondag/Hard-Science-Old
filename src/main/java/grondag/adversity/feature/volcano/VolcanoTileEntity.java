@@ -26,7 +26,24 @@ import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.varia.BlockSubstance;
 
-public class VolcanoTileEntity extends TileEntity implements ITickable{
+
+/**
+ * TODO: Eject Lava Blobs
+ * TODO: Lava Sounds
+ * TODO: Volcano Sounds
+ * TODO: Volcano Wand
+ * TODO: World Gen
+ * TODO: Remove TE - direct control from Simulation
+ * TODO: Detection Item
+ * TODO: Biome
+ * TODO: Haze
+ * TODO: Smoke
+ * TODO: Ash
+ * TODO: Falling Block Explosions
+ * TODO: Mound Explosions
+ */
+public class VolcanoTileEntity extends TileEntity implements ITickable
+{
 
     // Activity cycle.
     private VolcanoStage stage = VolcanoStage.NEW;

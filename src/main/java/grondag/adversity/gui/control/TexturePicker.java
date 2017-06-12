@@ -8,7 +8,6 @@ import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.client.renderer.texture.TextureMap;
 
 public class TexturePicker extends TabBar<TexturePallette>
 {

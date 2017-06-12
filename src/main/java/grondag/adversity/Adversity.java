@@ -17,45 +17,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import grondag.adversity.init.ModItems;
 
-/**
- * TODO: FEATURES
- * 
- * Vary color slightly with species, if user-selected
- * BlockFormer item
- * MultiBlockSubState implementation
- * MultiBlock Shapes
- * Torus surface painter
- * Cylinder surface painter
- * 
- * FIXME: BUGS
- * 
- * Shading/lighting on terrain blocks
- * Item rendering for columns
- * Column lamp cuts are not shaded if lamp not glowing
- */
-
-//VOLCANO STFF
-
-//FEATURES
-//simulation integration & control from simulation
-//volcano wand
-//detection item
-//world gen
-
-//biome
-//smoke
-//haze
-//ash
-
-//create falling-block explosion w/ configurable crater radius
-//explosion of mound
-//ignite surrounding blocks
-//sound effects for volcano
-//sound for lava
-//water rendering
-
-
-
 @Mod(   modid = Adversity.MODID, 
         name = Adversity.MODNAME,
         version = Adversity.VERSION,

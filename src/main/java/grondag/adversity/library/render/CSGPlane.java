@@ -181,7 +181,12 @@ public class CSGPlane
                         backLineID.add(jType != BACK ? this.lineID : iLineID);
                     }
                 }
-                if (frontVertex.size() >= 3) {
+                if (frontVertex.size() >= 3) 
+                {
+                    // forces face normal to be computed if it has not been already
+                    // this allows it to be copied to the split quad and 
+                    // and avoids having incomputable face normals due to very small polys.
+                    quad.getFaceNormal();
                     RawQuad frontQuad = new RawQuad(quad, frontVertex.size());
                     frontQuad.ancestorQuadID = quad.getAncestorQuadIDForDescendant();
                     
@@ -190,13 +195,16 @@ public class CSGPlane
                         frontQuad.setVertex(i, frontVertex.get(i));
                         frontQuad.setLineID(i, frontLineID.get(i));
                     }
-                    
-                    // avoid generate zero face normals due to very small polys
-                    frontQuad.setFaceNormal(quad.getFaceNormal());
+
                     front.add(frontQuad);
                 }
 
-                if (backVertex.size() >= 3) {
+                if (backVertex.size() >= 3) 
+                {
+                    // forces face normal to be computed if it has not been already
+                    // this allows it to be copied to the split quad and 
+                    // and avoids having incomputable face normals due to very small polys.
+                    quad.getFaceNormal();
                     RawQuad backQuad = new RawQuad(quad, backVertex.size());
                     backQuad.ancestorQuadID = quad.getAncestorQuadIDForDescendant();
 
@@ -206,8 +214,6 @@ public class CSGPlane
                         backQuad.setLineID(i, backLineID.get(i));
                     }
                     
-                    // avoid generate zero face normals due to very small polys
-                    backQuad.setFaceNormal(quad.getFaceNormal());
                     back.add(backQuad);               
                 }
                 break;

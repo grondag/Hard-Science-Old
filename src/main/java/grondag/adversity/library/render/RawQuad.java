@@ -1017,14 +1017,9 @@ public class RawQuad
         return faceNormal;
     }
     
-    public Vec3d computeFaceNormal()
+    private Vec3d computeFaceNormal()
     {
         return getVertex(2).subtract(getVertex(0)).crossProduct(getVertex(3).subtract(getVertex(1))).normalize();
-    }
-
-    public void setFaceNormal(Vec3d faceNormal)
-    {
-        this.faceNormal = faceNormal;
     }
 
     private float[] getFaceNormalArray()

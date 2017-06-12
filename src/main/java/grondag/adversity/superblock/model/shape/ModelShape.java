@@ -13,7 +13,6 @@ import grondag.adversity.superblock.placement.SimplePlacementHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
-
 public enum ModelShape
 {
     CUBE() 
@@ -42,6 +41,12 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return StackedPlatesMeshFactory.getShapeMeshFactory(); }
     },
     
+    //TODO: ROUND COLUMN
+    //TODO: STAIRS
+    //TODO: PIPES
+    //TODO: WALL/BARRIER/PANE
+    
+    // TODO: BOX
     BOX()
     {
         @Override
@@ -50,6 +55,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: SPHERE/DOME
     SPHERE()
     {
         @Override
@@ -58,7 +64,8 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
-    DOME()
+    // TODO: ROUNDED BOX
+    ROUNDED_BOX()
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -66,6 +73,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: CYLINDER/TUBE
     CYLINDER()
     {
         @Override
@@ -74,6 +82,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: ROCK
     TUBE()
     {
         @Override
@@ -82,6 +91,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: CONE
     CONE()
     {
         @Override
@@ -90,6 +100,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: PYRAMID
     PYRAMID()
     {
         @Override
@@ -98,7 +109,8 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
-    TORUS()
+    // TODO: TORUS
+   TORUS()
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -106,6 +118,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: ICOSAHEDRON
     ICOSAHEDRON()
     {
         @Override
@@ -113,7 +126,8 @@ public enum ModelShape
         @Override
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
-
+ 
+    // TODO: TETRAHEDRON
     TETRAHEDRON()
     {
         @Override
@@ -122,6 +136,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: OCTAHEDRON
     OCTAHEDRON()
     {
         @Override
@@ -130,6 +145,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
+    // TODO: DODECAHEDRON
     DODECAHEDRON()
     {
         @Override

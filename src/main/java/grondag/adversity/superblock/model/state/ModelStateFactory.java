@@ -61,7 +61,7 @@ public class ModelStateFactory
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_BASE = PACKER_0.createEnumElement(BlockRenderLayer.class);
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
     
-    // TODO: can save a couple bits and simplify semantics if create a NONE texture that disables layer when selected
+    // Note: if pressed for space could save a couple bits by creating a NONE texture that disables layer when selected
     private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
     private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);

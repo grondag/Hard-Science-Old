@@ -113,14 +113,14 @@ public class QuadFactory
         return retVal;
     }
     
-    //TODO: this is fine for smaller objects, but would likely generate excess polys for big shapes after CSG ops
+    // NOTE: this is a prototype implementation
+    // It's fine for smaller objects, but would likely generate excess polys for big shapes after CSG operations.
     // Also needs better/different texture handling for top and bottom when face diameter is > 1.
-    // So... create a separate version for creating axis-aligned cylinders and cones.  
-    // Also, create paramter for minimum slices to reduce poly count on small model parts when appropriate.
+    // Will probably need separate version for creating axis-aligned cylinders and cones.  
+    // Also needs a parameter for minimum slices to reduce poly count on small model parts when appropriate.
     // Right now minimum is fixed at 12.
-    public static List<RawQuad> makeCylinder(Vec3d start, Vec3d end, double startRadius, double endRadius, RawQuad template) {
-
-
+    public static List<RawQuad> makeCylinder(Vec3d start, Vec3d end, double startRadius, double endRadius, RawQuad template)
+    {
         double circumference = Math.PI * Math.max(startRadius, endRadius) * 2;
         int textureSlices = (int) Math.max(1, Math.round(circumference));
         int polysPerTextureSlice = 1;

@@ -75,11 +75,15 @@ public abstract class QuadPainter
             result.lightingMode = this.lightingMode;
             result.renderLayer = this.renderLayer;
             
-            //TODO: not working - maybe move to quad bake?
-            // bump texture slightly above surface to avoid z-fighting
+            // TODO: Vary color slightly with species, as user-selected option
+  
+            // Bump texture slightly above surface to avoid z-fighting
+            // Disabled for now because does not seem to work and doesn't seem to be needed.
+            // Could also try to make sure quads are properly ordered by dispatcher
+            // but that seems unlikely to be reliable.
 //            if(this.paintLayer == PaintLayer.OVERLAY)
 //            {
-//                Vec3d bump = result.computeFaceNormal().scale(0.0005);
+//                Vec3d bump = result.getFaceNormal().scale(0.0005);
 //                for(int i = result.getVertexCount() - 1; i >= 0; i--)
 //                {
 //                    Vertex v = result.getVertex(i);

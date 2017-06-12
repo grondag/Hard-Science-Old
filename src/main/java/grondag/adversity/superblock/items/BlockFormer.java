@@ -2,6 +2,7 @@ package grondag.adversity.superblock.items;
 
 import net.minecraft.item.Item;
 
+//TODO: Blockformer Item(s)
 public class BlockFormer extends Item
 {
 //    private String label;
