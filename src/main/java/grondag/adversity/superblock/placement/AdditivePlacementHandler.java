@@ -56,7 +56,6 @@ public class AdditivePlacementHandler implements IPlacementHandler
         
         int species = (onModelState.getSpecies() + myModelState.getSpecies());
         ArrayList<Pair<BlockPos, ItemStack>> result = new ArrayList<Pair<BlockPos, ItemStack>>(2);
-  
         
         // add to or top off existing block
         if(onModelState.getSpecies() < 0xF)

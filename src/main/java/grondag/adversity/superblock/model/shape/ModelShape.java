@@ -37,7 +37,7 @@ public enum ModelShape
     STACKED_PLATES()
     {
         @Override
-        public IPlacementHandler getPlacementHandler() { return AdditivePlacementHandler.INSTANCE; }
+        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return StackedPlatesMeshFactory.getShapeMeshFactory(); }
         @Override

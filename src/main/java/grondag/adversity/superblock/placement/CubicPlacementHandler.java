@@ -21,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -45,6 +46,10 @@ public class CubicPlacementHandler implements IPlacementHandler
         if(modelState.hasAxis())
         {
             modelState.setAxis(facing.getAxis());
+            if(modelState.hasAxisOrientation())
+            {
+                modelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+            }
         }
         if(modelState.hasSpecies())
         {

@@ -26,9 +26,10 @@ public class Textures
     
     /**
      * Important that this come first so that it is the default value returned by modelState.
-     * Is not meant for user selection - means that CUT paint layer should use same texture as base layer. 
+     * Is not meant for user selection. For CUT paint layer means should use same texture as base layer.
+     * For DETAIL and OVERLAY layers, indicates those layers are disabled. 
      */
-    public static final TexturePallette USE_BASE = REGISTRY.addTexturePallette("raw_durastone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, BlockRenderLayer.SOLID, TextureGroup.ALWAYS_HIDDEN);
+    public static final TexturePallette NONE = REGISTRY.addTexturePallette("raw_durastone", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, BlockRenderLayer.SOLID, TextureGroup.ALWAYS_HIDDEN);
     
     public static final TexturePallette BLOCK_COBBLE = REGISTRY.addTexturePallette("cobble", 4, TextureScale.SINGLE, TextureLayout.SPLIT_X_8, true, LIGHTING_SHADED_ONLY, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
     public static final TexturePallette BLOCK_COBBLE_ZOOM = REGISTRY.addZoomedPallete(BLOCK_COBBLE);

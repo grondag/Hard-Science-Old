@@ -27,6 +27,9 @@ public class ModelStateTest
         Log.info("bits3 block length = "  + ModelStateFactory.PACKER_3_BLOCK.bitLength());
         Log.info("bits3 flow length = "  + ModelStateFactory.PACKER_3_FLOW.bitLength());
         
+        // sign bit on first long is used to store static indicator
+        assert(ModelStateFactory.PACKER_0.bitLength() < 64);
+        
         ModelState state = new ModelState();
         
         state.setShape(ModelShape.COLUMN_SQUARE);

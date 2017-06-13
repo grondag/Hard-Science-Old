@@ -62,8 +62,8 @@ public class ModelStateFactory
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
     
     // Note: if pressed for space could save a couple bits by creating a NONE texture that disables layer when selected
-    private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
-    private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
+//    private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
+//    private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
@@ -93,10 +93,8 @@ public class ModelStateFactory
     /** used to compare states quickly for border joins  */
     private static final long P0_APPEARANCE_COMPARISON_MASK;
     private static final long P1_APPEARANCE_COMPARISON_MASK;
-    private static final long P2_APPEARANCE_COMPARISON_MASK;
-   
+    private static final long P2_APPEARANCE_COMPARISON_MASK;   
 
-    
     static
     {
         long borderMask0 = 0;
@@ -114,7 +112,6 @@ public class ModelStateFactory
             borderMask0 |= P0_PAINT_COLOR[i].comparisonMask();
             borderMask1 |= P1_PAINT_TEXTURE[i].comparisonMask();
             borderMask1 |= P1_PAINT_LIGHT[i].comparisonMask();
-            
         }
         
         for(TextureScale scale : TextureScale.values())
@@ -131,13 +128,10 @@ public class ModelStateFactory
                 | P0_AXIS_INVERTED.comparisonMask()
                 | P0_RENDER_LAYER_BASE.comparisonMask() 
                 | P0_RENDER_LAYER_LAMP.comparisonMask()
-                | P0_LAYER_ENABLED_OVERLAY.comparisonMask()
-                | P0_LAYER_ENABLED_DETAIL.comparisonMask()
                 | P0_TRANSLUCENCY.comparisonMask();
         
         P1_APPEARANCE_COMPARISON_MASK = borderMask1;
         P2_APPEARANCE_COMPARISON_MASK = P2_STATIC_SHAPE_BITS.comparisonMask();
-        
     }
     
     //hide constructor
@@ -198,6 +192,9 @@ public class ModelStateFactory
         
         public static final int STATE_FLAG_NEEDS_ROTATION = STATE_FLAG_HAS_AXIS << 1;
         
+        public static final int STATE_FLAG_HAS_AXIS_ORIENTATION = STATE_FLAG_NEEDS_ROTATION << 1;
+        
+        /** sign bit is used to indicate static state */
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
         
@@ -348,6 +345,11 @@ public class ModelStateFactory
             return (this.stateFlags & STATE_FLAG_HAS_AXIS) == STATE_FLAG_HAS_AXIS;
         }
         
+        public boolean hasAxisOrientation()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_HAS_AXIS_ORIENTATION) == STATE_FLAG_HAS_AXIS_ORIENTATION;
+        }
         public boolean hasBlockVersions()
         {
             this.populateStateFlagsIfNeeded();
@@ -634,26 +636,36 @@ public class ModelStateFactory
 
         public boolean isDetailLayerEnabled()
         {
-            return P0_LAYER_ENABLED_DETAIL.getValue(bits0);
+            return this.getTexture(PaintLayer.DETAIL) != Textures.NONE;
         }
         
         public void setDetailLayerEnabled(boolean isEnabled)
         {
-            bits0 = P0_LAYER_ENABLED_DETAIL.setValue(isEnabled, bits0);
-            clearStateFlags();
-            invalidateHashCode();
+            if(isEnabled && this.getTexture(PaintLayer.DETAIL) == Textures.NONE)
+            {
+                this.setTexture(PaintLayer.DETAIL, Textures.BLOCK_RAW_FLEXSTONE);
+            }
+            else if(!isEnabled && this.getTexture(PaintLayer.DETAIL) != Textures.NONE)
+            {
+                this.setTexture(PaintLayer.DETAIL, Textures.NONE);
+            }
         }
         
         public boolean isOverlayLayerEnabled()
         {
-            return P0_LAYER_ENABLED_OVERLAY.getValue(bits0);
+            return this.getTexture(PaintLayer.OVERLAY) != Textures.NONE;
         }
         
         public void setOverlayLayerEnabled(boolean isEnabled)
         {
-            bits0 = P0_LAYER_ENABLED_OVERLAY.setValue(isEnabled, bits0);
-            clearStateFlags();
-            invalidateHashCode();
+            if(isEnabled && this.getTexture(PaintLayer.OVERLAY) == Textures.NONE)
+            {
+                this.setTexture(PaintLayer.OVERLAY, Textures.BLOCK_RAW_FLEXSTONE);
+            }
+            else if(!isEnabled && this.getTexture(PaintLayer.OVERLAY) != Textures.NONE)
+            {
+                this.setTexture(PaintLayer.OVERLAY, Textures.NONE);
+            }
         }
         
         /** returns true if any surface painter is configured to have the given layer */

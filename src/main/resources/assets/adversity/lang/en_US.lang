@@ -5,6 +5,8 @@ misc.mode_set=Mode set to %s
 
 #UI LABELS
 label.accept=Accept
+label.axis=Axis
+label.axis_inverted=Axis Inverted
 label.base_color=Base Color
 label.base_texture=Base Texture
 label.cancel=Cancel

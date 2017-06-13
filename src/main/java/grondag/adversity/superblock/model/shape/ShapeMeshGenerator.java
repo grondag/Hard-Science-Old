@@ -3,6 +3,7 @@ package grondag.adversity.superblock.model.shape;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.vecmath.Matrix4f;
 
 import com.google.common.collect.ImmutableList;
 
@@ -12,9 +13,11 @@ import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
 
 
 public abstract class ShapeMeshGenerator
@@ -82,5 +85,36 @@ public abstract class ShapeMeshGenerator
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
 
     public abstract SideShape sideShape(ModelState modelState, EnumFacing side);
+    
+    /**
+     * Find appropriate transformation assuming base model is oriented to Y axis, positive.
+     * This is different than the Minecraft/Forge default because I brain that way.
+     */
+    protected static Matrix4f getMatrixForAxis(ModelState modelState)
+    {
+        return getMatrixForAxis(modelState.getAxis(), modelState.isAxisInverted());
+    }
+
+    /**
+     * See {@link #getMatrixForAxis(ModelState)}
+     */
+    protected static Matrix4f getMatrixForAxis(EnumFacing.Axis axis, boolean isAxisInverted)
+    {
+        switch(axis)
+        {
+        case X:
+            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X90_Y270 : ModelRotation.X90_Y90);
+    
+        case Y:
+            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X180_Y0 : ModelRotation.X0_Y0);
+    
+        case Z:
+            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X90_Y0 : ModelRotation.X270_Y0);
+            
+        default:
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
+        
+        }
+    }
     
 }

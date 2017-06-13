@@ -33,20 +33,30 @@ public class Vertex extends Vec3d
         this.normal = normal;
     }
 
+    /** returns copy of this vertex with given normal */
     public Vertex withNormal(Vec3d normalIn)
     {
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, this.color, normalIn);
     }
 
+    /** returns copy of this vertex with given color */
     public Vertex withColor(int colorIn)
     {
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, this.u, this.v, colorIn, this.normal);
     }
 
+    /** returns copy of this vertex with given UV */
     public Vertex withUV(double uNew, double vNew)
     {
         return new Vertex(this.xCoord, this.yCoord, this.zCoord, uNew, vNew, this.color, this.normal);
     }
+    
+    /** returns copy of this vertex with given XYZ coords */
+    public Vertex withXYZ(double xNew, double yNew, double zNew)
+    {
+        return new Vertex(xNew, yNew, zNew, this.u, this.v, this.color, this.normal);
+    }
+    
     public boolean hasNormal()
     {
         return this.normal != null;

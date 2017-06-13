@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector4d;
+import javax.vecmath.Vector4f;
+
 import grondag.adversity.Configurator;
 import grondag.adversity.library.varia.Color;
 import grondag.adversity.library.world.Rotation;
@@ -1141,5 +1146,28 @@ public class RawQuad
     {
         this.surfaceInstance = surfaceInstance;
         return this;
+    }
+    
+    /** returns a copy of this quad with the given transformation applied */
+    public RawQuad transform(Matrix4f m)
+    {
+        return this.transform(new Matrix4d(m));
+    }
+    
+    /** returns a copy of this quad with the given transformation applied */
+    public RawQuad transform(Matrix4d matrix)
+    {
+        RawQuad result = this.clone();
+        
+        for(int i = 0; i < result.vertexCount; i++)
+        {
+            Vertex vertex = result.getVertex(i);
+            Vector4d temp = new Vector4d(vertex.xCoord, vertex.yCoord, vertex.zCoord, 1.0);
+            matrix.transform(temp);
+            if(Math.abs(temp.w - 1.0) > 1e-5) temp.scale(1.0 / temp.w);
+            result.setVertex(i, vertex.withXYZ(temp.x, temp.y, temp.z));
+        }
+        
+        return result;
     }
 }

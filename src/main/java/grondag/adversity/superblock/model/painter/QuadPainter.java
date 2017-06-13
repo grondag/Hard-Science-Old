@@ -49,7 +49,7 @@ public abstract class QuadPainter
         this.renderLayer = modelState.getRenderLayer(paintLayer);
         this.lightingMode = modelState.getLightingMode(paintLayer);
         TexturePallette tex = modelState.getTexture(paintLayer);
-        this.texture = tex == Textures.USE_BASE ? modelState.getTexture(PaintLayer.BASE) : tex;
+        this.texture = tex == Textures.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
         this.translucency = modelState.getTranslucency();
     }
     
