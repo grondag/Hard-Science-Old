@@ -7,7 +7,6 @@ import grondag.adversity.gui.shape.GuiShape;
 import grondag.adversity.gui.shape.GuiSimpleShape;
 import grondag.adversity.gui.shape.GuiSquareColumn;
 import grondag.adversity.gui.shape.GuiStackedPlates;
-import grondag.adversity.superblock.placement.AdditivePlacementHandler;
 import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.placement.SimplePlacementHandler;

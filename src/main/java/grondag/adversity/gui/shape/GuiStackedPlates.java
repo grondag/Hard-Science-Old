@@ -2,7 +2,6 @@ package grondag.adversity.gui.shape;
 
 import grondag.adversity.gui.control.Slider;
 import grondag.adversity.gui.control.Toggle;
-import grondag.adversity.superblock.model.shape.SquareColumnMeshFactory;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
