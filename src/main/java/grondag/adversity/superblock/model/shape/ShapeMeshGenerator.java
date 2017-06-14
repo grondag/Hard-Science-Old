@@ -76,11 +76,16 @@ public abstract class ShapeMeshGenerator
     public abstract ModelState geometricModelState(ModelState modelState);
 
     /** 
-     * If true, will disable species selection on block placement. 
+     * If true, will disable species selection variation on block placement. 
      * Will also prevent rendering of textures with texture layouts that require species
      * because those will expect species to demarcate multiblock boundaries.
      */
     public boolean isSpeciesUsedForShape() { return false; }
+    
+    /**
+     * If true, shape can be placed on itself to become bigger.
+     */
+    public boolean isAdditive() { return false; }
     
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
 

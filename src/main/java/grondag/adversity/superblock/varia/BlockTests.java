@@ -46,7 +46,7 @@ public class BlockTests
         public boolean testBlock(IBlockAccess world, IBlockState ibs, BlockPos pos, ModelState modelState)
         {
             return ibs.getBlock() == this.block 
-                    && this.matchModelState.doesAppearanceMatch(modelState)
+                    && this.matchModelState.doShapeAndAppearanceMatch(modelState)
                     && (!this.isSpeciesPartOfMatch || !modelState.hasSpecies() || (this.matchModelState.getSpecies() == modelState.getSpecies()));
         }
     }

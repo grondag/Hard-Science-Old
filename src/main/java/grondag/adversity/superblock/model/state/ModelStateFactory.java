@@ -95,6 +95,9 @@ public class ModelStateFactory
     private static final long P1_APPEARANCE_COMPARISON_MASK;
     private static final long P2_APPEARANCE_COMPARISON_MASK;   
 
+    /** used to compare states quickly for appearance match */
+    private static final long P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY;
+    
     static
     {
         long borderMask0 = 0;
@@ -122,14 +125,16 @@ public class ModelStateFactory
             P3B_BLOCK_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
         }
         
-        P0_APPEARANCE_COMPARISON_MASK = borderMask0
-                | P0_SHAPE.comparisonMask() 
-                | P0_AXIS.comparisonMask()
-                | P0_AXIS_INVERTED.comparisonMask()
+        P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY = borderMask0
                 | P0_RENDER_LAYER_BASE.comparisonMask() 
                 | P0_RENDER_LAYER_LAMP.comparisonMask()
                 | P0_TRANSLUCENCY.comparisonMask();
-        
+
+        P0_APPEARANCE_COMPARISON_MASK = P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY
+                | P0_SHAPE.comparisonMask() 
+                | P0_AXIS.comparisonMask()
+                | P0_AXIS_INVERTED.comparisonMask();
+                
         P1_APPEARANCE_COMPARISON_MASK = borderMask1;
         P2_APPEARANCE_COMPARISON_MASK = P2_STATIC_SHAPE_BITS.comparisonMask();
     }
@@ -377,6 +382,12 @@ public class ModelStateFactory
         public boolean isSpeciesUsedForShape()
         {
             return this.getShape().meshFactory().isSpeciesUsedForShape();
+        }
+        
+        /** True if shape can be placed on itself to grow */
+        public boolean isAdditive()
+        {
+            return this.getShape().meshFactory().isAdditive();
         }
         
         /** 
@@ -1037,17 +1048,25 @@ public class ModelStateFactory
         }
         
         /** 
-         * Returns true if visual elements match.
+         * Returns true if visual elements and geometry match.
          * Does not consider species in matching.
-         * Used to determine if blocks/borders should join together.
          */
-        public boolean doesAppearanceMatch(ModelState other)
+        public boolean doShapeAndAppearanceMatch(ModelState other)
         {
             return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK)
                     && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK)
                     && (this.bits2 & P2_APPEARANCE_COMPARISON_MASK) == (other.bits2 & P2_APPEARANCE_COMPARISON_MASK);
         }
 
+        /** 
+         * Returns true if visual elements match.
+         * Does not consider species or geometry in matching.
+         */
+        public boolean doesAppearanceMatch(ModelState other)
+        {
+            return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY)
+                    && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK);
+        }
 
         /** 
          * Returns a copy of this model state with only the bits that matter for geometry.

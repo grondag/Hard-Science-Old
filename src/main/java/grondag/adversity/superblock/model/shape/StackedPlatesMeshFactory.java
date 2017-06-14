@@ -86,6 +86,12 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     }
 
     @Override
+    public boolean isAdditive()
+    {
+        return true;
+    }
+
+    @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {
         return this.makeQuads(modelState.getSpecies(), modelState.getAxis(), modelState.isAxisInverted());

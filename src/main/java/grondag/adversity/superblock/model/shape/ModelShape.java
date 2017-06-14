@@ -7,6 +7,7 @@ import grondag.adversity.gui.shape.GuiShape;
 import grondag.adversity.gui.shape.GuiSimpleShape;
 import grondag.adversity.gui.shape.GuiSquareColumn;
 import grondag.adversity.gui.shape.GuiStackedPlates;
+import grondag.adversity.superblock.placement.AdditivePlacementHandler;
 import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.placement.SimplePlacementHandler;
@@ -36,7 +37,7 @@ public enum ModelShape
     STACKED_PLATES()
     {
         @Override
-        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
+        public IPlacementHandler getPlacementHandler() { return AdditivePlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return StackedPlatesMeshFactory.getShapeMeshFactory(); }
         @Override

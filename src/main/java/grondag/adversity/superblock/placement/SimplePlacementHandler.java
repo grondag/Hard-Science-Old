@@ -1,11 +1,13 @@
 package grondag.adversity.superblock.placement;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.adversity.library.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,7 +33,13 @@ public class SimplePlacementHandler implements IPlacementHandler
             posOn = posOn.offset(facing);
         }
         
-        return ImmutableList.of(Pair.of(posOn, stack));
+        if(WorldHelper.isBlockReplaceable(worldIn, posOn))
+        {
+            return ImmutableList.of(Pair.of(posOn, stack));
+        }
+        else
+        {
+            return Collections.emptyList();
+        }
     }
-
 }

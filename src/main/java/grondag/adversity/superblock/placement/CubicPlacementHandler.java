@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.adversity.library.world.NeighborBlocks;
 import grondag.adversity.library.world.NeighborBlocks.BlockCorner;
 import grondag.adversity.library.world.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.library.world.WorldHelper;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -43,18 +44,42 @@ public class CubicPlacementHandler implements IPlacementHandler
         Block onBlock = blockStateOn.getBlock();
         BlockPos posPlaced = onBlock.isReplaceable(worldIn, posOn) ? posOn : posOn.offset(facing);
         
+        // abort if target space is occupied
+        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced))
+        {
+            return Collections.emptyList();
+        }
+        
         if(modelState.hasAxis())
         {
-            modelState.setAxis(facing.getAxis());
-            if(modelState.hasAxisOrientation())
+            // if player is sneaking, match orientation of targeted block
+            if(playerIn.isSneaking() && onBlock instanceof SuperBlock)
             {
-                modelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                ModelState modelStateOn = ((SuperBlock)onBlock).getModelState(worldIn, posOn, true);
+                if(modelStateOn.hasAxis())
+                {
+                    modelState.setAxis(modelStateOn.getAxis());
+                    if(modelState.hasAxisOrientation())
+                    {
+                        modelState.setAxisInverted(modelStateOn.isAxisInverted());
+                    }
+                }
+            }
+            else
+            {
+                // not sneaking, so set axis based on placement in world
+                modelState.setAxis(facing.getAxis());
+                if(modelState.hasAxisOrientation())
+                {
+                    modelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                }
             }
         }
-        if(modelState.hasSpecies())
+        
+        if(modelState.hasSpecies() && !modelState.isSpeciesUsedForShape())
         {
             int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, myBlock, modelState);
-            modelState.setSpecies(getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, myBlock, modelState));
+            modelState.setSpecies(species);
             result.setItemDamage(species);
         }
         SuperItemBlock.setModelState(result, modelState);
@@ -113,7 +138,7 @@ public class CubicPlacementHandler implements IPlacementHandler
             if(blockOn == myBlock)
             {
                 ModelState modelStateOn = ((SuperBlock)blockOn).getModelStateAssumeStateIsCurrent(blockStateOn, worldIn, posOn, true);
-                if(myModelState.doesAppearanceMatch(modelStateOn)) return modelStateOn.getSpecies();
+                if(myModelState.doShapeAndAppearanceMatch(modelStateOn)) return modelStateOn.getSpecies();
 
             }
             

@@ -5,6 +5,7 @@ import javax.vecmath.Quat4f;
 
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public class WorldHelper
 {
@@ -181,4 +182,11 @@ public class WorldHelper
         }
     }
 
+    /**
+     * Convenience method to keep code more readable
+     */
+    public static boolean isBlockReplaceable(IBlockAccess worldIn, BlockPos pos)
+    {
+        return worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos);
+    }
 }

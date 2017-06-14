@@ -1,5 +1,6 @@
 package grondag.adversity.superblock.items;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,11 +15,13 @@ import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.varia.BlockSubstance;
 import grondag.adversity.superblock.varia.SuperBlockNBTHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,6 +39,17 @@ import net.minecraft.world.World;
  */
 public class SuperItemBlock extends ItemBlock
 {
+    /**
+     * Called client-side before {@link #onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}.  
+     * If returns false for an itemBlock that method will never be called.
+     * We do all of our "can we put there here" checks in that method, so we always return true.
+     */
+    @Override
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, EntityPlayer player, ItemStack stack)
+    {
+        return true;
+    }
+
     public SuperItemBlock(SuperBlock block) {
         super(block);
         setHasSubtypes(true);
@@ -146,8 +160,8 @@ public class SuperItemBlock extends ItemBlock
         return didPlace ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
      
     }
- 
-    /**
+   
+     /**
      * Called to actually place the block, after the location is determined
      * and all permission checks have been made.
      *

@@ -1082,13 +1082,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public abstract boolean isGeometryFullCube(IBlockState state);
     
     public abstract boolean isHypermatter();
-    
-    /** To be overridden by stackable plates or blocks with similar behavior. */
-    public boolean isItemUsageAdditive(World worldIn, BlockPos pos, ItemStack stack)
-    {
-        return false;
-    }
-
+   
     /**
      * {@inheritDoc} <br><br>
      * 
@@ -1225,7 +1219,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                     ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
                     // for transparent blocks, want blocks with same apperance and species to join
                     return myModelState.getSpecies() != otherModelState.getSpecies()
-                            || !myModelState.doesAppearanceMatch(otherModelState);
+                            || !myModelState.doShapeAndAppearanceMatch(otherModelState);
 
                 }
             }
