@@ -2,6 +2,8 @@
 #MISC
 misc.denials=["Absolutely not.","Nope.","Not happening","Doctor No sends his regards.","You must be joking.","I made a list of things that aren\u0027t going to happen, and what you just tried is on it.","Nice try.","That\u0027s not going to work.","DENIED!"]
 misc.mode_set=Mode set to %s
+misc.rotate="Rotate"
+misc.connection="Connect"
 
 #UI LABELS
 label.accept=Accept
@@ -27,6 +29,7 @@ label.toughness=Toughness
 label.translucency=Translucency
 
 #ITEMS
+item.block_wand.name=Block Adjuster
 item.terrain_wand.name=Terrain Wand
 item.volcano_wand.name=Volcano Wand
 item.basalt_rubble.name=Basalt Rubble

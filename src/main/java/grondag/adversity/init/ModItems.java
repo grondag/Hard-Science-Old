@@ -5,6 +5,7 @@ import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaBlobItem;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.items.BlockAdjuster;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.terrain.TerrainWand;
 import net.minecraft.block.Block;
@@ -45,6 +46,7 @@ public class ModItems
         //Disabled until volcano world gen / activation logic revisited
         //itemReg.register(new VolcanoWand().setCreativeTab(Adversity.tabAdversity));
         itemReg.register(new TerrainWand().setCreativeTab(Adversity.tabAdversity));
+        itemReg.register(new BlockAdjuster().setCreativeTab(Adversity.tabAdversity));
     }
 
     private static void registerItemBlocks(IForgeRegistry<Item> itemReg)
