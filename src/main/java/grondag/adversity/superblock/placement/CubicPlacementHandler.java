@@ -52,8 +52,9 @@ public class CubicPlacementHandler implements IPlacementHandler
         
         if(modelState.hasAxis())
         {
-            // if player is sneaking, match orientation of targeted block
-            if(playerIn.isSneaking() && onBlock instanceof SuperBlock)
+            boolean isAxisDone = false;
+            // TODO: make fixed orientation a GUI option: match placement, match adjacent or fixed selected
+            if(onBlock instanceof SuperBlock)
             {
                 ModelState modelStateOn = ((SuperBlock)onBlock).getModelState(worldIn, posOn, true);
                 if(modelStateOn.hasAxis())
@@ -63,11 +64,12 @@ public class CubicPlacementHandler implements IPlacementHandler
                     {
                         modelState.setAxisInverted(modelStateOn.isAxisInverted());
                     }
+                    isAxisDone = true;
                 }
             }
-            else
+            
+            if(!isAxisDone)
             {
-                // not sneaking, so set axis based on placement in world
                 modelState.setAxis(facing.getAxis());
                 if(modelState.hasAxisOrientation())
                 {

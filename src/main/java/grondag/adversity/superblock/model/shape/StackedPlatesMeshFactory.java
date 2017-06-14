@@ -24,11 +24,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-// TODO: Borders on top face
-
 public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
     private static ShapeMeshGenerator instance;
+    
+    private static Surface TOP_AND_BOTTOM = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static Surface SIDES = new Surface(SurfaceType.CUT, SurfaceTopology.CUBIC);
     
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
@@ -40,7 +41,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     {
         super(StateFormat.BLOCK, 
                 STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_HAS_AXIS | STATE_FLAG_HAS_AXIS_ORIENTATION,
-                new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC));
+                TOP_AND_BOTTOM, SIDES);
     }
  
     private List<RawQuad> makeQuads(int meta, EnumFacing.Axis axis, boolean isAxisInverted)
@@ -51,7 +52,6 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         template.color = 0xFFFFFFFF;
         template.rotation = Rotation.ROTATE_NONE;
         template.lightingMode = LightingMode.SHADED;
-        template.surfaceInstance = this.surfaces.get(0).unitInstance;
         template.lockUV = true;
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
@@ -59,6 +59,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         Matrix4d matrix = new Matrix4d(getMatrixForAxis(axis, isAxisInverted));
         
         RawQuad quad = template.clone();
+        quad.surfaceInstance = TOP_AND_BOTTOM.unitInstance;
         quad.setFace(EnumFacing.UP);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 1-height, EnumFacing.NORTH);
         builder.add(quad.transform(matrix));
@@ -66,12 +67,14 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         for(EnumFacing face : EnumFacing.Plane.HORIZONTAL.facings())
         {
             quad = template.clone();
+            quad.surfaceInstance = SIDES.unitInstance;
             quad.setFace(face);
             quad.setupFaceQuad( 0.0, 0.0, 1.0, height, 0.0, EnumFacing.UP);
             builder.add(quad.transform(matrix));
         }
         
         quad = template.clone();
+        quad.surfaceInstance = TOP_AND_BOTTOM.unitInstance;
         quad.setFace(EnumFacing.DOWN);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
         builder.add(quad.transform(matrix));
