@@ -73,14 +73,34 @@ public abstract class ShapeMeshGenerator
      * Returns a copy of the given model state with only the attributes that affect geometry.
      * Used as a lookup key for block breaking models.
      */
-    public abstract ModelState geometricModelState(ModelState modelState);
+    public ModelState geometricModelState(ModelState modelState)
+    {
+        ModelState result = new ModelState();
+        result.setShape(modelState.getShape());
+        result.setStaticShapeBits(modelState.getStaticShapeBits());
+        return result;
+    }
 
-    /** 
-     * If true, will disable species selection variation on block placement. 
-     * Will also prevent rendering of textures with texture layouts that require species
-     * because those will expect species to demarcate multiblock boundaries.
+    /**
+     * If this shape uses metadata to affect geometry, retrieves the block/item metadata 
+     * value that should correspond to this modelstate
      */
-    public boolean isSpeciesUsedForShape() { return false; }
+    public int getMetaData(ModelState modelState)
+    {
+        return 0;
+    }
+    
+    /**
+     * If this shape uses metadata to affect geometry, will be called during block
+     * placement and during refreshFromWorld. Can be ignored if the
+     * shaped has another mechanism for synchronizing with block meta.
+     * (TerrainBlocks get it via TerrainState, for example)
+     */
+    public void setMetaData(ModelState modelState, int meta)
+    {
+        // Default is to do nothing
+    }
+    
     
     /**
      * If true, shape can be placed on itself to become bigger.

@@ -379,9 +379,48 @@ public class ModelStateFactory
             return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
         }
         
-        public boolean isSpeciesUsedForShape()
+        /** Convenience method. Same as shape attribute. */
+        public MetaUsage metaUsage()
         {
-            return this.getShape().meshFactory().isSpeciesUsedForShape();
+            return this.getShape().metaUsage;
+        }
+        
+        /**
+         * Retrieves block/item metadata that should apply to this modelState.
+         */
+        public int getMetaData()
+        {
+            switch(this.metaUsage())
+            {
+            case SHAPE:
+                return this.getShape().meshFactory().getMetaData(this);
+                
+            case SPECIES:
+                return this.hasSpecies() ? this.getSpecies() : 0;
+                
+            case NONE:
+            default:
+                if(Log.DEBUG_MODE) Log.warn("ModelState.getMetaData called for inappropriate shape");
+                return 0;
+            }            
+        }
+        
+        public void setMetaData(int meta)
+        {
+            switch(this.metaUsage())
+            {
+            case SHAPE:
+                this.getShape().meshFactory().setMetaData(this, meta);
+                break;
+                
+            case SPECIES:
+                if(this.hasSpecies()) this.setSpecies(meta);
+                break;
+                
+            case NONE:
+            default:
+                if(Log.DEBUG_MODE) Log.warn("ModelState.setMetaData called for inappropriate shape");
+            }            
         }
         
         /** True if shape can be placed on itself to grow */
@@ -460,6 +499,11 @@ public class ModelStateFactory
             
             populateStateFlagsIfNeeded();
             
+            if(this.metaUsage() != MetaUsage.NONE)
+            {
+                this.setMetaData(state.getValue(SuperBlock.META));
+            }
+            
             switch(this.getShape().meshFactory().stateFormat)
             {
             case BLOCK:
@@ -469,11 +513,6 @@ public class ModelStateFactory
                 if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 31);
                 
                 long b3 = bits3;
-                
-                if((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES)
-                {
-                     b3 = P3B_SPECIES.setValue(state.getValue(SuperBlock.META), b3);                  
-                }
                 
                 for(TextureScale scale : TextureScale.values())
                 {

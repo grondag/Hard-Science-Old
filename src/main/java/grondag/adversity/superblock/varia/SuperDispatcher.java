@@ -199,23 +199,11 @@ public class SuperDispatcher
                 painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.BASE));
                 if(modelState.isDetailLayerEnabled())
                 {
-                    // don't render painters that interpret species as multi-block boundaries
-                    // if species is used for block height instead
-                    if(!mesher.isSpeciesUsedForShape() 
-                            || (modelState.getTexture(PaintLayer.DETAIL).textureLayout.modelStateFlag & ModelState.STATE_FLAG_NEEDS_SPECIES) == 0)
-                    {
-                        painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
-                    }
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
                 }
                 if(modelState.isOverlayLayerEnabled())
                 {
-                    // don't render painters that interpret species as multi-block boundaries
-                    // if species is used for block height instead
-                    if(!mesher.isSpeciesUsedForShape() 
-                            || (modelState.getTexture(PaintLayer.OVERLAY).textureLayout.modelStateFlag & ModelState.STATE_FLAG_NEEDS_SPECIES) == 0)
-                    {
-                        painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OVERLAY));
-                    }
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OVERLAY));
                 }
                 break;
 

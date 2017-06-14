@@ -151,8 +151,11 @@ public class SuperItemBlock extends ItemBlock
                 {
                     didPlace = true;
                     worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    stackIn.shrink(1);
-                    if(stackIn.isEmpty()) break;
+                    if(!playerIn.isCreative())
+                    {
+                        stackIn.shrink(1);
+                        if(stackIn.isEmpty()) break;
+                    }
                 }
             }
         }

@@ -21,6 +21,7 @@ import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ICollisionHandler;
+import grondag.adversity.superblock.model.state.MetaUsage;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.varia.BlockSubstance;
 import grondag.adversity.superblock.varia.ParticleDiggingSuperBlock;
@@ -279,6 +280,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);
+        tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
+        
         ModelState modelState = SuperItemBlock.getModelState(stack);
         
         if(modelState != null)
@@ -318,6 +321,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
+        probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
+        
         ModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
         
         if(modelState != null)
@@ -878,9 +883,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         {
             ItemStack stack = new ItemStack(this, 1, i);
             ModelState modelState = this.getDefaultModelState();
-            if(modelState.hasSpecies())
+            if(modelState.metaUsage() != MetaUsage.NONE || i > 0)
             {
-                modelState.setSpecies(i);
+                // model state will squawk is usage is NONE
+                modelState.setMetaData(i);
             }
             SuperItemBlock.setModelState(stack, modelState);
             itemBuilder.add(stack);

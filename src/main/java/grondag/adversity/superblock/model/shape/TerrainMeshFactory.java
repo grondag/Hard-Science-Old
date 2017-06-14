@@ -76,12 +76,6 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     {
         return this;
     }
-
-    @Override
-    public boolean isSpeciesUsedForShape()
-    {
-        return true;
-    }
     
     @Override
     public int geometricSkyOcclusion(ModelState modelState)
@@ -563,9 +557,14 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public ModelState geometricModelState(ModelState modelState)
     {
-        ModelState result = new ModelState();
-        result.setShape(modelState.getShape());
+        ModelState result = super.geometricModelState(modelState);
         result.setTerrainState(modelState.getTerrainState());
         return result;
+    }
+
+    @Override
+    public int getMetaData(ModelState modelState)
+    {
+        return modelState.getTerrainState().getCenterHeight();
     }
 }

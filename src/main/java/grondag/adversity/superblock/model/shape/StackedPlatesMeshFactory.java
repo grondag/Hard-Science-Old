@@ -43,9 +43,9 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
                 new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC));
     }
  
-    private List<RawQuad> makeQuads(int species, EnumFacing.Axis axis, boolean isAxisInverted)
+    private List<RawQuad> makeQuads(int meta, EnumFacing.Axis axis, boolean isAxisInverted)
     {
-        double height = (species + 1) / 16.0;
+        double height = (meta + 1) / 16.0;
         
         RawQuad template = new RawQuad();
         template.color = 0xFFFFFFFF;
@@ -80,12 +80,6 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     }
     
     @Override
-    public boolean isSpeciesUsedForShape()
-    {
-        return true;
-    }
-
-    @Override
     public boolean isAdditive()
     {
         return true;
@@ -94,13 +88,13 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {
-        return this.makeQuads(modelState.getSpecies(), modelState.getAxis(), modelState.isAxisInverted());
+        return this.makeQuads(modelState.getMetaData(), modelState.getAxis(), modelState.isAxisInverted());
     }
 
     @Override
     public boolean isCube(ModelState modelState)
     {
-        return modelState.getSpecies() == 15;
+        return modelState.getMetaData() == 15;
     }
 
     @Override
@@ -112,7 +106,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public int geometricSkyOcclusion(ModelState modelState)
     {
-        return modelState.getAxis() == EnumFacing.Axis.Y ? 255 : modelState.getSpecies();
+        return modelState.getAxis() == EnumFacing.Axis.Y ? 255 : modelState.getMetaData();
     }
 
     @Override
@@ -130,7 +124,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
     {
-        return Useful.makeRotatedAABB(0, 0, 0, 1, (modelState.getSpecies() + 1) / 16f, 1, getMatrixForAxis(modelState));
+        return Useful.makeRotatedAABB(0, 0, 0, 1, (modelState.getMetaData() + 1) / 16f, 1, getMatrixForAxis(modelState));
     }
 
     @Override
@@ -142,7 +136,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {
-        if(modelState.getSpecies() ==15) return SideShape.SOLID;
+        if(modelState.getMetaData() ==15) return SideShape.SOLID;
         
         if(side.getAxis() == modelState.getAxis())
         {
@@ -151,16 +145,20 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         }
         else
         {
-            return modelState.getSpecies() > 8 ? SideShape.PARTIAL : SideShape.MISSING;
+            return modelState.getMetaData() > 8 ? SideShape.PARTIAL : SideShape.MISSING;
         }
     }
     
     @Override
-    public ModelState geometricModelState(ModelState modelState)
+    public int getMetaData(ModelState modelState)
     {
-        ModelState result = new ModelState();
-        result.setShape(modelState.getShape());
-        result.setSpecies(modelState.getSpecies());
-        return result;
+        return (int) (modelState.getStaticShapeBits() & 0xF);
     }
+
+    @Override
+    public void setMetaData(ModelState modelState, int meta)
+    {
+        modelState.setStaticShapeBits(meta);
+    }
+    
 }

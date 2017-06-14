@@ -3,6 +3,7 @@ package grondag.adversity.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.adversity.superblock.items.SuperItemBlock;
+import grondag.adversity.superblock.model.state.MetaUsage;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -38,10 +39,10 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
             ModelState result = myTE.getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
             
             // honor passed in species if different
-            if(currentState.getValue(META) != state.getValue(META))
+            if(currentState.getValue(META) != state.getValue(META) && result.metaUsage() != MetaUsage.NONE)
             {
                 result = result.clone();
-                result.setSpecies(state.getValue(META));
+                result.setMetaData(state.getValue(META));
             }
             return result;
         }

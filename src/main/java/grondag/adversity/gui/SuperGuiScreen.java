@@ -197,7 +197,7 @@ public class SuperGuiScreen extends GuiScreen
         
         if(hasUpdates)
         {
-            this.itemPreview.previewItem.setItemDamage(this.modelState.getSpecies());
+            this.itemPreview.previewItem.setItemDamage(this.modelState.getMetaData());
             SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
         }
     }

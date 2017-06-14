@@ -17,6 +17,7 @@ label.detail_color=Decoration Color
 label.detail_texture=Decoration Texture
 label.half_slab=Half Slab
 label.material=Material
+label.meta=Meta Data
 label.overlay_color=Border Color
 label.overlay_texture=Border Texture
 label.shape=Shape

@@ -617,9 +617,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
     @Override
     public ModelState geometricModelState(ModelState modelState)
     {
-        ModelState result = new ModelState();
-        result.setShape(modelState.getShape());
-        result.setStaticShapeBits(modelState.getStaticShapeBits());
+        ModelState result = super.geometricModelState(modelState);
         result.setCornerJoin(modelState.getCornerJoin());
         return result;
     }

@@ -25,8 +25,6 @@ public class CubeMeshFactory extends ShapeMeshGenerator
 {
     private static ShapeMeshGenerator instance;
     
-    /** all cubes have this same shape */
-    private final ModelState GEOMETRIC_STATE;
 
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
@@ -41,8 +39,6 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     {
         super(StateFormat.BLOCK, STATE_FLAG_NONE, new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC));
         this.cachedQuads = getCubeQuads();
-        this.GEOMETRIC_STATE = new ModelState();
-        this.GEOMETRIC_STATE.setShape(ModelShape.CUBE);
     }
 
     @Override
@@ -105,11 +101,5 @@ public class CubeMeshFactory extends ShapeMeshGenerator
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {
         return SideShape.SOLID;
-    }
-
-    @Override
-    public ModelState geometricModelState(ModelState modelState)
-    {
-        return GEOMETRIC_STATE.clone();
     }
 }

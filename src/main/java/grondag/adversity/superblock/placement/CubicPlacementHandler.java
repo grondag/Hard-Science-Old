@@ -76,11 +76,11 @@ public class CubicPlacementHandler implements IPlacementHandler
             }
         }
         
-        if(modelState.hasSpecies() && !modelState.isSpeciesUsedForShape())
+        if(modelState.hasSpecies())
         {
             int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, myBlock, modelState);
             modelState.setSpecies(species);
-            result.setItemDamage(species);
+            result.setItemDamage(modelState.getMetaData());
         }
         SuperItemBlock.setModelState(result, modelState);
  

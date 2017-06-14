@@ -27,14 +27,14 @@ public class GuiStackedPlates extends GuiShape
     
     private boolean isSlab(ModelState modelState)
     {
-        return modelState.getSpecies() == 7;
+        return modelState.getMetaData() == 7;
     }
 
     @Override
     public void loadSettings(ModelState modelState)
     {
         this.isSlab.setOn(isSlab(modelState));
-        this.thickness.setSelectedIndex(modelState.getSpecies());
+        this.thickness.setSelectedIndex(modelState.getMetaData());
         saveLast();
     }
 
@@ -42,9 +42,9 @@ public class GuiStackedPlates extends GuiShape
     public boolean saveSettings(ModelState modelState)
     {
         int t = this.thickness.getSelectedIndex();
-        if(t  != modelState.getSpecies())
+        if(t  != modelState.getMetaData())
         {
-            modelState.setSpecies(t);
+            modelState.setMetaData(t);
             return true;
         }
         else

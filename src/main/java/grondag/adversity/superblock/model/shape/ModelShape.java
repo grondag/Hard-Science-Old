@@ -7,6 +7,7 @@ import grondag.adversity.gui.shape.GuiShape;
 import grondag.adversity.gui.shape.GuiSimpleShape;
 import grondag.adversity.gui.shape.GuiSquareColumn;
 import grondag.adversity.gui.shape.GuiStackedPlates;
+import grondag.adversity.superblock.model.state.MetaUsage;
 import grondag.adversity.superblock.placement.AdditivePlacementHandler;
 import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
@@ -14,9 +15,11 @@ import grondag.adversity.superblock.placement.SimplePlacementHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
+import static grondag.adversity.superblock.model.state.MetaUsage.*;
+
 public enum ModelShape
 {
-    CUBE() 
+    CUBE(SPECIES) 
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
@@ -24,7 +27,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
 
-    COLUMN_SQUARE()
+    COLUMN_SQUARE(SPECIES)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
@@ -34,7 +37,7 @@ public enum ModelShape
         public GuiShape guiSettingsControl(Minecraft mc) { return new GuiSquareColumn(mc); }
     },
     
-    STACKED_PLATES()
+    STACKED_PLATES(SHAPE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return AdditivePlacementHandler.INSTANCE; }
@@ -50,7 +53,7 @@ public enum ModelShape
     //TODO: WALL/BARRIER/PANE
     
     // TODO: BOX
-    BOX()
+    BOX(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -59,7 +62,7 @@ public enum ModelShape
     },
 
     // TODO: SPHERE/DOME
-    SPHERE()
+    SPHERE(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -68,7 +71,7 @@ public enum ModelShape
     },
 
     // TODO: ROUNDED BOX
-    ROUNDED_BOX()
+    ROUNDED_BOX(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -77,7 +80,7 @@ public enum ModelShape
     },
 
     // TODO: CYLINDER/TUBE
-    CYLINDER()
+    CYLINDER(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -86,7 +89,7 @@ public enum ModelShape
     },
 
     // TODO: ROCK
-    TUBE()
+    TUBE(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -95,7 +98,7 @@ public enum ModelShape
     },
 
     // TODO: CONE
-    CONE()
+    CONE(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -104,7 +107,7 @@ public enum ModelShape
     },
 
     // TODO: PYRAMID
-    PYRAMID()
+    PYRAMID(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -113,7 +116,7 @@ public enum ModelShape
     },
 
     // TODO: TORUS
-   TORUS()
+   TORUS(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -122,7 +125,7 @@ public enum ModelShape
     },
 
     // TODO: ICOSAHEDRON
-    ICOSAHEDRON()
+    ICOSAHEDRON(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -131,7 +134,7 @@ public enum ModelShape
     },
  
     // TODO: TETRAHEDRON
-    TETRAHEDRON()
+    TETRAHEDRON(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -140,7 +143,7 @@ public enum ModelShape
     },
 
     // TODO: OCTAHEDRON
-    OCTAHEDRON()
+    OCTAHEDRON(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -149,7 +152,7 @@ public enum ModelShape
     },
 
     // TODO: DODECAHEDRON
-    DODECAHEDRON()
+    DODECAHEDRON(NONE)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -157,7 +160,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
     
-    TERRAIN_HEIGHT(false)
+    TERRAIN_HEIGHT(SHAPE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -165,7 +168,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getMeshFactory(); }
     },
     
-    TERRAIN_FILLER(false)
+    TERRAIN_FILLER(SHAPE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -174,15 +177,17 @@ public enum ModelShape
     };
 
     public final boolean isAvailableInGui;
+    public final MetaUsage metaUsage;
     
-    private ModelShape(boolean isAvailableInGui)
+    private ModelShape(MetaUsage metaUsage, boolean isAvailableInGui)
     {
+        this.metaUsage = metaUsage;
         this.isAvailableInGui = isAvailableInGui;
     }
     
-    private ModelShape()
+    private ModelShape(MetaUsage metaUsage)
     {
-        this(true);
+        this(metaUsage, true);
     }
     public static final List<ModelShape> GUI_AVAILABLE_SHAPES;
     

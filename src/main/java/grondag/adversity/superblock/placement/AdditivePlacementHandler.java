@@ -67,7 +67,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
                     
                     // confirm have space to add - the ItemStack handler will allow us to get 
                     // here if the adjacent position contains another additive block
-                    if(onModelState.getSpecies() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing)))
+                    if(onModelState.getMetaData() < 0xF || WorldHelper.isBlockReplaceable(worldIn, posOn.offset(facing)))
                     {
                         return addToBlockAtPosition(worldIn, stack, stackModelState, onModelState, posOn);
                     }
@@ -101,28 +101,28 @@ public class AdditivePlacementHandler implements IPlacementHandler
 
     private List<Pair<BlockPos, ItemStack>> addToBlockAtPosition(IBlockAccess worldIn, ItemStack stack, ModelState stackModelState, ModelState onModelState, BlockPos posOn)
     {
-        int species = (onModelState.getSpecies() + stackModelState.getSpecies() + 1);
+        int totalMeta = (onModelState.getMetaData() + stackModelState.getMetaData() + 1);
         ArrayList<Pair<BlockPos, ItemStack>> result = new ArrayList<Pair<BlockPos, ItemStack>>(2);
 
         // add to or top off existing block
-        if(onModelState.getSpecies() < 0xF)
+        if(onModelState.getMetaData() < 0xF)
         {
-            int targetSpecies = Math.min(species, 0xF);
+            int targetMeta = Math.min(totalMeta, 0xF);
             ModelState modelState = onModelState.clone();
             ItemStack newStack = stack.copy();
-            newStack.setItemDamage(targetSpecies);
-            modelState.setSpecies(targetSpecies);
+            newStack.setItemDamage(targetMeta);
+            modelState.setMetaData(targetMeta);
             SuperItemBlock.setModelState(newStack, modelState);
             result.add(Pair.of(posOn, newStack));
         }
 
         // add another block if we grew into next block and the space is open
-        if(species > 0xF)
+        if(totalMeta > 0xF)
         {
             EnumFacing addFace = EnumFacing.UP;
             
-            int targetSpecies = species & 0xF;
-            ModelState modelState = SuperItemBlock.getModelState(stack);
+            int targetMeta = totalMeta & 0xF;
+            ModelState modelState = onModelState.clone();
             if(modelState.hasAxis())
             {
                 modelState.setAxis(onModelState.getAxis());
@@ -141,8 +141,8 @@ public class AdditivePlacementHandler implements IPlacementHandler
             if(WorldHelper.isBlockReplaceable(worldIn, posOn.offset(addFace)))
             {
                 ItemStack newStack = stack.copy();
-                newStack.setItemDamage(targetSpecies);
-                modelState.setSpecies(targetSpecies);
+                newStack.setItemDamage(targetMeta);
+                modelState.setMetaData(targetMeta);
                 SuperItemBlock.setModelState(newStack, modelState);
                 result.add(Pair.of(posOn.offset(addFace), newStack));
             }
