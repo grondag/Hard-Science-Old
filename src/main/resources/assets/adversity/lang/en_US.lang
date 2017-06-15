@@ -5,7 +5,7 @@ misc.mode_set=Mode set to %s
 misc.rotate="Rotate"
 misc.connection="Connect"
 
-#UI LABELS
+#GUI LABELS
 label.accept=Accept
 label.axis=Axis
 label.axis_inverted=Axis Inverted
@@ -27,6 +27,19 @@ label.species=Species
 label.thickness=Thickness
 label.toughness=Toughness
 label.translucency=Translucency
+
+#KEYS
+key.categories.adversity=Adversity
+key.placement_mode=Placement Mode
+key.placement_face=Placement Axis/Orientation
+key.placement_rotation=Placement Rotation
+key.placement_preview=Placement Preview
+
+#PLACEMENT
+placement.message.preview_set=Placement preview mode set to %s
+placement.preview.none=NONE
+placement.preview.outline=OUTLINE
+placement.preview.ghost=GHOST
 
 #ITEMS
 item.block_wand.name=Block Adjuster

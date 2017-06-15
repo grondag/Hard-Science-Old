@@ -1,6 +1,8 @@
 package grondag.adversity.superblock.model.state;
 
 
+import java.util.List;
+
 import grondag.adversity.Log;
 import grondag.adversity.library.render.LightingMode;
 import grondag.adversity.library.varia.BinaryEnumSet;
@@ -31,6 +33,7 @@ import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -1114,6 +1117,14 @@ public class ModelStateFactory
         public ModelState geometricState()
         {
             return this.getShape().meshFactory().geometricModelState(this);
+        }
+        
+        /**
+         * Returns a list of collision boxes offset to the given world position 
+         */
+        public List<AxisAlignedBB> collisionBoxes(BlockPos offset)
+        {
+            return this.getShape().meshFactory().collisionHandler().getCollisionBoxes(this, offset);
         }
     }
 }

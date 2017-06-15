@@ -59,7 +59,7 @@ public abstract class SpeciesGenerator {
         {
             int speciesInUseFlags = 0;
             
-            ModelState stackModelState = SuperItemBlock.getModelState(stack);
+            ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
             NeighborBlocks neighbors = new NeighborBlocks(worldIn, pos, false);
             NeighborTestResults results = neighbors.getNeighborTestResults(new BlockTests.SuperBlockBorderMatch(block, stackModelState, false));
             

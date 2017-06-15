@@ -282,7 +282,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         super.addInformation(stack, playerIn, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
-        ModelState modelState = SuperItemBlock.getModelState(stack);
+        ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
         
         if(modelState != null)
         {
@@ -830,21 +830,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state)
     {
         ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
-        ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
-        if (handler == null)
-        {
-            return ImmutableList.of(this.getBoundingBox(state, worldIn, pos));
-        }
-        else
-        {
-            Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
-
-            for (AxisAlignedBB aabb : handler.getCollisionBoxes(modelState))
-            {
-                builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
-            }
-            return builder.build();
-        }
+        return modelState.collisionBoxes(pos);
+        
     }
 
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)

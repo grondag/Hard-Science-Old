@@ -140,6 +140,9 @@ public class Configurator
         @Comment("Debug Feature: draw block boundaries for non-cubic blocks.")
         public boolean debugDrawBlockBoundariesForNonCubicBlocks = false;
         
+        @Comment("Rendering for blocks about to be placed.")
+        public PreviewMode previewSetting = PreviewMode.OUTLINE;
+        
         public static float normalLightFactor;
         
         public static Vec3d lightingNormal;
@@ -148,6 +151,13 @@ public class Configurator
         {
             normalLightFactor = 0.5F * (1F - RENDER.minAmbientLight);
             lightingNormal = new Vec3d(RENDER.normalX, RENDER.normalY, RENDER.normalZ).normalize();
+        }
+        
+        public static enum PreviewMode
+        {
+            NONE,
+            OUTLINE,
+            GHOST
         }
     }
     

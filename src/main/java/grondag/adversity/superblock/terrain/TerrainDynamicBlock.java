@@ -83,7 +83,7 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         for(ItemStack stack : items)
         {
             int meta = stack.getMetadata();
-            ModelState modelState = SuperItemBlock.getModelState(stack);
+            ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
             int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
             TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);

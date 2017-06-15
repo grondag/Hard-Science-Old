@@ -225,7 +225,7 @@ public class SuperDispatcher
     
     public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity)
     {
-        ModelState key = SuperItemBlock.getModelState(stack);
+        ModelState key = SuperItemBlock.getModelStateFromStack(stack);
         return itemCache.get(key);
     }
   

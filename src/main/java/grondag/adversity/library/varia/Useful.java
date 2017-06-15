@@ -367,6 +367,17 @@ public class Useful
        return mask;
    }
    
+   @SuppressWarnings("unchecked")
+   public static <T extends Enum<?>> T nextEnumValue(T value)
+   {
+       int ord = value.ordinal() + 1;
+       if(ord >= value.getClass().getEnumConstants().length)
+       {
+           ord = 0;
+       }
+       return (T) value.getClass().getEnumConstants()[ord];
+   }
+   
 //   /**
 //    * Kept for possible future use.
 //    * Optimized sort for three element array

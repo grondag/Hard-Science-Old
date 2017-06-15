@@ -78,7 +78,6 @@ public class BlockAdjuster extends Item
         {
             return WandMode.CONNECT;
         }
-
     }
 
     @Override

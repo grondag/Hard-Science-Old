@@ -304,7 +304,7 @@ public class SuperGuiScreen extends GuiScreen
                 return;
             }
             //            this.meta = this.itemPreview.previewItem.getMetadata();
-            modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
+            modelState = SuperItemBlock.getModelStateFromStack(itemPreview.previewItem);
         }
 
         // abort on strangeness

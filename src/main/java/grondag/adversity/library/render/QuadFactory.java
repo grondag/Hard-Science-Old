@@ -51,7 +51,16 @@ public class QuadFactory
 
     public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();
 
-
+    public static float[] colorComponentsARGB(int colorARGB)
+    {
+        float[] result = new float[4];
+        result[0] = (float)((colorARGB >> 24) & 0xFF) / 0xFF;
+        result[1] = (float)((colorARGB >> 16) & 0xFF) / 0xFF;
+        result[2] = (float)((colorARGB >> 8) & 0xFF) / 0xFF;
+        result[3] = (float)(colorARGB & 0xFF) / 0xFF;
+        return result;
+    }
+    
     public static int shadeColor(int color, float shade, boolean glOrder)
     {
         int red = (int) (shade * 255f * ((color >> 16 & 0xFF) / 255f));

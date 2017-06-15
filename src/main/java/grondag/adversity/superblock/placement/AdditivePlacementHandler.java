@@ -43,7 +43,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
         final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).block;
-        final ModelState stackModelState = SuperItemBlock.getModelState(stack);
+        final ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
 
         final IBlockState onBlockState = worldIn.getBlockState(posOn);
 
