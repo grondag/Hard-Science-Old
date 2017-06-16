@@ -4,13 +4,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import grondag.adversity.Configurator;
+import grondag.adversity.Configurator.Render.PreviewMode;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -23,6 +24,9 @@ public interface PlacementItem
     
     default void renderOverlay(RenderWorldLastEvent event, EntityPlayerSP player, ItemStack heldItem)
     {
+        // abort if turned off
+        if(Configurator.RENDER.previewSetting == PreviewMode.NONE) return;
+        
         ModelState modelState = getModelState(heldItem);
         if(modelState == null) return;
         
@@ -51,14 +55,24 @@ public interface PlacementItem
                  
         if(placements.isEmpty()) return;
         
+        
         for(Pair<BlockPos, ItemStack> placement : placements)
         {
             ModelState placementModelState = SuperItemBlock.getModelStateFromStack(placement.getRight());
             
             if(placementModelState != null)
             {
-                BlockHighlighter.drawBlockHighlight(placementModelState, placement.getLeft(), player, event.getPartialTicks(), true);
+                if(Configurator.RENDER.previewSetting == PreviewMode.OUTLINE)
+                {
+                    BlockHighlighter.drawBlockHighlight(placementModelState, placement.getLeft(), player, event.getPartialTicks(), true);
+                }
+                else
+                {
+                    //TODO: Ghost Mode
+                }
             }
         }
+
+            
     }
 }

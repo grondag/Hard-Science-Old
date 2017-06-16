@@ -8,8 +8,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
 import grondag.adversity.Log;

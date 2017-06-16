@@ -11,7 +11,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.library.render.QuadFactory;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
@@ -49,7 +48,6 @@ public class BlockHighlighter
 	    double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
 	    
 	    float[] colorARGBfloat = isPreview ? COLOR_PREVIEW : COLOR_HIGHLIGHT;
-
 
 	    if(isPreview) GlStateManager.disableDepth();
 	    GlStateManager.enableBlend();
