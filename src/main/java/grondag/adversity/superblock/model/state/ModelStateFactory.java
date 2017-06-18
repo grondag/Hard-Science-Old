@@ -618,7 +618,7 @@ public class ModelStateFactory
         {
             if(isEnabled && this.getTexture(PaintLayer.DETAIL) == Textures.NONE)
             {
-                this.setTexture(PaintLayer.DETAIL, Textures.BLOCK_RAW_FLEXSTONE);
+                this.setTexture(PaintLayer.DETAIL, Textures.BLOCK_NOISE_STRONG);
             }
             else if(!isEnabled && this.getTexture(PaintLayer.DETAIL) != Textures.NONE)
             {
@@ -635,7 +635,7 @@ public class ModelStateFactory
         {
             if(isEnabled && this.getTexture(PaintLayer.OVERLAY) == Textures.NONE)
             {
-                this.setTexture(PaintLayer.OVERLAY, Textures.BLOCK_RAW_FLEXSTONE);
+                this.setTexture(PaintLayer.OVERLAY, Textures.BLOCK_NOISE_STRONG);
             }
             else if(!isEnabled && this.getTexture(PaintLayer.OVERLAY) != Textures.NONE)
             {

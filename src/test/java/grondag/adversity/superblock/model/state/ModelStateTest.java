@@ -42,8 +42,8 @@ public class ModelStateTest
         state.setLightingMode(PaintLayer.OVERLAY, LightingMode.SHADED);
         state.setRenderLayer(PaintLayer.LAMP, BlockRenderLayer.SOLID);
         state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.TRANSLUCENT);
-        state.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
-        state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_TEST);
+        state.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_STRONG);
+        state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_SMOOTH_BLEND);
         state.setAxis(EnumFacing.Axis.Z);
         state.setTranslucency(Translucency.SHADED);
         state.setTextureRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
@@ -74,8 +74,8 @@ public class ModelStateTest
         assert(reloadedState.getLightingMode(PaintLayer.DETAIL) == LightingMode.SHADED);
         assert(reloadedState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.SOLID);
         assert(reloadedState.getRenderLayer(PaintLayer.OVERLAY) == BlockRenderLayer.TRANSLUCENT);
-        assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_RAW_FLEXSTONE);
-        assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_TEST);
+        assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_NOISE_STRONG);
+        assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_SMOOTH_BLEND);
         assert(reloadedState.getAxis()) == EnumFacing.Axis.Z;
         assert(reloadedState.getTranslucency()) == Translucency.SHADED;
         assert(reloadedState.getTextureRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
