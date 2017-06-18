@@ -109,25 +109,33 @@ public class Textures
     public static final TexturePallette BIGTEX_CRACKED_EARTH_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CRACKED_EARTH);
     public static final TexturePallette BIGTEX_CRACKED_EARTH_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CRACKED_EARTH_ZOOM);
 
-    public static final TexturePallette BIGTEX_FLUID_GLOW = REGISTRY.addTexturePallette(animatedTextureName("fluid_glow"), 1, animatedTextueScale(), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_FLUID_GLOW = REGISTRY.addTexturePallette(animatedTextureName("fluid_glow"), 1, animatedTextueScale(TextureScale.MEDIUM), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
     public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW);
     public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW_ZOOM);
 
-    public static final TexturePallette BIGTEX_FLUID_VORTEX = REGISTRY.addTexturePallette(animatedTextureName("fluid_vortex"), 1, animatedTextueScale(), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_FLUID_VORTEX = REGISTRY.addTexturePallette(animatedTextureName("fluid_vortex"), 1, animatedTextueScale(TextureScale.MEDIUM), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
     public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX);
     public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_ZOOM);
 
-    public static final TexturePallette BIGTEX_FLUID_VORTEX_S = REGISTRY.addTexturePallette(animatedTextureName("fluid_vortex"), 1, animatedTextueScale(), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.DYNAMIC_TILES);
+    public static final TexturePallette BIGTEX_FLUID_VORTEX_S = REGISTRY.addTexturePallette(animatedTextureName("fluid_vortex"), 1, animatedTextueScale(TextureScale.MEDIUM), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.DYNAMIC_TILES);
     public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S);
     public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S_ZOOM);
     
-    public static final TexturePallette BIGTEX_CLOUDS = REGISTRY.addTexturePallette(animatedTextureName("clouds"), 1, animatedTextueScale(), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_CLOUDS = REGISTRY.addTexturePallette(animatedTextureName("clouds"), 1, animatedTextueScale(TextureScale.MEDIUM), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
     public static final TexturePallette BIGTEX_CLOUDS_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS);
     public static final TexturePallette BIGTEX_CLOUDS_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_ZOOM);
     
-    public static final TexturePallette BIGTEX_CLOUDS_S = REGISTRY.addTexturePallette(animatedTextureName("clouds"), 1, animatedTextueScale(), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.DYNAMIC_TILES);
+    public static final TexturePallette BIGTEX_CLOUDS_S = REGISTRY.addTexturePallette(animatedTextureName("clouds"), 1, animatedTextueScale(TextureScale.MEDIUM), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.DYNAMIC_TILES);
     public static final TexturePallette BIGTEX_CLOUDS_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_S);
     public static final TexturePallette BIGTEX_CLOUDS_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_S_ZOOM);
+    
+    public static final TexturePallette BIGTEX_STARFIELD = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 1, animatedTextueScale(TextureScale.SMALL), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_STARFIELD_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD);
+    public static final TexturePallette BIGTEX_STARFIELD_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_ZOOM);
+    
+    public static final TexturePallette BIGTEX_STARFIELD_S = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 1, animatedTextueScale(TextureScale.SMALL), TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.DYNAMIC_TILES);
+    public static final TexturePallette BIGTEX_STARFIELD_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_S);
+    public static final TexturePallette BIGTEX_STARFIELD_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_S_ZOOM);
 
     /** gives appropriate texture name for big-tex animated (or not, if turned off) textures based on user config */
     private static String animatedTextureName(String baseName)
@@ -143,10 +151,10 @@ public class Textures
     }
     
     /** gives base (no-zoom) texture scale for big-tex animated textures based on user config */
-    private static TextureScale animatedTextueScale()
+    private static TextureScale animatedTextueScale(TextureScale largerScale)
     {
         return (Configurator.RENDER.enableAnimatedTextures && !Configurator.RENDER.useLargeAnimatedTextures)
-                ? TextureScale.SMALL : TextureScale.MEDIUM;
+                ? TextureScale.values()[largerScale.ordinal() - 1] : largerScale;
     }
     
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
