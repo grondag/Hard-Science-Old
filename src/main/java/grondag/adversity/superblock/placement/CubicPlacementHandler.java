@@ -24,6 +24,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class CubicPlacementHandler implements IPlacementHandler
@@ -36,9 +37,12 @@ public class CubicPlacementHandler implements IPlacementHandler
     {
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
-        SuperBlock myBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).block;
+        SuperItemBlock item = (SuperItemBlock)stack.getItem();
+        PlacementMode placementMode = item.getMode(stack);
         
-        ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
+        SuperBlock stackBlock = (SuperBlock) item.block;
+        
+        ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
@@ -49,42 +53,91 @@ public class CubicPlacementHandler implements IPlacementHandler
         {
             return Collections.emptyList();
         }
-        
-        if(modelState.hasAxis())
+
+        ModelState closestModelState = null;
+        if(placementMode == PlacementMode.MATCH_CLOSEST)
         {
-            boolean isAxisDone = false;
-            // TODO: make fixed orientation a GUI option: match placement, match adjacent or fixed selected
             if(onBlock instanceof SuperBlock)
             {
-                ModelState modelStateOn = ((SuperBlock)onBlock).getModelState(worldIn, posOn, true);
-                if(modelStateOn.hasAxis())
+                closestModelState = ((SuperBlock)onBlock).getModelState(worldIn, posOn, true);
+            }
+            else
+            {
+                Vec3d location = new Vec3d(posOn.getX() + hitX, posOn.getY() + hitY, posOn.getZ() + hitZ);
+                double closestDistSq = Double.MAX_VALUE;
+                for(int x = -1; x <= 1; x++)
                 {
-                    modelState.setAxis(modelStateOn.getAxis());
-                    if(modelState.hasAxisOrientation())
+                    for(int y = -1; y <= 1; y++)
                     {
-                        modelState.setAxisInverted(modelStateOn.isAxisInverted());
+                        for(int z = -1; z <= 1; z++)
+                        {
+                            if((x | y | z) != 0)
+                            {
+                                BlockPos testPos = posOn.add(x, y, z);
+                                IBlockState testBlockState = worldIn.getBlockState(testPos);
+                                if(testBlockState.getBlock() instanceof SuperBlock)
+                                {
+                                    double distSq = location.squareDistanceTo(posOn.getX() + 0.5 + x, posOn.getY() + 0.5 + y, posOn.getZ() + 0.5 + z);
+                                    if(distSq < closestDistSq)
+                                    {
+                                        SuperBlock testBlock = (SuperBlock)testBlockState.getBlock();
+                                        ModelState testModelState = testBlock.getModelState(worldIn, testPos, true);
+                                        if(testModelState.getShape() == stackModelState.getShape())
+                                        {
+                                            closestDistSq = distSq;
+                                            closestModelState = testModelState;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(stackModelState.hasAxis())
+        {
+            if(placementMode == PlacementMode.STATIC)
+            {
+                stackModelState.setAxis(item.getFace(stack).getAxis());
+                if(stackModelState.hasAxisOrientation())
+                {
+                    stackModelState.setAxisInverted(item.getFace(stack).getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE);
+                }
+            }
+            else
+            {
+                boolean isAxisDone = false;
+                
+                if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
+                {
+                    stackModelState.setAxis(closestModelState.getAxis());
+                    if(stackModelState.hasAxisOrientation())
+                    {
+                        stackModelState.setAxisInverted(closestModelState.isAxisInverted());
                     }
                     isAxisDone = true;
                 }
-            }
-            
-            if(!isAxisDone)
-            {
-                modelState.setAxis(facing.getAxis());
-                if(modelState.hasAxisOrientation())
+
+                if(!isAxisDone)
                 {
-                    modelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                    stackModelState.setAxis(facing.getAxis());
+                    if(stackModelState.hasAxisOrientation())
+                    {
+                        stackModelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                    }
                 }
             }
         }
         
-        if(modelState.hasSpecies())
+        if(stackModelState.hasSpecies())
         {
-            int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, myBlock, modelState);
-            modelState.setSpecies(species);
-            result.setItemDamage(modelState.getMetaData());
+            int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, stackBlock, stackModelState);
+            stackModelState.setSpecies(species);
+            result.setItemDamage(stackModelState.getMetaData());
         }
-        SuperItemBlock.setModelState(result, modelState);
+        SuperItemBlock.setModelState(result, stackModelState);
  
         return ImmutableList.of(Pair.of(posPlaced, result));
     }

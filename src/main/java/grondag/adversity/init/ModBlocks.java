@@ -1,8 +1,5 @@
 package grondag.adversity.init;
 
-import java.util.Map;
-
-import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.VolcanoBlock;
 import grondag.adversity.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.adversity.feature.volcano.lava.LavaBlock;
@@ -22,28 +19,18 @@ import grondag.adversity.superblock.terrain.TerrainDynamicBlock;
 import grondag.adversity.superblock.terrain.TerrainStaticBlock;
 import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.adversity.superblock.varia.BlockSubstance;
-import grondag.adversity.superblock.varia.SuperStateMapper;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
-import net.minecraftforge.fml.relauncher.Side;
 
 @Mod.EventBusSubscriber
 @ObjectHolder("adversity")
 public class ModBlocks
 {
-    private static final SuperStateMapper STATE_MAPPER = new SuperStateMapper(ModModels.MODEL_DISPATCH);
-    
     public static final Block basalt_cobble = null;
     public static final Block basalt_cool_dynamic_height = null;
     public static final Block basalt_cool_dynamic_filler = null;
@@ -175,24 +162,7 @@ public class ModBlocks
     }
     
     public static void preInit(FMLPreInitializationEvent event) 
-    {
-        if (event.getSide() == Side.CLIENT)
-        {
-            IForgeRegistry<Block> blockReg = GameRegistry.findRegistry(Block.class);
-        
-            for(Map.Entry<ResourceLocation, Block> entry: blockReg.getEntries())
-            {
-                if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
-                {
-                    Block block = entry.getValue();
-                    if(block instanceof SuperBlock)
-                    {
-                        ModelLoader.setCustomStateMapper(block, STATE_MAPPER);
-                    }
-                }
-            }
-        }
-        
+    {   
         // these have to be in pre-init so that object holders are populated
         ((SuperBlock)ModBlocks.basalt_cut).setDropItem(ModItems.basalt_cobble);
 
@@ -220,24 +190,5 @@ public class ModBlocks
         ((CoolingBasaltBlock)ModBlocks.basalt_dynamic_very_hot_filler).setCoolingBlockInfo((TerrainDynamicBlock) ModBlocks.basalt_dynamic_hot_filler, 4);
         
      
-    }
-    
-    public static void init(FMLInitializationEvent event)
-    {
-        IForgeRegistry<Block> blockReg = GameRegistry.findRegistry(Block.class);
-        
-        for(Map.Entry<ResourceLocation, Block> entry: blockReg.getEntries())
-        {
-            if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
-            {
-                Block block = entry.getValue();
-                if(block instanceof SuperBlock)
-                {
-                    // won't work in pre-init because BlockColors/ItemColors aren't instantiated yet
-                    // Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(block.blockModelHelper.dispatcher, block);
-                    Minecraft.getMinecraft().getItemColors().registerItemColorHandler(DummyColorHandler.INSTANCE, block);
-                }
-            }
-        }
     }
 }

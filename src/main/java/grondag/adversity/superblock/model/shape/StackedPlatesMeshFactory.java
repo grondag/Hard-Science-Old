@@ -13,11 +13,13 @@ import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.library.varia.Useful;
 import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.collision.ICollisionHandler;
+import grondag.adversity.superblock.collision.SideShape;
 import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.SurfaceTopology;
 import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import grondag.adversity.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -44,7 +46,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
                 TOP_AND_BOTTOM, SIDES);
     }
  
-    private List<RawQuad> makeQuads(int meta, EnumFacing.Axis axis, boolean isAxisInverted)
+    private List<RawQuad> makeQuads(int meta, Matrix4d matrix)
     {
         double height = (meta + 1) / 16.0;
         
@@ -55,8 +57,6 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
         template.lockUV = true;
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
-        
-        Matrix4d matrix = new Matrix4d(getMatrixForAxis(axis, isAxisInverted));
         
         RawQuad quad = template.clone();
         quad.surfaceInstance = TOP_AND_BOTTOM.unitInstance;
@@ -91,7 +91,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public List<RawQuad> getShapeQuads(ModelState modelState)
     {
-        return this.makeQuads(modelState.getMetaData(), modelState.getAxis(), modelState.isAxisInverted());
+        return this.makeQuads(modelState.getMetaData(), getMatrix4d(modelState));
     }
 
     @Override
@@ -127,7 +127,7 @@ public class StackedPlatesMeshFactory extends ShapeMeshGenerator implements ICol
     @Override
     public AxisAlignedBB getCollisionBoundingBox(ModelState modelState)
     {
-        return Useful.makeRotatedAABB(0, 0, 0, 1, (modelState.getMetaData() + 1) / 16f, 1, getMatrixForAxis(modelState));
+        return Useful.makeRotatedAABB(0, 0, 0, 1, (modelState.getMetaData() + 1) / 16f, 1, getMatrix4f(modelState));
     }
 
     @Override

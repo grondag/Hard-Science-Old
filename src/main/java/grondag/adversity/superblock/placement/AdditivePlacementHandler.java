@@ -41,6 +41,9 @@ public class AdditivePlacementHandler implements IPlacementHandler
     {
 
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
+        
+        if(((PlacementItem)stack.getItem()).getMode(stack) == PlacementMode.STATIC) 
+            return CubicPlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
 
         final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).block;
         final ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);

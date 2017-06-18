@@ -9,7 +9,10 @@ import grondag.adversity.superblock.color.Hue;
 import grondag.adversity.superblock.color.Luminance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class ColorPicker extends GuiControl
 {
     private Hue selectedHue = Hue.AZURE;

@@ -8,7 +8,11 @@ import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class TexturePicker extends TabBar<TexturePallette>
 {
 
@@ -17,6 +21,7 @@ public class TexturePicker extends TabBar<TexturePallette>
     public TexturePicker(List<TexturePallette> items, double left, double top)
     {
         super(items);
+        this.setItemsPerRow(8);
     }
 
     @Override
@@ -24,6 +29,7 @@ public class TexturePicker extends TabBar<TexturePallette>
     {
         int color = this.colorMap == null ? 0xFFFFFFFF : this.colorMap.getColor(EnumColorMap.BASE);
       
-        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, item.getSampleSprite(), (int)this.actualItemSize(), (int)this.actualItemSize(), color, item.textureScale);
+        TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
+        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, (int)this.actualItemSize(), (int)this.actualItemSize(), color, item.textureScale);
     }
 }

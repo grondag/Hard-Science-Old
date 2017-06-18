@@ -14,7 +14,7 @@ public abstract class CubicQuadPainter extends QuadPainter
     protected CubicQuadPainter(ModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
-        this.rotation = modelState.hasRotation() ? modelState.getRotation(this.texture.textureScale) : Rotation.ROTATE_NONE;
+        this.rotation = modelState.hasTextureRotation() ? modelState.getTextureRotation(this.texture.textureScale) : Rotation.ROTATE_NONE;
         this.blockVersion = modelState.hasBlockVersions() ? modelState.getBlockVersion(this.texture.textureScale) : 0;
     }
 }

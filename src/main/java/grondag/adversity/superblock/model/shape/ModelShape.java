@@ -3,16 +3,11 @@ package grondag.adversity.superblock.model.shape;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.gui.shape.GuiShape;
-import grondag.adversity.gui.shape.GuiSimpleShape;
-import grondag.adversity.gui.shape.GuiSquareColumn;
-import grondag.adversity.gui.shape.GuiStackedPlates;
 import grondag.adversity.superblock.model.state.MetaUsage;
 import grondag.adversity.superblock.placement.AdditivePlacementHandler;
 import grondag.adversity.superblock.placement.CubicPlacementHandler;
 import grondag.adversity.superblock.placement.IPlacementHandler;
 import grondag.adversity.superblock.placement.SimplePlacementHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
 
 import static grondag.adversity.superblock.model.state.MetaUsage.*;
@@ -33,8 +28,6 @@ public enum ModelShape
         public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return SquareColumnMeshFactory.getShapeMeshFactory(); }
-        @Override
-        public GuiShape guiSettingsControl(Minecraft mc) { return new GuiSquareColumn(mc); }
     },
     
     STACKED_PLATES(SHAPE)
@@ -43,8 +36,6 @@ public enum ModelShape
         public IPlacementHandler getPlacementHandler() { return AdditivePlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return StackedPlatesMeshFactory.getShapeMeshFactory(); }
-        @Override
-        public GuiShape guiSettingsControl(Minecraft mc) { return new GuiStackedPlates(mc); }
     },
     
     //TODO: ROUND COLUMN
@@ -174,6 +165,14 @@ public enum ModelShape
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return TerrainMeshFactory.getMeshFactory(); }
+    },
+    
+    WEDGE(SPECIES, true)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return WedgeMeshFactory.getShapeMeshFactory(); }
     };
 
     public final boolean isAvailableInGui;
@@ -202,10 +201,6 @@ public enum ModelShape
     }
     public abstract ShapeMeshGenerator meshFactory();
     public abstract IPlacementHandler getPlacementHandler();
-    public GuiShape guiSettingsControl(Minecraft mc)
-    {
-        return new GuiSimpleShape(false);
-    }
     
     @SuppressWarnings("deprecation")
     public String localizedName()

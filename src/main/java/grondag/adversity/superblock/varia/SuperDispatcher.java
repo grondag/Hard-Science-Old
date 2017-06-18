@@ -3,6 +3,7 @@ package grondag.adversity.superblock.varia;
 import grondag.adversity.Log;
 import grondag.adversity.library.cache.ObjectSimpleCacheLoader;
 import grondag.adversity.library.cache.ObjectSimpleLoadingCache;
+import grondag.adversity.library.render.QuadBakery;
 import grondag.adversity.library.render.QuadContainer;
 import grondag.adversity.library.render.QuadFactory;
 import grondag.adversity.library.render.RawQuad;
@@ -18,7 +19,6 @@ import grondag.adversity.superblock.model.shape.ShapeMeshGenerator;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.SurfaceTopology;
-import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
@@ -41,8 +41,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SuppressWarnings("unused")
+@SideOnly(Side.CLIENT)
 public class SuperDispatcher
 {
     private final String resourceName;
@@ -98,7 +100,7 @@ public class SuperDispatcher
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
 	    	for(RawQuad quad : getFormattedQuads(key))
 	    	{
-	    	    builder.add(quad.createBakedQuad());
+	    	    builder.add(QuadBakery.createBakedQuad(quad));
 	    	}
 			return new SimpleItemBlockModel(builder.build(), key.getRenderLayerShadedFlags() != 0);
 		}       
@@ -114,7 +116,7 @@ public class SuperDispatcher
             for(RawQuad q : quads)
             {
                 // arbitrary choice - just needs to be a simple non-null texture
-                q.textureSprite = Textures.BLOCK_COBBLE.getSampleSprite();
+                q.textureName = Textures.BLOCK_COBBLE.getSampleTextureName();
              
                 // Need to scale UV on non-cubic surfaces to be within a 1 block boundary.
                 // This causes breaking textures to be scaled to normal size.

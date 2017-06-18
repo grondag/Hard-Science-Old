@@ -4,7 +4,10 @@ import grondag.adversity.gui.Layout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public abstract class GuiControl extends Gui
 {      
     public static final int BUTTON_COLOR_ACTIVE = 0x9AFFFFFF;

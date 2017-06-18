@@ -15,11 +15,8 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 
-@SideOnly(Side.CLIENT)
 public class RenderLavaBlob extends Render<EntityLavaBlob>
 {
 
@@ -81,7 +78,6 @@ public class RenderLavaBlob extends Render<EntityLavaBlob>
         return manager -> new RenderLavaBlob(manager);
     }
 
-    @SideOnly(Side.CLIENT)
     private static void compileDisplayList()
     {
         displayList = GLAllocation.generateDisplayLists(1);

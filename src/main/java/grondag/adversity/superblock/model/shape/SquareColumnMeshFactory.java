@@ -17,11 +17,14 @@ import grondag.adversity.library.world.CornerJoinFaceState;
 import grondag.adversity.library.world.FaceSide;
 import grondag.adversity.library.world.WorldHelper;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.collision.CubeCollisionHandler;
+import grondag.adversity.superblock.collision.ICollisionHandler;
+import grondag.adversity.superblock.collision.SideShape;
 import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.SurfaceTopology;
 import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import grondag.adversity.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -613,12 +616,5 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
     {
         modelState.setStaticShapeBits(STATE_CUT_COUNT.setValue(cutCount, modelState.getStaticShapeBits()));
     }
-
-    @Override
-    public ModelState geometricModelState(ModelState modelState)
-    {
-        ModelState result = super.geometricModelState(modelState);
-        result.setCornerJoin(modelState.getCornerJoin());
-        return result;
-    }
+ 
 }

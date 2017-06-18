@@ -37,6 +37,7 @@ import net.minecraft.world.World;
  */
 public class SuperItemBlock extends ItemBlock implements PlacementItem
 {
+    
     /**
      * Called client-side before {@link #onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}.  
      * If returns false for an itemBlock that method will never be called.
@@ -251,5 +252,4 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 ? BlockSubstance.FLEXSTONE
                 : SuperBlockNBTHelper.readSubstance(tag);
     }
-    
 }

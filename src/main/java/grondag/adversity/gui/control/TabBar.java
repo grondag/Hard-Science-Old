@@ -8,7 +8,10 @@ import grondag.adversity.library.varia.Useful;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public abstract class TabBar<T> extends GuiControl
 {
     public static final int TAB_MARGIN = 2;

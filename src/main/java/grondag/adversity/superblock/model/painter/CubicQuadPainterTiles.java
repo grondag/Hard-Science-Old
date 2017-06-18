@@ -19,7 +19,7 @@ public class CubicQuadPainterTiles extends CubicQuadPainter
         {
             quad.rotation = this.rotation;
         }
-        quad.textureSprite = this.texture.getTextureSprite(this.blockVersion);
+        quad.textureName = this.texture.getTextureName(this.blockVersion);
         return quad;
     }
 }

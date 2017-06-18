@@ -73,6 +73,59 @@ public class Textures
 
     public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette("bigtex_single", 1, TextureScale.SMALL, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.HIDDEN_TILES);
     
+    public static final TexturePallette BIGTEX_SANDSTONE = REGISTRY.addTexturePallette("sandstone", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_SANDSTONE_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_SANDSTONE);
+    public static final TexturePallette BIGTEX_SANDSTONE_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_SANDSTONE_ZOOM);
+
+    public static final TexturePallette BIGTEX_ASPHALT = REGISTRY.addTexturePallette("asphalt", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_ASPHALT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_ASPHALT);
+    public static final TexturePallette BIGTEX_ASPHALT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_ASPHALT_ZOOM);
+
+    public static final TexturePallette BIGTEX_WORN_ASPHALT = REGISTRY.addTexturePallette("worn_asphalt", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_WORN_ASPHALT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_WORN_ASPHALT);
+    public static final TexturePallette BIGTEX_WORN_ASPHALT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_WORN_ASPHALT_ZOOM);
+
+    public static final TexturePallette BIGTEX_WOOD = REGISTRY.addTexturePallette("wood", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_WOOD_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_WOOD);
+    public static final TexturePallette BIGTEX_WOOD_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_WOOD_ZOOM);
+
+    public static final TexturePallette BIGTEX_GRANITE = REGISTRY.addTexturePallette("granite", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_GRANITE_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_GRANITE);
+    public static final TexturePallette BIGTEX_GRANITE_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_GRANITE_ZOOM);
+
+    public static final TexturePallette BIGTEX_MARBLE = REGISTRY.addTexturePallette("marble", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_MARBLE_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_MARBLE);
+    public static final TexturePallette BIGTEX_MARBLE_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_MARBLE_ZOOM);
+
+    public static final TexturePallette BIGTEX_SLATE = REGISTRY.addTexturePallette("slate", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_SLATE_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_SLATE);
+    public static final TexturePallette BIGTEX_SLATE_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_SLATE_ZOOM);
+
+    public static final TexturePallette BIGTEX_ROUGH_ROCK = REGISTRY.addTexturePallette("rough_rock", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_ROUGH_ROCK_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_ROUGH_ROCK);
+    public static final TexturePallette BIGTEX_ROUGH_ROCK_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_ROUGH_ROCK_ZOOM);
+
+    public static final TexturePallette BIGTEX_CRACKED_EARTH = REGISTRY.addTexturePallette("cracked_earth", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.STATIC_TILES);
+    public static final TexturePallette BIGTEX_CRACKED_EARTH_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CRACKED_EARTH);
+    public static final TexturePallette BIGTEX_CRACKED_EARTH_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CRACKED_EARTH_ZOOM);
+
+    public static final TexturePallette BIGTEX_FLUID_GLOW = REGISTRY.addTexturePallette("fluid_glow", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW);
+    public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW_ZOOM);
+
+    public static final TexturePallette BIGTEX_FLUID_VORTEX = REGISTRY.addTexturePallette("fluid_vortex", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX);
+    public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_ZOOM);
+
+    public static final TexturePallette BIGTEX_FLUID_VORTEX_S = REGISTRY.addTexturePallette("fluid_vortex", 1, TextureScale.MEDIUM, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.SOLID, TextureGroup.DYNAMIC_TILES);
+    public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S);
+    public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S_ZOOM);
+    
+    public static final TexturePallette BIGTEX_CLOUDS = REGISTRY.addTexturePallette("clouds", 1, TextureScale.SMALL, TextureLayout.BIGTEX, false, LIGHTING_BOTH, BlockRenderLayer.TRANSLUCENT, TextureGroup.DYNAMIC_DETAILS);
+    public static final TexturePallette BIGTEX_CLOUDS_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS);
+    public static final TexturePallette BIGTEX_CLOUDS_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_ZOOM);
+    
+
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {
         int searchFlags = 0;

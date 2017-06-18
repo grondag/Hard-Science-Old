@@ -8,8 +8,6 @@ import grondag.adversity.library.render.LightingMode;
 import grondag.adversity.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.adversity.superblock.model.painter.CubicQuadPainterMasonry;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.text.translation.I18n;
 
@@ -140,7 +138,7 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             this.zoomLevel = zoomLevel;
   
             this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag 
-                    | (allowRotation ? ModelState.STATE_FLAG_NEEDS_ROTATION : 0);
+                    | (allowRotation ? ModelState.STATE_FLAG_NEEDS_TEXTURE_ROTATION : 0);
         }
         
         /**
@@ -189,12 +187,12 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             }
         }
         
-        public String buildTextureName_X_8(int offset)
+        private String buildTextureName_X_8(int offset)
         {
             return "adversity:blocks/" + textureBaseName + "_" + (offset >> 3) + "_" + (offset & 7);
         }
 
-        public String buildTextureNameBigTex()
+        private String buildTextureNameBigTex()
         {
             return "adversity:blocks/" + textureBaseName;
         }
@@ -221,15 +219,9 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             }
         }
         
-        /** used for GUI texture preview and particles */
-        public TextureAtlasSprite getSampleSprite()
+        public String getTextureName(int version)
         {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(getSampleTextureName());
-        }
-        
-        public TextureAtlasSprite getTextureSprite(int version)
-        {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version & this.textureVersionMask));
+            return buildTextureName(version & this.textureVersionMask);
         }
         
         private String buildTextureName(int version)
@@ -241,9 +233,9 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                     : buildTextureName_X_8(version);
         }
         
-        public TextureAtlasSprite getTextureSprite(int version, int index)
+        public String getTextureName(int version, int index)
         {
-            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(buildTextureName(version & this.textureVersionMask, index));
+            return buildTextureName(version & this.textureVersionMask, index);
         }
         
         private String buildTextureName(int version, int index)

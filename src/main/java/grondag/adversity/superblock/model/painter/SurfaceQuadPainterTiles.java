@@ -65,7 +65,7 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
        int hash = MathHelper.hash(uOrdinal | (vOrdinal << 8));
         
         int textureVersion = this.texture.textureVersionMask & (hash >> 4);
-        quad.textureSprite = this.texture.getTextureSprite(textureVersion);
+        quad.textureName = this.texture.getTextureName(textureVersion);
                 
         int rotation = hash & 0x3;
         if(this.texture.allowRotation & rotation > 0)

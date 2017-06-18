@@ -49,7 +49,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         if(this.texture.textureVersionCount == 1)
         {
             // single texture, so do rotation, uv flip and offset
-            quad.textureSprite = this.texture.getTextureSprite(this.blockVersion);
+            quad.textureName = this.texture.getTextureName(this.blockVersion);
             
             quad.useVertexUVRotation = true;
             quad.rotation = Rotation.values()[key & 3];
@@ -82,7 +82,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         else
         {
             // multiple texture versions, so do rotation and alternation
-            quad.textureSprite = this.texture.getTextureSprite((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
+            quad.textureName = this.texture.getTextureName((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
             
             quad.useVertexUVRotation = true;
             quad.rotation = Rotation.values()[(this.texture.allowRotation ? key + this.rotation.ordinal() : key) & 3];

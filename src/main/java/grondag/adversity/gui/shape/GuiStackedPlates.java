@@ -5,7 +5,10 @@ import grondag.adversity.gui.control.Toggle;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class GuiStackedPlates extends GuiShape
 {
 

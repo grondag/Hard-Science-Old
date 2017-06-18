@@ -4,18 +4,19 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import grondag.adversity.init.ModModels;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.block.SuperModelBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.DefaultStateMapper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
 * SuperBlocks all use the same underlying dispatcher.  
 */
-@SuppressWarnings("unused")
+@SideOnly(Side.CLIENT)
 public class SuperStateMapper extends DefaultStateMapper 
 {
     private final SuperDispatcher dispatcher;

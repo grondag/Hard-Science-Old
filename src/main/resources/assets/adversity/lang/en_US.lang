@@ -37,9 +37,28 @@ key.placement_preview=Placement Preview
 
 #PLACEMENT
 placement.message.preview_set=Placement preview mode set to %s
+placement.message.orientation_set=Placement orientation set to %s
+placement.message.mode=Placement mode set to %s
+placement.message.rotation=Placement rotation set to %s
 placement.preview.none=NONE
 placement.preview.outline=OUTLINE
 placement.preview.ghost=GHOST
+placement.orientation.up=UP
+placement.orientation.down=DOWN
+placement.orientation.east=EAST
+placement.orientation.west=WEST
+placement.orientation.north=NORTH
+placement.orientation.south=SOUTH
+placement.mode.static=STATIC
+placement.mode.face_simple=FACE
+placement.mode.face_location=FACE LOCATION
+placement.mode.match_closest=MATCH CLOSEST
+placement.rotation.rotate_none=NONE
+placement.rotation.rotate_90=CLOCKWISE
+placement.rotation.rotate_180=FLIP
+placement.rotation.rotate_270=COUNTER CLOCKWISE
+
+
 
 #ITEMS
 item.block_wand.name=Block Adjuster

@@ -1,78 +1,82 @@
 package grondag.adversity.superblock.placement;
 
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import grondag.adversity.Configurator;
-import grondag.adversity.Configurator.Render.PreviewMode;
-import grondag.adversity.superblock.items.SuperItemBlock;
+import grondag.adversity.library.varia.Useful;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.varia.BlockHighlighter;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.ForgeHooks;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 
 public interface PlacementItem
 {
+    public static final String TAG_ROTATION = "adv_placement_rotation";
+    public static final String TAG_FACE = "adv_placement_face";
+    public static final String TAG_MODE = "adv_placement_mode";
+    
     public abstract ModelState getModelState(ItemStack stack);
     
-    default void renderOverlay(RenderWorldLastEvent event, EntityPlayerSP player, ItemStack heldItem)
+    /** Face corresponding with the axis and orientation for placement. Not the face on which it is placed. */
+    public default void setFace(ItemStack stack, EnumFacing face)
     {
-        // abort if turned off
-        if(Configurator.RENDER.previewSetting == PreviewMode.NONE) return;
-        
-        ModelState modelState = getModelState(heldItem);
-        if(modelState == null) return;
-        
-        Minecraft mc = Minecraft.getMinecraft();
-        
-        // abort if out of range
-        if(ForgeHooks.rayTraceEyeHitVec(player, mc.playerController.getBlockReachDistance() + 1) == null) return;
-        
-        RayTraceResult target = mc.objectMouseOver;
-        
-        if(target.typeOfHit != RayTraceResult.Type.BLOCK) return;
-        
-        BlockPos pos = target.getBlockPos();
-        
-        if(player.world.isAirBlock(pos)) return;
-        
-        Vec3d hitVec = target.hitVec;
-        
-        float xHit = (float)(hitVec.xCoord - (double)pos.getX());
-        float yHit = (float)(hitVec.yCoord - (double)pos.getY());
-        float zHit = (float)(hitVec.zCoord - (double)pos.getZ());
-        
-        List<Pair<BlockPos, ItemStack>> placements = modelState.getShape().getPlacementHandler()
-                .getPlacementResults(player, player.world, target.getBlockPos(), player.getActiveHand(), target.sideHit, xHit, 
-                        yHit, zHit, heldItem);
-                 
-        if(placements.isEmpty()) return;
-        
-        
-        for(Pair<BlockPos, ItemStack> placement : placements)
-        {
-            ModelState placementModelState = SuperItemBlock.getModelStateFromStack(placement.getRight());
-            
-            if(placementModelState != null)
-            {
-                if(Configurator.RENDER.previewSetting == PreviewMode.OUTLINE)
-                {
-                    BlockHighlighter.drawBlockHighlight(placementModelState, placement.getLeft(), player, event.getPartialTicks(), true);
-                }
-                else
-                {
-                    //TODO: Ghost Mode
-                }
-            }
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
         }
+        tag.setInteger(TAG_FACE, face.ordinal());
+        stack.setTagCompound(tag);
+    }
+    
+    /** Face corresponding with the axis and orientation for placement. Not the face on which it is placed. */
+    public default EnumFacing getFace(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return (tag == null) ? EnumFacing.UP : EnumFacing.values()[tag.getInteger(TAG_FACE)];
+    }
+    
+    public default void cycleFace(ItemStack stack)
+    {
+        this.setFace(stack, Useful.nextEnumValue(this.getFace(stack)));
+    }
+    
+    public default void setRotation(ItemStack stack, Rotation rotation)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
+        }
+        tag.setInteger(TAG_ROTATION, rotation.ordinal());
+        stack.setTagCompound(tag);
+    }
 
-            
+    public default Rotation getRotation(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return (tag == null) ? Rotation.ROTATE_NONE : Rotation.values()[tag.getInteger(TAG_ROTATION)];
+    }
+    
+    public default void cycleRotation(ItemStack stack)
+    {
+        this.setRotation(stack, Useful.nextEnumValue(this.getRotation(stack)));
+    }
+    
+    public default void setMode(ItemStack stack, PlacementMode mode)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        if(tag == null){
+            tag = new NBTTagCompound();
+        }
+        tag.setInteger(TAG_MODE, mode.ordinal());
+        stack.setTagCompound(tag);
+    }
+    
+    public default PlacementMode getMode(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        return (tag == null) ? PlacementMode.STATIC : PlacementMode.values()[tag.getInteger(TAG_MODE)];       
+    }
+    
+    public default void cycleMode(ItemStack stack)
+    {
+        this.setMode(stack, Useful.nextEnumValue(this.getMode(stack)));
     }
 }

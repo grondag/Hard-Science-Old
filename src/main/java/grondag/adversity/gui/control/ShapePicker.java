@@ -9,11 +9,14 @@ import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class ShapePicker extends TabBar<ModelShape>
 {
 
-    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.GUI_AVAILABLE_SHAPES.size()];
+    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.values().length];
     
     static
     {

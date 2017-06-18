@@ -2,7 +2,10 @@ package grondag.adversity.gui.shape;
 
 import grondag.adversity.gui.control.Panel;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public abstract class GuiShape extends Panel
 {
 

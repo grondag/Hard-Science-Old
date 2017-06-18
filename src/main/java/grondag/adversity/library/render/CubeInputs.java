@@ -1,13 +1,7 @@
 package grondag.adversity.library.render;
 
-import java.util.List;
-
-import com.google.common.collect.ImmutableList;
-
 import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.model.state.Surface.SurfaceInstance;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
 
 public class CubeInputs{
@@ -15,7 +9,7 @@ public class CubeInputs{
     public double v0;
     public double u1;
     public double v1;
-    public TextureAtlasSprite textureSprite;
+    public String textureName;
     public int color = 0xFFFFFFFF;
     public Rotation textureRotation = Rotation.ROTATE_NONE;
     public boolean rotateBottom = false;
@@ -28,11 +22,11 @@ public class CubeInputs{
     {
         //NOOP
     }
-    public CubeInputs(int color, Rotation textureRotation, TextureAtlasSprite textureSprite, boolean flipU, boolean flipV, boolean isOverlay, boolean isItem)
+    public CubeInputs(int color, Rotation textureRotation, String textureName, boolean flipU, boolean flipV, boolean isOverlay, boolean isItem)
     {
         this.color = color;
         this.textureRotation = textureRotation;
-        this.textureSprite = textureSprite;
+        this.textureName = textureName;
         this.isOverlay = isOverlay;
         this.isItem = isItem;
         this.u0 = flipU ? 16 : 0;
@@ -52,7 +46,7 @@ public class CubeInputs{
         
         qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
-        qi.textureSprite = this.textureSprite;
+        qi.textureName = this.textureName;
         qi.surfaceInstance = this.surfaceInstance;
 
         double minBound = this.isOverlay ? -0.0002 : 0.0;
@@ -105,14 +99,5 @@ public class CubeInputs{
         }
         
         return qi;
-    }
-    
-    public List<BakedQuad> makeFace(EnumFacing side){
-
-        RawQuad qi = makeRawFace(side);
- 
-        ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-        builder.add(qi.createBakedQuad()).build();
-        return builder.build();
     }
 }

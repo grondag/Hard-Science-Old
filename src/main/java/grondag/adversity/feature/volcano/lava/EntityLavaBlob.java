@@ -31,8 +31,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityLavaBlob extends Entity
 {
@@ -502,7 +500,6 @@ public class EntityLavaBlob extends Entity
         this.dataManager.register(FLUID_AMOUNT, LavaSimulator.FLUID_UNITS_PER_BLOCK);
     }
     
-    @SideOnly(Side.CLIENT)
     public int getBrightnessForRender(float partialTicks)
     {
         return 15728880;

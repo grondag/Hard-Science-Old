@@ -1,37 +1,21 @@
 package grondag.adversity.superblock.block;
 
-import java.util.List;
-
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import grondag.adversity.Configurator;
-import grondag.adversity.library.render.LightingMode;
-import grondag.adversity.superblock.color.BlockColorMapProvider;
-import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.items.SuperItemBlock;
-import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.BlockRenderLayerSet;
-import grondag.adversity.superblock.model.state.ModelStateProperty;
-import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.WorldLightOpacity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.placement.SpeciesGenerator;
-import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.varia.BlockSubstance;
-import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.NonNullList;
@@ -43,8 +27,6 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * User-configurable Adversity building blocks.<br><br>
@@ -59,7 +41,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * 
  * The specific dimensions by which the block instances vary are: {@link #renderLayerSet}, {@link #worldLightOpacity}, Block.fullBlock and {@link #isHypermatter()}.
  */
-@SuppressWarnings("unused")
 public class SuperModelBlock extends SuperBlockPlus  
 {
     /**

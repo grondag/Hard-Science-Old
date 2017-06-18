@@ -10,8 +10,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.NBTReadHandler
 {
@@ -41,8 +39,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         super.onLoad();
     }
 
-    
-    @SideOnly(Side.CLIENT)
     public void updateClientRenderState()
     {
         this.isModelStateCacheDirty = true;
@@ -83,7 +79,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
 
     }
 
-    @SideOnly(Side.CLIENT)
     private void invalidateClientCache(BlockPos updatePos)
     {
         TileEntity target = this.world.getTileEntity(updatePos);

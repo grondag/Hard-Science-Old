@@ -4,7 +4,10 @@ import grondag.adversity.gui.GuiUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class ItemPreview extends GuiControl
 {
     public ItemStack previewItem;

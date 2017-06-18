@@ -117,3 +117,20 @@ processResources
         exclude 'mcmod.info'
     }
 }
+
+sourceSets {
+	main {
+	        java {
+	            include 'grondag/**'
+	        }
+	        resources
+	        {
+	        	include '**'
+	        }
+	    }
+    test {
+        java {
+            exclude 'grondag/**'
+        }
+    }
+}

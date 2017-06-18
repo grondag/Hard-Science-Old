@@ -30,7 +30,6 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     {
         // The description packet often arrives after render state is first cached on client
         // so we need to refresh render state once we have the server-side info.
-
         int oldLight = this.lightValue;
         
         super.handleUpdateTag(tag);

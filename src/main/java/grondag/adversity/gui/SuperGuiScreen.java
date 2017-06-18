@@ -24,6 +24,7 @@ import grondag.adversity.gui.control.TranslucencyPicker;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
 import grondag.adversity.gui.shape.GuiShape;
+import grondag.adversity.gui.shape.GuiShapeFinder;
 import grondag.adversity.init.ModSuperModelBlocks;
 import grondag.adversity.library.render.LightingMode;
 import grondag.adversity.network.AdversityMessages;
@@ -45,7 +46,10 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class SuperGuiScreen extends GuiScreen
 {
 
@@ -111,7 +115,7 @@ public class SuperGuiScreen extends GuiScreen
         {
             modelState.setShape(shapePicker.getSelected());
             rightPanel.remove(group_shape, 1);
-            shapeGui = modelState.getShape().guiSettingsControl(mc);
+            shapeGui = GuiShapeFinder.findGuiForShape(modelState.getShape(), mc);
             rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
             // display shape defaults if any
             shapeGui.loadSettings(modelState);
@@ -277,7 +281,7 @@ public class SuperGuiScreen extends GuiScreen
         super.initGui();
 
 
-        ySize = MathHelper.clamp(height * 3 / 5, fontRenderer.FONT_HEIGHT * 28, height);
+        ySize = MathHelper.clamp(height * 4 / 5, fontRenderer.FONT_HEIGHT * 28, height);
         yStart = (height - ySize) / 2;
         xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
         xStart = (width - xSize) / 2;
@@ -375,7 +379,7 @@ public class SuperGuiScreen extends GuiScreen
 
             group_shape = rightPanel.createVisiblityGroup(I18n.translateToLocal("label.shape"));
             rightPanel.add(group_shape, shapePicker.setVerticalWeight(5));
-            shapeGui = modelState.getShape().guiSettingsControl(mc);
+            shapeGui = GuiShapeFinder.findGuiForShape(modelState.getShape(), mc);
             rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
 
             group_material = rightPanel.createVisiblityGroup(I18n.translateToLocal("label.material"));

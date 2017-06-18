@@ -11,11 +11,14 @@ import grondag.adversity.library.varia.Color;
 import grondag.adversity.library.world.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.world.NeighborBlocks.HorizontalFace;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.collision.CollisionBoxDispatcher;
+import grondag.adversity.superblock.collision.ICollisionHandler;
+import grondag.adversity.superblock.collision.SideShape;
 import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.SurfaceTopology;
 import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import grondag.adversity.superblock.model.state.StateFormat;
 import grondag.adversity.superblock.terrain.TerrainState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -548,20 +551,6 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         return getCollisionBoundingBox(modelState);
     }
     
-    @Override
-    public long collisionKey(ModelState modelState)
-    {
-        return modelState.getTerrainState().getStateKey();
-    }
-    
-    @Override
-    public ModelState geometricModelState(ModelState modelState)
-    {
-        ModelState result = super.geometricModelState(modelState);
-        result.setTerrainState(modelState.getTerrainState());
-        return result;
-    }
-
     @Override
     public int getMetaData(ModelState modelState)
     {

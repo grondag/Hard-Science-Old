@@ -1,7 +1,8 @@
 package grondag.adversity.library.render;
 
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 /**
  * Used in QuadFactory primarily to enable full brightness rendering.
  * Quads will be packed with the format associated with this enum.
@@ -14,11 +15,12 @@ public enum LightingMode
     SHADED,
     FULLBRIGHT;
 
-    public VertexFormat vertexFormat = DefaultVertexFormats.ITEM;
-
-    static
+    @SideOnly(Side.CLIENT)
+    public net.minecraft.client.renderer.vertex.VertexFormat getVertexFormat()
     {
-        FULLBRIGHT.vertexFormat = DefaultVertexFormats.BLOCK;
+        return this==SHADED 
+                ? net.minecraft.client.renderer.vertex.DefaultVertexFormats.ITEM
+                :net.minecraft.client.renderer.vertex.DefaultVertexFormats.BLOCK;
     }
     
     public static int makeLightFlags(LightingMode[] lightingModes)

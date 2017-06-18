@@ -4,10 +4,13 @@ import grondag.adversity.gui.GuiUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import static grondag.adversity.gui.GuiUtil.VerticalAlignment.*;
 import static grondag.adversity.gui.GuiUtil.HorizontalAlignment.*;
 
+@SideOnly(Side.CLIENT)
 public class VisiblitySelector extends GuiControl
 {
     private final VisibilityPanel target;

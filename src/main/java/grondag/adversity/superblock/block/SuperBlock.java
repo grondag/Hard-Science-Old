@@ -12,13 +12,12 @@ import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
 import grondag.adversity.Log;
 import grondag.adversity.external.IWailaProvider;
-import grondag.adversity.init.ModModels;
 import grondag.adversity.library.varia.Color;
 import grondag.adversity.library.varia.Color.EnumHCLFailureMode;
+import grondag.adversity.superblock.collision.ICollisionHandler;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.items.SuperItemBlock;
-import grondag.adversity.superblock.model.shape.ICollisionHandler;
 import grondag.adversity.superblock.model.state.MetaUsage;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.varia.BlockSubstance;
@@ -73,11 +72,13 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.Optional;
 
 /**
  * Base class for Adversity building blocks.
  */
 @SuppressWarnings("deprecation")
+@Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe")
 public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
 {
 
@@ -166,6 +167,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
     {
         IBlockState blockState = world.getBlockState(pos);
@@ -205,6 +207,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
     {
         if(blockState.getBlock() != this)
@@ -275,6 +278,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);
@@ -306,6 +310,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
             int numberOfParticles)
     {
@@ -587,6 +592,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * Get no state here, so always report that we should.
      */
     @Override
+    @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
         return BlockRenderLayer.TRANSLUCENT;
@@ -805,9 +811,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
     }
  
+    @SideOnly(Side.CLIENT)
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        return ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
+        return grondag.adversity.init.ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
     }
 
     @Override
@@ -1113,6 +1120,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
  
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean isTranslucent(IBlockState state)
     {
         return this.worldLightOpacity(state) != WorldLightOpacity.SOLID;
@@ -1194,6 +1202,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         if(this.getSubstance(blockState, blockAccess, pos).isTranslucent)

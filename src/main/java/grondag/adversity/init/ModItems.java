@@ -1,6 +1,5 @@
 package grondag.adversity.init;
 
-import java.io.IOException;
 import java.util.Map;
 import grondag.adversity.Adversity;
 import grondag.adversity.feature.volcano.lava.LavaBlobItem;
@@ -14,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -98,33 +96,6 @@ public class ModItems
                     {
                         ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
                     }
-                }
-            }
-        }
-    }
-    
-    @SubscribeEvent
-    public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
-    {
-        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
-        
-        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
-        {
-            if(entry.getKey().getResourceDomain().equals(Adversity.MODID))
-            {
-                Item item = entry.getValue();
-                if(item instanceof SuperItemBlock)
-                {
-                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
-                    for (ItemStack stack : block.getSubItems())
-                    {
-                        event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                ModModels.MODEL_DISPATCH.getDelegate(block));
-                    }
-                }
-                else
-                {
-                    // Not needed - will look for json files for normal items;
                 }
             }
         }
