@@ -143,6 +143,14 @@ public class Configurator
         @Comment("Rendering for blocks about to be placed.")
         public PreviewMode previewSetting = PreviewMode.OUTLINE;
         
+        @RequiresMcRestart
+        @Comment("Enable animated textures. Set false if animation may be causing memory or performance problems.")
+        public boolean enableAnimatedTextures = true;
+        
+        @RequiresMcRestart
+        @Comment("Use high-resolution animated textures. Set false to reduce memory usage.")
+        public boolean useLargeAnimatedTextures = true;
+        
         public static float normalLightFactor;
         
         public static Vec3d lightingNormal;

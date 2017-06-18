@@ -3,6 +3,7 @@ Thumbs.db
 
 ## procedural texture outputs
 *.png
+.autosave
 
 # eclipse
 bin
