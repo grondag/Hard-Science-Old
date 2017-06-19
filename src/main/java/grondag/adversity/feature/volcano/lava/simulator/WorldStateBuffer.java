@@ -324,7 +324,8 @@ public class WorldStateBuffer implements IBlockAccess
             recordCount+= chunk.size();
         }
         
-        Log.info("Saving " + recordCount + " world updates.");
+        if(Configurator.VOLCANO.enablePerformanceLogging)
+            Log.info("Saving " + recordCount + " world updates.");
         
         int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;

@@ -3,6 +3,7 @@ package grondag.adversity.superblock.model.painter;
 import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Surface;
+import grondag.adversity.superblock.texture.TextureRotationType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.math.MathHelper;
 
@@ -67,10 +68,14 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
         int textureVersion = this.texture.textureVersionMask & (hash >> 4);
         quad.textureName = this.texture.getTextureName(textureVersion);
                 
-        int rotation = hash & 0x3;
-        if(this.texture.allowRotation & rotation > 0)
+        int rotationOrdinal = this.texture.rotation.rotation.ordinal();
+        if(this.texture.rotation.rotationType() != TextureRotationType.FIXED)
         {
-            for(int i = 0; i <= rotation; i++)
+            rotationOrdinal = (rotationOrdinal + hash) & 3;
+        }
+        if(rotationOrdinal > 0)
+        {
+            for(int i = 0; i < rotationOrdinal; i++)
             {
                 float oldMinU = quad.minU;
                 float oldMaxU = quad.maxU;

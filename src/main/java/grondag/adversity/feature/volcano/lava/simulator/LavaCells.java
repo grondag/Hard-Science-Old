@@ -415,7 +415,8 @@ public class LavaCells
             }
         }
         
-        Log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
+        if(Configurator.VOLCANO.enablePerformanceLogging)
+            Log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
         nbt.setIntArray(LavaCell.LAVA_CELL_NBT_TAG, Arrays.copyOfRange(saveData, 0, i));
     }

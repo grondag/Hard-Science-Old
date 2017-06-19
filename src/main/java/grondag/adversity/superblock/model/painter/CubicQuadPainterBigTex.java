@@ -45,16 +45,19 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         // And if the texture has alternates, we also vary the texture selection and, if supported, 
         // the rotation within the plane, to provide more variation within the same surface.
         
+     
+            quad.rotation = this.allowTexRotation 
+                    ? Rotation.values()[(key + this.rotation.ordinal()) & 3]
+                    : this.rotation;
+   
+        
+        quad.useVertexUVRotation = true;
+        surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
         
         if(this.texture.textureVersionCount == 1)
         {
             // single texture, so do rotation, uv flip and offset
             quad.textureName = this.texture.getTextureName(this.blockVersion);
-            
-            quad.useVertexUVRotation = true;
-            quad.rotation = Rotation.values()[key & 3];
-
-            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
             
             int xOffset = (key * 11) & this.texture.textureScale.sliceCountMask; 
             int yOffset = (key * 7) & this.texture.textureScale.sliceCountMask; 
@@ -63,8 +66,8 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             int newY = (surfaceVec.getY() + yOffset) & this.texture.textureScale.sliceCountMask;
             surfaceVec = new Vec3i(newX, newY, surfaceVec.getZ());
             
-            boolean flipU = (key & 4) == 0;
-            boolean flipV = (key & 8) == 0;
+            boolean flipU = this.allowTexRotation && (key & 4) == 0;
+            boolean flipV = this.allowTexRotation && (key & 8) == 0;
 
             float sliceIncrement = this.texture.textureScale.sliceIncrement;
             
@@ -83,11 +86,6 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         {
             // multiple texture versions, so do rotation and alternation
             quad.textureName = this.texture.getTextureName((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
-            
-            quad.useVertexUVRotation = true;
-            quad.rotation = Rotation.values()[(this.texture.allowRotation ? key + this.rotation.ordinal() : key) & 3];
-
-            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
             
             float sliceIncrement = this.texture.textureScale.sliceIncrement;
             

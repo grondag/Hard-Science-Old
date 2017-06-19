@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ComparisonChain;
 
+import grondag.adversity.Configurator;
 import grondag.adversity.Log;
 import grondag.adversity.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.adversity.library.world.PackedBlockPos;
@@ -146,7 +147,8 @@ public class LavaBlobManager
 
     public void writeToNBT(NBTTagCompound nbt)
     {
-        Log.info("Saving " + map.size() + " lava entities.");
+        if(Configurator.VOLCANO.enablePerformanceLogging)
+            Log.info("Saving " + map.size() + " lava entities.");
         
         int[] saveData = new int[map.size() * NBT_SAVE_DATA_WIDTH];
         int i = 0;

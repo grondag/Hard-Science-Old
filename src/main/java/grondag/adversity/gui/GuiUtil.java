@@ -1,5 +1,6 @@
 package grondag.adversity.gui;
 
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -159,12 +160,31 @@ public class GuiUtil
     /**
      * Draws a rectangle using the provide texture sprite and color
      */
-    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color)
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, Rotation rotation)
     {
-        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE);
+        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE, rotation);
     }
     
-    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale)
+    private static double[][] rotatedUV(double minU, double minV, double maxU, double maxV, Rotation rotation)
+    {
+        double[][] result = new double[2][4];
+        
+        int i = rotation.ordinal();
+        result[0][i] = minU;
+        result[1][i] = maxV;
+        i = (i + 1) & 3;
+        result[0][i] = maxU;
+        result[1][i] = maxV;
+        i = (i + 1) & 3;
+        result[0][i] = maxU;
+        result[1][i] = minV;
+        i = (i + 1) & 3;
+        result[0][i] = minU;
+        result[1][i] = minV;
+        
+        return result;
+    }
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale, Rotation rotation)
     {
         float alpha = (float)(color >> 24 & 255) / 255.0F;
         float red = (float)(color >> 16 & 255) / 255.0F;
@@ -172,10 +192,11 @@ public class GuiUtil
         float blue = (float)(color & 255) / 255.0F;
         
         
-        double maxU = textureSprite.getMinU() + (textureSprite.getMaxU() - textureSprite.getMinU())  / scale.sliceCount;
-        
-     
-        double maxV = textureSprite.getMinV() + (textureSprite.getMaxV() - textureSprite.getMinV())  / scale.sliceCount;
+        double minU = textureSprite.getMinU();
+        double minV = textureSprite.getMinV();
+        double maxU = minU + (textureSprite.getMaxU() - minU)  / scale.sliceCount;
+        double maxV = minV + (textureSprite.getMaxV() - minV)  / scale.sliceCount;
+        double uv[][] = rotatedUV(minU, minV, maxU, maxV, rotation);
         
         TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
         textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -190,16 +211,16 @@ public class GuiUtil
 
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
         vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + heightIn), zLevel)
-            .tex((double)textureSprite.getMinU(), maxV)
+            .tex(uv[0][0], uv[1][0])
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + heightIn), zLevel)
-            .tex(maxU, maxV)
+            .tex(uv[0][1], uv[1][1])
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + 0), zLevel)
-            .tex(maxU, (double)textureSprite.getMinV())
+            .tex(uv[0][2], uv[1][2])
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + 0), zLevel)
-            .tex((double)textureSprite.getMinU(), (double)textureSprite.getMinV())
+            .tex(uv[0][3], uv[1][3])
             .color(red, green, blue, alpha).endVertex();
         tessellator.draw();
         GlStateManager.disableBlend();

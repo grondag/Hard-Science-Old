@@ -434,7 +434,9 @@ public class LavaSimulator extends SimulationNode
 
         // SAVE BASALT BLOCKS
         {
-            Log.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            if(Configurator.VOLCANO.enablePerformanceLogging)
+                Log.info("Saving " + basaltBlocks.size() + " cooling basalt blocks.");
+            
             int[] saveData = new int[basaltBlocks.size() * BASALT_BLOCKS_NBT_WIDTH];
             int i = 0;
             for(AgedBlockPos apos: basaltBlocks)
