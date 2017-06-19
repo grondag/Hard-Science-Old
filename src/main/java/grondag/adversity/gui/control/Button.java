@@ -42,7 +42,7 @@ public class Button extends GuiButton
             int color = i == 0 ? this.disabledColor : i == 2 ? this.hoverColor : this.buttonColor;
 
             GuiUtil.drawRect(this.xPosition, this.yPosition, this.xPosition + this.width - 1, this.yPosition + this.height - 1, color);
-            FontRenderer fontrenderer = mc.fontRenderer;
+            FontRenderer fontrenderer = mc.fontRendererObj;
             GuiUtil.drawAlignedStringNoShadow(fontrenderer, this.displayString, this.xPosition, this.yPosition, this.width, this.height, this.textColor, CENTER, MIDDLE);
         }
     }

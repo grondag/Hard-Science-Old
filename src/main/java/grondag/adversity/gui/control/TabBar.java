@@ -18,11 +18,13 @@ public abstract class TabBar<T> extends GuiControl
     public static final int TAB_WIDTH = 8;
     public static final int ITEM_SPACING = 4;
     
+    public static final int NO_SELECTION = -1;
+    
     private int tabCount;
     private int itemsPerTab;
     private int columnsPerRow = 5;
     private int rowsPerTab;
-    private int selectedItemIndex;
+    private int selectedItemIndex = NO_SELECTION;
     private int selectedTabIndex;
     
     private double actualItemSize;
@@ -189,7 +191,7 @@ public abstract class TabBar<T> extends GuiControl
             if(tabSize < TAB_MARGIN * 2) tabSize = 0;
         }
         
-        if(this.focusOnSelection)
+        if(this.focusOnSelection && this.selectedItemIndex != NO_SELECTION)
         {
             if(this.itemsPerTab > 0) this.selectedTabIndex = this.selectedItemIndex / this.itemsPerTab;
             this.focusOnSelection = false;
@@ -294,14 +296,14 @@ public abstract class TabBar<T> extends GuiControl
     
     public T get(int index)
     {
-        if(items == null) return null;
+        if(items == null || index == NO_SELECTION) return null;
         
         return this.items.get(index);
     }
     
     public T getSelected()
     {
-        if(items == null) return null;
+        if(items == null || this.selectedItemIndex == NO_SELECTION) return null;
         
         return this.get(this.getSelectedIndex());
     }
@@ -342,20 +344,26 @@ public abstract class TabBar<T> extends GuiControl
     public void setSelectedIndex(int index)
     {
         if(items == null) return;
-        this.selectedItemIndex = MathHelper.clamp(index, 0, this.items.size() - 1);
+        this.selectedItemIndex = MathHelper.clamp(index, NO_SELECTION, this.items.size() - 1);
         this.showSelected();
     }
     
     public void setSelected(T selectedItem)
     {
-        if(items == null) return;
-        int i = this.items.indexOf(selectedItem);
-        if(i >= 0) this.setSelectedIndex(i);
+        if(items == null || selectedItem == null)
+        {
+            this.setSelectedIndex(NO_SELECTION);
+        }
+        else
+        {
+            int i = this.items.indexOf(selectedItem);
+            if(i >= -1) this.setSelectedIndex(i);
+        }
     }
     
     public int getSelectedIndex()
     {
-        if(items == null) return -1;
+        if(items == null) return NO_SELECTION;
         return this.selectedItemIndex;
     }
 
@@ -377,11 +385,11 @@ public abstract class TabBar<T> extends GuiControl
     
     /** 
      * If the currently selected item is on the current tab, is the 0-based position within the tab.
-     * Returns -1 if the currently selected item is not on the current tab.
+     * Returns NO_SELECTION if the currently selected item is not on the current tab or if no selection.
      */
     public int getHighlightIndex()
     {
-        if(items == null) return -1;
+        if(items == null || this.selectedItemIndex == NO_SELECTION) return NO_SELECTION;
         this.refreshContentCoordinatesIfNeeded();
         int result = this.selectedItemIndex - this.getFirstDisplayedIndex();
         return (result < 0 || result >= this.getItemsPerTab()) ? -1 : result;

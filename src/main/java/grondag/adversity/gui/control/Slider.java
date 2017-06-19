@@ -68,7 +68,7 @@ public class Slider extends GuiControl
         this.size = size;
         this.label = label;
         this.labelWidthFactor = labelWidthFactor;
-        this.setHeight(Math.max(TAB_WIDTH, mc.fontRenderer.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN));
+        this.setHeight(Math.max(TAB_WIDTH, mc.fontRendererObj.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN));
         this.setVerticalLayout(Layout.FIXED);
     }
     
@@ -92,7 +92,7 @@ public class Slider extends GuiControl
         // draw label if there is one
         if(this.label != null && this.labelWidth > 0)
         {
-            GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, this.label, this.left, this.top, 
+            GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, this.label, this.left, this.top, 
                     this.labelWidth, this.height, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
         }
         

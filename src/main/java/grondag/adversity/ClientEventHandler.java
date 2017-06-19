@@ -66,7 +66,7 @@ public class ClientEventHandler
     }
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent.KeyInputEvent event)
+    public static void onKeyInput(InputEvent.KeyInputEvent event)
     {
         if (ModKeys.PLACEMENT_FACE.isPressed())
         {

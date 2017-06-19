@@ -297,7 +297,7 @@ public class EntityLavaBlob extends Entity
     @Override
     public void move(MoverType type, double x, double y, double z)
     {
-        this.world.profiler.startSection("move");
+        this.world.theProfiler.startSection("move");
 
         AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
 
@@ -335,8 +335,8 @@ public class EntityLavaBlob extends Entity
 
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
 
-        this.world.profiler.endSection();
-        this.world.profiler.startSection("rest");
+        this.world.theProfiler.endSection();
+        this.world.theProfiler.startSection("rest");
         this.resetPositionToBB();
         this.isCollidedHorizontally = startingX != x || startingZ != z;
         this.isCollidedVertically = startingY != y;
@@ -401,7 +401,7 @@ public class EntityLavaBlob extends Entity
         }
 
 
-        this.world.profiler.endSection();
+        this.world.theProfiler.endSection();
 
     }
 

@@ -154,23 +154,36 @@ public class SuperGuiScreen extends GuiScreen
             modelState.setTranslucency(newTrans);
             hasUpdates = true;
         }
+        
+        if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
+        {
+            modelState.setOverlayLayerEnabled(overlayToggle.isOn());
+            hasUpdates = true;
 
+            if(!overlayToggle.isOn())
+            {
+                textureTabBar[PaintLayer.OVERLAY.dynamicIndex].setSelected(null);
+            }
+        }
+        
+        if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
+        {
+            modelState.setDetailLayerEnabled(detailToggle.isOn());
+            hasUpdates = true;
+            
+            if(!detailToggle.isOn())
+            {
+                textureTabBar[PaintLayer.DETAIL.dynamicIndex].setSelected(null);
+            }
+        }
+
+        // needs to happen before toggle checks because it turns on
+        // detail/overlay toggles when a texture is selected
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
             updateItemPreviewSub(layer);
         }
 
-        if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
-        {
-            modelState.setOverlayLayerEnabled(overlayToggle.isOn());
-            hasUpdates = true;
-        }
-
-        if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
-        {
-            modelState.setDetailLayerEnabled(detailToggle.isOn());
-            hasUpdates = true;
-        }
 
         BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
         if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
@@ -216,10 +229,22 @@ public class SuperGuiScreen extends GuiScreen
         }
 
         TexturePallette tex = textureTabBar[layer.dynamicIndex].getSelected();
-        if(modelState.getTexture(layer) != tex)
+        if(tex != null && modelState.getTexture(layer) != tex)
         {
             modelState.setTexture(layer, tex);
             hasUpdates = true;
+            
+            //enable layer if user selected a texture
+            if(layer == PaintLayer.OVERLAY && !overlayToggle.isOn())
+            {
+                overlayToggle.setOn(true);
+                modelState.setOverlayLayerEnabled(true);
+            }
+            else if(layer == PaintLayer.DETAIL && !detailToggle.isOn())
+            {
+                detailToggle.setOn(true);
+                modelState.setDetailLayerEnabled(true);
+            }
         }
 
         if(!((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && fullBrightToggle[layer.dynamicIndex].isOn()))
@@ -281,12 +306,12 @@ public class SuperGuiScreen extends GuiScreen
         super.initGui();
 
 
-        ySize = MathHelper.clamp(height * 4 / 5, fontRenderer.FONT_HEIGHT * 28, height);
+        ySize = MathHelper.clamp(height * 4 / 5, fontRendererObj.FONT_HEIGHT * 28, height);
         yStart = (height - ySize) / 2;
         xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
         xStart = (width - xSize) / 2;
 
-        FontRenderer fr = mc.fontRenderer;
+        FontRenderer fr = mc.fontRendererObj;
         buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
         buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
 
@@ -446,7 +471,8 @@ public class SuperGuiScreen extends GuiScreen
 
             t.clear();
             t.addAll(Textures.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
-            t.setSelected(modelState.getTexture(layer));
+            TexturePallette tex = modelState.getTexture(layer);
+            t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
             t.colorMap = modelState.getColorMap(layer);
 
