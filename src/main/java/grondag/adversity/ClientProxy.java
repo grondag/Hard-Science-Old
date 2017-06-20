@@ -26,7 +26,7 @@ public class ClientProxy extends CommonProxy
 		    BlockColorMapProvider.writeColorAtlas(event.getModConfigurationDirectory());
 		}
 	}
-
+	
 	@Override
 	public void init(FMLInitializationEvent event) 
 	{

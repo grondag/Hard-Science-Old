@@ -20,7 +20,8 @@ import grondag.adversity.init.ModItems;
 @Mod(   modid = Adversity.MODID, 
         name = Adversity.MODNAME,
         version = Adversity.VERSION,
-        acceptedMinecraftVersions = "[1.11.2]")
+        acceptedMinecraftVersions = "[1.11.2]",
+        dependencies = "after:theoneprobe; after:Waila")
 
 public class Adversity 
 {

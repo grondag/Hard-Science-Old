@@ -26,12 +26,12 @@ import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.model.state.WorldLightOpacity;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -78,7 +78,10 @@ import net.minecraftforge.fml.common.Optional;
  * Base class for Adversity building blocks.
  */
 @SuppressWarnings("deprecation")
-@Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe")
+
+@Optional.InterfaceList({
+    @Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe"),
+    @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaProvider", modid = "waila")})
 public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
 {
 
@@ -322,6 +325,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @Optional.Method(modid = "theoneprobe")
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
         probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
@@ -909,6 +913,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @Optional.Method(modid = "waila")
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
     {
         return Collections.emptyList();
