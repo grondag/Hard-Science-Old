@@ -108,9 +108,13 @@ public class Configurator
         public boolean enableQuadCacheStatistics = true;
         
         @RequiresMcRestart
-        @Comment("Seconds between output of quad cache statistics to log, if enabled.")
+        @Comment("Collect statistics on texture animation. Used for testing.")
+        public boolean enableAnimationStatistics = true;
+        
+        @RequiresMcRestart
+        @Comment("Seconds between output of client-side performance statistics to log, if any are enabled.")
         @RangeInt(min = 10, max = 600)
-        public int quadCacheStatReportingInterval = 60;
+        public int clientStatReportingInterval = 10;
         
         @Comment({"Shade blocks from this mod with a uniform light vector. Provides a somewhat better appearance for flowing ",
                   "lava blocks (for example) but may appear odd when next to blocks from Vanilla or other mods."})
@@ -146,10 +150,6 @@ public class Configurator
         @RequiresMcRestart
         @Comment("Enable animated textures. Set false if animation may be causing memory or performance problems.")
         public boolean enableAnimatedTextures = true;
-        
-        @RequiresMcRestart
-        @Comment("Use high-resolution animated textures. Set false to reduce memory usage.")
-        public boolean useLargeAnimatedTextures = true;
         
         public static float normalLightFactor;
         

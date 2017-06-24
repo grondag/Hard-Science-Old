@@ -1,11 +1,12 @@
 buildscript {
     repositories {
         jcenter()
-
-        maven {
+		
+	    maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        
         maven {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -38,6 +39,8 @@ task deobfJar(type: Jar) {
 }
 
 repositories {
+
+	
     maven { url "http://maven.amadornes.com/" }
         
     maven { // The repo from which to get waila
@@ -45,19 +48,27 @@ repositories {
         url "http://tehnut.info/maven"
         //url "http://mobiusstrip.eu/maven"
     }
+    
     maven { // JEI
         url "http://dvs1.progwml6.com/files/maven"
     }
+    
     maven { // TOP
         name 'tterrag maven'
         url "http://maven.tterrag.com/"
     }
+    
     maven { // CompatLayer
         url "http://maven.k-4u.nl"
     }
+    
     maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    
+    maven {
+    	url = "https://repo.adobe.com/nexus/content/repositories/public/"
     }
 }
 
@@ -95,7 +106,9 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    
+	// https://repo.adobe.com/nexus/content/repositories/public/org/apache/commons/commons-imaging/1.0-R1534292/commons-imaging-1.0-R1534292.jar
+	deobfCompile "org.apache.commons:commons-imaging:1.0-R1534292"
 }
 
 processResources

@@ -44,6 +44,18 @@ public class Useful
         return result;
     }
     
+    public static int max(int a, int b, int c)
+    {
+        if(a > b)
+        {
+            return a > c ? a : c;
+        }
+        else
+        {
+            return b > c ? b : c;
+        }
+    }
+    
     /** 
      * Returns the maximum absolute magnitude of the three axis for the given vector.
      * Mainly useful when you know that only one of the axis has a non-zero value

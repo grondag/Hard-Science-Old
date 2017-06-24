@@ -8,6 +8,7 @@ import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketReplaceHeldItem;
 import grondag.adversity.superblock.placement.PlacementItem;
 import grondag.adversity.superblock.placement.PlacementRenderer;
+import grondag.adversity.superblock.texture.CompressedAnimatedSprite;
 import grondag.adversity.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -52,17 +53,49 @@ public class ClientEventHandler
         BlockHighlighter.handleDrawBlockHighlightEvent(event);
     }
     
-    private static int clientStatCounter = Configurator.RENDER.quadCacheStatReportingInterval * 20;
+    private static int clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent event) 
     {
         if (event.phase == TickEvent.Phase.END
-                && Configurator.RENDER.enableQuadCacheStatistics
+                && (Configurator.RENDER.enableQuadCacheStatistics || Configurator.RENDER.enableAnimationStatistics)
                 && --clientStatCounter == 0) 
         {
-            clientStatCounter = Configurator.RENDER.quadCacheStatReportingInterval * 20;
-            Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+            clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
+            
+            if(Configurator.RENDER.enableQuadCacheStatistics)
+            {
+                Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+            }
+
+            if(Configurator.RENDER.enableAnimationStatistics)
+            {
+                CompressedAnimatedSprite.perfCollectorOnTick.outputStats();
+                CompressedAnimatedSprite.perfCollectorOnTick.clearStats();
+                CompressedAnimatedSprite.perfCollectorOffTick.outputStats();
+                CompressedAnimatedSprite.perfCollectorOffTick.clearStats();
+                int delayTicks = CompressedAnimatedSprite.getAndClearFrameMissCount();
+                if(delayTicks > 0)
+                {
+                    Log.info(("Texture animations were delayed by " + delayTicks
+                    + " ticks due to processor overload. (Usually will not affect game frame rate."));
+                }
+            }
+            
         }
+        
+        //TODO: move to client tick event
+//        if(enableStats)
+//        {
+//            if(nextStatTimeMS == 0)
+//            {
+//                nextStatTimeMS = System.currentTimeMillis() + 10000;
+//            }
+//            else if(System.currentTimeMillis() > nextStatTimeMS)
+//            {
+
+//            }
+//        }
     }
 
     @SubscribeEvent

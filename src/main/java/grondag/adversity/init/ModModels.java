@@ -1,12 +1,14 @@
 package grondag.adversity.init;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 
 import grondag.adversity.Adversity;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
+import grondag.adversity.superblock.texture.CompressedAnimatedSprite;
+import grondag.adversity.superblock.texture.TextureLayout;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.varia.SuperDispatcher;
 import grondag.adversity.superblock.varia.SuperDispatcher.DispatchDelegate;
@@ -14,6 +16,7 @@ import grondag.adversity.superblock.varia.SuperStateMapper;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -81,14 +84,32 @@ public class ModModels
     @SubscribeEvent
     public static void stitcherEventPre(TextureStitchEvent.Pre event)
     {
-        ArrayList<String> textureList = new ArrayList<String>();
-        
-        Textures.REGISTRY.addTexturesForPrestich(textureList);
-        
-        for(String s : textureList)
+        TextureMap map = event.getMap();
+        for(TexturePallette p : Textures.REGISTRY)
         {
-            event.getMap().registerSprite(new ResourceLocation(s));
+            for(String s : p.getTexturesForPrestich())
+            {
+                ResourceLocation loc = new ResourceLocation(s);
+                
+                if(p.textureLayout == TextureLayout.BIGTEX_ANIMATED)
+                {
+                    if(map.getTextureExtry(loc.toString()) == null)
+                    {
+                        map.setTextureEntry(new CompressedAnimatedSprite(loc, p.ticksPerFrame));
+                    }
+                }
+                else
+                {
+                    map.registerSprite(loc);
+                }
+            }
         }
+    }
+    
+    @SubscribeEvent
+    public static void stitcherEventPost(TextureStitchEvent.Post event)
+    {
+        CompressedAnimatedSprite.reportMemoryUsage();
     }
 
     public static void preInit(FMLPreInitializationEvent event) 

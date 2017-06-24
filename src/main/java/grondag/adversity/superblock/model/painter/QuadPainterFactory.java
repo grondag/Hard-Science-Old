@@ -18,6 +18,7 @@ public class QuadPainterFactory
             switch(texture.textureLayout)
             {
             case BIGTEX:
+            case BIGTEX_ANIMATED:
             case SPLIT_X_8:
                 return new SurfaceQuadPainterCylinder(modelState, surface, paintLayer);
                 
@@ -35,6 +36,7 @@ public class QuadPainterFactory
             switch(texture.textureLayout)
             {
             case BIGTEX:
+            case BIGTEX_ANIMATED:
             case SPLIT_X_8:
                 return new SurfaceQuadPainterTiles(modelState, surface, paintLayer);
                 
@@ -52,6 +54,7 @@ public class QuadPainterFactory
             switch(texture.textureLayout)
             {
             case BIGTEX:
+            case BIGTEX_ANIMATED:
             case SPLIT_X_8:
                 return new SurfaceQuadPainterTorus(modelState, surface, paintLayer);
                 
@@ -69,6 +72,7 @@ public class QuadPainterFactory
             switch(texture.textureLayout)
             {
             case BIGTEX:
+            case BIGTEX_ANIMATED:
             case SPLIT_X_8:
                 return(texture.textureScale == TextureScale.SINGLE)
                         ? new CubicQuadPainterTiles(modelState, surface, paintLayer)

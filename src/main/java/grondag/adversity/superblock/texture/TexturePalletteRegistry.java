@@ -1,9 +1,11 @@
 package grondag.adversity.superblock.texture;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.adversity.superblock.model.painter.CubicQuadPainterMasonry;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -20,17 +22,16 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
     
     private int nextOrdinal = 0;
     
-    public TexturePallette addTexturePallette(String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, TextureRotationSetting rotation, BlockRenderLayer renderLayer, TextureGroup textureGroup)
+    public TexturePallette addTexturePallette(String textureBaseName, TexturePalletteInfo info)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, textureVersionCount, textureScale, layout, rotation, renderLayer, textureGroup);
+        TexturePallette result = new TexturePallette(nextOrdinal++, textureBaseName, info);
         texturePallettes.add(result);
         return result;
     }
     
     public TexturePallette addZoomedPallete(TexturePallette source)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, source.textureVersionCount, source.textureScale.zoom(), source.textureLayout, source.rotation, 
-                    source.renderLayer, source.textureGroup, source.zoomLevel + 1);
+        TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, new TexturePalletteInfo(source).withZoomLevel(source.zoomLevel + 1));
         texturePallettes.add(result);
         return result;
     }
@@ -47,16 +48,105 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
    
     public TexturePallette get(int index) { return texturePallettes.get(index); }
     
-    /**
-     * Identifies all textures needed for texture stitch.
-     * Assumes a single texture per model.
-     * Override if have something more complicated.
-     */
-    public void addTexturesForPrestich(List<String> textureList)
+    public static class TexturePalletteInfo
     {
-        for(TexturePallette t : this.texturePallettes)
+        private int textureVersionCount = 1;
+        private TextureScale textureScale = TextureScale.SINGLE; 
+        private TextureLayout layout = TextureLayout.BIGTEX; 
+        private TextureRotationSetting rotation = TextureRotationType.CONSISTENT.with(Rotation.ROTATE_NONE);
+        private BlockRenderLayer renderLayer = BlockRenderLayer.SOLID; 
+        private TextureGroup textureGroup = TextureGroup.ALWAYS_HIDDEN;
+        private int zoomLevel = 0;
+        /** number of ticks to display each frame */
+        private int ticksPerFrame = 2;
+        
+        public TexturePalletteInfo()
         {
-            t.addTexturesForPrestich(textureList);
+            
+        }
+        
+        public TexturePalletteInfo(TexturePallette source)
+        {
+            this.textureVersionCount = source.textureVersionCount;
+            this.textureScale = source.textureScale;
+            this.layout = source.textureLayout;
+            this.rotation = source.rotation;
+            this.renderLayer = source.renderLayer;
+            this.textureGroup = source.textureGroup;
+            this.zoomLevel = source.zoomLevel;
+            this.ticksPerFrame = source.ticksPerFrame;
+        }
+
+        /**
+         * @see TexturePallette#textureVersionCount
+         */
+        public TexturePalletteInfo withVersionCount(int textureVersionCount)
+        {
+            this.textureVersionCount = textureVersionCount;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#textureScale
+         */
+        public TexturePalletteInfo withScale(TextureScale textureScale)
+        {
+            this.textureScale = textureScale;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#layout
+         */
+        public TexturePalletteInfo withLayout(TextureLayout layout)
+        {
+            this.layout = layout;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#rotation
+         */
+        public TexturePalletteInfo withRotation(TextureRotationSetting rotation)
+        {
+            this.rotation = rotation;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#renderLayer
+         */
+        public TexturePalletteInfo withRenderLayer(BlockRenderLayer renderLayer)
+        {
+            this.renderLayer = renderLayer;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#textureGroup
+         */
+        public TexturePalletteInfo withGroup(TextureGroup textureGroup)
+        {
+            this.textureGroup = textureGroup;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#zoomLevel
+         */
+        public TexturePalletteInfo withZoomLevel(int zoomLevel)
+        {
+            this.zoomLevel = zoomLevel;
+            return this;
+        }
+        
+        /**
+         * @see TexturePallette#ticksPerFrame
+         */
+        public TexturePalletteInfo withTicksPerFrame(int ticksPerFrame)
+        {
+            this.ticksPerFrame = ticksPerFrame;
+            return this;
         }
     }
     
@@ -83,7 +173,7 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
          */
         public final int textureVersionMask;
         
-        /** Used to limit user selection, is not enforced. */
+        /** Governs default rendering rotation for texture and what rotations are allowed. */
         public final TextureRotationSetting rotation;
         
         /** 
@@ -104,25 +194,27 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         public final int stateFlags;
         
         public final TextureGroup textureGroup;
+        
+        /**
+         * Number of ticks each frame should be rendered on the screen
+         * before progressing to the next frame.
+         */
+        public final int ticksPerFrame;
 
-        /** yes, this is too damn many parameters, but not like it's going to escape into the wild... */
-        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, TextureRotationSetting rotation, BlockRenderLayer renderLayer, TextureGroup textureGroup)
-        {
-            this(ordinal, textureBaseName, textureVersionCount, textureScale, layout, rotation, 
-                    renderLayer, textureGroup, 0);
-        }
-        private TexturePallette(int ordinal, String textureBaseName, int textureVersionCount, TextureScale textureScale, TextureLayout layout, TextureRotationSetting rotation, BlockRenderLayer renderLayer, TextureGroup textureGroup, int zoomLevel)
+
+        protected TexturePallette(int ordinal, String textureBaseName, TexturePalletteInfo info)
         {
             this.ordinal = ordinal;
             this.textureBaseName = textureBaseName;
-            this.textureVersionCount = textureVersionCount;
-            this.textureVersionMask = Math.max(0, textureVersionCount - 1);
-            this.textureScale = textureScale;
-            this.textureLayout = layout;
-            this.rotation = rotation;
-            this.renderLayer = renderLayer;
-            this.textureGroup = textureGroup;
-            this.zoomLevel = zoomLevel;
+            this.textureVersionCount = info.textureVersionCount;
+            this.textureVersionMask = Math.max(0, info.textureVersionCount - 1);
+            this.textureScale = info.textureScale;
+            this.textureLayout = info.layout;
+            this.rotation = info.rotation;
+            this.renderLayer = info.renderLayer;
+            this.textureGroup = info.textureGroup;
+            this.zoomLevel = info.zoomLevel;
+            this.ticksPerFrame = info.ticksPerFrame;
   
             this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag 
                     | (this.rotation.rotationType() == TextureRotationType.RANDOM ? ModelState.STATE_FLAG_NEEDS_TEXTURE_ROTATION : 0);
@@ -130,15 +222,17 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         
         /**
          * Identifies all textures needed for texture stitch.
-         * Assumes a single texture per model.
-         * Override if have something more complicated.
          */
-        private void addTexturesForPrestich(List<String> textureList)
+        public List<String> getTexturesForPrestich()
         {
-            if(this.textureBaseName == null) return;
+            if(this.textureBaseName == null) return Collections.emptyList();
+            
+            ArrayList<String> textureList = new ArrayList<String>();
+            
             switch(this.textureLayout)
             {
             case BIGTEX:
+            case BIGTEX_ANIMATED:
                 for (int i = 0; i < this.textureVersionCount; i++)
                 {
                     textureList.add(buildTextureNameBigTex());
@@ -172,6 +266,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                 }
                 break;
             }
+            
+            return textureList;
         }
         
         private String buildTextureName_X_8(int offset)
@@ -195,6 +291,7 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             switch(textureLayout)
             {
             case BIGTEX:
+            case BIGTEX_ANIMATED:
                 return buildTextureNameBigTex();
             case SPLIT_X_8:
             case MASONRY_5:    
@@ -215,7 +312,7 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         {
             if(textureBaseName == null) return "";
             
-            return (this.textureLayout == TextureLayout.BIGTEX)
+            return (this.textureLayout == TextureLayout.BIGTEX || this.textureLayout == TextureLayout.BIGTEX_ANIMATED)
                     ? buildTextureNameBigTex()
                     : buildTextureName_X_8(version);
         }
