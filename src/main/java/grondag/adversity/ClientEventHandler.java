@@ -68,18 +68,10 @@ public class ClientEventHandler
                 Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
             }
 
-            if(Configurator.RENDER.enableAnimationStatistics)
+            if(Configurator.RENDER.enableAnimatedTextures && Configurator.RENDER.enableAnimationStatistics)
             {
-                CompressedAnimatedSprite.perfCollectorOnTick.outputStats();
-                CompressedAnimatedSprite.perfCollectorOnTick.clearStats();
-                CompressedAnimatedSprite.perfCollectorOffTick.outputStats();
-                CompressedAnimatedSprite.perfCollectorOffTick.clearStats();
-                int delayTicks = CompressedAnimatedSprite.getAndClearFrameMissCount();
-                if(delayTicks > 0)
-                {
-                    Log.info(("Texture animations were delayed by " + delayTicks
-                    + " ticks due to processor overload. (Usually will not affect game frame rate."));
-                }
+                CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
+                CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
             }
             
         }

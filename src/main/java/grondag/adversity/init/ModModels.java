@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import grondag.adversity.Adversity;
+import grondag.adversity.Configurator;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.texture.CompressedAnimatedSprite;
@@ -109,7 +110,20 @@ public class ModModels
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
     {
-        CompressedAnimatedSprite.reportMemoryUsage();
+        if(Configurator.RENDER.enableAnimationStatistics && CompressedAnimatedSprite.perfLoadRead.runCount() > 0)
+        {
+            CompressedAnimatedSprite.perfCollectorLoad.outputStats();
+            CompressedAnimatedSprite.perfCollectorLoad.clearStats();
+            
+//            Log.info("JPEG decoding " + CompressedAnimatedSprite.perfLoadJpeg.stats());
+//            Log.info("Color conversion and alpha channel reconstruction " + CompressedAnimatedSprite.perfLoadAlpha.stats());
+//            Log.info("Mipmap generation " + CompressedAnimatedSprite.perfLoadMipMap.stats());
+//            Log.info("Transfer to buffer " + CompressedAnimatedSprite.perfLoadTransfer.stats());
+            
+            CompressedAnimatedSprite.reportMemoryUsage();
+        }
+        
+        CompressedAnimatedSprite.tearDown();
     }
 
     public static void preInit(FMLPreInitializationEvent event) 

@@ -108,8 +108,17 @@ public class Configurator
         public boolean enableQuadCacheStatistics = true;
         
         @RequiresMcRestart
+        @Comment("Enable animated textures. Set false if animation may be causing memory or performance problems.")
+        public boolean enableAnimatedTextures = true;
+        
+        @RequiresMcRestart
         @Comment("Collect statistics on texture animation. Used for testing.")
         public boolean enableAnimationStatistics = true;
+        
+        @RequiresMcRestart
+        @Comment({"Enable in-memroy texture compression of animated textures if your graphics card supports is.",
+            "Can reduce memory usage by 1GB or more."})
+        public boolean enableAnimatedTextureCompression = true;
         
         @RequiresMcRestart
         @Comment("Seconds between output of client-side performance statistics to log, if any are enabled.")
@@ -146,10 +155,6 @@ public class Configurator
         
         @Comment("Rendering for blocks about to be placed.")
         public PreviewMode previewSetting = PreviewMode.OUTLINE;
-        
-        @RequiresMcRestart
-        @Comment("Enable animated textures. Set false if animation may be causing memory or performance problems.")
-        public boolean enableAnimatedTextures = true;
         
         public static float normalLightFactor;
         
