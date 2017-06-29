@@ -1223,7 +1223,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                     ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
                     // for transparent blocks, want blocks with same apperance and species to join
-                    return myModelState.getSpecies() != otherModelState.getSpecies()
+                    return (myModelState.hasSpecies() && myModelState.getSpecies() != otherModelState.getSpecies())
                             || !myModelState.doShapeAndAppearanceMatch(otherModelState);
 
                 }

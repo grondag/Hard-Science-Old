@@ -105,8 +105,12 @@ public class ModBlocks
         workingModel = new ModelState();
         workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
         workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
-        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.INFRARED, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.RED, Chroma.WHITE, Luminance.BRILLIANT));
         workingModel.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
+        workingModel.setTexture(PaintLayer.DETAIL, Textures.BIGTEX_BASALT_HINT);
+        workingModel.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
+        workingModel.setLightingMode(PaintLayer.DETAIL, LightingMode.SHADED);
+        
         Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
         
         workingModel = workingModel.clone();

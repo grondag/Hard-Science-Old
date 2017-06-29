@@ -105,7 +105,7 @@ public class Configurator
         
         @RequiresMcRestart
         @Comment("Collect statistics on quad caching. Used for testing.")
-        public boolean enableQuadCacheStatistics = true;
+        public boolean enableQuadCacheStatistics = false;
         
         @RequiresMcRestart
         @Comment("Enable animated textures. Set false if animation may be causing memory or performance problems.")
@@ -113,12 +113,12 @@ public class Configurator
         
         @RequiresMcRestart
         @Comment("Collect statistics on texture animation. Used for testing.")
-        public boolean enableAnimationStatistics = true;
+        public boolean enableAnimationStatistics = false;
         
         @RequiresMcRestart
         @Comment({"Enable in-memroy texture compression of animated textures if your graphics card supports is.",
             "Can reduce memory usage by 1GB or more."})
-        public boolean enableAnimatedTextureCompression = true;
+        public boolean enableAnimatedTextureCompression = false;
         
         @RequiresMcRestart
         @Comment("Seconds between output of client-side performance statistics to log, if any are enabled.")
@@ -132,7 +132,7 @@ public class Configurator
         @Comment({"If true, Dynamic flow block (volcanic lava and basalt) will not render faces occulded by adjacent flow blocks.",
                   " True is harder on CPU and easier on your graphics card/chip.  Experiment if you have FPS problems.",
                   " Probably won't matter on systems with both a fast CPU and fast graphics."})
-        public boolean enableFaceCullingOnFlowBlocks = true;
+        public boolean enableFaceCullingOnFlowBlocks = false;
         
         @Comment("Minimum lighting on any block face with custom shading. Smaller values give deeper shadows.")
         @RangeDouble(min = 0, max = 0.9)

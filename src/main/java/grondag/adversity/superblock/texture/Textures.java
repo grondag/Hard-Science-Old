@@ -42,19 +42,27 @@ public class Textures
             .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.ALWAYS_HIDDEN));
     
 
-    //FIXME : don't load test textures if not enabled
-    public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette("bigtex_single", 
+    //don't load test textures if not enabled
+    public static final TexturePallette BIGTEX_TEST_SINGLE = Configurator.BLOCKS.showHiddenTextures ?
+            REGISTRY.addTexturePallette("bigtex_single", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES))
+             : NONE;
     
-    public static final TexturePallette BIGTEX_TEST1 = REGISTRY.addTexturePallette("bigtex", 
+    public static final TexturePallette BIGTEX_TEST1 = Configurator.BLOCKS.showHiddenTextures ? 
+            REGISTRY.addTexturePallette("bigtex", 
             new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.TINY).withLayout(TextureLayout.SPLIT_X_8)
-            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES)); 
+            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES))
+            : NONE;
     
-    public static final TexturePallette BIGTEX_TEST2 = REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.SMALL));
-    public static final TexturePallette BIGTEX_TEST3 = REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.MEDIUM));
-    public static final TexturePallette BIGTEX_TEST4 = REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.LARGE));
-    public static final TexturePallette BIGTEX_TEST5 = REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT));
+    public static final TexturePallette BIGTEX_TEST2 = Configurator.BLOCKS.showHiddenTextures ? 
+            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.SMALL)) : NONE;
+    public static final TexturePallette BIGTEX_TEST3 = Configurator.BLOCKS.showHiddenTextures ? 
+            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.MEDIUM)) : NONE;
+    public static final TexturePallette BIGTEX_TEST4 = Configurator.BLOCKS.showHiddenTextures ? 
+            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.LARGE)) : NONE;
+    public static final TexturePallette BIGTEX_TEST5 = Configurator.BLOCKS.showHiddenTextures ? 
+            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT)) : NONE;
 
     //======================================================================
     //  TILES - REGULAR
@@ -151,7 +159,8 @@ public class Textures
     public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_COOL);
     public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_COOL_ZOOM);
     
-    public static final TexturePallette BIGTEX_LAVA = REGISTRY.addTexturePallette("lava",  new TexturePalletteInfo(BIGTEX_BASALT_CUT).withGroup(TextureGroup.HIDDEN_TILES));
+    public static final TexturePallette BIGTEX_LAVA = REGISTRY.addTexturePallette("lava",  
+            new TexturePalletteInfo(BIGTEX_BASALT_CUT).withLayout(TextureLayout.BIGTEX_ANIMATED).withGroup(TextureGroup.HIDDEN_TILES));
     
     public static final TexturePallette BIGTEX_BASALT_COOLING = REGISTRY.addTexturePallette("basalt_cooling", 
              new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
@@ -164,14 +173,14 @@ public class Textures
     //  BIGTEX - ANIMATED
     //======================================================================
 
-    public static final TexturePallette BIGTEX_FLUID_GLOW = REGISTRY.addTexturePallette(animatedTextureName("fluid_glow"), 
-            new TexturePalletteInfo().withVersionCount(1).withScale(animatedTextueScale(TextureScale.MEDIUM)).withLayout(TextureLayout.BIGTEX)
+    public static final TexturePallette BIGTEX_FLUID_GLOW = REGISTRY.addTexturePallette("fluid_glow", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS));
     public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW);
     public static final TexturePallette BIGTEX_FLUID_GLOW_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_GLOW_ZOOM);
 
     public static final TexturePallette BIGTEX_FLUID_VORTEX = REGISTRY.addTexturePallette("fluid_vortex", 
-            new TexturePalletteInfo().withVersionCount(1).withScale(animatedTextueScale(TextureScale.MEDIUM)).withLayout(TextureLayout.BIGTEX_ANIMATED)
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS)
             .withTicksPerFrame(2));
     public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX);
@@ -182,58 +191,57 @@ public class Textures
     public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S);
     public static final TexturePallette BIGTEX_FLUID_VORTEX_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX_S_ZOOM);
     
-    public static final TexturePallette BIGTEX_CLOUDS = REGISTRY.addTexturePallette(animatedTextureName("clouds"), 
-            new TexturePalletteInfo().withVersionCount(1).withScale(animatedTextueScale(TextureScale.MEDIUM)).withLayout(TextureLayout.BIGTEX)
+    public static final TexturePallette BIGTEX_CLOUDS = REGISTRY.addTexturePallette("clouds", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS));
     public static final TexturePallette BIGTEX_CLOUDS_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS);
     public static final TexturePallette BIGTEX_CLOUDS_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_ZOOM);
     
-    public static final TexturePallette BIGTEX_CLOUDS_S = REGISTRY.addTexturePallette(animatedTextureName("clouds"), 
+    public static final TexturePallette BIGTEX_CLOUDS_S = REGISTRY.addTexturePallette("clouds", 
             new TexturePalletteInfo(BIGTEX_CLOUDS).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_CLOUDS_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_S);
     public static final TexturePallette BIGTEX_CLOUDS_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CLOUDS_S_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
-            new TexturePalletteInfo().withVersionCount(1).withScale(animatedTextueScale(TextureScale.SMALL)).withLayout(TextureLayout.BIGTEX)
+    public static final TexturePallette BIGTEX_STARFIELD = REGISTRY.addTexturePallette("starfield", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX_ANIMATED)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.DYNAMIC_DETAILS));
     public static final TexturePallette BIGTEX_STARFIELD_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD);
     public static final TexturePallette BIGTEX_STARFIELD_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_S = REGISTRY.addTexturePallette(animatedTextureName("starfield"),
+    public static final TexturePallette BIGTEX_STARFIELD_S = REGISTRY.addTexturePallette("starfield",
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_STARFIELD_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_S);
     public static final TexturePallette BIGTEX_STARFIELD_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_S_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_90 = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
+    public static final TexturePallette BIGTEX_STARFIELD_90 = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRotation(FIXED.with(ROTATE_90)));
     public static final TexturePallette BIGTEX_STARFIELD_90_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90);
     public static final TexturePallette BIGTEX_STARFIELD_90_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_90_S = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
+    public static final TexturePallette BIGTEX_STARFIELD_90_S = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD_90).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_STARFIELD_90_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90_S);
     public static final TexturePallette BIGTEX_STARFIELD_90_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_90_S_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_180 = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
+    public static final TexturePallette BIGTEX_STARFIELD_180 = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette BIGTEX_STARFIELD_180_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180);
     public static final TexturePallette BIGTEX_STARFIELD_180_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_180_S = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
+    public static final TexturePallette BIGTEX_STARFIELD_180_S = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD_180).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_STARFIELD_180_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180_S);
     public static final TexturePallette BIGTEX_STARFIELD_180_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_180_S_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_270 = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
+    public static final TexturePallette BIGTEX_STARFIELD_270 = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD).withRotation(FIXED.with(ROTATE_270)));
     public static final TexturePallette BIGTEX_STARFIELD_270_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270);
     public static final TexturePallette BIGTEX_STARFIELD_270_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270_ZOOM);
     
-    public static final TexturePallette BIGTEX_STARFIELD_270_S = REGISTRY.addTexturePallette(animatedTextureName("starfield"), 
+    public static final TexturePallette BIGTEX_STARFIELD_270_S = REGISTRY.addTexturePallette("starfield", 
             new TexturePalletteInfo(BIGTEX_STARFIELD_270).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.DYNAMIC_TILES));
     public static final TexturePallette BIGTEX_STARFIELD_270_S_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270_S);
     public static final TexturePallette BIGTEX_STARFIELD_270_S_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_STARFIELD_270_S_ZOOM);
-    //FIXME: reorganize textures after this point before release
     
     //======================================================================
     //  DECALS
@@ -296,26 +304,13 @@ public class Textures
     public static final TexturePallette DECAL_THICK_BARS_RANDOM = REGISTRY.addTexturePallette("thick_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THIN_BARS_RANDOM = REGISTRY.addTexturePallette("thin_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
 
-    /** gives appropriate texture name for big-tex animated (or not, if turned off) textures based on user config */
-    private static String animatedTextureName(String baseName)
-    {
-        //FIXME: remove after conversion
-        if(Configurator.RENDER.enableAnimatedTextures)
-        {
-            return baseName + "_anim";
-        }
-        else
-        {
-            return baseName + "_static";
-        }
-    }
+  //FIXME: reorganize textures after this point before release
     
-    /** gives base (no-zoom) texture scale for big-tex animated textures based on user config */
-    private static TextureScale animatedTextueScale(TextureScale largerScale)
-    {
-        //FIXME: remove after conversion
-        return largerScale;
-    }
+    public static final TexturePallette BIGTEX_BASALT_HINT = REGISTRY.addTexturePallette("basalt_hint", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_DETAILS));
+    public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT);
+    public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT_ZOOM);
     
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {

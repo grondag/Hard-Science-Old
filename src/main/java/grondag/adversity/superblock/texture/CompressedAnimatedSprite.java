@@ -1,13 +1,13 @@
 package grondag.adversity.superblock.texture;
 
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,9 +39,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class CompressedAnimatedSprite extends TextureAtlasSprite
 {
     /** DO NOT ACCESS DIRECTLY.  Use {@link #getLoaderPool()} */
-    private static ThreadPoolExecutor loaderThreadPool;
+    private static volatile ThreadPoolExecutor loaderThreadPool;
     
-    private static ThreadPoolExecutor getLoaderPool()
+    private static synchronized ThreadPoolExecutor getLoaderPool()
     {
         if(loaderThreadPool == null)
         {
@@ -51,9 +51,9 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
     }
     
     /** DO NOT ACCESS DIRECTLY!    */
-    private static JpegHelper jpegHelper;
+    private static volatile JpegHelper jpegHelper;
     
-    private static JpegHelper getJpegHelper()
+    private static synchronized JpegHelper getJpegHelper()
     {
         if(jpegHelper == null)
         {
@@ -93,24 +93,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
      */
     private static class JpegHelper
     {
-        
         private final JPEGImageReaderSpi JPEG_IMAGE_READER_PROVIDER = new JPEGImageReaderSpi();
-        
-        private final byte[] YCbB_OFFSETS = new byte[0xFF];
-        private final byte[] YCbG_OFFSETS = new byte[0xFF];
-        private final byte[] YCrG_OFFSETS = new byte[0xFF];
-        private final byte[] YCrR_OFFSETS = new byte[0xFF];
-        
-        private JpegHelper()
-        {
-            for(int i = 0; i < 0xFF; i++)
-            {
-                YCbB_OFFSETS[i] = (byte) Math.round(1.402 * (i-128));
-                YCbG_OFFSETS[i] = (byte) Math.round(-0.34416 * (i-128));
-                YCrG_OFFSETS[i] = (byte) Math.round(-0.71414136 * (i-128));
-                YCrR_OFFSETS[i] = (byte) Math.round(1.772* (i-128));
-            }
-        }
     }
     
     private final int mipmapLevels;
@@ -155,7 +138,9 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
     {
         perfLoadRead.startRun();
         
-        ExecutorCompletionService<Pair<Integer, int[][]>> runner = new ExecutorCompletionService<Pair<Integer, int[][]>>(getLoaderPool());
+        ThreadPoolExecutor loaderPool = getLoaderPool();
+        
+        ExecutorCompletionService<Pair<Integer, int[][]>> runner = new ExecutorCompletionService<Pair<Integer, int[][]>>(loaderPool);
         
         JpegHelper jpeg = getJpegHelper();
         
@@ -198,6 +183,12 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
                 // will throw IO Exception and we will abort if not found
                 IResource frameResouce = manager.getResource(frameLoc);
                 runner.submit(new FrameReader(frameResouce, frameIndex++));
+                
+                // only load the first texture if animation is disabled
+                if(frameIndex == 1 && !Configurator.RENDER.enableAnimatedTextures)
+                {
+                    keepGoing = false;
+                }
             }
             catch(Exception e)
             {
@@ -233,12 +224,14 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
             int completedFrameCount = 0;
             while(completedFrameCount < this.frameCount)
             {
-                Pair<Integer, int[][]> frameResult = runner.poll(200, TimeUnit.MILLISECONDS).get();
+                Future<Pair<Integer, int[][]>> result = runner.poll(200, TimeUnit.MILLISECONDS);
+                
+                Pair<Integer, int[][]> frameResult = result == null ? null : result.get();
 
 //                long start = perfLoadTransfer.startRun();
-                if(frameResult == null)
+                if(result == null || frameResult == null)
                 {
-                    if(loaderThreadPool.getActiveCount() == 0)
+                    if(loaderPool.getActiveCount() == 0)
                     {
                         Log.error(String.format("Unable to load animated texture due to unknown error.", this.getIconName()));
                         this.isValid = false;
@@ -309,10 +302,10 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
                 byte[] frameData = IOUtils.toByteArray(frameResouce.getInputStream());
                 ImageReader reader = jpeg.JPEG_IMAGE_READER_PROVIDER.createReaderInstance();
                 reader.setInput(new InMemoryImageInputStream(frameData));
-                Raster raster = reader.readRaster(0, null);
+                BufferedImage image = reader.read(0);
 //                perfLoadJpeg.endRun(start);
                 
-                if(raster == null)
+                if(image == null)
                 {
                     Log.warn(String.format("Unable to load frame for animated texture %s. Texture will not animate.", CompressedAnimatedSprite.this.getIconName()));
                     CompressedAnimatedSprite.this.isValid = false;
@@ -323,24 +316,16 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
 //                    start = perfLoadAlpha.startRun();
                     final int size = CompressedAnimatedSprite.this.width * CompressedAnimatedSprite.this.height;
                     int pixels[] = new int[size];
-                    int sourceIndex = 0;
                     
+                    image.getRGB(0, 0, CompressedAnimatedSprite.this.width, CompressedAnimatedSprite.this.height, pixels, 0, CompressedAnimatedSprite.this.width);
                     
-                    
-                    byte[] rawBuffer = ((DataBufferByte)raster.getDataBuffer()).getData();
+                    // restore alpha
                     for(int destIndex = 0; destIndex < size; destIndex++)
                     {
-                        // convert from JPEG YCbCr representation to RGB
-
-                        final int y = rawBuffer[sourceIndex++] & 0xFF;
-                        final int cb = rawBuffer[sourceIndex++] & 0xFF;
-                        final int cr = rawBuffer[sourceIndex++] & 0xFF;
+                        final int r = (pixels[destIndex] >> 16) & 0xFF;
+                        final int g = (pixels[destIndex] >> 8) & 0xFF;
+                        final int b = pixels[destIndex] & 0xFF;
                         
-                        final int r = MathHelper.clamp(jpeg.YCrR_OFFSETS[cr] + y, 0, 0xFF);
-                        final int g = MathHelper.clamp(jpeg.YCrG_OFFSETS[cr] + jpeg.YCbG_OFFSETS[cb] + y, 0, 0xFF);
-                        final int b = MathHelper.clamp(jpeg.YCbB_OFFSETS[cb] + y, 0, 0xFF);
-                        
-                        // restore alpha
                         int alpha = Math.max(Math.max(r, g), b);
                         pixels[destIndex] = alpha << 24 | (r << 16) | (g << 8) | b;
                     }

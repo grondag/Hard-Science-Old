@@ -270,19 +270,13 @@ texture.basalt_cooling=Cooling Basalt
 texture.basalt_warm=Warm Basalt
 texture.basalt_hot=Hot Basalt
 texture.basalt_very_hot=Very Hot Basalt
+texture.basalt_hint=Basalt Hint
 
-texture.fluid_glow_anim=Fluidic Glow
-texture.fluid_glow_anim_low=Fluidic Glow (Low Res)
-texture.fluid_glow_static=Fluidic Glow (Static)
-texture.fluid_vortex_anim=Vortex
-texture.fluid_vortex_anim_low=Vortex (Low Res)
-texture.ffluid_vortex_static=Vortex (Static)
-texture.clouds_anim=Clouds
-texture.clouds_anim_low=Clouds (Low Res)
-texture.clouds_static=Clouds (Static)
-texture.starfield_anim=Starfield
-texture.starfield_anim_low=Starfield (Low Res)
-texture.starfield_static=Starfield (Static)
+texture.fluid_glow=Fluidic Glow
+texture.fluid_vortex=Vortex
+texture.clouds=Clouds
+texture.starfield=Starfield
+
 
 
 
