@@ -187,9 +187,9 @@ public class SuperDispatcher
             {
             case CUT:
                 painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.CUT));
-                if(modelState.isDetailLayerEnabled())
+                if(modelState.isMiddleLayerEnabled())
                 {
-                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.MIDDLE));
                 }
                 break;
             
@@ -199,13 +199,13 @@ public class SuperDispatcher
 
             case MAIN:
                 painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.BASE));
-                if(modelState.isDetailLayerEnabled())
+                if(modelState.isMiddleLayerEnabled())
                 {
-                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.DETAIL));
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.MIDDLE));
                 }
-                if(modelState.isOverlayLayerEnabled())
+                if(modelState.isOuterLayerEnabled())
                 {
-                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OVERLAY));
+                    painters.add(QuadPainterFactory.getPainterForSurface(modelState, surface, PaintLayer.OUTER));
                 }
                 break;
 

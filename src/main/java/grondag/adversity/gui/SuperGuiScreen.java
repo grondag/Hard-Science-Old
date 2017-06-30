@@ -72,8 +72,8 @@ public class SuperGuiScreen extends GuiScreen
     private TexturePicker[] textureTabBar;
     private ShapePicker shapePicker;
     private Toggle[] fullBrightToggle;
-    private Toggle overlayToggle;
-    private Toggle detailToggle;
+    private Toggle outerToggle;
+    private Toggle middleToggle;
     private Toggle baseTranslucentToggle;
     private Toggle lampTranslucentToggle;
     private BrightnessSlider brightnessSlider;
@@ -90,8 +90,8 @@ public class SuperGuiScreen extends GuiScreen
 
     private Panel mainPanel;
     private int group_base;
-    private int group_border;
-    private int group_deco;
+    private int group_outer;
+    private int group_middle;
     private int group_lamp;
     private int group_shape;
     private int group_material;
@@ -155,30 +155,30 @@ public class SuperGuiScreen extends GuiScreen
             hasUpdates = true;
         }
         
-        if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
+        if(outerToggle.isOn() != modelState.isOuterLayerEnabled())
         {
-            modelState.setOverlayLayerEnabled(overlayToggle.isOn());
+            modelState.setOuterLayerEnabled(outerToggle.isOn());
             hasUpdates = true;
 
-            if(!overlayToggle.isOn())
+            if(!outerToggle.isOn())
             {
-                textureTabBar[PaintLayer.OVERLAY.dynamicIndex].setSelected(null);
+                textureTabBar[PaintLayer.OUTER.dynamicIndex].setSelected(null);
             }
         }
         
-        if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
+        if(middleToggle.isOn() != modelState.isMiddleLayerEnabled())
         {
-            modelState.setDetailLayerEnabled(detailToggle.isOn());
+            modelState.setMiddleLayerEnabled(middleToggle.isOn());
             hasUpdates = true;
             
-            if(!detailToggle.isOn())
+            if(!middleToggle.isOn())
             {
-                textureTabBar[PaintLayer.DETAIL.dynamicIndex].setSelected(null);
+                textureTabBar[PaintLayer.MIDDLE.dynamicIndex].setSelected(null);
             }
         }
 
         // needs to happen before toggle checks because it turns on
-        // detail/overlay toggles when a texture is selected
+        // middle/outer toggles when a texture is selected
         for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
         {
             updateItemPreviewSub(layer);
@@ -235,15 +235,15 @@ public class SuperGuiScreen extends GuiScreen
             hasUpdates = true;
             
             //enable layer if user selected a texture
-            if(layer == PaintLayer.OVERLAY && !overlayToggle.isOn())
+            if(layer == PaintLayer.OUTER && !outerToggle.isOn())
             {
-                overlayToggle.setOn(true);
-                modelState.setOverlayLayerEnabled(true);
+                outerToggle.setOn(true);
+                modelState.setOuterLayerEnabled(true);
             }
-            else if(layer == PaintLayer.DETAIL && !detailToggle.isOn())
+            else if(layer == PaintLayer.MIDDLE && !middleToggle.isOn())
             {
-                detailToggle.setOn(true);
-                modelState.setDetailLayerEnabled(true);
+                middleToggle.setOn(true);
+                modelState.setMiddleLayerEnabled(true);
             }
         }
 
@@ -350,8 +350,8 @@ public class SuperGuiScreen extends GuiScreen
             textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
             colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
 
-            overlayToggle = new Toggle().setLabel("Enabled");
-            detailToggle = new Toggle().setLabel("Enabled");
+            outerToggle = new Toggle().setLabel("Enabled");
+            middleToggle = new Toggle().setLabel("Enabled");
             baseTranslucentToggle = new Toggle().setLabel("Translucent");
             lampTranslucentToggle = new Toggle().setLabel("Translucent");
             fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
@@ -384,18 +384,18 @@ public class SuperGuiScreen extends GuiScreen
             rightPanel.addAll(group_base, tempH, textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(group_base);
 
-            group_border = rightPanel.createVisiblityGroup(PaintLayer.OVERLAY.localizedName());
-            tempV = new Panel(true).addAll(overlayToggle, fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
+            group_middle = rightPanel.createVisiblityGroup(PaintLayer.MIDDLE.localizedName());
+            tempV = new Panel(true).addAll(middleToggle, fullBrightToggle[PaintLayer.MIDDLE.ordinal()])
                     .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(group_border, tempH,textureTabBar[PaintLayer.OVERLAY.ordinal()]);
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.MIDDLE.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_middle, tempH, textureTabBar[PaintLayer.MIDDLE.ordinal()]);
 
-            group_deco = rightPanel.createVisiblityGroup(PaintLayer.DETAIL.localizedName());
-            tempV = new Panel(true).addAll(detailToggle, fullBrightToggle[PaintLayer.DETAIL.ordinal()])
+            group_outer = rightPanel.createVisiblityGroup(PaintLayer.OUTER.localizedName());
+            tempV = new Panel(true).addAll(outerToggle, fullBrightToggle[PaintLayer.OUTER.ordinal()])
                     .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(group_deco, tempH, textureTabBar[PaintLayer.DETAIL.ordinal()]);
-
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.OUTER.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_outer, tempH,textureTabBar[PaintLayer.OUTER.ordinal()]);
+            
             group_lamp = rightPanel.createVisiblityGroup(PaintLayer.LAMP.localizedName());
             tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.LAMP.ordinal()], lampTranslucentToggle)
                     .setHorizontalWeight(2);
@@ -452,8 +452,8 @@ public class SuperGuiScreen extends GuiScreen
         materialPicker.setSubstance(SuperItemBlock.getStackSubstance(itemPreview.previewItem));
         shapePicker.setSelected(modelState.getShape());
         brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(itemPreview.previewItem));
-        overlayToggle.setOn(modelState.isOverlayLayerEnabled());
-        detailToggle.setOn(modelState.isDetailLayerEnabled());
+        outerToggle.setOn(modelState.isOuterLayerEnabled());
+        middleToggle.setOn(modelState.isMiddleLayerEnabled());
         baseTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
         lampTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
 

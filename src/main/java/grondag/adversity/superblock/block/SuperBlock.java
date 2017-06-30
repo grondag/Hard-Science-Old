@@ -294,15 +294,15 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             tooltip.add(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
             tooltip.add(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
             tooltip.add(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
-            if(modelState.isOverlayLayerEnabled())
+            if(modelState.isOuterLayerEnabled())
             {
-                tooltip.add(I18n.translateToLocal("label.overlay_color") + ": " + modelState.getColorMap(PaintLayer.OVERLAY).localizedName());
-                tooltip.add(I18n.translateToLocal("label.overlay_texture") + ": " + modelState.getTexture(PaintLayer.OVERLAY).localizedName());
+                tooltip.add(I18n.translateToLocal("label.outer_color") + ": " + modelState.getColorMap(PaintLayer.OUTER).localizedName());
+                tooltip.add(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).localizedName());
             }
-            if(modelState.isDetailLayerEnabled())
+            if(modelState.isMiddleLayerEnabled())
             {
-                tooltip.add(I18n.translateToLocal("label.detail_color") + ": " + modelState.getColorMap(PaintLayer.DETAIL).localizedName());
-                tooltip.add(I18n.translateToLocal("label.detail_texture") + ": " + modelState.getTexture(PaintLayer.DETAIL).localizedName());
+                tooltip.add(I18n.translateToLocal("label.middle_color") + ": " + modelState.getColorMap(PaintLayer.MIDDLE).localizedName());
+                tooltip.add(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).localizedName());
             }
             if(modelState.hasSpecies()) 
             {
@@ -337,15 +337,15 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             probeInfo.text(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
             probeInfo.text(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
             probeInfo.text(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
-            if(modelState.isOverlayLayerEnabled())
+            if(modelState.isOuterLayerEnabled())
             {
-                probeInfo.text(I18n.translateToLocal("label.overlay_color") + ": " + modelState.getColorMap(PaintLayer.OVERLAY).localizedName());
-                probeInfo.text(I18n.translateToLocal("label.overlay_texture") + ": " + modelState.getTexture(PaintLayer.OVERLAY).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.outer_color") + ": " + modelState.getColorMap(PaintLayer.OUTER).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).localizedName());
             }
-            if(modelState.isDetailLayerEnabled())
+            if(modelState.isMiddleLayerEnabled())
             {
-                probeInfo.text(I18n.translateToLocal("label.detail_color") + ": " + modelState.getColorMap(PaintLayer.DETAIL).localizedName());
-                probeInfo.text(I18n.translateToLocal("label.detail_texture") + ": " + modelState.getTexture(PaintLayer.DETAIL).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.middle_color") + ": " + modelState.getColorMap(PaintLayer.MIDDLE).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).localizedName());
             }
             if(modelState.hasSpecies()) 
             {

@@ -107,9 +107,9 @@ public class ModBlocks
         workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
         workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.RED, Chroma.WHITE, Luminance.BRILLIANT));
         workingModel.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
-        workingModel.setTexture(PaintLayer.DETAIL, Textures.BIGTEX_BASALT_HINT);
-        workingModel.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
-        workingModel.setLightingMode(PaintLayer.DETAIL, LightingMode.SHADED);
+        workingModel.setTexture(PaintLayer.MIDDLE, Textures.BIGTEX_BASALT_HINT);
+        workingModel.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
+        workingModel.setLightingMode(PaintLayer.MIDDLE, LightingMode.SHADED);
         
         Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
         
@@ -158,9 +158,9 @@ public class ModBlocks
         model.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
         model.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.TORCH, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
         model.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
-        model.setTexture(PaintLayer.DETAIL, tex);
-        model.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
-        model.setDetailLayerEnabled(true);
+        model.setTexture(PaintLayer.MIDDLE, tex);
+        model.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
+        model.setMiddleLayerEnabled(true);
         
         return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, isFiller).setAllowSilkHarvest(false);
     }

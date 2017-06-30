@@ -31,7 +31,6 @@ import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -51,15 +50,15 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
     }
     
     /** DO NOT ACCESS DIRECTLY!    */
-    private static volatile JpegHelper jpegHelper;
+    private static volatile JPEGImageReaderSpi jpegReader;
     
-    private static synchronized JpegHelper getJpegHelper()
+    private static synchronized JPEGImageReaderSpi getJpegReader()
     {
-        if(jpegHelper == null)
+        if(jpegReader == null)
         {
-            jpegHelper = new JpegHelper();
+            jpegReader = new JPEGImageReaderSpi();
         }
-        return jpegHelper;
+        return jpegReader;
     }
     
     /**
@@ -67,7 +66,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
      */
     public static void tearDown()
     {
-        jpegHelper = null;
+        jpegReader = null;
         if(loaderThreadPool != null)
         {
             loaderThreadPool.shutdownNow();
@@ -87,14 +86,6 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
     
     private static int vanillaBytes = 0;
 
-    /**
-     * Enables fast color conversion from JPEG to RBG by
-     * taking a more efficient code path than native JPEG reader.
-     */
-    private static class JpegHelper
-    {
-        private final JPEGImageReaderSpi JPEG_IMAGE_READER_PROVIDER = new JPEGImageReaderSpi();
-    }
     
     private final int mipmapLevels;
     private final int ticksPerFrame;
@@ -142,7 +133,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
         
         ExecutorCompletionService<Pair<Integer, int[][]>> runner = new ExecutorCompletionService<Pair<Integer, int[][]>>(loaderPool);
         
-        JpegHelper jpeg = getJpegHelper();
+        JPEGImageReaderSpi jpeg = getJpegReader();
         
         // by default resource manager will give us a .png extension
         // we use .jpg for larger textures, so strip this off and go case by case
@@ -166,7 +157,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
                 // confirm first frame loads
                 if(frameIndex == 0)
                 {
-                    ImageReader reader = jpeg.JPEG_IMAGE_READER_PROVIDER.createReaderInstance();
+                    ImageReader reader = jpeg.createReaderInstance();
                     reader.setInput(new MemoryCacheImageInputStream(manager.getResource(frameLoc).getInputStream()));
                     this.width = reader.getWidth(0);
                     this.height = reader.getHeight(0);
@@ -297,10 +288,10 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
             {
 //                long start = perfLoadJpeg.startRun();
                 
-                JpegHelper jpeg = getJpegHelper();
+                JPEGImageReaderSpi jpeg = getJpegReader();
                 
                 byte[] frameData = IOUtils.toByteArray(frameResouce.getInputStream());
-                ImageReader reader = jpeg.JPEG_IMAGE_READER_PROVIDER.createReaderInstance();
+                ImageReader reader = jpeg.createReaderInstance();
                 reader.setInput(new InMemoryImageInputStream(frameData));
                 BufferedImage image = reader.read(0);
 //                perfLoadJpeg.endRun(start);

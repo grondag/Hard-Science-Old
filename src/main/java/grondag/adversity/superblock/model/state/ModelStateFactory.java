@@ -314,21 +314,21 @@ public class ModelStateFactory
                     shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), shadedFlags, false);
                 flags |= getTexture(PaintLayer.LAMP).stateFlags;
                 
-                if(this.isDetailLayerEnabled())
+                if(this.isMiddleLayerEnabled())
                 {
-                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), layerFlags, true);
-                    if(this.getLightingMode(PaintLayer.DETAIL) == LightingMode.FULLBRIGHT) 
-                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), shadedFlags, false);
-                    flags |= getTexture(PaintLayer.DETAIL).stateFlags;
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.MIDDLE), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.MIDDLE) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.MIDDLE), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.MIDDLE).stateFlags;
 
                 }
                 
-                if(this.isOverlayLayerEnabled())
+                if(this.isOuterLayerEnabled())
                 {
-                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), layerFlags, true);
-                    if(this.getLightingMode(PaintLayer.OVERLAY) == LightingMode.FULLBRIGHT) 
-                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), shadedFlags, false);
-                    flags |= getTexture(PaintLayer.OVERLAY).stateFlags;
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OUTER), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.OUTER) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OUTER), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.OUTER).stateFlags;
 
                 }
                 
@@ -571,8 +571,8 @@ public class ModelStateFactory
         {
             switch(layer)
             {
-            case DETAIL:
-            case OVERLAY:
+            case MIDDLE:
+            case OUTER:
                 return this.getTexture(layer).renderLayer;
 
             case LAMP:
@@ -591,8 +591,8 @@ public class ModelStateFactory
             
             switch(layer)
             {
-            case DETAIL:
-            case OVERLAY:
+            case MIDDLE:
+            case OUTER:
             default:
                 if(Log.DEBUG_MODE)
                     Log.warn("setRenderLayer on model state does not apply for given paint layer.");
@@ -609,37 +609,37 @@ public class ModelStateFactory
             invalidateHashCode();
         }
 
-        public boolean isDetailLayerEnabled()
+        public boolean isMiddleLayerEnabled()
         {
-            return this.getTexture(PaintLayer.DETAIL) != Textures.NONE;
+            return this.getTexture(PaintLayer.MIDDLE) != Textures.NONE;
         }
         
-        public void setDetailLayerEnabled(boolean isEnabled)
+        public void setMiddleLayerEnabled(boolean isEnabled)
         {
-            if(isEnabled && this.getTexture(PaintLayer.DETAIL) == Textures.NONE)
+            if(isEnabled && this.getTexture(PaintLayer.MIDDLE) == Textures.NONE)
             {
-                this.setTexture(PaintLayer.DETAIL, Textures.BLOCK_NOISE_STRONG);
+                this.setTexture(PaintLayer.MIDDLE, Textures.BLOCK_NOISE_STRONG);
             }
-            else if(!isEnabled && this.getTexture(PaintLayer.DETAIL) != Textures.NONE)
+            else if(!isEnabled && this.getTexture(PaintLayer.MIDDLE) != Textures.NONE)
             {
-                this.setTexture(PaintLayer.DETAIL, Textures.NONE);
+                this.setTexture(PaintLayer.MIDDLE, Textures.NONE);
             }
         }
         
-        public boolean isOverlayLayerEnabled()
+        public boolean isOuterLayerEnabled()
         {
-            return this.getTexture(PaintLayer.OVERLAY) != Textures.NONE;
+            return this.getTexture(PaintLayer.OUTER) != Textures.NONE;
         }
         
-        public void setOverlayLayerEnabled(boolean isEnabled)
+        public void setOuterLayerEnabled(boolean isEnabled)
         {
-            if(isEnabled && this.getTexture(PaintLayer.OVERLAY) == Textures.NONE)
+            if(isEnabled && this.getTexture(PaintLayer.OUTER) == Textures.NONE)
             {
-                this.setTexture(PaintLayer.OVERLAY, Textures.BLOCK_NOISE_STRONG);
+                this.setTexture(PaintLayer.OUTER, Textures.BLOCK_NOISE_STRONG);
             }
-            else if(!isEnabled && this.getTexture(PaintLayer.OVERLAY) != Textures.NONE)
+            else if(!isEnabled && this.getTexture(PaintLayer.OUTER) != Textures.NONE)
             {
-                this.setTexture(PaintLayer.OVERLAY, Textures.NONE);
+                this.setTexture(PaintLayer.OUTER, Textures.NONE);
             }
         }
         

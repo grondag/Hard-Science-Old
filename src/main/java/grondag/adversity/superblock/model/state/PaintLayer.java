@@ -12,7 +12,7 @@ public enum PaintLayer
     BASE(0, SurfaceType.MAIN),
     
     /**
-     * Textures the MAIN surface.  
+     * Textures the MAIN and CUT surfaces.  
      * Provides dirt or other character to a base layer.
      * Optional.
      * Middle z-position when other layers are present.
@@ -20,16 +20,18 @@ public enum PaintLayer
      * Individual quads can be solid or translucent, shaded or lit.
      * Has separate color.
      */
-    DETAIL(1, SurfaceType.MAIN),
+    MIDDLE(1, SurfaceType.MAIN),
     
     /**
-     * Textures the MAIN surface.  
-     * Border or brick lines, etc.
+      * Textures the MAIN surface only.  
+     * Provides dirt or other character to a base layer.
      * Optional.
-     * Outer z-position.
+     * Outer z-position when other layers are present.
+     * Will generally be partial quads, translucent or clipped.
+     * Individual quads can be solid or translucent, shaded or lit.
      * Has separate color.
      */
-    OVERLAY(2, SurfaceType.MAIN),
+    OUTER(2, SurfaceType.MAIN),
     
     /**
      * Textures the LAMP surface.  
@@ -64,12 +66,11 @@ public enum PaintLayer
         
         DYNAMIC_VALUES = new PaintLayer[DYNAMIC_SIZE];
         DYNAMIC_VALUES[BASE.ordinal()] = BASE;
-        DYNAMIC_VALUES[DETAIL.ordinal()] = DETAIL;
-        DYNAMIC_VALUES[OVERLAY.ordinal()] = OVERLAY;
+        DYNAMIC_VALUES[MIDDLE.ordinal()] = MIDDLE;
+        DYNAMIC_VALUES[OUTER.ordinal()] = OUTER;
         DYNAMIC_VALUES[LAMP.ordinal()] = LAMP;
         
         STATIC_VALUES = values();
-     
     }
     
     /** 

@@ -15,13 +15,13 @@ label.cancel=Cancel
 label.color=Color
 label.cuts_count=Cuts
 label.cuts_on_edge=Cuts on Edge
-label.detail_color=Decoration Color
-label.detail_texture=Decoration Texture
+label.middle_color=Middle Layer Color
+label.middle_texture=Middle Layer Texture
 label.half_slab=Half Slab
 label.material=Material
 label.meta=Meta Data
-label.overlay_color=Border Color
-label.overlay_texture=Border Texture
+label.outer_color=Outer Layer Color
+label.outer_texture=Outer Layer Texture
 label.shape=Shape
 label.species=Species
 label.thickness=Thickness
@@ -176,11 +176,11 @@ color.chroma.intense_accent=Intense Accent
 color.chroma.ultra_accent=Ultra Intense
 
 #PAINT LAYERS
-paintlayer.base=Base
-paintlayer.detail=Decoration
-paintlayer.overlay=Borders
-paintlayer.lamp=Lamp
-paintlayer.cut=Cut
+paintlayer.base=Base Surface
+paintlayer.middle=Middle Layer
+paintlayer.outer=Outer Layer
+paintlayer.lamp=Lamp Surface
+paintlayer.cut=Cut Surface
 
 #SHAPES
 shape.box=Box
