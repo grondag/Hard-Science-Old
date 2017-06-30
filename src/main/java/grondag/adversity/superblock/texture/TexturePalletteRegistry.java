@@ -31,7 +31,10 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
     
     public TexturePallette addZoomedPallete(TexturePallette source)
     {
-        TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, new TexturePalletteInfo(source).withZoomLevel(source.zoomLevel + 1));
+        TexturePallette result = new TexturePallette(nextOrdinal++, source.textureBaseName, 
+                new TexturePalletteInfo(source)
+                    .withZoomLevel(source.zoomLevel + 1)
+                    .withScale(source.textureScale.zoom()));
         texturePallettes.add(result);
         return result;
     }
