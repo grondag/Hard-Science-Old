@@ -3,7 +3,7 @@ package grondag.adversity.superblock.model.painter;
 import java.util.List;
 
 import grondag.adversity.library.render.LightingMode;
-import grondag.adversity.library.render.QuadFactory;
+import grondag.adversity.library.render.QuadHelper;
 import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.library.render.Vertex;
 import grondag.adversity.library.varia.Color;
@@ -116,7 +116,7 @@ public abstract class QuadPainter
         {
             // if surface has a lamp gradient and rendered with shading, need
             // to replace the colors to form the gradient.
-            int shadedColor = QuadFactory.shadeColor(color, (LightUtil.diffuseLight(result.getNormalFace()) + 2) / 3, false);
+            int shadedColor = QuadHelper.shadeColor(color, (LightUtil.diffuseLight(result.getNormalFace()) + 2) / 3, false);
             int lampColor = this.lampColorMap.getColor(EnumColorMap.LAMP);
             for(int i = 0; i < result.getVertexCount(); i++)
             {

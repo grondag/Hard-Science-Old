@@ -137,7 +137,7 @@ public class Vertex extends Vec3d
     
     public boolean isOnFacePlane(EnumFacing face)
     {
-        return Math.abs(this.distanceToFacePlane(face)) < QuadFactory.EPSILON;
+        return Math.abs(this.distanceToFacePlane(face)) < QuadHelper.EPSILON;
     }
     
     public Vertex clone()
@@ -212,9 +212,9 @@ public class Vertex extends Vec3d
      */
     public boolean isCsgEqual(Vertex vertexIn)
     {
-        return Math.abs(vertexIn.xCoord - this.xCoord) < QuadFactory.EPSILON
-            && Math.abs(vertexIn.yCoord - this.yCoord) < QuadFactory.EPSILON
-            && Math.abs(vertexIn.zCoord - this.zCoord) < QuadFactory.EPSILON;
+        return Math.abs(vertexIn.xCoord - this.xCoord) < QuadHelper.EPSILON
+            && Math.abs(vertexIn.yCoord - this.yCoord) < QuadHelper.EPSILON
+            && Math.abs(vertexIn.zCoord - this.zCoord) < QuadHelper.EPSILON;
 
     }
 
@@ -223,6 +223,6 @@ public class Vertex extends Vec3d
      */
     public boolean isOnLine(Vec3d pointA, Vec3d pointB)
     {
-        return(Math.abs(pointA.distanceTo(pointB) - pointB.distanceTo(this) - pointA.distanceTo(this)) < QuadFactory.EPSILON);
+        return(Math.abs(pointA.distanceTo(pointB) - pointB.distanceTo(this) - pointA.distanceTo(this)) < QuadHelper.EPSILON);
     }
 }

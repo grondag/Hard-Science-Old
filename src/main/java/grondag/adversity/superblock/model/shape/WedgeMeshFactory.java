@@ -5,7 +5,6 @@ import static grondag.adversity.superblock.model.state.ModelStateFactory.ModelSt
 import java.util.List;
 
 import javax.vecmath.Matrix4d;
-
 import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.render.FaceVertex;
@@ -33,8 +32,8 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
     private static ShapeMeshGenerator instance;
     
     private static Surface BACK_AND_BOTTOM = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    private static Surface SIDES = new Surface(SurfaceType.CUT, SurfaceTopology.CUBIC);
-    private static Surface TOP = new Surface(SurfaceType.CUT, SurfaceTopology.TILED);
+    private static Surface SIDES = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static Surface TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
@@ -45,12 +44,20 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
     private WedgeMeshFactory()
     {
         super(StateFormat.BLOCK, 
-                STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_HAS_AXIS | STATE_FLAG_HAS_AXIS_ORIENTATION | STATE_FLAG_HAS_MODEL_ROTATION,
+                STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_HAS_AXIS | STATE_FLAG_HAS_MODEL_ROTATION,
                 BACK_AND_BOTTOM, SIDES, TOP);
     }
- 
-    private List<RawQuad> makeQuads(Matrix4d matrix)
+    
+    @Override
+    public List<RawQuad> getShapeQuads(ModelState modelState)
     {
+        
+        // Axis for this shape is along the face of the sloping surface
+        // Four rotations x 3 axes gives 12 orientations - one for each edge of a cube.
+        // Default geometry is Y axis with full sides against north/east faces.
+        
+        Matrix4d matrix = getMatrix4d(modelState);
+        
         RawQuad template = new RawQuad();
         template.color = 0xFFFFFFFF;
         template.rotation = Rotation.ROTATE_NONE;
@@ -67,39 +74,65 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
       
         quad = template.clone();
         quad.surfaceInstance = BACK_AND_BOTTOM.unitInstance;
-        quad.setFace(EnumFacing.DOWN);
-        quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.NORTH);
+        quad.setFace(EnumFacing.EAST);
+        quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.UP);
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
         quad.surfaceInstance = SIDES.unitInstance;
-        quad.setFace(EnumFacing.EAST);
-        quad.setupFaceQuad(EnumFacing.EAST,
-                new FaceVertex(0, 0, 0),
+        quad.setFace(EnumFacing.UP);
+        quad.setupFaceQuad(EnumFacing.UP,
+                new FaceVertex(0, 1, 0),
                 new FaceVertex(1, 0, 0),
                 new FaceVertex(1, 1, 0), 
-                EnumFacing.UP);
+                EnumFacing.NORTH);
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
         quad.surfaceInstance = SIDES.unitInstance;
-        quad.setFace(EnumFacing.WEST);
-        quad.setupFaceQuad(EnumFacing.WEST,
+        quad.setFace(EnumFacing.DOWN);
+        quad.setupFaceQuad(EnumFacing.DOWN,
                 new FaceVertex(0, 0, 0),
-                new FaceVertex(1, 0, 0),
+                new FaceVertex(1, 1, 0),
                 new FaceVertex(0, 1, 0), 
-                EnumFacing.UP);
+                EnumFacing.NORTH);
         builder.add(quad.transform(matrix));
         
+        // get position within surface for bigtex according to axis 
+
+        // in default model, texture flows with u,v mapped to x, -y
+//        Vector4d uVec = new Vector4d(1, 0, 0, 1);
+//        Vector4d vVec = new Vector4d(0, -1, 0, 1);
+//        
+//        matrix.transform(uVec);
+//        matrix.transform(vVec);
+        
+        
+        
+        
+        // note that x, y, z are already limited to 0-31 for block-type model state
+//        int uPos = (int) Math.round(uVec.x * modelState.getPosX() + uVec.y * modelState.getPosY() + uVec.z * modelState.getPosZ()); 
+//        int vPos = (int) Math.round(vVec.x * modelState.getPosX() + vVec.y * modelState.getPosY() + vVec.z * modelState.getPosZ()); 
+//        int uStep = (int)Math.round(uVec.x + uVec.y + uVec.z);
+//        int vStep = (int)Math.round(vVec.x + vVec.y + vVec.z);
+        
+        quad = template.clone();
+        quad.surfaceInstance = TOP.newInstance(true);
+        quad.setFace(EnumFacing.SOUTH);
+        quad.setupFaceQuad(EnumFacing.SOUTH,
+                new FaceVertex(0, 0, 1),
+                new FaceVertex(1, 0, 0),
+                new FaceVertex(1, 1, 0), 
+                new FaceVertex(0, 1, 1), 
+                EnumFacing.UP);
+//        quad.minU = uStep < 0 ? 32 - uPos : uPos;
+//        quad.maxU = quad.minU + uStep;
+//        quad.minV = vStep < 0 ? 32 - vPos : vPos;
+//        quad.maxV = quad.minV + vStep;
+        builder.add(quad.transform(matrix));
         
         
         return builder.build();
-    }
-    
-    @Override
-    public List<RawQuad> getShapeQuads(ModelState modelState)
-    {
-        return this.makeQuads(getMatrix4d(modelState));
     }
 
     @Override
@@ -118,7 +151,7 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
     @Override
     public int geometricSkyOcclusion(ModelState modelState)
     {
-        return modelState.getAxis() == EnumFacing.Axis.Y ? 255 : 7;
+        return modelState.getAxis() == EnumFacing.Axis.Y ? 7 : 255;
     }
 
     @Override
@@ -130,18 +163,19 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
     @Override
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {
+        return SideShape.PARTIAL;
         //FIXME
-        if(modelState.getMetaData() ==15) return SideShape.SOLID;
-        
-        if(side.getAxis() == modelState.getAxis())
-        {
-            return (side.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) == modelState.isAxisInverted()
-                    ? SideShape.SOLID : SideShape.MISSING;
-        }
-        else
-        {
-            return modelState.getMetaData() > 8 ? SideShape.PARTIAL : SideShape.MISSING;
-        }
+//        if(modelState.getMetaData() ==15) return SideShape.SOLID;
+//        
+//        if(side.getAxis() == modelState.getAxis())
+//        {
+//            return (side.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE) == modelState.isAxisInverted()
+//                    ? SideShape.SOLID : SideShape.MISSING;
+//        }
+//        else
+//        {
+//            return modelState.getMetaData() > 8 ? SideShape.PARTIAL : SideShape.MISSING;
+//        }
     }
     
     @Override

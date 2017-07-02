@@ -70,7 +70,7 @@ public class SimpleItemBlockModel implements IBakedModel, IPerspectiveAwareModel
 
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		return side == null ? quads : QuadFactory.EMPTY_QUAD_LIST;
+		return side == null ? quads : QuadHelper.EMPTY_QUAD_LIST;
 	}
 
 	@Override

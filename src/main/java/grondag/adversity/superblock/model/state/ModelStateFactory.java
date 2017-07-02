@@ -12,10 +12,8 @@ import grondag.adversity.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.adversity.library.varia.BitPacker.BitElement.EnumElement;
 import grondag.adversity.library.varia.BitPacker.BitElement.IntElement;
 import grondag.adversity.library.varia.BitPacker.BitElement.LongElement;
-import grondag.adversity.library.world.Alternator;
 import grondag.adversity.library.world.CornerJoinBlockState;
 import grondag.adversity.library.world.CornerJoinBlockStateSelector;
-import grondag.adversity.library.world.IAlternator;
 import grondag.adversity.library.world.NeighborBlocks;
 import grondag.adversity.library.world.Rotation;
 import grondag.adversity.library.world.SimpleJoin;
@@ -29,7 +27,6 @@ import grondag.adversity.superblock.terrain.TerrainState;
 import grondag.adversity.superblock.texture.Textures;
 import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.adversity.superblock.varia.BlockTests;
-import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -40,10 +37,10 @@ import net.minecraft.world.World;
 
 public class ModelStateFactory
 {
-    private static final IAlternator[] ROTATION_ALTERNATOR = new IAlternator[TextureScale.values().length];
+//    private static final IAlternator[] ROTATION_ALTERNATOR = new IAlternator[TextureScale.values().length];
             
            // Alternator.getAlternator(4, 45927934);
-    private static final IAlternator[] BLOCK_ALTERNATOR = new IAlternator[TextureScale.values().length]; //Alternator.getAlternator(8, 2953424);
+//    private static final IAlternator[] BLOCK_ALTERNATOR = new IAlternator[TextureScale.values().length]; //Alternator.getAlternator(8, 2953424);
 
   
     //package scope to allow inspection in test harness
@@ -76,9 +73,9 @@ public class ModelStateFactory
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
     private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
     // these provide random alternate for texture version and rotation for single blocks or cubic groups of blocks 
-    private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<Rotation> P3B_TEXTURE_ROTATION[] = new EnumElement[TextureScale.values().length];
+//    private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
+//    @SuppressWarnings("unchecked")
+//    private static final EnumElement<Rotation> P3B_TEXTURE_ROTATION[] = new EnumElement[TextureScale.values().length];
     private static final IntElement P3B_MASONRY_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
     private static final EnumElement<Rotation> P3B_MODEL_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
     
@@ -124,13 +121,13 @@ public class ModelStateFactory
             borderMask1 |= P1_PAINT_LIGHT[i].comparisonMask();
         }
         
-        for(TextureScale scale : TextureScale.values())
-        {
-            ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
-            BLOCK_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(8, 2953424, scale.power);
-            P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
-            P3B_TEXTURE_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-        }
+//        for(TextureScale scale : TextureScale.values())
+//        {
+//            ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
+//            BLOCK_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(8, 2953424, scale.power);
+//            P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
+//            P3B_TEXTURE_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+//        }
         
         P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY = borderMask0
                 | P0_RENDER_LAYER_BASE.comparisonMask() 
@@ -188,6 +185,7 @@ public class ModelStateFactory
          */
         public static final int STATE_FLAG_NEEDS_POS = STATE_FLAG_NEEDS_MASONRY_JOIN << 1;
         
+        //FIXME: remove these
         /** 
          * True if block version and rotation are needed. Applies for block formats.
          */
@@ -433,20 +431,18 @@ public class ModelStateFactory
             {
             case BLOCK:
  
-                // for bigtex texture randomization - cubic painters only need 32 blocks of resolution
-                // to be effective at texture randomization because they have block version and rotation as well
-                if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 31);
+                if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 255);
                 
                 long b3 = bits3;
                 
-                for(TextureScale scale : TextureScale.values())
-                {
-                    if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
-                    {
-                        b3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(BLOCK_ALTERNATOR[scale.ordinal()].getAlternate(pos), b3);
-                        b3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
-                    }
-                }
+//                for(TextureScale scale : TextureScale.values())
+//                {
+//                    if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
+//                    {
+//                        b3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(BLOCK_ALTERNATOR[scale.ordinal()].getAlternate(pos), b3);
+//                        b3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
+//                    }
+//                }
 
                 NeighborBlocks neighbors = null;
                 
@@ -772,41 +768,41 @@ public class ModelStateFactory
         //  PACKER 3 ATTRIBUTES  (BLOCK FORMAT)
         ////////////////////////////////////////////////////
         
-        public Rotation getTextureRotation(TextureScale scale)
-        {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Log.warn("getRotation on model state does not apply for shape");
-            
-            populateStateFlagsIfNeeded();
-            return P3B_TEXTURE_ROTATION[scale.ordinal()].getValue(bits3);
-        }
+//        public Rotation getTextureRotation(TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("getRotation on model state does not apply for shape");
+//            
+//            populateStateFlagsIfNeeded();
+//            return P3B_TEXTURE_ROTATION[scale.ordinal()].getValue(bits3);
+//        }
         
-        public void setTextureRotation(Rotation rotation, TextureScale scale)
-        {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Log.warn("setRotation on model state does not apply for shape");
-            
-            populateStateFlagsIfNeeded();
-            bits3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(rotation, bits3);
-            invalidateHashCode();
-        }
+//        public void setTextureRotation(Rotation rotation, TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("setRotation on model state does not apply for shape");
+//            
+//            populateStateFlagsIfNeeded();
+//            bits3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(rotation, bits3);
+//            invalidateHashCode();
+//        }
 
-        public int getBlockVersion(TextureScale scale)
-        {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Log.warn("getBlockVersion on model state does not apply for shape");
-            
-            return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
-        }
+//        public int getBlockVersion(TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("getBlockVersion on model state does not apply for shape");
+//            
+//            return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
+//        }
         
-        public void setBlockVersion(int version, TextureScale scale)
-        {
-            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Log.warn("setBlockVersion on model state does not apply for shape");
-            
-            bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
-            invalidateHashCode();
-        }
+//        public void setBlockVersion(int version, TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("setBlockVersion on model state does not apply for shape");
+//            
+//            bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
+//            invalidateHashCode();
+//        }
 
         /**
          * Will return 0 if model state does not include species.

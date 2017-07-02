@@ -131,6 +131,11 @@ public class CubicPlacementHandler implements IPlacementHandler
             }
         }
         
+        if(stackModelState.hasModelRotation())
+        {
+            stackModelState.setModelRotation(item.getRotation(stack));
+        }
+        
         if(stackModelState.hasSpecies())
         {
             int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, stackBlock, stackModelState);

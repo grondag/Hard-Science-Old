@@ -121,7 +121,7 @@ public class QuadContainer
         case WEST:
             return this.west;
         default:
-            return QuadFactory.EMPTY_QUAD_LIST;
+            return QuadHelper.EMPTY_QUAD_LIST;
 
         }
     }

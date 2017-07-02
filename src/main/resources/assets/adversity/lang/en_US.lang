@@ -27,6 +27,7 @@ label.species=Species
 label.thickness=Thickness
 label.toughness=Toughness
 label.translucency=Translucency
+label.position=Position
 
 #KEYS
 key.categories.adversity=Adversity

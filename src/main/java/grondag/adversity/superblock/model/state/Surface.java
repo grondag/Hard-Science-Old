@@ -15,7 +15,7 @@ public class Surface
     public final boolean isLampGradient;
     
     /**
-     * Instance with unit scale uScale and vScale = 1.0
+     * Instance with unit scale uScale and vScale = 1.0, uses depth for bigtex
      */
     public final SurfaceInstance unitInstance;
     
@@ -29,12 +29,22 @@ public class Surface
         this.surfaceType = paintType;
         this.topology = topology;
         this.isLampGradient = isLampGradient;
-        this.unitInstance = new SurfaceInstance(1.0, 1.0);
+        this.unitInstance = new SurfaceInstance(1.0, 1.0, false);
     }
     
     public SurfaceInstance newInstance(double uScale, double vScale)
     {
-        return new SurfaceInstance(uScale, vScale);
+        return new SurfaceInstance(uScale, vScale, false);
+    }
+    
+    public SurfaceInstance newInstance(double uScale, double vScale, boolean ignoreDepthForRandomization)
+    {
+        return new SurfaceInstance(uScale, vScale, ignoreDepthForRandomization);
+    }
+    
+    public SurfaceInstance newInstance(boolean ignoreDepthForRandomization)
+    {
+        return new SurfaceInstance(1, 1, ignoreDepthForRandomization);
     }
     
     public class SurfaceInstance
@@ -55,10 +65,18 @@ public class Surface
          */
         public final double vScale;
         
-        private SurfaceInstance(double uScale, double vScale)
+        /**
+         * If true, texture painting should not vary by axis
+         * orthogonal to the surface.
+         */
+        public final boolean ignoreDepthForRandomization;
+        
+        
+        private SurfaceInstance(double uScale, double vScale, boolean ignoreDepthForRandomization)
         {
             this.uScale = uScale;
             this.vScale = vScale;
+            this.ignoreDepthForRandomization = ignoreDepthForRandomization;
         }
 
         public Surface surface()

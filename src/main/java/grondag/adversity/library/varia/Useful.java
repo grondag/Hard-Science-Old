@@ -379,6 +379,10 @@ public class Useful
        return mask;
    }
    
+   /**
+    * Equivalent to offsetEnumValue(value, 1)
+    * Probably slightly faster.
+    */
    @SuppressWarnings("unchecked")
    public static <T extends Enum<?>> T nextEnumValue(T value)
    {
@@ -389,6 +393,19 @@ public class Useful
        }
        return (T) value.getClass().getEnumConstants()[ord];
    }
+   
+   /**
+    * Returns enum value that is offset values distance
+    * from given value.  Wraps.
+    */
+   @SuppressWarnings("unchecked")
+   public static <T extends Enum<?>> T offsetEnumValue(T value, int offset)
+   {
+       int ord = (value.ordinal() + offset) % value.getClass().getEnumConstants().length;
+       if(ord < 0) ord += value.getClass().getEnumConstants().length;
+       return (T) value.getClass().getEnumConstants()[ord];
+   }
+   
    
 //   /**
 //    * Kept for possible future use.

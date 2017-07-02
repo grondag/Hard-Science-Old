@@ -5,7 +5,7 @@ import grondag.adversity.library.cache.ObjectSimpleCacheLoader;
 import grondag.adversity.library.cache.ObjectSimpleLoadingCache;
 import grondag.adversity.library.render.QuadBakery;
 import grondag.adversity.library.render.QuadContainer;
-import grondag.adversity.library.render.QuadFactory;
+import grondag.adversity.library.render.QuadHelper;
 import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.library.render.SimpleItemBlockModel;
 import grondag.adversity.library.render.SparseLayerMapBuilder;
@@ -261,7 +261,7 @@ public class SuperDispatcher
         @Override
         public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)
         {
-            if(state == null) return QuadFactory.EMPTY_QUAD_LIST;
+            if(state == null) return QuadHelper.EMPTY_QUAD_LIST;
     
             ModelState modelState = ((IExtendedBlockState)state).getValue(SuperBlock.MODEL_STATE);
             
@@ -272,17 +272,17 @@ public class SuperDispatcher
             {
                 QuadContainer qc = damageCache.get(modelState.geometricState());
                 if(qc == null) 
-                    return QuadFactory.EMPTY_QUAD_LIST;
+                    return QuadHelper.EMPTY_QUAD_LIST;
                 return qc.getQuads(side);
             }
             else
             {
                 SparseLayerMap map = modelCache.get(modelState);
                 if(map == null) 
-                    return QuadFactory.EMPTY_QUAD_LIST;
+                    return QuadHelper.EMPTY_QUAD_LIST;
                 QuadContainer container = map.get(layer);
                 if(container == null)
-                        return QuadFactory.EMPTY_QUAD_LIST;
+                        return QuadHelper.EMPTY_QUAD_LIST;
                 return container.getQuads(side);
             }
         }

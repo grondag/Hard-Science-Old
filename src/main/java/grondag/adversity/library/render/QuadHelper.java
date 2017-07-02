@@ -36,6 +36,8 @@ package grondag.adversity.library.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Vector4d;
+
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -44,7 +46,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.adversity.library.varia.Useful;
 
-public class QuadFactory
+public class QuadHelper
 {
     public static final double EPSILON = 0.0000001;
 
@@ -292,6 +294,39 @@ public class QuadFactory
 //        newQuad.recolor((Useful.SALT_SHAKER.nextInt(0x1000000) & 0xFFFFFF) | 0xFF000000);
         
         return newQuad;
+    }
+
+    public static EnumFacing computeFaceForNormal(Vec3d normal)
+    {
+        EnumFacing result = null;
+        
+        double minDiff = 0.0F;
+    
+        for (EnumFacing f : EnumFacing.values())
+        {
+            Vec3d faceNormal = new Vec3d(f.getDirectionVec());
+            double diff = normal.dotProduct(faceNormal);
+    
+            if (diff >= 0.0 && diff > minDiff)
+            {
+                minDiff = diff;
+                result = f;
+            }
+        }
+    
+        if (result == null)
+        {
+            return EnumFacing.UP;
+        }
+        else
+        {
+            return result;
+        }
+    }
+
+    public static EnumFacing computeFaceForNormal(Vector4d normal)
+    {
+        return computeFaceForNormal(new Vec3d(normal.x, normal.y, normal.z));
     }
     
     //    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)

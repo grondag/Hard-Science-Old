@@ -120,7 +120,7 @@ public class CSGPlane
         for (int i = 0; i < quad.getVertexCount(); i++) {
             double t = this.normal.dotProduct(quad.getVertex(i)) - this.dist;
             
-            int type = (t < -QuadFactory.EPSILON) ? BACK : (t > QuadFactory.EPSILON) ? FRONT : COPLANAR;
+            int type = (t < -QuadHelper.EPSILON) ? BACK : (t > QuadHelper.EPSILON) ? FRONT : COPLANAR;
             polygonType |= type;
             types[i] = type;
         }

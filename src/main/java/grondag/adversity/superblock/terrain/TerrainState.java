@@ -1,6 +1,6 @@
 package grondag.adversity.superblock.terrain;
 
-import grondag.adversity.library.render.QuadFactory;
+import grondag.adversity.library.render.QuadHelper;
 import grondag.adversity.library.world.NeighborBlocks.HorizontalCorner;
 import grondag.adversity.library.world.NeighborBlocks.HorizontalFace;
 import grondag.adversity.superblock.block.SuperBlock;
@@ -212,7 +212,7 @@ public class TerrainState
     public boolean isFullCube()
     {
         refreshVertexCalculationsIfNeeded();
-        double top = 1.0 + yOffset + QuadFactory.EPSILON;
+        double top = 1.0 + yOffset + QuadHelper.EPSILON;
         
         // center vertex does not matter if top is simplified to a single quad
         if(!getSimpleFlag(SIMPLE_FLAG_TOP_ORDINAL))

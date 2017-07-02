@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava;
 
 import java.util.List;
 
-import grondag.adversity.library.render.QuadFactory;
+import grondag.adversity.library.render.QuadHelper;
 import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.library.render.Vertex;
 import net.minecraft.client.renderer.GLAllocation;
@@ -30,7 +30,7 @@ public class RenderLavaBlob extends Render<EntityLavaBlob>
 
     private static final ResourceLocation TEXTURE = new ResourceLocation("adversity:textures/entity/lava.png");
 
-    private static final List<RawQuad> quads = QuadFactory.makeIcosahedron(new Vec3d(0,0,0), 0.5, new RawQuad());
+    private static final List<RawQuad> quads = QuadHelper.makeIcosahedron(new Vec3d(0,0,0), 0.5, new RawQuad());
 
     public void doRender(EntityLavaBlob entity, double x, double y, double z, float entityYaw, float partialTicks)
     {

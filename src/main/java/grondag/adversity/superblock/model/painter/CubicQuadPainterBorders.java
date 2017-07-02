@@ -57,10 +57,11 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
         quad.minV = inputs.flipV ? 16 : 0;
         quad.maxU = inputs.flipU ? 0 : 16;
         quad.maxV = inputs.flipV ? 0 : 16;
-        quad.textureName = this.texture.getTextureName(this.blockVersion, inputs.textureOffset);
+        quad.textureName = this.texture.getTextureName(textureVersionForFace(quad.getNominalFace()), inputs.textureOffset);
         
         return quad;
     }
+    
     
     static
     {

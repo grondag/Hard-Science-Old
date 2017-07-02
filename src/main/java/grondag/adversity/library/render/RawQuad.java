@@ -19,6 +19,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 
 public class RawQuad
 {
@@ -486,13 +487,13 @@ public class RawQuad
      */
     public RawQuad multiplyColor(int color)
     {
-        this.color = QuadFactory.multiplyColor(this.color, color);
+        this.color = QuadHelper.multiplyColor(this.color, color);
         for(int i = 0; i < this.getVertexCount(); i++)
         {
             Vertex v = this.getVertex(i);
             if(v != null)
             {
-                int vColor = QuadFactory.multiplyColor(color, v.color);
+                int vColor = QuadHelper.multiplyColor(color, v.color);
                 this.setVertex(i, v.withColor(vColor));
             }
         }
@@ -620,7 +621,7 @@ public class RawQuad
 
     protected boolean isOrthogonalTo(EnumFacing face)
     {
-        return Math.abs(this.getFaceNormal().dotProduct(new Vec3d(face.getDirectionVec()))) <= QuadFactory.EPSILON;
+        return Math.abs(this.getFaceNormal().dotProduct(new Vec3d(face.getDirectionVec()))) <= QuadHelper.EPSILON;
     }
 
     public boolean isOnSinglePlane()
@@ -635,7 +636,7 @@ public class RawQuad
             Vertex v = this.getVertex(i);
             if(v == null) return false;
 
-            if(Math.abs(v.subtract(this.getVertex(0)).dotProduct(fn)) > QuadFactory.EPSILON) return false;
+            if(Math.abs(v.subtract(this.getVertex(0)).dotProduct(fn)) > QuadHelper.EPSILON) return false;
         }
 
         return true;
@@ -661,7 +662,7 @@ public class RawQuad
         Vec3d normal = this.getFaceNormal();
 
         double directionDotNormal = normal.dotProduct(direction);
-        if (Math.abs(directionDotNormal) < QuadFactory.EPSILON) 
+        if (Math.abs(directionDotNormal) < QuadHelper.EPSILON) 
         { 
             // parallel
             return null;
@@ -669,7 +670,7 @@ public class RawQuad
 
         double distanceToPlane = -normal.dotProduct((origin.subtract(getVertex(0)))) / directionDotNormal;
         // facing away from plane
-        if(distanceToPlane < -QuadFactory.EPSILON) return null;
+        if(distanceToPlane < -QuadHelper.EPSILON) return null;
 
         return origin.add(direction.scale(distanceToPlane));
     }
@@ -896,31 +897,7 @@ public class RawQuad
      */
     public EnumFacing getNormalFace()
     {
-        Vec3d myNormal = this.getFaceNormal();
-        EnumFacing result = null;
-        
-        double minDiff = 0.0F;
-
-        for (EnumFacing f : EnumFacing.values())
-        {
-            Vec3d faceNormal = new Vec3d(f.getDirectionVec());
-            double diff = myNormal.dotProduct(faceNormal);
-
-            if (diff >= 0.0 && diff > minDiff)
-            {
-                minDiff = diff;
-                result = f;
-            }
-        }
-
-        if (result == null)
-        {
-            return EnumFacing.UP;
-        }
-        else
-        {
-            return result;
-        }
+        return QuadHelper.computeFaceForNormal(this.getFaceNormal());
     }
     
     /** 
@@ -966,6 +943,7 @@ public class RawQuad
     {
         RawQuad result = this.clone();
         
+        // transform vertices
         for(int i = 0; i < result.vertexCount; i++)
         {
             Vertex vertex = result.getVertex(i);
@@ -973,6 +951,15 @@ public class RawQuad
             matrix.transform(temp);
             if(Math.abs(temp.w - 1.0) > 1e-5) temp.scale(1.0 / temp.w);
             result.setVertex(i, vertex.withXYZ(temp.x, temp.y, temp.z));
+        }
+        
+        // transform nominal face
+        if(this.face != null)
+        {
+            Vec3i curNorm = this.face.getDirectionVec();
+            Vector4d newFaceVec = new Vector4d(curNorm.getX(), curNorm.getY(), curNorm.getZ(), 1.0);
+            matrix.transform(newFaceVec);
+            result.setFace(QuadHelper.computeFaceForNormal(newFaceVec));
         }
         
         return result;

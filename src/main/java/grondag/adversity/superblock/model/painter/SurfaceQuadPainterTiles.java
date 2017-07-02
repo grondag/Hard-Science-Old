@@ -69,10 +69,11 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
         quad.textureName = this.texture.getTextureName(textureVersion);
                 
         int rotationOrdinal = this.texture.rotation.rotation.ordinal();
-        if(this.texture.rotation.rotationType() != TextureRotationType.FIXED)
+        if(this.texture.rotation.rotationType() == TextureRotationType.RANDOM)
         {
             rotationOrdinal = (rotationOrdinal + hash) & 3;
         }
+        
         if(rotationOrdinal > 0)
         {
             for(int i = 0; i < rotationOrdinal; i++)

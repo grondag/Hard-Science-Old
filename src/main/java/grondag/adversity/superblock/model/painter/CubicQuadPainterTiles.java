@@ -15,8 +15,8 @@ public class CubicQuadPainterTiles extends CubicQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
-        quad.rotation = this.rotation;
-        quad.textureName = this.texture.getTextureName(this.blockVersion);
+        quad.rotation = this.textureRotationForFace(quad.getNominalFace());
+        quad.textureName = this.texture.getTextureName(this.textureVersionForFace(quad.getNominalFace()));
         return quad;
     }
 }
