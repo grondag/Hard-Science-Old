@@ -1,0 +1,283 @@
+
+#MISC
+misc.denials=["Absolutely not.","Nope.","Not happening","Doctor No sends his regards.","You must be joking.","I made a list of things that aren\u0027t going to happen, and what you just tried is on it.","Nice try.","That\u0027s not going to work.","DENIED!"]
+misc.mode_set=Mode set to %s
+misc.rotate="Rotate"
+misc.connection="Connect"
+
+#GUI LABELS
+label.accept=Accept
+label.axis=Axis
+label.axis_inverted=Axis Inverted
+label.base_color=Base Color
+label.base_texture=Base Texture
+label.cancel=Cancel
+label.color=Color
+label.cuts_count=Cuts
+label.cuts_on_edge=Cuts on Edge
+label.middle_color=Middle Layer Color
+label.middle_texture=Middle Layer Texture
+label.half_slab=Half Slab
+label.material=Material
+label.meta=Meta Data
+label.outer_color=Outer Layer Color
+label.outer_texture=Outer Layer Texture
+label.shape=Shape
+label.species=Species
+label.thickness=Thickness
+label.toughness=Toughness
+label.translucency=Translucency
+label.position=Position
+
+#KEYS
+key.categories.hard_science=Hard Science
+key.placement_mode=Placement Mode
+key.placement_face=Placement Axis/Orientation
+key.placement_rotation=Placement Rotation
+key.placement_preview=Placement Preview
+
+#PLACEMENT
+placement.message.preview_set=Placement preview mode set to %s
+placement.message.orientation_set=Placement orientation set to %s
+placement.message.mode=Placement mode set to %s
+placement.message.rotation=Placement rotation set to %s
+placement.preview.none=NONE
+placement.preview.outline=OUTLINE
+placement.preview.ghost=GHOST
+placement.orientation.up=UP
+placement.orientation.down=DOWN
+placement.orientation.east=EAST
+placement.orientation.west=WEST
+placement.orientation.north=NORTH
+placement.orientation.south=SOUTH
+placement.mode.static=STATIC
+placement.mode.face=FACE
+placement.mode.match_closest=MATCH CLOSEST
+placement.rotation.rotate_none=NONE
+placement.rotation.rotate_90=CLOCKWISE
+placement.rotation.rotate_180=FLIP
+placement.rotation.rotate_270=COUNTER CLOCKWISE
+
+
+
+#ITEMS
+item.block_wand.name=Block Adjuster
+item.terrain_wand.name=Terrain Wand
+item.volcano_wand.name=Volcano Wand
+item.basalt_rubble.name=Basalt Rubble
+item.lava_blob.name=Lava Ball
+
+#BLOCKS
+tile.super_model_block.name=SuperModel Block
+tile.basalt_cobble.name=Basalt Cobblestone
+tile.basalt_cool_dynamic_height.name=Cool Basalt
+tile.basalt_cool_dynamic_filler.name=Cool Basalt (Filler)
+tile.basalt_cool_static_height.name=Cool Basalt (Static)
+tile.basalt_cool_static_filler.name=Cool Basalt (Static Filler)
+tile.basalt_cut.name=Cut Basalt
+tile.basalt_dynamic_cooling_height.name=Cooling Basalt
+tile.basalt_dynamic_cooling_filler.name=Cooling Basalt (Filler)
+tile.basalt_dynamic_warm_height.name=Warm Basalt
+tile.basalt_dynamic_warm_filler.name=Warm Basalt (Filler)
+tile.basalt_dynamic_hot_height.name=Hot Basalt
+tile.basalt_dynamic_hot_filler.name=Hot Basalt (Filler)
+tile.basalt_dynamic_very_hot_height.name=Very Hot Basalt
+tile.basalt_dynamic_very_hot_filler.name=Very Hot Basalt (Filler)
+tile.lava_dynamic_height.name=Volcanic Lava
+tile.lava_dynamic_filler.name=Volcanic Lava (Filler)
+tile.block_volcano.name=Volcano Root
+
+#COLORS
+# Java format string that defines order and punctuation for displaying colors. 1=hue, 2=chroma, 3=luminance
+color.format.color=%3$s %2$s %1$s
+color.format.pure_neutral=%3$s %2$s
+color.hue.infrared=Infrared
+color.hue.cherry=Cherry
+color.hue.rose=Rose
+color.hue.pomegranate=Pomegranate
+color.hue.crimson=Crimson
+color.hue.scarlet=Scarlet
+color.hue.red=Red
+color.hue.vermillion=Vermillion
+color.hue.tangerine=Tangerine
+color.hue.orange=Orange
+color.hue.ember=Ember
+color.hue.sunset=Sunset
+color.hue.pumpkin=Pumpkin
+color.hue.cheddar=Cheddar
+color.hue.mango=Mango
+color.hue.sunflower=Sunflower
+color.hue.gold=Gold
+color.hue.torch=Torch
+color.hue.yellow=Yellow
+color.hue.lemon=Lemon
+color.hue.lime=Lime
+color.hue.peridot=Peridot
+color.hue.chartreuse=Chartreuse
+color.hue.cactus=Cactus
+color.hue.green=Green
+color.hue.foliage=Foliage
+color.hue.mint=Mint
+color.hue.sage=Sage
+color.hue.juniper=Juniper
+color.hue.celadon=Celadon
+color.hue.emerald=Emerald
+color.hue.verdigris=Verdigris
+color.hue.turquoise=Turquoise
+color.hue.sea_foam=Sea Foam
+color.hue.cyan=Cyan
+color.hue.ice=Ice
+color.hue.beryl=Beryl
+color.hue.apatite=Apatite
+color.hue.marine=Marine
+color.hue.aqua=Aqua
+color.hue.robin_egg=Robin Egg
+color.hue.morning=Morning
+color.hue.cerulean=Cerulean
+color.hue.topaz=Topaz
+color.hue.sky=Sky
+color.hue.sapphire=Sapphire
+color.hue.periwinkle=Periwinkle
+color.hue.twilight=Twilight
+color.hue.azure=Azure
+color.hue.ocean=Ocean
+color.hue.cobalt=Cobalt
+color.hue.blue=Blue
+color.hue.lapis=Lapis
+color.hue.indigo=Indigo
+color.hue.violet=Violet
+color.hue.purple=Purple
+color.hue.amethyst=Amethyst
+color.hue.lilac=Lilac
+color.hue.magenta=Magenta
+color.hue.fuschia=Fuschia
+color.hue.tulip=Tulip
+color.hue.pink=Pink
+color.hue.peony=Peony
+color.luminance.brilliant=Brilliant
+color.luminance.extra_bright=Extra Bright
+color.luminance.bright=Bright
+color.luminance.extra_light=Extra Light
+color.luminance.light=Light
+color.luminance.medium_light=Medium Light
+color.luminance.medium_dark=Medium Dark
+color.luminance.dark=Dark
+color.luminance.extra_dark=Extra Dark
+color.chroma.pure_netural=Pure Neutral
+color.chroma.white=White
+color.chroma.grey=Grey
+color.chroma.neutral=Neutral
+color.chroma.rich=Rich
+color.chroma.deep=Deep
+color.chroma.extra_deep=Extra Deep
+color.chroma.bold=Bold
+color.chroma.extra_bold=Extra Bold
+color.chroma.accent=Accent
+color.chroma.intense_accent=Intense Accent
+color.chroma.ultra_accent=Ultra Intense
+
+#PAINT LAYERS
+paintlayer.base=Base Surface
+paintlayer.middle=Middle Layer
+paintlayer.outer=Outer Layer
+paintlayer.lamp=Lamp Surface
+paintlayer.cut=Cut Surface
+
+#SHAPES
+shape.box=Box
+shape.column_square=Square Column
+shape.cone=Cone
+shape.cube=Cube
+shape.cylinder=Cylinder
+shape.dodecahedron=Dodecahedron
+shape.dome=Dome
+shape.icosahedron=Icosahedron
+shape.pyramid=Pyramid
+shape.sphere=Sphere
+shape.staked_plates=Stacked Plates
+shape.terrain_filler=Flowing Terrain Filler
+shape.terrain_height=Flowing Terrain
+shape.tetrahedron=Tetrahedron
+shape.torus=Torus
+shape.tube=Tube
+
+#SUBSTANCES
+material.basalt=Basalt
+material.duraglass=DuraGlass
+material.durastone=DuraStone
+material.durawood=DuraWood
+material.flexiglass=FlexiGlass
+material.flexstone=FlexStone
+material.flexwood=FlexWood
+material.hyperglass=HyperGlass
+material.hyperstone=HyperStone
+material.hyperwood=HyperWood
+material.volcanic_lava=Volcanic Lava
+
+#TEXTURES - INITIAL RELEASE
+texture.zoom2x_format=%s Zoom X2
+texture.zoom4x_format=%s Zoom X4
+texture.bigtex_single=Single BigTex Test Texture
+texture.bigtex=Varied BigTex Test Texture
+texture.cobble=Cobblestone
+texture.noise_strong=Strong Noise
+texture.noise_moderate=Moderate Noise
+texture.noise_subtle=Subtle Noise
+
+texture.border_smooth_blended=Smooth Blended Edges
+texture.masonry_simple=Simple MutiBlock Masonry
+
+texture.small_dot=Small Circle
+texture.medium_dot=Medium Circle
+texture.big_dot=Big Circle
+texture.small_square=Small Square
+texture.medium_square=Medium Square
+texture.big_square=Big Square
+texture.skinny_diagonal_ridges=Skinny Diagonal Ridges
+texture.thick_diagonal_cross_ridges=Thick Diagonal Ridge Lattice
+texture.thick_diagonal_ridges=Thick Diagonal Ridges
+texture.thin_diagonal_cross_ridges=Thin Diagonal Ridge Lattice
+texture.thin_diagonal_ridges=Thin Diagaonal Ridges
+texture.thin_diagonal_cross_bars=Thin Diagonal Lattice
+texture.thin_diagonal_bars=Thin Diagonal Stripes
+texture.skinny_diagnal_cross_bars=Skinny Diagonal Lattice
+texture.skinny_diagonal_bars=Skinny Diagonal Stripes
+texture.diagonal_cross_bars=Diagonal Lattice
+texture.diagonal_bars=Diagonal Stripes
+texture.fat_diagonal_cross_bars=Fat Diagonal Lattice
+texture.fat_diagonal_bars=Fat Diagonal Stripes
+texture.diagonal_cross_ridges=Diagonal Ridge Lattice
+texture.diagonal_ridges=Diagonal Ridges
+texture.skinny_bars=Skinny Stripes
+texture.fat_bars=Fat Stripes
+texture.thick_bars=Thick Stripes
+texture.thin_bars=Thin Stripes
+
+texture.weathered_smooth_stone=Weathered Stone
+texture.sandstone=Sandstone
+texture.asphalt=Asphalt
+texture.worn_asphalt=Weathered Asphalt
+texture.wood=Wood
+texture.granite=Granite
+texture.marble=Marble
+texture.slate=Slate
+texture.rough_rock=Rough Stone
+texture.cracked_earth=Cracked Earth
+
+texture.basalt_cut=Cut Stone
+texture.basalt_cool=Cool Basalt
+texture.lava=Volcanic Lava
+texture.basalt_cooling=Cooling Basalt
+texture.basalt_warm=Warm Basalt
+texture.basalt_hot=Hot Basalt
+texture.basalt_very_hot=Very Hot Basalt
+texture.basalt_hint=Basalt Hint
+
+texture.fluid_glow=Fluidic Glow
+texture.fluid_vortex=Vortex
+texture.clouds=Clouds
+texture.starfield=Starfield
+
+
+
+

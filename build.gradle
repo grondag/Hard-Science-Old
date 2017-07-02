@@ -20,8 +20,8 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
 version = "0.1"
-group= "grondag.adversity" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "adversity"
+group= "grondag.hard_science" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "hard_science"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
