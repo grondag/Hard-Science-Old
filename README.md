@@ -1,4 +1,4 @@
-# Adversity
+# Hard Science
 
 Welcome to the repository for Hard Science.
 
