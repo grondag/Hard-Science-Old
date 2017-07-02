@@ -36,6 +36,7 @@ public class RawQuad
     // if true, rotates texture by swaping uv on vertices
     // Needed for big-tex painter, but does not work well for regular square quads.
     public boolean useVertexUVRotation = false;
+    
     public int color = Color.WHITE;
     public LightingMode lightingMode = LightingMode.SHADED;
     public boolean lockUV = false;
@@ -45,7 +46,7 @@ public class RawQuad
     
     public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
     public SurfaceInstance surfaceInstance = NO_SURFACE;
-    
+
     public float minU = 0;
     public float maxU = 16;
     public float minV = 0;

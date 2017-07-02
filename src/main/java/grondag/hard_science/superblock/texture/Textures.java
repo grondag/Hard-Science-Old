@@ -43,26 +43,22 @@ public class Textures
     
 
     //don't load test textures if not enabled
-    public static final TexturePallette BIGTEX_TEST_SINGLE = Configurator.BLOCKS.showHiddenTextures ?
-            REGISTRY.addTexturePallette("bigtex_single", 
+    public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex_single" : "noise_moderate",
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES))
-             : NONE;
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
     
-    public static final TexturePallette BIGTEX_TEST1 = Configurator.BLOCKS.showHiddenTextures ? 
-            REGISTRY.addTexturePallette("bigtex", 
+    public static final TexturePallette BIGTEX_TEST1  = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
             new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.TINY).withLayout(TextureLayout.SPLIT_X_8)
-            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES))
-            : NONE;
+            .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
     
-    public static final TexturePallette BIGTEX_TEST2 = Configurator.BLOCKS.showHiddenTextures ? 
-            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.SMALL)) : NONE;
-    public static final TexturePallette BIGTEX_TEST3 = Configurator.BLOCKS.showHiddenTextures ? 
-            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.MEDIUM)) : NONE;
-    public static final TexturePallette BIGTEX_TEST4 = Configurator.BLOCKS.showHiddenTextures ? 
-            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.LARGE)) : NONE;
-    public static final TexturePallette BIGTEX_TEST5 = Configurator.BLOCKS.showHiddenTextures ? 
-            REGISTRY.addTexturePallette("bigtex", new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT)) : NONE;
+    public static final TexturePallette BIGTEX_TEST2 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
+            new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.SMALL));
+    public static final TexturePallette BIGTEX_TEST3 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
+            new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.MEDIUM));
+    public static final TexturePallette BIGTEX_TEST4 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
+            new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.LARGE));
+    public static final TexturePallette BIGTEX_TEST5 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
+            new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT));
 
     //======================================================================
     //  TILES - REGULAR
