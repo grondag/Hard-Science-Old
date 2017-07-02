@@ -5,7 +5,10 @@ import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class BrightnessSlider extends Slider
 {
     private static final String LABEL = "Brightness";
@@ -37,7 +40,7 @@ public class BrightnessSlider extends Slider
         
         int textColor = this.selectedTabIndex > 6 ? 0xFF000000 : 0xFFFFFFFF;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, Integer.toString(this.selectedTabIndex), 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, Integer.toString(this.selectedTabIndex), 
                 this.labelRight, this.top, this.choiceWidth, this.height, 
                 textColor, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
     }

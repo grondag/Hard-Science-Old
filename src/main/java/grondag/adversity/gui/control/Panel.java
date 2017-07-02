@@ -5,10 +5,12 @@ import java.util.Arrays;
 
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.Layout;
-import grondag.adversity.gui.base.GuiControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class Panel extends GuiControl
 {
     /** if false is horizontal */

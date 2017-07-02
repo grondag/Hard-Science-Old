@@ -3,22 +3,26 @@ package grondag.adversity.gui.control;
 import java.util.List;
 
 import grondag.adversity.gui.GuiUtil;
-import grondag.adversity.gui.base.TabBar;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.adversity.superblock.texture.TextureRotationType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class TexturePicker extends TabBar<TexturePallette>
 {
-
     public ColorMap colorMap;
     
     public TexturePicker(List<TexturePallette> items, double left, double top)
     {
         super(items);
+        this.setItemsPerRow(8);
     }
 
     @Override
@@ -26,9 +30,11 @@ public class TexturePicker extends TabBar<TexturePallette>
     {
         int color = this.colorMap == null ? 0xFFFFFFFF : this.colorMap.getColor(EnumColorMap.BASE);
       
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-        
-        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, item.getSampleSprite(), (int)this.actualItemSize(), (int)this.actualItemSize(), color, item.textureScale);
+        Rotation rotation = item.rotation.rotationType() == TextureRotationType.RANDOM 
+                ? Rotation.values()[(int) ((System.currentTimeMillis() >> 11) & 3)]
+                : item.rotation.rotation;
+                
+        TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
+        GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, (int)this.actualItemSize(), (int)this.actualItemSize(), color, item.textureScale, rotation);
     }
 }

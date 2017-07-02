@@ -8,20 +8,23 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.NeighborBlocks.BlockCorner;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.library.world.NeighborBlocks;
+import grondag.adversity.library.world.NeighborBlocks.BlockCorner;
+import grondag.adversity.library.world.NeighborBlocks.NeighborTestResults;
+import grondag.adversity.library.world.WorldHelper;
 import grondag.adversity.superblock.block.SuperBlock;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockTests;
+import grondag.adversity.superblock.varia.BlockTests;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class CubicPlacementHandler implements IPlacementHandler
@@ -34,25 +37,112 @@ public class CubicPlacementHandler implements IPlacementHandler
     {
         if(!(stack.getItem() instanceof SuperItemBlock)) return Collections.emptyList();
 
-        SuperBlock myBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).block;
+        SuperItemBlock item = (SuperItemBlock)stack.getItem();
+        PlacementMode placementMode = item.getMode(stack);
         
-        ModelState modelState = SuperItemBlock.getModelState(stack);
+        SuperBlock stackBlock = (SuperBlock) item.block;
+        
+        ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
         BlockPos posPlaced = onBlock.isReplaceable(worldIn, posOn) ? posOn : posOn.offset(facing);
         
-        if(modelState.hasAxis())
+        // abort if target space is occupied
+        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced))
         {
-            modelState.setAxis(facing.getAxis());
+            return Collections.emptyList();
         }
-        if(modelState.hasSpecies())
+
+        ModelState closestModelState = null;
+        if(placementMode == PlacementMode.MATCH_CLOSEST)
         {
-            int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, myBlock, modelState);
-            modelState.setSpecies(getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, myBlock, modelState));
-            result.setItemDamage(species);
+            if(onBlock instanceof SuperBlock)
+            {
+                closestModelState = ((SuperBlock)onBlock).getModelState(worldIn, posOn, true);
+            }
+            else
+            {
+                Vec3d location = new Vec3d(posOn.getX() + hitX, posOn.getY() + hitY, posOn.getZ() + hitZ);
+                double closestDistSq = Double.MAX_VALUE;
+                for(int x = -1; x <= 1; x++)
+                {
+                    for(int y = -1; y <= 1; y++)
+                    {
+                        for(int z = -1; z <= 1; z++)
+                        {
+                            if((x | y | z) != 0)
+                            {
+                                BlockPos testPos = posOn.add(x, y, z);
+                                IBlockState testBlockState = worldIn.getBlockState(testPos);
+                                if(testBlockState.getBlock() instanceof SuperBlock)
+                                {
+                                    double distSq = location.squareDistanceTo(posOn.getX() + 0.5 + x, posOn.getY() + 0.5 + y, posOn.getZ() + 0.5 + z);
+                                    if(distSq < closestDistSq)
+                                    {
+                                        SuperBlock testBlock = (SuperBlock)testBlockState.getBlock();
+                                        ModelState testModelState = testBlock.getModelState(worldIn, testPos, true);
+                                        if(testModelState.getShape() == stackModelState.getShape())
+                                        {
+                                            closestDistSq = distSq;
+                                            closestModelState = testModelState;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        SuperItemBlock.setModelState(result, modelState);
+        
+        if(stackModelState.hasAxis())
+        {
+            if(placementMode == PlacementMode.STATIC)
+            {
+                stackModelState.setAxis(item.getFace(stack).getAxis());
+                if(stackModelState.hasAxisOrientation())
+                {
+                    stackModelState.setAxisInverted(item.getFace(stack).getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE);
+                }
+            }
+            else
+            {
+                boolean isAxisDone = false;
+                
+                if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
+                {
+                    stackModelState.setAxis(closestModelState.getAxis());
+                    if(stackModelState.hasAxisOrientation())
+                    {
+                        stackModelState.setAxisInverted(closestModelState.isAxisInverted());
+                    }
+                    isAxisDone = true;
+                }
+
+                if(!isAxisDone)
+                {
+                    stackModelState.setAxis(facing.getAxis());
+                    if(stackModelState.hasAxisOrientation())
+                    {
+                        stackModelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                    }
+                }
+            }
+        }
+        
+        if(stackModelState.hasModelRotation())
+        {
+            stackModelState.setModelRotation(item.getRotation(stack));
+        }
+        
+        if(stackModelState.hasSpecies())
+        {
+            int species = getSpecies(playerIn, worldIn, posOn, blockStateOn, onBlock, posPlaced, stackBlock, stackModelState);
+            stackModelState.setSpecies(species);
+            result.setItemDamage(stackModelState.getMetaData());
+        }
+        SuperItemBlock.setModelState(result, stackModelState);
  
         return ImmutableList.of(Pair.of(posPlaced, result));
     }
@@ -108,7 +198,7 @@ public class CubicPlacementHandler implements IPlacementHandler
             if(blockOn == myBlock)
             {
                 ModelState modelStateOn = ((SuperBlock)blockOn).getModelStateAssumeStateIsCurrent(blockStateOn, worldIn, posOn, true);
-                if(myModelState.doesAppearanceMatch(modelStateOn)) return modelStateOn.getSpecies();
+                if(myModelState.doShapeAndAppearanceMatch(modelStateOn)) return modelStateOn.getSpecies();
 
             }
             

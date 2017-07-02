@@ -7,13 +7,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import grondag.adversity.Adversity;
 import grondag.adversity.gui.AdversityGuiHandler;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.block.SuperBlockNBTHelper;
 import grondag.adversity.superblock.block.SuperBlockPlus;
 import grondag.adversity.superblock.block.SuperModelTileEntity;
 import grondag.adversity.superblock.block.SuperTileEntity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.placement.IPlacementHandler;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.placement.PlacementItem;
+import grondag.adversity.superblock.varia.BlockSubstance;
+import grondag.adversity.superblock.varia.SuperBlockNBTHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -34,8 +35,20 @@ import net.minecraft.world.World;
 /**
  * Provides sub-items and handles item logic for NiceBlocks.
  */
-public class SuperItemBlock extends ItemBlock
+public class SuperItemBlock extends ItemBlock implements PlacementItem
 {
+    
+    /**
+     * Called client-side before {@link #onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}.  
+     * If returns false for an itemBlock that method will never be called.
+     * We do all of our "can we put there here" checks in that method, so we always return true.
+     */
+    @Override
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, EntityPlayer player, ItemStack stack)
+    {
+        return true;
+    }
+
     public SuperItemBlock(SuperBlock block) {
         super(block);
         setHasSubtypes(true);
@@ -54,19 +67,28 @@ public class SuperItemBlock extends ItemBlock
 //        return retVal;
 //    }
 
-    public static ModelState getModelState(ItemStack stack)
+    /** static version */
+    public static ModelState getModelStateFromStack(ItemStack stack)
     {
         if(stack.getItem() instanceof SuperItemBlock)
         {
-            NBTTagCompound tag = stack.getTagCompound();
-            //WAILA or other mods might create a stack with no NBT
-            if(tag != null)
-            {
-                ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
-                if(modelState != null) return modelState;
-            }
+            return ((SuperItemBlock)stack.getItem()).getModelState(stack);
         }
-        return ((SuperBlock)((SuperItemBlock)stack.getItem()).block).getDefaultModelState();
+        return null;
+    }
+    
+    /** instance version */
+    @Override
+    public ModelState getModelState(ItemStack stack)
+    {
+        NBTTagCompound tag = stack.getTagCompound();
+        //WAILA or other mods might create a stack with no NBT
+        if(tag != null)
+        {
+            ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
+            if(modelState != null) return modelState;
+        }
+        return ((SuperBlock)block).getDefaultModelState();
     }
     
     public static void setModelState(ItemStack stack, ModelState modelState)
@@ -110,13 +132,12 @@ public class SuperItemBlock extends ItemBlock
 
         if (stackIn.isEmpty()) return EnumActionResult.FAIL;
         
-        ModelState modelState = getModelState(stackIn);
+        ModelState modelState = getModelStateFromStack(stackIn);
         
         if(modelState == null) return EnumActionResult.FAIL;
         
         IPlacementHandler placementHandler = modelState.getShape().getPlacementHandler();
         
-        //TODO:  all logic currently in SuperBlock.updatedStackForPlacementGetSpecies goes here
         List<Pair<BlockPos, ItemStack>> placements = placementHandler.getPlacementResults(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ, stackIn);
 
         if(placements.isEmpty()) return EnumActionResult.FAIL;
@@ -127,7 +148,7 @@ public class SuperItemBlock extends ItemBlock
         for(Pair<BlockPos, ItemStack> p : placements)
         {
             ItemStack placedStack = p.getRight();
-            ModelState placedModelState = SuperItemBlock.getModelState(placedStack);
+            ModelState placedModelState = SuperItemBlock.getModelStateFromStack(placedStack);
             BlockPos placedPos = p.getLeft();
             AxisAlignedBB axisalignedbb = placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
 
@@ -138,8 +159,11 @@ public class SuperItemBlock extends ItemBlock
                 {
                     didPlace = true;
                     worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    stackIn.shrink(1);
-                    if(stackIn.isEmpty()) break;
+                    if(!playerIn.isCreative())
+                    {
+                        stackIn.shrink(1);
+                        if(stackIn.isEmpty()) break;
+                    }
                 }
             }
         }
@@ -147,8 +171,8 @@ public class SuperItemBlock extends ItemBlock
         return didPlace ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
      
     }
- 
-    /**
+   
+     /**
      * Called to actually place the block, after the location is determined
      * and all permission checks have been made.
      *
@@ -175,12 +199,11 @@ public class SuperItemBlock extends ItemBlock
                 if(blockTE instanceof SuperModelTileEntity)
                 {
                     SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
-                    superTE.setPlacementShape(SuperItemBlock.getStackPlacementShape(stack));
                     superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
                     superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
                 }
 
-                blockTE.setModelState(getModelState(stack));
+                blockTE.setModelState(getModelStateFromStack(stack));
             }
         }
         
@@ -193,26 +216,7 @@ public class SuperItemBlock extends ItemBlock
     {
         return ((SuperBlock)this.block).getItemStackDisplayName(stack);
     }
-    
-    
-    public static void setStackPlacementShape(ItemStack stack, int placementShape)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        if(tag == null){
-            tag = new NBTTagCompound();
-        }
-        SuperBlockNBTHelper.writePlacementShape(tag, placementShape);
-        stack.setTagCompound(tag);
-    }
-    
-    public static int getStackPlacementShape(ItemStack stack)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null 
-                ? 0
-                : SuperBlockNBTHelper.readPlacementShape(tag);
-    }
-    
+
     public static void setStackLightValue(ItemStack stack, int lightValue)
     {
         NBTTagCompound tag = stack.getTagCompound();
@@ -248,5 +252,4 @@ public class SuperItemBlock extends ItemBlock
                 ? BlockSubstance.FLEXSTONE
                 : SuperBlockNBTHelper.readSubstance(tag);
     }
-    
 }

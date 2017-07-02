@@ -1,6 +1,6 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 
 /** Builds a new cell stack from a CellColumn */
 public class CellStackBuilder
@@ -81,7 +81,7 @@ public class CellStackBuilder
             
         } while(++y < 256);
         
-        if(Output.DEBUG_MODE)
+        if(Log.DEBUG_MODE)
         {
             // validate no cell overlap
             LavaCell testCell1 = simEntryCell.firstCell();
@@ -93,10 +93,10 @@ public class CellStackBuilder
                     if(testCell1 != testCell2)
                     {
                         if(testCell1.intersectsWith(testCell2))
-                            Output.warn("Found interesecting cells in same column after rebuild. Should never happen. ");
+                            Log.warn("Found interesecting cells in same column after rebuild. Should never happen. ");
                         
                         if(testCell1.isVerticallyAdjacentTo(testCell2))
-                            Output.warn("Found vertically adjacent cells in same column after rebuild. Should never happen. ");
+                            Log.warn("Found vertically adjacent cells in same column after rebuild. Should never happen. ");
                     }
                     
                     testCell2 = testCell2.above;

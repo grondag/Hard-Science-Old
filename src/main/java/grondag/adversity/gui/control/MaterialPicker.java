@@ -3,8 +3,7 @@ package grondag.adversity.gui.control;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
-import grondag.adversity.gui.base.GuiControl;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -12,15 +11,20 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class MaterialPicker extends GuiControl
 {
     /** dimensions are material and toughness */
     private static BlockSubstance[][]substances = new BlockSubstance[3][3];
     
-    //TODO: localize
-    private static final String MATERIAL_LABEL = "Material";
-    private static final String TOUGHNESS_LABEL = "Toughness";
+    @SuppressWarnings("deprecation")
+    private final String textMaterial = I18n.translateToLocal("label.material");
+    @SuppressWarnings("deprecation")
+    private final String textToughness = I18n.translateToLocal("label.toughness");
 
     private double boxSize;
     private double spacing;
@@ -118,10 +122,10 @@ public class MaterialPicker extends GuiControl
         double xMiddle = this.left + halfWidth;
         double yMiddle = this.top + halfHeight;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, MATERIAL_LABEL, (float) this.left, (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, textMaterial, (float) this.left, (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, TOUGHNESS_LABEL, (float) (xMiddle + spacing), (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, textToughness, (float) (xMiddle + spacing), (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);
@@ -145,7 +149,6 @@ public class MaterialPicker extends GuiControl
 
         
         mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
         
         double x = this.left + 1;
         double y = yMiddle + 1;

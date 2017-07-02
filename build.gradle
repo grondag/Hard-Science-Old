@@ -1,10 +1,12 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
+		
+	    maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        
         maven {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -25,9 +27,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "1.11.2-13.20.0.2282"
+    version = "1.11.2-13.20.0.2315"
     runDir = "run"
-    mappings = "snapshot_20170411"
+    mappings = "snapshot_20161220"
     useDepAts = true
 }
 
@@ -37,24 +39,36 @@ task deobfJar(type: Jar) {
 }
 
 repositories {
+
+	
+    maven { url "http://maven.amadornes.com/" }
+        
     maven { // The repo from which to get waila
         name "Mobius Repo"
         url "http://tehnut.info/maven"
         //url "http://mobiusstrip.eu/maven"
     }
+    
     maven { // JEI
         url "http://dvs1.progwml6.com/files/maven"
     }
+    
     maven { // TOP
         name 'tterrag maven'
         url "http://maven.tterrag.com/"
     }
+    
     maven { // CompatLayer
         url "http://maven.k-4u.nl"
     }
+    
     maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    
+    maven {
+    	url = "https://repo.adobe.com/nexus/content/repositories/public/"
     }
 }
 
@@ -82,15 +96,19 @@ dependencies {
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
     deobfCompile "mcp.mobius.waila:Hwyla:1.8.10-B23_1.11:api"
-    deobfCompile "mezz.jei:jei_1.11.2:4.2.5.234"
-    deobfCompile "mcjty.theoneprobe:TheOneProbe:1.1x-1.4.1-51"
-    deobfCompile "com.github.mcjty:compatlayer:1.11.2-0.2.6"
-    deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.4"
+    deobfCompile "mezz.jei:jei_1.11.2:4.5.0.289"
+    deobfCompile "mcjty.theoneprobe:TheOneProbe:1.1x-1.4.7-57"
+    deobfCompile "com.github.mcjty:compatlayer:1.11.2-0.2.9"
+    // deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.4"
+    
+    deobfCompile "MCMultiPart2:MCMultiPart-exp:2.0.0_22"
     
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    
+	// https://repo.adobe.com/nexus/content/repositories/public/org/apache/commons/commons-imaging/1.0-R1534292/commons-imaging-1.0-R1534292.jar
+	deobfCompile "org.apache.commons:commons-imaging:1.0-R1534292"
 }
 
 processResources
@@ -110,5 +128,22 @@ processResources
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
+    }
+}
+
+sourceSets {
+	main {
+	        java {
+	            include 'grondag/**'
+	        }
+	        resources
+	        {
+	        	include '**'
+	        }
+	    }
+    test {
+        java {
+            exclude 'grondag/**'
+        }
     }
 }

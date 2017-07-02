@@ -1,15 +1,12 @@
 package grondag.adversity.superblock.color;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Color;
-import grondag.adversity.library.Color.EnumHCLFailureMode;
-import grondag.adversity.superblock.color.HueSet.Chroma;
-import grondag.adversity.superblock.color.HueSet.Luminance;
-import grondag.adversity.superblock.color.NiceHues.Hue;
+import grondag.adversity.Log;
+import grondag.adversity.library.varia.Color;
+import grondag.adversity.library.varia.Color.EnumHCLFailureMode;
+import net.minecraft.util.text.translation.I18n;
 
 public class ColorMap
 {
-    public final String colorMapName;
     public final int ordinal;
     public final Hue hue;
     public final Chroma chroma;
@@ -17,9 +14,8 @@ public class ColorMap
     
     private final int[] colors = new int[EnumColorMap.values().length];
 
-    public ColorMap(String vectorName, Hue hue, Chroma chromaIn, Luminance luminanceIn, int ordinal)
+    public ColorMap(Hue hue, Chroma chromaIn, Luminance luminanceIn, int ordinal)
     {
-        this.colorMapName = vectorName;
         this.ordinal = ordinal;
         this.hue = hue;
         this.chroma = chromaIn;
@@ -37,14 +33,16 @@ public class ColorMap
         return colors[whichColor.ordinal()];
     }
     
+    public String localizedName()
+    {
+        @SuppressWarnings("deprecation")
+        String format = I18n.translateToLocal(this.chroma == Chroma.PURE_NETURAL ? "color.format.pure_neutral" : "color.format.color");
+        return String.format(format, this.hue.localizedName(), this.chroma.localizedName(), this.luminance.localizedName());
+    
+    }
     public static ColorMap makeColorMap(Hue hue, Chroma chromaIn, Luminance luminanceIn, int ordinal)
     {
-        //TODO: localize
-        String mapName =  chromaIn == Chroma.PURE_NETURAL
-                ? "Pure Neutral " + luminanceIn.name 
-                : luminanceIn.name + " " + chromaIn.name + " " + hue.hueName();
-                
-        ColorMap newColorMap = new ColorMap(mapName, hue, chromaIn, luminanceIn, ordinal);
+        ColorMap newColorMap = new ColorMap(hue, chromaIn, luminanceIn, ordinal);
     
         // use these for manipulation so can use realistic values for HCL_MAX inputs
         double chroma = chromaIn.value;
@@ -62,7 +60,7 @@ public class ColorMap
                 EnumHCLFailureMode.REDUCE_CHROMA);
         if(!whichColor.IS_VISIBLE)
         {
-            Output.debug("makeColorMap produced invisible border color for " + mapName);
+            Log.debug("makeColorMap produced invisible border color for " + newColorMap.localizedName());
         }
         newColorMap.setColor(EnumColorMap.BORDER, whichColor.RGB_int | 0xFF000000);
     
@@ -72,7 +70,7 @@ public class ColorMap
         Color lampColor = Color.fromHCL(hue.hueDegrees(), baseColor.HCL_C, Color.HCL_MAX, EnumHCLFailureMode.NORMAL);
         if(lampColor.RGB_int == 0)
         {
-            Output.info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);
+            Log.info("whoops hcl" + hue.hueDegrees() + " " + chromaIn.value / 2 + " " + Color.HCL_MAX);
         }
         newColorMap.setColor(EnumColorMap.LAMP, lampColor.RGB_int | 0xFF000000);
     

@@ -2,8 +2,8 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.Output;
-import grondag.adversity.superblock.model.state.FlowHeightState;
+import grondag.adversity.Log;
+import grondag.adversity.superblock.terrain.TerrainState;
 
 public abstract class AbstractLavaCell
 {
@@ -97,7 +97,7 @@ public abstract class AbstractLavaCell
         // 13 -> 1
         // 23 -> 11
         // 24 -> 0
-        return this.floorLevel % FlowHeightState.BLOCK_LEVELS_INT;
+        return this.floorLevel % TerrainState.BLOCK_LEVELS_INT;
     }
 
     /** 
@@ -202,8 +202,8 @@ public abstract class AbstractLavaCell
     {
         if(this.fluidUnits.addAndGet(deltaUnits) < 0)
         {
-            if(Output.DEBUG_MODE)
-                Output.info(String.format("Negative fluid units detected.  NewAmount=%1$d Delta=%2$d cellID=%3$d", this.fluidUnits.get(), deltaUnits, this.id));
+            if(Log.DEBUG_MODE)
+                Log.info(String.format("Negative fluid units detected.  NewAmount=%1$d Delta=%2$d cellID=%3$d", this.fluidUnits.get(), deltaUnits, this.id));
             this.fluidUnits.set(0);
         }
         
@@ -213,8 +213,8 @@ public abstract class AbstractLavaCell
     {
         if(newUnits < 0)
         {
-            if(Output.DEBUG_MODE)
-                Output.info(String.format("Negative fluid units detected.  NewAmount=%1$d cellID=%2$d", newUnits, this.id));
+            if(Log.DEBUG_MODE)
+                Log.info(String.format("Negative fluid units detected.  NewAmount=%1$d cellID=%2$d", newUnits, this.id));
             newUnits = 0;
         }
         this.fluidUnits.set(newUnits);
@@ -227,8 +227,8 @@ public abstract class AbstractLavaCell
         if(newUnits < 0)
         {
             newUnits = 0;
-            if(Output.DEBUG_MODE)
-                    Output.info(String.format("Negative fluid units detected.  PriorAmount=%1$d Deltar=%2$d cellID=%3$d", expectedPriorUnits, deltaUnits, this.id));
+            if(Log.DEBUG_MODE)
+                    Log.info(String.format("Negative fluid units detected.  PriorAmount=%1$d Deltar=%2$d cellID=%3$d", expectedPriorUnits, deltaUnits, this.id));
         }
       
         return this.fluidUnits.compareAndSet(expectedPriorUnits, expectedPriorUnits + deltaUnits);
@@ -310,7 +310,7 @@ public abstract class AbstractLavaCell
         // 23 -> 11
         // 24 -> 12
         // 25 -> 1
-        return this.worldSurfaceLevel() - this.worldSurfaceY() * FlowHeightState.BLOCK_LEVELS_INT;
+        return this.worldSurfaceLevel() - this.worldSurfaceY() * TerrainState.BLOCK_LEVELS_INT;
     }
     
     
@@ -361,6 +361,8 @@ public abstract class AbstractLavaCell
     }
     
     /**
+     * When total fluid in both cells is above this amount, 
+     * at least one cell will be under pressure at equilibrium.
      * Floor order does not matter but ceiling must be min of both cells. 
      */
     public static int singlePressureThreshold(int floor1, int floor2, int ceilingMin)

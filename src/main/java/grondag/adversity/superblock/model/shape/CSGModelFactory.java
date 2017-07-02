@@ -1,4 +1,8 @@
 package grondag.adversity.superblock.model.shape;
+/**
+ * Kept for salvage purposes - didn't want to dig back through source history.
+ * Should be deleted when mined out.
+ */
 //package grondag.adversity.niceblock.model;
 //
 //import java.util.List;
@@ -39,7 +43,6 @@ package grondag.adversity.superblock.model.shape;
 //        super(ModelShape.SPHERE, components);
 //    }
 //    
-//    //TODO: should eventually be removed
 //    private static TextureState DEFAULT_TEXTURE_STATE 
 //        = TextureProviders.BLOCK_INDIVIDUAL.get(0).getTextureState(false, LightingMode.SHADED, BlockRenderLayer.SOLID);
 //    

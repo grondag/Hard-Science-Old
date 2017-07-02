@@ -3,10 +3,12 @@ package grondag.adversity.gui.control;
 import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
-import grondag.adversity.gui.base.GuiControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class Toggle extends GuiControl
 {
 
@@ -30,18 +32,18 @@ public class Toggle extends GuiControl
             GuiUtil.drawRect(this.left + 2, this.targetAreaTop + 2, boxRight - 2, this.targetAreaBottom - 2, BUTTON_COLOR_ACTIVE);
         }
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, this.label, boxRight + CONTROL_INTERNAL_MARGIN, this.targetAreaTop, 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, this.label, boxRight + CONTROL_INTERNAL_MARGIN, this.targetAreaTop, 
                 this.labelWidth, this.labelHeight, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
     }
 
     @Override
     protected void handleCoordinateUpdate()
     {
-        int fontHeight = Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT;
+        int fontHeight = Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT;
         this.targetAreaTop = (int) Math.max(this.top, this.top + (this.height - fontHeight) / 2);
         this.targetAreaBottom = (int) Math.min(this.bottom, this.targetAreaTop + fontHeight);
         this.labelHeight = fontHeight;
-        this.labelWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(this.label);
+        this.labelWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(this.label);
     }
 
     private boolean isMouseOver(int mouseX, int mouseY)

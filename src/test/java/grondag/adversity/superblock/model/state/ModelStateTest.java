@@ -2,10 +2,10 @@ package grondag.adversity.superblock.model.state;
 
 import org.junit.Test;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.Log;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.world.CornerJoinBlockStateSelector;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.color.BlockColorMapProvider;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
@@ -20,12 +20,15 @@ public class ModelStateTest
     @Test
     public void test()
     {
-        Output.info("bits0 length = "  + ModelStateFactory.PACKER_0.bitLength());
-        Output.info("bits1 length = "  + ModelStateFactory.PACKER_1.bitLength());
-        Output.info("bits2 length = "  + ModelStateFactory.PACKER_2.bitLength());
+        Log.info("bits0 length = "  + ModelStateFactory.PACKER_0.bitLength());
+        Log.info("bits1 length = "  + ModelStateFactory.PACKER_1.bitLength());
+        Log.info("bits2 length = "  + ModelStateFactory.PACKER_2.bitLength());
         
-        Output.info("bits3 block length = "  + ModelStateFactory.PACKER_3_BLOCK.bitLength());
-        Output.info("bits3 flow length = "  + ModelStateFactory.PACKER_3_FLOW.bitLength());
+        Log.info("bits3 block length = "  + ModelStateFactory.PACKER_3_BLOCK.bitLength());
+        Log.info("bits3 flow length = "  + ModelStateFactory.PACKER_3_FLOW.bitLength());
+        
+        // sign bit on first long is used to store static indicator
+        assert(ModelStateFactory.PACKER_0.bitLength() < 64);
         
         ModelState state = new ModelState();
         
@@ -39,11 +42,11 @@ public class ModelStateTest
         state.setLightingMode(PaintLayer.OVERLAY, LightingMode.SHADED);
         state.setRenderLayer(PaintLayer.LAMP, BlockRenderLayer.SOLID);
         state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.TRANSLUCENT);
-        state.setTexture(PaintLayer.BASE, Textures.BLOCK_RAW_FLEXSTONE);
-        state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_TEST);
+        state.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_STRONG);
+        state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_SMOOTH_BLEND);
         state.setAxis(EnumFacing.Axis.Z);
         state.setTranslucency(Translucency.SHADED);
-        state.setRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
+        state.setTextureRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
         state.setBlockVersion(7, TextureScale.SINGLE);
         state.setPosX(3);
         state.setPosY(7);
@@ -71,11 +74,11 @@ public class ModelStateTest
         assert(reloadedState.getLightingMode(PaintLayer.DETAIL) == LightingMode.SHADED);
         assert(reloadedState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.SOLID);
         assert(reloadedState.getRenderLayer(PaintLayer.OVERLAY) == BlockRenderLayer.TRANSLUCENT);
-        assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_RAW_FLEXSTONE);
-        assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_TEST);
+        assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_NOISE_STRONG);
+        assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_SMOOTH_BLEND);
         assert(reloadedState.getAxis()) == EnumFacing.Axis.Z;
         assert(reloadedState.getTranslucency()) == Translucency.SHADED;
-        assert(reloadedState.getRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
+        assert(reloadedState.getTextureRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
         assert(reloadedState.getBlockVersion(TextureScale.SINGLE)) == 7;
         assert(reloadedState.getPosX() == 3);
         assert(reloadedState.getPosY() == 7);

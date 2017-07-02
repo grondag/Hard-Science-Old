@@ -2,7 +2,7 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import org.junit.Test;
 
-import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.library.world.PackedBlockPos;
 
 public class WorldStateBufferTest
 {

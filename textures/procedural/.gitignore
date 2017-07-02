@@ -1,0 +1,41 @@
+## Windows
+Thumbs.db
+
+## procedural texture outputs
+*.png
+*.jpg
+.autosave
+
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+eclipse
+
+## gradle
+gradle
+.gradle
+build
+run
+
+## Jars
+*.jar
+
+### OSX (adds a lot of garbage)###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+#stuff
+#config
+logs
+.html
+discarded textures
+*.nps
+

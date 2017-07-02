@@ -6,16 +6,19 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.model.quadfactory.CubeInputs;
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.render.CubeInputs;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.surface.Surface;
-import grondag.adversity.superblock.model.painter.surface.SurfaceTopology;
-import grondag.adversity.superblock.model.painter.surface.SurfaceType;
+import grondag.adversity.superblock.collision.CubeCollisionHandler;
+import grondag.adversity.superblock.collision.ICollisionHandler;
+import grondag.adversity.superblock.collision.SideShape;
+import grondag.adversity.superblock.model.state.Surface;
+import grondag.adversity.superblock.model.state.SurfaceTopology;
+import grondag.adversity.superblock.model.state.SurfaceType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import grondag.adversity.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +28,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
 {
     private static ShapeMeshGenerator instance;
     
+
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
         if(instance == null) instance = new CubeMeshFactory();
@@ -57,7 +61,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
         result.u1 = 16;
         result.v1 = 16;
         result.isOverlay = false;
-        result.surface = this.surfaces.get(0);
+        result.surfaceInstance = this.surfaces.get(0).unitInstance;
         
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
        

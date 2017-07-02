@@ -1,8 +1,8 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 
 public class SurfaceQuadPainterCylinder extends SurfaceQuadPainter
@@ -16,7 +16,6 @@ public class SurfaceQuadPainterCylinder extends SurfaceQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
-        // TODO Auto-generated method stub
         return null;
     }
 }

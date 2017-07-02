@@ -1,6 +1,10 @@
 ## Windows
 Thumbs.db
 
+## exclude large animated textures
+*_anim.png
+*_anim_low.png
+
 # eclipse
 bin
 *.launch

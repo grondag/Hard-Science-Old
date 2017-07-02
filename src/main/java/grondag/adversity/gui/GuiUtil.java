@@ -1,19 +1,26 @@
 package grondag.adversity.gui;
 
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.texture.TextureScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class GuiUtil
 {
 
@@ -153,12 +160,31 @@ public class GuiUtil
     /**
      * Draws a rectangle using the provide texture sprite and color
      */
-    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color)
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, Rotation rotation)
     {
-        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE);
+        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE, rotation);
     }
     
-    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale)
+    private static double[][] rotatedUV(double minU, double minV, double maxU, double maxV, Rotation rotation)
+    {
+        double[][] result = new double[2][4];
+        
+        int i = rotation.ordinal();
+        result[0][i] = minU;
+        result[1][i] = maxV;
+        i = (i + 1) & 3;
+        result[0][i] = maxU;
+        result[1][i] = maxV;
+        i = (i + 1) & 3;
+        result[0][i] = maxU;
+        result[1][i] = minV;
+        i = (i + 1) & 3;
+        result[0][i] = minU;
+        result[1][i] = minV;
+        
+        return result;
+    }
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale, Rotation rotation)
     {
         float alpha = (float)(color >> 24 & 255) / 255.0F;
         float red = (float)(color >> 16 & 255) / 255.0F;
@@ -166,11 +192,16 @@ public class GuiUtil
         float blue = (float)(color & 255) / 255.0F;
         
         
-        double maxU = textureSprite.getMinU() + (textureSprite.getMaxU() - textureSprite.getMinU())  / scale.sliceCount;
+        double minU = textureSprite.getMinU();
+        double minV = textureSprite.getMinV();
+        double maxU = minU + (textureSprite.getMaxU() - minU)  / scale.sliceCount;
+        double maxV = minV + (textureSprite.getMaxV() - minV)  / scale.sliceCount;
+        double uv[][] = rotatedUV(minU, minV, maxU, maxV, rotation);
         
-     
-        double maxV = textureSprite.getMinV() + (textureSprite.getMaxV() - textureSprite.getMinV())  / scale.sliceCount;
-        
+        TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+        textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         GlStateManager.enableBlend();
@@ -180,18 +211,23 @@ public class GuiUtil
 
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
         vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + heightIn), zLevel)
-            .tex((double)textureSprite.getMinU(), maxV)
+            .tex(uv[0][0], uv[1][0])
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + heightIn), zLevel)
-            .tex(maxU, maxV)
+            .tex(uv[0][1], uv[1][1])
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + widthIn), (double)(yCoord + 0), zLevel)
-            .tex(maxU, (double)textureSprite.getMinV())
+            .tex(uv[0][2], uv[1][2])
             .color(red, green, blue, alpha).endVertex();
         vertexbuffer.pos((double)(xCoord + 0), (double)(yCoord + 0), zLevel)
-            .tex((double)textureSprite.getMinU(), (double)textureSprite.getMinV())
+            .tex(uv[0][3], uv[1][3])
             .color(red, green, blue, alpha).endVertex();
         tessellator.draw();
+        GlStateManager.disableBlend();
+        
+        textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+        
     }
     
     public static void playPressedSound(Minecraft mc)
@@ -205,30 +241,28 @@ public class GuiUtil
      */
     public static boolean renderItemAndEffectIntoGui(Minecraft mc, RenderItem itemRender, ItemStack itm, double x, double y, double contentSize)
     {
-        GlStateManager.color(1F, 1F, 1F);
-        
         boolean rc = false;
 
         if (itm != null && itm.getItem() != null) {
             rc = true;
+            
+            RenderHelper.enableGUIStandardItemLighting();
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, 0);
             GlStateManager.scale(1 / 16f, 1 / 16f, 1 / 16f);
             GlStateManager.scale(contentSize, contentSize, contentSize);
-            
-            GlStateManager.color(1F, 1F, 1F, 1F);
+
             GlStateManager.enableRescaleNormal();
-            GlStateManager.enableLighting();
-            short short1 = 240;
-            short short2 = 240;
-            net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
-            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, short1 / 1.0F, short2 / 1.0F);
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+ 
             itemRender.renderItemAndEffectIntoGUI(itm, 0, 0);
-//            renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt, txt.length() - 2);
-//            itemRender.renderItemOverlayIntoGUI(mc.fontRenderer, itm, x, y, txt);
+
             GlStateManager.popMatrix();
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.disableLighting();
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepth();
+            RenderHelper.disableStandardItemLighting();
+//            RenderHelper.enableStandardItemLighting();
         }
 
         return rc;

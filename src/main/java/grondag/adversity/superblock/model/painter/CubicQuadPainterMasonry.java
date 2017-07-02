@@ -1,12 +1,12 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.joinstate.SimpleJoin;
-import grondag.adversity.library.joinstate.SimpleJoinFaceState;
-import grondag.adversity.library.model.FaceQuadInputs;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.library.render.FaceQuadInputs;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.world.Rotation;
+import grondag.adversity.library.world.SimpleJoin;
+import grondag.adversity.library.world.SimpleJoinFaceState;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
 
@@ -43,7 +43,7 @@ public class CubicQuadPainterMasonry extends CubicQuadPainter
         quad.minV = inputs.flipV ? 16 : 0;
         quad.maxU = inputs.flipU ? 0 : 16;
         quad.maxV = inputs.flipV ? 0 : 16;
-        quad.textureSprite = this.texture.getTextureSprite(this.blockVersion, inputs.textureOffset);
+        quad.textureName = this.texture.getTextureName(this.textureVersionForFace(quad.getNominalFace()), inputs.textureOffset);
         
         return quad;
     }

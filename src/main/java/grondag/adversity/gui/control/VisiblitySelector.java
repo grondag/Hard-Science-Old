@@ -1,14 +1,16 @@
 package grondag.adversity.gui.control;
 
 import grondag.adversity.gui.GuiUtil;
-import grondag.adversity.gui.base.GuiControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import static grondag.adversity.gui.GuiUtil.VerticalAlignment.*;
 import static grondag.adversity.gui.GuiUtil.HorizontalAlignment.*;
 
+@SideOnly(Side.CLIENT)
 public class VisiblitySelector extends GuiControl
 {
     private final VisibilityPanel target;
@@ -23,7 +25,7 @@ public class VisiblitySelector extends GuiControl
     @Override
     protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-        FontRenderer fontrenderer = mc.fontRenderer;
+        FontRenderer fontrenderer = mc.fontRendererObj;
         double y = this.top;
         
         int hoverIndex = this.getButtonIndex(mouseX, mouseY);

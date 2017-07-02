@@ -2,9 +2,8 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.ISimpleListItem;
-import grondag.adversity.library.PackedBlockPos;
+import grondag.adversity.Log;
+import grondag.adversity.library.world.PackedBlockPos;
 /**
  * Container for all cells in a world chunk.
  * When a chunk is loaded (or updated) all cells that can exist in the chunk are created.
@@ -25,7 +24,7 @@ import grondag.adversity.library.PackedBlockPos;
  *      they are not active
  *      AND they are not retained           
  */
-public class CellChunk implements ISimpleListItem
+public class CellChunk
 {
 
     public final long packedChunkPos;
@@ -298,16 +297,16 @@ public class CellChunk implements ISimpleListItem
 
                 if(entryCell == null)
                 {
-                    if(Output.DEBUG_MODE)
-                        Output.warn("Null entry cell in chunk being unloaded.");
+                    if(Log.DEBUG_MODE)
+                        Log.warn("Null entry cell in chunk being unloaded.");
                     continue;
                 }
                 
                 LavaCell firstCell = entryCell.firstCell();
                 if(firstCell == null)
                 {
-                    if(Output.DEBUG_MODE)
-                        Output.warn("First cell in entry cell is null in chunk being unloaded.");
+                    if(Log.DEBUG_MODE)
+                        Log.warn("First cell in entry cell is null in chunk being unloaded.");
                     
                     // strange case - do our best
                     entryCell.setDeleted();
@@ -316,8 +315,8 @@ public class CellChunk implements ISimpleListItem
                 }
                 entryCell = firstCell;
                 
-                if(Output.DEBUG_MODE && entryCell.belowCell() != null)
-                    Output.warn("First cell is not actually the first cell.");
+                if(Log.DEBUG_MODE && entryCell.belowCell() != null)
+                    Log.warn("First cell is not actually the first cell.");
                     
                 do
                 {
@@ -343,14 +342,14 @@ public class CellChunk implements ISimpleListItem
      */
     LavaCell getEntryCell(int x, int z)
     {
-        if(Output.DEBUG_MODE && this.isUnloaded)
-            Output.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
+        if(Log.DEBUG_MODE && this.isUnloaded)
+            Log.warn("derp in CellChunk unloading - returning cell from unloaded chunk in getEntryCell");
         
-        if(Output.DEBUG_MODE)
+        if(Log.DEBUG_MODE)
         {
             LavaCell result = this.entryCells[getIndex(x, z)];
             if(result != null && result.isDeleted())
-                Output.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
+                Log.warn("derp in CellChunk unloading - returning deleted cell from getEntryCell");
             return result;
         }
         else
@@ -391,7 +390,6 @@ public class CellChunk implements ISimpleListItem
         return ((x & 15) << 4) | (z & 15);
     }
 
-    @Override
     public boolean isDeleted()
     {
         return this.isUnloaded;

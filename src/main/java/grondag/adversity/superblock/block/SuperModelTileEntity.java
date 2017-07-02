@@ -1,14 +1,12 @@
 package grondag.adversity.superblock.block;
 
-import grondag.adversity.superblock.block.SuperBlockNBTHelper.SuperModelNBTReadHandler;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
+import grondag.adversity.superblock.varia.SuperBlockNBTHelper;
+import grondag.adversity.superblock.varia.SuperBlockNBTHelper.SuperModelNBTReadHandler;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class SuperModelTileEntity extends SuperTileEntity implements SuperModelNBTReadHandler
 {
-    /** used by big blocks */
-    private int placementShape;
-    
     /** non-zero if block emits light */
     private byte lightValue = 0;
 
@@ -17,13 +15,12 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        return SuperBlockNBTHelper.writeToNBT(super.writeToNBT(compound), this.placementShape, this.lightValue, this.substance);
+        return SuperBlockNBTHelper.writeToNBT(super.writeToNBT(compound), this.lightValue, this.substance);
     }
 
     @Override
-    public void handleNBTRead(int placementShape, byte lightValue, BlockSubstance substance)
+    public void handleNBTRead(byte lightValue, BlockSubstance substance)
     {
-        this.placementShape = placementShape;
         this.lightValue = lightValue;
         this.substance = substance;
     }
@@ -33,7 +30,6 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     {
         // The description packet often arrives after render state is first cached on client
         // so we need to refresh render state once we have the server-side info.
-
         int oldLight = this.lightValue;
         
         super.handleUpdateTag(tag);
@@ -50,20 +46,6 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
         super.readFromNBT(compound);
         SuperBlockNBTHelper.superModelReadFromNBT(compound, this);
         isLoaded = true;
-    }
-    
-    public int getPlacementShape()
-    { 
-        return placementShape;
-    }
-    
-    public void setPlacementShape( int placementShape)
-    { 
-        if(this.placementShape != placementShape)
-        {
-            this.placementShape = placementShape;
-            if(!this.world.isRemote) this.markDirty();
-        }
     }
 
     public byte getLightValue()

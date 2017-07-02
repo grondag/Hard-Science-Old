@@ -1,71 +1,71 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.varia.Useful;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.texture.TextureScale;
-import net.minecraft.util.EnumFacing;
+import grondag.adversity.superblock.texture.TextureRotationType;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 
 public class CubicQuadPainterBigTex extends CubicQuadPainter
 {
-
-    private final Vec3i pos;
-    private final int species;
+    private final boolean allowTexRotation;
     
     public CubicQuadPainterBigTex(ModelState modelState, Surface surface, PaintLayer paintLayer)
     {
         super(modelState, surface, paintLayer);
-        this.pos = new Vec3i(modelState.getPosX(), modelState.getPosY(), modelState.getPosZ());
-        this.species = modelState.hasSpecies() ? modelState.getSpecies() : 0;
+        
+        this.allowTexRotation = this.texture.rotation.rotationType() != TextureRotationType.FIXED;
     }
 
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
-        
-        EnumFacing face = quad.getNominalFace() == null ? EnumFacing.UP : quad.getNominalFace();
-        
-        // represents position within a 32x32x32 volume, with x, y representing position on the surface
-        // qnd z representing depth into the surface
-        Vec3i surfaceVec = getFacePerspective(this.pos, face, this.texture.textureScale);
-
-//        int key = Math.abs(MathHelper.hash((surfaceVec.getZ() << 4) | this.species));
-        int key = 0;
-        
         // Determine what type of randomizations to apply so that we have a different
         // appearance based on depth and species.
         // If we are applying a single texture, then we alternate by translating, flipping and rotating the texture.
+        // In this case, the normal variation logic in superclass does not apply.
         //
-        // If the texture has alternates, then won't don't translate because then we'd need a way to know the 
+        // If the texture has alternates, we simply use the normal alternation/rotation logic in super class.
+        // But we won't don't translate because then we'd need a way to know the 
         // texture version of adjacent volumes.  This would be possible if we got a reference to the 
         // alternator array instead of the alternator result, but it would needlessly complex.
         // 
-        // And if the texture has alternates, we also vary the texture selection and, if supported, 
-        // the rotation within the plane, to provide more variation within the same surface.
+        // If the texture has alternates, we also vary the texture selection and, if supported, 
+        // based on depth within the plane, to provide variation between adjacent layers.
+        // This depth-based variation can be disabled with a setting in the surface instance.
+     
+        quad.useVertexUVRotation = true;
+
+        Vec3i surfaceVec = getFacePerspective(this.pos, quad.face, this.texture.textureScale);
         
+                
         
         if(this.texture.textureVersionCount == 1)
         {
-            // single texture, so do rotation, uv flip and offset
-            quad.textureSprite = this.texture.getTextureSprite(this.blockVersion);
+            // no alternates, so do uv flip and offset and rotation based on depth & species only
+            int depthAndSpeciesHash = quad.surfaceInstance.ignoreDepthForRandomization ? 0 : MathHelper.hash(surfaceVec.getZ() | (this.species << 8));
             
-            quad.useVertexUVRotation = true;
-            quad.rotation = Rotation.values()[key & 3];
-
+            // rotation 
+            quad.rotation = this.allowTexRotation
+                    ? Useful.offsetEnumValue(texture.rotation.rotation, depthAndSpeciesHash & 3)
+                    : texture.rotation.rotation;
+                    
             surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
+
+            quad.textureName = this.texture.getTextureName(0);
             
-            int xOffset = (key * 11) & this.texture.textureScale.sliceCountMask; 
-            int yOffset = (key * 7) & this.texture.textureScale.sliceCountMask; 
+            int xOffset = (depthAndSpeciesHash >> 2) & this.texture.textureScale.sliceCountMask; 
+            int yOffset = (depthAndSpeciesHash >> 8) & this.texture.textureScale.sliceCountMask; 
             
             int newX = (surfaceVec.getX() + xOffset) & this.texture.textureScale.sliceCountMask;
             int newY = (surfaceVec.getY() + yOffset) & this.texture.textureScale.sliceCountMask;
             surfaceVec = new Vec3i(newX, newY, surfaceVec.getZ());
             
-            boolean flipU = (key & 4) == 0;
-            boolean flipV = (key & 8) == 0;
+            boolean flipU = this.allowTexRotation && (depthAndSpeciesHash & 256) == 0;
+            boolean flipV = this.allowTexRotation && (depthAndSpeciesHash & 512) == 0;
 
             float sliceIncrement = this.texture.textureScale.sliceIncrement;
             
@@ -82,14 +82,17 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         }
         else
         {
-            // multiple texture versions, so do rotation and alternation
-            quad.textureSprite = this.texture.getTextureSprite((this.blockVersion + (key >> 2)) & this.texture.textureVersionMask);
-            
-            quad.useVertexUVRotation = true;
-            quad.rotation = Rotation.values()[(this.texture.allowRotation ? key + this.rotation.ordinal() : key) & 3];
+            // multiple texture versions, so do rotation and alternation normally, except add additional variation for depth;
+            int depthHash = quad.surfaceInstance.ignoreDepthForRandomization ? 0 : MathHelper.hash(surfaceVec.getZ());
 
-            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
+            quad.textureName = this.texture.getTextureName((this.textureVersionForFace(quad.getNominalFace()) + depthHash) & this.texture.textureVersionMask);
             
+            quad.rotation = this.allowTexRotation
+                    ? Useful.offsetEnumValue(this.textureRotationForFace(quad.getNominalFace()), (depthHash >> 16) & 3)
+                    : this.textureRotationForFace(quad.getNominalFace());
+                    
+            surfaceVec = rotateFacePerspective(surfaceVec, quad.rotation, this.texture.textureScale);
+
             float sliceIncrement = this.texture.textureScale.sliceIncrement;
             
             quad.minU = surfaceVec.getX() * sliceIncrement;
@@ -100,68 +103,5 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             quad.maxV = quad.minV + sliceIncrement;
         }
         return quad;
-    }
-
-    /** 
-     * Transform input vector so that x & y correspond with u / v on the given face, with u,v origin at upper left
-     * and z is depth, where positive values represent distance into the face (away from viewer).
-     * 
-     * Coordinates are first masked to the scale of the texture being used and when we reverse an axis, 
-     * we use the texture's sliceMask as the basis so that we remain within the frame of the
-     * texture scale we are using.  
-     */
-
-    private static Vec3i getFacePerspective(Vec3i vec, EnumFacing face, TextureScale scale)
-    {
-        int sliceCountMask = scale.sliceCountMask;
-        int x = vec.getX() & sliceCountMask;
-        int y = vec.getY() & sliceCountMask;
-        int z = vec.getZ() & sliceCountMask;
-        
-        switch(face)
-        {
-        case EAST:
-            return new Vec3i(sliceCountMask - z, sliceCountMask - y, -vec.getX());
-        
-        case WEST:
-            return new Vec3i(z, sliceCountMask - y, vec.getX());
-        
-        case NORTH:
-            return new Vec3i(sliceCountMask - x, sliceCountMask - y, vec.getZ());
-        
-        case SOUTH:
-            return new Vec3i(x, sliceCountMask - y, -vec.getZ());
-        
-        case DOWN:
-            return new Vec3i(sliceCountMask - x, z, vec.getY());
-
-        case UP:
-        default:
-            return new Vec3i(x, z, -vec.getY());
-        }
-    }
-    
-    /** 
-     * Rotates given surface vector around the center of the texture by the given degree.
-     * 
-     */
-    private static Vec3i rotateFacePerspective(Vec3i vec, Rotation rotation, TextureScale scale)
-    {
-        switch(rotation)
-        {
-        case ROTATE_90:
-            return new Vec3i(vec.getY(), scale.sliceCountMask - vec.getX(), vec.getZ());
-
-        case ROTATE_180:
-            return new Vec3i(scale.sliceCountMask - vec.getX(), scale.sliceCountMask - vec.getY(), vec.getZ());
-            
-        case ROTATE_270:
-            return new Vec3i(scale.sliceCountMask - vec.getY(), vec.getX(), vec.getZ());
-
-        case ROTATE_NONE:
-        default:
-            return vec;
-        
-        }
     }
 }

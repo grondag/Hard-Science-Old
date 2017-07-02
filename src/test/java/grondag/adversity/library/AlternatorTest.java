@@ -2,6 +2,8 @@ package grondag.adversity.library;
 
 import org.junit.Test;
 
+import grondag.adversity.library.world.Alternator;
+import grondag.adversity.library.world.IAlternator;
 import net.minecraft.util.math.BlockPos;
 
 public class AlternatorTest

@@ -17,12 +17,17 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import grondag.adversity.init.ModItems;
 
+@Mod(   modid = Adversity.MODID, 
+        name = Adversity.MODNAME,
+        version = Adversity.VERSION,
+        acceptedMinecraftVersions = "[1.11.2]",
+        dependencies = "after:theoneprobe; after:Waila")
 
-@Mod(modid = Adversity.MODID, name = Adversity.MODNAME, acceptedMinecraftVersions = "[1.11.2]")
-public class Adversity {
+public class Adversity 
+{
 	public static final String MODID = "adversity";
 	public static final String MODNAME = "Adversity";
-
+	public static final String VERSION = "0.0.1";
 	public static WorldType adversityWorld;
 	
 	public static CreativeTabs tabAdversity = new CreativeTabs("Adversity") 

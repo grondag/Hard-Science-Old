@@ -4,12 +4,13 @@ import grondag.adversity.gui.GuiUtil;
 import grondag.adversity.gui.Layout;
 import grondag.adversity.gui.GuiUtil.HorizontalAlignment;
 import grondag.adversity.gui.GuiUtil.VerticalAlignment;
-import grondag.adversity.gui.base.GuiControl;
-import grondag.adversity.library.Useful;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class Slider extends GuiControl
 {
     public static final int TAB_MARGIN = 2;
@@ -67,7 +68,7 @@ public class Slider extends GuiControl
         this.size = size;
         this.label = label;
         this.labelWidthFactor = labelWidthFactor;
-        this.setHeight(Math.max(TAB_WIDTH, mc.fontRenderer.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN));
+        this.setHeight(Math.max(TAB_WIDTH, mc.fontRendererObj.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN));
         this.setVerticalLayout(Layout.FIXED);
     }
     
@@ -91,7 +92,7 @@ public class Slider extends GuiControl
         // draw label if there is one
         if(this.label != null && this.labelWidth > 0)
         {
-            GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, this.label, this.left, this.top, 
+            GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, this.label, this.left, this.top, 
                     this.labelWidth, this.height, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
         }
         
@@ -159,7 +160,7 @@ public class Slider extends GuiControl
         else
         {
             this.currentMouseLocation = MouseLocation.TAB;
-            this.currentMouseIndex = Useful.clamp((int) ((mouseX - this.choiceRight - TAB_WIDTH - ITEM_SPACING / 2) / (this.scrollWidth) * this.size), 0, this.size - 1);
+            this.currentMouseIndex = MathHelper.clamp((int) ((mouseX - this.choiceRight - TAB_WIDTH - ITEM_SPACING / 2) / (this.scrollWidth) * this.size), 0, this.size - 1);
         }
     }
     
@@ -233,7 +234,7 @@ public class Slider extends GuiControl
     {
         this.selectedTabIndex = this.size == 0
                 ? NO_SELECTION 
-                : Useful.clamp(index, 0, this.size - 1);
+                : MathHelper.clamp(index, 0, this.size - 1);
     }
     
     public int getSelectedIndex()

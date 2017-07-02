@@ -1,56 +1,48 @@
 package grondag.adversity.superblock.model.state;
 
 
-import grondag.adversity.Output;
-import grondag.adversity.library.Alternator;
-import grondag.adversity.library.BinaryEnumSet;
-import grondag.adversity.library.BitPacker;
-import grondag.adversity.library.IAlternator;
-import grondag.adversity.library.NeighborBlocks;
-import grondag.adversity.library.Useful;
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.library.BitPacker.BitElement.EnumElement;
-import grondag.adversity.library.BitPacker.BitElement.IntElement;
-import grondag.adversity.library.BitPacker.BitElement.LongElement;
-import grondag.adversity.library.NeighborBlocks.NeighborTestResults;
-import grondag.adversity.library.joinstate.CornerJoinBlockState;
-import grondag.adversity.library.joinstate.CornerJoinBlockStateSelector;
-import grondag.adversity.library.joinstate.SimpleJoin;
-import grondag.adversity.library.Rotation;
-import grondag.adversity.library.BitPacker.BitElement.BooleanElement;
+import java.util.List;
+
+import grondag.adversity.Log;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.varia.BinaryEnumSet;
+import grondag.adversity.library.varia.BitPacker;
+import grondag.adversity.library.varia.Useful;
+import grondag.adversity.library.varia.BitPacker.BitElement.BooleanElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.EnumElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.IntElement;
+import grondag.adversity.library.varia.BitPacker.BitElement.LongElement;
+import grondag.adversity.library.world.CornerJoinBlockState;
+import grondag.adversity.library.world.CornerJoinBlockStateSelector;
+import grondag.adversity.library.world.NeighborBlocks;
+import grondag.adversity.library.world.Rotation;
+import grondag.adversity.library.world.SimpleJoin;
+import grondag.adversity.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.adversity.superblock.block.SuperBlock;
+import grondag.adversity.superblock.collision.SideShape;
 import grondag.adversity.superblock.color.BlockColorMapProvider;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.model.shape.ModelShape;
-import grondag.adversity.superblock.model.shape.SideShape;
-import grondag.adversity.superblock.support.BlockTests;
+import grondag.adversity.superblock.terrain.TerrainState;
 import grondag.adversity.superblock.texture.Textures;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
-import grondag.adversity.superblock.texture.TextureScale;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.adversity.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class ModelStateFactory
 {
-    private static final IAlternator[] ROTATION_ALTERNATOR = new IAlternator[TextureScale.values().length];
+//    private static final IAlternator[] ROTATION_ALTERNATOR = new IAlternator[TextureScale.values().length];
             
            // Alternator.getAlternator(4, 45927934);
-    private static final IAlternator[] BLOCK_ALTERNATOR = new IAlternator[TextureScale.values().length]; //Alternator.getAlternator(8, 2953424);
+//    private static final IAlternator[] BLOCK_ALTERNATOR = new IAlternator[TextureScale.values().length]; //Alternator.getAlternator(8, 2953424);
 
   
-    public static enum StateFormat
-    {
-        /** use for flowing terrain shapes */
-        FLOW,
-        /** use for single blocks */
-        BLOCK,
-        /** use for sliced multi-block shapes (sphere, cylinder, etc.) */
-        MULTIBLOCK
-    }
     //package scope to allow inspection in test harness
     static final BitPacker PACKER_0 = new BitPacker();
     private static final EnumElement<ModelShape> P0_SHAPE = PACKER_0.createEnumElement(ModelShape.class);
@@ -60,9 +52,9 @@ public class ModelStateFactory
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_BASE = PACKER_0.createEnumElement(BlockRenderLayer.class);
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
     
-    // TODO: can save a couple bits and simplify semantics if create a NONE texture that disables layer when selected
-    private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
-    private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
+    // Note: if pressed for space could save a couple bits by creating a NONE texture that disables layer when selected
+//    private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
+//    private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
@@ -81,20 +73,34 @@ public class ModelStateFactory
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
     private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
     // these provide random alternate for texture version and rotation for single blocks or cubic groups of blocks 
-    private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
-    @SuppressWarnings("unchecked")
-    private static final EnumElement<Rotation> P3B_BLOCK_ROTATION[] = new EnumElement[TextureScale.values().length];
+//    private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
+//    @SuppressWarnings("unchecked")
+//    private static final EnumElement<Rotation> P3B_TEXTURE_ROTATION[] = new EnumElement[TextureScale.values().length];
     private static final IntElement P3B_MASONRY_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
+    private static final EnumElement<Rotation> P3B_MODEL_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
     
     static final BitPacker PACKER_3_FLOW = new BitPacker();
-    private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(FlowHeightState.STATE_BIT_MASK + 1);
+    private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(TerrainState.STATE_BIT_MASK + 1);
 
+    static final BitPacker PACKER_3_MULTIBLOCK = new BitPacker();
+//  private static final BooleanElement P3M_IS_CORNER = PACKER_3_MULTIBLOCK.createBooleanElement();
+//  private static final IntElement P3M_OFFSET_X = PACKER_3_MULTIBLOCK.createIntElement(256);
+//  private static final IntElement P3M_OFFSET_Y = PACKER_3_MULTIBLOCK.createIntElement(256);
+//  private static final IntElement P3M_OFFSET_Z = PACKER_3_MULTIBLOCK.createIntElement(256);
+//  private static final IntElement P3M_SCALE_X = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+//  private static final IntElement P3M_SCALE_Y = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+//  private static final IntElement P3M_SCALE_Z = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+//  // zero value indicates solid shape
+//  private static final IntElement P3M_WALL_THICKNESS = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
+
+    
     /** used to compare states quickly for border joins  */
     private static final long P0_APPEARANCE_COMPARISON_MASK;
     private static final long P1_APPEARANCE_COMPARISON_MASK;
-    private static final long P2_APPEARANCE_COMPARISON_MASK;
-   
+    private static final long P2_APPEARANCE_COMPARISON_MASK;   
 
+    /** used to compare states quickly for appearance match */
+    private static final long P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY;
     
     static
     {
@@ -113,30 +119,28 @@ public class ModelStateFactory
             borderMask0 |= P0_PAINT_COLOR[i].comparisonMask();
             borderMask1 |= P1_PAINT_TEXTURE[i].comparisonMask();
             borderMask1 |= P1_PAINT_LIGHT[i].comparisonMask();
-            
         }
         
-        for(TextureScale scale : TextureScale.values())
-        {
-            ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
-            BLOCK_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(8, 2953424, scale.power);
-            P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
-            P3B_BLOCK_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-        }
+//        for(TextureScale scale : TextureScale.values())
+//        {
+//            ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
+//            BLOCK_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(8, 2953424, scale.power);
+//            P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
+//            P3B_TEXTURE_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+//        }
         
-        P0_APPEARANCE_COMPARISON_MASK = borderMask0
-                | P0_SHAPE.comparisonMask() 
-                | P0_AXIS.comparisonMask()
-                | P0_AXIS_INVERTED.comparisonMask()
+        P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY = borderMask0
                 | P0_RENDER_LAYER_BASE.comparisonMask() 
                 | P0_RENDER_LAYER_LAMP.comparisonMask()
-                | P0_LAYER_ENABLED_OVERLAY.comparisonMask()
-                | P0_LAYER_ENABLED_DETAIL.comparisonMask()
                 | P0_TRANSLUCENCY.comparisonMask();
-        
+
+        P0_APPEARANCE_COMPARISON_MASK = P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY
+                | P0_SHAPE.comparisonMask() 
+                | P0_AXIS.comparisonMask()
+                | P0_AXIS_INVERTED.comparisonMask();
+                
         P1_APPEARANCE_COMPARISON_MASK = borderMask1;
         P2_APPEARANCE_COMPARISON_MASK = P2_STATIC_SHAPE_BITS.comparisonMask();
-        
     }
     
     //hide constructor
@@ -181,6 +185,7 @@ public class ModelStateFactory
          */
         public static final int STATE_FLAG_NEEDS_POS = STATE_FLAG_NEEDS_MASONRY_JOIN << 1;
         
+        //FIXME: remove these
         /** 
          * True if block version and rotation are needed. Applies for block formats.
          */
@@ -195,8 +200,14 @@ public class ModelStateFactory
         
         public static final int STATE_FLAG_HAS_AXIS = STATE_FLAG_NEEDS_SPECIES << 1;
         
-        public static final int STATE_FLAG_NEEDS_ROTATION = STATE_FLAG_HAS_AXIS << 1;
+        public static final int STATE_FLAG_NEEDS_TEXTURE_ROTATION = STATE_FLAG_HAS_AXIS << 1;
         
+        public static final int STATE_FLAG_HAS_AXIS_ORIENTATION = STATE_FLAG_NEEDS_TEXTURE_ROTATION << 1;
+        
+        /** True if shape can be rotated. Only applies to block models; multiblock models manage this situationally. */
+        public static final int STATE_FLAG_HAS_MODEL_ROTATION = STATE_FLAG_HAS_AXIS_ORIENTATION << 1;
+        
+        /** sign bit is used to indicate static state */
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
         
@@ -207,7 +218,7 @@ public class ModelStateFactory
         /** use this to turn off flags that should not be used with non-block state formats */
         private static final int STATE_FLAG_DISABLE_BLOCK_ONLY = ~(
                   STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SIMPLE_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN
-                | STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM | STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_NEEDS_ROTATION);
+                | STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM | STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_NEEDS_TEXTURE_ROTATION);
 
                 
         public static final BinaryEnumSet<BlockRenderLayer> BENUMSET_RENDER_LAYER = new BinaryEnumSet<BlockRenderLayer>(BlockRenderLayer.class);
@@ -301,21 +312,21 @@ public class ModelStateFactory
                     shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.LAMP), shadedFlags, false);
                 flags |= getTexture(PaintLayer.LAMP).stateFlags;
                 
-                if(this.isDetailLayerEnabled())
+                if(this.isMiddleLayerEnabled())
                 {
-                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), layerFlags, true);
-                    if(this.getLightingMode(PaintLayer.DETAIL) == LightingMode.FULLBRIGHT) 
-                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.DETAIL), shadedFlags, false);
-                    flags |= getTexture(PaintLayer.DETAIL).stateFlags;
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.MIDDLE), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.MIDDLE) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.MIDDLE), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.MIDDLE).stateFlags;
 
                 }
                 
-                if(this.isOverlayLayerEnabled())
+                if(this.isOuterLayerEnabled())
                 {
-                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), layerFlags, true);
-                    if(this.getLightingMode(PaintLayer.OVERLAY) == LightingMode.FULLBRIGHT) 
-                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OVERLAY), shadedFlags, false);
-                    flags |= getTexture(PaintLayer.OVERLAY).stateFlags;
+                    layerFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OUTER), layerFlags, true);
+                    if(this.getLightingMode(PaintLayer.OUTER) == LightingMode.FULLBRIGHT) 
+                        shadedFlags = BENUMSET_RENDER_LAYER.setFlagForValue(this.getRenderLayer(PaintLayer.OUTER), shadedFlags, false);
+                    flags |= getTexture(PaintLayer.OUTER).stateFlags;
 
                 }
                 
@@ -339,36 +350,6 @@ public class ModelStateFactory
                 this.renderLayerEnabledFlags = 0;
                 this.renderLayerShadedFlags = 0xF;
             }
-        }
-        
-        public boolean hasAxis()
-        {
-            this.populateStateFlagsIfNeeded();
-            return (this.stateFlags & STATE_FLAG_HAS_AXIS) == STATE_FLAG_HAS_AXIS;
-        }
-        
-        public boolean hasBlockVersions()
-        {
-            this.populateStateFlagsIfNeeded();
-            return (this.stateFlags & STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM) > 0;
-        }
-        
-        public boolean hasMasonryJoin()
-        {
-            this.populateStateFlagsIfNeeded();
-            return (this.stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == STATE_FLAG_NEEDS_MASONRY_JOIN;
-        }
-        
-        public boolean hasRotation()
-        {
-            this.populateStateFlagsIfNeeded();
-            return (this.stateFlags & STATE_FLAG_NEEDS_ROTATION) == STATE_FLAG_NEEDS_ROTATION;
-        }
-        
-        public boolean hasSpecies()
-        {
-            this.populateStateFlagsIfNeeded();
-            return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
         }
         
         /** 
@@ -441,29 +422,27 @@ public class ModelStateFactory
             
             populateStateFlagsIfNeeded();
             
+            if(this.metaUsage() != MetaUsage.NONE)
+            {
+                this.setMetaData(state.getValue(SuperBlock.META));
+            }
+            
             switch(this.getShape().meshFactory().stateFormat)
             {
             case BLOCK:
  
-                // for bigtex texture randomization - cubic painters only need 32 blocks of resolution
-                // to be effective at texture randomization because they have block version and rotation as well
-                if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 31);
+                if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 255);
                 
                 long b3 = bits3;
                 
-                if((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES)
-                {
-                     b3 = P3B_SPECIES.setValue(state.getValue(SuperBlock.META), b3);                  
-                }
-                
-                for(TextureScale scale : TextureScale.values())
-                {
-                    if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
-                    {
-                        b3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(BLOCK_ALTERNATOR[scale.ordinal()].getAlternate(pos), b3);
-                        b3 = P3B_BLOCK_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
-                    }
-                }
+//                for(TextureScale scale : TextureScale.values())
+//                {
+//                    if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
+//                    {
+//                        b3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(BLOCK_ALTERNATOR[scale.ordinal()].getAlternate(pos), b3);
+//                        b3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
+//                    }
+//                }
 
                 NeighborBlocks neighbors = null;
                 
@@ -498,7 +477,7 @@ public class ModelStateFactory
                 // terrain blocks need larger position space to drive texture randomization because doesn't have per-block rotation or version
                 if((stateFlags & STATE_FLAG_NEEDS_POS) == STATE_FLAG_NEEDS_POS) refreshBlockPosFromWorld(pos, 255);
 
-                bits3 = P3F_FLOW_JOIN.setValue(FlowHeightState.getBitsFromWorldStatically(this, (SuperBlock)state.getBlock(), state, world, pos), bits3);
+                bits3 = P3F_FLOW_JOIN.setValue(TerrainState.getBitsFromWorldStatically(this, (SuperBlock)state.getBlock(), state, world, pos), bits3);
                 break;
             
             case MULTIBLOCK:
@@ -588,8 +567,8 @@ public class ModelStateFactory
         {
             switch(layer)
             {
-            case DETAIL:
-            case OVERLAY:
+            case MIDDLE:
+            case OUTER:
                 return this.getTexture(layer).renderLayer;
 
             case LAMP:
@@ -608,11 +587,11 @@ public class ModelStateFactory
             
             switch(layer)
             {
-            case DETAIL:
-            case OVERLAY:
+            case MIDDLE:
+            case OUTER:
             default:
-                if(Output.DEBUG_MODE)
-                    Output.warn("setRenderLayer on model state does not apply for given paint layer.");
+                if(Log.DEBUG_MODE)
+                    Log.warn("setRenderLayer on model state does not apply for given paint layer.");
                 return;
 
             case LAMP:
@@ -626,28 +605,38 @@ public class ModelStateFactory
             invalidateHashCode();
         }
 
-        public boolean isDetailLayerEnabled()
+        public boolean isMiddleLayerEnabled()
         {
-            return P0_LAYER_ENABLED_DETAIL.getValue(bits0);
+            return this.getTexture(PaintLayer.MIDDLE) != Textures.NONE;
         }
         
-        public void setDetailLayerEnabled(boolean isEnabled)
+        public void setMiddleLayerEnabled(boolean isEnabled)
         {
-            bits0 = P0_LAYER_ENABLED_DETAIL.setValue(isEnabled, bits0);
-            clearStateFlags();
-            invalidateHashCode();
+            if(isEnabled && this.getTexture(PaintLayer.MIDDLE) == Textures.NONE)
+            {
+                this.setTexture(PaintLayer.MIDDLE, Textures.BLOCK_NOISE_STRONG);
+            }
+            else if(!isEnabled && this.getTexture(PaintLayer.MIDDLE) != Textures.NONE)
+            {
+                this.setTexture(PaintLayer.MIDDLE, Textures.NONE);
+            }
         }
         
-        public boolean isOverlayLayerEnabled()
+        public boolean isOuterLayerEnabled()
         {
-            return P0_LAYER_ENABLED_OVERLAY.getValue(bits0);
+            return this.getTexture(PaintLayer.OUTER) != Textures.NONE;
         }
         
-        public void setOverlayLayerEnabled(boolean isEnabled)
+        public void setOuterLayerEnabled(boolean isEnabled)
         {
-            bits0 = P0_LAYER_ENABLED_OVERLAY.setValue(isEnabled, bits0);
-            clearStateFlags();
-            invalidateHashCode();
+            if(isEnabled && this.getTexture(PaintLayer.OUTER) == Textures.NONE)
+            {
+                this.setTexture(PaintLayer.OUTER, Textures.BLOCK_NOISE_STRONG);
+            }
+            else if(!isEnabled && this.getTexture(PaintLayer.OUTER) != Textures.NONE)
+            {
+                this.setTexture(PaintLayer.OUTER, Textures.NONE);
+            }
         }
         
         /** returns true if any surface painter is configured to have the given layer */
@@ -685,7 +674,7 @@ public class ModelStateFactory
         
         public TexturePallette getTexture(PaintLayer layer)
         {
-            return Textures.ALL_TEXTURES.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
+            return Textures.REGISTRY.get(P1_PAINT_TEXTURE[layer.ordinal()].getValue(bits1));
         }
         
         public void setTexture(PaintLayer layer, TexturePallette tex)
@@ -779,41 +768,41 @@ public class ModelStateFactory
         //  PACKER 3 ATTRIBUTES  (BLOCK FORMAT)
         ////////////////////////////////////////////////////
         
-        public Rotation getRotation(TextureScale scale)
-        {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("getRotation on model state does not apply for shape");
-            
-            populateStateFlagsIfNeeded();
-            return P3B_BLOCK_ROTATION[scale.ordinal()].getValue(bits3);
-        }
+//        public Rotation getTextureRotation(TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("getRotation on model state does not apply for shape");
+//            
+//            populateStateFlagsIfNeeded();
+//            return P3B_TEXTURE_ROTATION[scale.ordinal()].getValue(bits3);
+//        }
         
-        public void setRotation(Rotation rotation, TextureScale scale)
-        {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("setRotation on model state does not apply for shape");
-            
-            populateStateFlagsIfNeeded();
-            bits3 = P3B_BLOCK_ROTATION[scale.ordinal()].setValue(rotation, bits3);
-            invalidateHashCode();
-        }
+//        public void setTextureRotation(Rotation rotation, TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("setRotation on model state does not apply for shape");
+//            
+//            populateStateFlagsIfNeeded();
+//            bits3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(rotation, bits3);
+//            invalidateHashCode();
+//        }
 
-        public int getBlockVersion(TextureScale scale)
-        {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("getBlockVersion on model state does not apply for shape");
-            
-            return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
-        }
+//        public int getBlockVersion(TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("getBlockVersion on model state does not apply for shape");
+//            
+//            return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
+//        }
         
-        public void setBlockVersion(int version, TextureScale scale)
-        {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("setBlockVersion on model state does not apply for shape");
-            
-            bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
-            invalidateHashCode();
-        }
+//        public void setBlockVersion(int version, TextureScale scale)
+//        {
+//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+//                Log.warn("setBlockVersion on model state does not apply for shape");
+//            
+//            bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
+//            invalidateHashCode();
+//        }
 
         /**
          * Will return 0 if model state does not include species.
@@ -824,8 +813,8 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
             
-            if(Output.DEBUG_MODE && !this.hasSpecies())
-                Output.warn("getSpecies on model state does not apply for shape");
+            if(Log.DEBUG_MODE && !this.hasSpecies())
+                Log.warn("getSpecies on model state does not apply for shape");
 
             return this.hasSpecies() ? P3B_SPECIES.getValue(bits3) : 0;
         }
@@ -834,8 +823,8 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
             
-            if(Output.DEBUG_MODE && !this.hasSpecies())
-                Output.warn("setSpecies on model state does not apply for shape");
+            if(Log.DEBUG_MODE && !this.hasSpecies())
+                Log.warn("setSpecies on model state does not apply for shape");
             
             if(this.hasSpecies())
             {
@@ -846,11 +835,11 @@ public class ModelStateFactory
         
         public CornerJoinBlockState getCornerJoin()
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                    Output.warn("getCornerJoin on model state does not apply for shape");
+                    Log.warn("getCornerJoin on model state does not apply for shape");
             }
             
             return CornerJoinBlockStateSelector.getJoinState(P3B_BLOCK_JOIN.getValue(bits3));
@@ -858,11 +847,11 @@ public class ModelStateFactory
         
         public void setCornerJoin(CornerJoinBlockState join)
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0 || this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                    Output.warn("setCornerJoin on model state does not apply for shape");
+                    Log.warn("setCornerJoin on model state does not apply for shape");
             }
             
             bits3 = P3B_BLOCK_JOIN.setValue(join.getIndex(), bits3);
@@ -871,8 +860,8 @@ public class ModelStateFactory
         
         public SimpleJoin getSimpleJoin()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-                Output.warn("getSimpleJoin on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+                Log.warn("getSimpleJoin on model state does not apply for shape");
             
             
             // If this state is using corner join, join index is for a corner join
@@ -885,18 +874,18 @@ public class ModelStateFactory
         
         public void setSimpleJoin(SimpleJoin join)
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 {
-                    Output.warn("Ignored setSimpleJoin on model state that does not apply for shape");
+                    Log.warn("Ignored setSimpleJoin on model state that does not apply for shape");
                     return;
                 }
                 
                 populateStateFlagsIfNeeded();
                 if((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) != 0)
                 {
-                    Output.warn("Ignored setSimpleJoin on model state that uses corner join instead");
+                    Log.warn("Ignored setSimpleJoin on model state that uses corner join instead");
                     return;
                 }
             }
@@ -907,8 +896,8 @@ public class ModelStateFactory
         
         public SimpleJoin getMasonryJoin()
         {
-            if(Output.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
-                Output.warn("getMasonryJoin on model state does not apply for shape");
+            if(Log.DEBUG_MODE && (this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
+                Log.warn("getMasonryJoin on model state does not apply for shape");
             
             populateStateFlagsIfNeeded();
             return new SimpleJoin(P3B_MASONRY_JOIN.getValue(bits3));
@@ -916,23 +905,54 @@ public class ModelStateFactory
         
         public void setMasonryJoin(SimpleJoin join)
         {
-            if(Output.DEBUG_MODE)
+            if(Log.DEBUG_MODE)
             {
+                populateStateFlagsIfNeeded();
                 if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
                 {
-                    Output.warn("Ignored setMasonryJoin on model state that does not apply for shape");
+                    Log.warn("Ignored setMasonryJoin on model state that does not apply for shape");
                     return;
                 }
                 
-                populateStateFlagsIfNeeded();
                 if(((stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == 0) || ((stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == 0))
                 {
-                    Output.warn("Ignored setMasonryJoin on model state for which it does not apply");
+                    Log.warn("Ignored setMasonryJoin on model state for which it does not apply");
                     return;
                 }
             }
             
             bits3 = P3B_MASONRY_JOIN.setValue(join.getIndex(), bits3);
+            invalidateHashCode();
+        }
+        
+
+        public Rotation getModelRotation()
+        {
+            if(Log.DEBUG_MODE)
+            {
+                populateStateFlagsIfNeeded();
+                if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == 0)
+                    Log.warn("getModelRotation on model state does not apply for shape");
+            }
+            return P3B_MODEL_ROTATION.getValue(bits3);
+        }
+        
+        public void setModelRotation(Rotation rotation)
+        {
+            populateStateFlagsIfNeeded();
+            if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
+            {
+                if(Log.DEBUG_MODE) Log.warn("Ignored setModelRotation on model state that does not apply for shape");
+                return;
+            }
+            
+            if((stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == 0)
+            {
+                if(Log.DEBUG_MODE) Log.warn("Ignored setModelRotation on model state for which it does not apply");
+                return;
+            }
+            
+            bits3 = P3B_MODEL_ROTATION.setValue(rotation, bits3);
             invalidateHashCode();
         }
         
@@ -943,8 +963,8 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public long getMultiBlockBits()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
-                Output.warn("getMultiBlockBits on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+                Log.warn("getMultiBlockBits on model state does not apply for shape");
             
             return bits3;
         }
@@ -952,8 +972,8 @@ public class ModelStateFactory
         /** Multiblock shapes also get a full 64 bits of information - does not update from world */
         public void setMultiBlockBits(long bits)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
-                Output.warn("setMultiBlockBits on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.MULTIBLOCK)
+                Log.warn("setMultiBlockBits on model state does not apply for shape");
             
             bits3 = bits;
             invalidateHashCode();
@@ -963,18 +983,18 @@ public class ModelStateFactory
         //  PACKER 3 ATTRIBUTES  (FLOWING TERRAIN FORMAT)
         ////////////////////////////////////////////////////
         
-        public FlowHeightState getFlowState()
+        public TerrainState getTerrainState()
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
-                Output.warn("getFlowState on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+                Log.warn("getTerrainState on model state does not apply for shape");
                 
-            return new FlowHeightState(P3F_FLOW_JOIN.getValue(bits3));
+            return new TerrainState(P3F_FLOW_JOIN.getValue(bits3));
         }
         
-        public void setFlowState(FlowHeightState flowState)
+        public void setTerrainState(TerrainState flowState)
         {
-            if(Output.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
-                Output.warn("setFlowState on model state does not apply for shape");
+            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.FLOW)
+                Log.warn("setTerrainState on model state does not apply for shape");
 
             bits3 = P3F_FLOW_JOIN.setValue(flowState.getStateKey(), bits3);
             invalidateHashCode();
@@ -982,9 +1002,100 @@ public class ModelStateFactory
         
         
         ////////////////////////////////////////////////////
-        //  SHAPE-DEPENDENT CONVENIENCE METHODS
+        //  SHAPE/STATE-DEPENDENT CONVENIENCE METHODS
         ////////////////////////////////////////////////////
 
+        public boolean hasAxis()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_HAS_AXIS) == STATE_FLAG_HAS_AXIS;
+        }
+        
+        public boolean hasAxisOrientation()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_HAS_AXIS_ORIENTATION) == STATE_FLAG_HAS_AXIS_ORIENTATION;
+        }
+        
+        public boolean hasModelRotation()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == STATE_FLAG_HAS_MODEL_ROTATION;
+        }
+        
+        public boolean hasBlockVersions()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM) > 0;
+        }
+        
+        public boolean hasMasonryJoin()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_NEEDS_MASONRY_JOIN) == STATE_FLAG_NEEDS_MASONRY_JOIN;
+        }
+        
+        public boolean hasTextureRotation()
+        {
+            this.populateStateFlagsIfNeeded();
+            return (this.stateFlags & STATE_FLAG_NEEDS_TEXTURE_ROTATION) == STATE_FLAG_NEEDS_TEXTURE_ROTATION;
+        }
+        
+        public boolean hasSpecies()
+        {
+            this.populateStateFlagsIfNeeded();
+            return((this.stateFlags & STATE_FLAG_NEEDS_SPECIES) == STATE_FLAG_NEEDS_SPECIES);
+        }
+        
+        /** Convenience method. Same as shape attribute. */
+        public MetaUsage metaUsage()
+        {
+            return this.getShape().metaUsage;
+        }
+        
+        /**
+         * Retrieves block/item metadata that should apply to this modelState.
+         */
+        public int getMetaData()
+        {
+            switch(this.metaUsage())
+            {
+            case SHAPE:
+                return this.getShape().meshFactory().getMetaData(this);
+                
+            case SPECIES:
+                return this.hasSpecies() ? this.getSpecies() : 0;
+                
+            case NONE:
+            default:
+                if(Log.DEBUG_MODE) Log.warn("ModelState.getMetaData called for inappropriate shape");
+                return 0;
+            }            
+        }
+        
+        public void setMetaData(int meta)
+        {
+            switch(this.metaUsage())
+            {
+            case SHAPE:
+                this.getShape().meshFactory().setMetaData(this, meta);
+                break;
+                
+            case SPECIES:
+                if(this.hasSpecies()) this.setSpecies(meta);
+                break;
+                
+            case NONE:
+            default:
+                if(Log.DEBUG_MODE) Log.warn("ModelState.setMetaData called for inappropriate shape");
+            }            
+        }
+        
+        /** True if shape can be placed on itself to grow */
+        public boolean isAdditive()
+        {
+            return this.getShape().meshFactory().isAdditive();
+        }
         public SideShape sideShape(EnumFacing side)
         {
             return getShape().meshFactory().sideShape(this, side);
@@ -1019,15 +1130,71 @@ public class ModelStateFactory
         }
         
         /** 
-         * Returns true if visual elements match.
+         * Returns true if visual elements and geometry match.
          * Does not consider species in matching.
-         * Used to determine if blocks/borders should join together.
          */
-        public boolean doesAppearanceMatch(ModelState other)
+        public boolean doShapeAndAppearanceMatch(ModelState other)
         {
             return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK)
                     && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK)
                     && (this.bits2 & P2_APPEARANCE_COMPARISON_MASK) == (other.bits2 & P2_APPEARANCE_COMPARISON_MASK);
+        }
+
+        /** 
+         * Returns true if visual elements match.
+         * Does not consider species or geometry in matching.
+         */
+        public boolean doesAppearanceMatch(ModelState other)
+        {
+            return (this.bits0 & P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY) == (other.bits0 & P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY)
+                    && (this.bits1 & P1_APPEARANCE_COMPARISON_MASK) == (other.bits1 & P1_APPEARANCE_COMPARISON_MASK);
+        }
+
+        /** 
+         * Returns a copy of this model state with only the bits that matter for geometry.
+         * Used as lookup key for block damage models.
+         */
+        public ModelState geometricState()
+        {
+            this.populateStateFlagsIfNeeded();
+            ModelState result = new ModelState();
+            result.setShape(this.getShape());
+            result.setStaticShapeBits(this.getStaticShapeBits());
+
+            switch(this.getShape().meshFactory().stateFormat)
+            {
+            case BLOCK:
+                if(this.hasAxis()) result.setAxis(this.getAxis());
+                if(this.hasAxisOrientation()) result.setAxisInverted(this.isAxisInverted());
+                if(this.hasModelRotation()) result.setModelRotation(this.getModelRotation());
+                if((this.getShape().meshFactory().stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == STATE_FLAG_NEEDS_CORNER_JOIN)
+                {
+                    result.setCornerJoin(this.getCornerJoin());
+                }
+                else if((this.getShape().meshFactory().stateFlags & STATE_FLAG_NEEDS_SIMPLE_JOIN) == STATE_FLAG_NEEDS_SIMPLE_JOIN)  
+                { 
+                    result.setSimpleJoin(this.getSimpleJoin());
+                }
+                break;
+                
+            case FLOW:
+            case MULTIBLOCK:
+                result.bits3 = this.bits3;
+                break;
+                
+            default:
+                break;
+            
+            }
+            return result;
+        }
+        
+        /**
+         * Returns a list of collision boxes offset to the given world position 
+         */
+        public List<AxisAlignedBB> collisionBoxes(BlockPos offset)
+        {
+            return this.getShape().meshFactory().collisionHandler().getCollisionBoxes(this, offset);
         }
     }
 }

@@ -3,8 +3,10 @@ package grondag.adversity.gui.control;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import grondag.adversity.gui.base.GuiControl;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class VisibilityPanel extends Panel
 {
 

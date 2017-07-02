@@ -1,9 +1,7 @@
 package grondag.adversity.superblock.terrain;
 
-import grondag.adversity.feature.volcano.lava.LavaTerrainHelper;
 import grondag.adversity.init.ModBlocks;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.state.FlowHeightState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -172,7 +170,7 @@ public class TerrainWand extends Item
                 int currentLevel = height[x][z];
                 
 
-                int currentY = (int) Math.floor((currentLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                int currentY = (int) Math.floor((currentLevel - 1) / TerrainState.BLOCK_LEVELS_FLOAT);
                 BlockPos targetPos = new BlockPos(pos.getX() - 16 + x, currentY, pos.getZ() - 16 + z);
                 IBlockState currentState = worldIn.getBlockState(targetPos);
                 
@@ -180,32 +178,32 @@ public class TerrainWand extends Item
                 {
                     if(avg > currentLevel)
                     {
-                        int newLevel = Math.min(currentLevel + FlowHeightState.BLOCK_LEVELS_INT, avg);
-                        int newY = (int) Math.floor((newLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                        int newLevel = Math.min(currentLevel + TerrainState.BLOCK_LEVELS_INT, avg);
+                        int newY = (int) Math.floor((newLevel - 1) / TerrainState.BLOCK_LEVELS_FLOAT);
                         
                         if(newY == currentY)
                         {
-                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                         else
                         {
-                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, FlowHeightState.BLOCK_LEVELS_INT));
-                            worldIn.setBlockState(targetPos.up(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, TerrainState.BLOCK_LEVELS_INT));
+                            worldIn.setBlockState(targetPos.up(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                     }
                     else if(avg < currentLevel)
                     {
-                        int newLevel = Math.max(currentLevel - FlowHeightState.BLOCK_LEVELS_INT, avg);
-                        int newY = (int) Math.floor((newLevel - 1) / FlowHeightState.BLOCK_LEVELS_FLOAT);
+                        int newLevel = Math.max(currentLevel - TerrainState.BLOCK_LEVELS_INT, avg);
+                        int newY = (int) Math.floor((newLevel - 1) / TerrainState.BLOCK_LEVELS_FLOAT);
                         
                         if(newY == currentY)
                         {
-                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos, TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                         else
                         {
                             worldIn.setBlockToAir(targetPos);
-                            worldIn.setBlockState(targetPos.down(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * FlowHeightState.BLOCK_LEVELS_INT)));
+                            worldIn.setBlockState(targetPos.down(), TerrainBlock.stateWithDiscreteFlowHeight(currentState, newLevel - (newY * TerrainState.BLOCK_LEVELS_INT)));
                         }
                     }
                 }
@@ -220,7 +218,7 @@ public class TerrainWand extends Item
         IBlockState state = world.getBlockState(pos);
         int h = TerrainBlock.getFlowHeightFromState(state);
         
-        if(h != 0) return y * FlowHeightState.BLOCK_LEVELS_INT + h;
+        if(h != 0) return y * TerrainState.BLOCK_LEVELS_INT + h;
         
         if(state.getMaterial().isReplaceable())
         {
@@ -234,7 +232,7 @@ public class TerrainWand extends Item
                 state = world.getBlockState(pos.down(downCount));
             }
             h = TerrainBlock.getFlowHeightFromState(state);
-            return (y - downCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
+            return (y - downCount) * TerrainState.BLOCK_LEVELS_INT + h;
         }
         else
         {
@@ -249,7 +247,7 @@ public class TerrainWand extends Item
                 state = world.getBlockState(pos.up(upCount));
                 h = TerrainBlock.getFlowHeightFromState(state);
             }
-            return (y + upCount) * FlowHeightState.BLOCK_LEVELS_INT + h;
+            return (y + upCount) * TerrainState.BLOCK_LEVELS_INT + h;
         }
             
     }
@@ -295,7 +293,7 @@ public class TerrainWand extends Item
             }
             else
             {
-                if(level < FlowHeightState.BLOCK_LEVELS_INT)
+                if(level < TerrainState.BLOCK_LEVELS_INT)
                 {
                     targetPos = pos;
                     targetState = TerrainBlock.stateWithDiscreteFlowHeight(stateIn, level + 1);
@@ -326,15 +324,15 @@ public class TerrainWand extends Item
 
         worldIn.setBlockState(targetPos, targetState);
 
-        adjustFillIfNeeded(targetPos, worldIn);
-        adjustFillIfNeeded(targetPos.east(), worldIn);
-        adjustFillIfNeeded(targetPos.west(), worldIn);
-        adjustFillIfNeeded(targetPos.north(), worldIn);
-        adjustFillIfNeeded(targetPos.south(), worldIn);
-        adjustFillIfNeeded(targetPos.north().east(), worldIn);
-        adjustFillIfNeeded(targetPos.south().east(), worldIn);
-        adjustFillIfNeeded(targetPos.north().west(), worldIn);
-        adjustFillIfNeeded(targetPos.south().west(), worldIn);
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos);
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.east());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.west());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.north());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.south());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.north().east());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.south().east());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.north().west());
+        TerrainBlock.adjustFillIfNeeded(worldIn, targetPos.south().west());
 
         worldIn.playSound((double)((float)targetPos.getX() + 0.5F), 
                 (double)((float)targetPos.getY() + 0.5F), 
@@ -346,79 +344,79 @@ public class TerrainWand extends Item
 
     }
 
-    /**
-     * Adds or removes filler blocks as needed.
-     * @param basePos
-     */
-    public static void adjustFillIfNeeded(BlockPos posIn, World worldObj)
-    {
-        final int SHOULD_BE_AIR = -1;
-
-        for(int y = -4; y <= 4; y++)
-        {
-            BlockPos basePos = posIn.add(0, y, 0);
-
-
-
-            IBlockState baseState = worldObj.getBlockState(basePos);
-            Block baseBlock = baseState.getBlock();
-            SuperBlock fillBlock = null;
-            
-            //don't adjust static blocks
-            if(baseBlock instanceof TerrainStaticBlock) continue;
-            
-            int targetMeta = SHOULD_BE_AIR;
-
-            /**
-             * If space is occupied with a non-displaceable block, will be ignored.
-             * Static flow blocks are also ignored.
-             * Otherwise, possible target states: air, fill +1, fill +2
-             * 
-             * Should be fill +1 if block below is a heightblock and needs a fill >= 1;
-             * Should be a fill +2 if block below is not a heightblock and block
-             * two below needs a fill = 2;
-             * Otherwise should be air.
-             */
-            IBlockState stateBelow = worldObj.getBlockState(basePos.down());
-            if(TerrainBlock.isFlowHeight(stateBelow.getBlock()) 
-                    && TerrainBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
-            {
-                targetMeta = 0;
-                fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateBelow.getBlock());
-            }
-            else 
-            {
-                IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
-                if((TerrainBlock.isFlowHeight(stateTwoBelow.getBlock()) 
-                        && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
-                {
-                    targetMeta = 1;
-                    fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateTwoBelow.getBlock());
-                }
-            }
-
-            if(TerrainBlock.isFlowFiller(baseBlock))
-            {
-
-                if(targetMeta == SHOULD_BE_AIR)
-                {
-                    worldObj.setBlockToAir(basePos);
-                }
-                else if(baseState.getValue(SuperBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
-                {
-
-                    worldObj.setBlockState(basePos, fillBlock.getDefaultState()
-                            .withProperty(SuperBlock.META, targetMeta));
-
-                }
-
-            }
-            else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
-            {
-                worldObj.setBlockState(basePos, fillBlock.getDefaultState()
-                        .withProperty(SuperBlock.META, targetMeta));
-
-            }
-        }
-    }
+//    /**
+//     * Adds or removes filler blocks as needed.
+//     * @param basePos
+//     */
+//    public static void adjustFillIfNeeded(World worldObj, BlockPos posIn)
+//    {
+//        final int SHOULD_BE_AIR = -1;
+//
+//        for(int y = -4; y <= 4; y++)
+//        {
+//            BlockPos basePos = posIn.add(0, y, 0);
+//
+//
+//
+//            IBlockState baseState = worldObj.getBlockState(basePos);
+//            Block baseBlock = baseState.getBlock();
+//            SuperBlock fillBlock = null;
+//            
+//            //don't adjust static blocks
+//            if(baseBlock instanceof TerrainStaticBlock) continue;
+//            
+//            int targetMeta = SHOULD_BE_AIR;
+//
+//            /**
+//             * If space is occupied with a non-displaceable block, will be ignored.
+//             * Static flow blocks are also ignored.
+//             * Otherwise, possible target states: air, fill +1, fill +2
+//             * 
+//             * Should be fill +1 if block below is a heightblock and needs a fill >= 1;
+//             * Should be a fill +2 if block below is not a heightblock and block
+//             * two below needs a fill = 2;
+//             * Otherwise should be air.
+//             */
+//            IBlockState stateBelow = worldObj.getBlockState(basePos.down());
+//            if(TerrainBlock.isFlowHeight(stateBelow.getBlock()) 
+//                    && TerrainBlock.topFillerNeeded(stateBelow, worldObj, basePos.down()) > 0)
+//            {
+//                targetMeta = 0;
+//                fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateBelow.getBlock());
+//            }
+//            else 
+//            {
+//                IBlockState stateTwoBelow = worldObj.getBlockState(basePos.down(2));
+//                if((TerrainBlock.isFlowHeight(stateTwoBelow.getBlock()) 
+//                        && TerrainBlock.topFillerNeeded(stateTwoBelow, worldObj, basePos.down(2)) == 2))
+//                {
+//                    targetMeta = 1;
+//                    fillBlock = (SuperBlock) TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.getFillerBlock(stateTwoBelow.getBlock());
+//                }
+//            }
+//
+//            if(TerrainBlock.isFlowFiller(baseBlock))
+//            {
+//
+//                if(targetMeta == SHOULD_BE_AIR)
+//                {
+//                    worldObj.setBlockToAir(basePos);
+//                }
+//                else if(baseState.getValue(SuperBlock.META) != targetMeta || baseBlock != fillBlock && fillBlock != null)
+//                {
+//
+//                    worldObj.setBlockState(basePos, fillBlock.getDefaultState()
+//                            .withProperty(SuperBlock.META, targetMeta));
+//
+//                }
+//
+//            }
+//            else if(targetMeta != SHOULD_BE_AIR && LavaTerrainHelper.canLavaDisplace(baseState) && fillBlock != null)
+//            {
+//                worldObj.setBlockState(basePos, fillBlock.getDefaultState()
+//                        .withProperty(SuperBlock.META, targetMeta));
+//
+//            }
+//        }
+//    }
 }

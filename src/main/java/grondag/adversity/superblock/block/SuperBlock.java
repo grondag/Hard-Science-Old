@@ -8,30 +8,30 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-
 import grondag.adversity.Adversity;
 import grondag.adversity.Configurator;
-import grondag.adversity.Output;
+import grondag.adversity.Log;
 import grondag.adversity.external.IWailaProvider;
-import grondag.adversity.init.ModModels;
-import grondag.adversity.library.Color;
-import grondag.adversity.library.Color.EnumHCLFailureMode;
+import grondag.adversity.library.varia.Color;
+import grondag.adversity.library.varia.Color.EnumHCLFailureMode;
+import grondag.adversity.superblock.collision.ICollisionHandler;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
 import grondag.adversity.superblock.items.SuperItemBlock;
-import grondag.adversity.superblock.model.shape.ICollisionHandler;
+import grondag.adversity.superblock.model.state.MetaUsage;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
+import grondag.adversity.superblock.varia.ParticleDiggingSuperBlock;
 import mcjty.theoneprobe.api.IProbeHitData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.IProbeInfoAccessor;
 import mcjty.theoneprobe.api.ProbeMode;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import grondag.adversity.superblock.model.state.ModelStateProperty;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Translucency;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
+import grondag.adversity.superblock.model.state.WorldLightOpacity;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -62,6 +62,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -71,11 +72,16 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.Optional;
 
 /**
  * Base class for Adversity building blocks.
  */
 @SuppressWarnings("deprecation")
+
+@Optional.InterfaceList({
+    @Optional.Interface(iface = "mcjty.theoneprobe.api.IProbeInfoAccessor", modid = "theoneprobe"),
+    @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaProvider", modid = "waila")})
 public abstract class SuperBlock extends Block implements IWailaProvider, IProbeInfoAccessor
 {
 
@@ -129,7 +135,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         setResistance(50);
         
         this.setRegistryName(blockName);
-        this.setUnlocalizedName(this.getRegistryName().toString());
+        this.setUnlocalizedName(blockName);
         this.associatedBlock = this;
         
         this.lightOpacity = 0;
@@ -164,6 +170,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
     {
         IBlockState blockState = world.getBlockState(pos);
@@ -203,6 +210,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean addHitEffects(IBlockState blockState, World world, RayTraceResult target, ParticleManager manager)
     {
         if(blockState.getBlock() != this)
@@ -273,26 +281,39 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
     {
         super.addInformation(stack, playerIn, tooltip, advanced);
-        ModelState modelState = SuperItemBlock.getModelState(stack);
+        tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
-        ColorMap colorMap = modelState.getColorMap(PaintLayer.BASE);
-        if(colorMap != null)
+        ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
+        
+        if(modelState != null)
         {
-            tooltip.add("Color: " + colorMap.colorMapName);
+            tooltip.add(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
+            tooltip.add(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
+            tooltip.add(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
+            if(modelState.isOuterLayerEnabled())
+            {
+                tooltip.add(I18n.translateToLocal("label.outer_color") + ": " + modelState.getColorMap(PaintLayer.OUTER).localizedName());
+                tooltip.add(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).localizedName());
+            }
+            if(modelState.isMiddleLayerEnabled())
+            {
+                tooltip.add(I18n.translateToLocal("label.middle_color") + ": " + modelState.getColorMap(PaintLayer.MIDDLE).localizedName());
+                tooltip.add(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).localizedName());
+            }
+            if(modelState.hasSpecies()) 
+            {
+                tooltip.add(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
+            }
         }
-        
-        int placementShape = SuperItemBlock.getStackPlacementShape(stack);
-        if(placementShape != 0)
-        {
-            tooltip.add(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));
-        }
-        
+        tooltip.add(I18n.translateToLocal("label.material") + ": " + SuperItemBlock.getStackSubstance(stack).localizedName());
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean addLandingEffects(IBlockState state, WorldServer worldObj, BlockPos blockPosition, IBlockState iblockstate, EntityLivingBase entity,
             int numberOfParticles)
     {
@@ -304,24 +325,43 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @Optional.Method(modid = "theoneprobe")
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
+        probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
+        
         ModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
         
         if(modelState != null)
         {
-            probeInfo.text("Shape: " + modelState.getShape());
-            probeInfo.text("Base Color: " + modelState.getColorMap(PaintLayer.BASE).colorMapName);
+            probeInfo.text(I18n.translateToLocal("label.shape") + ": " + modelState.getShape().localizedName());
+            probeInfo.text(I18n.translateToLocal("label.base_color") + ": " + modelState.getColorMap(PaintLayer.BASE).localizedName());
+            probeInfo.text(I18n.translateToLocal("label.base_texture") + ": " + modelState.getTexture(PaintLayer.BASE).localizedName());
+            if(modelState.isOuterLayerEnabled())
+            {
+                probeInfo.text(I18n.translateToLocal("label.outer_color") + ": " + modelState.getColorMap(PaintLayer.OUTER).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.outer_texture") + ": " + modelState.getTexture(PaintLayer.OUTER).localizedName());
+            }
+            if(modelState.isMiddleLayerEnabled())
+            {
+                probeInfo.text(I18n.translateToLocal("label.middle_color") + ": " + modelState.getColorMap(PaintLayer.MIDDLE).localizedName());
+                probeInfo.text(I18n.translateToLocal("label.middle_texture") + ": " + modelState.getTexture(PaintLayer.MIDDLE).localizedName());
+            }
             if(modelState.hasSpecies()) 
             {
-                probeInfo.text("Species: " + modelState.getSpecies());
-                int placementShape = SuperItemBlock.getStackPlacementShape(this.getStackFromBlock(blockState, world, data.getPos()));
-                if(placementShape != 0)
+                probeInfo.text(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
+            }
+            if(modelState.hasAxis())
+            {
+                probeInfo.text(I18n.translateToLocal("label.axis") + ": " + modelState.getAxis());
+                if(modelState.hasAxisOrientation())
                 {
-                    probeInfo.text(String.format("Block Size: %1$d x %2$d x %3$d", placementShape & 0xFF, (placementShape >> 8) & 0xFF, (placementShape >> 16) & 0xFF));
+                    probeInfo.text(I18n.translateToLocal("label.axis_inverted") + ": " + modelState.isAxisInverted());
                 }
             }
+            probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
         }
+        probeInfo.text(I18n.translateToLocal("label.material") + ": " + this.getSubstance(blockState, world, data.getPos()).localizedName());
     }
 
     /**
@@ -557,6 +597,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * Get no state here, so always report that we should.
      */
     @Override
+    @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
         return BlockRenderLayer.TRANSLUCENT;
@@ -748,16 +789,16 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     
     /**
      * At least one vanilla routine passes in a block state that does not match world.
-     * (After block updates, passes in previous state to detect collision box changes.)
+     * (After block updates, passes in previous state to detect collision box changes.) <br><br>
      * 
-     * We don't want to update our current state based on stale block state, so the TE
-     * refresh is coded to always use current world state.
+     * We don't want to update our current state based on stale block state, so for TE
+     * blocks the refresh must be coded so we don't inject bad (stale) modelState into TE. <br><br>
      * 
      * However, we do want to honor the given world state if species is different than current.
      * We do this by directly changing species, because that is only thing that can changed
-     * in model state based on block state, and also affects collision box.
+     * in model state based on block state, and also affects collision box. <br><br>
      * 
-     * TODO: there is probably still a bug here, because collision box can change based
+     * NOTE: there is probably still a bug here, because collision box can change based
      * on other components of model state (axis, for example) and those changes may not be detected
      * by path finding.
      */
@@ -775,9 +816,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return getModelStateAssumeStateIsStale(state, world, pos, refreshFromWorldIfNeeded);
     }
  
+    @SideOnly(Side.CLIENT)
     public int getOcclusionKey(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
-        return ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
+        return grondag.adversity.init.ModModels.MODEL_DISPATCH.getOcclusionKey(this.getModelStateAssumeStateIsCurrent(state, world, pos, true), side);
     }
 
     @Override
@@ -798,21 +840,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public List<AxisAlignedBB> getSelectionBoundingBoxes(World worldIn, BlockPos pos, IBlockState state)
     {
         ModelState modelState = this.getModelStateAssumeStateIsStale(state, worldIn, pos, true);
-        ICollisionHandler handler = modelState.getShape().meshFactory().collisionHandler();
-        if (handler == null)
-        {
-            return ImmutableList.of(this.getBoundingBox(state, worldIn, pos));
-        }
-        else
-        {
-            Builder<AxisAlignedBB> builder = new ImmutableList.Builder<AxisAlignedBB>();
-
-            for (AxisAlignedBB aabb : handler.getCollisionBoxes(modelState))
-            {
-                builder.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
-            }
-            return builder.build();
-        }
+        return modelState.collisionBoxes(pos);
+        
     }
 
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
@@ -826,12 +855,17 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         return getDefaultState().withProperty(META, meta);
     }
 
-    //In most cases only display one item meta variant for item search
+    /**
+     * {@inheritDoc} <br><br>
+     * 
+     * Confusingly named because is really the back end for Item.getSubItems.
+     * Used by Creative and JEI to show a list of blocks.
+     */
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
     {
-        list.add(getSubItems().get(0));
+        list.addAll(getSubItems());
     }
 
     public List<ItemStack> getSubItems()
@@ -846,9 +880,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         {
             ItemStack stack = new ItemStack(this, 1, i);
             ModelState modelState = this.getDefaultModelState();
-            if(modelState.hasSpecies())
+            if(modelState.metaUsage() != MetaUsage.NONE || i > 0)
             {
-                modelState.setSpecies(i);
+                // model state will squawk is usage is NONE
+                modelState.setMetaData(i);
             }
             SuperItemBlock.setModelState(stack, modelState);
             itemBuilder.add(stack);
@@ -879,6 +914,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @Optional.Method(modid = "waila")
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor, IWailaConfigHandler config)
     {
         return Collections.emptyList();
@@ -1050,13 +1086,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public abstract boolean isGeometryFullCube(IBlockState state);
     
     public abstract boolean isHypermatter();
-    
-    /** To be overridden by stackable plates or blocks with similar behavior. */
-    public boolean isItemUsageAdditive(World worldIn, BlockPos pos, ItemStack stack)
-    {
-        return false;
-    }
-
+   
     /**
      * {@inheritDoc} <br><br>
      * 
@@ -1096,6 +1126,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
  
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean isTranslucent(IBlockState state)
     {
         return this.worldLightOpacity(state) != WorldLightOpacity.SOLID;
@@ -1126,7 +1157,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDropped(IBlockState state, int fortune, Random random)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.quantityDropped(IBlockState state, int fortune, Random random)");
         return 0;
     }
 
@@ -1134,7 +1165,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDropped(Random random)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.quantityDropped(Random random)");
         return 0;
     }
 
@@ -1142,7 +1173,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public int quantityDroppedWithBonus(int fortune, Random random)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.quantityDroppedWithBonus");
         return 0;
     }
 
@@ -1150,7 +1181,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox)
     {
-        if(Output.DEBUG_MODE) Output.warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
+        if(Log.DEBUG_MODE) Log.warn("Unsupported call to SuperBlock.rayTrace on block with custom collision handler");
         return super.rayTrace(pos, start, end, boundingBox);
     }
 
@@ -1177,6 +1208,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         if(this.getSubstance(blockState, blockAccess, pos).isTranslucent)
@@ -1191,11 +1223,10 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 {
                     ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);
-                    //TODO: need to check for texture/occlusion match
-                    return myModelState.getSpecies() != otherModelState.getSpecies()
-                            || myModelState.getRenderLayer(PaintLayer.BASE) != otherModelState.getRenderLayer(PaintLayer.BASE)
-                            || myModelState.getTranslucency() != otherModelState.getTranslucency()
-                            || myModelState.getColorMap(PaintLayer.BASE) != otherModelState.getColorMap(PaintLayer.BASE);
+                    // for transparent blocks, want blocks with same apperance and species to join
+                    return (myModelState.hasSpecies() && myModelState.getSpecies() != otherModelState.getSpecies())
+                            || !myModelState.doShapeAndAppearanceMatch(otherModelState);
+
                 }
             }
         }

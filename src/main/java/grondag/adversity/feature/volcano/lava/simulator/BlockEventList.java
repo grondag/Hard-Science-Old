@@ -2,15 +2,16 @@ package grondag.adversity.feature.volcano.lava.simulator;
 
 import java.util.Arrays;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
-import grondag.adversity.Output;
-import grondag.adversity.library.CountedJob;
-import grondag.adversity.library.CountedJob.CountedJobTask;
-import grondag.adversity.library.ISimpleListItem;
-import grondag.adversity.library.Job;
-import grondag.adversity.library.SimpleConcurrentList;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.PerformanceCollector;
+import grondag.adversity.Configurator;
+import grondag.adversity.Log;
+import grondag.adversity.library.concurrency.CountedJob;
+import grondag.adversity.library.concurrency.Job;
+import grondag.adversity.library.concurrency.PerformanceCollector;
+import grondag.adversity.library.concurrency.SimpleConcurrentList;
+import grondag.adversity.library.concurrency.CountedJob.CountedJobTask;
+import grondag.adversity.library.world.PackedBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
@@ -35,10 +36,10 @@ public class BlockEventList
     
     public BlockEventList(int maxRetries, String nbtTagName, BlockEventHandler eventHandler, PerformanceCollector perfCollector)
     {
-        eventList = SimpleConcurrentList.create(LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Block Events", perfCollector);
+        eventList = SimpleConcurrentList.create(Configurator.VOLCANO.enablePerformanceLogging, nbtTagName + " Block Events", perfCollector);
         
         processJob = new CountedJob<BlockEventList.BlockEvent>(this.eventList, processTask, 64, 
-                LavaSimulator.ENABLE_PERFORMANCE_COUNTING, nbtTagName + " Event Processing", perfCollector);
+                Configurator.VOLCANO.enablePerformanceLogging, nbtTagName + " Event Processing", perfCollector);
         
         this.maxRetries = maxRetries;
         this.nbtTagName = nbtTagName;
@@ -66,7 +67,7 @@ public class BlockEventList
         synchronized(this)
         {
             processJob.runOn(executor);
-            this.eventList.removeDeletedItems();
+            this.eventList.removeSomeDeletedItems(EVENT_REMOVAL_PREDICATE);
         }
     }
     
@@ -87,7 +88,7 @@ public class BlockEventList
             }
         }
         
-        Output.info("Saving " + i / BlockEvent.NBT_WIDTH + " Block Events with tag " + this.nbtTagName);
+        Log.info("Saving " + i / BlockEvent.NBT_WIDTH + " Block Events with tag " + this.nbtTagName);
         
         nbt.setIntArray(this.nbtTagName, Arrays.copyOfRange(saveData, 0, i));
     }
@@ -101,7 +102,7 @@ public class BlockEventList
         //confirm correct size
         if(saveData == null || saveData.length % BlockEvent.NBT_WIDTH != 0)
         {
-            Output.warn("Invalid save data loading block events with tag " + nbtTagName + ". Lava blocks may not be updated properly.");
+            Log.warn("Invalid save data loading block events with tag " + nbtTagName + ". Lava blocks may not be updated properly.");
         }
         else
         {
@@ -114,7 +115,7 @@ public class BlockEventList
                 i += BlockEvent.NBT_WIDTH;
             }
           
-            Output.info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
+            Log.info("Loaded " + this.eventList.size() + " block events with NBT Tag " + nbtTagName);
         }
     }
     
@@ -124,8 +125,18 @@ public class BlockEventList
         public abstract boolean handleEvent(BlockEvent event);
     }
     
-    public class BlockEvent implements ISimpleListItem
+    private static final Predicate<BlockEvent> EVENT_REMOVAL_PREDICATE = new Predicate<BlockEvent>()
     {
+        @Override
+        public boolean test(BlockEvent t)
+        {
+            return t.isDeleted();
+        }
+    };
+    
+    public class BlockEvent
+    {
+        
         public final int x;
         public final int y;
         public final int z;
@@ -145,8 +156,8 @@ public class BlockEventList
             else if(retryCount++ > maxRetries)
             {
                 //exceeded max retries - give up
-                if(Output.DEBUG_MODE)
-                    Output.info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
+                if(Log.DEBUG_MODE)
+                    Log.info(String.format("Lava add event @ %1$d %2$d %3$d discarded after max retries. Amount = %4$d", this.x, this.y, this.z, this.amount));
                 retryCount = IS_COMPLETE;
             }
         }
@@ -159,7 +170,6 @@ public class BlockEventList
             this.amount = amount;
         }
         
-        @Override
         public boolean isDeleted()
         {
             return retryCount == IS_COMPLETE;

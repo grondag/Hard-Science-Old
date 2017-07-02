@@ -1,21 +1,22 @@
 package grondag.adversity.gui.control;
 
 import grondag.adversity.gui.GuiUtil;
-import grondag.adversity.gui.base.TabBar;
 import grondag.adversity.init.ModSuperModelBlocks;
 import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.shape.ModelShape;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class ShapePicker extends TabBar<ModelShape>
 {
 
-    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.GUI_AVAILABLE_SHAPES.size()];
+    private static final ItemStack[] ITEMS = new ItemStack[ModelShape.values().length];
     
     static
     {
@@ -38,10 +39,6 @@ public class ShapePicker extends TabBar<ModelShape>
     @Override
     protected void drawItem(ModelShape item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
     {
-      
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-        
         GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, ITEMS[item.ordinal()], left, top, (int)this.actualItemSize());
     }
 }

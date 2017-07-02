@@ -3,18 +3,26 @@ package grondag.adversity.superblock.model.shape;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Matrix4f;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.adversity.library.model.quadfactory.RawQuad;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.world.Rotation;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.superblock.collision.ICollisionHandler;
+import grondag.adversity.superblock.collision.SideShape;
+import grondag.adversity.superblock.model.state.Surface;
+import jline.internal.Log;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.model.state.ModelStateFactory.StateFormat;
+import grondag.adversity.superblock.model.state.StateFormat;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
 
 
 public abstract class ShapeMeshGenerator
@@ -60,20 +68,123 @@ public abstract class ShapeMeshGenerator
      */
     public abstract int geometricSkyOcclusion(ModelState modelState);
 
+    @Nonnull
     public abstract List<RawQuad> getShapeQuads(ModelState modelState);
 
     /** Returns true if geometry is a full 1x1x1 cube. */
     public abstract boolean isCube(ModelState modelState);
-
-    /** 
-     * If true, will disable species selection on block placement. 
-     * Will also prevent rendering of textures with texture layouts that require species
-     * because those will expect species to demarcate multiblock boundaries.
+    
+     /**
+     * If this shape uses metadata to affect geometry, retrieves the block/item metadata 
+     * value that should correspond to this modelstate
      */
-    public boolean isSpeciesUsedForHeight() { return false; }
+    public int getMetaData(ModelState modelState)
+    {
+        return 0;
+    }
+    
+    /**
+     * If this shape uses metadata to affect geometry, will be called during block
+     * placement and during refreshFromWorld. Can be ignored if the
+     * shaped has another mechanism for synchronizing with block meta.
+     * (TerrainBlocks get it via TerrainState, for example)
+     */
+    public void setMetaData(ModelState modelState, int meta)
+    {
+        // Default is to do nothing
+    }
+    
+    
+    /**
+     * If true, shape can be placed on itself to become bigger.
+     */
+    public boolean isAdditive() { return false; }
     
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
 
     public abstract SideShape sideShape(ModelState modelState, EnumFacing side);
     
+    /**
+     * Find appropriate transformation assuming base model is oriented to Y axis, positive.
+     * This is different than the Minecraft/Forge default because I brain that way.
+     */
+    protected static Matrix4f getMatrix4f(ModelState modelState)
+    {
+        if(modelState.hasAxis())
+        {
+            if(modelState.hasModelRotation())
+            {
+                return getMatrixForAxisAndRotation(modelState.getAxis(), modelState.isAxisInverted(), modelState.getModelRotation());
+            }
+            else
+            {
+                return getMatrixForAxis(modelState.getAxis(), modelState.isAxisInverted());
+            }
+        }
+        else if(modelState.hasModelRotation())
+        {
+            return getMatrixForRotation(modelState.getModelRotation());
+        }
+        else
+        {
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
+        }
+    }
+    
+    /** for compatibility with double-valued raw quad vertices */
+    protected static Matrix4d getMatrix4d(ModelState modelState)
+    {
+        return new Matrix4d(getMatrix4f(modelState));
+    }
+    
+    /**
+     * See {@link #getMatrixForAxis(ModelState)}
+     */
+    protected static Matrix4f getMatrixForAxis(EnumFacing.Axis axis, boolean isAxisInverted)
+    {
+        switch(axis)
+        {
+        case X:
+            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X90_Y270 : ModelRotation.X90_Y90);
+    
+        case Y:
+            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X180_Y0 : ModelRotation.X0_Y0);
+    
+        case Z:
+            return ForgeHooksClient.getMatrix(isAxisInverted ? ModelRotation.X90_Y0 : ModelRotation.X270_Y0);
+            
+        default:
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
+        
+        }
+    }
+    
+    protected static Matrix4f getMatrixForRotation(Rotation rotation)
+    {
+        switch(rotation)
+        {
+        default:
+        case ROTATE_NONE:
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y0);
+    
+        case ROTATE_90:
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y90);
+    
+        case ROTATE_180:
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y180);
+            
+        case ROTATE_270:
+            return ForgeHooksClient.getMatrix(ModelRotation.X0_Y270);
+        }
+    }
+    
+    protected static Matrix4f getMatrixForAxisAndRotation(EnumFacing.Axis axis, boolean isAxisInverted, Rotation rotation)
+    {
+        //FIXME: remove
+        Log.info(rotation);
+        Matrix4f result = getMatrixForRotation(rotation);
+        result.mul(getMatrixForAxis(axis, isAxisInverted));
+        return result;
+        
+    }
 }

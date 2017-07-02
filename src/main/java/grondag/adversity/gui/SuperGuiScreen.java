@@ -1,8 +1,8 @@
 package grondag.adversity.gui;
 
 
-import static grondag.adversity.gui.base.GuiControl.CONTROL_EXTERNAL_MARGIN;
-import static grondag.adversity.gui.base.GuiControl.CONTROL_INTERNAL_MARGIN;
+import static grondag.adversity.gui.control.GuiControl.CONTROL_EXTERNAL_MARGIN;
+import static grondag.adversity.gui.control.GuiControl.CONTROL_INTERNAL_MARGIN;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import org.lwjgl.input.Mouse;
 
 import grondag.adversity.Configurator;
-import grondag.adversity.gui.base.GuiControl;
 import grondag.adversity.gui.control.BrightnessSlider;
 import grondag.adversity.gui.control.Button;
 import grondag.adversity.gui.control.ColorPicker;
+import grondag.adversity.gui.control.GuiControl;
 import grondag.adversity.gui.control.ItemPreview;
 import grondag.adversity.gui.control.MaterialPicker;
 import grondag.adversity.gui.control.Panel;
@@ -24,8 +24,9 @@ import grondag.adversity.gui.control.TranslucencyPicker;
 import grondag.adversity.gui.control.VisibilityPanel;
 import grondag.adversity.gui.control.VisiblitySelector;
 import grondag.adversity.gui.shape.GuiShape;
+import grondag.adversity.gui.shape.GuiShapeFinder;
 import grondag.adversity.init.ModSuperModelBlocks;
-import grondag.adversity.library.model.quadfactory.LightingMode;
+import grondag.adversity.library.render.LightingMode;
 import grondag.adversity.network.AdversityMessages;
 import grondag.adversity.network.PacketReplaceHeldItem;
 import grondag.adversity.superblock.block.SuperBlock;
@@ -34,7 +35,7 @@ import grondag.adversity.superblock.items.SuperItemBlock;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.PaintLayer;
 import grondag.adversity.superblock.model.state.Translucency;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.adversity.superblock.texture.Textures;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -44,16 +45,21 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class SuperGuiScreen extends GuiScreen
 {
 
     private static final int BUTTON_ID_CANCEL = 0;
     private static final int BUTTON_ID_ACCEPT = 1;
 
-    //TODO: localize
-    private static final String STR_ACCEPT = "Accept";
-    private static final String STR_CANCEL = "Cancel";
+    @SuppressWarnings("deprecation")
+    private final String STR_ACCEPT = I18n.translateToLocal("label.accept");
+    @SuppressWarnings("deprecation")
+    private final String STR_CANCEL = I18n.translateToLocal("label.cancel");
 
     private int xStart;
     private int yStart;
@@ -66,8 +72,8 @@ public class SuperGuiScreen extends GuiScreen
     private TexturePicker[] textureTabBar;
     private ShapePicker shapePicker;
     private Toggle[] fullBrightToggle;
-    private Toggle overlayToggle;
-    private Toggle detailToggle;
+    private Toggle outerToggle;
+    private Toggle middleToggle;
     private Toggle baseTranslucentToggle;
     private Toggle lampTranslucentToggle;
     private BrightnessSlider brightnessSlider;
@@ -75,7 +81,6 @@ public class SuperGuiScreen extends GuiScreen
 
     private ItemPreview itemPreview;
 
-    //    private int meta = 0;
     private ModelState modelState = null;
 
     private boolean hasUpdates = false;
@@ -85,8 +90,8 @@ public class SuperGuiScreen extends GuiScreen
 
     private Panel mainPanel;
     private int group_base;
-    private int group_border;
-    private int group_deco;
+    private int group_outer;
+    private int group_middle;
     private int group_lamp;
     private int group_shape;
     private int group_material;
@@ -110,7 +115,7 @@ public class SuperGuiScreen extends GuiScreen
         {
             modelState.setShape(shapePicker.getSelected());
             rightPanel.remove(group_shape, 1);
-            shapeGui = modelState.getShape().guiSettingsControl(mc);
+            shapeGui = GuiShapeFinder.findGuiForShape(modelState.getShape(), mc);
             rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
             // display shape defaults if any
             shapeGui.loadSettings(modelState);
@@ -140,68 +145,78 @@ public class SuperGuiScreen extends GuiScreen
         Translucency newTrans = materialPicker.getSubstance().isTranslucent
                 ? translucencyPicker.getTranslucency()
                         : Translucency.CLEAR;
-            if(newTrans == null)
-            {
-                newTrans = Translucency.CLEAR;
-            }
-            if(newTrans != modelState.getTranslucency() )
-            {
-                modelState.setTranslucency(newTrans);
-                hasUpdates = true;
-            }
+        if(newTrans == null)
+        {
+            newTrans = Translucency.CLEAR;
+        }
+        if(newTrans != modelState.getTranslucency() )
+        {
+            modelState.setTranslucency(newTrans);
+            hasUpdates = true;
+        }
+        
+        if(outerToggle.isOn() != modelState.isOuterLayerEnabled())
+        {
+            modelState.setOuterLayerEnabled(outerToggle.isOn());
+            hasUpdates = true;
 
-            for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
+            if(!outerToggle.isOn())
             {
-                updateItemPreviewSub(layer);
+                textureTabBar[PaintLayer.OUTER.dynamicIndex].setSelected(null);
             }
-
-            if(overlayToggle.isOn() != modelState.isOverlayLayerEnabled())
-            {
-                modelState.setOverlayLayerEnabled(overlayToggle.isOn());
-                hasUpdates = true;
-            }
-
-            if(detailToggle.isOn() != modelState.isDetailLayerEnabled())
-            {
-                modelState.setDetailLayerEnabled(detailToggle.isOn());
-                hasUpdates = true;
-            }
-
-            BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-            if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
-            {
-                modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
-                hasUpdates = true;
-            }
-
-            renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-            if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
-            {
-                modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
-                hasUpdates = true;
-            }
-
-            SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
-            SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
-
-            if(currentBlock != newBlock && newBlock != null)
-            {
-                ItemStack newStack = new ItemStack(newBlock);
-                newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
-                newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
-                itemPreview.previewItem = newStack;
-                hasUpdates = true;
-
-            }
+        }
+        
+        if(middleToggle.isOn() != modelState.isMiddleLayerEnabled())
+        {
+            modelState.setMiddleLayerEnabled(middleToggle.isOn());
+            hasUpdates = true;
             
-            if(hasUpdates)
+            if(!middleToggle.isOn())
             {
-                // see notes in SuperBlock for canRenderInLayer()
-                //            this.meta = this.modelState.getCanRenderInLayerFlags();
-
-                //            this.itemPreview.previewItem.setItemDamage(this.meta);
-                SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
+                textureTabBar[PaintLayer.MIDDLE.dynamicIndex].setSelected(null);
             }
+        }
+
+        // needs to happen before toggle checks because it turns on
+        // middle/outer toggles when a texture is selected
+        for(PaintLayer layer : PaintLayer.DYNAMIC_VALUES)
+        {
+            updateItemPreviewSub(layer);
+        }
+
+
+        BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
+        {
+            modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
+            hasUpdates = true;
+        }
+
+        renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
+        {
+            modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+            hasUpdates = true;
+        }
+
+        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
+        SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
+
+        if(currentBlock != newBlock && newBlock != null)
+        {
+            ItemStack newStack = new ItemStack(newBlock);
+            newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
+            newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
+            itemPreview.previewItem = newStack;
+            hasUpdates = true;
+
+        }
+        
+        if(hasUpdates)
+        {
+            this.itemPreview.previewItem.setItemDamage(this.modelState.getMetaData());
+            SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
+        }
     }
 
     private void updateItemPreviewSub(PaintLayer layer)
@@ -214,10 +229,22 @@ public class SuperGuiScreen extends GuiScreen
         }
 
         TexturePallette tex = textureTabBar[layer.dynamicIndex].getSelected();
-        if(modelState.getTexture(layer) != tex)
+        if(tex != null && modelState.getTexture(layer) != tex)
         {
             modelState.setTexture(layer, tex);
             hasUpdates = true;
+            
+            //enable layer if user selected a texture
+            if(layer == PaintLayer.OUTER && !outerToggle.isOn())
+            {
+                outerToggle.setOn(true);
+                modelState.setOuterLayerEnabled(true);
+            }
+            else if(layer == PaintLayer.MIDDLE && !middleToggle.isOn())
+            {
+                middleToggle.setOn(true);
+                modelState.setMiddleLayerEnabled(true);
+            }
         }
 
         if(!((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && fullBrightToggle[layer.dynamicIndex].isOn()))
@@ -272,18 +299,19 @@ public class SuperGuiScreen extends GuiScreen
         super.keyTyped(typedChar, keyCode);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void initGui()
     {
         super.initGui();
 
 
-        ySize = MathHelper.clamp(height * 3 / 5, fontRenderer.FONT_HEIGHT * 28, height);
+        ySize = MathHelper.clamp(height * 4 / 5, fontRendererObj.FONT_HEIGHT * 28, height);
         yStart = (height - ySize) / 2;
         xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
         xStart = (width - xSize) / 2;
 
-        FontRenderer fr = mc.fontRenderer;
+        FontRenderer fr = mc.fontRendererObj;
         buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
         buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
 
@@ -305,7 +333,7 @@ public class SuperGuiScreen extends GuiScreen
                 return;
             }
             //            this.meta = this.itemPreview.previewItem.getMetadata();
-            modelState = SuperItemBlock.getModelState(itemPreview.previewItem);
+            modelState = SuperItemBlock.getModelStateFromStack(itemPreview.previewItem);
         }
 
         // abort on strangeness
@@ -322,8 +350,8 @@ public class SuperGuiScreen extends GuiScreen
             textureTabBar = new TexturePicker[PaintLayer.DYNAMIC_SIZE];
             colorPicker = new ColorPicker[PaintLayer.DYNAMIC_SIZE];
 
-            overlayToggle = new Toggle().setLabel("Enabled");
-            detailToggle = new Toggle().setLabel("Enabled");
+            outerToggle = new Toggle().setLabel("Enabled");
+            middleToggle = new Toggle().setLabel("Enabled");
             baseTranslucentToggle = new Toggle().setLabel("Translucent");
             lampTranslucentToggle = new Toggle().setLabel("Translucent");
             fullBrightToggle = new Toggle[PaintLayer.DYNAMIC_SIZE];
@@ -349,38 +377,37 @@ public class SuperGuiScreen extends GuiScreen
                     .setHorizontalWeight(5)
                     .setBackgroundColor(GuiControl.CONTROL_BACKGROUND);
 
-            //TODO: localize
-            group_base = rightPanel.createVisiblityGroup("Base Layer");
+            group_base = rightPanel.createVisiblityGroup(PaintLayer.BASE.localizedName());
             GuiControl tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
                     .setHorizontalWeight(2);
             GuiControl tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_base, tempH, textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(group_base);
 
-            group_border = rightPanel.createVisiblityGroup("Overlay");
-            tempV = new Panel(true).addAll(overlayToggle, fullBrightToggle[PaintLayer.OVERLAY.ordinal()])
+            group_middle = rightPanel.createVisiblityGroup(PaintLayer.MIDDLE.localizedName());
+            tempV = new Panel(true).addAll(middleToggle, fullBrightToggle[PaintLayer.MIDDLE.ordinal()])
                     .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.OVERLAY.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(group_border, tempH,textureTabBar[PaintLayer.OVERLAY.ordinal()]);
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.MIDDLE.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_middle, tempH, textureTabBar[PaintLayer.MIDDLE.ordinal()]);
 
-            group_deco = rightPanel.createVisiblityGroup("Decoration");
-            tempV = new Panel(true).addAll(detailToggle, fullBrightToggle[PaintLayer.DETAIL.ordinal()])
+            group_outer = rightPanel.createVisiblityGroup(PaintLayer.OUTER.localizedName());
+            tempV = new Panel(true).addAll(outerToggle, fullBrightToggle[PaintLayer.OUTER.ordinal()])
                     .setHorizontalWeight(2);
-            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.DETAIL.ordinal()]).setVerticalWeight(2);
-            rightPanel.addAll(group_deco, tempH, textureTabBar[PaintLayer.DETAIL.ordinal()]);
-
-            group_lamp = rightPanel.createVisiblityGroup("Lamp");
+            tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.OUTER.ordinal()]).setVerticalWeight(2);
+            rightPanel.addAll(group_outer, tempH,textureTabBar[PaintLayer.OUTER.ordinal()]);
+            
+            group_lamp = rightPanel.createVisiblityGroup(PaintLayer.LAMP.localizedName());
             tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.LAMP.ordinal()], lampTranslucentToggle)
                     .setHorizontalWeight(2);
             tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.LAMP.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_lamp, tempH, textureTabBar[PaintLayer.LAMP.ordinal()]);
 
-            group_shape = rightPanel.createVisiblityGroup("Shape");
+            group_shape = rightPanel.createVisiblityGroup(I18n.translateToLocal("label.shape"));
             rightPanel.add(group_shape, shapePicker.setVerticalWeight(5));
-            shapeGui = modelState.getShape().guiSettingsControl(mc);
+            shapeGui = GuiShapeFinder.findGuiForShape(modelState.getShape(), mc);
             rightPanel.add(group_shape, shapeGui.setVerticalWeight(2));
 
-            group_material = rightPanel.createVisiblityGroup("Material");
+            group_material = rightPanel.createVisiblityGroup(I18n.translateToLocal("label.material"));
             rightPanel.add(group_material, materialPicker.setVerticalLayout(Layout.PROPORTIONAL));
             rightPanel.add(group_material, translucencyPicker.setVerticalLayout(Layout.PROPORTIONAL));
             rightPanel.add(group_material, brightnessSlider);
@@ -425,8 +452,8 @@ public class SuperGuiScreen extends GuiScreen
         materialPicker.setSubstance(SuperItemBlock.getStackSubstance(itemPreview.previewItem));
         shapePicker.setSelected(modelState.getShape());
         brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(itemPreview.previewItem));
-        overlayToggle.setOn(modelState.isOverlayLayerEnabled());
-        detailToggle.setOn(modelState.isDetailLayerEnabled());
+        outerToggle.setOn(modelState.isOuterLayerEnabled());
+        middleToggle.setOn(modelState.isMiddleLayerEnabled());
         baseTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
         lampTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
 
@@ -444,7 +471,8 @@ public class SuperGuiScreen extends GuiScreen
 
             t.clear();
             t.addAll(Textures.getTexturesForSubstanceAndPaintLayer(Configurator.SUBSTANCES.flexstone, layer));
-            t.setSelected(modelState.getTexture(layer));
+            TexturePallette tex = modelState.getTexture(layer);
+            t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
             t.colorMap = modelState.getColorMap(layer);
 

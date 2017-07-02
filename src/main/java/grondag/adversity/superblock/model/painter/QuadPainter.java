@@ -2,19 +2,19 @@ package grondag.adversity.superblock.model.painter;
 
 import java.util.List;
 
-import grondag.adversity.library.Color;
-import grondag.adversity.library.model.quadfactory.LightingMode;
-import grondag.adversity.library.model.quadfactory.QuadFactory;
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.library.model.quadfactory.Vertex;
+import grondag.adversity.library.render.LightingMode;
+import grondag.adversity.library.render.QuadHelper;
+import grondag.adversity.library.render.RawQuad;
+import grondag.adversity.library.render.Vertex;
+import grondag.adversity.library.varia.Color;
 import grondag.adversity.superblock.color.ColorMap;
 import grondag.adversity.superblock.color.ColorMap.EnumColorMap;
-import grondag.adversity.superblock.model.painter.surface.Surface;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
 import grondag.adversity.superblock.model.state.Translucency;
 import grondag.adversity.superblock.texture.Textures;
-import grondag.adversity.superblock.texture.TexturePalletteProvider.TexturePallette;
+import grondag.adversity.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
@@ -49,7 +49,7 @@ public abstract class QuadPainter
         this.renderLayer = modelState.getRenderLayer(paintLayer);
         this.lightingMode = modelState.getLightingMode(paintLayer);
         TexturePallette tex = modelState.getTexture(paintLayer);
-        this.texture = tex == Textures.USE_BASE ? modelState.getTexture(PaintLayer.BASE) : tex;
+        this.texture = tex == Textures.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
         this.translucency = modelState.getTranslucency();
     }
     
@@ -68,18 +68,22 @@ public abstract class QuadPainter
 
     public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
     {
-        if(inputQuad.surface == this.surface)
+        if(inputQuad.surfaceInstance.surface() == this.surface)
         {
             RawQuad result = inputQuad.clone();
             recolorQuad(result);
             result.lightingMode = this.lightingMode;
             result.renderLayer = this.renderLayer;
             
-            //TODO: not working - maybe move to quad bake?
-            // bump texture slightly above surface to avoid z-fighting
+            // TODO: Vary color slightly with species, as user-selected option
+  
+            // Bump texture slightly above surface to avoid z-fighting
+            // Disabled for now because does not seem to work and doesn't seem to be needed.
+            // Could also try to make sure quads are properly ordered by dispatcher
+            // but that seems unlikely to be reliable.
 //            if(this.paintLayer == PaintLayer.OVERLAY)
 //            {
-//                Vec3d bump = result.computeFaceNormal().scale(0.0005);
+//                Vec3d bump = result.getFaceNormal().scale(0.0005);
 //                for(int i = result.getVertexCount() - 1; i >= 0; i--)
 //                {
 //                    Vertex v = result.getVertex(i);
@@ -112,7 +116,7 @@ public abstract class QuadPainter
         {
             // if surface has a lamp gradient and rendered with shading, need
             // to replace the colors to form the gradient.
-            int shadedColor = QuadFactory.shadeColor(color, (LightUtil.diffuseLight(result.getNormalFace()) + 2) / 3, false);
+            int shadedColor = QuadHelper.shadeColor(color, (LightUtil.diffuseLight(result.getNormalFace()) + 2) / 3, false);
             int lampColor = this.lampColorMap.getColor(EnumColorMap.LAMP);
             for(int i = 0; i < result.getVertexCount(); i++)
             {

@@ -1,8 +1,9 @@
 package grondag.adversity.superblock.model.painter;
 
-import grondag.adversity.library.model.quadfactory.RawQuad;
-import grondag.adversity.superblock.model.painter.surface.Surface;
+import grondag.adversity.library.render.RawQuad;
 import grondag.adversity.superblock.model.state.PaintLayer;
+import grondag.adversity.superblock.model.state.Surface;
+import grondag.adversity.superblock.texture.TextureRotationType;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.math.MathHelper;
 
@@ -10,6 +11,7 @@ import net.minecraft.util.math.MathHelper;
  * Paints unconstrained, non-wrapping 2d surface.
  * Expects that UV coordinates on incoming quads have the following properties:
  * A UV distance of 1 represents one block in world.
+ * (UV scale on the surface instance will be 1.0)
  * UV values range from 0 through 256 and then repeat.
  * This means applied textures repeat every 256 blocks in both directions of the plane.
  * 
@@ -64,12 +66,17 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
        int hash = MathHelper.hash(uOrdinal | (vOrdinal << 8));
         
         int textureVersion = this.texture.textureVersionMask & (hash >> 4);
-        quad.textureSprite = this.texture.getTextureSprite(textureVersion);
+        quad.textureName = this.texture.getTextureName(textureVersion);
                 
-        int rotation = hash & 0x3;
-        if(this.texture.allowRotation & rotation > 0)
+        int rotationOrdinal = this.texture.rotation.rotation.ordinal();
+        if(this.texture.rotation.rotationType() == TextureRotationType.RANDOM)
         {
-            for(int i = 0; i <= rotation; i++)
+            rotationOrdinal = (rotationOrdinal + hash) & 3;
+        }
+        
+        if(rotationOrdinal > 0)
+        {
+            for(int i = 0; i < rotationOrdinal; i++)
             {
                 float oldMinU = quad.minU;
                 float oldMaxU = quad.maxU;

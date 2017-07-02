@@ -1,7 +1,8 @@
 package grondag.adversity.superblock.block;
 
+import grondag.adversity.superblock.model.state.WorldLightOpacity;
 import grondag.adversity.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.adversity.superblock.support.BlockSubstance;
+import grondag.adversity.superblock.varia.BlockSubstance;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;

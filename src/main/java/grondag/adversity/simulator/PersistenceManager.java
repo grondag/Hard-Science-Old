@@ -1,7 +1,6 @@
 package grondag.adversity.simulator;
 
 import grondag.adversity.Adversity;
-import grondag.adversity.simulator.base.SimulationNode;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 

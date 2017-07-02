@@ -3,7 +3,10 @@ package grondag.adversity.gui;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class AdversityGuiHandler implements IGuiHandler
 {
     public static final int GUI_SUPERMODEL_ITEM = 0;

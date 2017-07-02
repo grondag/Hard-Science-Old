@@ -1,22 +1,26 @@
 package grondag.adversity.feature.volcano.lava.simulator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import grondag.adversity.Output;
+import grondag.adversity.Adversity;
+import grondag.adversity.Configurator;
+import grondag.adversity.Log;
+import grondag.adversity.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.adversity.init.ModBlocks;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.PerformanceCollector;
-import grondag.adversity.library.PerformanceCounter;
+import grondag.adversity.library.concurrency.PerformanceCollector;
+import grondag.adversity.library.concurrency.PerformanceCounter;
+import grondag.adversity.library.world.PackedBlockPos;
 import grondag.adversity.simulator.Simulator;
 import grondag.adversity.superblock.block.SuperBlock;
-import grondag.adversity.superblock.terrain.CoolingBasaltBlock;
 import grondag.adversity.superblock.terrain.TerrainBlock;
 import grondag.adversity.superblock.terrain.TerrainStaticBlock;
 import net.minecraft.block.Block;
@@ -87,9 +91,9 @@ public class WorldStateBuffer implements IBlockAccess
         
         if(chunk == null) 
         {            
-            if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
+            if(Log.DEBUG_MODE && !isMCWorldAccessAppropriate)
             {
-                Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                Log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
             }
             
             // prevent concurrent access to MC world
@@ -128,7 +132,7 @@ public class WorldStateBuffer implements IBlockAccess
     
     public void setBlockState(int x, int y, int z, IBlockState newState, IBlockState expectedPriorState)
     {
-        if(Output.DEBUG_MODE) this.stateSetCount++;
+        if(Log.DEBUG_MODE) this.stateSetCount++;
         
         getChunkBuffer(x, z).setBlockState(x, y, z, newState, expectedPriorState);
     }
@@ -172,87 +176,62 @@ public class WorldStateBuffer implements IBlockAccess
     
     /** 
      * Makes the updates in the game world for up to chunkCount chunks.
-     * Returns list of chunks that were updated so that they can be used for cell validation.
-     * 
      */
-    //public List<Chunk> applyBlockUpdates(int chunkCount, AbstractLavaSimulator sim)
-    public void applyBlockUpdates(int chunkCount, LavaSimulator sim)
+    public void applyBlockUpdates(LavaSimulator sim)
     {
         this.perfStateApplication.startRun();
         
-        int currentTick = Simulator.INSTANCE.getTick();
+        final int currentTick = Simulator.INSTANCE.getTick();
+        final int minTickDiff = Configurator.VOLCANO.minBlockUpdateBufferTicks;
+        final int maxTickDiff = Configurator.VOLCANO.maxBlockUpdateBufferTicks;
+        final int maxChunkUpdates = Configurator.VOLCANO.maxChunkUpdatesPerTick;
+
+        ArrayList<ChunkBuffer> candidates = new ArrayList<ChunkBuffer>();
         
-        boolean maybeSomethingToDo = true;
-        int foundCount = 0;
-        
-        
-//        ArrayList<Chunk> result = new ArrayList<Chunk>();
-        
-        //TODO: make tick diff configurable
-        
-        // should not be getting concurrent blockstate calls, so use this
-        // opportunity to clean out empty chunk buffers
+        // first pass removes empties and updates priority, puts into array for sorting
         Iterator<ChunkBuffer> things = chunks.values().iterator();
         while(things.hasNext())
         {
+            // should not be getting concurrent blockstate calls, so use this
+            // opportunity to clean out empty chunk buffers
             ChunkBuffer buff = things.next();
             if(buff.size() == 0)
             {
                 things.remove();
                 this.usedBuffers.add(buff);
                 
-//                if(Adversity.DEBUG_MODE)
-//                    Adversity.log.info("Successful unqueud chunk buffer due to complete state reversion");
-            }
-            
-        }
-       
-
-        while(maybeSomethingToDo && foundCount++ < chunkCount)
-        {
-            ChunkBuffer best = null;
-            int bestScore = 0;
-            
-            //TODO: maintain a sorted list of the top N chunks (N = chunkCount)
-            //so that we don't have loop through the collection more than once.
-
-            for(ChunkBuffer buff : this.chunks.values())
-            {
-                int tickDiff = currentTick - buff.tickCreated;
-                if(tickDiff > 3)
-                {
-                    if(buff.requiredUpdateCount.get() != 0 || tickDiff >= 20)
-                    {
-                        int scoreCount = tickDiff < 20 ? buff.requiredUpdateCount.get() : buff.size();
-                        if(best == null)
-                        {
-                             best = buff;
-                             bestScore = scoreCount * tickDiff;
-                        }
-                        else
-                        {   
-                            int newScore = scoreCount * tickDiff;
-                            if(newScore > bestScore)
-                            {
-                                best = buff;
-                                bestScore = newScore;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            if(best == null)
-            {
-                maybeSomethingToDo = false;
+//                if(Output.DEBUG_MODE)
+//                    Output.info("Successful unqueud chunk buffer due to complete state reversion");
             }
             else
             {
-//                result.add(this.realWorld.getChunkFromChunkCoords(PackedBlockPos.getChunkXPos(best.packedChunkpos), PackedBlockPos.getChunkZPos(best.packedChunkpos)));
-                this.chunks.remove(best.packedChunkpos);
-                best.applyBlockUpdates(tracker, sim);
-                this.usedBuffers.add(best);
+                int tickDiff = currentTick - buff.tickCreated;
+                if(tickDiff > minTickDiff)
+                {
+                    buff.updatePriority = tickDiff * (tickDiff < maxTickDiff ? buff.requiredUpdateCount.get() : buff.size());
+                    candidates.add(buff);
+                }
             }
+        }
+       
+        candidates.sort(new Comparator<ChunkBuffer>() {
+            @Override
+            public int compare(ChunkBuffer o1, ChunkBuffer o2)
+            {
+                // note reverse order - higher scores first
+                return Integer.compare(o2.updatePriority, o1.updatePriority);
+            }
+        });
+
+        int doneCount = 0;
+        for(ChunkBuffer buff : candidates)
+        {
+            this.chunks.remove(buff.packedChunkpos);
+            buff.applyBlockUpdates(tracker, sim);
+            this.usedBuffers.add(buff);
+            
+            // honor limit on chunk updates per tick
+            if(++doneCount > maxChunkUpdates) break;
         }
         
         this.perfStateApplication.endRun();
@@ -319,7 +298,7 @@ public class WorldStateBuffer implements IBlockAccess
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
         {
-            Output.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
+            Log.warn("Invalid save data loading world state buffer. Blocks updates may have been lost.");
             return;
         }
 
@@ -334,7 +313,7 @@ public class WorldStateBuffer implements IBlockAccess
         }
 //        this.isLoading = false;
 
-        Output.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
+        Log.info("Loaded " + i / NBT_SAVE_DATA_WIDTH + " world updates.");
     }
 
     public void writeToNBT(NBTTagCompound nbt)
@@ -345,7 +324,8 @@ public class WorldStateBuffer implements IBlockAccess
             recordCount+= chunk.size();
         }
         
-        Output.info("Saving " + recordCount + " world updates.");
+        if(Configurator.VOLCANO.enablePerformanceLogging)
+            Log.info("Saving " + recordCount + " world updates.");
         
         int[] saveData = new int[recordCount * NBT_SAVE_DATA_WIDTH];
         int i = 0;
@@ -581,6 +561,12 @@ public class WorldStateBuffer implements IBlockAccess
         private AtomicInteger[] levelCounts = new AtomicInteger[256];
         
         private BlockStateBuffer[] states = new BlockStateBuffer[0x10000];
+        
+        /** 
+         * Used by {@link #applyBlockUpdates(AdjustmentTracker, LavaSimulator)} to 
+         * maintain update priority sort order 
+         */
+        private int updatePriority;
                 
         private ChunkBuffer(long packedChunkpos, int tickCreated)
         {
@@ -615,9 +601,9 @@ public class WorldStateBuffer implements IBlockAccess
 //                Adversity.log.info("blockstate from world @" + x + ", " + y + ", " + z + " = " + 
 //                        realWorld.getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(x, y, z).toString());
                 
-                if(Output.DEBUG_MODE && !isMCWorldAccessAppropriate)
+                if(Log.DEBUG_MODE && !isMCWorldAccessAppropriate)
                 {
-                    Output.warn("Access to MC world in worldBuffer occurred outside expected time window.");
+                    Log.warn("Access to MC world in worldBuffer occurred outside expected time window.");
                 }
                 
                 if(this.worldChunk == null || !this.worldChunk.isLoaded())

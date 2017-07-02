@@ -1,9 +1,10 @@
 package grondag.adversity.feature.volcano.lava;
 
 
-import grondag.adversity.library.ISimpleListItem;
-import grondag.adversity.library.PackedBlockPos;
-import grondag.adversity.library.Useful;
+import java.util.function.Predicate;
+
+import grondag.adversity.library.varia.Useful;
+import grondag.adversity.library.world.PackedBlockPos;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -11,11 +12,20 @@ import net.minecraft.util.math.BlockPos;
  * Tick value does not affect hashcode or equals, 
  * so in a set two values with same BlockPos will collide (as intended).
  */
-public class AgedBlockPos implements ISimpleListItem
+public class AgedBlockPos
 {
     private int tick;
     public final long packedBlockPos;
     private boolean isDeleted = false;
+    
+    public static final Predicate<AgedBlockPos> REMOVAL_PREDICATE = new Predicate<AgedBlockPos>()
+    {
+        @Override
+        public boolean test(AgedBlockPos t)
+        {
+            return t.isDeleted;
+        }
+    };
     
     public AgedBlockPos(BlockPos pos, int tick)
     {
@@ -66,7 +76,6 @@ public class AgedBlockPos implements ISimpleListItem
         }
     }
 
-    @Override
     public boolean isDeleted()
     {
          return this.isDeleted;
