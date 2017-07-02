@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
@@ -34,6 +35,8 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
+        if(Log.DEBUG_MODE && quad.lockUV) Log.warn("Tiled surface quad painter received quad with lockUV semantics.  Not expected");
+        
         int sliceCount = this.texture.textureScale.sliceCount;
         
         float maxU = Math.max(quad.maxU, quad.minU);

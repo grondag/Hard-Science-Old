@@ -16,7 +16,6 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelRotation;
 import net.minecraft.util.EnumFacing;
@@ -180,8 +179,6 @@ public abstract class ShapeMeshGenerator
     
     protected static Matrix4f getMatrixForAxisAndRotation(EnumFacing.Axis axis, boolean isAxisInverted, Rotation rotation)
     {
-        //FIXME: remove
-        Log.info(rotation);
         Matrix4f result = getMatrixForRotation(rotation);
         result.mul(getMatrixForAxis(axis, isAxisInverted));
         return result;

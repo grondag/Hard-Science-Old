@@ -9,6 +9,7 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector4d;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.WorldHelper;
@@ -32,13 +33,23 @@ public class RawQuad
 
     public EnumFacing face;
     public String textureName;
+    
+    /** 
+     * Ignored unless {@link #lockUV} is true.
+     */
     public Rotation rotation = Rotation.ROTATE_NONE;
+    
     // if true, rotates texture by swaping uv on vertices
     // Needed for big-tex painter, but does not work well for regular square quads.
     public boolean useVertexUVRotation = false;
     
     public int color = Color.WHITE;
     public LightingMode lightingMode = LightingMode.SHADED;
+    
+    /** 
+     * If true then UV coordinates will be ignored and instead set
+     * based on projection of vertices onto the given nominal face.
+     */
     public boolean lockUV = false;
 //    public boolean isItem = false;
 //    public String tag = "";
@@ -288,25 +299,27 @@ public class RawQuad
     }
 
     /** 
-     * Sets up a quad with human-friendly semantics.  
+     * Sets up a quad with human-friendly semantics. <br><br>
      * 
      * topFace establishes a reference for "up" in these semantics.
-     * Depth represents how far recessed into the surface of the face the quad should be.
-     * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
-     * means the UV coordinates *are* rotated so they aren't affected by the order of vertices.
+     * Depth represents how far recessed into the surface of the face the quad should be. <br><br>
      * 
      * Vertices should be given counter-clockwise.
      * Ordering of vertices is maintained for future references.
-     * (First vertex passed in will be vertex 0, for example.)
+     * (First vertex passed in will be vertex 0, for example.) <br><br>
+     * 
+     * UV coordinates always based on where rotated vertices project onto the nominal 
+     * face for this quad. (Do not use this unless lockUV is on.)
      */
     public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
     {
+        if(!this.lockUV) Log.warn("RawQuad faceQuad used when lockUV is false. Quad semantics may be invalid.");
+        
         EnumFacing defaultTop = WorldHelper.defaultTopOf(this.getNominalFace());
         FaceVertex rv0;
         FaceVertex rv1;
         FaceVertex rv2;
         FaceVertex rv3;
-        int uvRotationCount = 0;
 
         if(topFace == defaultTop)
         {
@@ -321,7 +334,6 @@ public class RawQuad
             rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
             rv2 = new FaceVertex.Colored(vertexIn2.y, 1.0 - vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
             rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
-            uvRotationCount = lockUV ? 0 : 1;
         }
         else if(topFace == WorldHelper.bottomOf(this.getNominalFace(), defaultTop))
         {
@@ -329,7 +341,6 @@ public class RawQuad
             rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
             rv2 = new FaceVertex.Colored(1.0 - vertexIn2.x, 1.0 - vertexIn2.y, vertexIn2.depth, vertexIn2.getColor(this.color));
             rv3 = new FaceVertex.Colored(1.0 - vertexIn3.x, 1.0 - vertexIn3.y, vertexIn3.depth, vertexIn3.getColor(this.color));
-            uvRotationCount = lockUV ? 0 : 2;
         }
         else // left of
         {
@@ -337,47 +348,36 @@ public class RawQuad
             rv1 = new FaceVertex.Colored(1.0 - vertexIn1.y, vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
             rv2 = new FaceVertex.Colored(1.0 - vertexIn2.y, vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
             rv3 = new FaceVertex.Colored(1.0 - vertexIn3.y, vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
-            uvRotationCount = lockUV ? 0 : 3;
         }
 
-        if(this.lockUV)
-        {
-            vertexIn0 = rv0;
-            vertexIn1 = rv1;
-            vertexIn2 = rv2;
-            vertexIn3 = rv3;
-        }
-        
         switch(this.getNominalFace())
         {
         case UP:
-            setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
+            setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
+            setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
+            setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
             break;
 
         case DOWN:     
-            setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-vertexIn0.x) * 16.0, vertexIn0.y * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-vertexIn1.x) * 16.0, vertexIn1.y * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-vertexIn2.x) * 16.0, vertexIn2.y * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-vertexIn3.x) * 16.0, vertexIn3.y * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-rv0.x) * 16.0, rv0.y * 16.0, rv0.getColor(this.color)));
+            setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-rv1.x) * 16.0, rv1.y * 16.0, rv1.getColor(this.color)));
+            setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-rv2.x) * 16.0, rv2.y * 16.0, rv2.getColor(this.color)));
+            setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-rv3.x) * 16.0, rv3.y * 16.0, rv3.getColor(this.color)));
             break;
 
         case EAST:
-
-
-            setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
+            setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
+            setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
+            setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
             break;
 
         case WEST:
-            setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, vertexIn0.x * 16.0, (1-vertexIn0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, vertexIn1.x * 16.0, (1-vertexIn1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, vertexIn2.x * 16.0, (1-vertexIn2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, vertexIn3.x * 16.0, (1-vertexIn3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
+            setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
+            setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
+            setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
             break;
 
         case NORTH:
@@ -395,14 +395,14 @@ public class RawQuad
             break;
         }
 
-        for (int r = 0; r < uvRotationCount; r++)
-        {
-            rotateQuadUV();
-        }
-
         return this;
     }
 
+    /**
+     * Same as {@link #setupFaceQuad(FaceVertex, FaceVertex, FaceVertex, FaceVertex, EnumFacing)}
+     * except also sets nominal face to the given face in the first parameter. 
+     * Returns self for convenience.
+     */
     public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, FaceVertex tv3, EnumFacing topFace)
     {
         assert(this.getVertexCount() == 4);
@@ -414,11 +414,11 @@ public class RawQuad
      * Sets up a quad with standard semantics.  
      * x0,y0 are at lower left and x1, y1 are top right.
      * topFace establishes a reference for "up" in these semantics.
-     * Depth represents how far recessed into the surface of the face the quad should be.
-     * lockUV means UV coordinates means the texture doesn't appear rotated, which in practice
-     * means the UV coordinates *are* rotated so that a different part of the texture shows through.
+     * Depth represents how far recessed into the surface of the face the quad should be.<br><br>
      * 
-     * Returns self for convenience.
+     * Returns self for convenience.<br><br>
+     * 
+     * @see #setupFaceQuad(FaceVertex, FaceVertex, FaceVertex, FaceVertex, EnumFacing)
      */
     public RawQuad setupFaceQuad(double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
     {
@@ -433,6 +433,11 @@ public class RawQuad
     }
 
 
+    /**
+     * Same as {@link #setupFaceQuad(double, double, double, double, double, EnumFacing)}
+     * but also sets nominal face with given face in first parameter.  
+     * Returns self as convenience.
+     */
     public RawQuad setupFaceQuad(EnumFacing face, double x0, double y0, double x1, double y1, double depth, EnumFacing topFace)
     {
         assert(this.getVertexCount() == 4);
@@ -441,7 +446,7 @@ public class RawQuad
     }
 
     /**
-     * Triangular version
+     * Triangular version of {@link #setupFaceQuad(EnumFacing, FaceVertex, FaceVertex, FaceVertex, EnumFacing)}
      */
     public RawQuad setupFaceQuad(EnumFacing side, FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
     {
@@ -451,7 +456,7 @@ public class RawQuad
     }
 
     /**
-     * Triangular version
+     * Triangular version of {@link #setupFaceQuad(FaceVertex, FaceVertex, FaceVertex, FaceVertex, EnumFacing)}
      */
     public RawQuad setupFaceQuad(FaceVertex tv0, FaceVertex tv1, FaceVertex tv2, EnumFacing topFace)
     {

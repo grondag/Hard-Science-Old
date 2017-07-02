@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.render.FaceQuadInputs;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.world.Rotation;
@@ -29,6 +30,8 @@ public class CubicQuadPainterMasonry extends CubicQuadPainter
     @Override
     public RawQuad paintQuad(RawQuad quad)
     {
+        if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("Masonry cubic quad painter received quad without lockUV semantics.  Not expected");
+        
         EnumFacing face = quad.getNominalFace();
         if(face == null) return null;
         

@@ -20,7 +20,7 @@ public class QuadBakery
     public static BakedQuad createBakedQuad(RawQuad raw)
     {
         // this is an egregious hack, but ensure we don't mutate the instance if UVs need to be rotated
-        if(raw.rotation == Rotation.ROTATE_NONE)
+        if(!raw.lockUV || raw.rotation == Rotation.ROTATE_NONE)
         {
             return createBakedQuadInner(raw);
         }

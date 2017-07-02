@@ -44,7 +44,7 @@ public enum ModelShape
     //TODO: WALL/BARRIER/PANE
     
     // TODO: BOX
-    BOX(NONE)
+    BOX(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -53,7 +53,7 @@ public enum ModelShape
     },
 
     // TODO: SPHERE/DOME
-    SPHERE(NONE)
+    SPHERE(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -62,7 +62,7 @@ public enum ModelShape
     },
 
     // TODO: ROUNDED BOX
-    ROUNDED_BOX(NONE)
+    ROUNDED_BOX(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -71,7 +71,7 @@ public enum ModelShape
     },
 
     // TODO: CYLINDER/TUBE
-    CYLINDER(NONE)
+    CYLINDER(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -80,7 +80,7 @@ public enum ModelShape
     },
 
     // TODO: ROCK
-    TUBE(NONE)
+    TUBE(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -89,7 +89,7 @@ public enum ModelShape
     },
 
     // TODO: CONE
-    CONE(NONE)
+    CONE(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -98,7 +98,7 @@ public enum ModelShape
     },
 
     // TODO: PYRAMID
-    PYRAMID(NONE)
+    PYRAMID(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -107,7 +107,7 @@ public enum ModelShape
     },
 
     // TODO: TORUS
-   TORUS(NONE)
+   TORUS(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -116,7 +116,7 @@ public enum ModelShape
     },
 
     // TODO: ICOSAHEDRON
-    ICOSAHEDRON(NONE)
+    ICOSAHEDRON(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -134,7 +134,7 @@ public enum ModelShape
     },
 
     // TODO: OCTAHEDRON
-    OCTAHEDRON(NONE)
+    OCTAHEDRON(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -143,7 +143,7 @@ public enum ModelShape
     },
 
     // TODO: DODECAHEDRON
-    DODECAHEDRON(NONE)
+    DODECAHEDRON(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -151,7 +151,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     },
     
-    TERRAIN_HEIGHT(SHAPE, false)
+    TERRAIN_HEIGHT(SHAPE, true)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }

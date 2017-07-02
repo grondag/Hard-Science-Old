@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.model.painter;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.model.state.PaintLayer;
@@ -37,6 +38,8 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         // based on depth within the plane, to provide variation between adjacent layers.
         // This depth-based variation can be disabled with a setting in the surface instance.
      
+        if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("BigTex cubic quad painter received quad without lockUV semantics.  Not expected");
+        
         quad.useVertexUVRotation = true;
 
         Vec3i surfaceVec = getFacePerspective(this.pos, quad.face, this.texture.textureScale);
