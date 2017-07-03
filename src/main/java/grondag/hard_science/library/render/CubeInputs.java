@@ -41,8 +41,6 @@ public class CubeInputs{
         RawQuad qi = new RawQuad();
         qi.color = this.color;
         
-        //necessary for bigtex blocks
-        qi.useVertexUVRotation = true;
         qi.lockUV = true;
         qi.lightingMode = this.lightingMode;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;

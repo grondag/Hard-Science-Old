@@ -7,6 +7,8 @@ import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TextureRotationType;
+import grondag.hard_science.superblock.texture.TextureScale;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 
@@ -39,10 +41,8 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         // This depth-based variation can be disabled with a setting in the surface instance.
      
         if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("BigTex cubic quad painter received quad without lockUV semantics.  Not expected");
-        
-        quad.useVertexUVRotation = true;
 
-        Vec3i surfaceVec = getFacePerspective(this.pos, quad.face, this.texture.textureScale);
+        Vec3i surfaceVec = CubicQuadPainterBigTex.getSurfaceVector(this.pos, quad.face, this.texture.textureScale);
         
                 
         
@@ -106,5 +106,50 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             quad.maxV = quad.minV + sliceIncrement;
         }
         return quad;
+    }
+
+    /** 
+     * Transform input vector so that x & y correspond with u / v on the given face, with u,v origin at upper left
+     * and z is depth, where positive values represent distance into the face (away from viewer). <br><br>
+     * 
+     * Coordinates are first masked to the scale of the texture being used and when we reverse an axis, 
+     * we use the texture's sliceMask as the basis so that we remain within the frame of the
+     * texture scale we are using.  <br><br>
+     * 
+     * Note that the x, y components are for determining min/max UV values. 
+     * They should NOT be used to set vertex UV coordinates directly.
+     * All bigtex models should have lockUV = true, which means that 
+     * uv coordinates will be derived at time of quad bake by projecting each
+     * vertex onto the plane of the quad's nominal face. 
+     * Setting UV coordinates on a quad with lockUV=true has no effect.
+     */
+    protected static Vec3i getSurfaceVector(Vec3i vec, EnumFacing face, TextureScale scale)
+    {
+        int sliceCountMask = scale.sliceCountMask;
+        int x = vec.getX() & sliceCountMask;
+        int y = vec.getY() & sliceCountMask;
+        int z = vec.getZ() & sliceCountMask;
+        
+        switch(face)
+        {
+        case EAST:
+            return new Vec3i(sliceCountMask - z, sliceCountMask - y, -vec.getX());
+        
+        case WEST:
+            return new Vec3i(z, sliceCountMask - y, vec.getX());
+        
+        case NORTH:
+            return new Vec3i(sliceCountMask - x, sliceCountMask - y, vec.getZ());
+        
+        case SOUTH:
+            return new Vec3i(x, sliceCountMask - y, -vec.getZ());
+        
+        case DOWN:
+            return new Vec3i(x, sliceCountMask - z, vec.getY());
+    
+        case UP:
+        default:
+            return new Vec3i(x, z, -vec.getY());
+        }
     }
 }

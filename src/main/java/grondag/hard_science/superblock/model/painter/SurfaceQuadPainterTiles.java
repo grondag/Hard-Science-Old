@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.model.painter;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RawQuad;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -71,11 +72,16 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
         int textureVersion = this.texture.textureVersionMask & (hash >> 4);
         quad.textureName = this.texture.getTextureName(textureVersion);
                 
+        //FIXME - doubt that the rest of this still works at all after
+        //lockUV and texture rotation were refactored.
+
         int rotationOrdinal = this.texture.rotation.rotation.ordinal();
         if(this.texture.rotation.rotationType() == TextureRotationType.RANDOM)
         {
             rotationOrdinal = (rotationOrdinal + hash) & 3;
         }
+        
+        quad.rotation = Rotation.values()[rotationOrdinal];
         
         if(rotationOrdinal > 0)
         {
@@ -88,7 +94,6 @@ public class SurfaceQuadPainterTiles extends SurfaceQuadPainter
                 quad.minV = 16 - oldMaxU;
                 quad.maxV = 16 - oldMinU;
 
-                quad.rotateQuadUVMoveTexture();
             }
         }
         return quad;

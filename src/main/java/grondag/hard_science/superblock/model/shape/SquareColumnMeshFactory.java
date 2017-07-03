@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.render.FaceVertex;
+import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.SimpleQuadBounds;
 import grondag.hard_science.library.varia.BitPacker;
@@ -15,7 +16,6 @@ import grondag.hard_science.library.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.library.world.CornerJoinBlockState;
 import grondag.hard_science.library.world.CornerJoinFaceState;
 import grondag.hard_science.library.world.FaceSide;
-import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
@@ -177,10 +177,10 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
         
-        EnumFacing topFace = WorldHelper.getAxisTop(axis);
+        EnumFacing topFace = QuadHelper.getAxisTop(axis);
         EnumFacing bottomFace = topFace.getOpposite();
-        EnumFacing leftFace = WorldHelper.leftOf(face, topFace);
-        EnumFacing rightFace = WorldHelper.rightOf(face, topFace);
+        EnumFacing leftFace = QuadHelper.leftOf(face, topFace);
+        EnumFacing rightFace = QuadHelper.rightOf(face, topFace);
 
         int actualCutCount = spec.cutCount;
 
@@ -433,13 +433,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                 {
                     RawQuad quad = template.clone();
                     quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                    setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.rightOf(face, side), 1.0 -spec.baseMarginWidth, 1.0 -spec.cutDepth, 1.0, 1, 1.0 -spec.baseMarginWidth, face));
+                    setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.rightOf(face, side), 1.0 -spec.baseMarginWidth, 1.0 -spec.cutDepth, 1.0, 1, 1.0 -spec.baseMarginWidth, face));
                     builder.add(quad);
                 }
                 {
                     RawQuad quad = template.clone();
                     quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                    setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, spec.baseMarginWidth, 1, 1.0 -spec.baseMarginWidth, face));
+                    setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, spec.baseMarginWidth, 1, 1.0 -spec.baseMarginWidth, face));
                     builder.add(quad);
                 }
 
@@ -481,13 +481,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xLeft, 1.0, xLeft, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xLeft, 1.0, xLeft, face));
                             builder.add(quad);
                         }
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.rightOf(face, side), 1.0 -xLeft, 1.0 -spec.cutDepth, 1.0, 1.0, xLeft, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.rightOf(face, side), 1.0 -xLeft, 1.0 -spec.cutDepth, 1.0, 1.0, xLeft, face));
                             builder.add(quad);
                         }
                     }
@@ -496,13 +496,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.rightOf(face, side), 1.0 -xRight, 1.0 -spec.cutDepth, 1.0, 1.0, 1.0 -xRight, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.rightOf(face, side), 1.0 -xRight, 1.0 -spec.cutDepth, 1.0, 1.0, 1.0 -xRight, face));
                             builder.add(quad);
                         }
                         {
                             RawQuad quad = template.clone();
                             quad.surfaceInstance = SURFACE_CUT.unitInstance;
-                            setupCutSideQuad(quad, new SimpleQuadBounds(WorldHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xRight, 1.0, 1.0 -xRight, face));
+                            setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xRight, 1.0, 1.0 -xRight, face));
                             builder.add(quad);
                         }
                     }

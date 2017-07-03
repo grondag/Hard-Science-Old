@@ -12,7 +12,6 @@ import javax.vecmath.Vector4d;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
@@ -35,13 +34,15 @@ public class RawQuad
     public String textureName;
     
     /** 
-     * Ignored unless {@link #lockUV} is true.
+     * Causes texture to appear rotated within the frame
+     * of this texture. Relies on UV coordinates
+     * being in the range 0-16. <br><br>
+     * 
+     * Rotation happens during quad bake.
+     * If lockUV is true, rotation happens after UV
+     * coordinates are derived.
      */
     public Rotation rotation = Rotation.ROTATE_NONE;
-    
-    // if true, rotates texture by swaping uv on vertices
-    // Needed for big-tex painter, but does not work well for regular square quads.
-    public boolean useVertexUVRotation = false;
     
     public int color = Color.WHITE;
     public LightingMode lightingMode = LightingMode.SHADED;
@@ -51,8 +52,8 @@ public class RawQuad
      * based on projection of vertices onto the given nominal face.
      */
     public boolean lockUV = false;
-//    public boolean isItem = false;
-//    public String tag = "";
+    
+
     public boolean shouldContractUVs = true;
     
     public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
@@ -127,11 +128,9 @@ public class RawQuad
         this.color = fromObject.color;
         this.lightingMode = fromObject.lightingMode;
         this.lockUV = fromObject.lockUV;
-//        this.isItem = fromObject.isItem;
         this.ancestorQuadID = fromObject.ancestorQuadID;
         this.isInverted = fromObject.isInverted;
         this.faceNormal = fromObject.faceNormal;
-//        this.tag = fromObject.tag;
         this.shouldContractUVs = fromObject.shouldContractUVs;
         this.minU = fromObject.minU;
         this.maxU = fromObject.maxU;
@@ -315,7 +314,7 @@ public class RawQuad
     {
         if(!this.lockUV) Log.warn("RawQuad faceQuad used when lockUV is false. Quad semantics may be invalid.");
         
-        EnumFacing defaultTop = WorldHelper.defaultTopOf(this.getNominalFace());
+        EnumFacing defaultTop = QuadHelper.defaultTopOf(this.getNominalFace());
         FaceVertex rv0;
         FaceVertex rv1;
         FaceVertex rv2;
@@ -328,14 +327,14 @@ public class RawQuad
             rv2 = vertexIn2.clone();
             rv3 = vertexIn3.clone();
         }
-        else if(topFace == WorldHelper.rightOf(this.getNominalFace(), defaultTop))
+        else if(topFace == QuadHelper.rightOf(this.getNominalFace(), defaultTop))
         {
             rv0 = new FaceVertex.Colored(vertexIn0.y, 1.0 - vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
             rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
             rv2 = new FaceVertex.Colored(vertexIn2.y, 1.0 - vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
             rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
         }
-        else if(topFace == WorldHelper.bottomOf(this.getNominalFace(), defaultTop))
+        else if(topFace == QuadHelper.bottomOf(this.getNominalFace(), defaultTop))
         {
             rv0 = new FaceVertex.Colored(1.0 - vertexIn0.x, 1.0 - vertexIn0.y, vertexIn0.depth, vertexIn0.getColor(this.color));
             rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
@@ -350,6 +349,10 @@ public class RawQuad
             rv3 = new FaceVertex.Colored(1.0 - vertexIn3.y, vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
         }
 
+        // NOTE: the UVs that are populated here will be replaced at quad bake.
+        // They are leftover from a prior approach.
+        // Left in because we need to put in some value anyway and they do no harm.
+        
         switch(this.getNominalFace())
         {
         case UP:
@@ -763,56 +766,6 @@ public class RawQuad
         return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    /**
-     * Rotates face texture 90deg clockwise.
-     * Rotates *entire* texture. 
-     */
-     public void rotateQuadUV()
-    {
-        if(this.useVertexUVRotation)
-        {
-            this.rotateQuadUVSwapVertex();
-        }
-        else
-        {
-            this.rotateQuadUVMoveTexture();
-        }
-    }
-     
-     /**
-     * Transforms UV coords so that face texture appears to rotate 90deg clockwise.
-     */
-     public void rotateQuadUVMoveTexture()
-     {
-         for(int i = 0; i < this.getVertexCount(); i++)
-         {
-             Vertex vOld = getVertex(i);
-             setVertex(i, vOld.withUV(vOld.v, 16 - vOld.u));
-         }
-     }
-     
-     
-     /**
-      * Used by BigTex painter, moves the UV coordinates around the edges of the quad
-      * so that texture appears to rotate 90deg clockwise.
-      */
-     public void rotateQuadUVSwapVertex()
-     {
-         double swapU = this.getVertex(0).u;
-         double swapV = this.getVertex(0).v;
-         
-         for(int i = 0; i < this.getVertexCount() - 1; i++)
-         {
-             Vertex vOld = getVertex(i);
-             Vertex vNext = getVertex(i + 1);
-             Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, vNext.u, vNext.v, vOld.color, vOld.normal);
-             setVertex(i, vNew);
-         } 
-         Vertex vOld = getVertex(this.getVertexCount() - 1);
-         Vertex vNew = new Vertex(vOld.xCoord, vOld.yCoord, vOld.zCoord, swapU, swapV, vOld.color, vOld.normal);
-         setVertex(this.getVertexCount() - 1, vNew);
-     }
-    
      /**
       * Multiplies uvMin/Max by the given factors.
       */
@@ -823,10 +776,6 @@ public class RawQuad
         this.minV *= vScale;
         this.maxV *= vScale;
     }
-    
-
-    
- 
 
     public Vec3d getFaceNormal()
     {
@@ -961,11 +910,17 @@ public class RawQuad
         }
         
         // transform nominal face
+        // our matrix transform has block center as its origin,
+        // so need to translate face vectors to/from block center 
+        // origin before/applying matrix.
         if(this.face != null)
         {
             Vec3i curNorm = this.face.getDirectionVec();
-            Vector4d newFaceVec = new Vector4d(curNorm.getX(), curNorm.getY(), curNorm.getZ(), 1.0);
+            Vector4d newFaceVec = new Vector4d(curNorm.getX() + 0.5, curNorm.getY() + 0.5, curNorm.getZ() + 0.5, 1.0);
             matrix.transform(newFaceVec);
+            newFaceVec.x -= 0.5;
+            newFaceVec.y -= 0.5;
+            newFaceVec.z -= 0.5;
             result.setFace(QuadHelper.computeFaceForNormal(newFaceVec));
         }
         

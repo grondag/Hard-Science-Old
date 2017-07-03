@@ -105,7 +105,10 @@ public abstract class ShapeMeshGenerator
     
     /**
      * Find appropriate transformation assuming base model is oriented to Y axis, positive.
-     * This is different than the Minecraft/Forge default because I brain that way.
+     * This is different than the Minecraft/Forge default because I brain that way.<br><br>
+     * 
+     * @see #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation) for
+     * more explanation.
      */
     protected static Matrix4f getMatrix4f(ModelState modelState)
     {
@@ -137,7 +140,7 @@ public abstract class ShapeMeshGenerator
     }
     
     /**
-     * See {@link #getMatrixForAxis(ModelState)}
+     * See {@link #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation)}
      */
     protected static Matrix4f getMatrixForAxis(EnumFacing.Axis axis, boolean isAxisInverted)
     {
@@ -158,6 +161,9 @@ public abstract class ShapeMeshGenerator
         }
     }
     
+    /**
+     * See {@link #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation)}
+     */
     protected static Matrix4f getMatrixForRotation(Rotation rotation)
     {
         switch(rotation)
@@ -177,11 +183,26 @@ public abstract class ShapeMeshGenerator
         }
     }
     
+    /**
+     * Models in default state should have axis = Y with positive
+     * orientation (if orientation applies) and whatever rotation
+     * that represents "none".  Generally, in this mod, north is
+     * considered "top" of the reference frame when looking down
+     * the Y-axis. <br><br>
+     * 
+     * With a model in the default state, the rotation occurs
+     * first - around the Y-axis, followed by the transformation
+     * from the Y axis/orientation to whatever new axis/orientation is 
+     * given. <br><br>
+     * 
+     * Because 4d rotational matrices are the brain-child of
+     * malevolent walrus creatures from hyperspace, this means
+     * the order of multiplication is the opposite of what I just described.
+     */
     protected static Matrix4f getMatrixForAxisAndRotation(EnumFacing.Axis axis, boolean isAxisInverted, Rotation rotation)
     {
-        Matrix4f result = getMatrixForRotation(rotation);
-        result.mul(getMatrixForAxis(axis, isAxisInverted));
+        Matrix4f result = getMatrixForAxis(axis, isAxisInverted);
+        result.mul(getMatrixForRotation(rotation));
         return result;
-        
     }
 }

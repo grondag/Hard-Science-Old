@@ -1,7 +1,6 @@
 package grondag.hard_science.library.render;
 
 import grondag.hard_science.Configurator;
-import grondag.hard_science.library.world.Rotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -15,43 +14,41 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class QuadBakery
 {
     /**
-     * Creates a baked quad - does not (permanently) mutate the given instance.
+     * Creates a baked quad - does not mutate the given instance.
      */
     public static BakedQuad createBakedQuad(RawQuad raw)
     {
-        // this is an egregious hack, but ensure we don't mutate the instance if UVs need to be rotated
-        if(!raw.lockUV || raw.rotation == Rotation.ROTATE_NONE)
-        {
-            return createBakedQuadInner(raw);
-        }
-        else
-        {
-            RawQuad workQuad = raw.clone();
-            for (int r = 0; r < raw.rotation.ordinal(); r++)
-            {
-                workQuad.rotateQuadUV();
-            }
-            return createBakedQuadInner(workQuad);
-        }
-    }
-    
-    /**
-     * Does not do rotation because it mutates this instance.
-     */
-    private static BakedQuad createBakedQuadInner(RawQuad raw)
-    {    
         float spanU = raw.maxU - raw.minU;
         float spanV = raw.maxV - raw.minV;
         
         TextureAtlasSprite textureSprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(raw.textureName);
         
-        //Used to manipulate UV without breaking immutability.
         //Dimensions are vertex 0-4 and u/v 0-1.
         float[][] uvData = new float[4][2];
+        if(raw.lockUV)
+        {
+            // if lockUV is on, derive UV coords by projection
+            // of vertex coordinates on the plane of the quad's face
+            getLockedUVCoordinates(raw, uvData);
+        }
+        else
+        {
+            // honor UV coordinates given in the quad
+            for(int v = 0; v < 4; v++)
+            {
+                uvData[v][0] = (float) raw.getVertex(v).u;
+                uvData[v][1] = (float) raw.getVertex(v).v;
+            }
+        }
+        
+        // apply texture rotation
+        applyTextureRotation(raw, uvData);
+        
+        // scale UV coordinates to size of texture sub-region
         for(int v = 0; v < 4; v++)
         {
-            uvData[v][0] = raw.minU + spanU * ((float)raw.getVertex(v).u) / 16F;
-            uvData[v][1] = raw.minV + spanV * ((float)raw.getVertex(v).v) / 16F;
+            uvData[v][0] = raw.minU + spanU * uvData[v][0] / 16F;
+            uvData[v][1] = raw.minV + spanV * uvData[v][1] / 16F;
         }
 
         if(raw.shouldContractUVs)
@@ -149,9 +146,103 @@ public class QuadBakery
         
         return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, raw.color, raw.face, textureSprite, 
                 applyDiffuseLighting, format));
-        
     }
     
+    private static void applyTextureRotation(RawQuad raw, float[][] uvData)
+    {
+       switch(raw.rotation)
+       {
+       case ROTATE_NONE:
+       default:
+           break;
+           
+       case ROTATE_90:
+           for(int i = 0; i < 4; i++)
+           {
+               float uOld = uvData[i][0];
+               float vOld = uvData[i][1];
+               uvData[i][0] = vOld;
+               uvData[i][1] = 16 - uOld;
+           }
+           break;
+
+       case ROTATE_180:
+           for(int i = 0; i < 4; i++)
+           {
+               float uOld = uvData[i][0];
+               float vOld = uvData[i][1];
+               uvData[i][0] = 16 - uOld;
+               uvData[i][1] = 16 - vOld;
+           }
+           break;
+       
+       case ROTATE_270:
+           for(int i = 0; i < 4; i++)
+           {
+               float uOld = uvData[i][0];
+               float vOld = uvData[i][1];
+               uvData[i][0] = 16 - vOld;
+               uvData[i][1] = uOld;
+           }
+        break;
+       
+       }
+    }
+
+    /**
+     * Assigns UV coordinates to each vertex by projecting vertex
+     * onto plane of the quad's face. If the quad is not rotated,
+     * then semantics of vertex coordinates matches those of setupFaceQuad.
+     * For example, on NSEW faces, "up" (+y) corresponds to the top of the texture.
+     * 
+     * Assigned values are in the range 0-16, as is conventional for MC.
+     */
+    private static void getLockedUVCoordinates(RawQuad raw, float[][] uvData)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            Vertex v = raw.getVertex(i);
+            
+            switch(raw.getNominalFace())
+            {
+            case EAST:
+                uvData[i][0] = (float) ((1.0 - v.zCoord) * 16);
+                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                break;
+                
+            case WEST:
+                uvData[i][0] = (float) (v.zCoord * 16);
+                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                break;
+                
+            case NORTH:
+                uvData[i][0] = (float) ((1.0 - v.xCoord) * 16);
+                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                break;
+                
+            case SOUTH:
+                uvData[i][0] = (float) (v.xCoord * 16);
+                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                break;
+                
+            case DOWN:
+                uvData[i][0] = (float) (v.xCoord * 16);
+                uvData[i][1] = (float) ((1.0 - v.zCoord) * 16);
+                break;
+                
+            case UP:
+            default:
+                // our default semantic for UP is different than MC
+                // "top" is north instead of south
+                uvData[i][0] = (float) (v.xCoord * 16);
+                uvData[i][1] = (float) (v.zCoord * 16);
+                break;
+            
+            }
+        }
+        
+    }
+
     /**
      * Prevents visible seams along quad boundaries due to slight overlap
      * with neighboring textures or empty texture buffer.

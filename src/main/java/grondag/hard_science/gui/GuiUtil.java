@@ -169,7 +169,28 @@ public class GuiUtil
     {
         double[][] result = new double[2][4];
         
-        int i = rotation.ordinal();
+        int i;
+        
+        switch(rotation)
+        {
+        case ROTATE_NONE:
+        default:
+            i = 0;
+            break;
+            
+        case ROTATE_90:
+            i = 3;
+            break;
+            
+        case ROTATE_180:
+            i = 2;
+            break;
+
+        case ROTATE_270:
+            i = 1;
+            break;
+        }
+        
         result[0][i] = minU;
         result[1][i] = maxV;
         i = (i + 1) & 3;

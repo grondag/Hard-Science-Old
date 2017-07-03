@@ -286,7 +286,7 @@ public class Configurator
         @Comment({"If true, volcano simulation will periodically output performance statistics to log.",
             "Does cause minor additional overhead and log spam so should generally only be enabled for testing.",
             "Turning this off does NOT disable the minimal performance counting needed to detect simulation overload."})
-        public boolean enablePerformanceLogging = true;
+        public boolean enablePerformanceLogging = false;
         
         @RequiresMcRestart
         @Comment({"Number of seconds in each volcano fluid simulation performance sample.",
@@ -319,7 +319,7 @@ public class Configurator
         
         @Comment({"If true, volcano simulation will output cell debug information each performance interval.",
             "Will cause significant log spam so should only be enabled for testing."})
-        public boolean outputLavaCellDebugSummaries = true;
+        public boolean outputLavaCellDebugSummaries = false;
         
         
         /** Contains block objects configured to be destroyed by lava */

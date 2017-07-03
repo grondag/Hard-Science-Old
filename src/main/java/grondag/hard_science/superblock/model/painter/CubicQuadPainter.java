@@ -14,44 +14,6 @@ public abstract class CubicQuadPainter extends QuadPainter
 {
 
     /** 
-     * Transform input vector so that x & y correspond with u / v on the given face, with u,v origin at upper left
-     * and z is depth, where positive values represent distance into the face (away from viewer).
-     * 
-     * Coordinates are first masked to the scale of the texture being used and when we reverse an axis, 
-     * we use the texture's sliceMask as the basis so that we remain within the frame of the
-     * texture scale we are using.  
-     */
-    protected static Vec3i getFacePerspective(Vec3i vec, EnumFacing face, TextureScale scale)
-    {
-        int sliceCountMask = scale.sliceCountMask;
-        int x = vec.getX() & sliceCountMask;
-        int y = vec.getY() & sliceCountMask;
-        int z = vec.getZ() & sliceCountMask;
-        
-        switch(face)
-        {
-        case EAST:
-            return new Vec3i(sliceCountMask - z, sliceCountMask - y, -vec.getX());
-        
-        case WEST:
-            return new Vec3i(z, sliceCountMask - y, vec.getX());
-        
-        case NORTH:
-            return new Vec3i(sliceCountMask - x, sliceCountMask - y, vec.getZ());
-        
-        case SOUTH:
-            return new Vec3i(x, sliceCountMask - y, -vec.getZ());
-        
-        case DOWN:
-            return new Vec3i(sliceCountMask - x, z, vec.getY());
-    
-        case UP:
-        default:
-            return new Vec3i(x, z, -vec.getY());
-        }
-    }
-
-    /** 
      * Rotates given surface vector around the center of the texture by the given degree.
      * 
      */

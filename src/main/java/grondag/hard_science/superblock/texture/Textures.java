@@ -308,6 +308,28 @@ public class Textures
     public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT);
     public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT_ZOOM);
     
+    public static final TexturePallette TEST = REGISTRY.addTexturePallette("test", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+    public static final TexturePallette TEST_ZOOM = REGISTRY.addZoomedPallete(TEST);
+    
+    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette("test", new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette TEST_90_ZOOM = REGISTRY.addZoomedPallete(TEST_90);
+    
+    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette("test", new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette TEST_180_ZOOM = REGISTRY.addZoomedPallete(TEST_180);
+    
+    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette("test", new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_270)));
+    public static final TexturePallette TEST_270_ZOOM = REGISTRY.addZoomedPallete(TEST_270);
+    
+    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette("test4x4", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+    
+    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette("test4x4", new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette("test4x4", new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette("test4x4", new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_270)));
+    
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {
         int searchFlags = 0;

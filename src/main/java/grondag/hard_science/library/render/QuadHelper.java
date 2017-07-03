@@ -36,6 +36,8 @@ package grondag.hard_science.library.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector4d;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -328,6 +330,149 @@ public class QuadHelper
     {
         return computeFaceForNormal(new Vec3d(normal.x, normal.y, normal.z));
     }
+
+    /** returns the face that is normally the "top" of the given face */
+    public static EnumFacing defaultTopOf(EnumFacing faceIn)
+    {
+        switch(faceIn)
+        {
+        case UP:
+            return EnumFacing.NORTH;
+        case DOWN:
+            return EnumFacing.SOUTH;
+        default:
+            return EnumFacing.UP;
+        }
+    }
+
+    public static EnumFacing bottomOf(EnumFacing faceIn, EnumFacing topFace)
+       {
+           return topFace.getOpposite();
+       }
+
+    public static EnumFacing getAxisTop(EnumFacing.Axis axis)
+       {
+           switch(axis)
+           {
+           case Y: 
+               return EnumFacing.UP;
+           case X:
+               return EnumFacing.EAST;
+           default:
+               return EnumFacing.NORTH;
+           }
+       }
+
+    public static EnumFacing leftOf(EnumFacing faceIn, EnumFacing topFace)
+       {
+           return QuadHelper.rightOf(faceIn, topFace).getOpposite();
+       }
+
+    public static EnumFacing rightOf(EnumFacing faceIn, EnumFacing topFace)
+       {
+           switch (faceIn)
+           {
+               case NORTH:
+                   switch (topFace)
+                   {
+                       case UP:
+                           return EnumFacing.WEST;
+                       case EAST:
+                           return EnumFacing.UP;
+                       case DOWN:
+                           return EnumFacing.EAST;
+                       case WEST:
+                       default:
+                           return EnumFacing.DOWN;
+                   }
+               case SOUTH:
+                   switch (topFace)
+                   {
+                       case UP:
+                           return EnumFacing.EAST;
+                       case EAST:
+                           return EnumFacing.DOWN;
+                       case DOWN:
+                           return EnumFacing.WEST;
+                       case WEST:
+                       default:
+                           return EnumFacing.UP;
+                   }
+               case EAST:
+                   switch (topFace)
+                   {
+                       case UP:
+                           return EnumFacing.NORTH;
+                       case NORTH:
+                           return EnumFacing.DOWN;
+                       case DOWN:
+                           return EnumFacing.SOUTH;
+                       case SOUTH:
+                       default:
+                           return EnumFacing.UP;
+                   }
+               case WEST:
+                   switch (topFace)
+                   {
+                       case UP:
+                           return EnumFacing.SOUTH;
+                       case NORTH:
+                           return EnumFacing.UP;
+                       case DOWN:
+                           return EnumFacing.NORTH;
+                       case SOUTH:
+                       default:
+                           return EnumFacing.DOWN;
+                   }
+               case UP:
+                   switch (topFace)
+                   {
+                       case NORTH:
+                           return EnumFacing.EAST;
+                       case EAST:
+                           return EnumFacing.SOUTH;
+                       case SOUTH:
+                           return EnumFacing.WEST;
+                       case WEST:
+                       default:
+                           return EnumFacing.NORTH;
+                   }
+               case DOWN:
+               default:
+                   switch (topFace)
+                   {
+                       case NORTH:
+                           return EnumFacing.WEST;
+                       case EAST:
+                           return EnumFacing.NORTH;
+                       case SOUTH:
+                           return EnumFacing.EAST;
+                       case WEST:
+                       default:
+                           return EnumFacing.SOUTH;
+                   }
+           }
+       }
+
+    /**
+        * Builds the appropriate quaternion to rotate around the given axis.
+        */
+       public static Quat4f rotationForAxis(EnumFacing.Axis axis, double degrees)
+       {
+       	Quat4f retVal = new Quat4f();
+       	switch (axis) {
+       	case X:
+       		retVal.set(new AxisAngle4d(1, 0, 0, Math.toRadians(degrees)));
+       		break;
+       	case Y:
+       		retVal.set(new AxisAngle4d(0, 1, 0, Math.toRadians(degrees)));
+       		break;
+       	case Z:
+       		retVal.set(new AxisAngle4d(0, 0, 1, Math.toRadians(degrees)));
+       		break;
+       	}
+       	return retVal;
+       }
     
     //    private static int[] vertexToInts(double x, double y, double z, double u, double v, int color, TextureAtlasSprite sprite)
     //    {

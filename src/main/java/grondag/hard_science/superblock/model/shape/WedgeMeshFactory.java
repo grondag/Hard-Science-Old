@@ -98,24 +98,6 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
                 EnumFacing.NORTH);
         builder.add(quad.transform(matrix));
         
-        // get position within surface for bigtex according to axis 
-
-        // in default model, texture flows with u,v mapped to x, -y
-//        Vector4d uVec = new Vector4d(1, 0, 0, 1);
-//        Vector4d vVec = new Vector4d(0, -1, 0, 1);
-//        
-//        matrix.transform(uVec);
-//        matrix.transform(vVec);
-        
-        
-        
-        
-        // note that x, y, z are already limited to 0-31 for block-type model state
-//        int uPos = (int) Math.round(uVec.x * modelState.getPosX() + uVec.y * modelState.getPosY() + uVec.z * modelState.getPosZ()); 
-//        int vPos = (int) Math.round(vVec.x * modelState.getPosX() + vVec.y * modelState.getPosY() + vVec.z * modelState.getPosZ()); 
-//        int uStep = (int)Math.round(uVec.x + uVec.y + uVec.z);
-//        int vStep = (int)Math.round(vVec.x + vVec.y + vVec.z);
-        
         quad = template.clone();
         quad.surfaceInstance = TOP.newInstance(true);
         quad.setFace(EnumFacing.SOUTH);
@@ -125,10 +107,6 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
                 new FaceVertex(1, 1, 0), 
                 new FaceVertex(0, 1, 1), 
                 EnumFacing.UP);
-//        quad.minU = uStep < 0 ? 32 - uPos : uPos;
-//        quad.maxU = quad.minU + uStep;
-//        quad.minV = vStep < 0 ? 32 - vPos : vPos;
-//        quad.maxV = quad.minV + vStep;
         builder.add(quad.transform(matrix));
         
         
