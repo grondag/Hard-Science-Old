@@ -2,8 +2,11 @@ package grondag.hard_science.superblock.model.painter;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.RawQuad;
+import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
+import net.minecraft.util.math.MathHelper;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 
 public class CubicQuadPainterTiles extends CubicQuadPainter
@@ -17,8 +20,19 @@ public class CubicQuadPainterTiles extends CubicQuadPainter
     public RawQuad paintQuad(RawQuad quad)
     {
         if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("Tiled cubic quad painter received quad without lockUV semantics.  Not expected");
-        quad.rotation = this.textureRotationForFace(quad.getNominalFace());
-        quad.textureName = this.texture.getTextureName(this.textureVersionForFace(quad.getNominalFace()));
+        
+        Rotation rotation = this.textureRotationForFace(quad.getNominalFace());
+        int textureVersion = this.textureVersionForFace(quad.getNominalFace());
+        
+        if(quad.surfaceInstance.textureSalt != 0)
+        {
+            int saltHash = MathHelper.hash(quad.surfaceInstance.textureSalt);
+            rotation = Useful.offsetEnumValue(rotation, saltHash & 3);
+            textureVersion = (textureVersion + (saltHash >> 2)) & this.texture.textureVersionMask;
+        }
+        
+        quad.rotation = rotation;
+        quad.textureName = this.texture.getTextureName(textureVersion);
         return quad;
     }
 }

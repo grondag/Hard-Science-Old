@@ -58,7 +58,7 @@ public class StairMeshFactory extends AbstractWedgeMeshFactory
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
-        quad.surfaceInstance = SIDES.unitInstance;
+        quad.surfaceInstance = SIDES.unitInstance.withAllowBorders(false);
         quad.setFace(EnumFacing.UP);
         quad.setupFaceQuad(EnumFacing.UP,
                 new FaceVertex(0, 1, 0),
@@ -68,7 +68,7 @@ public class StairMeshFactory extends AbstractWedgeMeshFactory
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
-        quad.surfaceInstance = SIDES.unitInstance;
+        quad.surfaceInstance = SIDES.unitInstance.withAllowBorders(false);
         quad.setFace(EnumFacing.DOWN);
         quad.setupFaceQuad(EnumFacing.DOWN,
                 new FaceVertex(0, 0, 0),
@@ -78,7 +78,7 @@ public class StairMeshFactory extends AbstractWedgeMeshFactory
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
-        quad.surfaceInstance = TOP.newInstance(true);
+        quad.surfaceInstance = TOP.newInstance(true, false);
         quad.setFace(EnumFacing.SOUTH);
         quad.setupFaceQuad(EnumFacing.SOUTH,
                 new FaceVertex(0, 0, 1),

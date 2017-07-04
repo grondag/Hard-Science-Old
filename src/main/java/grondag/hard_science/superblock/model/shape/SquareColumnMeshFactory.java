@@ -184,6 +184,9 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
         int actualCutCount = spec.cutCount;
 
+        /** used to randomize cut textures */
+        int nextTextureSalt = 1;
+        
         boolean hasLeftJoin = fjs.isJoined(leftFace, face);
         boolean hasRightJoin = fjs.isJoined(rightFace, face);
         boolean hasTopJoin = fjs.isJoined(topFace, face);
@@ -290,7 +293,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(sx0 > 0.0001)
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(rightFace, bottomCapHeight, 1.0-spec.cutDepth, 1.0-topCapHeight, 1.0, 1.0 - sx0, face));
                 builder.add(quad);
             }
@@ -299,7 +302,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(sx1 < 0.9999)
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(leftFace, topCapHeight, 1.0-spec.cutDepth, 1.0-bottomCapHeight, 1.0, sx1, face));
                 builder.add(quad);
             }
@@ -308,7 +311,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(topCapHeight > 0)
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(bottomFace, sx0, 1.0-spec.cutDepth, sx1, 1.0, 1.0 -topCapHeight, face));
                 builder.add(quad);
             }
@@ -317,7 +320,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(bottomCapHeight > 0)
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(topFace, 1.0 -sx1, 1.0-spec.cutDepth, 1.0 -sx0, 1.0, 1.0 -bottomCapHeight, face));
                 builder.add(quad);
             }
@@ -326,7 +329,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(fjs.needsCorner(topFace, leftFace, face))
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(bottomFace, Math.max(leftMarginWidth, 0.0), 1.0-spec.cutDepth, leftMarginWidth + spec.cutWidth, 1.0, 1.0 -spec.baseMarginWidth, face));
                 builder.add(quad);
             }
@@ -335,7 +338,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(fjs.needsCorner(bottomFace, leftFace, face))
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(topFace, 1.0 - leftMarginWidth - spec.cutWidth, 1.0-spec.cutDepth, Math.min(1.0 - leftMarginWidth, 1.0), 1.0, 1.0 -spec.baseMarginWidth, face));
                 builder.add(quad);
 
@@ -345,7 +348,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(fjs.needsCorner(topFace, rightFace, face))
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(bottomFace, 1.0 - rightMarginWidth - spec.cutWidth, 1.0-spec.cutDepth, Math.min(1.0 - rightMarginWidth, 1.0), 1.0, 1.0 -spec.baseMarginWidth, face));
                 builder.add(quad);
             }
@@ -354,7 +357,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
             if(fjs.needsCorner(bottomFace, rightFace, face))
             {
                 RawQuad quad = template.clone();
-                quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                 setupCutSideQuad(quad, new SimpleQuadBounds(topFace, Math.max(rightMarginWidth, 0.0), 1.0-spec.cutDepth, rightMarginWidth + spec.cutWidth, 1.0, 1.0 -spec.baseMarginWidth, face));
                 builder.add(quad);
             }
@@ -377,6 +380,8 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
 
+        /** used to randomize cut textures */
+        int nextTextureSalt = 1;
         
         // lamp bottom can be a single poly
         {
@@ -432,13 +437,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                 // margin corner sides
                 {
                     RawQuad quad = template.clone();
-                    quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                    quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                     setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.rightOf(face, side), 1.0 -spec.baseMarginWidth, 1.0 -spec.cutDepth, 1.0, 1, 1.0 -spec.baseMarginWidth, face));
                     builder.add(quad);
                 }
                 {
                     RawQuad quad = template.clone();
-                    quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                    quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                     setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, spec.baseMarginWidth, 1, 1.0 -spec.baseMarginWidth, face));
                     builder.add(quad);
                 }
@@ -480,13 +485,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                     {
                         {
                             RawQuad quad = template.clone();
-                            quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                            quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                             setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xLeft, 1.0, xLeft, face));
                             builder.add(quad);
                         }
                         {
                             RawQuad quad = template.clone();
-                            quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                            quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                             setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.rightOf(face, side), 1.0 -xLeft, 1.0 -spec.cutDepth, 1.0, 1.0, xLeft, face));
                             builder.add(quad);
                         }
@@ -495,13 +500,13 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                     {
                         {
                             RawQuad quad = template.clone();
-                            quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                            quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                             setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.rightOf(face, side), 1.0 -xRight, 1.0 -spec.cutDepth, 1.0, 1.0, 1.0 -xRight, face));
                             builder.add(quad);
                         }
                         {
                             RawQuad quad = template.clone();
-                            quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                            quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                             setupCutSideQuad(quad, new SimpleQuadBounds(QuadHelper.leftOf(face, side), 0.0, 1.0 -spec.cutDepth, xRight, 1.0, 1.0 -xRight, face));
                             builder.add(quad);
                         }
@@ -532,7 +537,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                         double offset = spec.baseMarginWidth + (spec.cutWidth * 2.0 * i);
 
                         RawQuad quad = template.clone();
-                        quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                        quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                         setupCutSideQuad(quad, new SimpleQuadBounds(side.getOpposite(), offset, 1.0 -spec.cutDepth, 1.0 -offset, 1.0, 1.0 -offset, face));
                         builder.add(quad);
 
@@ -546,7 +551,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
                     {
                         // inner cut sides
                         RawQuad quad = template.clone();
-                        quad.surfaceInstance = SURFACE_CUT.unitInstance;
+                        quad.surfaceInstance = SURFACE_CUT.unitInstance.withTextureSalt(nextTextureSalt++);
                         setupCutSideQuad(quad, new SimpleQuadBounds(side, offset, 1.0 -spec.cutDepth, 1.0 -offset, 1.0, offset, face));
                         builder.add(quad);
                     }

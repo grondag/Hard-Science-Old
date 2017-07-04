@@ -45,6 +45,9 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
     public RawQuad paintQuad(RawQuad quad)
     {
         if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("Borders cubic quad painter received quad without lockUV semantics.  Not expected");
+        
+        if(!quad.surfaceInstance.allowBorders) return null;
+        
         EnumFacing face = quad.getNominalFace();
         if(face == null) return null;
 

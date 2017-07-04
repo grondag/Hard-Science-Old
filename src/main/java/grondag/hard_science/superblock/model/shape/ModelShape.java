@@ -646,7 +646,7 @@ public enum ModelShape
         public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     };
     
-    // Can add more shapes - up to 128 without exceeding limits of current model state binary structure
+    // Can add more shapes - up to 128 total shapes without breaking / exceeding limits of current model state binary structure
 
     public final boolean isAvailableInGui;
     public final MetaUsage metaUsage;

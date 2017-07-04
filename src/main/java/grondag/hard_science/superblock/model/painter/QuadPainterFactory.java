@@ -2,7 +2,6 @@ package grondag.hard_science.superblock.model.painter;
 
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Surface;
-import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TextureScale;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
@@ -79,17 +78,11 @@ public class QuadPainterFactory
                         ? new CubicQuadPainterTiles(modelState, surface, paintLayer)
                         : new CubicQuadPainterBigTex(modelState, surface, paintLayer);
                 
-            // Borders only apply to main surface
             case BORDER_13:
-                 return surface.surfaceType == SurfaceType.MAIN
-                 ? new CubicQuadPainterBorders(modelState, surface, paintLayer)
-                 : QuadPainter.makeNullQuadPainter(modelState, surface, paintLayer);       
+                 return new CubicQuadPainterBorders(modelState, surface, paintLayer);
                 
-            // Masonry only applies to main surface 
             case MASONRY_5:
-                return surface.surfaceType == SurfaceType.MAIN
-                ? new CubicQuadPainterMasonry(modelState, surface, paintLayer)
-                : QuadPainter.makeNullQuadPainter(modelState, surface, paintLayer);  
+                return new CubicQuadPainterMasonry(modelState, surface, paintLayer);  
                 
             default:
                 return QuadPainter.makeNullQuadPainter(modelState, surface, paintLayer);

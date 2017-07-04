@@ -32,6 +32,8 @@ public class CubicQuadPainterMasonry extends CubicQuadPainter
     {
         if(Log.DEBUG_MODE && !quad.lockUV) Log.warn("Masonry cubic quad painter received quad without lockUV semantics.  Not expected");
         
+        if(!quad.surfaceInstance.allowBorders) return null;
+        
         EnumFacing face = quad.getNominalFace();
         if(face == null) return null;
         
