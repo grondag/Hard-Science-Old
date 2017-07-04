@@ -108,7 +108,7 @@ public class PointInPolygonTest
 
     public static boolean isPointInRawQuad(Vec3d point, RawQuad quad)
     {
-        // faster to check in 2 dimensions, so throw away the axis 
+        // faster to check in 2 dimensions, so throw away the orthogonalAxis 
         // that is most orthogonal to our plane
         DiscardAxis discardAxis = DiscardAxis.get(quad.getFaceNormal());
 
@@ -135,7 +135,7 @@ public class PointInPolygonTest
         Z;
 
         /** 
-         * Returns the axis that is most orthogonal to the plane
+         * Returns the orthogonalAxis that is most orthogonal to the plane
          * identified by the given normal and thus should be ignored for PnP testing.
          */
         private static DiscardAxis get(Vec3d normal)
@@ -159,7 +159,7 @@ public class PointInPolygonTest
         }
 
         /**
-         * Returns a 2d point with this axis discarded.
+         * Returns a 2d point with this orthogonalAxis discarded.
          */
         private Point2d get2dPoint(Vec3d pointIn)
         {

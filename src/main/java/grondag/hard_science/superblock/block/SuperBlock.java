@@ -804,7 +804,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      * in model state based on block state, and also affects collision box. <br><br>
      * 
      * NOTE: there is probably still a bug here, because collision box can change based
-     * on other components of model state (axis, for example) and those changes may not be detected
+     * on other components of model state (orthogonalAxis, for example) and those changes may not be detected
      * by path finding.
      */
     public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)

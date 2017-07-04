@@ -50,7 +50,7 @@ public class Surface
     public class SurfaceInstance
     {
         /** 
-         * The approximate in-world scale of the U texture axis.
+         * The approximate in-world scale of the U texture orthogonalAxis.
          * At scale = 1.0, 0 to 16 is one block.
          * At scale = 1/16, 0 to 1 is one block, etc.
          * Generally only comes into play for non-cubic surface painters.
@@ -58,7 +58,7 @@ public class Surface
         public final double uScale;
         
         /** 
-         * The approximate in-world scale of the V texture axis.
+         * The approximate in-world scale of the V texture orthogonalAxis.
          * At scale = 1.0, 0 to 16 is one block.
          * At scale = 1/16, 0 to 1 is one block, etc.
          * Generally only comes into play for non-cubic surface painters.
@@ -66,7 +66,7 @@ public class Surface
         public final double vScale;
         
         /**
-         * If true, texture painting should not vary by axis
+         * If true, texture painting should not vary by orthogonalAxis
          * orthogonal to the surface.
          */
         public final boolean ignoreDepthForRandomization;

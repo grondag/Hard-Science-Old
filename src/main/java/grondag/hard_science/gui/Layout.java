@@ -10,6 +10,6 @@ public enum Layout
     FIXED,
     /** dimension represents weight for allocating variable space */
     WEIGHTED,
-    /** scale dimension to other axis according to aspect ratio */
+    /** scale dimension to other orthogonalAxis according to aspect ratio */
     PROPORTIONAL
 }

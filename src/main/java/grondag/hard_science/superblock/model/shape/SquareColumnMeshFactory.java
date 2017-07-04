@@ -145,7 +145,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 //        int cacheKey = 0;
         List<RawQuad> retVal = null;
 //
-//        cacheKey = makeCacheKey(face, axis, bjs.getFaceJoinState(face), state.getValue(this.colorComponent).ordinal, textureIndex);
+//        cacheKey = makeCacheKey(face, orthogonalAxis, bjs.getFaceJoinState(face), state.getValue(this.colorComponent).ordinal, textureIndex);
 //        retVal = cache.getIfPresent(cacheKey);
 
 //        if(retVal == null)

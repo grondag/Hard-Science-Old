@@ -204,7 +204,7 @@ public class Configurator
         @RangeInt(min = 0, max = 6000)
         public int cooldownWaitTicks = 200;
         
-        @Comment("Y-axis build limit at which Volcano becomes permanently dormant.")
+        @Comment("Y-orthogonalAxis build limit at which Volcano becomes permanently dormant.")
         @RangeInt(min = 128, max = 255)
         public int maxYLevel = 147; 
         

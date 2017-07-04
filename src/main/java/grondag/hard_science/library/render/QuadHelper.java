@@ -129,7 +129,7 @@ public class QuadHelper
     // NOTE: this is a prototype implementation
     // It's fine for smaller objects, but would likely generate excess polys for big shapes after CSG operations.
     // Also needs better/different texture handling for top and bottom when face diameter is > 1.
-    // Will probably need separate version for creating axis-aligned cylinders and cones.  
+    // Will probably need separate version for creating orthogonalAxis-aligned cylinders and cones.  
     // Also needs a parameter for minimum slices to reduce poly count on small model parts when appropriate.
     // Right now minimum is fixed at 12.
     public static List<RawQuad> makeCylinder(Vec3d start, Vec3d end, double startRadius, double endRadius, RawQuad template)
@@ -455,7 +455,7 @@ public class QuadHelper
        }
 
     /**
-        * Builds the appropriate quaternion to rotate around the given axis.
+        * Builds the appropriate quaternion to rotate around the given orthogonalAxis.
         */
        public static Quat4f rotationForAxis(EnumFacing.Axis axis, double degrees)
        {

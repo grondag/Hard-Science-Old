@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.placement;
 
 /** 
- * Determines how placed blocks are oriented (axis, rotation)
+ * Determines how placed blocks are oriented (orthogonalAxis, rotation)
  */
 public enum PlacementMode
 {

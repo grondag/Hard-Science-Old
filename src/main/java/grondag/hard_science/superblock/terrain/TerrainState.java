@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.terrain;
 
 import grondag.hard_science.library.render.QuadHelper;
-import grondag.hard_science.library.world.NeighborBlocks.HorizontalCorner;
-import grondag.hard_science.library.world.NeighborBlocks.HorizontalFace;
+import grondag.hard_science.library.world.HorizontalCorner;
+import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory;

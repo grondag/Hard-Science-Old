@@ -229,8 +229,8 @@ package grondag.hard_science.superblock.placement;
 ////	}
 //
 ////	/**
-////	 * Handles placement of axis-aligned blocks like columns. Switches to
-////	 * different style of block automatically based on axis of placement using
+////	 * Handles placement of orthogonalAxis-aligned blocks like columns. Switches to
+////	 * different style of block automatically based on orthogonalAxis of placement using
 ////	 * the styles passed in.
 ////	 */
 ////	public static class PlacementColumn extends NicePlacement {

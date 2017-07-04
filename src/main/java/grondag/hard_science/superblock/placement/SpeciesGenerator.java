@@ -1,8 +1,8 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.PlacementValidatorCubic;
-import grondag.hard_science.library.world.NeighborBlocks.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -207,8 +207,8 @@ public abstract class SpeciesGenerator {
 //	}
 
 //	/**
-//	 * Handles placement of axis-aligned blocks like columns. Switches to
-//	 * different style of block automatically based on axis of placement using
+//	 * Handles placement of orthogonalAxis-aligned blocks like columns. Switches to
+//	 * different style of block automatically based on orthogonalAxis of placement using
 //	 * the styles passed in.
 //	 */
 //	public static class PlacementColumn extends NicePlacement {

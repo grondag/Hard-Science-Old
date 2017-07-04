@@ -2,7 +2,6 @@ package grondag.hard_science.library.world;
 
 import java.util.ArrayList;
 
-import grondag.hard_science.library.world.NeighborBlocks.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import net.minecraft.util.EnumFacing;
 

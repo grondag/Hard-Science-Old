@@ -99,12 +99,19 @@ public abstract class ShapeMeshGenerator
      */
     public boolean isAdditive() { return false; }
     
+    /**
+     * Override to true for blocks like stairs and wedges.
+     * CubicPlacementHandler will know they need to be placed 
+     * in a corner instead of a face.
+     */
+    public boolean isAxisOrthogonalToPlacementFace() { return false; }
+    
     public abstract boolean rotateBlock(IBlockState blockState, World world, BlockPos pos, EnumFacing axis, SuperBlock block, ModelState modelState);
 
     public abstract SideShape sideShape(ModelState modelState, EnumFacing side);
     
     /**
-     * Find appropriate transformation assuming base model is oriented to Y axis, positive.
+     * Find appropriate transformation assuming base model is oriented to Y orthogonalAxis, positive.
      * This is different than the Minecraft/Forge default because I brain that way.<br><br>
      * 
      * @see #getMatrixForAxisAndRotation(net.minecraft.util.EnumFacing.Axis, boolean, Rotation) for
@@ -184,15 +191,20 @@ public abstract class ShapeMeshGenerator
     }
     
     /**
-     * Models in default state should have axis = Y with positive
+     * Models in default state should have orthogonalAxis = Y with positive
      * orientation (if orientation applies) and whatever rotation
      * that represents "none".  Generally, in this mod, north is
      * considered "top" of the reference frame when looking down
-     * the Y-axis. <br><br>
+     * the Y-orthogonalAxis. <br><br>
+     * 
+     * Models that are oriented to an edge, like stairs and wedges
+     * should have a default geometry such that the North and East
+     * faces are "full" or "behind" the sloped part of the geometry.<br><br>
+     *
      * 
      * With a model in the default state, the rotation occurs
-     * first - around the Y-axis, followed by the transformation
-     * from the Y axis/orientation to whatever new axis/orientation is 
+     * first - around the Y-orthogonalAxis, followed by the transformation
+     * from the Y orthogonalAxis/orientation to whatever new orthogonalAxis/orientation is 
      * given. <br><br>
      * 
      * Because 4d rotational matrices are the brain-child of

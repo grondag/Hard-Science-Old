@@ -15,7 +15,7 @@ public interface PlacementItem
     
     public abstract ModelState getModelState(ItemStack stack);
     
-    /** Face corresponding with the axis and orientation for placement. Not the face on which it is placed. */
+    /** Face corresponding with the orthogonalAxis and orientation for placement. Not the face on which it is placed. */
     public default void setFace(ItemStack stack, EnumFacing face)
     {
         NBTTagCompound tag = stack.getTagCompound();
@@ -26,7 +26,7 @@ public interface PlacementItem
         stack.setTagCompound(tag);
     }
     
-    /** Face corresponding with the axis and orientation for placement. Not the face on which it is placed. */
+    /** Face corresponding with the orthogonalAxis and orientation for placement. Not the face on which it is placed. */
     public default EnumFacing getFace(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();

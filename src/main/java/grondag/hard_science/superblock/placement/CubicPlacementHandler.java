@@ -8,14 +8,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.WorldHelper;
-import grondag.hard_science.library.world.NeighborBlocks.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockTests;
+import jline.internal.Log;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,6 +97,8 @@ public class CubicPlacementHandler implements IPlacementHandler
             }
         }
         
+        boolean isRotationDone = false;
+        
         if(stackModelState.hasAxis())
         {
             if(placementMode == PlacementMode.STATIC)
@@ -122,18 +125,51 @@ public class CubicPlacementHandler implements IPlacementHandler
 
                 if(!isAxisDone)
                 {
-                    stackModelState.setAxis(facing.getAxis());
-                    if(stackModelState.hasAxisOrientation())
+                    if(stackModelState.isAxisOrthogonalToPlacementFace())
                     {
-                        stackModelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                        // handle hit-sensitive placement for stairs, wedges
+                        EnumFacing adjacentFace = WorldHelper.closestAdjacentFace(facing, hitX, hitY, hitZ);
+                        
+                        
+                        BlockCorner corner = BlockCorner.find(facing.getOpposite(), adjacentFace);
+                        
+                        if(corner == null)
+                        {
+                            Log.warn("Unable to find block corner from placement. This is very strange but probably harmless.");
+                        }
+                        else
+                        {
+                            stackModelState.setAxis(corner.orthogonalAxis);
+                        
+                            if(stackModelState.hasModelRotation())
+                            {
+                                stackModelState.setModelRotation(corner.modelRotation);
+                                isRotationDone = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        stackModelState.setAxis(facing.getAxis());
+                        if(stackModelState.hasAxisOrientation())
+                        {
+                            stackModelState.setAxisInverted(facing.getAxisDirection() == AxisDirection.NEGATIVE);
+                        }
                     }
                 }
             }
         }
         
-        if(stackModelState.hasModelRotation())
+        if(!isRotationDone && stackModelState.hasModelRotation())
         {
-            stackModelState.setModelRotation(item.getRotation(stack));
+            if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
+            {
+                stackModelState.setModelRotation(closestModelState.getModelRotation());
+            }
+            else
+            {
+                stackModelState.setModelRotation(item.getRotation(stack));
+            }
         }
         
         if(stackModelState.hasSpecies())

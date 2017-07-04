@@ -54,12 +54,12 @@ public class PlacementValidatorCubic {
 	 */
 	private BlockPos bottomCorner;
 
-	/** Highest-valued corner of the axis-aligned bounding box
+	/** Highest-valued corner of the orthogonalAxis-aligned bounding box
 	 * containing all visited blocks that are valid for this structure.
 	 */
 	private BlockPos maxPos;
 	
-	/** Least-valued corner of the axis-aligned bounding box
+	/** Least-valued corner of the orthogonalAxis-aligned bounding box
 	 * containing all visited blocks that are valid for this structure.
 	 */
 	private BlockPos minPos;
@@ -158,7 +158,7 @@ public class PlacementValidatorCubic {
 
 	private int getPosHash(BlockPos pos) {
 		// volume could be 255 in any direction for origin,
-		// so need more than 8 bits per axis. 10 is plenty. 
+		// so need more than 8 bits per orthogonalAxis. 10 is plenty. 
 		return pos.getX() & 0x3FF | (pos.getY() & 0x3FF) << 10 | (pos.getZ() & 0x3FF) << 20;
 	}
 }

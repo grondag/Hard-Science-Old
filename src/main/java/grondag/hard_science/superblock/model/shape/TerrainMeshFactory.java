@@ -8,8 +8,8 @@ import grondag.hard_science.library.render.CSGShape;
 import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.varia.Color;
-import grondag.hard_science.library.world.NeighborBlocks.HorizontalCorner;
-import grondag.hard_science.library.world.NeighborBlocks.HorizontalFace;
+import grondag.hard_science.library.world.HorizontalCorner;
+import grondag.hard_science.library.world.HorizontalFace;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CollisionBoxDispatcher;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
@@ -381,7 +381,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
         // Bottom face
         RawQuad qBottom = new RawQuad(template);
-        //flip X-axis texture on bottom face
+        //flip X-orthogonalAxis texture on bottom face
 //        qBottom.minU = 14 - qBottom.minU;
 //        qBottom.maxU = qBottom.minU + 2;
         qBottom.surfaceInstance = SURFACE_SIDE.unitInstance;
@@ -395,7 +395,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         cubeQuads.add(template.clone().setSurfaceInstance(SURFACE_SIDE.unitInstance).setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0, EnumFacing.NORTH));
         RawQuad faceQuad = template.clone();
         
-        //flip X-axis texture on bottom face
+        //flip X-orthogonalAxis texture on bottom face
 //        faceQuad.minU = 14 - faceQuad.minU;
 //        faceQuad.maxU = faceQuad.minU + 2;
         

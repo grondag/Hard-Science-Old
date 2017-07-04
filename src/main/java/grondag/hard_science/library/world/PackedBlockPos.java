@@ -30,7 +30,7 @@ public class PackedBlockPos
     private static final long Z_INCREMENT = 1L;
     
     /** 
-     * Very similar to MC vanilla method on BlockPos but only uses 8 bits for Y axis instead of 12. 
+     * Very similar to MC vanilla method on BlockPos but only uses 8 bits for Y orthogonalAxis instead of 12. 
      * As with that method, uses 26 bits each for X and Z, leaving 3 higher-order bits available for other information.
      * Not using the sign bit because it complicates things somewhat and not currently needed.
      */

@@ -1052,6 +1052,13 @@ public class ModelStateFactory
         {
             return this.getShape().metaUsage;
         }
+
+        /** Convenience method. Same as shape attribute. */
+        public boolean isAxisOrthogonalToPlacementFace() 
+        {
+            return this.getShape().meshFactory().isAxisOrthogonalToPlacementFace();
+        }
+
         
         /**
          * Retrieves block/item metadata that should apply to this modelState.
@@ -1108,7 +1115,7 @@ public class ModelStateFactory
         }
         
         /** 
-         * Rotate this block around the given axis if possible, making necessary changes to world state.
+         * Rotate this block around the given orthogonalAxis if possible, making necessary changes to world state.
          * Return true if successful. 
          * @param blockState 
          */

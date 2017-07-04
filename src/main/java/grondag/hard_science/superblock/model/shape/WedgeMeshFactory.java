@@ -54,7 +54,7 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
         
         // Axis for this shape is along the face of the sloping surface
         // Four rotations x 3 axes gives 12 orientations - one for each edge of a cube.
-        // Default geometry is Y axis with full sides against north/east faces.
+        // Default geometry is Y orthogonalAxis with full sides against north/east faces.
         
         Matrix4d matrix = getMatrix4d(modelState);
         
@@ -173,4 +173,7 @@ public class WedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHa
     {
         return Block.FULL_BLOCK_AABB;
     }
+    
+    @Override
+    public boolean isAxisOrthogonalToPlacementFace() { return true; }
 }

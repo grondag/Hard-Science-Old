@@ -65,7 +65,7 @@ public class QuadBakery
         float[] faceNormal = raw.getFaceNormalArray();          
 
         // The item renderer doesn't recognize pre-baked lightmaps, so we have to get creative.
-        // REMOVED: this was really a hack - doesn't work well if item is at angle to Y axis
+        // REMOVED: this was really a hack - doesn't work well if item is at angle to Y orthogonalAxis
         // There does not yet appear to be a supported method for full-bright items.
 //        if(raw.isItem && raw.lightingMode == LightingMode.FULLBRIGHT)
 //        {

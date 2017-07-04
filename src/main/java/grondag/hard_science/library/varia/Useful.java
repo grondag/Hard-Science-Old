@@ -23,7 +23,6 @@ import net.minecraft.world.World;
  */
 public class Useful 
 {
-	
     public static int min(int... input)
     {
         int result = Integer.MAX_VALUE;
@@ -57,8 +56,8 @@ public class Useful
     }
     
     /** 
-     * Returns the maximum absolute magnitude of the three axis for the given vector.
-     * Mainly useful when you know that only one of the axis has a non-zero value
+     * Returns the maximum absolute magnitude of the three orthogonalAxis for the given vector.
+     * Mainly useful when you know that only one of the orthogonalAxis has a non-zero value
      * and you want to retrieve it while avoiding the need for expendisive square root.
      */
     public static int maxAxisLength(Vec3i vec)

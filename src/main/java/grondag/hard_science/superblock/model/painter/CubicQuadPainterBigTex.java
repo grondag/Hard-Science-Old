@@ -112,7 +112,7 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
      * Transform input vector so that x & y correspond with u / v on the given face, with u,v origin at upper left
      * and z is depth, where positive values represent distance into the face (away from viewer). <br><br>
      * 
-     * Coordinates are first masked to the scale of the texture being used and when we reverse an axis, 
+     * Coordinates are first masked to the scale of the texture being used and when we reverse an orthogonalAxis, 
      * we use the texture's sliceMask as the basis so that we remain within the frame of the
      * texture scale we are using.  <br><br>
      * 
