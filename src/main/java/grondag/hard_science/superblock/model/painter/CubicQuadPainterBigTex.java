@@ -49,9 +49,12 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         if(this.texture.textureVersionCount == 1)
         {
             // no alternates, so do uv flip and offset and rotation based on depth & species only
+            
+            // abs is necessary so that hash input components combine together properly
+            // Small random numbers already have most bits set.
             int depthAndSpeciesHash = quad.surfaceInstance.ignoreDepthForRandomization && quad.surfaceInstance.textureSalt == 0
                     ? 0 
-                    : MathHelper.hash(surfaceVec.getZ() | (this.species << 8) | (quad.surfaceInstance.textureSalt << 12));
+                    : MathHelper.hash(Math.abs(surfaceVec.getZ()) | (this.species << 8) | (quad.surfaceInstance.textureSalt << 12));
             
             // rotation 
             quad.rotation = this.allowTexRotation
@@ -88,9 +91,12 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
         else
         {
             // multiple texture versions, so do rotation and alternation normally, except add additional variation for depth;
+            
+         // abs is necessary so that hash input components combine together properly
+            // Small random numbers already have most bits set.
             int depthHash = quad.surfaceInstance.ignoreDepthForRandomization && quad.surfaceInstance.textureSalt == 0
                     ? 0 
-                    : MathHelper.hash(surfaceVec.getZ() | (quad.surfaceInstance.textureSalt << 8));
+                    : MathHelper.hash(Math.abs(surfaceVec.getZ()) | (quad.surfaceInstance.textureSalt << 8));
 
             quad.textureName = this.texture.getTextureName((this.textureVersionForFace(quad.getNominalFace()) + depthHash) & this.texture.textureVersionMask);
             

@@ -14,6 +14,7 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
+import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import net.minecraft.block.Block;
@@ -26,9 +27,17 @@ import net.minecraft.world.World;
 public abstract class AbstractWedgeMeshFactory extends ShapeMeshGenerator implements ICollisionHandler
 {
 
-    protected static Surface BACK_AND_BOTTOM = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    protected static Surface SIDES = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    protected static Surface TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static Surface BACK_AND_BOTTOM = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static Surface SIDES = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static Surface TOP = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    
+    protected static SurfaceInstance BACK_AND_BOTTOM_INSTANCE = BACK_AND_BOTTOM.unitInstance;
+    protected static SurfaceInstance SIDE_INSTANCE = SIDES.unitInstance.withAllowBorders(false);
+    
+    // salt is for stairs, so cuts appear different from top/front face
+    // wedges can't connect textures with adjacent flat blocks consistently anyway, so doesn't hurt them
+    protected static SurfaceInstance TOP_INSTANCE = TOP.unitInstance.withIgnoreDepthForRandomization(true).withAllowBorders(false).withTextureSalt(1);
+    
 
     public AbstractWedgeMeshFactory()
     {

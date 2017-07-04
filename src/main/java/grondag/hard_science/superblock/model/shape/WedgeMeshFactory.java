@@ -45,19 +45,19 @@ public class WedgeMeshFactory extends AbstractWedgeMeshFactory
         ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
         
         RawQuad quad = template.clone();
-        quad.surfaceInstance = BACK_AND_BOTTOM.unitInstance;
+        quad.surfaceInstance = BACK_AND_BOTTOM_INSTANCE;
         quad.setFace(EnumFacing.NORTH);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0, EnumFacing.UP);
         builder.add(quad.transform(matrix));
       
         quad = template.clone();
-        quad.surfaceInstance = BACK_AND_BOTTOM.unitInstance;
+        quad.surfaceInstance = BACK_AND_BOTTOM_INSTANCE;
         quad.setFace(EnumFacing.EAST);
         quad.setupFaceQuad(0.0, 0.0, 1.0, 1.0, 0.0, EnumFacing.UP);
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
-        quad.surfaceInstance = SIDES.unitInstance.withAllowBorders(false);
+        quad.surfaceInstance = SIDE_INSTANCE;
         quad.setFace(EnumFacing.UP);
         quad.setupFaceQuad(EnumFacing.UP,
                 new FaceVertex(0, 1, 0),
@@ -67,7 +67,7 @@ public class WedgeMeshFactory extends AbstractWedgeMeshFactory
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
-        quad.surfaceInstance = SIDES.unitInstance.withAllowBorders(false);
+        quad.surfaceInstance = SIDE_INSTANCE;
         quad.setFace(EnumFacing.DOWN);
         quad.setupFaceQuad(EnumFacing.DOWN,
                 new FaceVertex(0, 0, 0),
@@ -77,7 +77,7 @@ public class WedgeMeshFactory extends AbstractWedgeMeshFactory
         builder.add(quad.transform(matrix));
         
         quad = template.clone();
-        quad.surfaceInstance = TOP.newInstance(true, false);
+        quad.surfaceInstance = TOP_INSTANCE;
         quad.setFace(EnumFacing.SOUTH);
         quad.setupFaceQuad(EnumFacing.SOUTH,
                 new FaceVertex(0, 0, 1),
