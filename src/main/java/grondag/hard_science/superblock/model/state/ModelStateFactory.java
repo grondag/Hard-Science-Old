@@ -52,9 +52,6 @@ public class ModelStateFactory
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_BASE = PACKER_0.createEnumElement(BlockRenderLayer.class);
     private static final EnumElement<BlockRenderLayer> P0_RENDER_LAYER_LAMP = PACKER_0.createEnumElement(BlockRenderLayer.class);
     
-    // Note: if pressed for space could save a couple bits by creating a NONE texture that disables layer when selected
-//    private static final BooleanElement P0_LAYER_ENABLED_OVERLAY = PACKER_0.createBooleanElement();
-//    private static final BooleanElement P0_LAYER_ENABLED_DETAIL = PACKER_0.createBooleanElement();
     private static final EnumElement<Translucency> P0_TRANSLUCENCY = PACKER_0.createEnumElement(Translucency.class);
     
     static final BitPacker PACKER_1 = new BitPacker();
@@ -62,20 +59,17 @@ public class ModelStateFactory
     @SuppressWarnings("unchecked")
     private static final EnumElement<LightingMode>[] P1_PAINT_LIGHT= new EnumElement[PaintLayer.DYNAMIC_SIZE];
 
+    /** note that sign bit on packer 2 is reserved to persist static state during serialization */ 
     static final BitPacker PACKER_2 = new BitPacker();
     private static final IntElement P2_POS_X = PACKER_2.createIntElement(256);
     private static final IntElement P2_POS_Y = PACKER_2.createIntElement(256);
     private static final IntElement P2_POS_Z = PACKER_2.createIntElement(256);
-    /** value semantics are owned by consumer - only constraints are size and does not update from world */
-    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 40);
+    /** value semantics are owned by consumer - only constraints are size (39 bits) and does not update from world */
+    private static final LongElement P2_STATIC_SHAPE_BITS = PACKER_2.createLongElement(1L << 39);
 
     static final BitPacker PACKER_3_BLOCK = new BitPacker();
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
     private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
-    // these provide random alternate for texture version and rotation for single blocks or cubic groups of blocks 
-//    private static final IntElement P3B_BLOCK_VERSION[] = new IntElement[TextureScale.values().length];
-//    @SuppressWarnings("unchecked")
-//    private static final EnumElement<Rotation> P3B_TEXTURE_ROTATION[] = new EnumElement[TextureScale.values().length];
     private static final IntElement P3B_MASONRY_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
     private static final EnumElement<Rotation> P3B_MODEL_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
     
@@ -83,16 +77,6 @@ public class ModelStateFactory
     private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(TerrainState.STATE_BIT_MASK + 1);
 
     static final BitPacker PACKER_3_MULTIBLOCK = new BitPacker();
-//  private static final BooleanElement P3M_IS_CORNER = PACKER_3_MULTIBLOCK.createBooleanElement();
-//  private static final IntElement P3M_OFFSET_X = PACKER_3_MULTIBLOCK.createIntElement(256);
-//  private static final IntElement P3M_OFFSET_Y = PACKER_3_MULTIBLOCK.createIntElement(256);
-//  private static final IntElement P3M_OFFSET_Z = PACKER_3_MULTIBLOCK.createIntElement(256);
-//  private static final IntElement P3M_SCALE_X = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
-//  private static final IntElement P3M_SCALE_Y = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
-//  private static final IntElement P3M_SCALE_Z = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
-//  // zero value indicates solid shape
-//  private static final IntElement P3M_WALL_THICKNESS = PACKER_3_MULTIBLOCK.createIntElement(128 * 4);
-
     
     /** used to compare states quickly for border joins  */
     private static final long P0_APPEARANCE_COMPARISON_MASK;
@@ -108,7 +92,7 @@ public class ModelStateFactory
         long borderMask1 = 0;
         for(int i = 0; i < PaintLayer.STATIC_SIZE; i++)
         {
-            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x4 = 48
+            P1_PAINT_TEXTURE[i] = PACKER_1.createIntElement(Textures.MAX_TEXTURES); // 12 bits each x5 = 60
         }
         
         for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
@@ -120,14 +104,6 @@ public class ModelStateFactory
             borderMask1 |= P1_PAINT_TEXTURE[i].comparisonMask();
             borderMask1 |= P1_PAINT_LIGHT[i].comparisonMask();
         }
-        
-//        for(TextureScale scale : TextureScale.values())
-//        {
-//            ROTATION_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(4, 45927934, scale.power);
-//            BLOCK_ALTERNATOR[scale.ordinal()] = Alternator.getAlternator(8, 2953424, scale.power);
-//            P3B_BLOCK_VERSION[scale.ordinal()] = PACKER_3_BLOCK.createIntElement(8);
-//            P3B_TEXTURE_ROTATION[scale.ordinal()] = PACKER_3_BLOCK.createEnumElement(Rotation.class);
-//        }
         
         P0_APPEARANCE_COMPARISON_MASK_NO_GEOMETRY = borderMask0
                 | P0_RENDER_LAYER_BASE.comparisonMask() 
@@ -185,18 +161,8 @@ public class ModelStateFactory
          */
         public static final int STATE_FLAG_NEEDS_POS = STATE_FLAG_NEEDS_MASONRY_JOIN << 1;
         
-        //FIXME: remove these
-        /** 
-         * True if block version and rotation are needed. Applies for block formats.
-         */
-        public static final int STATE_FLAG_NEEDS_BLOCK_RANDOMS = STATE_FLAG_NEEDS_POS << 1;
-        public static final int STATE_FLAG_NEEDS_2x2_BLOCK_RANDOMS = STATE_FLAG_NEEDS_BLOCK_RANDOMS << 1;
-        public static final int STATE_FLAG_NEEDS_4x4_BLOCK_RANDOMS = STATE_FLAG_NEEDS_2x2_BLOCK_RANDOMS << 1;
-        public static final int STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS = STATE_FLAG_NEEDS_4x4_BLOCK_RANDOMS << 1;
-        public static final int STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS = STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS << 1;
-        public static final int STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS = STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS << 1;
         
-        public static final int STATE_FLAG_NEEDS_SPECIES = STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS << 1;
+        public static final int STATE_FLAG_NEEDS_SPECIES = STATE_FLAG_NEEDS_POS << 1;
         
         public static final int STATE_FLAG_HAS_AXIS = STATE_FLAG_NEEDS_SPECIES << 1;
         
@@ -211,14 +177,10 @@ public class ModelStateFactory
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
         
-        // used to check if any block alternates are needed */
-        private static final int STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM = STATE_FLAG_NEEDS_BLOCK_RANDOMS | STATE_FLAG_NEEDS_2x2_BLOCK_RANDOMS | STATE_FLAG_NEEDS_4x4_BLOCK_RANDOMS
-                | STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS | STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS | STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS;
-
         /** use this to turn off flags that should not be used with non-block state formats */
         private static final int STATE_FLAG_DISABLE_BLOCK_ONLY = ~(
                   STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SIMPLE_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN
-                | STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM | STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_NEEDS_TEXTURE_ROTATION);
+                 | STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_NEEDS_TEXTURE_ROTATION);
 
                 
         public static final BinaryEnumSet<BlockRenderLayer> BENUMSET_RENDER_LAYER = new BinaryEnumSet<BlockRenderLayer>(BlockRenderLayer.class);
@@ -249,12 +211,12 @@ public class ModelStateFactory
         
         public ModelState(int[] bits)
         {
-            // sign on first word is used to store static indicator
-            this.isStatic = (INT_SIGN_BIT & bits[0]) == INT_SIGN_BIT;
+            // sign on third long word is used to store static indicator
+            this.isStatic = (INT_SIGN_BIT & bits[4]) == INT_SIGN_BIT;
             
-            bits0 = ((long) (INT_SIGN_BIT_INVERSE & bits[0])) << 32 | (bits[1] & 0xffffffffL);
+            bits0 = ((long)bits[0]) << 32 | (bits[1] & 0xffffffffL);
             bits1 = ((long)bits[2]) << 32 | (bits[3] & 0xffffffffL);
-            bits2 = ((long)bits[4]) << 32 | (bits[5] & 0xffffffffL);
+            bits2 = ((long)(INT_SIGN_BIT_INVERSE & bits[4])) << 32 | (bits[5] & 0xffffffffL);
             bits3 = ((long)bits[6]) << 32 | (bits[7] & 0xffffffffL);
         }
         
@@ -274,13 +236,13 @@ public class ModelStateFactory
         public int[] getBitsIntArray() 
         {
             int[] result = new int[8];
-            result[0] = (int) (this.isStatic ? (bits0 >> 32) | INT_SIGN_BIT : (bits0 >> 32));
+            result[0] = (int) (bits0 >> 32);
             result[1] = (int) (bits0);
             
             result[2] = (int) (bits1 >> 32);
             result[3] = (int) (bits1);
             
-            result[4] = (int) (bits2 >> 32);
+            result[4] = (int) (this.isStatic ? (bits2 >> 32) | INT_SIGN_BIT : (bits2 >> 32));
             result[5] = (int) (bits2);
             
             result[6] = (int) (bits3 >> 32);
@@ -435,15 +397,6 @@ public class ModelStateFactory
                 
                 long b3 = bits3;
                 
-//                for(TextureScale scale : TextureScale.values())
-//                {
-//                    if((scale.modelStateFlag & stateFlags) == scale.modelStateFlag)
-//                    {
-//                        b3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(BLOCK_ALTERNATOR[scale.ordinal()].getAlternate(pos), b3);
-//                        b3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(Rotation.values()[ROTATION_ALTERNATOR[scale.ordinal()].getAlternate(pos)], b3);
-//                    }
-//                }
-
                 NeighborBlocks neighbors = null;
                 
                 if((STATE_FLAG_NEEDS_CORNER_JOIN & stateFlags) == STATE_FLAG_NEEDS_CORNER_JOIN)
@@ -768,42 +721,6 @@ public class ModelStateFactory
         //  PACKER 3 ATTRIBUTES  (BLOCK FORMAT)
         ////////////////////////////////////////////////////
         
-//        public Rotation getTextureRotation(TextureScale scale)
-//        {
-//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-//                Log.warn("getRotation on model state does not apply for shape");
-//            
-//            populateStateFlagsIfNeeded();
-//            return P3B_TEXTURE_ROTATION[scale.ordinal()].getValue(bits3);
-//        }
-        
-//        public void setTextureRotation(Rotation rotation, TextureScale scale)
-//        {
-//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-//                Log.warn("setRotation on model state does not apply for shape");
-//            
-//            populateStateFlagsIfNeeded();
-//            bits3 = P3B_TEXTURE_ROTATION[scale.ordinal()].setValue(rotation, bits3);
-//            invalidateHashCode();
-//        }
-
-//        public int getBlockVersion(TextureScale scale)
-//        {
-//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-//                Log.warn("getBlockVersion on model state does not apply for shape");
-//            
-//            return P3B_BLOCK_VERSION[scale.ordinal()].getValue(bits3);
-//        }
-        
-//        public void setBlockVersion(int version, TextureScale scale)
-//        {
-//            if(Log.DEBUG_MODE && this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
-//                Log.warn("setBlockVersion on model state does not apply for shape");
-//            
-//            bits3 = P3B_BLOCK_VERSION[scale.ordinal()].setValue(version, bits3);
-//            invalidateHashCode();
-//        }
-
         /**
          * Will return 0 if model state does not include species.
          * This is more convenient than checking each place species is used.
@@ -1021,12 +938,6 @@ public class ModelStateFactory
         {
             this.populateStateFlagsIfNeeded();
             return (this.stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == STATE_FLAG_HAS_MODEL_ROTATION;
-        }
-        
-        public boolean hasBlockVersions()
-        {
-            this.populateStateFlagsIfNeeded();
-            return (this.stateFlags & STATE_FLAG_NEEDS_ANY_BLOCK_RANDOM) > 0;
         }
         
         public boolean hasMasonryJoin()

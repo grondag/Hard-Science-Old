@@ -93,7 +93,6 @@ public abstract class ShapeMeshGenerator
         // Default is to do nothing
     }
     
-    
     /**
      * If true, shape can be placed on itself to become bigger.
      */

@@ -5,22 +5,22 @@ import static grondag.hard_science.superblock.model.state.ModelStateFactory.Mode
 public enum TextureScale
 {
     /** 1x1 */
-    SINGLE(0, STATE_FLAG_NEEDS_BLOCK_RANDOMS),
+    SINGLE(0, STATE_FLAG_NONE),
     
     /** 2x2 */
-    TINY(1, STATE_FLAG_NEEDS_2x2_BLOCK_RANDOMS | STATE_FLAG_NEEDS_POS),
+    TINY(1, STATE_FLAG_NEEDS_POS),
     
     /** 4x4 */
-    SMALL(2, STATE_FLAG_NEEDS_4x4_BLOCK_RANDOMS | STATE_FLAG_NEEDS_POS),
+    SMALL(2, STATE_FLAG_NEEDS_POS),
     
     /** 8x8 */
-    MEDIUM(3, STATE_FLAG_NEEDS_8x8_BLOCK_RANDOMS | STATE_FLAG_NEEDS_POS),
+    MEDIUM(3, STATE_FLAG_NEEDS_POS),
     
     /** 16x16 */
-    LARGE(4, STATE_FLAG_NEEDS_16x16_BLOCK_RANDOMS | STATE_FLAG_NEEDS_POS),
+    LARGE(4, STATE_FLAG_NEEDS_POS),
     
     /** 32x32 */
-    GIANT(5, STATE_FLAG_NEEDS_32x32_BLOCK_RANDOMS | STATE_FLAG_NEEDS_POS);
+    GIANT(5, STATE_FLAG_NEEDS_POS);
     
     /** UV length for each subdivision of the texture */
     public final float sliceIncrement;

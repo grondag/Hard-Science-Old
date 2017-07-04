@@ -39,7 +39,6 @@ public enum ModelShape
     },
     
     //TODO: ROUND COLUMN
-    //TODO: STAIRS
     //TODO: PIPES
     //TODO: WALL/BARRIER/PANE
     
@@ -125,7 +124,7 @@ public enum ModelShape
     },
  
     // TODO: TETRAHEDRON
-    TETRAHEDRON(NONE)
+    TETRAHEDRON(NONE, false)
     {
         @Override
         public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
@@ -173,7 +172,481 @@ public enum ModelShape
         public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
         @Override
         public ShapeMeshGenerator meshFactory() { return WedgeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    STAIR(SPECIES, true)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return CubicPlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return StairMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_002(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_003(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_004(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_005(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_006(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_007(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_008(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_009(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_010(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_011(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_012(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_013(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_014(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_015(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_016(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_017(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_018(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_019(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_020(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_021(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_022(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_023(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_024(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_025(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_026(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_027(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_028(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_029(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_030(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_031(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_032(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_033(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_034(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_035(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_036(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_037(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_038(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_039(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_040(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_041(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_042(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_043(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_044(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_045(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_046(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_047(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_048(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_049(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_050(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_051(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_052(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_053(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_054(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_055(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_056(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_057(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_058(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
+    },
+    
+    RESERVED_059(NONE, false)
+    {
+        @Override
+        public IPlacementHandler getPlacementHandler() { return SimplePlacementHandler.INSTANCE; }
+        @Override
+        public ShapeMeshGenerator meshFactory() { return CubeMeshFactory.getShapeMeshFactory(); }
     };
+    
+    // Can add more shapes - up to 128 without exceeding limits of current model state binary structure
 
     public final boolean isAvailableInGui;
     public final MetaUsage metaUsage;

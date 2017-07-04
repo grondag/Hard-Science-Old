@@ -1,12 +1,7 @@
 package grondag.hard_science.library.varia;
 
-import java.util.ArrayList;
-
 public class BitPacker
 {
-    @SuppressWarnings("unused")
-    private ArrayList<BitElement> elements = new ArrayList<BitElement>();
-    
     private int totalBitLength;
     private long bitMask;
     

@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import grondag.hard_science.library.render.FaceVertex;
-import grondag.hard_science.library.render.QuadFactory;
+import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
@@ -50,7 +50,7 @@ public class RawQuadTest
         //convexity & area tests
         quad = new RawQuad().setupFaceQuad(EnumFacing.UP, 0, 0, 1, 1, 0.5, EnumFacing.NORTH);
         assertTrue(quad.isConvex());
-        assertTrue(Math.abs(quad.getArea() - 1.0) < QuadFactory.EPSILON);
+        assertTrue(Math.abs(quad.getArea() - 1.0) < QuadHelper.EPSILON);
         
         quad = new RawQuad(3).setupFaceQuad(EnumFacing.UP,
                 new FaceVertex(0, 0, 0), 
@@ -58,7 +58,7 @@ public class RawQuadTest
                 new FaceVertex(1, 1, 0), 
                 EnumFacing.NORTH);
         assertTrue(quad.isConvex());
-        assertTrue(Math.abs(quad.getArea() - 0.5) < QuadFactory.EPSILON);
+        assertTrue(Math.abs(quad.getArea() - 0.5) < QuadHelper.EPSILON);
         
         quad = new RawQuad().setupFaceQuad(EnumFacing.UP,
                 new FaceVertex(0, 0, 0), 

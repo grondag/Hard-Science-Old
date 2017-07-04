@@ -5,14 +5,13 @@ import org.junit.Test;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.library.world.CornerJoinBlockStateSelector;
-import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
-import grondag.hard_science.superblock.texture.TextureScale;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
 
 public class ModelStateTest
 {
@@ -20,6 +19,7 @@ public class ModelStateTest
     @Test
     public void test()
     {
+        Log.info("Max shapes within current format: " + MathHelper.smallestEncompassingPowerOfTwo(ModelShape.values().length));
         Log.info("bits0 length = "  + ModelStateFactory.PACKER_0.bitLength());
         Log.info("bits1 length = "  + ModelStateFactory.PACKER_1.bitLength());
         Log.info("bits2 length = "  + ModelStateFactory.PACKER_2.bitLength());
@@ -27,27 +27,25 @@ public class ModelStateTest
         Log.info("bits3 block length = "  + ModelStateFactory.PACKER_3_BLOCK.bitLength());
         Log.info("bits3 flow length = "  + ModelStateFactory.PACKER_3_FLOW.bitLength());
         
-        // sign bit on first long is used to store static indicator
-        assert(ModelStateFactory.PACKER_0.bitLength() < 64);
+        // sign bit on third long is used to store static indicator
+        assert(ModelStateFactory.PACKER_2.bitLength() < 64);
         
         ModelState state = new ModelState();
         
         state.setShape(ModelShape.COLUMN_SQUARE);
         state.setStatic(true);
 
-        state.setOverlayLayerEnabled(true);
+        state.setOuterLayerEnabled(true);
         state.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(5));
-        state.setColorMap(PaintLayer.DETAIL, BlockColorMapProvider.INSTANCE.getColorMap(7));
+        state.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(7));
         state.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
-        state.setLightingMode(PaintLayer.OVERLAY, LightingMode.SHADED);
+        state.setLightingMode(PaintLayer.OUTER, LightingMode.SHADED);
         state.setRenderLayer(PaintLayer.LAMP, BlockRenderLayer.SOLID);
         state.setRenderLayer(PaintLayer.BASE, BlockRenderLayer.TRANSLUCENT);
         state.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_STRONG);
-        state.setTexture(PaintLayer.OVERLAY, Textures.BORDER_SMOOTH_BLEND);
+        state.setTexture(PaintLayer.OUTER, Textures.BORDER_SMOOTH_BLEND);
         state.setAxis(EnumFacing.Axis.Z);
         state.setTranslucency(Translucency.SHADED);
-        state.setTextureRotation(Rotation.ROTATE_270, TextureScale.SINGLE);
-        state.setBlockVersion(7, TextureScale.SINGLE);
         state.setPosX(3);
         state.setPosY(7);
         state.setPosZ(15);
@@ -65,21 +63,19 @@ public class ModelStateTest
         
         assert(reloadedState.getShape() == ModelShape.COLUMN_SQUARE);
         assert(reloadedState.isStatic());
-        assert(reloadedState.isOverlayLayerEnabled());
-        assert(!reloadedState.isDetailLayerEnabled());
+        assert(reloadedState.isOuterLayerEnabled());
+        assert(!reloadedState.isMiddleLayerEnabled());
         assert(reloadedState.isLayerShaded(BlockRenderLayer.TRANSLUCENT) == false);
         assert(reloadedState.getColorMap(PaintLayer.BASE) == BlockColorMapProvider.INSTANCE.getColorMap(5));
-        assert(reloadedState.getColorMap(PaintLayer.DETAIL) == BlockColorMapProvider.INSTANCE.getColorMap(7));
+        assert(reloadedState.getColorMap(PaintLayer.OUTER) == BlockColorMapProvider.INSTANCE.getColorMap(7));
         assert(reloadedState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT);
-        assert(reloadedState.getLightingMode(PaintLayer.DETAIL) == LightingMode.SHADED);
+        assert(reloadedState.getLightingMode(PaintLayer.OUTER) == LightingMode.SHADED);
         assert(reloadedState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.SOLID);
-        assert(reloadedState.getRenderLayer(PaintLayer.OVERLAY) == BlockRenderLayer.TRANSLUCENT);
+        assert(reloadedState.getRenderLayer(PaintLayer.OUTER) == BlockRenderLayer.TRANSLUCENT);
         assert(reloadedState.getTexture(PaintLayer.BASE) == Textures.BLOCK_NOISE_STRONG);
-        assert(reloadedState.getTexture(PaintLayer.OVERLAY) == Textures.BORDER_SMOOTH_BLEND);
+        assert(reloadedState.getTexture(PaintLayer.OUTER) == Textures.BORDER_SMOOTH_BLEND);
         assert(reloadedState.getAxis()) == EnumFacing.Axis.Z;
         assert(reloadedState.getTranslucency()) == Translucency.SHADED;
-        assert(reloadedState.getTextureRotation(TextureScale.SINGLE)) == Rotation.ROTATE_270;
-        assert(reloadedState.getBlockVersion(TextureScale.SINGLE)) == 7;
         assert(reloadedState.getPosX() == 3);
         assert(reloadedState.getPosY() == 7);
         assert(reloadedState.getPosZ() == 15);

@@ -3,6 +3,7 @@ package grondag.hard_science.superblock.model.shape;
 import java.util.List;
 
 import javax.vecmath.Matrix4d;
+
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.render.FaceVertex;
@@ -12,17 +13,17 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.util.EnumFacing;
 
-public class WedgeMeshFactory extends AbstractWedgeMeshFactory
+public class StairMeshFactory extends AbstractWedgeMeshFactory
 {
     private static ShapeMeshGenerator instance;
     
     public static ShapeMeshGenerator getShapeMeshFactory()
     {
-        if(instance == null) instance = new WedgeMeshFactory();
+        if(instance == null) instance = new StairMeshFactory();
         return instance; 
     }
     
-    private WedgeMeshFactory()
+    private StairMeshFactory()
     {
         super();
     }
@@ -86,7 +87,6 @@ public class WedgeMeshFactory extends AbstractWedgeMeshFactory
                 new FaceVertex(0, 1, 1), 
                 EnumFacing.UP);
         builder.add(quad.transform(matrix));
-        
         
         return builder.build();
     }

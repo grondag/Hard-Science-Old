@@ -45,12 +45,16 @@ public enum BlockCorner
     
     private static final BlockCorner[][] CORNER_LOOKUP = new BlockCorner[6][6];
     
+    /** used to look up by axis and rotation */
+    private static final BlockCorner[][] MODEL_LOOKUP = new BlockCorner[3][4];
+    
     static
     {
         for(BlockCorner corner : BlockCorner.values())
         {
             CORNER_LOOKUP[corner.face1.ordinal()][corner.face2.ordinal()] = corner;
             CORNER_LOOKUP[corner.face2.ordinal()][corner.face1.ordinal()] = corner;
+            MODEL_LOOKUP[corner.orthogonalAxis.ordinal()][corner.modelRotation.ordinal()] = corner;
         }
     }
 
@@ -74,5 +78,10 @@ public enum BlockCorner
     public static BlockCorner find(EnumFacing face1, EnumFacing face2)
     {
         return BlockCorner.CORNER_LOOKUP[face1.ordinal()][face2.ordinal()];
+    }
+    
+    public static BlockCorner find(EnumFacing.Axis axis, Rotation modelRotation)
+    {
+        return BlockCorner.MODEL_LOOKUP[axis.ordinal()][modelRotation.ordinal()];
     }
 }
