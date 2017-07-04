@@ -1,10 +1,10 @@
-# Adversity
+# Hard Science
 
-Welcome to the repository for Adversity.
+Welcome to the repository for Hard Science.
 
-This mod is in active development and will not be feature-complete until after Minecraft 1.9 ships.  
+This mod is in active development and is not feature-complete nor stable.  
 
-Until further notice, please do not use this mod in ModPacks, nor in any world you want to keep.
+You may use this mod in ModPacks but it is not yet recommended that you use it in any world you want to keep.
 
 
 

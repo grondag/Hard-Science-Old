@@ -20,14 +20,14 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
 version = "0.1"
-group= "grondag.adversity" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "adversity"
+group= "grondag.hard_science" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "hard_science"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "1.11.2-13.20.0.2315"
+    version = "1.11.2-13.20.1.2393"
     runDir = "run"
     mappings = "snapshot_20161220"
     useDepAts = true
@@ -108,7 +108,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     
 	// https://repo.adobe.com/nexus/content/repositories/public/org/apache/commons/commons-imaging/1.0-R1534292/commons-imaging-1.0-R1534292.jar
-	deobfCompile "org.apache.commons:commons-imaging:1.0-R1534292"
+	// deobfCompile "org.apache.commons:commons-imaging:1.0-R1534292"
 }
 
 processResources

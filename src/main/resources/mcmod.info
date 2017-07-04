@@ -1,7 +1,7 @@
 [
 {
-  "modid": "adversity",
-  "name": "Adversity",
+  "modid": "hard_science",
+  "name": "Hard Science",
   "description": "New looks and new challenges with a hard science-fiction flavor.",
   "version": "1.11.2-0.0.1.0",
   "mcversion": "${mcversion}",
