@@ -1,5 +1,6 @@
 package grondag.hard_science.init;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.feature.volcano.VolcanoTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -12,7 +13,11 @@ public class ModTileEntities
 {
     public static void preInit(FMLPreInitializationEvent event) 
     {
-        GameRegistry.registerTileEntity(VolcanoTileEntity.class, "TileVolcano");
+        if(Configurator.VOLCANO.enableVolcano)
+        {
+            GameRegistry.registerTileEntity(VolcanoTileEntity.class, "TileVolcano");
+        }
+
         GameRegistry.registerTileEntity(SuperTileEntity.class, "SuperTileEntity");
         GameRegistry.registerTileEntity(SuperModelTileEntity.class, "SuperModelTileEntity");
         

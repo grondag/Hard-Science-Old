@@ -67,10 +67,6 @@ public class PlacementRenderer
                 {
                     BlockHighlighter.drawBlockHighlight(placementModelState, placement.getLeft(), player, event.getPartialTicks(), true);
                 }
-                else
-                {
-                    //TODO: Ghost Mode
-                }
             }
         }
 

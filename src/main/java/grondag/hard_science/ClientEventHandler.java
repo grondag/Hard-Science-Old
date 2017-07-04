@@ -73,21 +73,7 @@ public class ClientEventHandler
                 CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
                 CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
             }
-            
         }
-        
-        //TODO: move to client tick event
-//        if(enableStats)
-//        {
-//            if(nextStatTimeMS == 0)
-//            {
-//                nextStatTimeMS = System.currentTimeMillis() + 10000;
-//            }
-//            else if(System.currentTimeMillis() > nextStatTimeMS)
-//            {
-
-//            }
-//        }
     }
 
     @SubscribeEvent

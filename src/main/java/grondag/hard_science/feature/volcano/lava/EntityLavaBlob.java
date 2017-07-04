@@ -267,7 +267,7 @@ public class EntityLavaBlob extends Entity
         if(!this.world.isRemote )
         {
 //            HardScience.log.info("particle landing @" + this.getPosition().toString() + " amount=" + this.getFluidAmount());
-            Simulator.INSTANCE.getFluidTracker().addLava(this.getPosition(), this.getFluidAmount());
+            Simulator.INSTANCE.getLavaSimulator().addLava(this.getPosition(), this.getFluidAmount());
         }
         //            this.world.setBlockState(this.getPosition(), NiceBlockRegistrar.HOT_FLOWING_LAVA_HEIGHT_BLOCK.getDefaultState());
         this.setDead();

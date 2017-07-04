@@ -221,7 +221,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         }
         
         // if have too many blocks, switch to cooling mode
-        if(Simulator.INSTANCE.getFluidTracker().loadFactor() > 1)
+        if(Simulator.INSTANCE.getLavaSimulator().loadFactor() > 1)
         {
             this.clearingLevel = CLEARING_LEVEL_RESTART;
             return VolcanoStage.COOLING;
@@ -263,7 +263,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
      */
     private VolcanoStage doCooling()
     {
-        if(Simulator.INSTANCE.getFluidTracker().loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
+        if(Simulator.INSTANCE.getLavaSimulator().loadFactor() > Configurator.VOLCANO.cooldownTargetLoadFactor)
         {
             this.lavaCooldownTicks = 0;
             return VolcanoStage.COOLING;
@@ -281,7 +281,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     private VolcanoStage doFlowing()
     {
         
-        if(Simulator.INSTANCE.getFluidTracker().loadFactor() > 1)
+        if(Simulator.INSTANCE.getLavaSimulator().loadFactor() > 1)
         {
             this.wasBoreFlowEnabled = false;
             setBoreFlowEnabled(false);
@@ -302,7 +302,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
 
     private void setBoreFlowEnabled(boolean enabled)
     {
-        LavaCells cells = Simulator.INSTANCE.getFluidTracker().cells;
+        LavaCells cells = Simulator.INSTANCE.getLavaSimulator().cells;
         for(int i = 0; i < BORE_OFFSETS.size(); i++)
         {
             Vec3i offset = BORE_OFFSETS.get(i);
@@ -331,7 +331,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         
         if(block == ModBlocks.lava_dynamic_height)
         {
-            LavaCell cell = Simulator.INSTANCE.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+            LavaCell cell = Simulator.INSTANCE.getLavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
             if(cell != null) cell.setCoolingDisabled(true);
             return;
         }
@@ -345,11 +345,11 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
                 buildMound();
             }
         }
-        LavaCell cell = Simulator.INSTANCE.getFluidTracker().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
+        LavaCell cell = Simulator.INSTANCE.getLavaSimulator().cells.getCellIfExists(clearPos.getX(), clearPos.getY(), clearPos.getZ());
         if(cell == null) 
         {
             // force cell creation
-            Simulator.INSTANCE.getFluidTracker().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
+            Simulator.INSTANCE.getLavaSimulator().addLava(clearPos, LavaSimulator.FLUID_UNITS_PER_LEVEL);
         }
         else
         {

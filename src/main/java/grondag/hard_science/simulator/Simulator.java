@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.google.common.collect.Lists;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
@@ -66,6 +67,9 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     private volatile boolean isRunning = false;
     public boolean isRunning() { return isRunning; }
     
+    /** true if we've warned once about clock going backwards - prevents log spam */
+    private boolean isClockSetbackNotificationNeeded = true;
+    
  //   private AtomicInteger nextNodeID = new AtomicInteger(NodeRoots.FIRST_NORMAL_NODE_ID);
 //    private static final String TAG_NEXT_NODE_ID = "nxid";
 	
@@ -99,21 +103,25 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
-	        this.volcanoManager = new VolcanoManager();
-	        this.lavaSimulator = new LavaSimulator(this.world);
+	     
 	        
             if(PersistenceManager.loadNode(world, this))
             {
-                if(!PersistenceManager.loadNode(world, this.volcanoManager))
+                if(Configurator.VOLCANO.enableVolcano)
                 {
-                    Log.info("Volcano manager data not found - recreating.  Some world state may be lost.");
-                    PersistenceManager.registerNode(world, this.volcanoManager);
-                }
-                
-                if(!PersistenceManager.loadNode(world, this.lavaSimulator))
-                {
-                    Log.info("Lava simulator data not found - recreating.  Some world state may be lost.");
-                    PersistenceManager.registerNode(world, this.lavaSimulator);
+                    this.volcanoManager = new VolcanoManager();
+                    this.lavaSimulator = new LavaSimulator(this.world);
+                    if(!PersistenceManager.loadNode(world, this.volcanoManager))
+                    {
+                        Log.info("Volcano manager data not found - recreating.  Some world state may be lost.");
+                        PersistenceManager.registerNode(world, this.volcanoManager);
+                    }
+                    
+                    if(!PersistenceManager.loadNode(world, this.lavaSimulator))
+                    {
+                        Log.info("Lava simulator data not found - recreating.  Some world state may be lost.");
+                        PersistenceManager.registerNode(world, this.lavaSimulator);
+                    }
                 }
             }
             else
@@ -124,14 +132,18 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     	        this.lastSimTick = 0;
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
-    	        PersistenceManager.registerNode(world, this.volcanoManager);
-    	        PersistenceManager.registerNode(world, this.lavaSimulator);
-
+    	        
+    	        if(Configurator.VOLCANO.enableVolcano)
+                {
+                    this.volcanoManager = new VolcanoManager();
+                    this.lavaSimulator = new LavaSimulator(this.world);
+        	        PersistenceManager.registerNode(world, this.volcanoManager);
+        	        PersistenceManager.registerNode(world, this.lavaSimulator);
+                }
     	    }
 
     		this.isRunning = true;
-            Log.info("starting first frame");
-//    		executor.execute(new FrameStarter());
+            Log.info("starting first simulation frame");
 	    }
 	}
 	
@@ -188,12 +200,20 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
                     this.lastSimTick++;
                     this.worldTickOffset = this.lastSimTick - world.getWorldTime();
                     this.setSaveDirty(true);
-                    Log.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
-                    Log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
+                    if(isClockSetbackNotificationNeeded)
+                    {
+                        Log.warn("World clock appears to have run backwards.  Simulation clock offset was adjusted to compensate.");
+                        Log.warn("Next tick according to world was " + newLastSimTick + ", using " + this.lastSimTick + " instead.");
+                        Log.warn("If this recurs, simulation clock will be similarly adjusted without notification.");
+                        isClockSetbackNotificationNeeded = false;
+                    }
                 }
                 
-                this.volcanoManager.doOnTick();
-                this.lavaSimulator.doOnTick();
+                if(this.volcanoManager != null)
+                {                  
+                    this.volcanoManager.doOnTick();
+                    this.lavaSimulator.doOnTick();
+                }
                 
                 lastTickFuture = controlThread.submit(this.offTickFrame);
             }
@@ -241,7 +261,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
     public int getTick() { return this.lastSimTick; }
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
-    public LavaSimulator getFluidTracker() { return this.lavaSimulator; }
+    public LavaSimulator getLavaSimulator() { return this.lavaSimulator; }
 
     // Frame execution logic
     Runnable offTickFrame = new Runnable()
@@ -249,14 +269,17 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
         @Override
         public void run()
         {
-            try
+            if(Simulator.this.volcanoManager != null)
             {
-                Simulator.this.volcanoManager.doOffTick();
-                Simulator.this.lavaSimulator.doOffTick();
-            }
-            catch(Exception e)
-            {
-                Log.error("Exception during simulator off-tick processing", e);
+                try
+                {
+                    Simulator.this.volcanoManager.doOffTick();
+                    Simulator.this.lavaSimulator.doOffTick();
+                }
+                catch(Exception e)
+                {
+                    Log.error("Exception during simulator off-tick processing", e);
+                }
             }
         }    
      };

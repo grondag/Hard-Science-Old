@@ -41,8 +41,12 @@ public class Textures
             new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.SPLIT_X_8)
             .withRotation(RANDOM.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.ALWAYS_HIDDEN));
     
-
-    //don't load test textures if not enabled
+    //======================================================================
+    //  TEST/DEBUG TEXTURES - NOT LOADED UNLESS NEEDED
+    //======================================================================
+    
+    // but still load placeholders so we don't mess up texture slot IDs
+    
     public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex_single" : "noise_moderate",
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
@@ -60,6 +64,34 @@ public class Textures
     public static final TexturePallette BIGTEX_TEST5 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
             new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT));
 
+    public static final TexturePallette TEST = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+    public static final TexturePallette TEST_ZOOM = REGISTRY.addZoomedPallete(TEST);
+    
+    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+            new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette TEST_90_ZOOM = REGISTRY.addZoomedPallete(TEST_90);
+    
+    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+            new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette TEST_180_ZOOM = REGISTRY.addZoomedPallete(TEST_180);
+    
+    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+            new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_270)));
+    public static final TexturePallette TEST_270_ZOOM = REGISTRY.addZoomedPallete(TEST_270);
+    
+    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
+    
+    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+            new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+            new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+            new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_270)));
+    
     //======================================================================
     //  TILES - REGULAR
     //======================================================================
@@ -140,7 +172,6 @@ public class Textures
     public static final TexturePallette BIGTEX_CRACKED_EARTH_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_CRACKED_EARTH);
     public static final TexturePallette BIGTEX_CRACKED_EARTH_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_CRACKED_EARTH_ZOOM);
 
-    
     //======================================================================
     //  VOLCANO
     //======================================================================
@@ -155,7 +186,7 @@ public class Textures
     public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_COOL);
     public static final TexturePallette BIGTEX_BASALT_COOL_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_COOL_ZOOM);
     
-    public static final TexturePallette BIGTEX_LAVA = REGISTRY.addTexturePallette("lava",  
+    public static final TexturePallette BIGTEX_LAVA = REGISTRY.addTexturePallette(Configurator.VOLCANO.enableVolcano ? "lava" : "clouds",  
             new TexturePalletteInfo(BIGTEX_BASALT_CUT).withLayout(TextureLayout.BIGTEX_ANIMATED).withGroup(TextureGroup.HIDDEN_TILES));
     
     public static final TexturePallette BIGTEX_BASALT_COOLING = REGISTRY.addTexturePallette("basalt_cooling", 
@@ -164,6 +195,12 @@ public class Textures
     public static final TexturePallette BIGTEX_BASALT_WARM = REGISTRY.addTexturePallette("basalt_warm",  new TexturePalletteInfo(BIGTEX_BASALT_COOLING));
     public static final TexturePallette BIGTEX_BASALT_HOT = REGISTRY.addTexturePallette("basalt_hot", new TexturePalletteInfo(BIGTEX_BASALT_COOLING));
     public static final TexturePallette BIGTEX_BASALT_VERY_HOT = REGISTRY.addTexturePallette("basalt_very_hot", new TexturePalletteInfo(BIGTEX_BASALT_COOLING));
+    
+    public static final TexturePallette BIGTEX_BASALT_HINT = REGISTRY.addTexturePallette("basalt_hint", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_DETAILS));
+    public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT);
+    public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT_ZOOM);
     
     //======================================================================
     //  BIGTEX - ANIMATED
@@ -300,36 +337,6 @@ public class Textures
     public static final TexturePallette DECAL_THICK_BARS_RANDOM = REGISTRY.addTexturePallette("thick_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THIN_BARS_RANDOM = REGISTRY.addTexturePallette("thin_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
 
-  //FIXME: reorganize textures after this point before release
-    
-    public static final TexturePallette BIGTEX_BASALT_HINT = REGISTRY.addTexturePallette("basalt_hint", 
-            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_DETAILS));
-    public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT);
-    public static final TexturePallette BIGTEX_BASALT_HINT_ZOOM_X2 = REGISTRY.addZoomedPallete(BIGTEX_BASALT_HINT_ZOOM);
-    
-    public static final TexturePallette TEST = REGISTRY.addTexturePallette("test", 
-            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
-    public static final TexturePallette TEST_ZOOM = REGISTRY.addZoomedPallete(TEST);
-    
-    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette("test", new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_90)));
-    public static final TexturePallette TEST_90_ZOOM = REGISTRY.addZoomedPallete(TEST_90);
-    
-    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette("test", new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_180)));
-    public static final TexturePallette TEST_180_ZOOM = REGISTRY.addZoomedPallete(TEST_180);
-    
-    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette("test", new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_270)));
-    public static final TexturePallette TEST_270_ZOOM = REGISTRY.addZoomedPallete(TEST_270);
-    
-    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette("test4x4", 
-            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
-            .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
-    
-    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette("test4x4", new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_90)));
-    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette("test4x4", new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_180)));
-    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette("test4x4", new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_270)));
-    
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {
         int searchFlags = 0;

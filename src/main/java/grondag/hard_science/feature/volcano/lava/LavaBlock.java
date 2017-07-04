@@ -68,7 +68,7 @@ public class LavaBlock extends TerrainDynamicBlock
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.INSTANCE.getFluidTracker().notifyBlockChange(worldIn, fromPos);
+        Simulator.INSTANCE.getLavaSimulator().notifyBlockChange(worldIn, fromPos);
     }
 
     @Override
@@ -76,14 +76,14 @@ public class LavaBlock extends TerrainDynamicBlock
     {
         super.onBlockAdded(worldIn, pos, state);
         handleFallingBlocks(worldIn, pos, state);
-        Simulator.INSTANCE.getFluidTracker().registerPlacedLava(worldIn, pos, state);
+        Simulator.INSTANCE.getLavaSimulator().registerPlacedLava(worldIn, pos, state);
     }
     
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         super.breakBlock(worldIn, pos, state);
-        if(this.isFlowHeight()) Simulator.INSTANCE.getFluidTracker().unregisterDestroyedLava(worldIn, pos, state);
+        if(this.isFlowHeight()) Simulator.INSTANCE.getLavaSimulator().unregisterDestroyedLava(worldIn, pos, state);
     }
     
     private void handleFallingBlocks(World worldIn, BlockPos pos, IBlockState state)
@@ -117,9 +117,9 @@ public class LavaBlock extends TerrainDynamicBlock
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
         super.addProbeInfo(mode, probeInfo, player, world, blockState, data);
-        if(Simulator.INSTANCE.getFluidTracker() instanceof LavaSimulator)
+        if(Simulator.INSTANCE.getLavaSimulator() instanceof LavaSimulator)
         {
-            LavaSimulator sim = (LavaSimulator)Simulator.INSTANCE.getFluidTracker();
+            LavaSimulator sim = (LavaSimulator)Simulator.INSTANCE.getLavaSimulator();
             BlockPos pos = data.getPos();  
             LavaCell cell = sim.cells.getCellIfExists(pos.getX(), pos.getY(), pos.getZ());
             if(cell == null)

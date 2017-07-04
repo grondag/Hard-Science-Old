@@ -84,7 +84,8 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
+            LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+            if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
@@ -94,7 +95,8 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            Simulator.INSTANCE.getFluidTracker().notifyBlockChange(event.getWorld(), event.getPos());
+            LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+            if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
     
@@ -103,12 +105,15 @@ public class CommonEventHandler
     {
         if(event.getWorld().isRemote) return;
         
-        LavaSimulator sim = Simulator.INSTANCE.getFluidTracker();
-        for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
+        LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+        if(sim != null)
         {
-            if(!(snap.getCurrentBlock() instanceof LavaBlock))
+            for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
             {
-                sim.notifyBlockChange(event.getWorld(), snap.getPos());
+                if(!(snap.getCurrentBlock() instanceof LavaBlock))
+                {
+                    sim.notifyBlockChange(event.getWorld(), snap.getPos());
+                }
             }
         }
     }

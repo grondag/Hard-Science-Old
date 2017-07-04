@@ -2,6 +2,7 @@ package grondag.hard_science.init;
 
 import java.util.Map;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.lava.LavaBlobItem;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -40,11 +41,15 @@ public class ModItems
         IForgeRegistry<Item> itemReg = event.getRegistry();
         registerItemBlocks(itemReg);
  
-        itemReg.register(new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new LavaBlobItem().setRegistryName("lava_blob").setUnlocalizedName("lava_blob").setCreativeTab(HardScience.tabMod));
-        //Disabled until volcano world gen / activation logic revisited
-        //itemReg.register(new VolcanoWand().setCreativeTab(HardScience.tabMod));
-        itemReg.register(new TerrainWand().setCreativeTab(HardScience.tabMod));
+        if(Configurator.VOLCANO.enableVolcano)
+        {
+            itemReg.register(new Item().setRegistryName("basalt_rubble").setUnlocalizedName("basalt_rubble").setCreativeTab(HardScience.tabMod));
+            itemReg.register(new LavaBlobItem().setRegistryName("lava_blob").setUnlocalizedName("lava_blob").setCreativeTab(HardScience.tabMod));
+            //Disabled until volcano world gen / activation logic revisited
+            //itemReg.register(new VolcanoWand().setCreativeTab(HardScience.tabMod));
+            itemReg.register(new TerrainWand().setCreativeTab(HardScience.tabMod));
+        }
+        
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
     }
 
