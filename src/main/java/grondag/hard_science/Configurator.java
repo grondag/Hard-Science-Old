@@ -169,8 +169,7 @@ public class Configurator
         public static enum PreviewMode
         {
             NONE,
-            OUTLINE,
-            GHOST
+            OUTLINE
         }
     }
     
