@@ -47,7 +47,7 @@ public class Textures
     
     // but still load placeholders so we don't mess up texture slot IDs
     
-    public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex_single" : "noise_moderate",
+    public static final TexturePallette BIGTEX_TEST_SINGLE = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex_single" : "noise_moderate_0_0",
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
             .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
     
@@ -64,32 +64,32 @@ public class Textures
     public static final TexturePallette BIGTEX_TEST5 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "bigtex" : "noise_moderate",
             new TexturePalletteInfo(BIGTEX_TEST1).withScale(TextureScale.GIANT));
 
-    public static final TexturePallette TEST = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
     public static final TexturePallette TEST_ZOOM = REGISTRY.addZoomedPallete(TEST);
     
-    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_90)));
     public static final TexturePallette TEST_90_ZOOM = REGISTRY.addZoomedPallete(TEST_90);
     
-    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette TEST_180_ZOOM = REGISTRY.addZoomedPallete(TEST_180);
     
-    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate", 
+    public static final TexturePallette TEST_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST).withRotation(FIXED.with(ROTATE_270)));
     public static final TexturePallette TEST_270_ZOOM = REGISTRY.addZoomedPallete(TEST_270);
     
-    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4X4 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SMALL).withLayout(TextureLayout.BIGTEX)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.HIDDEN_TILES));
     
-    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4x4_90 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_90)));
-    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4x4_180 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_180)));
-    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate", 
+    public static final TexturePallette TEST_4x4_270 = REGISTRY.addTexturePallette(Configurator.BLOCKS.showHiddenTextures ? "test4x4" : "noise_moderate_0_0", 
             new TexturePalletteInfo(TEST_4X4).withRotation(FIXED.with(ROTATE_270)));
     
     //======================================================================
@@ -296,7 +296,7 @@ public class Textures
     public static final TexturePallette DECAL_THIN_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("thin_diagonal_ridges", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_THIN_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("thin_diagonal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_THIN_DIAGONAL_BARS = REGISTRY.addTexturePallette("thin_diagonal_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
-    public static final TexturePallette DECAL_SKINNY_DIAGNAL_CROSS_BARS = REGISTRY.addTexturePallette("skinny_diagnal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SKINNY_DIAGNAL_CROSS_BARS = REGISTRY.addTexturePallette("skinny_diagonal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_SKINNY_DIAGONAL_BARS = REGISTRY.addTexturePallette("skinny_diagonal_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("diagonal_cross_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
     public static final TexturePallette DECAL_DIAGONAL_BARS = REGISTRY.addTexturePallette("diagonal_bars", new TexturePalletteInfo(DECAL_SMALL_DOT));
