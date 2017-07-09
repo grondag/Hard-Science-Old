@@ -62,6 +62,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         private int zoomLevel = 0;
         /** number of ticks to display each frame */
         private int ticksPerFrame = 2;
+        /** for border-layout textures, controls if "no border" texture is rendered */
+        private boolean renderNoBorderAsTile = false;
         
         public TexturePalletteInfo()
         {
@@ -78,6 +80,7 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             this.textureGroup = source.textureGroup;
             this.zoomLevel = source.zoomLevel;
             this.ticksPerFrame = source.ticksPerFrame;
+            this.renderNoBorderAsTile = source.renderNoBorderAsTile;
         }
 
         /**
@@ -151,6 +154,12 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             this.ticksPerFrame = ticksPerFrame;
             return this;
         }
+        
+        public TexturePalletteInfo withRenderNoBorderAsTile(boolean renderAsTile)
+        {
+            this.renderNoBorderAsTile = renderAsTile;
+            return this;
+        }
     }
     
     public class TexturePallette
@@ -204,6 +213,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
          */
         public final int ticksPerFrame;
 
+        /** for border-layout textures, controls if "no border" texture is rendered */
+        public final boolean renderNoBorderAsTile;
 
         protected TexturePallette(int ordinal, String textureBaseName, TexturePalletteInfo info)
         {
@@ -218,9 +229,23 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             this.textureGroup = info.textureGroup;
             this.zoomLevel = info.zoomLevel;
             this.ticksPerFrame = info.ticksPerFrame;
+            this.renderNoBorderAsTile = info.renderNoBorderAsTile;
   
-            this.stateFlags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag 
-                    | (this.rotation.rotationType() == TextureRotationType.RANDOM ? ModelState.STATE_FLAG_NEEDS_TEXTURE_ROTATION : 0);
+            int flags = this.textureScale.modelStateFlag | this.textureLayout.modelStateFlag;
+            
+            // textures with randomization options also require position information
+            
+            if(info.rotation.rotationType() == TextureRotationType.RANDOM)
+            {
+                flags |= (ModelState.STATE_FLAG_NEEDS_TEXTURE_ROTATION | ModelState.STATE_FLAG_NEEDS_POS);
+            }
+            
+            if(info.textureVersionCount > 1)
+            {
+                flags |= ModelState.STATE_FLAG_NEEDS_POS;
+            }
+            this.stateFlags =  flags;
+                    
         }
         
         /**
@@ -243,15 +268,21 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                 break;
                 
             case BORDER_13:
+            {
+                // last texture (no border) only needed if rendering in solid layer
+                int texCount = this.renderLayer == BlockRenderLayer.SOLID 
+                        ? CubicQuadPainterBorders.TEXTURE_COUNT 
+                        : CubicQuadPainterBorders.TEXTURE_COUNT -1;
+                
                 for(int i = 0; i < this.textureVersionCount; i++)
                 {
-                    for(int j = 0; j < CubicQuadPainterBorders.TEXTURE_COUNT; j++)
+                    for(int j = 0; j < texCount; j++)
                     {
                         textureList.add(buildTextureName_X_8(i * CubicQuadPainterBorders.TEXTURE_BLOCK_SIZE + j));
                     }
                 }
                 break;
-                
+            }
             case MASONRY_5:
                 for(int i = 0; i < this.textureVersionCount; i++)
                 {

@@ -121,6 +121,47 @@ public class Textures
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.MASONRY_5)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.CUTOUT_MIPPED).withGroup(TextureGroup.STATIC_BORDERS));
 
+    public static final TexturePallette BORDER_SINGLE_PINSTRIPE = addBorderSingle("border_single_pinstripe");
+    public static final TexturePallette BORDER_INSET_PINSTRIPE = addBorderSingle("border_inset_pinstripe");
+    public static final TexturePallette BORDER_GRITTY_INSET_PINSTRIPE = addBorderRandom("border_gritty_inset_pinstripe", false);
+    public static final TexturePallette BORDER_SINGLE_LINE = addBorderSingle("border_single_line");
+    public static final TexturePallette BORDER_SINGLE_BOLD_LINE = addBorderSingle("border_single_bold_line");
+    public static final TexturePallette BORDER_SINGLE_FAT_LINE = addBorderSingle("border_single_fat_line");
+    public static final TexturePallette BORDER_GRITTY_FAT_LINE = addBorderRandom("border_gritty_fat_line", false);
+    public static final TexturePallette BORDER_DOUBLE_MIXED_LINES = addBorderSingle("border_double_mixed_lines");
+    public static final TexturePallette BORDER_DOUBLE_PINSTRIPES = addBorderSingle("border_double_pinstripes");
+    public static final TexturePallette BORDER_INSET_DOUBLE_PINSTRIPES = addBorderSingle("border_inset_double_pinstripes");
+    public static final TexturePallette BORDER_TRIPLE_MIXED_LINES = addBorderSingle("border_triple_mixed_lines");
+    public static final TexturePallette BORDER_DOUBLE_DOUBLE = addBorderSingle("border_double_double");
+    public static final TexturePallette BORDER_WHITEWALL = addBorderSingle("border_whitewall");
+    public static final TexturePallette BORDER_GRITTY_WHITEWALL = addBorderRandom("border_gritty_whitewall", false);
+    
+    public static final TexturePallette BORDER_PINSTRIPE_DASH = addBorderSingle("border_pinstripe_dash");
+    public static final TexturePallette BORDER_INSET_DOTS_1 = addBorderSingle("border_inset_dots_1");
+    public static final TexturePallette BORDER_INSET_DOTS_2 = addBorderSingle("border_inset_dots_2");
+    public static final TexturePallette BORDER_INSET_PIN_DOTS = addBorderSingle("border_inset_pin_dots");
+    public static final TexturePallette BORDER_CHANNEL_DOTS = addBorderSingle("border_channel_dots");
+    public static final TexturePallette BORDER_CHANNEL_PIN_DOTS = addBorderSingle("border_channel_pin_dots");
+    
+    public static final TexturePallette BORDER_CHANNEL_CHECKERBOARD = addBorderSingle("border_channel_checkerboard");
+    public static final TexturePallette BORDER_CHECKERBOARD = addBorderSingle("border_checkerboard");
+    public static final TexturePallette BORDER_GRITTY_CHECKERBOARD = addBorderRandom("border_gritty_checkerboard", false);
+    
+    public static final TexturePallette BORDER_GROOVY_STRIPES = addBorderSingle("border_groovy_stripes");
+    public static final TexturePallette BORDER_GRITTY_GROOVES = addBorderRandom("border_gritty_grooves", false);
+    public static final TexturePallette BORDER_GROOVY_PINSTRIPES = addBorderSingle("border_groovy_pinstripes");
+    public static final TexturePallette BORDER_GRITTY_PINSTRIPE_GROOVES = addBorderRandom("border_gritty_pinstripe_grooves", false);
+    
+    public static final TexturePallette BORDER_ZIGZAG = addBorderSingle("border_zigzag");
+    public static final TexturePallette BORDER_INVERSE_ZIGZAG = addBorderSingle("border_inverse_zigzag");
+    public static final TexturePallette BORDER_CAUTION = addBorderSingle("border_caution");
+    public static final TexturePallette BORDER_FILMSTRIP = addBorderSingle("border_filmstrip");
+    public static final TexturePallette BORDER_CHANNEL_LINES = addBorderSingle("border_channel_lines");
+    public static final TexturePallette BORDER_SIGNAL = addBorderSingle("border_signal");
+    public static final TexturePallette BORDER_GRITTY_SIGNAL = addBorderRandom("border_gritty_signal", false);
+    public static final TexturePallette BORDER_LOGIC = addBorderRandom("border_logic", false);
+    public static final TexturePallette BORDER_INVERSE_LOGIC = addBorderRandom("border_inverse_logic", true);
+    public static final TexturePallette BORDER_INVERSE_TILE = addBorderRandomTile("border_inverse_logic");
     
     //======================================================================
     //  BIGTEX
@@ -336,7 +377,29 @@ public class Textures
     public static final TexturePallette DECAL_FAT_BARS_RANDOM = REGISTRY.addTexturePallette("fat_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THICK_BARS_RANDOM = REGISTRY.addTexturePallette("thick_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THIN_BARS_RANDOM = REGISTRY.addTexturePallette("thin_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
-
+    
+    private static TexturePallette addBorderSingle(String textureName)
+    {
+        return REGISTRY.addTexturePallette(textureName, 
+                new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_BORDERS));
+    }
+    
+    private static TexturePallette addBorderRandom(String textureName, boolean renderNoBorderAsTile)
+    {
+        return REGISTRY.addTexturePallette(textureName, 
+                new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.TRANSLUCENT).withGroup(TextureGroup.STATIC_BORDERS)
+                .withRenderNoBorderAsTile(renderNoBorderAsTile));
+    }
+    
+    private static TexturePallette addBorderRandomTile(String textureName)
+    {
+        return REGISTRY.addTexturePallette(textureName, 
+                new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.STATIC_TILES));
+    }
+    
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)
     {
         int searchFlags = 0;

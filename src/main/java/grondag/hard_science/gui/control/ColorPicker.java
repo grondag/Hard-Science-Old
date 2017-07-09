@@ -1,6 +1,7 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -35,6 +36,9 @@ public class ColorPicker extends GuiControl
     public Hue getHue() { return selectedHue; }
     public void setHue(Hue h) { selectedHue = h; }
     public int getColorMapID() { return colorMapID; }
+    
+    public boolean showLampColors = false;
+    
     public void setColorMapID( int colorMapID ) 
     { 
         this.colorMapID = colorMapID;
@@ -75,6 +79,9 @@ public class ColorPicker extends GuiControl
         double top = this.gridTop;
         double right;
         double bottom;
+        
+        EnumColorMap map = this.showLampColors ? EnumColorMap.LAMP : EnumColorMap.BASE;
+       
         for(Luminance l : Luminance.values())
         {
             bottom = top + this.gridIncrementY;
@@ -85,7 +92,7 @@ public class ColorPicker extends GuiControl
                 ColorMap colormap = BlockColorMapProvider.INSTANCE.getColorMap(selectedHue, c, l);
                 if(colormap != null)
                 {
-                    GuiUtil.drawRect(left, top, right, bottom, colormap.getColor(EnumColorMap.BASE));
+                    GuiUtil.drawRect(left, top, right, bottom, colormap.getColor(map));
                 }
                 left = right;
             }
@@ -97,8 +104,8 @@ public class ColorPicker extends GuiControl
         double sLeft = this.gridLeft + selectedColormap.chroma.ordinal() * this.gridIncrementX;
         double sTop = this.gridTop + selectedColormap.luminance.ordinal() * this.gridIncrementY;
 
-        GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrementX + 1, sTop + this.gridIncrementY + 1, 0xFFFFFFFF);
-        GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrementX + 0.5, sTop + this.gridIncrementY + 0.5, selectedColormap.getColor(EnumColorMap.BASE));
+        GuiUtil.drawRect(sLeft - 1, sTop - 1, sLeft + this.gridIncrementX + 1, sTop + this.gridIncrementY + 1, this.showLampColors ? Color.BLACK : Color.WHITE);
+        GuiUtil.drawRect(sLeft - 0.5, sTop - 0.5, sLeft + this.gridIncrementX + 0.5, sTop + this.gridIncrementY + 0.5, selectedColormap.getColor(map));
     }
 
     private void changeHueIfDifferent(Hue newHue)

@@ -28,6 +28,8 @@ public abstract class TabBar<T> extends GuiControl
     private int selectedTabIndex;
     
     private double actualItemSize;
+    /** {@link #actualItemSize()} rounded down */
+    private int actualItemPixels;
     private double tabSize;
     private double scrollHeight;
     
@@ -183,6 +185,7 @@ public abstract class TabBar<T> extends GuiControl
             
             double horizontalSpaceRemaining = this.width - TAB_WIDTH;
             this.actualItemSize = horizontalSpaceRemaining / this.columnsPerRow - ITEM_SPACING;
+            this.actualItemPixels = (int)actualItemSize;
             this.rowsPerTab = (int) ((this.height + ITEM_SPACING) / (actualItemSize + ITEM_SPACING));
             this.itemsPerTab = columnsPerRow * rowsPerTab;
             this.tabCount = this.itemsPerTab > 0 ? (this.items.size() + this.itemsPerTab - 1) / this.itemsPerTab : 0;
@@ -407,5 +410,12 @@ public abstract class TabBar<T> extends GuiControl
     {
         this.refreshContentCoordinatesIfNeeded();
         return this.actualItemSize;
-    }   
+    } 
+    
+    /** {@link #actualItemSize()} rounded down to nearest integer */
+    protected int actualItemPixels() 
+    {
+        this.refreshContentCoordinatesIfNeeded();
+        return this.actualItemPixels;
+    } 
 }

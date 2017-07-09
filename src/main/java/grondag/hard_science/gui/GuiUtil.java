@@ -160,9 +160,9 @@ public class GuiUtil
     /**
      * Draws a rectangle using the provide texture sprite and color
      */
-    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, Rotation rotation)
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, Rotation rotation, boolean useAlpha)
     {
-        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE, rotation);
+        drawTexturedRectWithColor(heightIn, heightIn, heightIn, textureSprite, heightIn, heightIn, color, TextureScale.SINGLE, rotation, useAlpha);
     }
     
     private static double[][] rotatedUV(double minU, double minV, double maxU, double maxV, Rotation rotation)
@@ -205,7 +205,7 @@ public class GuiUtil
         
         return result;
     }
-    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale, Rotation rotation)
+    public static void drawTexturedRectWithColor(double xCoord, double yCoord, double zLevel, TextureAtlasSprite textureSprite, double widthIn, double heightIn, int color, TextureScale scale, Rotation rotation, boolean useAlpha)
     {
         float alpha = (float)(color >> 24 & 255) / 255.0F;
         float red = (float)(color >> 16 & 255) / 255.0F;
@@ -225,9 +225,20 @@ public class GuiUtil
 
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
-        GlStateManager.enableBlend();
         GlStateManager.enableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        
+        if(useAlpha)
+        {
+            GlStateManager.enableAlpha();  // should already be, but make sure
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        }
+        else
+        {
+            GlStateManager.disableBlend();
+            GlStateManager.disableAlpha();
+        }
+        
         GlStateManager.color(1, 1, 1, 1);
 
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
@@ -244,7 +255,15 @@ public class GuiUtil
             .tex(uv[0][3], uv[1][3])
             .color(red, green, blue, alpha).endVertex();
         tessellator.draw();
-        GlStateManager.disableBlend();
+        
+        if(useAlpha)
+        {
+            GlStateManager.disableBlend();
+        }
+        else
+        {
+            GlStateManager.enableAlpha();
+        }
         
         textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();

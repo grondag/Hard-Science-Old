@@ -31,6 +31,7 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
+import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.Translucency;
@@ -184,7 +185,6 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewSub(layer);
         }
 
-
         BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
         if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
         {
@@ -223,8 +223,7 @@ public class SuperGuiScreen extends GuiScreen
     {
         if(modelState.getColorMap(layer).ordinal != colorPicker[layer.dynamicIndex].getColorMapID())
         {
-            modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
-            textureTabBar[layer.dynamicIndex].colorMap = BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID());
+            updateColors(layer);
             hasUpdates = true;
         }
 
@@ -247,13 +246,35 @@ public class SuperGuiScreen extends GuiScreen
             }
         }
 
-        if(!((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) && fullBrightToggle[layer.dynamicIndex].isOn()))
+        if(((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) != fullBrightToggle[layer.dynamicIndex].isOn()))
         {
             modelState.setLightingMode(layer, fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
+            updateColors(layer);
+            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT;
             hasUpdates = true;
         }
     }
 
+    private void updateColors(PaintLayer layer)
+    {
+        modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
+        textureTabBar[layer.dynamicIndex].borderColor = BlockColorMapProvider.INSTANCE
+                .getColorMap(colorPicker[layer.dynamicIndex].getColorMapID())
+                .getColor(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP: EnumColorMap.BASE);
+        
+        if(layer == PaintLayer.BASE)
+        {
+            // refresh base color on overlay layers if it has changed
+            int baseColor = modelState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT
+                    ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
+                    : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
+
+            textureTabBar[PaintLayer.MIDDLE.dynamicIndex].baseColor = baseColor;
+            textureTabBar[PaintLayer.OUTER.dynamicIndex].baseColor = baseColor;
+            textureTabBar[PaintLayer.LAMP.dynamicIndex].baseColor = baseColor;
+        }
+    }
+    
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
@@ -360,6 +381,8 @@ public class SuperGuiScreen extends GuiScreen
             for(int i = 0; i < PaintLayer.DYNAMIC_SIZE; i++)
             {
                 TexturePicker t = (TexturePicker) new TexturePicker(new ArrayList<TexturePallette>(), xStart + CONTROL_EXTERNAL_MARGIN, yStart + 100).setVerticalWeight(5);
+                // only render textures with alpha for layers that will render that way in world
+                t.renderAlpha = PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.MIDDLE || PaintLayer.DYNAMIC_VALUES[i] == PaintLayer.OUTER;
                 textureTabBar[i] = t;
 
                 colorPicker[i] = (ColorPicker) new ColorPicker().setHorizontalWeight(5);
@@ -474,11 +497,17 @@ public class SuperGuiScreen extends GuiScreen
             TexturePallette tex = modelState.getTexture(layer);
             t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
-            t.colorMap = modelState.getColorMap(layer);
+            t.borderColor = modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT
+                    ? modelState.getColorMap(layer).getColor(EnumColorMap.LAMP)
+                    : modelState.getColorMap(layer).getColor(EnumColorMap.BASE);
+            t.baseColor = modelState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT
+                    ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
+                    : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
 
             ColorPicker c = colorPicker[layer.dynamicIndex];
             c.setColorMapID(modelState.getColorMap(layer).ordinal);
-
+            
+            c.showLampColors = modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT;
             fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
         }
     }
