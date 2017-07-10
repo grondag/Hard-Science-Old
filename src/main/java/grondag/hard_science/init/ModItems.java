@@ -10,20 +10,15 @@ import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.terrain.TerrainWand;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 
 @Mod.EventBusSubscriber
 @ObjectHolder(HardScience.MODID)
@@ -79,31 +74,8 @@ public class ModItems
         }
     }
     
-    public static void preInit(FMLPreInitializationEvent event) 
-    {
-        if(event.getSide() == Side.CLIENT)
-        {
-            IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
-            
-            for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
-            {
-                if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
-                {
-                    Item item = entry.getValue();
-                    if(item instanceof SuperItemBlock)
-                    {
-                        for (ItemStack stack : ((SuperBlock)(((ItemBlock)item).getBlock())).getSubItems())
-                        {
-                            ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory");
-                            ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), itemModelResourceLocation);
-                        }
-                    }
-                    else
-                    {
-                        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
-                    }
-                }
-            }
-        }
-    }
+//    public static void preInit(FMLPreInitializationEvent event) 
+//    {
+//  
+//    }
 }

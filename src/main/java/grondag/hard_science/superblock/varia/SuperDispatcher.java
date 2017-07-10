@@ -246,8 +246,17 @@ public class SuperDispatcher
      */
     public DispatchDelegate getDelegate(String resourceString)
     {
-        int index = resourceString.lastIndexOf(SuperDispatcher.RESOURCE_BASE_NAME);
-        index = Integer.parseInt(resourceString.substring(index + SuperDispatcher.RESOURCE_BASE_NAME.length()));
+        int start = resourceString.lastIndexOf(SuperDispatcher.RESOURCE_BASE_NAME) + SuperDispatcher.RESOURCE_BASE_NAME.length();
+        int index;
+        if(resourceString.contains("item"))
+        {
+            int end = resourceString.lastIndexOf(".");
+            index = Integer.parseInt(resourceString.substring(start, end));
+        }
+        else
+        {
+            index = Integer.parseInt(resourceString.substring(start));
+        }
         return this.delegates[index];
     }
     

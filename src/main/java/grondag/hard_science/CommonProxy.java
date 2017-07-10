@@ -4,7 +4,6 @@ package grondag.hard_science;
 import grondag.hard_science.external.WailaDataProvider;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModEntities;
-import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModRecipes;
 import grondag.hard_science.init.ModTileEntities;
 import grondag.hard_science.network.ModMessages;
@@ -26,7 +25,6 @@ public class CommonProxy
         ModMessages.registerNetworkMessages();
 
         ModBlocks.preInit(event);
-		ModItems.preInit(event);
 		ModTileEntities.preInit(event);
 		ModEntities.preInit(event);
 		

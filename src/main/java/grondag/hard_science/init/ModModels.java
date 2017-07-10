@@ -17,6 +17,7 @@ import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
@@ -150,6 +151,30 @@ public class ModModels
             }
         }
           
+        IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
+        
+        for(Map.Entry<ResourceLocation, Item> entry: itemReg.getEntries())
+        {
+            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
+            {
+                Item item = entry.getValue();
+                if(item instanceof SuperItemBlock)
+                {
+                    
+                    SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
+                    for (ItemStack stack : block.getSubItems())
+                    {
+                        String variantName = ModModels.MODEL_DISPATCH.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
+                        ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
+                        ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
+                    }
+                }
+                else
+                {
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+                }
+            }
+        }
     }
     
     public static void preInit(FMLPreInitializationEvent event) 
