@@ -38,7 +38,7 @@ public class TranslucencyPicker extends GuiControl
     @Override
     protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, LABEL, (float)this.left, (float)this.top, 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, LABEL, (float)this.left, (float)this.top, 
                 (float)(this.width - this.firstBoxLeft), (float)this.height, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
         
         double x = this.firstBoxLeft;
@@ -49,7 +49,7 @@ public class TranslucencyPicker extends GuiControl
         {
             GuiUtil.drawRect(x + 2, this.top + 2, x + this.height - 2, this.bottom - 2, 0xFFFFFFFF);
             String label = Integer.toString((int)Math.round((100 * (1 - t.alpha)))) + "%";
-            GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, label, x, this.top, this.height, this.height, 0xFF000000, 
+            GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, label, x, this.top, this.height, this.height, 0xFF000000, 
                     HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
             int color = t.alphaARGB | 0x00FF0000;
             GuiUtil.drawRect(x + 2, this.top + 2, x + this.height - 2, this.bottom - 2, color);

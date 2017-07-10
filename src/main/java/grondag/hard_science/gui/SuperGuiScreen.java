@@ -199,7 +199,7 @@ public class SuperGuiScreen extends GuiScreen
             hasUpdates = true;
         }
 
-        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).block;
+        SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).getBlock();
         SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
 
         if(currentBlock != newBlock && newBlock != null)
@@ -327,12 +327,12 @@ public class SuperGuiScreen extends GuiScreen
         super.initGui();
 
 
-        ySize = MathHelper.clamp(height * 4 / 5, fontRendererObj.FONT_HEIGHT * 28, height);
+        ySize = MathHelper.clamp(height * 4 / 5, fontRenderer.FONT_HEIGHT * 28, height);
         yStart = (height - ySize) / 2;
         xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
         xStart = (width - xSize) / 2;
 
-        FontRenderer fr = mc.fontRendererObj;
+        FontRenderer fr = mc.fontRenderer;
         buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
         buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
 

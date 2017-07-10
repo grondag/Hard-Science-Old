@@ -75,7 +75,7 @@ public class CSGPlane
     
     @Override
     public CSGPlane clone() {
-        return new CSGPlane(new Vec3d(normal.xCoord, normal.yCoord, normal.zCoord), dist);
+        return new CSGPlane(new Vec3d(normal.x, normal.y, normal.z), dist);
     }
 
     /**

@@ -102,7 +102,7 @@ public class Simulator extends SimulationNode implements ForgeChunkManager.Order
 	    synchronized(this)
 	    {
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
-	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
+	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
 	     
 	        
             if(PersistenceManager.loadNode(world, this))

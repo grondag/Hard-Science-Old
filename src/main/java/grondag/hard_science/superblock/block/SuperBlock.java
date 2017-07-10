@@ -16,6 +16,7 @@ import grondag.hard_science.external.IWailaProvider;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
+import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -38,9 +39,11 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -162,7 +165,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(modelState);
 
             for (AxisAlignedBB aabb : bounds) {
-                if (localMask.intersectsWith(aabb)) 
+                if (localMask.intersects(aabb)) 
                 {
                     collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
                 }
@@ -283,9 +286,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced)
     {
-        super.addInformation(stack, playerIn, tooltip, advanced);
+        super.addInformation(stack, world, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
         ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
@@ -517,7 +520,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
 
             this.addCollisionBoxToList(blockState, worldIn, pos, 
-                    new AxisAlignedBB(start.xCoord, start.yCoord, start.zCoord, end.xCoord, end.yCoord, end.zCoord),
+                    new AxisAlignedBB(start.x, start.y, start.z, end.x, end.y, end.z),
                     bounds, null, false);
 
             RayTraceResult retval = null;
@@ -868,9 +871,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
      */
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
     {
-        list.addAll(getSubItems());
+        items.addAll(getSubItems());
     }
 
     public List<ItemStack> getSubItems()
@@ -1004,19 +1007,13 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         return this.isGeometryFullCube(state) && this.worldLightOpacity(state) == WorldLightOpacity.SOLID;
     }
-
-    /**
-     * {@inheritDoc} <br><br>
-     * 
-     * Has nothing to do with block geometry but instead is based on material.
-     * Is used by fluid rendering to know if fluid should appear to flow into this block.
-     */
-    @Override
-    public boolean isBlockSolid(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+  
+    public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing face)
     {
-        return this.getSubstance(worldIn, pos).material.isSolid();
+        return this.getModelState(world, pos, true).sideShape(face) == SideShape.SOLID
+         ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }
-
+    
     @Override
     public boolean isBurning(IBlockAccess world, BlockPos pos)
     {

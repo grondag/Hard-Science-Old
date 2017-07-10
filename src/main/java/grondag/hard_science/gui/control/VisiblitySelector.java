@@ -25,7 +25,7 @@ public class VisiblitySelector extends GuiControl
     @Override
     protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
-        FontRenderer fontrenderer = mc.fontRendererObj;
+        FontRenderer fontrenderer = mc.fontRenderer;
         double y = this.top;
         
         int hoverIndex = this.getButtonIndex(mouseX, mouseY);

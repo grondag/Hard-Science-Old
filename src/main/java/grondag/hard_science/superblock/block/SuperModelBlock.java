@@ -14,7 +14,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
@@ -189,7 +188,7 @@ public class SuperModelBlock extends SuperBlockPlus
     }
   
     @Override
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list)
+    public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)
     {
         // We only want to show one item for supermodelblocks
         // Otherwise will spam creative search / JEI

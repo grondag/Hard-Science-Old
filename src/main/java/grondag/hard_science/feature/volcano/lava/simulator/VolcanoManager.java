@@ -61,7 +61,7 @@ public class VolcanoManager extends SimulationNodeRunnable
            
             int centerX = node.getX() >> 4;
             int centerZ = node.getZ() >> 4;
-            World worldObj = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(node.getDimension());
+            World worldObj = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(node.getDimension());
             
             Ticket chunkTicket = null;
             int chunksUsedThisTicket = 0;

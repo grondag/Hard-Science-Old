@@ -40,7 +40,7 @@ public class BrightnessSlider extends Slider
         
         int textColor = this.selectedTabIndex > 6 ? 0xFF000000 : 0xFFFFFFFF;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, Integer.toString(this.selectedTabIndex), 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, Integer.toString(this.selectedTabIndex), 
                 this.labelRight, this.top, this.choiceWidth, this.height, 
                 textColor, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
     }

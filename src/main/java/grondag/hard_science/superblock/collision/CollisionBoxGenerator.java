@@ -164,12 +164,12 @@ public class CollisionBoxGenerator
             for(int i = 0; i < quad.getVertexCount(); i++)
             {
                 Vertex v = quad.getVertex(i);
-                if(v.xCoord > maxX) maxX = v.xCoord;
-                if(v.yCoord > maxY) maxY = v.yCoord;
-                if(v.zCoord > maxZ) maxZ = v.zCoord;
-                if(v.xCoord < minX) minX = v.xCoord;
-                if(v.yCoord < minY) minY = v.yCoord;
-                if(v.zCoord < minZ) minZ = v.zCoord;
+                if(v.x > maxX) maxX = v.x;
+                if(v.y > maxY) maxY = v.y;
+                if(v.z > maxZ) maxZ = v.z;
+                if(v.x < minX) minX = v.x;
+                if(v.y < minY) minY = v.y;
+                if(v.z < minZ) minZ = v.z;
             }
         }
 

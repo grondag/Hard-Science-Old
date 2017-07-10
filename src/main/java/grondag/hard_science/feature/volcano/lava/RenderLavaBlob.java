@@ -8,7 +8,7 @@ import grondag.hard_science.library.render.Vertex;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -82,7 +82,7 @@ public class RenderLavaBlob extends Render<EntityLavaBlob>
     {
         displayList = GLAllocation.generateDisplayLists(1);
         GlStateManager.glNewList(displayList, 4864);
-        VertexBuffer vertexbuffer = Tessellator.getInstance().getBuffer();
+        BufferBuilder vertexbuffer = Tessellator.getInstance().getBuffer();
 
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
 
@@ -92,7 +92,7 @@ public class RenderLavaBlob extends Render<EntityLavaBlob>
             {
                 Vertex v = q.getVertex(i);
                 Vec3d n = v.getNormal();
-                vertexbuffer.pos(v.xCoord, v.yCoord, v.zCoord).tex(v.u, v.v).normal((float)n.xCoord, (float)n.yCoord, (float)n.zCoord).endVertex();
+                vertexbuffer.pos(v.x, v.y, v.z).tex(v.u, v.v).normal((float)n.x, (float)n.y, (float)n.z).endVertex();
             }
         }
 

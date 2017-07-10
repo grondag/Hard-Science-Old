@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "hard_science:basalt_cobble"
+    }
+  ],
+  "result": {
+    "item": "hard_science:basalt_rubble",
+    "count": 9
+  }
+}

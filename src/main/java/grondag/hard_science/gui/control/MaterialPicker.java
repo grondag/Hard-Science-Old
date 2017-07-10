@@ -122,10 +122,10 @@ public class MaterialPicker extends GuiControl
         double xMiddle = this.left + halfWidth;
         double yMiddle = this.top + halfHeight;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, textMaterial, (float) this.left, (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, textMaterial, (float) this.left, (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRendererObj, textToughness, (float) (xMiddle + spacing), (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, textToughness, (float) (xMiddle + spacing), (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);

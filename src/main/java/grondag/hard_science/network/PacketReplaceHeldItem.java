@@ -62,7 +62,7 @@ public class PacketReplaceHeldItem implements IMessage
 
         private void handle(PacketReplaceHeldItem message, MessageContext ctx) 
         {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().playerEntity;
+            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
             playerEntity.setHeldItem(EnumHand.MAIN_HAND, message.stack);
         }
     }

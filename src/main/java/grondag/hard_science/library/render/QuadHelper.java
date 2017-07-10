@@ -144,7 +144,7 @@ public class QuadHelper
         int raySlices = (int) Math.ceil(length);
         
         final Vec3d axisZ = end.subtract(start).normalize();
-        boolean isY = (Math.abs(axisZ.yCoord) > 0.5);
+        boolean isY = (Math.abs(axisZ.y) > 0.5);
         final Vec3d axisX = new Vec3d(isY ? 1 : 0, !isY ? 1 : 0, 0)
                 .crossProduct(axisZ).normalize();
         final Vec3d axisY = axisX.crossProduct(axisZ).normalize();

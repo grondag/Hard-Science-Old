@@ -9,21 +9,22 @@ public class ModRecipes
 {
     public static void init(FMLInitializationEvent event) 
     {
-
         if(Configurator.VOLCANO.enableVolcano)
         {
-            // convert rubble to cobble
-            GameRegistry.addRecipe(new ItemStack(ModBlocks.basalt_cobble), new Object[]{
-                    "CCC",
-                    "CCC",
-                    "CCC",
-                    'C', ModItems.basalt_rubble
-            });
+
+            //FIXME: remove once validated in new system
+//            // convert rubble to cobble
+//            GameRegistry.addShapedRecipe(name, group, output, params);  .addRecipe(new ItemStack(ModBlocks.basalt_cobble), new Object[]{
+//                    "CCC",
+//                    "CCC",
+//                    "CCC",
+//                    'C', ModItems.basalt_rubble
+//            });
             
-            // convert cobble to rubble
-            GameRegistry.addShapelessRecipe(new ItemStack(ModItems.basalt_rubble, 9), 
-                    new Object[]{new ItemStack(ModBlocks.basalt_cobble, 1)}
-            );
+//            // convert cobble to rubble
+//            GameRegistry.addShapelessRecipe(new ItemStack(ModItems.basalt_rubble, 9), 
+//                    new Object[]{new ItemStack(ModBlocks.basalt_cobble, 1)}
+//            );
             
             // smelt cobble to smooth basalt
             GameRegistry.addSmelting(ModBlocks.basalt_cobble, new ItemStack(ModItems.basalt_cut, 1, 0), 0.1F);

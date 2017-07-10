@@ -281,38 +281,38 @@ public class Useful
       
        double t1, t2;
        
-       if(direction.xCoord != 0)
+       if(direction.x != 0)
        {
-           t1 = (box.minX - origin.xCoord)/direction.xCoord;
-           t2 = (box.maxX - origin.xCoord)/direction.xCoord;
+           t1 = (box.minX - origin.x)/direction.x;
+           t2 = (box.maxX - origin.x)/direction.x;
            tmin = Math.max(tmin, Math.min(t1, t2));
            tmax = Math.min(tmax, Math.max(t1, t2));
        }
-       else if (origin.xCoord <= box.minX || origin.xCoord >= box.maxX) 
+       else if (origin.x <= box.minX || origin.x >= box.maxX) 
        {
            return false;
        }
        
-       if(direction.yCoord != 0)
+       if(direction.y != 0)
        {
-           t1 = (box.minY - origin.yCoord)/direction.yCoord;
-           t2 = (box.maxY - origin.yCoord)/direction.yCoord;
+           t1 = (box.minY - origin.y)/direction.y;
+           t2 = (box.maxY - origin.y)/direction.y;
            tmin = Math.max(tmin, Math.min(t1, t2));
            tmax = Math.min(tmax, Math.max(t1, t2));
        }
-       else if (origin.yCoord <= box.minY || origin.yCoord >= box.maxY) 
+       else if (origin.y <= box.minY || origin.y >= box.maxY) 
        {
            return false;
        }
            
-       if(direction.zCoord != 0)
+       if(direction.z != 0)
        {
-           t1 = (box.minZ - origin.zCoord)/direction.zCoord;
-           t2 = (box.maxZ - origin.zCoord)/direction.zCoord;
+           t1 = (box.minZ - origin.z)/direction.z;
+           t2 = (box.maxZ - origin.z)/direction.z;
            tmin = Math.max(tmin, Math.min(t1, t2));
            tmax = Math.min(tmax, Math.max(t1, t2));
        }
-       else if (origin.zCoord <= box.minZ || origin.zCoord >= box.maxZ) 
+       else if (origin.z <= box.minZ || origin.z >= box.maxZ) 
        {
            return false;
        }

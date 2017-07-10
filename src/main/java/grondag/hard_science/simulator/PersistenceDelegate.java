@@ -1,7 +1,7 @@
 package grondag.hard_science.simulator;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 public class PersistenceDelegate extends WorldSavedData
 {

@@ -8,7 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 
 @LangKey("hard_science.config.general")
 @Config(modid = HardScience.MODID, type = Type.INSTANCE)

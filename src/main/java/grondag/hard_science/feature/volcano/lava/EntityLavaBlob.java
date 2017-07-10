@@ -68,12 +68,12 @@ public class EntityLavaBlob extends Entity
     {
         this(world, amount);
 //        if(!world.isRemote) HardScience.log.info("EntityLavaParticle amount=" + amount + " @" + position.toString());
-        this.setPosition(position.xCoord, position.yCoord, position.zCoord);
+        this.setPosition(position.x, position.y, position.z);
 
 
-        this.motionX = velocity.xCoord;
-        this.motionY = velocity.yCoord;
-        this.motionZ = velocity.zCoord;
+        this.motionX = velocity.x;
+        this.motionY = velocity.y;
+        this.motionZ = velocity.z;
 
     }
 
@@ -297,9 +297,9 @@ public class EntityLavaBlob extends Entity
     @Override
     public void move(MoverType type, double x, double y, double z)
     {
-        this.world.theProfiler.startSection("move");
+        this.world.profiler.startSection("move");
 
-        AxisAlignedBB targetBox = this.getEntityBoundingBox().addCoord(x, y, z);
+        AxisAlignedBB targetBox = this.getEntityBoundingBox().offset(x, y, z);
 
         this.destroyCollidingDisplaceableBlocks(targetBox);
 
@@ -335,8 +335,8 @@ public class EntityLavaBlob extends Entity
 
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
 
-        this.world.theProfiler.endSection();
-        this.world.theProfiler.startSection("rest");
+        this.world.profiler.endSection();
+        this.world.profiler.startSection("rest");
         this.resetPositionToBB();
         this.isCollidedHorizontally = startingX != x || startingZ != z;
         this.isCollidedVertically = startingY != y;
@@ -401,7 +401,7 @@ public class EntityLavaBlob extends Entity
         }
 
 
-        this.world.theProfiler.endSection();
+        this.world.profiler.endSection();
 
     }
 
@@ -445,7 +445,7 @@ public class EntityLavaBlob extends Entity
             Vec3d posCurrent = new Vec3d(this.posX, this.posY, this.posZ);
             Vec3d posNext = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
     
-            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expandXyz(1.0D));
+            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().offset(this.motionX, this.motionY, this.motionZ).grow(1.0D));
     
             if(!list.isEmpty())
             {
@@ -458,7 +458,7 @@ public class EntityLavaBlob extends Entity
                     if (victim.canBeCollidedWith())
                     {
                         
-                        AxisAlignedBB axisalignedbb = victim.getEntityBoundingBox().expandXyz(0.30000001192092896D);
+                        AxisAlignedBB axisalignedbb = victim.getEntityBoundingBox().grow(0.30000001192092896D);
                         RayTraceResult intercept = axisalignedbb.calculateIntercept(posCurrent, posNext);
         
                         if (intercept != null)
@@ -470,7 +470,7 @@ public class EntityLavaBlob extends Entity
                             Vec3d centerDistance = posEntity.subtract(posCurrent);
                             double pushMagnitude = myVelocity.dotProduct(centerDistance) / centerDistance.lengthSquared();
                             Vec3d pushVector = centerDistance.scale(pushMagnitude);
-                            victim.addVelocity(pushVector.xCoord, pushVector.yCoord, pushVector.zCoord);
+                            victim.addVelocity(pushVector.x, pushVector.y, pushVector.z);
                             victim.attackEntityFrom(DamageSource.FALLING_BLOCK, this.getFluidAmount() / TerrainState.BLOCK_LEVELS_INT);
                             victim.setFire(5);
                         }

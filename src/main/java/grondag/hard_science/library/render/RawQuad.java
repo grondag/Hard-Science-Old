@@ -755,13 +755,13 @@ public class RawQuad
 
     public AxisAlignedBB getAABB()
     {
-        double minX = Math.min(Math.min(getVertex(0).xCoord, getVertex(1).xCoord), Math.min(getVertex(2).xCoord, getVertex(3).xCoord));
-        double minY = Math.min(Math.min(getVertex(0).yCoord, getVertex(1).yCoord), Math.min(getVertex(2).yCoord, getVertex(3).yCoord));
-        double minZ = Math.min(Math.min(getVertex(0).zCoord, getVertex(1).zCoord), Math.min(getVertex(2).zCoord, getVertex(3).zCoord));
+        double minX = Math.min(Math.min(getVertex(0).x, getVertex(1).x), Math.min(getVertex(2).x, getVertex(3).x));
+        double minY = Math.min(Math.min(getVertex(0).y, getVertex(1).y), Math.min(getVertex(2).y, getVertex(3).y));
+        double minZ = Math.min(Math.min(getVertex(0).z, getVertex(1).z), Math.min(getVertex(2).z, getVertex(3).z));
 
-        double maxX = Math.max(Math.max(getVertex(0).xCoord, getVertex(1).xCoord), Math.max(getVertex(2).xCoord, getVertex(3).xCoord));
-        double maxY = Math.max(Math.max(getVertex(0).yCoord, getVertex(1).yCoord), Math.max(getVertex(2).yCoord, getVertex(3).yCoord));
-        double maxZ = Math.max(Math.max(getVertex(0).zCoord, getVertex(1).zCoord), Math.max(getVertex(2).zCoord, getVertex(3).zCoord));
+        double maxX = Math.max(Math.max(getVertex(0).x, getVertex(1).x), Math.max(getVertex(2).x, getVertex(3).x));
+        double maxY = Math.max(Math.max(getVertex(0).y, getVertex(1).y), Math.max(getVertex(2).y, getVertex(3).y));
+        double maxZ = Math.max(Math.max(getVertex(0).z, getVertex(1).z), Math.max(getVertex(2).z, getVertex(3).z));
 
         return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
@@ -797,9 +797,9 @@ public class RawQuad
 
         float[] retval = new float[3];
 
-        retval[0] = (float)(normal.xCoord);
-        retval[1] = (float)(normal.yCoord);
-        retval[2] = (float)(normal.zCoord);
+        retval[0] = (float)(normal.x);
+        retval[1] = (float)(normal.y);
+        retval[2] = (float)(normal.z);
         return retval;
     }
 
@@ -903,7 +903,7 @@ public class RawQuad
         for(int i = 0; i < result.vertexCount; i++)
         {
             Vertex vertex = result.getVertex(i);
-            Vector4d temp = new Vector4d(vertex.xCoord, vertex.yCoord, vertex.zCoord, 1.0);
+            Vector4d temp = new Vector4d(vertex.x, vertex.y, vertex.z, 1.0);
             matrix.transform(temp);
             if(Math.abs(temp.w - 1.0) > 1e-5) temp.scale(1.0 / temp.w);
             result.setVertex(i, vertex.withXYZ(temp.x, temp.y, temp.z));

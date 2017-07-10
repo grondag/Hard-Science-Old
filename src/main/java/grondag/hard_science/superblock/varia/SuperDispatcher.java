@@ -3,8 +3,11 @@ package grondag.hard_science.superblock.varia;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.cache.ObjectSimpleCacheLoader;
 import grondag.hard_science.library.cache.ObjectSimpleLoadingCache;
@@ -33,12 +36,16 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -46,7 +53,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class SuperDispatcher
 {
-    private final String resourceName;
+    public static final String RESOURCE_BASE_NAME = "super_dispatcher";
     private final SparseLayerMapBuilder[] layerMapBuilders;
     
     public final DispatchDelegate[] delegates;
@@ -133,10 +140,8 @@ public class SuperDispatcher
         }       
     }
     
-    public SuperDispatcher(String resourceName)
+    public SuperDispatcher()
     {
-        this.resourceName = resourceName;
-
         this.layerMapBuilders = new SparseLayerMapBuilder[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
         this.delegates  = new DispatchDelegate[ModelState.BENUMSET_RENDER_LAYER.combinationCount()];
 
@@ -235,14 +240,24 @@ public class SuperDispatcher
     {
         return this.delegates[block.renderLayerShadedFlags()];
     }
-        
-    public class DispatchDelegate implements IBakedModel
+    
+    /**
+     * Ugly but only used during load. Retrieves delegates for our custom model loader.
+     */
+    public DispatchDelegate getDelegate(String resourceString)
+    {
+        int index = resourceString.lastIndexOf(SuperDispatcher.RESOURCE_BASE_NAME);
+        index = Integer.parseInt(resourceString.substring(index + SuperDispatcher.RESOURCE_BASE_NAME.length()));
+        return this.delegates[index];
+    }
+    
+    public class DispatchDelegate implements IBakedModel, IModel
     {
         private final int renderLayerShadedFlags;
         
         public String getModelResourceString()
         {
-            return SuperDispatcher.this.resourceName  + this.renderLayerShadedFlags;
+            return HardScience.MODID + ":" + SuperDispatcher.RESOURCE_BASE_NAME  + this.renderLayerShadedFlags;
         }
 
         private DispatchDelegate(int renderLayerShadedFlags)
@@ -315,6 +330,12 @@ public class SuperDispatcher
         public ItemCameraTransforms getItemCameraTransforms()
         {
             return ItemCameraTransforms.DEFAULT;
+        }
+
+        @Override
+        public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
+        {
+            return this;
         }
     }
 }

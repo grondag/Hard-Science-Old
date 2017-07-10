@@ -158,7 +158,7 @@ public class PackedBlockPos
     
     public static long getPackedChunkPos(Chunk chunk)
     {
-            return ((long)chunk.xPosition) + CHUNK_BOUNDARY | (((long)chunk.zPosition) + CHUNK_BOUNDARY) << 32;
+            return ((long)chunk.x) + CHUNK_BOUNDARY | (((long)chunk.z) + CHUNK_BOUNDARY) << 32;
     }
     
     /** analog of Chunk.chunkXPos */

@@ -206,36 +206,36 @@ public class QuadBakery
             switch(raw.getNominalFace())
             {
             case EAST:
-                uvData[i][0] = (float) ((1.0 - v.zCoord) * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                uvData[i][0] = (float) ((1.0 - v.z) * 16);
+                uvData[i][1] = (float) ((1.0 - v.y) * 16);
                 break;
                 
             case WEST:
-                uvData[i][0] = (float) (v.zCoord * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                uvData[i][0] = (float) (v.z * 16);
+                uvData[i][1] = (float) ((1.0 - v.y) * 16);
                 break;
                 
             case NORTH:
-                uvData[i][0] = (float) ((1.0 - v.xCoord) * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                uvData[i][0] = (float) ((1.0 - v.x) * 16);
+                uvData[i][1] = (float) ((1.0 - v.y) * 16);
                 break;
                 
             case SOUTH:
-                uvData[i][0] = (float) (v.xCoord * 16);
-                uvData[i][1] = (float) ((1.0 - v.yCoord) * 16);
+                uvData[i][0] = (float) (v.x * 16);
+                uvData[i][1] = (float) ((1.0 - v.y) * 16);
                 break;
                 
             case DOWN:
-                uvData[i][0] = (float) (v.xCoord * 16);
-                uvData[i][1] = (float) ((1.0 - v.zCoord) * 16);
+                uvData[i][0] = (float) (v.x * 16);
+                uvData[i][1] = (float) ((1.0 - v.z) * 16);
                 break;
                 
             case UP:
             default:
                 // our default semantic for UP is different than MC
                 // "top" is north instead of south
-                uvData[i][0] = (float) (v.xCoord * 16);
-                uvData[i][1] = (float) (v.zCoord * 16);
+                uvData[i][0] = (float) (v.x * 16);
+                uvData[i][1] = (float) (v.z * 16);
                 break;
             
             }

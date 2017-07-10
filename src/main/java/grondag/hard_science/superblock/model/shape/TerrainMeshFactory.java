@@ -93,7 +93,7 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
      */
     private Vec3d shadowEnhance(Vec3d vec)
     {
-        return new Vec3d(vec.xCoord * 4, vec.yCoord, vec.zCoord * 2);
+        return new Vec3d(vec.x * 4, vec.y, vec.z * 2);
     }
 
     @Override

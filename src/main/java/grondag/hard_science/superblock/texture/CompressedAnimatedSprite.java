@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -125,7 +126,7 @@ public class CompressedAnimatedSprite extends TextureAtlasSprite
     }
 
     @Override
-    public boolean load(IResourceManager manager, ResourceLocation location)
+    public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
     {
         perfLoadRead.startRun();
         

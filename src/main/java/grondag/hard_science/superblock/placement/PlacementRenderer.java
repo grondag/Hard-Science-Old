@@ -46,9 +46,9 @@ public class PlacementRenderer
         
         Vec3d hitVec = target.hitVec;
         
-        float xHit = (float)(hitVec.xCoord - (double)pos.getX());
-        float yHit = (float)(hitVec.yCoord - (double)pos.getY());
-        float zHit = (float)(hitVec.zCoord - (double)pos.getZ());
+        float xHit = (float)(hitVec.x - (double)pos.getX());
+        float yHit = (float)(hitVec.y - (double)pos.getY());
+        float zHit = (float)(hitVec.z - (double)pos.getZ());
         
         List<Pair<BlockPos, ItemStack>> placements = modelState.getShape().getPlacementHandler()
                 .getPlacementResults(player, player.world, target.getBlockPos(), player.getActiveHand(), target.sideHit, xHit, 

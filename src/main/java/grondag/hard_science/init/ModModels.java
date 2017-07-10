@@ -14,6 +14,7 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
+import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -23,14 +24,16 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -38,7 +41,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class ModModels
 {
-    public static final SuperDispatcher MODEL_DISPATCH = new SuperDispatcher("model_dispatcher");
+    public static final SuperDispatcher MODEL_DISPATCH = new SuperDispatcher();
 
     @SubscribeEvent()
     public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
@@ -126,26 +129,32 @@ public class ModModels
         CompressedAnimatedSprite.tearDown();
     }
 
-    public static void preInit(FMLPreInitializationEvent event) 
+    @SubscribeEvent
+    public static void modelRegistryEvent(ModelRegistryEvent event)
     {
-        final SuperStateMapper mapper = new SuperStateMapper(MODEL_DISPATCH);
+       final SuperStateMapper mapper = new SuperStateMapper(MODEL_DISPATCH);
         
-        if (event.getSide() == Side.CLIENT)
+        ModelLoaderRegistry.registerLoader(new SuperModelLoader());
+        
+        IForgeRegistry<Block> blockReg = GameRegistry.findRegistry(Block.class);
+    
+        for(Map.Entry<ResourceLocation, Block> entry: blockReg.getEntries())
         {
-            IForgeRegistry<Block> blockReg = GameRegistry.findRegistry(Block.class);
-        
-            for(Map.Entry<ResourceLocation, Block> entry: blockReg.getEntries())
+            if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
             {
-                if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
+                Block block = entry.getValue();
+                if(block instanceof SuperBlock)
                 {
-                    Block block = entry.getValue();
-                    if(block instanceof SuperBlock)
-                    {
-                        ModelLoader.setCustomStateMapper(block, mapper);
-                    }
+                    ModelLoader.setCustomStateMapper(block, mapper);
                 }
             }
         }
+          
+    }
+    
+    public static void preInit(FMLPreInitializationEvent event) 
+    {
+ 
     }
     
     public static void init(FMLInitializationEvent event)

@@ -41,7 +41,7 @@ public class CubicPlacementHandler implements IPlacementHandler
         SuperItemBlock item = (SuperItemBlock)stack.getItem();
         PlacementMode placementMode = item.getMode(stack);
         
-        SuperBlock stackBlock = (SuperBlock) item.block;
+        SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
         ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
         ItemStack result = stack.copy();

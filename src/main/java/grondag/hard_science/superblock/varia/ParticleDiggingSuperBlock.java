@@ -11,7 +11,7 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleDigging;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -47,7 +47,7 @@ public class ParticleDiggingSuperBlock extends ParticleDigging
     
     /** same as vanilla except for alpha and uvScale*/
     @Override
-    public void renderParticle(VertexBuffer buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
+    public void renderParticle(BufferBuilder buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ)
     {
         // This code should never matter because values all get replaced below unless particle texture is null
         // Leaving in because modded weirdness...
