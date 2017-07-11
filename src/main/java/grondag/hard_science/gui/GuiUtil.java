@@ -295,12 +295,12 @@ public class GuiUtil
             GlStateManager.enableRescaleNormal();
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.enableDepth();
  
             itemRender.renderItemAndEffectIntoGUI(itm, 0, 0);
 
             GlStateManager.popMatrix();
             GlStateManager.enableLighting();
-            GlStateManager.enableDepth();
             RenderHelper.disableStandardItemLighting();
 //            RenderHelper.enableStandardItemLighting();
         }

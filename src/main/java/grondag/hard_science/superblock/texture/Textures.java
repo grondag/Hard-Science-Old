@@ -397,7 +397,8 @@ public class Textures
     {
         return REGISTRY.addTexturePallette(textureName, 
                 new TexturePalletteInfo().withVersionCount(4).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BORDER_13)
-                .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.STATIC_TILES));
+                .withRotation(FIXED.with(ROTATE_NONE)).withRenderLayer(BlockRenderLayer.SOLID).withGroup(TextureGroup.STATIC_TILES)
+                .withRenderNoBorderAsTile(true));
     }
     
     public static List<TexturePallette> getTexturesForSubstanceAndPaintLayer(Substance substance, PaintLayer layer)

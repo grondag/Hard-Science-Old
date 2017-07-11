@@ -112,7 +112,7 @@ public abstract class QuadPainter
             // so make all vertices white before we recolor.
             result.replaceColor(color);
         }
-        else if(this.surface.isLampGradient)
+        else if(result.surfaceInstance.isLampGradient)
         {
             // if surface has a lamp gradient and rendered with shading, need
             // to replace the colors to form the gradient.
