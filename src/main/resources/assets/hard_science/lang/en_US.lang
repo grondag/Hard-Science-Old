@@ -29,6 +29,7 @@ label.toughness=Toughness
 label.translucency=Translucency
 label.position=Position
 label.model_rotation=Model Rotation
+label.full_block=Full Block
 
 #KEYS
 key.categories.hard_science=Hard Science

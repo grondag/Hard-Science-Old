@@ -2,7 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "hard_science:basalt_cobble"
+      "item": "hard_science:basalt_cobble",
+      "data": 0
     }
   ],
   "result": {

@@ -1,8 +1,6 @@
 package grondag.hard_science.library.render;
 
 import java.util.List;
-import java.util.Optional;
-
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
@@ -20,7 +18,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformT
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.model.TRSRTransformation;
 
 public class SimpleItemBlockModel implements IBakedModel
@@ -105,8 +102,6 @@ public class SimpleItemBlockModel implements IBakedModel
         return ItemOverrideList.NONE;
     }
 
-
-    //FIXME: remove
     // Below is borrowed from the old IPerspectiveAwareModel.
     // I confess I'm not exactly sure how it works.
     // Seems necessary to have item model render properly in 1st person.
@@ -118,17 +113,6 @@ public class SimpleItemBlockModel implements IBakedModel
         return Pair.of(model, mat);
     }
     
-    //FIXME: remove
-//    public static Pair<? extends IBakedModel, Matrix4f> handlePerspective(IBakedModel model, IModelState state, TransformType cameraTransformType)
-//    {
-//        TRSRTransformation tr = state.apply(Optional.of(cameraTransformType)).or(TRSRTransformation.identity());
-//        if(tr != TRSRTransformation.identity())
-//        {
-//            return Pair.of(model, TRSRTransformation.blockCornerToCenter(tr).getMatrix());
-//        }
-//        return Pair.of(model, null);
-//    }
-
     @Override
     public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
         return handlePerspective(this, BLOCK_TRANSFORMS, cameraTransformType);

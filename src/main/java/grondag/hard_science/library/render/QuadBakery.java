@@ -1,10 +1,12 @@
 package grondag.hard_science.library.render;
 
 import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.fml.relauncher.Side;
@@ -203,7 +205,16 @@ public class QuadBakery
         {
             Vertex v = raw.getVertex(i);
             
-            switch(raw.getNominalFace())
+            EnumFacing face = raw.getNominalFace();
+            
+            if(face == null)
+            {
+                if(Log.DEBUG_MODE)
+                    Log.warn("QuadBakery.getLockedUVCoordinates encounter null nominal face.  Should not occur.  Using normal face instead.");
+                face = raw.getNormalFace();
+            }
+            
+            switch(face)
             {
             case EAST:
                 uvData[i][0] = (float) ((1.0 - v.z) * 16);

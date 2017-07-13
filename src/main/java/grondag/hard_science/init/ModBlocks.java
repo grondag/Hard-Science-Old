@@ -25,7 +25,7 @@ import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
@@ -170,11 +170,11 @@ public class ModBlocks
         return new CoolingBasaltBlock(name, BlockSubstance.BASALT, model, isFiller).setAllowSilkHarvest(false);
     }
     
-    public static void preInit(FMLPreInitializationEvent event) 
+    public static void init(FMLInitializationEvent event) 
     {   
         if(Configurator.VOLCANO.enableVolcano)
         {
-            // these have to be in pre-init so that object holders are populated
+            // these have to be in init so that object holders are populated
             ((SuperBlock)ModBlocks.basalt_cut).setDropItem(ModItems.basalt_cobble);
     
             ((SuperBlock)ModBlocks.basalt_cool_dynamic_height).setDropItem(ModItems.basalt_rubble);

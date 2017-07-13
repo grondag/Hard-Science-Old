@@ -28,6 +28,7 @@ public class SuperSimpleBlock extends SuperBlock
         
         this.isGeometryFullCube = defaultModelState.isCube();
         this.worldLightOpacity = WorldLightOpacity.getClosest(substance, defaultModelState);
+        this.metaCount = 1;
     }
 
     @Override

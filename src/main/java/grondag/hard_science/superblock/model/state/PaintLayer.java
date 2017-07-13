@@ -43,8 +43,10 @@ public enum PaintLayer
     
     /**
      * Textures the CUT surface. 
-     * Same texture and color as base layer but without any overlay or detail applied.
+     * Same texture and color as base layer but may have a separate surface instance.
      * Must always be present.
+     * 
+     *TODO: probably not needed any more now that have surface instances
      */
     CUT(0, SurfaceType.CUT);
     

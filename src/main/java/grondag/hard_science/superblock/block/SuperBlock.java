@@ -370,6 +370,22 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
         }
         probeInfo.text(I18n.translateToLocal("label.material") + ": " + this.getSubstance(blockState, world, data.getPos()).localizedName());
+        probeInfo.text(I18n.translateToLocal("label.full_block") + ": " + this.fullBlock);
+        probeInfo.text("isOpaqueCube(): " + this.isOpaqueCube(blockState));
+        probeInfo.text("isFullCube(): " + this.isFullCube(blockState));
+        probeInfo.text("getUseNB: " + this.getUseNeighborBrightness(blockState));
+        probeInfo.text("getLightOpacity: " + this.getLightOpacity(blockState));
+        probeInfo.text("getAmbientOcclusionLightValue: " + this.getAmbientOcclusionLightValue(blockState));
+        probeInfo.text("getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos()));
+        
+        IBlockState upState = world.getBlockState(data.getPos().up());
+        probeInfo.text("UP isFullBlock: " + upState.isFullBlock());
+        probeInfo.text("UP isOpaqueCube(): " + upState.isOpaqueCube());
+        probeInfo.text("UP isFullCube(): " + upState.isFullCube());
+        probeInfo.text("UP getUseNB: " + upState.useNeighborBrightness());
+        probeInfo.text("UP getLightOpacity: " + upState.getLightOpacity());
+        probeInfo.text("UP getAmbientOcclusionLightValue: " + upState.getAmbientOcclusionLightValue());
+        probeInfo.text("UP getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos().up()));
     }
 
     /**

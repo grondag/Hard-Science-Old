@@ -30,7 +30,7 @@ public class RawQuad
     private Vec3d faceNormal = null;
     private final int vertexCount;
 
-    public EnumFacing face;
+    protected EnumFacing face;
     public String textureName;
     
     /** 

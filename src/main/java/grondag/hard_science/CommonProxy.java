@@ -24,7 +24,6 @@ public class CommonProxy
 		
         ModMessages.registerNetworkMessages();
 
-        ModBlocks.preInit(event);
 		ModTileEntities.preInit(event);
 		ModEntities.preInit(event);
 		
@@ -40,6 +39,7 @@ public class CommonProxy
 	{
 	    Configurator.recalcDerived();
 		ModRecipes.init(event);
+        ModBlocks.init(event);
 	}
 
 	public void postInit(FMLPostInitializationEvent event) 
