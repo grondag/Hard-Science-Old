@@ -145,12 +145,26 @@ public class SuperModelBlock extends SuperBlockPlus
     /**
      * {@inheritDoc}
      * 
-     * Model dispatcher always returns isAmbientOcclusion=true for SuperModelBlocks.
+     * Model dispatcher always returns isAmbientOcclusion=true for SuperModelBlocks if any layer is shaded.
      * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
      * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
      * populated in getExtendedState and if true for the current layer return 1 for the light value.
      * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
      * light calculations are done via the location-aware version of getLightValue(), so should be fine.
+     * 
+     * 
+     *FIXME: if the same layer is full-bright and shaded, will force flat rendering on shaded layer
+     *
+     *need to disable full-bright on disabled paint layers
+     *
+     *possible problems:
+     *BASE and LAMP share SOLID but have different lighting (solid block)
+     *  use SOLID for fullbright layer
+     *  use CUTOUT_MIPPED for other layer
+     *  if cutout layer has alpha, then also render SOLID layer quads under it
+     *MIDDLE and OUTER share TRANSLUCENT but have different lighting (solid block)
+     *  both are glowing or not glowing
+     *Translucent block with different lighting on any combination of layers
      */
 
     @SuppressWarnings("deprecation")

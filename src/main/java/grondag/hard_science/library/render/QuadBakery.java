@@ -146,8 +146,8 @@ public class QuadBakery
                 && !raw.surfaceInstance.isLampGradient()  
                 && !Configurator.RENDER.enableCustomShading;
         
-        return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, raw.color, raw.face, textureSprite, 
-                applyDiffuseLighting, format));
+        return QuadCache.INSTANCE.getCachedQuad(new CachedBakedQuad(vertexData, raw.face, textureSprite, applyDiffuseLighting, 
+                format));
     }
     
     private static void applyTextureRotation(RawQuad raw, float[][] uvData)

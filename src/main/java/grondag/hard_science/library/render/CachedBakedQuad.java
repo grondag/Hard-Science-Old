@@ -10,10 +10,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 class CachedBakedQuad extends BakedQuad
 {
-    public CachedBakedQuad(int[] vertexDataIn, int tintIndexIn, EnumFacing faceIn, TextureAtlasSprite spriteIn, boolean applyDiffuseLighting,
-            VertexFormat format)
+    public CachedBakedQuad(int[] vertexDataIn, EnumFacing faceIn, TextureAtlasSprite spriteIn, boolean applyDiffuseLighting, VertexFormat format)
     {
-        super(vertexDataIn, tintIndexIn, faceIn, spriteIn, applyDiffuseLighting, format);
+        super(vertexDataIn, -1, faceIn, spriteIn, applyDiffuseLighting, format);
     }
 
     @Override

@@ -16,6 +16,7 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
 public abstract class QuadPainter
@@ -81,15 +82,24 @@ public abstract class QuadPainter
             // Disabled for now because does not seem to work and doesn't seem to be needed.
             // Could also try to make sure quads are properly ordered by dispatcher
             // but that seems unlikely to be reliable.
-//            if(this.paintLayer == PaintLayer.OVERLAY)
-//            {
-//                Vec3d bump = result.getFaceNormal().scale(0.0005);
-//                for(int i = result.getVertexCount() - 1; i >= 0; i--)
-//                {
-//                    Vertex v = result.getVertex(i);
-//                    result.setVertex(i, (Vertex) v.add(bump));
-//                }
-//            }
+            if(this.paintLayer == PaintLayer.MIDDLE)
+            {
+                Vec3d bump = result.getFaceNormal().scale(0.0005);
+                for(int i = result.getVertexCount() - 1; i >= 0; i--)
+                {
+                    Vertex v = result.getVertex(i);
+                    result.setVertex(i, (Vertex) v.add(bump));
+                }
+            }
+            else if(this.paintLayer == PaintLayer.OUTER)
+            {
+                Vec3d bump = result.getFaceNormal().scale(0.001);
+                for(int i = result.getVertexCount() - 1; i >= 0; i--)
+                {
+                    Vertex v = result.getVertex(i);
+                    result.setVertex(i, (Vertex) v.add(bump));
+                }
+            }
             
             result = this.paintQuad(result);
             if(result != null) outputList.add(result);
