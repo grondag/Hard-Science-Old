@@ -72,7 +72,7 @@ public class WorldStateBuffer implements IBlockAccess
     public WorldStateBuffer(World worldIn, boolean enablePerfCounting, PerformanceCollector perfCollector)
     {
         this.realWorld = worldIn;
-        this.perfStateApplication = PerformanceCounter.create(enablePerfCounting, "Word State Application", perfCollector);
+        this.perfStateApplication = PerformanceCounter.create(enablePerfCounting, "World State Application", perfCollector);
     }
     
     public IBlockState getBlockState(BlockPos pos)
