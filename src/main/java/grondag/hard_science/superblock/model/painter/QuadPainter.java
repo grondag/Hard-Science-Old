@@ -21,9 +21,19 @@ public abstract class QuadPainter
 {
     /** color map for this surface */
     protected final ColorMap myColorMap;
-    /** color map for lamp surface - used to render lamp gradients */
-    protected final ColorMap lampColorMap;
     protected final BlockRenderLayer renderLayer;
+    
+    /** 
+     * Color map for lamp surface - used to render lamp gradients
+     * Only populated for BASE/CUT surfaces
+     */
+    protected final ColorMap lampColorMap;
+
+    /**
+    * Render layer for lamp surface - used to render lamp gradients
+    * Only populated for BASE/CUT surfaces
+    */
+    protected final BlockRenderLayer lampRenderLayer;
     
     /**
      * True if paint layer is supposed to be rendered at full brightness.
@@ -42,11 +52,6 @@ public abstract class QuadPainter
     /** Do bitwise OR with color value to get correct alpha for rendering */
     protected final int translucencyArgb;
     
-//    public static final double MIDDLE_LAYER_SCALE = 1.025;
-//    public static final double OUTER_LAYER_SCALE = 1.05;
-    public static final double OUTER_LAYER_BUMP_EPSILON = 0.051;
-    
-    
     /**
      * Provided quad is already a clone, and should be
      * modified directly and returned.
@@ -61,11 +66,23 @@ public abstract class QuadPainter
         this.surface = surface;
         this.paintLayer = paintLayer;
         this.myColorMap = modelState.getColorMap(paintLayer);
-        this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
+        
         RenderMode renderMode = modelState.getRenderMode(paintLayer);
         this.renderLayer = renderMode.renderLayer;
         this.isFullBrightnessEffective = renderMode.isFullBrightness;
         this.isFullBrightnessIntended = modelState.isFullBrightness(paintLayer);
+
+        if(paintLayer == PaintLayer.BASE || paintLayer == PaintLayer.CUT)
+        {
+            this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
+            this.lampRenderLayer = modelState.getRenderMode(PaintLayer.LAMP).renderLayer;
+        }
+        else
+        {
+            this.lampColorMap = null;
+            this.lampRenderLayer = null;
+        }
+        
         TexturePallette tex = modelState.getTexture(paintLayer);
         this.texture = tex == Textures.NONE ? modelState.getTexture(PaintLayer.BASE) : tex;
         this.translucencyArgb = modelState.isTranslucent(paintLayer) ? modelState.getTranslucency().alphaARGB : 0xFF000000;
@@ -76,6 +93,7 @@ public abstract class QuadPainter
     {
         this.myColorMap = null;
         this.lampColorMap = null;
+        this.lampRenderLayer = null;
         this.renderLayer = null;
         this.isFullBrightnessEffective = false;
         this.isFullBrightnessIntended = false;
@@ -90,11 +108,11 @@ public abstract class QuadPainter
         if(inputQuad.surfaceInstance.surface() == this.surface)
         {
             RawQuad result = inputQuad.clone();
-            recolorQuad(result);
-            result.isFullBrightness = this.isFullBrightnessEffective;
             result.renderLayer = this.renderLayer;
-            
-  
+            result.isFullBrightness = this.isFullBrightnessEffective;
+
+            recolorQuad(result);
+         
             // TODO: Vary color slightly with species, as user-selected option
             
             result = this.paintQuad(result);
@@ -131,7 +149,7 @@ public abstract class QuadPainter
             result.replaceColor(color);
         }
         
-        else if(result.surfaceInstance.isLampGradient)
+        else if(result.surfaceInstance.isLampGradient && this.lampColorMap != null)
         {
             // if surface has a lamp gradient and rendered with shading, need
             // to replace the colors to form the gradient.
@@ -145,6 +163,15 @@ public abstract class QuadPainter
                     int vColor = v.color == Color.WHITE ? lampColor : shadedColor;
                     result.setVertex(i, v.withColor(vColor));
                 }
+            }
+            
+            // if the quad texture is compatible with the 
+            // renderlayer being using for lamp
+            // then render the quad with the lamp render layer 
+            // so that it doesn't get darkened by AO
+            if(this.texture.renderIntent.isCompatibleWith(this.lampRenderLayer))
+            {
+                result.renderLayer = this.lampRenderLayer;
             }
         }
         else

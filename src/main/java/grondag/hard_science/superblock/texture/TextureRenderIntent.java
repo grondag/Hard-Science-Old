@@ -1,5 +1,7 @@
 package grondag.hard_science.superblock.texture;
 
+import net.minecraft.util.BlockRenderLayer;
+
 /**
  * Describes if/how this texture can be rendered in alpha or cutout modes.
  * Used to select the optimal (or least bad) block render layer for each paint layer.
@@ -51,5 +53,27 @@ public enum TextureRenderIntent
         this.canRenderAsBase = base;
         this.canRenderAsOverlay = overlay;
         this.canRenderAsBaseInCutoutLayer = flexible;
+    }
+    
+    public boolean isCompatibleWith(BlockRenderLayer renderLayer)
+    {
+        switch(renderLayer)
+        {
+        case CUTOUT:
+            return false;
+            
+        case CUTOUT_MIPPED:
+            return this == BASE_ONLY || this == BASE_OR_OVERLAY_CUTOUT_OKAY;
+            
+        case SOLID:
+            return this != OVERLAY_ONLY;
+            
+        case TRANSLUCENT:
+            return true;
+            
+        default:
+            return false;
+        
+        }
     }
 }

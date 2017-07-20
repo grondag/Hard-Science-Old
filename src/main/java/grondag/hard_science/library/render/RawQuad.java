@@ -12,7 +12,6 @@ import javax.vecmath.Vector4d;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
@@ -935,11 +934,11 @@ public class RawQuad
     public EnumFacing getActualFace()
     {
         // semantic face will be right most of the time
-        if(this.isOnFace(this.face, QuadPainter.OUTER_LAYER_BUMP_EPSILON)) return face;
+        if(this.isOnFace(this.face, QuadHelper.EPSILON)) return face;
 
         for(EnumFacing f : EnumFacing.values())
         {
-            if(f != face && this.isOnFace(f, QuadPainter.OUTER_LAYER_BUMP_EPSILON)) return f;
+            if(f != face && this.isOnFace(f, QuadHelper.EPSILON)) return f;
         }
         return null;
     }

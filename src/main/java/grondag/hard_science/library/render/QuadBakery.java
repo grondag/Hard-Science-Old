@@ -48,7 +48,7 @@ public class QuadBakery
 
         int[] vertexData = new int[28];
 
-        VertexFormat format = raw.isFullBrightness 
+        VertexFormat format = raw.isFullBrightness || raw.surfaceInstance.isLampGradient
                 ? net.minecraft.client.renderer.vertex.DefaultVertexFormats.BLOCK
                 : net.minecraft.client.renderer.vertex.DefaultVertexFormats.ITEM;
 
