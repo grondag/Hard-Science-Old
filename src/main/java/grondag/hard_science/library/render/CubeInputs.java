@@ -15,7 +15,7 @@ public class CubeInputs{
     public boolean rotateBottom = false;
     public boolean isOverlay = false;
     public boolean isItem = false;
-    public LightingMode lightingMode = LightingMode.SHADED;
+    public boolean isFullBrightness = false;
     public SurfaceInstance surfaceInstance;
     
     public CubeInputs()
@@ -42,7 +42,7 @@ public class CubeInputs{
         qi.color = this.color;
         
         qi.lockUV = true;
-        qi.lightingMode = this.lightingMode;
+        qi.isFullBrightness = this.isFullBrightness;
         qi.rotation = (rotateBottom && side == EnumFacing.DOWN) ? this.textureRotation.clockwise().clockwise() : this.textureRotation;
         qi.textureName = this.textureName;
         qi.surfaceInstance = this.surfaceInstance;

@@ -290,7 +290,7 @@ public class SuperDispatcher
             
             BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
             
-            // If no renderLayer set then probably getting request from block breaking
+            // If no renderIntent set then probably getting request from block breaking
             if(layer == null)
             {
                 QuadContainer qc = damageCache.get(modelState.geometricState());

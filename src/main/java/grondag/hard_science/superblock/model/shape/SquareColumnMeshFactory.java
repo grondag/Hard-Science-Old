@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.render.FaceVertex;
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.SimpleQuadBounds;
@@ -144,7 +143,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
         CornerJoinBlockState bjs = state.getCornerJoin();
         EnumFacing.Axis axis = state.getAxis();
-        SurfaceInstance cutSurface = SURFACE_CUT.unitInstance.withLampGradient(state.getLightingMode(PaintLayer.LAMP) == LightingMode.FULLBRIGHT);
+        SurfaceInstance cutSurface = SURFACE_CUT.unitInstance.withLampGradient(state.isFullBrightness(PaintLayer.LAMP));
 
         List<RawQuad> retVal = null;
 

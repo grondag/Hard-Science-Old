@@ -573,8 +573,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face)
     {
         ModelState modelState = this.getModelStateAssumeStateIsCurrent(state, world, pos, true);
-        return modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.SOLID
-                && modelState.sideShape(face).occludesOpposite;
+        return !modelState.hasTranslucentGeometry() && modelState.sideShape(face).occludesOpposite;
     }
     
     @Override
@@ -1229,6 +1228,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
+
         if(this.getSubstance(blockState, blockAccess, pos).isTranslucent)
         {
             BlockPos otherPos = pos.offset(side);

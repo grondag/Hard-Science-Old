@@ -135,9 +135,9 @@ public class Vertex extends Vec3d
         }
     }
     
-    public boolean isOnFacePlane(EnumFacing face)
+    public boolean isOnFacePlane(EnumFacing face, double tolerance)
     {
-        return Math.abs(this.distanceToFacePlane(face)) < QuadHelper.EPSILON;
+        return Math.abs(this.distanceToFacePlane(face)) < tolerance;
     }
     
     public Vertex clone()

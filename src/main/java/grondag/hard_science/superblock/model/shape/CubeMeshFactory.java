@@ -7,7 +7,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.render.CubeInputs;
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -55,7 +54,7 @@ public class CubeMeshFactory extends ShapeMeshGenerator
         CubeInputs result = new CubeInputs();
         result.color = 0xFFFFFFFF;
         result.textureRotation = Rotation.ROTATE_NONE;
-        result.lightingMode = LightingMode.SHADED;
+        result.isFullBrightness = false;
         result.u0 = 0;
         result.v0 = 0;
         result.u1 = 16;

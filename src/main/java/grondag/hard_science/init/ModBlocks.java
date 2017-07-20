@@ -5,7 +5,6 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.VolcanoBlock;
 import grondag.hard_science.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -110,10 +109,10 @@ public class ModBlocks
             workingModel.setShape(ModelShape.TERRAIN_HEIGHT);
             workingModel.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.RED, Chroma.WHITE, Luminance.BRILLIANT));
-            workingModel.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
+            workingModel.setFullBrightness(PaintLayer.BASE, true);
             workingModel.setTexture(PaintLayer.MIDDLE, Textures.BIGTEX_BASALT_HINT);
             workingModel.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.VERMILLION, Chroma.ULTRA_ACCENT, Luminance.MEDIUM_DARK));
-            workingModel.setLightingMode(PaintLayer.MIDDLE, LightingMode.SHADED);
+            workingModel.setFullBrightness(PaintLayer.MIDDLE, false);
             
             Block dynamicLavaHeight = new LavaBlock("lava_dynamic_height", BlockSubstance.VOLCANIC_LAVA, workingModel, false);
             
@@ -156,13 +155,13 @@ public class ModBlocks
         }
     }
     
-    private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller)
+    private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
     {
         ModelState model = new ModelState();
         model.setShape(isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
         model.setTexture(PaintLayer.BASE, Textures.BIGTEX_LAVA);
         model.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.TORCH, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
-        model.setLightingMode(PaintLayer.BASE, LightingMode.FULLBRIGHT);
+        model.setFullBrightness(PaintLayer.BASE, true);
         model.setTexture(PaintLayer.MIDDLE, tex);
         model.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));
         model.setMiddleLayerEnabled(true);

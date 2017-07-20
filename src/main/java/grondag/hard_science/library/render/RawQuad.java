@@ -12,6 +12,7 @@ import javax.vecmath.Vector4d;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
@@ -45,7 +46,8 @@ public class RawQuad
     public Rotation rotation = Rotation.ROTATE_NONE;
     
     public int color = Color.WHITE;
-    public LightingMode lightingMode = LightingMode.SHADED;
+    
+    public boolean isFullBrightness = false;
     
     /** 
      * If true then UV coordinates will be ignored and instead set
@@ -126,7 +128,7 @@ public class RawQuad
         this.textureName = fromObject.textureName;
         this.rotation = fromObject.rotation;
         this.color = fromObject.color;
-        this.lightingMode = fromObject.lightingMode;
+        this.isFullBrightness = fromObject.isFullBrightness;
         this.lockUV = fromObject.lockUV;
         this.ancestorQuadID = fromObject.ancestorQuadID;
         this.isInverted = fromObject.isInverted;
@@ -652,13 +654,13 @@ public class RawQuad
         return true;
     }
 
-    public boolean isOnFace(EnumFacing face)
+    public boolean isOnFace(EnumFacing face, double tolerance)
     {
         if(face == null) return false;
         boolean retVal = true;
         for(int i = 0; i < this.vertexCount; i++)
         {
-            retVal = retVal && getVertex(i).isOnFacePlane(face);
+            retVal = retVal && getVertex(i).isOnFacePlane(face, tolerance);
         }
         return retVal;
     }
@@ -766,6 +768,60 @@ public class RawQuad
         return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    /**
+     * Assigns UV coordinates to each vertex by projecting vertex
+     * onto plane of the quad's face. If the quad is not rotated,
+     * then semantics of vertex coordinates matches those of setupFaceQuad.
+     * For example, on NSEW faces, "up" (+y) corresponds to the top of the texture.
+     * 
+     * Assigned values are in the range 0-16, as is conventional for MC.
+     */
+    public void assignLockedUVCoordinates()
+    {
+        EnumFacing face = getNominalFace();
+        if(face == null)
+        {
+            if(Log.DEBUG_MODE)
+                Log.warn("RawQuad.assignLockedUVCoordinates encountered null nominal face.  Should not occur.  Using normal face instead.");
+            face = getNormalFace();
+        }
+
+        for(int i = 0; i < this.getVertexCount(); i++)
+        {
+            Vertex v = getVertex(i);
+            
+            switch(face)
+            {
+            case EAST:
+                this.setVertex(i, v.withUV((1.0 - v.z) * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case WEST:
+                this.setVertex(i, v.withUV(v.z * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case NORTH:
+                this.setVertex(i, v.withUV((1.0 - v.x) * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case SOUTH:
+                this.setVertex(i, v.withUV(v.x * 16, (1.0 - v.y) * 16));
+                break;
+                
+            case DOWN:
+                this.setVertex(i, v.withUV(v.x * 16, (1.0 - v.z) * 16));
+                break;
+                
+            case UP:
+                // our default semantic for UP is different than MC
+                // "top" is north instead of south
+                this.setVertex(i, v.withUV(v.x * 16, v.z * 16));
+                break;
+            
+            }
+        }
+        
+    }
      /**
       * Multiplies uvMin/Max by the given factors.
       */
@@ -775,6 +831,21 @@ public class RawQuad
         this.maxU *= uScale;
         this.minV *= vScale;
         this.maxV *= vScale;
+    }
+    
+    /** 
+     * Simple scale transformation of all vertex coordinates 
+     * using block center (0.5, 0.5, 0.5) as origin.
+     */
+    public void scaleFromBlockCenter(double scale)
+    {
+        double c = 0.5 * (1-scale);
+        
+        for(int i = 0; i < this.getVertexCount(); i++)
+        {
+            Vertex v = getVertex(i);
+            this.setVertex(i, v.withXYZ(v.x * scale + c, v.y * scale + c, v.z * scale + c));
+        }
     }
 
     public Vec3d getFaceNormal()
@@ -859,15 +930,16 @@ public class RawQuad
     /** 
      * Face to use for occlusion testing.
      * Null if not fully on one of the faces.
+     * Fudges a bit because painted quads can be slightly offset from the plane.
      */
     public EnumFacing getActualFace()
     {
         // semantic face will be right most of the time
-        if(this.isOnFace(this.face)) return face;
+        if(this.isOnFace(this.face, QuadPainter.OUTER_LAYER_BUMP_EPSILON)) return face;
 
         for(EnumFacing f : EnumFacing.values())
         {
-            if(f != face && this.isOnFace(f)) return f;
+            if(f != face && this.isOnFace(f, QuadPainter.OUTER_LAYER_BUMP_EPSILON)) return f;
         }
         return null;
     }

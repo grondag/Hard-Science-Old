@@ -140,9 +140,9 @@ package grondag.hard_science.superblock.model.shape;
 //    }
 //    
 //    @Override
-//    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderLayer)
+//    public QuadContainer getFaceQuads(TextureState texState, ModelStateSetValue state, BlockRenderLayer renderIntent)
 //    {
-//        if(renderLayer != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
+//        if(renderIntent != texState.renderLayer) return QuadContainer.EMPTY_CONTAINER;
 //        
 //        return QuadContainer.fromRawQuads(this.makeRawQuads(texState, state));
 //    }

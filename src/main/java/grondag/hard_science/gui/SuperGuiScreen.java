@@ -26,7 +26,6 @@ import grondag.hard_science.gui.control.VisiblitySelector;
 import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
 import grondag.hard_science.init.ModSuperModelBlocks;
-import grondag.hard_science.library.render.LightingMode;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -43,7 +42,6 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
@@ -185,20 +183,18 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewSub(layer);
         }
 
-        BlockRenderLayer renderLayer = baseTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        if(renderLayer != modelState.getRenderLayer(PaintLayer.BASE))
+        if(baseTranslucentToggle.isOn() != modelState.isTranslucent(PaintLayer.BASE))
         {
-            modelState.setRenderLayer(PaintLayer.BASE, renderLayer);
+            modelState.setTranslucent(PaintLayer.BASE, baseTranslucentToggle.isOn());
             hasUpdates = true;
         }
 
-        renderLayer = lampTranslucentToggle.isOn() ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
-        if(renderLayer != modelState.getRenderLayer(PaintLayer.LAMP))
+        if(lampTranslucentToggle.isOn() != modelState.isTranslucent(PaintLayer.LAMP))
         {
-            modelState.setRenderLayer(PaintLayer.LAMP, renderLayer);
+            modelState.setTranslucent(PaintLayer.LAMP, lampTranslucentToggle.isOn());
             hasUpdates = true;
         }
-
+       
         SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).getBlock();
         SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
 
@@ -246,11 +242,11 @@ public class SuperGuiScreen extends GuiScreen
             }
         }
 
-        if(((modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT) != fullBrightToggle[layer.dynamicIndex].isOn()))
+        if(((modelState.isFullBrightness(layer)) != fullBrightToggle[layer.dynamicIndex].isOn()))
         {
-            modelState.setLightingMode(layer, fullBrightToggle[layer.dynamicIndex].isOn() ? LightingMode.FULLBRIGHT : LightingMode.SHADED);
+            modelState.setFullBrightness(layer, fullBrightToggle[layer.dynamicIndex].isOn());
             updateColors(layer);
-            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT;
+            this.colorPicker[layer.dynamicIndex].showLampColors = modelState.isFullBrightness(layer);
             hasUpdates = true;
         }
     }
@@ -260,12 +256,12 @@ public class SuperGuiScreen extends GuiScreen
         modelState.setColorMap(layer, BlockColorMapProvider.INSTANCE.getColorMap(colorPicker[layer.dynamicIndex].getColorMapID()));
         textureTabBar[layer.dynamicIndex].borderColor = BlockColorMapProvider.INSTANCE
                 .getColorMap(colorPicker[layer.dynamicIndex].getColorMapID())
-                .getColor(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT ? EnumColorMap.LAMP: EnumColorMap.BASE);
+                .getColor(modelState.isFullBrightness(layer) ? EnumColorMap.LAMP: EnumColorMap.BASE);
         
         if(layer == PaintLayer.BASE)
         {
             // refresh base color on overlay layers if it has changed
-            int baseColor = modelState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT
+            int baseColor = modelState.isFullBrightness(PaintLayer.BASE)
                     ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
                     : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
 
@@ -477,8 +473,8 @@ public class SuperGuiScreen extends GuiScreen
         brightnessSlider.setBrightness(SuperItemBlock.getStackLightValue(itemPreview.previewItem));
         outerToggle.setOn(modelState.isOuterLayerEnabled());
         middleToggle.setOn(modelState.isMiddleLayerEnabled());
-        baseTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.BASE) == BlockRenderLayer.TRANSLUCENT);
-        lampTranslucentToggle.setOn(modelState.getRenderLayer(PaintLayer.LAMP) == BlockRenderLayer.TRANSLUCENT);
+        baseTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.BASE));
+        lampTranslucentToggle.setOn(modelState.isTranslucent(PaintLayer.LAMP));
 
         baseTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
         lampTranslucentToggle.setVisible(materialPicker.getSubstance().isTranslucent);
@@ -497,18 +493,18 @@ public class SuperGuiScreen extends GuiScreen
             TexturePallette tex = modelState.getTexture(layer);
             t.setSelected(tex == Textures.NONE ? null : modelState.getTexture(layer));
             t.showSelected();
-            t.borderColor = modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT
+            t.borderColor = modelState.isFullBrightness(layer)
                     ? modelState.getColorMap(layer).getColor(EnumColorMap.LAMP)
                     : modelState.getColorMap(layer).getColor(EnumColorMap.BASE);
-            t.baseColor = modelState.getLightingMode(PaintLayer.BASE) == LightingMode.FULLBRIGHT
+            t.baseColor = modelState.isFullBrightness(PaintLayer.BASE)
                     ? modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.LAMP)
                     : modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE);
 
             ColorPicker c = colorPicker[layer.dynamicIndex];
             c.setColorMapID(modelState.getColorMap(layer).ordinal);
             
-            c.showLampColors = modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT;
-            fullBrightToggle[layer.dynamicIndex].setOn(modelState.getLightingMode(layer) == LightingMode.FULLBRIGHT);
+            c.showLampColors = modelState.isFullBrightness(layer);
+            fullBrightToggle[layer.dynamicIndex].setOn(modelState.isFullBrightness(layer));
         }
     }
 

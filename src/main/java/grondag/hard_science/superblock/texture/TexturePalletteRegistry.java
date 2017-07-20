@@ -10,7 +10,6 @@ import grondag.hard_science.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterMasonry;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TextureRotationType.TextureRotationSetting;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.text.translation.I18n;
 
 public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry.TexturePallette>
@@ -57,8 +56,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         private TextureScale textureScale = TextureScale.SINGLE; 
         private TextureLayout layout = TextureLayout.BIGTEX; 
         private TextureRotationSetting rotation = TextureRotationType.CONSISTENT.with(Rotation.ROTATE_NONE);
-        private BlockRenderLayer renderLayer = BlockRenderLayer.SOLID; 
-        private TextureGroup textureGroup = TextureGroup.ALWAYS_HIDDEN;
+        private TextureRenderIntent renderIntent = TextureRenderIntent.BASE_ONLY; 
+        private int textureGroupFlags = TextureGroup.ALWAYS_HIDDEN.bitFlag;
         private int zoomLevel = 0;
         /** number of ticks to display each frame */
         private int ticksPerFrame = 2;
@@ -76,8 +75,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             this.textureScale = source.textureScale;
             this.layout = source.textureLayout;
             this.rotation = source.rotation;
-            this.renderLayer = source.renderLayer;
-            this.textureGroup = source.textureGroup;
+            this.renderIntent = source.renderIntent;
+            this.textureGroupFlags = source.textureGroupFlags;
             this.zoomLevel = source.zoomLevel;
             this.ticksPerFrame = source.ticksPerFrame;
             this.renderNoBorderAsTile = source.renderNoBorderAsTile;
@@ -120,20 +119,20 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         }
         
         /**
-         * @see TexturePallette#renderLayer
+         * @see TexturePallette#renderIntent
          */
-        public TexturePalletteInfo withRenderLayer(BlockRenderLayer renderLayer)
+        public TexturePalletteInfo withRenderIntent(TextureRenderIntent renderIntent)
         {
-            this.renderLayer = renderLayer;
+            this.renderIntent = renderIntent;
             return this;
         }
         
         /**
-         * @see TexturePallette#textureGroup
+         * @see TexturePallette#textureGroupFlags
          */
-        public TexturePalletteInfo withGroup(TextureGroup textureGroup)
+        public TexturePalletteInfo withGroups(TextureGroup... groups)
         {
-            this.textureGroup = textureGroup;
+            this.textureGroupFlags = TextureGroup.makeTextureGroupFlags(groups);
             return this;
         }
         
@@ -189,10 +188,9 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
         public final TextureRotationSetting rotation;
         
         /** 
-         * Layer that should be used for rendering this texture.
-         * SOLID textures may still be rendered as translucent for materials like glass.
+         * Determines layer that should be used for rendering this texture.
          */
-        public final BlockRenderLayer renderLayer;
+        public final TextureRenderIntent renderIntent;
         
         /**
          * Globally unique id
@@ -205,7 +203,7 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
          */
         public final int stateFlags;
         
-        public final TextureGroup textureGroup;
+        public final int textureGroupFlags;
         
         /**
          * Number of ticks each frame should be rendered on the screen
@@ -225,8 +223,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             this.textureScale = info.textureScale;
             this.textureLayout = info.layout;
             this.rotation = info.rotation;
-            this.renderLayer = info.renderLayer;
-            this.textureGroup = info.textureGroup;
+            this.renderIntent = info.renderIntent;
+            this.textureGroupFlags = info.textureGroupFlags;
             this.zoomLevel = info.zoomLevel;
             this.ticksPerFrame = info.ticksPerFrame;
             this.renderNoBorderAsTile = info.renderNoBorderAsTile;
@@ -269,8 +267,8 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
                 
             case BORDER_13:
             {
-                // last texture (no border) only needed if rendering in solid layer
-                int texCount = this.renderLayer == BlockRenderLayer.SOLID 
+                // last texture (no border) only needed if indicated
+                int texCount = this.renderNoBorderAsTile 
                         ? CubicQuadPainterBorders.TEXTURE_COUNT 
                         : CubicQuadPainterBorders.TEXTURE_COUNT -1;
                 

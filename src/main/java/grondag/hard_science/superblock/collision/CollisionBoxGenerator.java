@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.Vertex;
 import grondag.hard_science.library.varia.VoxelBitField;
@@ -84,7 +85,7 @@ public class CollisionBoxGenerator
 
         for(RawQuad quad : quads)
         {                  
-            if(quad.isOnFace(EnumFacing.DOWN))
+            if(quad.isOnFace(EnumFacing.DOWN, QuadHelper.EPSILON))
             {
                 for(int x = 0; x < 8; x++)
                 {
