@@ -108,8 +108,8 @@ public class PackedBlockPosTest
         pos1 = new BlockPos(414, 2, -52234);
         ChunkPos cpos = new ChunkPos(pos1);
         long1 = PackedBlockPos.getPackedChunkPos(PackedBlockPos.pack(pos1));
-        assert(PackedBlockPos.getChunkXPos(long1) == cpos.chunkXPos);
-        assert(PackedBlockPos.getChunkZPos(long1) == cpos.chunkZPos);
+        assert(PackedBlockPos.getChunkXPos(long1) == cpos.x);
+        assert(PackedBlockPos.getChunkZPos(long1) == cpos.z);
         assert(PackedBlockPos.getChunkXStart(long1) == cpos.getXStart());
         assert(PackedBlockPos.getChunkZStart(long1) == cpos.getZStart());
         

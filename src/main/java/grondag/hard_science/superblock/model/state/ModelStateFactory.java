@@ -192,7 +192,7 @@ public class ModelStateFactory
         /**
          * See {@link #getCanRenderInLayerFlags()}
          */
-        private static final int RENDER_LAYER_FLAG_SHIFT = Useful.bitLength(STATE_FLAG_HAS_RENDER_LAYER_SOLID) - 1;
+        private static final int RENDER_LAYER_FLAG_SHIFT = Useful.bitLength(STATE_FLAG_HAS_RENDER_LAYER_SOLID);
 
         ///////////////////////////////////
         // FULL BRIGHTNESS FLAGS
@@ -214,7 +214,7 @@ public class ModelStateFactory
         /**
          * See {@link #getRenderLayerShadedFlags()}
          */
-        private static final int FULLBRIGHT_FLAG_SHIFT = Useful.bitLength(STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID) - 1;
+        private static final int FULLBRIGHT_FLAG_SHIFT = Useful.bitLength(STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID);
         
         /** Set if either Base/Cut or Lamp (if present) paint layers are translucent */
         public static final int STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY = STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT << 1;
@@ -591,7 +591,7 @@ public class ModelStateFactory
         public byte getCanRenderInLayerFlags() 
         { 
             this.populateStateFlagsIfNeeded();
-            return (byte) ((this.stateFlags & RENDER_LAYER_FLAG_SHIFT) & 0xF); 
+            return (byte) ((this.stateFlags >> RENDER_LAYER_FLAG_SHIFT) & 0xF); 
         };
 
         /**
