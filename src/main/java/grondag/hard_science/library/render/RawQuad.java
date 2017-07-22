@@ -76,6 +76,7 @@ public class RawQuad
 
 //    private static final Vec3d LIGHTING_NORMAL = new Vec3d(0, 1, 0.35).normalize();
 
+
     public RawQuad()
     {
         this(4);

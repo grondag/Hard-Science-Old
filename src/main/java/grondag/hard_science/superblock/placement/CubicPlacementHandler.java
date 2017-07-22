@@ -141,9 +141,9 @@ public class CubicPlacementHandler implements IPlacementHandler
                         {
                             stackModelState.setAxis(corner.orthogonalAxis);
                         
-                            if(stackModelState.hasModelRotation())
+                            if(stackModelState.hasAxisRotation())
                             {
-                                stackModelState.setModelRotation(corner.modelRotation);
+                                stackModelState.setAxisRotation(corner.modelRotation);
                                 isRotationDone = true;
                             }
                         }
@@ -160,15 +160,15 @@ public class CubicPlacementHandler implements IPlacementHandler
             }
         }
         
-        if(!isRotationDone && stackModelState.hasModelRotation())
+        if(!isRotationDone && stackModelState.hasAxisRotation())
         {
             if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
             {
-                stackModelState.setModelRotation(closestModelState.getModelRotation());
+                stackModelState.setAxisRotation(closestModelState.getAxisRotation());
             }
             else
             {
-                stackModelState.setModelRotation(item.getRotation(stack));
+                stackModelState.setAxisRotation(item.getRotation(stack));
             }
         }
         

@@ -64,7 +64,7 @@ public class ModelStateFactory
     private static final IntElement P3B_SPECIES = PACKER_3_BLOCK.createIntElement(16);
     private static final IntElement P3B_BLOCK_JOIN = PACKER_3_BLOCK.createIntElement(CornerJoinBlockStateSelector.BLOCK_JOIN_STATE_COUNT);
     private static final IntElement P3B_MASONRY_JOIN = PACKER_3_BLOCK.createIntElement(SimpleJoin.STATE_COUNT);
-    private static final EnumElement<Rotation> P3B_MODEL_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
+    private static final EnumElement<Rotation> P3B_AXIS_ROTATION = PACKER_3_BLOCK.createEnumElement(Rotation.class);
 
     static final BitPacker PACKER_3_FLOW = new BitPacker();
     private static final LongElement P3F_FLOW_JOIN = PACKER_3_FLOW.createLongElement(TerrainState.STATE_BIT_MASK + 1);
@@ -163,11 +163,11 @@ public class ModelStateFactory
 
         public static final int STATE_FLAG_HAS_AXIS_ORIENTATION = STATE_FLAG_NEEDS_TEXTURE_ROTATION << 1;
 
-        /** Set if shape can be rotated. Only applies to block models; multiblock models manage this situationally. */
-        public static final int STATE_FLAG_HAS_MODEL_ROTATION = STATE_FLAG_HAS_AXIS_ORIENTATION << 1;
+        /** Set if shape can be rotated around an axis. Only applies to block models; multiblock models manage this situationally. */
+        public static final int STATE_FLAG_HAS_AXIS_ROTATION = STATE_FLAG_HAS_AXIS_ORIENTATION << 1;
 
         /** Set if Base paint layer is non-translucent and should be rendered on Cutout Mipped render layer */
-        public static final int STATE_FLAG_IS_BASE_CUTOUT = STATE_FLAG_HAS_MODEL_ROTATION << 1;
+        public static final int STATE_FLAG_IS_BASE_CUTOUT = STATE_FLAG_HAS_AXIS_ROTATION << 1;
 
         /** Set if Lamp paint layer is non-translucent and should be rendered on Cutout Mipped render layer */
         public static final int STATE_FLAG_IS_LAMP_CUTOUT = STATE_FLAG_IS_BASE_CUTOUT << 1;
@@ -853,33 +853,33 @@ public class ModelStateFactory
         }
 
 
-        public Rotation getModelRotation()
+        public Rotation getAxisRotation()
         {
             if(Log.DEBUG_MODE)
             {
                 populateStateFlagsIfNeeded();
-                if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == 0)
-                    Log.warn("getModelRotation on model state does not apply for shape");
+                if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK || (stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == 0)
+                    Log.warn("getAxisRotation on model state does not apply for shape");
             }
-            return P3B_MODEL_ROTATION.getValue(bits3);
+            return P3B_AXIS_ROTATION.getValue(bits3);
         }
 
-        public void setModelRotation(Rotation rotation)
+        public void setAxisRotation(Rotation rotation)
         {
             populateStateFlagsIfNeeded();
             if(this.getShape().meshFactory().stateFormat != StateFormat.BLOCK)
             {
-                if(Log.DEBUG_MODE) Log.warn("Ignored setModelRotation on model state that does not apply for shape");
+                if(Log.DEBUG_MODE) Log.warn("Ignored setAxisRotation on model state that does not apply for shape");
                 return;
             }
 
-            if((stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == 0)
+            if((stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == 0)
             {
-                if(Log.DEBUG_MODE) Log.warn("Ignored setModelRotation on model state for which it does not apply");
+                if(Log.DEBUG_MODE) Log.warn("Ignored setAxisRotation on model state for which it does not apply");
                 return;
             }
 
-            bits3 = P3B_MODEL_ROTATION.setValue(rotation, bits3);
+            bits3 = P3B_AXIS_ROTATION.setValue(rotation, bits3);
             invalidateHashCode();
         }
 
@@ -1025,12 +1025,12 @@ public class ModelStateFactory
             return (this.stateFlags & STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY) == STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
         }
 
-        public boolean hasModelRotation()
+        public boolean hasAxisRotation()
         {
             this.populateStateFlagsIfNeeded();
-            return (this.stateFlags & STATE_FLAG_HAS_MODEL_ROTATION) == STATE_FLAG_HAS_MODEL_ROTATION;
+            return (this.stateFlags & STATE_FLAG_HAS_AXIS_ROTATION) == STATE_FLAG_HAS_AXIS_ROTATION;
         }
-
+        
         public boolean hasMasonryJoin()
         {
             this.populateStateFlagsIfNeeded();
@@ -1175,7 +1175,7 @@ public class ModelStateFactory
             case BLOCK:
                 if(this.hasAxis()) result.setAxis(this.getAxis());
                 if(this.hasAxisOrientation()) result.setAxisInverted(this.isAxisInverted());
-                if(this.hasModelRotation()) result.setModelRotation(this.getModelRotation());
+                if(this.hasAxisRotation()) result.setAxisRotation(this.getAxisRotation());
                 if((this.getShape().meshFactory().stateFlags & STATE_FLAG_NEEDS_CORNER_JOIN) == STATE_FLAG_NEEDS_CORNER_JOIN)
                 {
                     result.setCornerJoin(this.getCornerJoin());

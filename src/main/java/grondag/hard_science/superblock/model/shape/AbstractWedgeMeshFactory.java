@@ -1,7 +1,7 @@
 package grondag.hard_science.superblock.model.shape;
 
 import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_HAS_AXIS;
-import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_HAS_MODEL_ROTATION;
+import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_HAS_AXIS_ROTATION;
 import static grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState.STATE_FLAG_NEEDS_SPECIES;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public abstract class AbstractWedgeMeshFactory extends ShapeMeshGenerator implem
     public AbstractWedgeMeshFactory()
     {
         super(StateFormat.BLOCK, 
-                STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_HAS_AXIS | STATE_FLAG_HAS_MODEL_ROTATION,
+                STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_HAS_AXIS | STATE_FLAG_HAS_AXIS_ROTATION,
                 BACK_AND_BOTTOM, SIDES, TOP);
     }
 
@@ -74,7 +74,7 @@ public abstract class AbstractWedgeMeshFactory extends ShapeMeshGenerator implem
     @Override
     public SideShape sideShape(ModelState modelState, EnumFacing side)
     {
-        BlockCorner corner = BlockCorner.find(modelState.getAxis(), modelState.getModelRotation());
+        BlockCorner corner = BlockCorner.find(modelState.getAxis(), modelState.getAxisRotation());
         return side == corner.face1 || side == corner.face2 ? SideShape.SOLID : SideShape.MISSING;
     }
 

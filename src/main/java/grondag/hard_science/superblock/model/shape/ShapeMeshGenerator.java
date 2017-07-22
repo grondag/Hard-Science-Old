@@ -147,18 +147,18 @@ public abstract class ShapeMeshGenerator
     {
         if(modelState.hasAxis())
         {
-            if(modelState.hasModelRotation())
+            if(modelState.hasAxisRotation())
             {
-                return getMatrixForAxisAndRotation(modelState.getAxis(), modelState.isAxisInverted(), modelState.getModelRotation());
+                return getMatrixForAxisAndRotation(modelState.getAxis(), modelState.isAxisInverted(), modelState.getAxisRotation());
             }
             else
             {
                 return getMatrixForAxis(modelState.getAxis(), modelState.isAxisInverted());
             }
         }
-        else if(modelState.hasModelRotation())
+        else if(modelState.hasAxisRotation())
         {
-            return getMatrixForRotation(modelState.getModelRotation());
+            return getMatrixForRotation(modelState.getAxisRotation());
         }
         else
         {

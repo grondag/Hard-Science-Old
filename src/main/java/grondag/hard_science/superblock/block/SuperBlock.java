@@ -363,9 +363,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                     probeInfo.text(I18n.translateToLocal("label.axis_inverted") + ": " + modelState.isAxisInverted());
                 }
             }
-            if(modelState.hasModelRotation())
+            if(modelState.hasAxisRotation())
             {
-                probeInfo.text(I18n.translateToLocal("label.model_rotation") + ": " + modelState.getModelRotation());
+                probeInfo.text(I18n.translateToLocal("label.model_rotation") + ": " + modelState.getAxisRotation());
             }
             probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
         }
