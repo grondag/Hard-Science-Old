@@ -33,6 +33,7 @@ public enum BlockSubstance {
 
     HYPERWOOD(Configurator.SUBSTANCES.hyperwood, Material.WOOD, SoundType.WOOD, BlockColorMapProvider.INSTANCE.getColorMap(Hue.CHERRY, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 
+    HDPE(Configurator.SUBSTANCES.hdpe, Material.WOOD, SoundType.WOOD, BlockColorMapProvider.INSTANCE.getColorMap(Hue.BERYL, Chroma.PURE_NETURAL, Luminance.LIGHT).ordinal),
     
 	BASALT(Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	

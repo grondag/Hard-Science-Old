@@ -50,15 +50,25 @@ public class ModBlocks
     public static final Block lava_dynamic_height = null;
     public static final Block lava_dynamic_filler = null;
     
+    public static final Block hdpe_block = null;
+    
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
+        ModelState workingModel;
+        
+        workingModel = new ModelState();
+        workingModel.setShape(ModelShape.CUBE);
+        workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_SUBTLE_ZOOM);
+        workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.BERYL, Chroma.PURE_NETURAL, Luminance.EXTRA_LIGHT));
+        event.getRegistry().register(new SuperSimpleBlock("hdpe_block", BlockSubstance.HDPE, workingModel));
+        
         if(Configurator.VOLCANO.enableVolcano)
         {
             event.getRegistry().register(new VolcanoBlock());
             
-            ModelState workingModel = new ModelState();
+            workingModel = new ModelState();
             workingModel.setShape(ModelShape.CUBE);
             workingModel.setTexture(PaintLayer.BASE, Textures.BLOCK_COBBLE);
             workingModel.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK));

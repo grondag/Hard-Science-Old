@@ -8,9 +8,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
-
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Configurator;
+import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.Log;
 import grondag.hard_science.external.IWailaProvider;
 import grondag.hard_science.library.varia.Color;
@@ -332,8 +332,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Optional.Method(modid = "theoneprobe")
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
     {
-        probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
-        
         ModelState modelState = this.getModelStateAssumeStateIsStale(blockState, world, data.getPos(), true);
         
         if(modelState != null)
@@ -355,37 +353,48 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             {
                 probeInfo.text(I18n.translateToLocal("label.species") + ": " + modelState.getSpecies());
             }
-            if(modelState.hasAxis())
+            
+            if(Configurator.BLOCKS.probeInfoLevel != ProbeInfoLevel.BASIC)
             {
-                probeInfo.text(I18n.translateToLocal("label.axis") + ": " + modelState.getAxis());
-                if(modelState.hasAxisOrientation())
+                if(modelState.hasAxis())
                 {
-                    probeInfo.text(I18n.translateToLocal("label.axis_inverted") + ": " + modelState.isAxisInverted());
+                    probeInfo.text(I18n.translateToLocal("label.axis") + ": " + modelState.getAxis());
+                    if(modelState.hasAxisOrientation())
+                    {
+                        probeInfo.text(I18n.translateToLocal("label.axis_inverted") + ": " + modelState.isAxisInverted());
+                    }
                 }
+                if(modelState.hasAxisRotation())
+                {
+                    probeInfo.text(I18n.translateToLocal("label.model_rotation") + ": " + modelState.getAxisRotation());
+                }
+                probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
             }
-            if(modelState.hasAxisRotation())
-            {
-                probeInfo.text(I18n.translateToLocal("label.model_rotation") + ": " + modelState.getAxisRotation());
-            }
-            probeInfo.text(I18n.translateToLocal("label.position") + ": " + modelState.getPosX() + ", " + modelState.getPosY() + ", " + modelState.getPosZ());
         }
         probeInfo.text(I18n.translateToLocal("label.material") + ": " + this.getSubstance(blockState, world, data.getPos()).localizedName());
-        probeInfo.text(I18n.translateToLocal("label.full_block") + ": " + this.fullBlock);
-        probeInfo.text("isOpaqueCube(): " + this.isOpaqueCube(blockState));
-        probeInfo.text("isFullCube(): " + this.isFullCube(blockState));
-        probeInfo.text("getUseNB: " + this.getUseNeighborBrightness(blockState));
-        probeInfo.text("getLightOpacity: " + this.getLightOpacity(blockState));
-        probeInfo.text("getAmbientOcclusionLightValue: " + this.getAmbientOcclusionLightValue(blockState));
-        probeInfo.text("getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos()));
         
-        IBlockState upState = world.getBlockState(data.getPos().up());
-        probeInfo.text("UP isFullBlock: " + upState.isFullBlock());
-        probeInfo.text("UP isOpaqueCube(): " + upState.isOpaqueCube());
-        probeInfo.text("UP isFullCube(): " + upState.isFullCube());
-        probeInfo.text("UP getUseNB: " + upState.useNeighborBrightness());
-        probeInfo.text("UP getLightOpacity: " + upState.getLightOpacity());
-        probeInfo.text("UP getAmbientOcclusionLightValue: " + upState.getAmbientOcclusionLightValue());
-        probeInfo.text("UP getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos().up()));
+        if(Configurator.BLOCKS.probeInfoLevel == ProbeInfoLevel.DEBUG)
+        {
+            probeInfo.text(I18n.translateToLocal("label.meta") + ": " + blockState.getValue(SuperBlock.META));
+
+            
+            probeInfo.text(I18n.translateToLocal("label.full_block") + ": " + this.fullBlock);
+            probeInfo.text("isOpaqueCube(): " + this.isOpaqueCube(blockState));
+            probeInfo.text("isFullCube(): " + this.isFullCube(blockState));
+            probeInfo.text("getUseNB: " + this.getUseNeighborBrightness(blockState));
+            probeInfo.text("getLightOpacity: " + this.getLightOpacity(blockState));
+            probeInfo.text("getAmbientOcclusionLightValue: " + this.getAmbientOcclusionLightValue(blockState));
+            probeInfo.text("getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos()));
+            
+            IBlockState upState = world.getBlockState(data.getPos().up());
+            probeInfo.text("UP isFullBlock: " + upState.isFullBlock());
+            probeInfo.text("UP isOpaqueCube(): " + upState.isOpaqueCube());
+            probeInfo.text("UP isFullCube(): " + upState.isFullCube());
+            probeInfo.text("UP getUseNB: " + upState.useNeighborBrightness());
+            probeInfo.text("UP getLightOpacity: " + upState.getLightOpacity());
+            probeInfo.text("UP getAmbientOcclusionLightValue: " + upState.getAmbientOcclusionLightValue());
+            probeInfo.text("UP getPackedLightmapCoords: " + this.getPackedLightmapCoords(blockState, world, data.getPos().up()));
+        }
     }
 
     /**

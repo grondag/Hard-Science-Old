@@ -23,6 +23,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
         acceptedMinecraftVersions = "[1.12]",
         dependencies = "after:theoneprobe; after:Waila")
 
+/**
+ * General bugs
+ * FIXME: need alternative to sneak for breaking species on placement
+ * FIXME: bottom of connected textures is messed up
+ * FIXME: need more subtle versions of geometric decals
+ * FIXME: textures on wedge surfaces in stair formation (wood texture)
+ */
+
+
 public class HardScience 
 {
 	public static final String MODID = "hard_science";

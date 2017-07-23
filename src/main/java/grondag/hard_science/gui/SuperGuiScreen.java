@@ -201,6 +201,7 @@ public class SuperGuiScreen extends GuiScreen
         if(currentBlock != newBlock && newBlock != null)
         {
             ItemStack newStack = new ItemStack(newBlock);
+            newStack.setCount(itemPreview.previewItem.getCount());
             newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
             newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
             itemPreview.previewItem = newStack;

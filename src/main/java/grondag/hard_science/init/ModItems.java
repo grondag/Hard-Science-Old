@@ -5,6 +5,7 @@ import java.util.Map;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.lava.LavaBlobItem;
+import grondag.hard_science.materials.PolyethyleneCube;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -26,9 +27,19 @@ public class ModItems
 {
     public static final Item basalt_rubble = null;
 
+    // materials
+    public static final Item hdpe_cube_1 = null;
+    public static final Item hdpe_cube_2 = null;
+    public static final Item hdpe_cube_3 = null;
+    public static final Item hdpe_cube_4 = null;
+    public static final Item hdpe_cube_5 = null;
+    public static final Item hdpe_cube_6 = null;
+    public static final Item hdpe_wafer_6 = null;
+    
     // item blocks
     public static final Item basalt_cobble = null;
     public static final Item basalt_cut = null;
+    
     
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
@@ -46,6 +57,15 @@ public class ModItems
         }
         
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(1).setRegistryName("hdpe_cube_1").setUnlocalizedName("hdpe_cube_1").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(2).setRegistryName("hdpe_cube_2").setUnlocalizedName("hdpe_cube_2").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(3).setRegistryName("hdpe_cube_3").setUnlocalizedName("hdpe_cube_3").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(4).setRegistryName("hdpe_cube_4").setUnlocalizedName("hdpe_cube_4").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(5).setRegistryName("hdpe_cube_5").setUnlocalizedName("hdpe_cube_5").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(6).setRegistryName("hdpe_cube_6").setUnlocalizedName("hdpe_cube_6").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new PolyethyleneCube(6).setRegistryName("hdpe_wafer_6").setUnlocalizedName("hdpe_wafer_6").setCreativeTab(HardScience.tabMod));
+
+
     }
 
     private static void registerItemBlocks(IForgeRegistry<Item> itemReg)

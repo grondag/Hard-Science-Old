@@ -49,6 +49,8 @@ public class Configurator
         public Substance hyperwood = new Substance(10, "axe", 3, 200, 1.3);
         
         public Substance basalt = new Substance(2, "pickaxe", 1, 10, 1.0);
+        
+        public Substance hdpe = new Substance(2, "axe", 1, 10, 1.0);
 
         public Substance volcanicLava = new Substance(-1, "shovel", 3, 2000, 0.75);
         
@@ -184,6 +186,16 @@ public class Configurator
     {
         @Comment("Allow user selection of hidden textures in SuperModel Block GUI. Generally only useful for testing.")
         public boolean showHiddenTextures = false;
+        
+        @Comment("Controls how much detail should be shown if The One Probe is enabled.")
+        public ProbeInfoLevel probeInfoLevel = ProbeInfoLevel.BASIC;
+        
+        public static enum ProbeInfoLevel
+        {
+            BASIC,
+            EXTRA,
+            DEBUG
+        }
     }
     
     ////////////////////////////////////////////////////        

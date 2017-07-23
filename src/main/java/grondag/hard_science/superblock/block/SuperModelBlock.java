@@ -136,10 +136,10 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
-        return myTE == null
+        TileEntity myTE = world.getTileEntity(pos);
+        return myTE == null || !(myTE instanceof SuperModelTileEntity)
                 ? 0
-                : myTE.getLightValue();
+                : ((SuperModelTileEntity)myTE).getLightValue();
     }
     
     /**
@@ -177,11 +177,12 @@ public class SuperModelBlock extends SuperBlockPlus
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
-        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
-        if(myTE != null)
+        TileEntity myTE = world.getTileEntity(pos);
+        if(myTE != null && myTE instanceof SuperModelTileEntity)
         {
-            SuperItemBlock.setStackLightValue(stack, myTE.getLightValue());
-            SuperItemBlock.setStackSubstance(stack, myTE.getSubstance());
+            
+            SuperItemBlock.setStackLightValue(stack, ((SuperModelTileEntity)myTE).getLightValue());
+            SuperItemBlock.setStackSubstance(stack, ((SuperModelTileEntity)myTE).getSubstance());
         }
         return stack;
     }
@@ -204,10 +205,10 @@ public class SuperModelBlock extends SuperBlockPlus
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
-        return myTE == null
+        TileEntity myTE = world.getTileEntity(pos);
+        return myTE == null || !(myTE instanceof SuperModelTileEntity)
                 ? BlockSubstance.FLEXSTONE
-                : myTE.getSubstance();
+                : ((SuperModelTileEntity)myTE).getSubstance();
     }
     
     @Override
@@ -234,14 +235,14 @@ public class SuperModelBlock extends SuperBlockPlus
      */
     public void setLightValue(IBlockState state, IBlockAccess world, BlockPos pos, int lightValue)
     {
-        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
-        if(myTE != null) myTE.setLightValue((byte)(lightValue & 0xF));
+        TileEntity myTE = world.getTileEntity(pos);
+        if(myTE != null && myTE instanceof SuperModelTileEntity) ((SuperModelTileEntity)myTE).setLightValue((byte)(lightValue & 0xF));
     }
 
     public void setSubstance(IBlockState state, IBlockAccess world, BlockPos pos, BlockSubstance substance)
     {
-        SuperModelTileEntity myTE = (SuperModelTileEntity) world.getTileEntity(pos);
-        if(myTE != null) myTE.setSubstance(substance);
+        TileEntity myTE = world.getTileEntity(pos);
+        if(myTE != null && myTE instanceof SuperModelTileEntity) ((SuperModelTileEntity)myTE).setSubstance(substance);
     }
  
     @Override

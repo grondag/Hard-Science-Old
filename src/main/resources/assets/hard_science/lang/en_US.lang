@@ -68,6 +68,7 @@ item.terrain_wand.name=Terrain Wand
 item.volcano_wand.name=Volcano Wand
 item.basalt_rubble.name=Basalt Rubble
 item.lava_blob.name=Lava Ball
+item.hdpe_cube_1.name=Polyethylene #1 Cube
 
 #BLOCKS
 tile.super_model_block.name=SuperModel Block
@@ -88,6 +89,7 @@ tile.basalt_dynamic_very_hot_filler.name=Very Hot Basalt (Filler)
 tile.lava_dynamic_height.name=Volcanic Lava
 tile.lava_dynamic_filler.name=Volcanic Lava (Filler)
 tile.block_volcano.name=Volcano Root
+tile.hdpe_block.name=Polyethylene Block
 
 #COLORS
 # Java format string that defines order and punctuation for displaying colors. 1=hue, 2=chroma, 3=luminance

@@ -32,11 +32,11 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     @Override
     public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
-        if(myTE != null) 
+        TileEntity myTE = world.getTileEntity(pos);
+        if(myTE != null && myTE instanceof SuperTileEntity) 
         {
             IBlockState currentState = world.getBlockState(pos);
-            ModelState result = myTE.getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
+            ModelState result = ((SuperTileEntity)myTE).getModelState(currentState, world, pos, refreshFromWorldIfNeeded);
             
             // honor passed in species if different
             if(currentState.getValue(META) != state.getValue(META) && result.metaUsage() != MetaUsage.NONE)
@@ -58,10 +58,10 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     @Override
     public ModelState getModelStateAssumeStateIsCurrent(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {
-        SuperTileEntity myTE = (SuperTileEntity) world.getTileEntity(pos);
-        if(myTE != null) 
+        TileEntity myTE = world.getTileEntity(pos);
+        if(myTE != null && myTE instanceof SuperTileEntity) 
         {
-            return myTE.getModelState(state, world, pos, refreshFromWorldIfNeeded);
+            return ((SuperTileEntity)myTE).getModelState(state, world, pos, refreshFromWorldIfNeeded);
             
         }
         else
@@ -111,10 +111,10 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     
     public void setModelState(World world, BlockPos pos, ModelState modelState)
     {
-        SuperTileEntity blockTE = (SuperTileEntity)world.getTileEntity(pos);
-        if (blockTE != null) 
+        TileEntity blockTE = world.getTileEntity(pos);
+        if (blockTE != null && blockTE instanceof SuperTileEntity) 
         {
-            blockTE.setModelState(modelState);
+            ((SuperTileEntity)blockTE).setModelState(modelState);
         }
     }
 }

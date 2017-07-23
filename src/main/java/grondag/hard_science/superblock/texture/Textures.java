@@ -247,7 +247,7 @@ public class Textures
 
     public static final TexturePallette BIGTEX_FLUID_VORTEX = REGISTRY.addTexturePallette("fluid_vortex", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.MEDIUM).withLayout(TextureLayout.BIGTEX_ANIMATED)
-            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_CUTOUT_OKAY)
+            .withRotation(CONSISTENT.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.BASE_OR_OVERLAY_NO_CUTOUT)
             .withGroups(TextureGroup.DYNAMIC_DETAILS, TextureGroup.DYNAMIC_TILES)
             .withTicksPerFrame(2));
     public static final TexturePallette BIGTEX_FLUID_VORTEX_ZOOM = REGISTRY.addZoomedPallete(BIGTEX_FLUID_VORTEX);
