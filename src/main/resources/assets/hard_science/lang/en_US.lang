@@ -265,7 +265,8 @@ texture.border_channel_lines=Lines in Channel
 texture.border_channel_pin_dots=Pin Dots in Channel
 texture.border_signal=Signal
 texture.border_logic=Logic
-texture.border_inverse_logic=Inverse Logic
+texture.border_inverse_logic_1=Inverse Logic 1
+texture.border_inverse_logic_2=Inverse Logic 2
 
 texture.small_dot=Small Circle
 texture.medium_dot=Medium Circle

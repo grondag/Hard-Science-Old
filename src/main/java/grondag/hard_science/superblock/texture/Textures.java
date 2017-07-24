@@ -152,8 +152,8 @@ public class Textures
     public static final TexturePallette BORDER_CHANNEL_LINES = addBorderSingle("border_channel_lines");
     public static final TexturePallette BORDER_SIGNAL = addBorderSingle("border_signal");
     public static final TexturePallette BORDER_GRITTY_SIGNAL = addBorderRandom("border_gritty_signal", false);
-    public static final TexturePallette BORDER_LOGIC = addBorderRandom("border_logic", false);
-    public static final TexturePallette BORDER_INVERSE_TILE = addBorderRandomTile("border_inverse_logic");
+    public static final TexturePallette BORDER_LOGIC = addBorderRandomTile("border_logic");
+    public static final TexturePallette BORDER_INVERSE_TILE_1 = addBorderRandomTile("border_inverse_logic_1");
     
     //======================================================================
     //  BIGTEX
@@ -342,6 +342,11 @@ public class Textures
     public static final TexturePallette DECAL_FAT_BARS_RANDOM = REGISTRY.addTexturePallette("fat_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THICK_BARS_RANDOM = REGISTRY.addTexturePallette("thick_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_THIN_BARS_RANDOM = REGISTRY.addTexturePallette("thin_bars", new TexturePalletteInfo(DECAL_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    
+    // Integrate after here at next compatibility break
+    
+    public static final TexturePallette BORDER_INVERSE_TILE_2 = addBorderRandomTile("border_inverse_logic_2");
+    
     
     private static TexturePallette addBorderSingle(String textureName)
     {
