@@ -144,6 +144,19 @@ public class CubicQuadPainterBorders extends CubicQuadPainter
             FACE_INPUTS[face.ordinal()][CornerJoinFaceState.ALL_TL_TR_BR.ordinal()] = new FaceQuadInputs( TEXTURE_JOIN_ALL_TR_BL_BR, Rotation.ROTATE_270, false, false);
             
             FACE_INPUTS[face.ordinal()][CornerJoinFaceState.ALL_TL_TR_BL_BR.ordinal()] = new FaceQuadInputs( TEXTURE_JOIN_ALL_ALL_CORNERS, Rotation.ROTATE_NONE, false, false);
+            
+            // rotate bottom face 180 so that it works - bottom face orientation is different from others
+            if(face == EnumFacing.DOWN)
+            {
+                for(int i = 0; i <  FACE_INPUTS[EnumFacing.DOWN.ordinal()].length; i++ )
+                {
+                    FaceQuadInputs fqi = FACE_INPUTS[EnumFacing.DOWN.ordinal()][i];
+                    if(fqi != null && fqi != NO_BORDER)
+                    {
+                        FACE_INPUTS[EnumFacing.DOWN.ordinal()][i] = new FaceQuadInputs(fqi.textureOffset, fqi.rotation.clockwise().clockwise(), fqi.flipU, fqi.flipV);
+                    }
+                }
+            }
         }
     }
 }

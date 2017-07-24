@@ -26,7 +26,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * General bugs
  * FIXME: need alternative to sneak for breaking species on placement
- * FIXME: bottom of connected textures is messed up
  * FIXME: need more subtle versions of geometric decals
  * FIXME: textures on wedge surfaces in stair formation (wood texture)
  */
