@@ -511,7 +511,9 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
     @Override
     public boolean isCube(ModelState modelState)
     {
-        return modelState.getTerrainState().isFullCube();
+        return false; 
+        // doing it this way caused lighting problems: massive dark areas
+//        return modelState.getTerrainState().isFullCube();
     }
 
     @Override
