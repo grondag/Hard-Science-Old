@@ -52,8 +52,8 @@ public class CubicQuadPainterBigTex extends CubicQuadPainter
             
             // abs is necessary so that hash input components combine together properly
             // Small random numbers already have most bits set.
-            int depthAndSpeciesHash = quad.surfaceInstance.ignoreDepthForRandomization && quad.surfaceInstance.textureSalt == 0
-                    ? 0 
+            int depthAndSpeciesHash = quad.surfaceInstance.ignoreDepthForRandomization
+                    ? quad.surfaceInstance.textureSalt 
                     : MathHelper.hash(Math.abs(surfaceVec.getZ()) | (this.species << 8) | (quad.surfaceInstance.textureSalt << 12));
             
             // rotation 
