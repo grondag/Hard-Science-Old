@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.WorldHelper;
+import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -188,7 +189,7 @@ public class CubicPlacementHandler implements IPlacementHandler
     {
         // If player is sneaking, force no match to adjacent species.
         // If not sneaking, try to match block on which placed, or failing that, any adjacent block it can match.
-        if(player.isSneaking())
+        if(ModPlayerCaps.isPlacementModifierOn(player))
         {
             // Force non-match of species for any neighboring blocks
             int speciesInUseFlags = 0;

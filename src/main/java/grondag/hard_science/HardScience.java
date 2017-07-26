@@ -23,13 +23,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
         acceptedMinecraftVersions = "[1.12]",
         dependencies = "after:theoneprobe; after:Waila")
 
-/**
- * General bugs
- * FIXME: need alternative to sneak for breaking species on placement
- * FIXME: need more subtle versions of geometric decals
- */
-
-
 public class HardScience 
 {
 	public static final String MODID = "hard_science";

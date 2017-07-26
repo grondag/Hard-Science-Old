@@ -348,6 +348,44 @@ public class Textures
     public static final TexturePallette BORDER_INVERSE_TILE_2 = addBorderRandomTile("border_inverse_logic_2");
     
     
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("skinny_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_CROSS_RIDGES = REGISTRY.addTexturePallette("thick_diagonal_cross_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("thick_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_CROSS_RIDGES = REGISTRY.addTexturePallette("thin_diagonal_cross_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("thin_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("thin_diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_BARS = REGISTRY.addTexturePallette("thin_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGNAL_CROSS_BARS = REGISTRY.addTexturePallette("skinny_diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_BARS = REGISTRY.addTexturePallette("skinny_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_BARS = REGISTRY.addTexturePallette("diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_CROSS_BARS = REGISTRY.addTexturePallette("fat_diagonal_cross_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_CROSS_RIDGES = REGISTRY.addTexturePallette("diagonal_cross_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SMALL_DOT));
+
+    
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("skinny_diagonal_ridges", 
+            new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("thick_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("thin_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("thin_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("skinny_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS_90 = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES_90 = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_90));
+
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("skinny_diagonal_ridges", 
+            new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(RANDOM.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_SOFT_THICK_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("thick_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("thin_diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_THIN_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("thin_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_SKINNY_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("skinny_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
+    
+    
     private static TexturePallette addBorderSingle(String textureName)
     {
         return REGISTRY.addTexturePallette(textureName, 

@@ -196,6 +196,16 @@ public class Configurator
             EXTRA,
             DEBUG
         }
+        
+        @Comment("Keypress modifier that is used to force difference species or other alternate behavior on block placement.")
+        public PlacementModifier placementModifier = PlacementModifier.SHIFT;
+        
+        public static enum PlacementModifier
+        {
+            SHIFT,
+            CONTROL,
+            ALT
+        }
     }
     
     ////////////////////////////////////////////////////        

@@ -6,12 +6,15 @@ import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
+import grondag.hard_science.network.PacketUpdatePlacementKey;
+import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
@@ -53,6 +56,9 @@ public class ClientEventHandler
         BlockHighlighter.handleDrawBlockHighlightEvent(event);
     }
     
+    /** used to detect key down/up for modifier key */
+    private static boolean isPlacementModifierPressed=false;
+    
     private static int clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent event) 
@@ -73,6 +79,33 @@ public class ClientEventHandler
                 CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
                 CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
             }
+            
+        }
+
+        boolean newDown;
+        
+        switch(Configurator.BLOCKS.placementModifier)
+        {
+        case ALT:
+            newDown = GuiScreen.isAltKeyDown();
+            break;
+            
+        case CONTROL:
+            newDown =  GuiScreen.isCtrlKeyDown();
+            break;
+            
+        case SHIFT:
+        default:
+            newDown = GuiScreen.isShiftKeyDown();
+            break;
+        }
+        
+        
+        if(newDown != isPlacementModifierPressed)
+        {
+            isPlacementModifierPressed = newDown;
+            ModPlayerCaps.setPlacementModifierOn(Minecraft.getMinecraft().player, newDown);
+            ModMessages.INSTANCE.sendToServer(new PacketUpdatePlacementKey(newDown));
         }
     }
 

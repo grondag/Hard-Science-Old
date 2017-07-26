@@ -13,6 +13,7 @@ public class ModKeys
     public static KeyBinding PLACEMENT_FACE;
     public static KeyBinding PLACEMENT_ROTATION;
     public static KeyBinding PLACEMENT_PREVIEW;
+    public static KeyBinding PLACEMENT_BREAK;
 
     public static void init(FMLInitializationEvent event)
     {
