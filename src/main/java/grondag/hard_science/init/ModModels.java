@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.library.render.HSObjModelLoader;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -29,6 +30,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -169,6 +171,11 @@ public class ModModels
                         ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
                     }
                 }
+                // Would not actually do it this way if start using OBJ models
+//                else if(item == ModItems.obj_test_model)
+//                {
+//                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName() + ".obj", "inventory"));
+//                }
                 else
                 {
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
@@ -179,7 +186,8 @@ public class ModModels
     
     public static void preInit(FMLPreInitializationEvent event) 
     {
- 
+        ModelLoaderRegistry.registerLoader(HSObjModelLoader.INSTANCE);
+        //OBJLoader.INSTANCE.addDomain(HardScience.MODID);
     }
     
     public static void init(FMLInitializationEvent event)

@@ -40,7 +40,9 @@ public class ModItems
     public static final Item basalt_cobble = null;
     public static final Item basalt_cut = null;
     
-    
+    // tools
+//    public static final Item obj_test_model = null;
+      
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) 
     {
@@ -64,8 +66,8 @@ public class ModItems
         itemReg.register(new PolyethyleneCube(5).setRegistryName("hdpe_cube_5").setUnlocalizedName("hdpe_cube_5").setCreativeTab(HardScience.tabMod));
         itemReg.register(new PolyethyleneCube(6).setRegistryName("hdpe_cube_6").setUnlocalizedName("hdpe_cube_6").setCreativeTab(HardScience.tabMod));
         itemReg.register(new PolyethyleneCube(6).setRegistryName("hdpe_wafer_6").setUnlocalizedName("hdpe_wafer_6").setCreativeTab(HardScience.tabMod));
-
-
+        
+//        itemReg.register(new Item().setRegistryName("obj_test_model").setUnlocalizedName("obj_test_model").setCreativeTab(HardScience.tabMod));
     }
 
     private static void registerItemBlocks(IForgeRegistry<Item> itemReg)
