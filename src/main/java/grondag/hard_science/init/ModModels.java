@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.library.render.HSObjModelLoader;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -15,6 +14,10 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
+import grondag.hard_science.virtualblock.VirtualBlock;
+import grondag.hard_science.virtualblock.VirtualBlockBakedModel;
+import grondag.hard_science.virtualblock.VirtualBlockTESR;
+import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -30,7 +33,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.obj.OBJLoader;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -46,6 +49,9 @@ public class ModModels
 {
     public static final SuperDispatcher MODEL_DISPATCH = new SuperDispatcher();
 
+    public static final VirtualBlockBakedModel VIRTUAL_BAKED_MODEL =  new VirtualBlockBakedModel();
+    public static final String VIRTUAL_BLOCK_LOCATION = HardScience.MODID + ":" + VirtualBlock.VIRTUAL_BLOCK_NAME;
+    
     @SubscribeEvent()
     public static void onModelBakeEvent(ModelBakeEvent event) throws IOException
     {
@@ -59,6 +65,8 @@ public class ModModels
         {
             event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
         }
+        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION), VIRTUAL_BAKED_MODEL);
+        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION, "inventory"), VIRTUAL_BAKED_MODEL);
         
         IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
         
@@ -137,8 +145,6 @@ public class ModModels
     {
        final SuperStateMapper mapper = new SuperStateMapper(MODEL_DISPATCH);
         
-        ModelLoaderRegistry.registerLoader(new SuperModelLoader());
-        
         IForgeRegistry<Block> blockReg = GameRegistry.findRegistry(Block.class);
     
         for(Map.Entry<ResourceLocation, Block> entry: blockReg.getEntries())
@@ -182,11 +188,16 @@ public class ModModels
                 }
             }
         }
+        
+//        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ModBlocks.virtual_block), 0, new ModelResourceLocation(ModBlocks.virtual_block.getRegistryName(), "inventory"));
+        // Bind our TESR to our tile entity
+        ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 
     {
-        ModelLoaderRegistry.registerLoader(HSObjModelLoader.INSTANCE);
+        ModelLoaderRegistry.registerLoader(new SuperModelLoader());
+        //ModelLoaderRegistry.registerLoader(HSObjModelLoader.INSTANCE);
         //OBJLoader.INSTANCE.addDomain(HardScience.MODID);
     }
     

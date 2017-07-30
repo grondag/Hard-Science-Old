@@ -21,6 +21,7 @@ import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -52,6 +53,7 @@ public class ModBlocks
     
     public static final Block hdpe_block = null;
     
+    public static final Block virtual_block = null;
     
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
@@ -162,7 +164,11 @@ public class ModBlocks
             event.getRegistry().register(dynamicVeryHotBasaltHeight);
             event.getRegistry().register(dynamicVeryHotBasaltFiller);
             TerrainBlockRegistry.TERRAIN_STATE_REGISTRY.registerFiller(dynamicVeryHotBasaltHeight, dynamicVeryHotBasaltFiller);
+            
         }
+        
+        // VIRTUAL BLOCKS
+        event.getRegistry().register(new VirtualBlock().setRegistryName(VirtualBlock.VIRTUAL_BLOCK_NAME).setUnlocalizedName(VirtualBlock.VIRTUAL_BLOCK_NAME));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 
