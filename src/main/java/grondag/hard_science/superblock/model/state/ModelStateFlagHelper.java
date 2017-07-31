@@ -11,22 +11,8 @@ import grondag.hard_science.superblock.texture.Textures;
  * Populates state flags for a given model state.
  * 
  * Most important function is to encapsulates rules 
- * for shading mode and render layer selection
- * for each paint layer based on limitations of MC rendering engine.
+ * for render mode selection for each paint layer.
  * 
- * Overlay paint layers always render on translucent layer when present.
- * 
- * If any paint layer rendering in translucency is full brightness,
- * then all paint layers rendering in translucency must be full brightness, 
- * because all will use the flat lighter.
- * 
- * For Base/Cut and Lamp layers:
- * 
- *  If one is translucent, the other renders on solid.
- *  If none are translucent and none are glowing, both render on solid
- *  If none are translucent and one is glowing, try to render one on cutout and other on solid
- *      Except: if neither can be rendered cutout render both solid - both will glow
- *      
  * Results are returns as STATE_FLAG_XXXX values from ModelState
  * for easy persistence and usage within that class.     
  */
@@ -42,11 +28,8 @@ public class ModelStateFlagHelper
     /** True if base paint layer is full brightness */
     private static final int IS_BASE_LIT = IS_BASE_TRANSLUCENT << 1;
     
-    /** True if base paint layer texture support cutout layer for rendering */
-    private static final int IS_BASE_CUTOUT_OK = IS_BASE_LIT << 1;
-    
     /** True if lamp paint layer surface is present in the model */
-    private static final int IS_LAMP_PRESENT = IS_BASE_CUTOUT_OK << 1;
+    private static final int IS_LAMP_PRESENT = IS_BASE_LIT << 1;
     
     /** True if lamp paint layer surface is translucent */
     private static final int IS_LAMP_TRANSLUCENT = IS_LAMP_PRESENT << 1;
@@ -54,11 +37,8 @@ public class ModelStateFlagHelper
     /** True if lamp paint layer surface is full brightness */
     private static final int IS_LAMP_LIT = IS_LAMP_TRANSLUCENT << 1;
     
-    /** True if lamp paint layer texture support cutout layer for rendering */
-    private static final int IS_LAMP_CUTOUT_OK = IS_LAMP_LIT << 1;
-    
     /** True if middle paint layer is enabled */
-    private static final int IS_MIDDLE_PRESENT = IS_LAMP_CUTOUT_OK << 1;
+    private static final int IS_MIDDLE_PRESENT = IS_LAMP_LIT << 1;
     
     /** True if middle paint layer is full brightness */
     private static final int IS_MIDDLE_LIT = IS_MIDDLE_PRESENT << 1;
@@ -82,44 +62,35 @@ public class ModelStateFlagHelper
             
             boolean isBaseTranslucent = (i & IS_BASE_TRANSLUCENT) != 0;
             boolean isBaseLit = (i & IS_BASE_LIT) != 0;
-            boolean isBaseCutoutOK = (i & IS_BASE_CUTOUT_OK) != 0;
             boolean isLampPresent = (i & IS_LAMP_PRESENT) != 0;
             boolean isLampTranslucent = (i & IS_LAMP_TRANSLUCENT) != 0;
             boolean isLampLit = (i & IS_LAMP_LIT) != 0;
-            boolean isLampCutoutOK = (i & IS_LAMP_CUTOUT_OK) != 0;
             boolean isMiddlePresent = (i & IS_MIDDLE_PRESENT) != 0;
             boolean isMiddleLit = (i & IS_MIDDLE_LIT) != 0;
             boolean isOuterPresent = (i & IS_OUTER_PRESENT) != 0;
             boolean isOuterLit = (i & IS_OUTER_LIT) != 0;
             
             
-            boolean isLampCutout = isLampPresent && !isBaseTranslucent && !isLampTranslucent && isLampCutoutOK && (isBaseLit != isLampLit);
-            if(isLampCutout) result |= STATE_FLAG_IS_LAMP_CUTOUT;
-                    
-            boolean isBaseCutout = !isLampCutout && !isBaseTranslucent && !isLampTranslucent && isBaseCutoutOK && (isBaseLit != isLampLit);
-            if(isBaseCutout) result |= STATE_FLAG_IS_LAMP_CUTOUT;
-            
-            boolean isLampSolid = isLampPresent && !isLampTranslucent && !isLampCutout;
-            boolean isBaseSolid = !isBaseTranslucent && !isBaseCutout;
+            boolean isLampSolid = isLampPresent && !isLampTranslucent;
+            boolean isBaseSolid = !isBaseTranslucent;
 
-            boolean isSolidPresent = isLampSolid || isBaseSolid;
-            if(isSolidPresent) result |= STATE_FLAG_HAS_RENDER_LAYER_SOLID;
+            boolean hasSolidLayer = (isLampSolid && !isLampLit) || (isBaseSolid && !isBaseLit);
+            if(hasSolidLayer) result |= STATE_FLAG_HAS_RENDER_LAYER_SOLID;
             
-            boolean isSolidLit = (isLampSolid && isLampLit) || (isBaseSolid && isBaseLit);
-            if(isSolidLit) result |= STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID;
-            
-            boolean isCutoutPresent = isLampCutout || isBaseCutout;
-            if(isCutoutPresent) result |= STATE_FLAG_HAS_RENDER_LAYER_CUTOUT_MIPPED;
-            
-            boolean isCutoutLit = (isLampCutout && isLampLit) || (isBaseCutout && isBaseLit);
-            if(isCutoutLit) result |= STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT_MIPPED;
+            boolean hasSolidTESR = (isLampSolid && isLampLit) || (isBaseSolid && isBaseLit);
+            if(hasSolidTESR) result |= STATE_FLAG_TESR_RENDER_LAYER_SOLID;
            
-            boolean hasTranslucent = isBaseTranslucent || (isLampPresent && isLampTranslucent) || isMiddlePresent || isOuterPresent;
-            if(hasTranslucent) result |= STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT;
+            boolean hasTranslucentLayer = (isBaseTranslucent && !isBaseLit)
+                    || (isLampPresent && isLampTranslucent && !isLampLit) 
+                    || (isMiddlePresent && !isMiddleLit)
+                    || (isOuterPresent && !isOuterLit);
+            if(hasTranslucentLayer) result |= STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT;
             
-            boolean isTranslucentLit = (isMiddlePresent && isMiddleLit) || (isOuterPresent && isOuterLit) || (isBaseTranslucent && isBaseLit)
+            boolean hasTranslucentTESR = (isMiddlePresent && isMiddleLit) 
+                    || (isOuterPresent && isOuterLit) 
+                    || (isBaseTranslucent && isBaseLit)
                     || (isLampPresent && isLampTranslucent && isLampLit);
-            if(isTranslucentLit) result |= STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT;
+            if(hasTranslucentTESR) result |= STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT;
             
             if(isBaseTranslucent || (isLampPresent && isLampTranslucent))
                 result |= STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;
@@ -148,16 +119,13 @@ public class ModelStateFlagHelper
         if(mesh.hasLampSurface(state)) 
         {
             index |= IS_LAMP_PRESENT;
-            
-            // don't need to consider base cutout if no lamp surface
-            if(texBase.renderIntent.canRenderAsBaseInCutoutLayer) index |= IS_BASE_CUTOUT_OK;
-
+      
             TexturePallette texLamp = state.getTexture(PaintLayer.LAMP);
             flags |= texLamp.stateFlags;
             
             if(state.isTranslucent(PaintLayer.LAMP)) index |= IS_LAMP_TRANSLUCENT;
             if(state.isFullBrightness(PaintLayer.LAMP)) index |= IS_LAMP_LIT;
-            if(texLamp.renderIntent.canRenderAsBaseInCutoutLayer) index |= IS_LAMP_CUTOUT_OK;
+
         }
         
         TexturePallette texOverlay = state.getTexture(PaintLayer.MIDDLE);

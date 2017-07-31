@@ -2,15 +2,12 @@ package grondag.hard_science.virtualblock;
 
 import java.util.List;
 
-import javax.swing.colorchooser.ColorSelectionModel;
-
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.block.SuperBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -28,7 +25,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -93,7 +89,7 @@ public class VirtualBlockTESR extends TileEntitySpecialRenderer<VirtualBlockTile
         World world = te.getWorld();
         SuperBlock block = (SuperBlock) ModBlocks.basalt_cobble;
         IBlockState state = ModBlocks.basalt_cobble.getExtendedState(block.getDefaultState(), world, te.getPos());
-        IBakedModel model = ModModels.MODEL_DISPATCH.getDelegate(block);
+        IBakedModel model = ModModels.MODEL_DISPATCH.delegate_block;
         
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
@@ -126,6 +122,7 @@ public class VirtualBlockTESR extends TileEntitySpecialRenderer<VirtualBlockTile
         super.renderTileEntityFast(te, x, y, z, partialTicks, destroyStage, partial, buffer);
     }
     
+    @SuppressWarnings("unused")
     private void renderModel(IBakedModel model, int color, ItemStack stack)
     {
         Tessellator tessellator = Tessellator.getInstance();

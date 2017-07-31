@@ -12,11 +12,11 @@ import javax.vecmath.Vector4d;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.superblock.model.state.RenderMode;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -57,7 +57,7 @@ public class RawQuad
 
     public boolean shouldContractUVs = true;
     
-    public BlockRenderLayer renderLayer = BlockRenderLayer.SOLID;
+    public RenderMode renderMode = RenderMode.SOLID_SHADED;
     public SurfaceInstance surfaceInstance = NO_SURFACE;
 
     public float minU = 0;
@@ -138,7 +138,7 @@ public class RawQuad
         this.maxU = fromObject.maxU;
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
-        this.renderLayer = fromObject.renderLayer;
+        this.renderMode = fromObject.renderMode;
         this.surfaceInstance = fromObject.surfaceInstance;
     }
 

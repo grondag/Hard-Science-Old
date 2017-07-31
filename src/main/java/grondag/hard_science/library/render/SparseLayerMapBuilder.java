@@ -4,24 +4,24 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import net.minecraft.util.BlockRenderLayer;
+import grondag.hard_science.superblock.model.state.RenderMode;
 
 /**
  * Super lightweight version of EnumMap for Block layers to QuadContainer. Only stores values for keys that are used.
  */
 public class SparseLayerMapBuilder
 {
-    private final int[] layerIndices = new int[BlockRenderLayer.values().length];
+    private final int[] layerIndices = new int[RenderMode.values().length];
     private final int size;
-    public final ImmutableList<BlockRenderLayer> layerList;
+    public final ImmutableList<RenderMode> layerList;
     
-    public SparseLayerMapBuilder(List<BlockRenderLayer> layers)
+    public SparseLayerMapBuilder(List<RenderMode> layers)
     {
         this.size = layers.size();
         this.layerList = ImmutableList.copyOf(layers);
         int counter = 0;
         
-        for(BlockRenderLayer l: layers)
+        for(RenderMode l: layers)
         {
             layerIndices[l.ordinal()] = counter++;
         }
@@ -37,9 +37,9 @@ public class SparseLayerMapBuilder
     
     public abstract class SparseLayerMap
     {
-        public abstract QuadContainer get(BlockRenderLayer layer);
+        public abstract QuadContainer get(RenderMode layer);
         
-        public abstract void set(BlockRenderLayer layer, QuadContainer value);
+        public abstract void set(RenderMode layer, QuadContainer value);
         
         public abstract QuadContainer[] getAll();
     }
@@ -53,12 +53,12 @@ public class SparseLayerMapBuilder
             //NOOP - just making it private
         }
         
-        public QuadContainer get(BlockRenderLayer layer)
+        public QuadContainer get(RenderMode layer)
         {
             return values[layerIndices[layer.ordinal()]];
         }
         
-        public void set(BlockRenderLayer layer, QuadContainer value)
+        public void set(RenderMode layer, QuadContainer value)
         {
             values[layerIndices[layer.ordinal()]] = value;
         }
@@ -78,12 +78,12 @@ public class SparseLayerMapBuilder
             //NOOP - just making it private
         }
         
-        public QuadContainer get(BlockRenderLayer layer)
+        public QuadContainer get(RenderMode layer)
         {
             return value;
         }
         
-        public void set(BlockRenderLayer layer, QuadContainer value)
+        public void set(RenderMode layer, QuadContainer value)
         {
             this.value = value;
         }

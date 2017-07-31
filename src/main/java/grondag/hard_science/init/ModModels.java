@@ -6,6 +6,9 @@ import java.util.Map;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.block.SuperBlockTESR;
+import grondag.hard_science.superblock.block.SuperModelTileEntity;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.texture.TextureLayout;
@@ -13,11 +16,8 @@ import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
-import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import grondag.hard_science.virtualblock.VirtualBlockBakedModel;
-import grondag.hard_science.virtualblock.VirtualBlockTESR;
-import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -61,12 +61,11 @@ public class ModModels
         // }
         
         ModModels.MODEL_DISPATCH.clear();
-        for(DispatchDelegate delegate : ModModels.MODEL_DISPATCH.delegates)
-        {
-            event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
-        }
-        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION), VIRTUAL_BAKED_MODEL);
-        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION, "inventory"), VIRTUAL_BAKED_MODEL);
+     
+        event.getModelRegistry().putObject(new ModelResourceLocation(ModModels.MODEL_DISPATCH.delegate_block.getModelResourceString()), ModModels.MODEL_DISPATCH.delegate_block);
+        
+//        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION), VIRTUAL_BAKED_MODEL);
+//        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION, "inventory"), VIRTUAL_BAKED_MODEL);
         
         IForgeRegistry<Item> itemReg = GameRegistry.findRegistry(Item.class);
         
@@ -81,7 +80,7 @@ public class ModModels
                     for (ItemStack stack : block.getSubItems())
                     {
                         event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                ModModels.MODEL_DISPATCH.getDelegate(block));
+                                ModModels.MODEL_DISPATCH.delegate_block);
                     }
                 }
                 else
@@ -172,7 +171,7 @@ public class ModModels
                     SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
                     for (ItemStack stack : block.getSubItems())
                     {
-                        String variantName = ModModels.MODEL_DISPATCH.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
+                        String variantName = ModModels.MODEL_DISPATCH.delegate_block.getModelResourceString() + "." + stack.getMetadata();
                         ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
                         ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
                     }
@@ -191,7 +190,9 @@ public class ModModels
         
 //        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ModBlocks.virtual_block), 0, new ModelResourceLocation(ModBlocks.virtual_block.getRegistryName(), "inventory"));
         // Bind our TESR to our tile entity
-        ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
+//        ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntity.class, SuperBlockTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntity.class, SuperBlockTESR.INSTANCE);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

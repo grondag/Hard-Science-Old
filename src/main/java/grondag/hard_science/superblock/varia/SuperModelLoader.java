@@ -25,7 +25,7 @@ public class SuperModelLoader implements ICustomModelLoader
     @Override
     public IModel loadModel(ResourceLocation modelLocation) throws Exception
     {
-        return ModModels.MODEL_DISPATCH.getDelegate(modelLocation.getResourcePath());
+        return ModModels.MODEL_DISPATCH.delegate_block;
     }
 
 }

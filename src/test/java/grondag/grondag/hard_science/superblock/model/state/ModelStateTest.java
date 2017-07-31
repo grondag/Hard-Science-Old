@@ -64,8 +64,6 @@ public class ModelStateTest
         assert(reloadedState.isStatic());
         assert(reloadedState.isOuterLayerEnabled());
         assert(reloadedState.isMiddleLayerEnabled());
-        assert(reloadedState.isLayerShaded(BlockRenderLayer.TRANSLUCENT) == true);
-        assert(reloadedState.isLayerShaded(BlockRenderLayer.CUTOUT_MIPPED) ==false);
         assert(reloadedState.getColorMap(PaintLayer.BASE) == BlockColorMapProvider.INSTANCE.getColorMap(5));
         assert(reloadedState.getColorMap(PaintLayer.OUTER) == BlockColorMapProvider.INSTANCE.getColorMap(7));
         assert(reloadedState.isFullBrightness(PaintLayer.LAMP));
@@ -85,22 +83,16 @@ public class ModelStateTest
         assert(reloadedState.getStaticShapeBits() == 879579585L);
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.SOLID) == true);
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT) == false);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED) == true);
+        assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED) == false);
         assert(reloadedState.canRenderInLayer(BlockRenderLayer.TRANSLUCENT) == true);
         
-        int flags = reloadedState.getRenderLayerShadedFlags();
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.SOLID, flags));
-        assert(!ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.CUTOUT_MIPPED, flags));
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.TRANSLUCENT, flags));
+        int flags = reloadedState.getRenderModeFlags();
+        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.SOLID_SHADED, flags));
+        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.TRANSLUCENT_SHADED, flags));
+        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.SOLID_TESR, flags));
+        assert(!ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.TRANSLUCENT_TESR, flags));
 
-        flags = reloadedState.getCanRenderInLayerFlags();
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.SOLID, flags));
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.CUTOUT_MIPPED, flags));
-        assert(!ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.CUTOUT, flags));
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(BlockRenderLayer.TRANSLUCENT, flags));
-
-        
-        
+             
     }
 
 }

@@ -166,11 +166,6 @@ public class ModelStateFactory
         /** Set if shape can be rotated around an axis. Only applies to block models; multiblock models manage this situationally. */
         public static final int STATE_FLAG_HAS_AXIS_ROTATION = STATE_FLAG_HAS_AXIS_ORIENTATION << 1;
 
-        /** Set if Base paint layer is non-translucent and should be rendered on Cutout Mipped render layer */
-        public static final int STATE_FLAG_IS_BASE_CUTOUT = STATE_FLAG_HAS_AXIS_ROTATION << 1;
-
-        /** Set if Lamp paint layer is non-translucent and should be rendered on Cutout Mipped render layer */
-        public static final int STATE_FLAG_IS_LAMP_CUTOUT = STATE_FLAG_IS_BASE_CUTOUT << 1;
 
         ///////////////////////////////////
         // RENDER LAYER FLAGS
@@ -178,9 +173,9 @@ public class ModelStateFactory
         ///////////////////////////////////
         
         /** Set if Solid render layer is present */
-        public static final int STATE_FLAG_HAS_RENDER_LAYER_SOLID = STATE_FLAG_IS_LAMP_CUTOUT << 1;
+        public static final int STATE_FLAG_HAS_RENDER_LAYER_SOLID = STATE_FLAG_HAS_AXIS_ROTATION << 1;
 
-        /** Set if Cutout Mipped render layer is present */
+        /** Set if Cutout Mipped render layer is present. Not used, but needed for proper flag order. */
         public static final int STATE_FLAG_HAS_RENDER_LAYER_CUTOUT_MIPPED = STATE_FLAG_HAS_RENDER_LAYER_SOLID << 1;
         
         /** Set if Cutout render layer is present.  Not used, but needed for proper flag order. */
@@ -189,35 +184,28 @@ public class ModelStateFactory
         /** Set if Translucent render layer is present */
         public static final int STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT = STATE_FLAG_HAS_RENDER_LAYER_CUTOUT << 1;
         
-        /**
-         * See {@link #getCanRenderInLayerFlags()}
-         */
-        private static final int RENDER_LAYER_FLAG_SHIFT = Useful.bitLength(STATE_FLAG_HAS_RENDER_LAYER_SOLID);
+ 
 
         ///////////////////////////////////
-        // FULL BRIGHTNESS FLAGS
+        // TESR FLAGS
         // Note that order must match Enum ordinal so that BENUMSET_RENDER_LAYER can use these.
         ///////////////////////////////////
         
-        /** Set if Solid render layer is present and full brightness */
-        public static final int STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID = STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT << 1;
+        /** Set if Solid quads are present that must be rendered as TESR */
+        public static final int STATE_FLAG_TESR_RENDER_LAYER_SOLID = STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT << 1;
 
-        /** Set if Cutout Mipped render layer is present and full brightness */
-        public static final int STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT_MIPPED = STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID << 1;
+        /** Set if Cutout Mipped quads are present that must be rendered as TESR */
+        public static final int STATE_FLAG_TESR_RENDER_LAYER_CUTOUT_MIPPED = STATE_FLAG_TESR_RENDER_LAYER_SOLID << 1;
 
-        /** Set if Cutout render layer is present and full brightness.  Not used, but needed for proper flag order.  */
-        public static final int STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT = STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT_MIPPED << 1;
+        /** Set if Cutout quads are present that must be rendered as TESR.  Not used, but needed for proper flag order.  */
+        public static final int STATE_FLAG_TESR_RENDER_LAYER_CUTOUT = STATE_FLAG_TESR_RENDER_LAYER_CUTOUT_MIPPED << 1;
         
-        /** Set if Translucent render layer is present and full brightness */
-        public static final int STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT = STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT << 1;
+        /** Set if Translucent quads are present that must be rendered as TESR */
+        public static final int STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT = STATE_FLAG_TESR_RENDER_LAYER_CUTOUT << 1;
 
-        /**
-         * See {@link #getRenderLayerShadedFlags()}
-         */
-        private static final int FULLBRIGHT_FLAG_SHIFT = Useful.bitLength(STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID);
         
         /** Set if either Base/Cut or Lamp (if present) paint layers are translucent */
-        public static final int STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY = STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT << 1;
+        public static final int STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY = STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT << 1;
 
         /** sign bit is used to indicate static state */
         private static final int INT_SIGN_BIT = 1 << 31;
@@ -229,7 +217,7 @@ public class ModelStateFactory
                 | STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_NEEDS_TEXTURE_ROTATION);
 
 
-        public static final BinaryEnumSet<BlockRenderLayer> BENUMSET_RENDER_LAYER = new BinaryEnumSet<BlockRenderLayer>(BlockRenderLayer.class);
+        public static final BinaryEnumSet<RenderMode> BENUMSET_RENDER_MODE = new BinaryEnumSet<RenderMode>(RenderMode.class);
 
         private boolean isStatic;
         private long bits0;
@@ -585,13 +573,18 @@ public class ModelStateFactory
 
         /** 
          * Exposed for use as a lookup key in model dispatch logic. 
-         * Identifies which block render layers can be rendered in this model.
-         * Can be decoded with {@link #BENUMSET_RENDER_LAYER} 
+         * Identifies which block render modes can be rendered in this model.
+         * Can be decoded with {@link #BENUMSET_RENDER_MODE}
          */
-        public byte getCanRenderInLayerFlags() 
+        public byte getRenderModeFlags() 
         { 
             this.populateStateFlagsIfNeeded();
-            return (byte) ((this.stateFlags >> RENDER_LAYER_FLAG_SHIFT) & 0xF); 
+            int result = 0;
+            if((this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_SOLID) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.SOLID_SHADED, result, true);
+            if((this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_SOLID) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.SOLID_TESR, result, true);
+            if((this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.TRANSLUCENT_SHADED, result, true);
+            if((this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.TRANSLUCENT_TESR, result, true);
+            return (byte) (result); 
         };
 
         /**
@@ -644,38 +637,6 @@ public class ModelStateFactory
             clearStateFlags();
             invalidateHashCode();
         }
-
-        /** returns true if no surface painters for the given layer are configured for full brightness rendering */
-        public boolean isLayerShaded(BlockRenderLayer renderLayer)
-        {
-            this.populateStateFlagsIfNeeded();
-            switch(renderLayer)
-            {
-            case SOLID:
-                return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID) == 0;
-                
-            case CUTOUT_MIPPED:
-                return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT_MIPPED) == 0;
-                
-            case TRANSLUCENT:
-                return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT) == 0;
-                
-            case CUTOUT:
-            default:
-                return true;
-            }
-        }
-
-        /** 
-         * Exposed for use as a lookup key in model dispatch logic. 
-         * Identifies which block render layers should be rendered with AO (not full brightness).
-         * Can be decoded with {@link ModelState#BENUMSET_RENDER_LAYER} 
-         */
-        public byte getRenderLayerShadedFlags() 
-        { 
-            this.populateStateFlagsIfNeeded();
-            return (byte) ((~(this.stateFlags >> FULLBRIGHT_FLAG_SHIFT)) & 0xF);
-        };
 
         ////////////////////////////////////////////////////
         //  PACKER 2 ATTRIBUTES  (NOT SHAPE-DEPENDENT)
@@ -933,69 +894,61 @@ public class ModelStateFactory
         ////////////////////////////////////////////////////
 
         /**
-         * Determines what block render layer and shading mode should be used
+         * Determines what rendering path should apply for the given paint layer
          * based on user choices and the constraints imposed by MC rendering.  
-         * Not all combinations that can be requested will render successfully.  
-         * Will provide closest possible match to what user requested.
          */
         public RenderMode getRenderMode(PaintLayer layer)
         {
-            this.populateStateFlagsIfNeeded();
+            boolean needsTESR = this.isFullBrightness(layer);
             
             switch(layer)
             {
             case BASE:
             case CUT:
-                if(this.isTranslucent(PaintLayer.BASE))
-                {
-                    return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT) == 0
-                            ? RenderMode.TRANSLUCENT_SHADED 
-                            : RenderMode.TRANSLUCENT_GLOW;
-                }
-                else if((this.stateFlags & STATE_FLAG_IS_BASE_CUTOUT) == 0)
-                {
-                    return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID) == 0
-                            ? RenderMode.SOLID_SHADED 
-                            : RenderMode.SOLID_GLOW;
-                }
-                else
-                {
-                    return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT_MIPPED) == 0
-                            ? RenderMode.CUTOUT_SHADED 
-                            : RenderMode.CUTOUT_GLOW;
-                }
-                
             case LAMP:
-                if(this.isTranslucent(PaintLayer.LAMP))
+            default:
+                if(this.isTranslucent(layer))
                 {
-                    return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT) == 0
-                            ? RenderMode.TRANSLUCENT_SHADED 
-                            : RenderMode.TRANSLUCENT_GLOW;
-                }
-                else if((this.stateFlags & STATE_FLAG_IS_LAMP_CUTOUT) == 0)
-                {
-                    return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_SOLID) == 0
-                            ? RenderMode.SOLID_SHADED 
-                            : RenderMode.SOLID_GLOW;
+                    return needsTESR ? RenderMode.TRANSLUCENT_TESR : RenderMode.TRANSLUCENT_SHADED;
                 }
                 else
                 {
-                    return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_CUTOUT_MIPPED) == 0
-                            ? RenderMode.CUTOUT_SHADED 
-                            : RenderMode.CUTOUT_GLOW;
+                    return needsTESR ? RenderMode.SOLID_TESR : RenderMode.SOLID_SHADED;
                 }
                 
             case MIDDLE:
             case OUTER:
-                return (this.stateFlags & STATE_FLAG_FULLBRIGHT_RENDER_LAYER_TRANSLUCENT) == 0
-                    ? RenderMode.TRANSLUCENT_SHADED 
-                    : RenderMode.TRANSLUCENT_GLOW;
-            }
+                return needsTESR ? RenderMode.TRANSLUCENT_TESR : RenderMode.TRANSLUCENT_SHADED;
             
-            // never gets here
-            return RenderMode.SOLID_SHADED;
+            }
         }
 
+        public boolean hasRenderMode(RenderMode mode)
+        {
+           this.populateStateFlagsIfNeeded();
+           switch(mode)
+           {
+            case SOLID_SHADED:
+                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_SOLID) != 0;
+                
+            case SOLID_TESR:
+                return (this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_SOLID) != 0;
+                
+            case TRANSLUCENT_SHADED:
+                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT) != 0;
+                
+            case TRANSLUCENT_TESR:
+                return (this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT) != 0;
+
+//            case CUTOUT_SHADED:
+//            case CUTOUT_TESR:
+            default:
+                return false;
+               
+           }
+            
+        }
+        
         public boolean hasAxis()
         {
             this.populateStateFlagsIfNeeded();

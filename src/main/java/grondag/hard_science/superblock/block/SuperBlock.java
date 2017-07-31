@@ -23,6 +23,7 @@ import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.PaintLayer;
+import grondag.hard_science.superblock.model.state.RenderModeSet;
 import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -109,17 +110,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
     /** change in constructor to have different appearance */
     protected int[] defaultModelStateBits;
-
-    /** will be set based on default model state first time is needed */
-    protected int renderLayerEnabledFlags = -1;
-    
-    /** 
-     * Used by dispatcher to known if shading should be enabled for the given render layer.
-     * Will be set based on default model state first time is needed unless
-     * changed to value other than -1 in constructor.
-     */
-    /** will be set based on default model state first time is needed */
-    protected int renderLayerShadedFlags = -1;
     
     /** change in constructor to have fewer variants */
     protected int metaCount = 16;
@@ -127,7 +117,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     /** see {@link #isAssociatedBlock(Block)} */
     protected Block associatedBlock;
     
-    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState)
+    public final RenderModeSet renderModeSet;
+    
+    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState, RenderModeSet renderModeSet)
     {
         super(defaultMaterial);
         setCreativeTab(HardScience.tabMod);
@@ -145,7 +137,11 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         this.lightOpacity = 0;
 
         this.defaultModelStateBits = defaultModelState.getBitsIntArray();
-    }
+        
+        this.renderModeSet = renderModeSet == null
+                ? RenderModeSet.findSmallestInclusiveSet(defaultModelState)
+                : renderModeSet;
+    }   
 
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
@@ -481,42 +477,23 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     /**
      * This is queried before getActualState, which means it cannot be determined from world.
      * 
-     * We only have a couple ways to get around this that don't involve ASM or switching to a TESR.
-     * 
-     * 1) We can persist it in the block instance somehow and set block states that have the
-     * right value for the model they represent.  This could force some block state changes in 
-     * the world however if model state changes - but those changes are not likely.
-     * Main drawback of this approach is that it consumes a lot of block ids.
-     * 
-     * 2) We can report that we render in all layers but return no quads.  However, this means RenderChunk
+     * We could report that we render in all layers but return no quads.  However, this means RenderChunk
      * does quite a bit of work asking us for stuff that isn't there. 
      * 
-     * Default implementation derives it from default model state first time it is needed.
+     * Instead we persist it in the block instance and set block states that point to the
+     * appropriate block instance for the model they represent.  This could force some block state changes in 
+     * the world however if model state changes - but those changes are not likely.
+     * Main drawback of this approach is that it consumes more block ids.
+     * 
+     * If any rendering is done by TESR, then don't render in any layer because too hard to
+     * get render depth perfectly aligned that way.  TESR will also render normal block layers.
      */
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-        int layerFlags = this.renderLayerEnabledFlags;
-        if(layerFlags == -1)
-        {
-            layerFlags = this.getDefaultModelState().getCanRenderInLayerFlags();
-            this.renderLayerEnabledFlags = layerFlags;
-        }
-        return ModelState.BENUMSET_RENDER_LAYER.isFlagSetForValue(layer, layerFlags);
+        return !this.renderModeSet.hasTESR && this.renderModeSet.canRenderInLayer(layer);
     }
-    
-    /** used by dispatcher to control AO shading by render layer */
-    public int renderLayerShadedFlags()
-    {
-        int layerFlags = this.renderLayerShadedFlags;
-        if(layerFlags == -1)
-        {
-            layerFlags = this.getDefaultModelState().getRenderLayerShadedFlags();
-            this.renderLayerShadedFlags = layerFlags;
-        }
-        return layerFlags;
-    }
-
+   
     @Override
     public boolean canSilkHarvest()
     {
@@ -712,7 +689,6 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     {
         return ((IExtendedBlockState)state)
                 .withProperty(MODEL_STATE, getModelStateAssumeStateIsCurrent(state, world, pos, true));
-//                .withProperty(SHADE_FLAGS, (int)this.getModelState(state, world, pos, false).getRenderLayerShadedFlags());;
     }
 
     /**

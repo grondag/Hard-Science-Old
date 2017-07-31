@@ -1,7 +1,7 @@
 package grondag.hard_science.init;
 
 import grondag.hard_science.superblock.block.SuperModelBlock;
-import grondag.hard_science.superblock.model.state.BlockRenderLayerSet;
+import grondag.hard_science.superblock.model.state.RenderModeSet;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -14,14 +14,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber
 public class ModSuperModelBlocks
 {
-    /** dimensions are BlockRenderLayerSet, worldOpacity, hypermatter (y = 1 /n = 0), cube (y = 1 /n = 0) */
-    public static final SuperModelBlock[][][][] superModelBlocks = new SuperModelBlock[BlockRenderLayerSet.values().length][WorldLightOpacity.values().length][2][2];
+    /** dimensions are RenderModeSet, worldOpacity, hypermatter (y = 1 /n = 0), cube (y = 1 /n = 0) */
+    public static final SuperModelBlock[][][][] superModelBlocks = new SuperModelBlock[RenderModeSet.values().length][WorldLightOpacity.values().length][2][2];
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
         int superModelIndex = 0;
-        for(BlockRenderLayerSet layerSet : BlockRenderLayerSet.values())
+        for(RenderModeSet layerSet : RenderModeSet.values())
         {
             for(WorldLightOpacity opacity : WorldLightOpacity.values())
             {
@@ -51,7 +51,7 @@ public class ModSuperModelBlocks
     public static SuperModelBlock findAppropriateSuperModelBlock(BlockSubstance substance, ModelState modelState)
     {
         WorldLightOpacity opacity = WorldLightOpacity.getClosest(substance, modelState);
-        BlockRenderLayerSet layerSet = BlockRenderLayerSet.findSmallestInclusiveSet(modelState);
+        RenderModeSet layerSet = RenderModeSet.findSmallestInclusiveSet(modelState);
         int hypermaterIndex = substance.isHyperMaterial ? 1 : 0;
         int cubeIndex = modelState.isCube() ? 1 : 0;
         return superModelBlocks[layerSet.ordinal()][opacity.ordinal()][hypermaterIndex][cubeIndex];

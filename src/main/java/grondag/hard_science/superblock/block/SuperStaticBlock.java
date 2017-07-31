@@ -15,7 +15,7 @@ public class SuperStaticBlock extends SuperBlockPlus
     
     public SuperStaticBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
     {
-        super(blockName, substance.material, defaultModelState);
+        super(blockName, substance.material, defaultModelState, null);
         
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();

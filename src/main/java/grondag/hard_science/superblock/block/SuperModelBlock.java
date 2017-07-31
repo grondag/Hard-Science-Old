@@ -3,7 +3,7 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.BlockRenderLayerSet;
+import grondag.hard_science.superblock.model.state.RenderModeSet;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -16,15 +16,12 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.ExtendedBlockState;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 /**
@@ -38,7 +35,9 @@ import net.minecraftforge.common.property.IUnlistedProperty;
  * The choice of which block to deploy is made by the item/creative stack that places the block
  * by calling {@link grondag.hard_science.init.ModSuperModelBlocks#findAppropriateSuperModelBlock(BlockSubstance substance, ModelState modelState)} <br><br>
  * 
- * The specific dimensions by which the block instances vary are: {@link #renderLayerSet}, {@link #worldLightOpacity}, Block.fullBlock and {@link #isHypermatter()}.
+ * The specific dimensions by which the block instances vary are:  {@link #getRenderModeSet()}, {@link #worldLightOpacity}, Block.fullBlock and {@link #isHypermatter()}.
+ * 
+ *
  */
 public class SuperModelBlock extends SuperBlockPlus  
 {
@@ -52,8 +51,6 @@ public class SuperModelBlock extends SuperBlockPlus
     
     protected final boolean isHyperMatter;
     
-    public final BlockRenderLayerSet renderLayerSet;
-    
     /**
      * 
      * @param blockName
@@ -63,23 +60,17 @@ public class SuperModelBlock extends SuperBlockPlus
      * @param isHyperMatter
      * @param isGeometryFullCube        If true, blocks with this instance are expected to have a full block geometry
      */
-    public SuperModelBlock(String blockName, Material defaultMaterial, BlockRenderLayerSet renderLayerSet, WorldLightOpacity worldLightOpacity, 
+    public SuperModelBlock(String blockName, Material defaultMaterial, RenderModeSet renderModeSet, WorldLightOpacity worldLightOpacity, 
                 boolean isHyperMatter, boolean isGeometryFullCube)
     {
-        super(blockName, defaultMaterial, new ModelState());
+        super(blockName, defaultMaterial, new ModelState(), renderModeSet);
         //all superblocks have same display name
         this.setUnlocalizedName("super_model_block");
         this.isHyperMatter = isHyperMatter;
         this.fullBlock = isGeometryFullCube;
         this.worldLightOpacity = worldLightOpacity;
-        this.renderLayerSet = renderLayerSet;
-        this.renderLayerEnabledFlags = renderLayerSet.blockRenderLayerFlags;
         this.lightOpacity = worldLightOpacity.opacity;
-        
-        // dispatcher reports always reports shading enabled for supermodel blocks
-        // light level is used for fullbright rendering instead
-        this.renderLayerShadedFlags = ModelState.BENUMSET_RENDER_LAYER.getFlagsForIncludedValues(BlockRenderLayer.CUTOUT, BlockRenderLayer.CUTOUT_MIPPED, BlockRenderLayer.SOLID, BlockRenderLayer.TRANSLUCENT);
-    }
+     }
 
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
@@ -142,37 +133,6 @@ public class SuperModelBlock extends SuperBlockPlus
                 : ((SuperModelTileEntity)myTE).getLightValue();
     }
     
-    /**
-     * {@inheritDoc}
-     * 
-     * Model dispatcher always returns isAmbientOcclusion=true for SuperModelBlocks if any layer is shaded.
-     * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
-     * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
-     * populated in getExtendedState and if true for the current layer return 1 for the light value.
-     * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
-     * light calculations are done via the location-aware version of getLightValue(), so should be fine.
-     */
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getLightValue(IBlockState state)
-    {
-        int min = 0;
-        
-        if(state instanceof IExtendedBlockState)
-        {
-            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-            if(layer != null)
-            {
-                ModelState modelState = ((IExtendedBlockState)state).getValue(MODEL_STATE);
-                if(modelState != null)
-                {
-                    if(!modelState.isLayerShaded(layer)) min = 1;
-                }
-            }
-        }
-        return Math.max(min, super.getLightValue(state));
-    }
-    
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
     {
@@ -194,9 +154,9 @@ public class SuperModelBlock extends SuperBlockPlus
         // Otherwise will spam creative search / JEI
         // All do the same thing in the end.
         if(this.worldLightOpacity == WorldLightOpacity.SOLID 
-                && this.renderLayerSet == BlockRenderLayerSet.ALL 
                 && this.fullBlock 
-                && !this.isHyperMatter)
+                && !this.isHyperMatter
+                && this.renderModeSet == RenderModeSet.ALL)
         {
             list.add(this.getSubItems().get(0));
         }

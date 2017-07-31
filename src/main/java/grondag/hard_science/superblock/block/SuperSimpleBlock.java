@@ -20,7 +20,7 @@ public class SuperSimpleBlock extends SuperBlock
     
     public SuperSimpleBlock(String blockName, BlockSubstance substance, ModelState defaultModelState)
     {
-        super(blockName, substance.material, defaultModelState);
+        super(blockName, substance.material, defaultModelState, null);
         this.substance = substance;
         this.blockHardness = substance.hardness;
         this.blockResistance = substance.resistance;

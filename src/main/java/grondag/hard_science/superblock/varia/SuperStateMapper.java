@@ -41,13 +41,13 @@ public class SuperStateMapper extends DefaultStateMapper
                    for(BlockSubstance substance : BlockSubstance.values())
                    {
                        mapLocations.put(state.withProperty(SuperModelBlock.SUBSTANCE, substance.ordinal()),
-                               new ModelResourceLocation(dispatcher.getDelegate((SuperBlock)block).getModelResourceString()));
+                               new ModelResourceLocation(dispatcher.delegate_block.getModelResourceString()));
                    }
                }
                else
                {
                    mapLocations.put(state,
-                           new ModelResourceLocation(dispatcher.getDelegate((SuperBlock)block).getModelResourceString()));
+                           new ModelResourceLocation(dispatcher.delegate_block.getModelResourceString()));
                }
            }
        }

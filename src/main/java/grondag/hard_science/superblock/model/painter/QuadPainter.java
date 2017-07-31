@@ -21,7 +21,7 @@ public abstract class QuadPainter
 {
     /** color map for this surface */
     protected final ColorMap myColorMap;
-    protected final BlockRenderLayer renderLayer;
+    protected final RenderMode renderMode;
     
     /** 
      * Color map for lamp surface - used to render lamp gradients
@@ -33,18 +33,12 @@ public abstract class QuadPainter
     * Render layer for lamp surface - used to render lamp gradients
     * Only populated for BASE/CUT surfaces
     */
-    protected final BlockRenderLayer lampRenderLayer;
+    protected final RenderMode lampRenderMode;
     
     /**
      * True if paint layer is supposed to be rendered at full brightness.
      */
     protected final boolean isFullBrightnessIntended;
-    
-    /**
-     * True if layer is forced to going to be rendered with flat 
-     * lighting even if it wasn't intended, due to limitations of MC rendering.
-     */
-    protected final boolean isFullBrightnessEffective;
     
     protected final TexturePallette texture;
     public final Surface surface;
@@ -67,20 +61,18 @@ public abstract class QuadPainter
         this.paintLayer = paintLayer;
         this.myColorMap = modelState.getColorMap(paintLayer);
         
-        RenderMode renderMode = modelState.getRenderMode(paintLayer);
-        this.renderLayer = renderMode.renderLayer;
-        this.isFullBrightnessEffective = renderMode.isFullBrightness;
+        this.renderMode = modelState.getRenderMode(paintLayer);
         this.isFullBrightnessIntended = modelState.isFullBrightness(paintLayer);
 
         if(paintLayer == PaintLayer.BASE || paintLayer == PaintLayer.CUT)
         {
             this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
-            this.lampRenderLayer = modelState.getRenderMode(PaintLayer.LAMP).renderLayer;
+            this.lampRenderMode = modelState.getRenderMode(PaintLayer.LAMP);
         }
         else
         {
             this.lampColorMap = null;
-            this.lampRenderLayer = null;
+            this.lampRenderMode = null;
         }
         
         TexturePallette tex = modelState.getTexture(paintLayer);
@@ -93,9 +85,8 @@ public abstract class QuadPainter
     {
         this.myColorMap = null;
         this.lampColorMap = null;
-        this.lampRenderLayer = null;
-        this.renderLayer = null;
-        this.isFullBrightnessEffective = false;
+        this.lampRenderMode = null;
+        this.renderMode = null;
         this.isFullBrightnessIntended = false;
         this.surface = null;
         this.paintLayer = null;
@@ -108,8 +99,8 @@ public abstract class QuadPainter
         if(inputQuad.surfaceInstance.surface() == this.surface)
         {
             RawQuad result = inputQuad.clone();
-            result.renderLayer = this.renderLayer;
-            result.isFullBrightness = this.isFullBrightnessEffective;
+            result.renderMode = this.renderMode;
+            result.isFullBrightness = this.isFullBrightnessIntended;
 
             recolorQuad(result);
          
@@ -136,7 +127,7 @@ public abstract class QuadPainter
     {
         int color = this.myColorMap.getColor(this.isFullBrightnessIntended ? EnumColorMap.LAMP : EnumColorMap.BASE);
         
-        if(this.renderLayer == BlockRenderLayer.TRANSLUCENT)
+        if(this.renderMode.renderLayer == BlockRenderLayer.TRANSLUCENT)
         {
             color = this.translucencyArgb | (color & 0x00FFFFFF);
         }
@@ -165,13 +156,10 @@ public abstract class QuadPainter
                 }
             }
             
-            // if the quad texture is compatible with the 
-            // renderlayer being using for lamp
-            // then render the quad with the lamp render layer 
-            // so that it doesn't get darkened by AO
-            if(this.texture.renderIntent.isCompatibleWith(this.lampRenderLayer))
+            // render with TESR so that it doesn't get darkened by AO
+            if(this.lampRenderMode.needsTESR && !this.renderMode.needsTESR)
             {
-                result.renderLayer = this.lampRenderLayer;
+                result.renderMode = this.renderMode.withTESR();
             }
         }
         else
