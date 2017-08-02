@@ -4,7 +4,6 @@ package grondag.hard_science.superblock.model.state;
 import java.util.List;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
@@ -27,7 +26,6 @@ import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -120,93 +118,92 @@ public class ModelStateFactory
 
     public static class ModelState
     {
+        
+        public static final BitPacker STATE_PACKER = new BitPacker();
+        
+        
         /**
          * For readability.
          */
         public static final int STATE_FLAG_NONE = 0;
 
+        
+        /** see {@link #STATE_FLAG_IS_POPULATED} */
+        public static final BooleanElement STATE_BIT_IS_POPULATED = STATE_PACKER.createBooleanElement();
         /* 
          * Enables lazy derivation - set after derivation is complete.
          * NB - check logic assumes that ALL bits are zero for simplicity.
          */
-        public static final int STATE_FLAG_IS_POPULATED = 1;
+        public static final int STATE_FLAG_IS_POPULATED = (int) STATE_BIT_IS_POPULATED.comparisonMask();
 
+        
+        /** see {@link #STATE_FLAG_NEEDS_CORNER_JOIN} */
+        public static final BooleanElement STATE_BIT_NEEDS_CORNER_JOIN = STATE_PACKER.createBooleanElement();
         /** 
          * Applies to block-type states.  
          * True if is a block type state and requires full join state.
          */
-        public static final int STATE_FLAG_NEEDS_CORNER_JOIN = STATE_FLAG_IS_POPULATED << 1;
+        public static final int STATE_FLAG_NEEDS_CORNER_JOIN = (int) STATE_BIT_NEEDS_CORNER_JOIN.comparisonMask();
 
+        
+        /** see {@link #STATE_FLAG_NEEDS_SIMPLE_JOIN} */
+        public static final BooleanElement STATE_BIT_NEEDS_SIMPLE_JOIN = STATE_PACKER.createBooleanElement();
         /** 
          * Applies to block-type states.  
          * True if is a block type state and requires full join state.
          */
-        public static final int STATE_FLAG_NEEDS_SIMPLE_JOIN = STATE_FLAG_NEEDS_CORNER_JOIN << 1;
+        public static final int STATE_FLAG_NEEDS_SIMPLE_JOIN = (int) STATE_BIT_NEEDS_SIMPLE_JOIN.comparisonMask();
 
+        
+        /** see {@link #STATE_FLAG_NEEDS_MASONRY_JOIN} */
+        public static final BooleanElement STATE_BIT_NEEDS_MASONRY_JOIN = STATE_PACKER.createBooleanElement();
         /** 
          * Applies to block-type states.  
          * True if is a block type state and requires masonry join info.
          */
-        public static final int STATE_FLAG_NEEDS_MASONRY_JOIN = STATE_FLAG_NEEDS_SIMPLE_JOIN << 1;
+        public static final int STATE_FLAG_NEEDS_MASONRY_JOIN = (int) STATE_BIT_NEEDS_MASONRY_JOIN.comparisonMask();
 
+
+        /** see {@link #STATE_FLAG_NEEDS_POS} */
+        public static final BooleanElement STATE_BIT_NEEDS_POS = STATE_PACKER.createBooleanElement();
         /** 
          * True if position (big-tex) world state is needed. Applies for block and flow state formats.
          */
-        public static final int STATE_FLAG_NEEDS_POS = STATE_FLAG_NEEDS_MASONRY_JOIN << 1;
+        public static final int STATE_FLAG_NEEDS_POS = (int) STATE_BIT_NEEDS_POS.comparisonMask();
 
+        
+        /** see {@link #STATE_FLAG_NEEDS_SPECIES} */
+        public static final BooleanElement STATE_BIT_NEEDS_SPECIES = STATE_PACKER.createBooleanElement();
+        public static final int STATE_FLAG_NEEDS_SPECIES = (int) STATE_BIT_NEEDS_SPECIES.comparisonMask();
 
-        public static final int STATE_FLAG_NEEDS_SPECIES = STATE_FLAG_NEEDS_POS << 1;
+        
+        /** see {@link #STATE_FLAG_HAS_AXIS} */
+        public static final BooleanElement STATE_BIT_HAS_AXIS = STATE_PACKER.createBooleanElement();
+        public static final int STATE_FLAG_HAS_AXIS = (int) STATE_BIT_HAS_AXIS.comparisonMask();
 
-        public static final int STATE_FLAG_HAS_AXIS = STATE_FLAG_NEEDS_SPECIES << 1;
+        
+        /** see {@link #STATE_FLAG_NEEDS_TEXTURE_ROTATION} */
+        public static final BooleanElement STATE_BIT_NEEDS_TEXTURE_ROTATION = STATE_PACKER.createBooleanElement();
+        public static final int STATE_FLAG_NEEDS_TEXTURE_ROTATION = (int) STATE_BIT_NEEDS_TEXTURE_ROTATION.comparisonMask();
 
-        public static final int STATE_FLAG_NEEDS_TEXTURE_ROTATION = STATE_FLAG_HAS_AXIS << 1;
+        
+        /** see {@link #STATE_FLAG_HAS_AXIS_ORIENTATION} */
+        public static final BooleanElement STATE_BIT_HAS_AXIS_ORIENTATION = STATE_PACKER.createBooleanElement();
+        public static final int STATE_FLAG_HAS_AXIS_ORIENTATION = (int) STATE_BIT_HAS_AXIS_ORIENTATION.comparisonMask();
 
-        public static final int STATE_FLAG_HAS_AXIS_ORIENTATION = STATE_FLAG_NEEDS_TEXTURE_ROTATION << 1;
-
+        /** see {@link #STATE_FLAG_HAS_AXIS_ROTATION} */
+        public static final BooleanElement STATE_BIT_HAS_AXIS_ROTATION = STATE_PACKER.createBooleanElement();
         /** Set if shape can be rotated around an axis. Only applies to block models; multiblock models manage this situationally. */
-        public static final int STATE_FLAG_HAS_AXIS_ROTATION = STATE_FLAG_HAS_AXIS_ORIENTATION << 1;
+        public static final int STATE_FLAG_HAS_AXIS_ROTATION = (int) STATE_BIT_HAS_AXIS_ROTATION.comparisonMask();
 
-
-        ///////////////////////////////////
-        // RENDER LAYER FLAGS
-        // Note that order must match Enum ordinal so that BENUMSET_RENDER_LAYER can use these.
-        ///////////////////////////////////
-        
-        /** Set if Solid render layer is present */
-        public static final int STATE_FLAG_HAS_RENDER_LAYER_SOLID = STATE_FLAG_HAS_AXIS_ROTATION << 1;
-
-        /** Set if Cutout Mipped render layer is present. Not used, but needed for proper flag order. */
-        public static final int STATE_FLAG_HAS_RENDER_LAYER_CUTOUT_MIPPED = STATE_FLAG_HAS_RENDER_LAYER_SOLID << 1;
-        
-        /** Set if Cutout render layer is present.  Not used, but needed for proper flag order. */
-        public static final int STATE_FLAG_HAS_RENDER_LAYER_CUTOUT = STATE_FLAG_HAS_RENDER_LAYER_CUTOUT_MIPPED << 1;
-
-        /** Set if Translucent render layer is present */
-        public static final int STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT = STATE_FLAG_HAS_RENDER_LAYER_CUTOUT << 1;
-        
- 
-
-        ///////////////////////////////////
-        // TESR FLAGS
-        // Note that order must match Enum ordinal so that BENUMSET_RENDER_LAYER can use these.
-        ///////////////////////////////////
-        
-        /** Set if Solid quads are present that must be rendered as TESR */
-        public static final int STATE_FLAG_TESR_RENDER_LAYER_SOLID = STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT << 1;
-
-        /** Set if Cutout Mipped quads are present that must be rendered as TESR */
-        public static final int STATE_FLAG_TESR_RENDER_LAYER_CUTOUT_MIPPED = STATE_FLAG_TESR_RENDER_LAYER_SOLID << 1;
-
-        /** Set if Cutout quads are present that must be rendered as TESR.  Not used, but needed for proper flag order.  */
-        public static final int STATE_FLAG_TESR_RENDER_LAYER_CUTOUT = STATE_FLAG_TESR_RENDER_LAYER_CUTOUT_MIPPED << 1;
-        
-        /** Set if Translucent quads are present that must be rendered as TESR */
-        public static final int STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT = STATE_FLAG_TESR_RENDER_LAYER_CUTOUT << 1;
-
-        
+   
+        /** see {@link #STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY} */
+        public static final BooleanElement STATE_BIT_HAS_TRANSLUCENT_GEOMETRY = STATE_PACKER.createBooleanElement();
         /** Set if either Base/Cut or Lamp (if present) paint layers are translucent */
-        public static final int STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY = STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT << 1;
-
+        public static final int STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY = (int) STATE_BIT_HAS_TRANSLUCENT_GEOMETRY.comparisonMask();
+        
+        public static final EnumElement<RenderPassSet> STATE_ENUM_RENDER_PASS_SET = STATE_PACKER.createEnumElement(RenderPassSet.class);
+        
         /** sign bit is used to indicate static state */
         private static final int INT_SIGN_BIT = 1 << 31;
         private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
@@ -216,8 +213,6 @@ public class ModelStateFactory
                 STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SIMPLE_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN
                 | STATE_FLAG_NEEDS_SPECIES | STATE_FLAG_NEEDS_TEXTURE_ROTATION);
 
-
-        public static final BinaryEnumSet<RenderMode> BENUMSET_RENDER_MODE = new BinaryEnumSet<RenderMode>(RenderMode.class);
 
         private boolean isStatic;
         private long bits0;
@@ -550,44 +545,7 @@ public class ModelStateFactory
             }
         }
 
-        /** returns true if any surface painter is configured to have the given layer */
-        public boolean canRenderInLayer(BlockRenderLayer renderLayer)
-        {
-            this.populateStateFlagsIfNeeded();
-            switch(renderLayer)
-            {
-            case SOLID:
-                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_SOLID) != 0;
-                
-            case CUTOUT_MIPPED:
-                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_CUTOUT_MIPPED) != 0;
-                
-            case TRANSLUCENT:
-                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT) != 0;
-                
-            case CUTOUT:
-            default:
-                return false;
-            }
-        }
-
-        /** 
-         * Exposed for use as a lookup key in model dispatch logic. 
-         * Identifies which block render modes can be rendered in this model.
-         * Can be decoded with {@link #BENUMSET_RENDER_MODE}
-         */
-        public byte getRenderModeFlags() 
-        { 
-            this.populateStateFlagsIfNeeded();
-            int result = 0;
-            if((this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_SOLID) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.SOLID_SHADED, result, true);
-            if((this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_SOLID) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.SOLID_TESR, result, true);
-            if((this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.TRANSLUCENT_SHADED, result, true);
-            if((this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT) != 0) result = BENUMSET_RENDER_MODE.setFlagForValue(RenderMode.TRANSLUCENT_TESR, result, true);
-            return (byte) (result); 
-        };
-
-        /**
+         /**
          * Should only be applied to rendering if {@link #isTranslucent(PaintLayer)} is true
          * for the paint layer being rendered. 
          */
@@ -897,9 +855,9 @@ public class ModelStateFactory
          * Determines what rendering path should apply for the given paint layer
          * based on user choices and the constraints imposed by MC rendering.  
          */
-        public RenderMode getRenderMode(PaintLayer layer)
+        public RenderPass getRenderPass(PaintLayer layer)
         {
-            boolean needsTESR = this.isFullBrightness(layer);
+            boolean needsFlat = this.isFullBrightness(layer);
             
             switch(layer)
             {
@@ -909,44 +867,24 @@ public class ModelStateFactory
             default:
                 if(this.isTranslucent(layer))
                 {
-                    return needsTESR ? RenderMode.TRANSLUCENT_TESR : RenderMode.TRANSLUCENT_SHADED;
+                    return needsFlat ? RenderPass.TRANSLUCENT_FLAT : RenderPass.TRANSLUCENT_SHADED;
                 }
                 else
                 {
-                    return needsTESR ? RenderMode.SOLID_TESR : RenderMode.SOLID_SHADED;
+                    return needsFlat ? RenderPass.SOLID_FLAT : RenderPass.SOLID_SHADED;
                 }
                 
             case MIDDLE:
             case OUTER:
-                return needsTESR ? RenderMode.TRANSLUCENT_TESR : RenderMode.TRANSLUCENT_SHADED;
+                return needsFlat ? RenderPass.TRANSLUCENT_FLAT : RenderPass.TRANSLUCENT_SHADED;
             
             }
         }
 
-        public boolean hasRenderMode(RenderMode mode)
+        public RenderPassSet getRenderPassSet()
         {
            this.populateStateFlagsIfNeeded();
-           switch(mode)
-           {
-            case SOLID_SHADED:
-                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_SOLID) != 0;
-                
-            case SOLID_TESR:
-                return (this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_SOLID) != 0;
-                
-            case TRANSLUCENT_SHADED:
-                return (this.stateFlags & STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT) != 0;
-                
-            case TRANSLUCENT_TESR:
-                return (this.stateFlags & STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT) != 0;
-
-//            case CUTOUT_SHADED:
-//            case CUTOUT_TESR:
-            default:
-                return false;
-               
-           }
-            
+           return STATE_ENUM_RENDER_PASS_SET.getValue(this.stateFlags);
         }
         
         public boolean hasAxis()

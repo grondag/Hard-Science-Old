@@ -4,24 +4,26 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.superblock.model.state.RenderMode;
+import net.minecraft.util.BlockRenderLayer;
+
+
 
 /**
  * Super lightweight version of EnumMap for Block layers to QuadContainer. Only stores values for keys that are used.
  */
 public class SparseLayerMapBuilder
 {
-    private final int[] layerIndices = new int[RenderMode.values().length];
+    private final int[] layerIndices = new int[BlockRenderLayer.values().length];
     private final int size;
-    public final ImmutableList<RenderMode> layerList;
+    public final ImmutableList<BlockRenderLayer> layerList;
     
-    public SparseLayerMapBuilder(List<RenderMode> layers)
+    public SparseLayerMapBuilder(List<BlockRenderLayer> layers)
     {
         this.size = layers.size();
         this.layerList = ImmutableList.copyOf(layers);
         int counter = 0;
         
-        for(RenderMode l: layers)
+        for(BlockRenderLayer l: layers)
         {
             layerIndices[l.ordinal()] = counter++;
         }
@@ -29,17 +31,21 @@ public class SparseLayerMapBuilder
     
     public SparseLayerMap makeNewMap()
     {
-        if(size == 1)
+        if(this.size == 1)
             return new SparseLayerSingletonMap();
+        
+        else if(this.size == 2 && this.layerList.get(0) == BlockRenderLayer.SOLID && this.layerList.get(1) == BlockRenderLayer.TRANSLUCENT)
+            return new SparseLayerSolidTransMap();
+        
         else 
             return new SparseLayerArrayMap();
     }
     
     public abstract class SparseLayerMap
     {
-        public abstract QuadContainer get(RenderMode layer);
+        public abstract QuadContainer get(BlockRenderLayer layer);
         
-        public abstract void set(RenderMode layer, QuadContainer value);
+        public abstract void set(BlockRenderLayer layer, QuadContainer value);
         
         public abstract QuadContainer[] getAll();
     }
@@ -53,12 +59,12 @@ public class SparseLayerMapBuilder
             //NOOP - just making it private
         }
         
-        public QuadContainer get(RenderMode layer)
+        public QuadContainer get(BlockRenderLayer layer)
         {
             return values[layerIndices[layer.ordinal()]];
         }
         
-        public void set(RenderMode layer, QuadContainer value)
+        public void set(BlockRenderLayer layer, QuadContainer value)
         {
             values[layerIndices[layer.ordinal()]] = value;
         }
@@ -78,12 +84,12 @@ public class SparseLayerMapBuilder
             //NOOP - just making it private
         }
         
-        public QuadContainer get(RenderMode layer)
+        public QuadContainer get(BlockRenderLayer layer)
         {
             return value;
         }
         
-        public void set(RenderMode layer, QuadContainer value)
+        public void set(BlockRenderLayer layer, QuadContainer value)
         {
             this.value = value;
         }
@@ -91,6 +97,55 @@ public class SparseLayerMapBuilder
         public QuadContainer[] getAll()
         {
             return new QuadContainer[] { this.value };
+        }
+    }
+    
+    /**
+     * Optimized for most common (currently only) non-singleton case/
+     */
+    private class SparseLayerSolidTransMap extends SparseLayerMap
+    {
+        private QuadContainer solid;
+        private QuadContainer translucent;
+        
+        private SparseLayerSolidTransMap()
+        {
+            // Keep private
+        }
+        
+        public QuadContainer get(BlockRenderLayer layer)
+        {
+            switch(layer)
+            {
+            case SOLID:
+                return this.solid;
+                
+            case TRANSLUCENT:
+                return this.translucent;
+                
+            default:
+                return null;
+            }
+        }
+        
+        public void set(BlockRenderLayer layer, QuadContainer value)
+        {
+            switch(layer)
+            {
+            case SOLID:
+                this.solid = value;
+                
+            case TRANSLUCENT:
+                this.translucent = value;
+                
+            default:
+                //NOOP
+            }
+        }
+        
+        public QuadContainer[] getAll()
+        {
+            return new QuadContainer[] { this.solid, this.translucent };
         }
     }
 }

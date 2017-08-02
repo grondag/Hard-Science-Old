@@ -15,6 +15,7 @@ import grondag.hard_science.superblock.texture.TextureLayout;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
+import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import grondag.hard_science.virtualblock.VirtualBlockBakedModel;
@@ -62,7 +63,10 @@ public class ModModels
         
         ModModels.MODEL_DISPATCH.clear();
      
-        event.getModelRegistry().putObject(new ModelResourceLocation(ModModels.MODEL_DISPATCH.delegate_block.getModelResourceString()), ModModels.MODEL_DISPATCH.delegate_block);
+        for(DispatchDelegate delegate : ModModels.MODEL_DISPATCH.delegates)
+        {
+            event.getModelRegistry().putObject(new ModelResourceLocation(delegate.getModelResourceString()), delegate);
+        }
         
 //        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION), VIRTUAL_BAKED_MODEL);
 //        event.getModelRegistry().putObject(new ModelResourceLocation(VIRTUAL_BLOCK_LOCATION, "inventory"), VIRTUAL_BAKED_MODEL);
@@ -80,7 +84,7 @@ public class ModModels
                     for (ItemStack stack : block.getSubItems())
                     {
                         event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
-                                ModModels.MODEL_DISPATCH.delegate_block);
+                                ModModels.MODEL_DISPATCH.getDelegate(block));
                     }
                 }
                 else
@@ -171,7 +175,7 @@ public class ModModels
                     SuperBlock block = (SuperBlock)((ItemBlock)item).getBlock();
                     for (ItemStack stack : block.getSubItems())
                     {
-                        String variantName = ModModels.MODEL_DISPATCH.delegate_block.getModelResourceString() + "." + stack.getMetadata();
+                        String variantName = ModModels.MODEL_DISPATCH.getDelegate(block).getModelResourceString() + "." + stack.getMetadata();
                         ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
                         ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
                     }

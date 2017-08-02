@@ -8,6 +8,7 @@ import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -89,7 +90,7 @@ public class VirtualBlockTESR extends TileEntitySpecialRenderer<VirtualBlockTile
         World world = te.getWorld();
         SuperBlock block = (SuperBlock) ModBlocks.basalt_cobble;
         IBlockState state = ModBlocks.basalt_cobble.getExtendedState(block.getDefaultState(), world, te.getPos());
-        IBakedModel model = ModModels.MODEL_DISPATCH.delegate_block;
+        IBakedModel model = ModModels.MODEL_DISPATCH.delegates[BlockRenderMode.TESR.ordinal()];
         
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();

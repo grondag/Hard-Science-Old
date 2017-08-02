@@ -3,8 +3,8 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
-import grondag.hard_science.superblock.model.state.RenderModeSet;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -19,9 +19,9 @@ import net.minecraft.world.World;
 /** base class for tile entity blocks */
 public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityProvider
 {
-    public SuperBlockPlus(String blockName, Material defaultMaterial, ModelState defaultModelState, RenderModeSet renderModeSet)
+    public SuperBlockPlus(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
-        super(blockName, defaultMaterial, defaultModelState, renderModeSet);
+        super(blockName, defaultMaterial, defaultModelState, blockRenderMode);
     }
 
     @Override

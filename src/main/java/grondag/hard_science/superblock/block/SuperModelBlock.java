@@ -3,8 +3,8 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.items.SuperItemBlock;
-import grondag.hard_science.superblock.model.state.RenderModeSet;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.block.material.Material;
@@ -60,10 +60,10 @@ public class SuperModelBlock extends SuperBlockPlus
      * @param isHyperMatter
      * @param isGeometryFullCube        If true, blocks with this instance are expected to have a full block geometry
      */
-    public SuperModelBlock(String blockName, Material defaultMaterial, RenderModeSet renderModeSet, WorldLightOpacity worldLightOpacity, 
+    public SuperModelBlock(String blockName, Material defaultMaterial, BlockRenderMode blockRenderMode, WorldLightOpacity worldLightOpacity, 
                 boolean isHyperMatter, boolean isGeometryFullCube)
     {
-        super(blockName, defaultMaterial, new ModelState(), renderModeSet);
+        super(blockName, defaultMaterial, new ModelState(), blockRenderMode);
         //all superblocks have same display name
         this.setUnlocalizedName("super_model_block");
         this.isHyperMatter = isHyperMatter;
@@ -156,12 +156,44 @@ public class SuperModelBlock extends SuperBlockPlus
         if(this.worldLightOpacity == WorldLightOpacity.SOLID 
                 && this.fullBlock 
                 && !this.isHyperMatter
-                && this.renderModeSet == RenderModeSet.ALL)
+                && this.blockRenderMode == BlockRenderMode.SOLID_SHADED)
         {
             list.add(this.getSubItems().get(0));
         }
     }
 
+    //FIXME: not needed?
+//    /**
+//     * {@inheritDoc}
+//     * 
+//     * Model dispatcher always returns isAmbientOcclusion=true for SuperModelBlocks if any layer is shaded.
+//     * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
+//     * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
+//     * populated in getExtendedState and if true for the current layer return 1 for the light value.
+//     * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
+//     * light calculations are done via the location-aware version of getLightValue(), so should be fine.
+//     */
+//    @SuppressWarnings("deprecation")
+//    @Override
+//    public int getLightValue(IBlockState state)
+//    {
+//        int min = 0;
+//        
+//        if(state instanceof IExtendedBlockState)
+//        {
+//            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+//            if(layer != null)
+//            {
+//                ModelState modelState = ((IExtendedBlockState)state).getValue(MODEL_STATE);
+//                if(modelState != null)
+//                {
+//                    if(!modelState.isLayerShaded(layer)) min = 1;
+//                }
+//            }
+//        }
+//        return Math.max(min, super.getLightValue(state));
+//    }
+    
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {

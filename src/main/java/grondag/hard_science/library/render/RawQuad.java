@@ -12,7 +12,7 @@ import javax.vecmath.Vector4d;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.superblock.model.state.RenderMode;
+import grondag.hard_science.superblock.model.state.RenderPass;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
@@ -57,7 +57,7 @@ public class RawQuad
 
     public boolean shouldContractUVs = true;
     
-    public RenderMode renderMode = RenderMode.SOLID_SHADED;
+    public RenderPass renderPass = RenderPass.SOLID_SHADED;
     public SurfaceInstance surfaceInstance = NO_SURFACE;
 
     public float minU = 0;
@@ -138,7 +138,7 @@ public class RawQuad
         this.maxU = fromObject.maxU;
         this.minV = fromObject.minV;
         this.maxV = fromObject.maxV;
-        this.renderMode = fromObject.renderMode;
+        this.renderPass = fromObject.renderPass;
         this.surfaceInstance = fromObject.surfaceInstance;
     }
 

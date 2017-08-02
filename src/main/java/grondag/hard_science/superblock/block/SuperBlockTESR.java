@@ -3,11 +3,13 @@ package grondag.hard_science.superblock.block;
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.library.render.PerQuadModelRenderer;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.model.state.RenderMode;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -29,6 +31,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
 {
     public static final SuperBlockTESR INSTANCE = new SuperBlockTESR();
+    
+    private final DispatchDelegate tesrDelegate = ModModels.MODEL_DISPATCH.delegates[BlockRenderMode.TESR.ordinal()];
     
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
@@ -64,7 +68,7 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
     private void renderBlock(SuperTileEntity te)
     {
         SuperBlock block = (SuperBlock) te.getBlockType();
-        if(!block.renderModeSet.hasTESR) return;
+        if(block.blockRenderMode != BlockRenderMode.TESR) return;
         
         if(MinecraftForgeClient.getRenderPass() == 0)
         {
@@ -104,47 +108,29 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         
       
         World world = te.getWorld();
-        IBlockState state = ((IExtendedBlockState)world.getBlockState(te.getPos())).withProperty(SuperBlock.MODEL_STATE,  te.getCachedModelState());
+        ModelState modelState = te.getCachedModelState();
+        IBlockState state = ((IExtendedBlockState)world.getBlockState(te.getPos())).withProperty(SuperBlock.MODEL_STATE,  modelState);
         
         bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
-     
+       
         
         if (translucent ) 
         {
             
-            //FIXME: order of these is borked if doesn't coincide with layer order
-            // has to be base/lamp/cut, followed by MIDDLE then OUTER.
-            // If all are translucent, could be TESR, SHADED, TESR
-            // or SHADED TESER SHADED
-            // or TESR SHADED  or SHADED TESR
-            // or TESR or SHADED
-            
-            // given that models are rendered in block  layer  OR in TESR,
-            // can have container set up to be SOLID/TRANSLUCENT  or PASS 0 / PASS 1A / PASS 1B / PASS 1C
-            if(block.renderModeSet.includes(RenderMode.TRANSLUCENT_TESR))
+            if(modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.TRANSLUCENT))
             {
-                dispatcher.getBlockModelRenderer().renderModelFlat(world, ModModels.MODEL_DISPATCH.delegate_tesr, state, te.getPos(), bufferBuilder, true, 0L);
-            }
-            if(block.renderModeSet.includes(RenderMode.TRANSLUCENT_SHADED))
-            {
-                dispatcher.getBlockModelRenderer().renderModelSmooth(world, ModModels.MODEL_DISPATCH.delegate_block, state, te.getPos(), bufferBuilder, true, 0L);
-            }
+                PerQuadModelRenderer.INSTANCE.renderModel(world, this.tesrDelegate, state, te.getPos(), bufferBuilder, true, 0L);
 
-            bufferBuilder.sortVertexData((float) TileEntityRendererDispatcher.staticPlayerX,
-                    (float) TileEntityRendererDispatcher.staticPlayerY, (float) TileEntityRendererDispatcher.staticPlayerZ);
+                bufferBuilder.sortVertexData((float) TileEntityRendererDispatcher.staticPlayerX,
+                        (float) TileEntityRendererDispatcher.staticPlayerY, (float) TileEntityRendererDispatcher.staticPlayerZ);
+            }
         }
         else
         {
-            if(block.renderModeSet.includes(RenderMode.SOLID_SHADED))
+            if(modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID))
             {
-                dispatcher.getBlockModelRenderer().renderModelSmooth(world, ModModels.MODEL_DISPATCH.delegate_block, state, te.getPos(), bufferBuilder, true, 0L);
+                PerQuadModelRenderer.INSTANCE.renderModel(world, this.tesrDelegate, state, te.getPos(), bufferBuilder, true, 0L);
             }
-            if(block.renderModeSet.includes(RenderMode.SOLID_TESR))
-            {
-                dispatcher.getBlockModelRenderer().renderModelFlat(world, ModModels.MODEL_DISPATCH.delegate_tesr, state, te.getPos(), bufferBuilder, true, 0L);
-            }
-
         }
         
         tessellator.draw();

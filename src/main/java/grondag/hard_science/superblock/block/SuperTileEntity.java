@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.block;
 
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.RenderPassSet;
 import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -232,10 +233,11 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public boolean shouldRenderInPass(int pass)
     {
-        SuperBlock block = (SuperBlock) this.getBlockType();
-      
-        return block.renderModeSet.hasTESR 
-                && block.renderModeSet.canRenderInLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
+        if(this.modelState == null) return false;
+        
+        RenderPassSet rps = this.modelState.getRenderPassSet();
+        return !rps.canRenderAsNormalBlock() 
+                && rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
       
     }
 }

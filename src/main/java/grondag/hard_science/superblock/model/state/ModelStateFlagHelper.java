@@ -73,24 +73,32 @@ public class ModelStateFlagHelper
             
             boolean isLampSolid = isLampPresent && !isLampTranslucent;
             boolean isBaseSolid = !isBaseTranslucent;
-
-            boolean hasSolidLayer = (isLampSolid && !isLampLit) || (isBaseSolid && !isBaseLit);
-            if(hasSolidLayer) result |= STATE_FLAG_HAS_RENDER_LAYER_SOLID;
             
-            boolean hasSolidTESR = (isLampSolid && isLampLit) || (isBaseSolid && isBaseLit);
-            if(hasSolidTESR) result |= STATE_FLAG_TESR_RENDER_LAYER_SOLID;
+            int renderPassFlags = 0;
+            
+            if((isBaseSolid && !isBaseLit) || (isLampSolid && !isLampLit))
+            {
+                renderPassFlags = RenderLayout.BENUMSET_RENDER_PASS.setFlagForValue(RenderPass.SOLID_SHADED, renderPassFlags, true); 
+            }
            
-            boolean hasTranslucentLayer = (isBaseTranslucent && !isBaseLit)
-                    || (isLampPresent && isLampTranslucent && !isLampLit) 
-                    || (isMiddlePresent && !isMiddleLit)
-                    || (isOuterPresent && !isOuterLit);
-            if(hasTranslucentLayer) result |= STATE_FLAG_HAS_RENDER_LAYER_TRANSLUCENT;
+            if((isBaseSolid && isBaseLit) || (isLampSolid && isLampLit))
+            {
+                renderPassFlags = RenderLayout.BENUMSET_RENDER_PASS.setFlagForValue(RenderPass.SOLID_FLAT, renderPassFlags, true); 
+            }
             
-            boolean hasTranslucentTESR = (isMiddlePresent && isMiddleLit) 
-                    || (isOuterPresent && isOuterLit) 
-                    || (isBaseTranslucent && isBaseLit)
-                    || (isLampPresent && isLampTranslucent && isLampLit);
-            if(hasTranslucentTESR) result |= STATE_FLAG_TESR_RENDER_LAYER_TRANSLUCENT;
+            if((!isBaseSolid && !isBaseLit) || (isLampPresent && isLampTranslucent && !isLampLit) || (isMiddlePresent &&  !isMiddleLit) || (isOuterPresent && !isOuterLit))
+            {
+                renderPassFlags = RenderLayout.BENUMSET_RENDER_PASS.setFlagForValue(RenderPass.TRANSLUCENT_SHADED, renderPassFlags, true); 
+            }
+            
+            if((!isBaseSolid && isBaseLit) || (isLampPresent && isLampTranslucent && isLampLit) || (isMiddlePresent &&  isMiddleLit) || (isOuterPresent && isOuterLit))
+            {
+                renderPassFlags = RenderLayout.BENUMSET_RENDER_PASS.setFlagForValue(RenderPass.TRANSLUCENT_FLAT, renderPassFlags, true); 
+            }
+            
+            RenderPassSet rps = RenderPassSet.findByFlags(renderPassFlags);
+            
+            result = (int) ModelStateFactory.ModelState.STATE_ENUM_RENDER_PASS_SET.setValue(rps, result);
             
             if(isBaseTranslucent || (isLampPresent && isLampTranslucent))
                 result |= STATE_FLAG_HAS_TRANSLUCENT_GEOMETRY;

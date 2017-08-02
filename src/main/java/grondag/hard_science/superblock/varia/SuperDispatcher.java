@@ -145,13 +145,9 @@ public class SuperDispatcher
     
     public SuperDispatcher()
     {
-        this.layerMapBuilders = new SparseLayerMapBuilder[ModelState.BENUMSET_RENDER_MODE.combinationCount()];
 
-        for(int i = 0; i < ModelState.BENUMSET_RENDER_MODE.combinationCount(); i++)
         {
-            this.layerMapBuilders[i] = new SparseLayerMapBuilder(ModelState.BENUMSET_RENDER_MODE.getValuesForSetFlags(i));
         }
-    }
         
     public void clear()
     {
@@ -161,7 +157,6 @@ public class SuperDispatcher
 
     public int getOcclusionKey(ModelState modelState, EnumFacing face)
     {
-        if(modelState.canRenderInLayer(BlockRenderLayer.SOLID)) return 0;
 
         SparseLayerMap map = modelCache.get(modelState);
         if(map == null)
@@ -171,7 +166,6 @@ public class SuperDispatcher
         }
         
         //FIXME: won't work for TESR solid layers
-        QuadContainer container = map.get(RenderMode.SOLID_SHADED);
         if(container == null) 
         {
             Log.warn("Missing model for occlusion key.");

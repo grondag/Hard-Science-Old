@@ -81,16 +81,19 @@ public class ModelStateTest
         assert(reloadedState.getSimpleJoin().getIndex() == CornerJoinBlockStateSelector.getJoinState(69).simpleJoin.getIndex());
         assert(reloadedState.isAxisInverted());
         assert(reloadedState.getStaticShapeBits() == 879579585L);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.SOLID) == true);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT) == false);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED) == false);
-        assert(reloadedState.canRenderInLayer(BlockRenderLayer.TRANSLUCENT) == true);
+        RenderPassSet rps = reloadedState.getRenderPassSet();
+        assert(rps.renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID) == true);
+        assert(rps.renderLayout.containsBlockRenderLayer(BlockRenderLayer.CUTOUT) == false);
+        assert(rps.renderLayout.containsBlockRenderLayer(BlockRenderLayer.CUTOUT_MIPPED) == false);
+        assert(rps.renderLayout.containsBlockRenderLayer(BlockRenderLayer.TRANSLUCENT) == true);
         
-        int flags = reloadedState.getRenderModeFlags();
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.SOLID_SHADED, flags));
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.TRANSLUCENT_SHADED, flags));
-        assert(ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.SOLID_TESR, flags));
-        assert(!ModelStateFactory.ModelState.BENUMSET_RENDER_MODE.isFlagSetForValue(RenderMode.TRANSLUCENT_TESR, flags));
+
+        assert(rps.renderLayout.containsRenderPass(RenderPass.SOLID_SHADED));
+        assert(rps.renderLayout.containsRenderPass(RenderPass.SOLID_FLAT));
+        assert(rps.renderLayout.containsRenderPass(RenderPass.TRANSLUCENT_SHADED));
+        assert(!rps.renderLayout.containsRenderPass(RenderPass.TRANSLUCENT_FLAT));
+        
+        assert(rps.blockRenderMode == BlockRenderMode.TESR);
 
              
     }

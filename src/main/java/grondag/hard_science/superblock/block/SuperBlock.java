@@ -20,10 +20,10 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateProperty;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.RenderModeSet;
 import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -79,6 +79,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.fml.common.Optional;
 
+
+//FIXME: put back light level hack to disable AO for full bright non-TESR rendering 
+//FIXME: put back different delegate selection for the four combination of non-TESR rendering types
 /**
  * Base class for HardScience building blocks.
  */
@@ -117,9 +120,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     /** see {@link #isAssociatedBlock(Block)} */
     protected Block associatedBlock;
     
-    public final RenderModeSet renderModeSet;
+    public final BlockRenderMode blockRenderMode;
     
-    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState, RenderModeSet renderModeSet)
+    public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
         super(defaultMaterial);
         setCreativeTab(HardScience.tabMod);
@@ -138,9 +141,9 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
 
         this.defaultModelStateBits = defaultModelState.getBitsIntArray();
         
-        this.renderModeSet = renderModeSet == null
-                ? RenderModeSet.findSmallestInclusiveSet(defaultModelState)
-                : renderModeSet;
+        this.blockRenderMode = blockRenderMode == null
+                ? defaultModelState.getRenderPassSet().blockRenderMode
+                : blockRenderMode;
     }   
 
     @Override
@@ -491,7 +494,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-        return !this.renderModeSet.hasTESR && this.renderModeSet.canRenderInLayer(layer);
+        return this.blockRenderMode != BlockRenderMode.TESR && this.blockRenderMode.renderLayout.containsBlockRenderLayer(layer);
     }
    
     @Override

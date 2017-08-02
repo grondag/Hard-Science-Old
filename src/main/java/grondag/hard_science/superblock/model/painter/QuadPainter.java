@@ -9,7 +9,7 @@ import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.RenderMode;
+import grondag.hard_science.superblock.model.state.RenderPass;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
@@ -21,7 +21,7 @@ public abstract class QuadPainter
 {
     /** color map for this surface */
     protected final ColorMap myColorMap;
-    protected final RenderMode renderMode;
+    protected final RenderPass renderPass;
     
     /** 
      * Color map for lamp surface - used to render lamp gradients
@@ -33,7 +33,7 @@ public abstract class QuadPainter
     * Render layer for lamp surface - used to render lamp gradients
     * Only populated for BASE/CUT surfaces
     */
-    protected final RenderMode lampRenderMode;
+    protected final RenderPass lampRenderPass;
     
     /**
      * True if paint layer is supposed to be rendered at full brightness.
@@ -61,18 +61,18 @@ public abstract class QuadPainter
         this.paintLayer = paintLayer;
         this.myColorMap = modelState.getColorMap(paintLayer);
         
-        this.renderMode = modelState.getRenderMode(paintLayer);
+        this.renderPass = modelState.getRenderPass(paintLayer);
         this.isFullBrightnessIntended = modelState.isFullBrightness(paintLayer);
 
         if(paintLayer == PaintLayer.BASE || paintLayer == PaintLayer.CUT)
         {
             this.lampColorMap = modelState.getColorMap(PaintLayer.LAMP);
-            this.lampRenderMode = modelState.getRenderMode(PaintLayer.LAMP);
+            this.lampRenderPass = modelState.getRenderPass(PaintLayer.LAMP);
         }
         else
         {
             this.lampColorMap = null;
-            this.lampRenderMode = null;
+            this.lampRenderPass = null;
         }
         
         TexturePallette tex = modelState.getTexture(paintLayer);
@@ -85,8 +85,8 @@ public abstract class QuadPainter
     {
         this.myColorMap = null;
         this.lampColorMap = null;
-        this.lampRenderMode = null;
-        this.renderMode = null;
+        this.lampRenderPass = null;
+        this.renderPass = null;
         this.isFullBrightnessIntended = false;
         this.surface = null;
         this.paintLayer = null;
@@ -99,7 +99,7 @@ public abstract class QuadPainter
         if(inputQuad.surfaceInstance.surface() == this.surface)
         {
             RawQuad result = inputQuad.clone();
-            result.renderMode = this.renderMode;
+            result.renderPass = this.renderPass;
             result.isFullBrightness = this.isFullBrightnessIntended;
 
             recolorQuad(result);
@@ -127,7 +127,7 @@ public abstract class QuadPainter
     {
         int color = this.myColorMap.getColor(this.isFullBrightnessIntended ? EnumColorMap.LAMP : EnumColorMap.BASE);
         
-        if(this.renderMode.renderLayer == BlockRenderLayer.TRANSLUCENT)
+        if(this.renderPass.blockRenderLayer == BlockRenderLayer.TRANSLUCENT)
         {
             color = this.translucencyArgb | (color & 0x00FFFFFF);
         }
@@ -156,10 +156,10 @@ public abstract class QuadPainter
                 }
             }
             
-            // render with TESR so that it doesn't get darkened by AO
-            if(this.lampRenderMode.needsTESR && !this.renderMode.needsTESR)
+            // if needed, change render pass of gradient surface to flat so that it doesn't get darkened by AO
+            if(!this.lampRenderPass.isShaded && this.renderPass.isShaded)
             {
-                result.renderMode = this.renderMode.withTESR();
+                result.renderPass = this.renderPass.flipShading();
             }
         }
         else
