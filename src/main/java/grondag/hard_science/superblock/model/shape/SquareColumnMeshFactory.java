@@ -143,7 +143,7 @@ public class SquareColumnMeshFactory extends ShapeMeshGenerator
 
         CornerJoinBlockState bjs = state.getCornerJoin();
         EnumFacing.Axis axis = state.getAxis();
-        SurfaceInstance cutSurface = SURFACE_CUT.unitInstance.withLampGradient(state.isFullBrightness(PaintLayer.LAMP));
+        SurfaceInstance cutSurface = SURFACE_CUT.unitInstance.withLampGradient(state.isFullBrightness(PaintLayer.LAMP)).withAllowBorders(false);
 
         List<RawQuad> retVal = null;
 
