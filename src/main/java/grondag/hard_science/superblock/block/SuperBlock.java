@@ -79,9 +79,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.fml.common.Optional;
 
-
-//FIXME: put back light level hack to disable AO for full bright non-TESR rendering 
-//FIXME: put back different delegate selection for the four combination of non-TESR rendering types
 /**
  * Base class for HardScience building blocks.
  */

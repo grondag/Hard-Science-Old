@@ -34,7 +34,6 @@ public class QuadContainer
     private final List<BakedQuad> south;
     private final List<BakedQuad> general;
     
-    //TODO: should probably exist outside/independent of this class, only relevant to solid layer
     private int[] occlusionHash;
 
     public static QuadContainer fromRawQuads(List<RawQuad> rawQuads)

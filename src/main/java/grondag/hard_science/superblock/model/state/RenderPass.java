@@ -2,7 +2,10 @@ package grondag.hard_science.superblock.model.state;
 
 import net.minecraft.util.BlockRenderLayer;
 
-//FIXME should be called rendermode or something sim - does not always imply separate passes
+/**
+ * Does not always imply separate passes.  
+ * If using TESR flat and shaded can render in same pass.
+ */
 public enum RenderPass
 {
     SOLID_SHADED(BlockRenderLayer.SOLID, true),

@@ -161,38 +161,6 @@ public class SuperModelBlock extends SuperBlockPlus
             list.add(this.getSubItems().get(0));
         }
     }
-
-    //FIXME: not needed?
-//    /**
-//     * {@inheritDoc}
-//     * 
-//     * Model dispatcher always returns isAmbientOcclusion=true for SuperModelBlocks if any layer is shaded.
-//     * We want getLightValue() to return a non-zero value for fullbright layers to force disable of AO.
-//     * When getLightValue() is called it passes in an extended state, so we can check for modeLstate 
-//     * populated in getExtendedState and if true for the current layer return 1 for the light value.
-//     * Means that all glowing blocks emit at least a tiny amount of light, except that actual 
-//     * light calculations are done via the location-aware version of getLightValue(), so should be fine.
-//     */
-//    @SuppressWarnings("deprecation")
-//    @Override
-//    public int getLightValue(IBlockState state)
-//    {
-//        int min = 0;
-//        
-//        if(state instanceof IExtendedBlockState)
-//        {
-//            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
-//            if(layer != null)
-//            {
-//                ModelState modelState = ((IExtendedBlockState)state).getValue(MODEL_STATE);
-//                if(modelState != null)
-//                {
-//                    if(!modelState.isLayerShaded(layer)) min = 1;
-//                }
-//            }
-//        }
-//        return Math.max(min, super.getLightValue(state));
-//    }
     
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)

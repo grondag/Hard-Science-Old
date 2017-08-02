@@ -137,12 +137,4 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
 
         RenderHelper.enableStandardItemLighting();
     }
-    
-    @Override
-    public void renderTileEntityFast(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float partial,
-            BufferBuilder buffer)
-    {
-        // TODO Auto-generated method stub
-        super.renderTileEntityFast(te, x, y, z, partialTicks, destroyStage, partial, buffer);
-    }
 }

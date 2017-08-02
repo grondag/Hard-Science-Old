@@ -42,8 +42,6 @@ public enum BlockRenderMode
         this.isSolidLayerFlatLighting = this.renderLayout.containsRenderPass(RenderPass.SOLID_FLAT);
         this.isTranlucentLayerFlatLighting = this.renderLayout.containsRenderPass(RenderPass.TRANSLUCENT_FLAT);
     }
-    
-    // FIXME: add light level hook and re-implement that to disable AO
 
     /**
      * True if given block render layer should be rendered with flat lighting.
