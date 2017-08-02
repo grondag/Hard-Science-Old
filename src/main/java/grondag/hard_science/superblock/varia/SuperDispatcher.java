@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.varia;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
@@ -25,9 +26,10 @@ import grondag.hard_science.superblock.model.painter.QuadPainter;
 import grondag.hard_science.superblock.model.painter.QuadPainterFactory;
 import grondag.hard_science.superblock.model.shape.ShapeMeshGenerator;
 import grondag.hard_science.superblock.model.state.PaintLayer;
-import grondag.hard_science.superblock.model.state.RenderMode;
+import grondag.hard_science.superblock.model.state.RenderLayout;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
@@ -57,9 +59,7 @@ public class SuperDispatcher
     public static final String RESOURCE_BASE_NAME = "super_dispatcher";
     private final SparseLayerMapBuilder[] layerMapBuilders;
     
-    // these don't currently behave differently - kept separate to allow for improved item rendering in future
-    public final DispatchDelegate delegate_block = new DispatchDelegate(false);
-    public final DispatchDelegate delegate_tesr = new DispatchDelegate(true);
+    public final DispatchDelegate[] delegates;
     
     //custom loading cache is at least 2X faster than guava LoadingCache for our use case
     private final ObjectSimpleLoadingCache<ModelState, SparseLayerMap> modelCache = new ObjectSimpleLoadingCache<ModelState, SparseLayerMap>(new BlockCacheLoader(),  0xFFFF);
@@ -83,18 +83,20 @@ public class SuperDispatcher
 		    
 			for(RawQuad quad : paintedQuads)
 			{
-			    containers[quad.renderMode.ordinal()].add(quad);
+			    containers[quad.renderPass.blockRenderLayer.ordinal()].add(quad);
 			}
 
-			SparseLayerMap result = layerMapBuilders[key.getRenderModeFlags()].makeNewMap();
+			RenderLayout renderLayout = key.getRenderPassSet().renderLayout;
+			
+			SparseLayerMap result = layerMapBuilders[renderLayout.blockLayerFlags].makeNewMap();
 
-			for(RenderMode mode : RenderMode.values())
+			for(BlockRenderLayer layer : BlockRenderLayer.values())
 			{
-			    if(key.hasRenderMode(mode))
+			    if(renderLayout.containsBlockRenderLayer(layer))
 			    {
 //			        if(Output.DEBUG_MODE && containers[layer.ordinal()].isEmpty())
 //			            Output.warn("SuperDispatcher BlockCacheLoader: Empty quads on enabled render layer.");
-			        result.set(mode, QuadContainer.fromRawQuads(containers[mode.ordinal()]));
+			        result.set(layer, QuadContainer.fromRawQuads(containers[layer.ordinal()]));
 			    }
 			}
 			return result;
@@ -145,10 +147,21 @@ public class SuperDispatcher
     
     public SuperDispatcher()
     {
+        this.layerMapBuilders = new SparseLayerMapBuilder[RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.combinationCount()];
 
+        for(int i = 0; i < RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.combinationCount(); i++)
         {
+            this.layerMapBuilders[i] = new SparseLayerMapBuilder(RenderLayout.BENUMSET_BLOCK_RENDER_LAYER.getValuesForSetFlags(i));
         }
         
+        this.delegates = new DispatchDelegate[BlockRenderMode.values().length];
+        for(BlockRenderMode mode : BlockRenderMode.values())
+        {
+            DispatchDelegate newDelegate = new DispatchDelegate(mode);
+            this.delegates[mode.ordinal()] = newDelegate;
+        }
+    }
+    
     public void clear()
     {
             modelCache.clear();
@@ -157,6 +170,7 @@ public class SuperDispatcher
 
     public int getOcclusionKey(ModelState modelState, EnumFacing face)
     {
+        if(!modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID)) return 0;
 
         SparseLayerMap map = modelCache.get(modelState);
         if(map == null)
@@ -164,8 +178,8 @@ public class SuperDispatcher
             Log.warn("Missing layer map for occlusion key.");
             return 0;
         }
-        
-        //FIXME: won't work for TESR solid layers
+
+        QuadContainer container = map.get(BlockRenderLayer.SOLID);
         if(container == null) 
         {
             Log.warn("Missing model for occlusion key.");
@@ -231,20 +245,45 @@ public class SuperDispatcher
         return itemCache.get(key);
     }
   
+    public DispatchDelegate getDelegate(SuperBlock block)
+    {
+        return this.delegates[block.blockRenderMode.ordinal()];
+    }
+    
+    /**
+     * Ugly but only used during load. Retrieves delegates for our custom model loader.
+     */
+    public DispatchDelegate getDelegate(String resourceString)
+    {
+        int start = resourceString.lastIndexOf(SuperDispatcher.RESOURCE_BASE_NAME) + SuperDispatcher.RESOURCE_BASE_NAME.length();
+        int index;
+        if(resourceString.contains("item"))
+        {
+            int end = resourceString.lastIndexOf(".");
+            index = Integer.parseInt(resourceString.substring(start, end));
+        }
+        else
+        {
+            index = Integer.parseInt(resourceString.substring(start));
+        }
+        return this.delegates[index];
+    }
     
     public class DispatchDelegate implements IBakedModel, IModel
     {
-        private final boolean needsTESR;
+        private final BlockRenderMode blockRenderMode;
+        private final String modelResourceString;
         
+        private DispatchDelegate(BlockRenderMode blockRenderMode)
+        {
+            this.blockRenderMode = blockRenderMode;
+            this.modelResourceString = HardScience.MODID + ":" + SuperDispatcher.RESOURCE_BASE_NAME  + blockRenderMode.ordinal();
+        }
+
         /** only used for block layer version */
         public String getModelResourceString()
         {
-            return HardScience.MODID + ":" + SuperDispatcher.RESOURCE_BASE_NAME;
-        }
-
-        private DispatchDelegate(boolean needsTESR)
-        {
-            this.needsTESR = needsTESR;
+            return this.modelResourceString;
         }
         
         @Override
@@ -276,7 +315,7 @@ public class SuperDispatcher
                 SparseLayerMap map = modelCache.get(modelState);
                 if(map == null) 
                     return QuadHelper.EMPTY_QUAD_LIST;
-                QuadContainer container = map.get(RenderMode.find(layer, this.needsTESR));
+                QuadContainer container = map.get(layer);
                 if(container == null)
                         return QuadHelper.EMPTY_QUAD_LIST;
                 return container.getQuads(side);
@@ -286,7 +325,18 @@ public class SuperDispatcher
         @Override
         public boolean isAmbientOcclusion()
         {
-           return true;
+         
+            switch(MinecraftForgeClient.getRenderLayer())
+            {
+            case SOLID:
+                return !this.blockRenderMode.isSolidLayerFlatLighting;
+                
+            case TRANSLUCENT:
+                return !this.blockRenderMode.isTranlucentLayerFlatLighting;
+                
+            default:
+                return true;
+            }
         }
     
         @Override
