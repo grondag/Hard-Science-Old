@@ -25,6 +25,7 @@ import grondag.hard_science.gui.control.VisibilityPanel;
 import grondag.hard_science.gui.control.VisiblitySelector;
 import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
@@ -196,17 +197,22 @@ public class SuperGuiScreen extends GuiScreen
         }
        
         SuperBlock currentBlock = (SuperBlock) ((ItemBlock)(itemPreview.previewItem.getItem())).getBlock();
-        SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
-
-        if(currentBlock != newBlock && newBlock != null)
+        
+        // virtual block always remains same block
+        if(currentBlock != ModBlocks.virtual_block)
         {
-            ItemStack newStack = new ItemStack(newBlock);
-            newStack.setCount(itemPreview.previewItem.getCount());
-            newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
-            newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
-            itemPreview.previewItem = newStack;
-            hasUpdates = true;
-
+            SuperBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(materialPicker.getSubstance(), modelState);
+    
+            if(currentBlock != newBlock && newBlock != null)
+            {
+                ItemStack newStack = new ItemStack(newBlock);
+                newStack.setCount(itemPreview.previewItem.getCount());
+                newStack.setItemDamage(itemPreview.previewItem.getItemDamage());
+                newStack.setTagCompound(itemPreview.previewItem.getTagCompound());
+                itemPreview.previewItem = newStack;
+                hasUpdates = true;
+    
+            }
         }
         
         if(hasUpdates)

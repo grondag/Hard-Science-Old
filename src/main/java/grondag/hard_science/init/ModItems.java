@@ -40,6 +40,8 @@ public class ModItems
     public static final Item basalt_cobble = null;
     public static final Item basalt_cut = null;
     
+    public static final Item virtual_block = null;
+    
     // tools
 //    public static final Item obj_test_model = null;
       

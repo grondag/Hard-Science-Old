@@ -1,6 +1,7 @@
 package grondag.hard_science;
 
 import grondag.hard_science.Configurator.Render.PreviewMode;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.library.varia.Useful;
@@ -8,6 +9,7 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
 import grondag.hard_science.network.PacketUpdatePlacementKey;
 import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
@@ -15,6 +17,7 @@ import grondag.hard_science.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
@@ -79,9 +82,29 @@ public class ClientEventHandler
                 CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
                 CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
             }
-            
         }
 
+        // render virtual blocks only if player is holding item that enables it
+        boolean renderVirtual = Configurator.BLOCKS.alwaysRenderVirtualBlocks;
+        if(!renderVirtual)
+        {
+            EntityPlayer player = Minecraft.getMinecraft().player;
+            if(player != null)
+            {
+                ItemStack stack = player.getHeldItemMainhand();
+                if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
+                if(!renderVirtual)
+                {
+                    stack = player.getHeldItemOffhand();
+                    if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
+                }
+            }
+        }
+        if(renderVirtual != SuperBlockTESR.isVirtualBlockRenderingEnabled())
+        {
+            SuperBlockTESR.setVirtualBlockRenderingEnabled(renderVirtual);
+        }
+        
         boolean newDown;
         
         switch(Configurator.BLOCKS.placementModifier)

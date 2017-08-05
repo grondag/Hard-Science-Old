@@ -146,7 +146,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes,
             Entity entityIn, boolean p_185477_7_)
-    {
+    {       
         ModelState modelState = this.getModelState(worldIn, pos, true);
         ICollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
 

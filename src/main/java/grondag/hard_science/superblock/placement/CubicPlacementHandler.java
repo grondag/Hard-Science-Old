@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
 import grondag.hard_science.library.world.WorldHelper;
@@ -48,10 +49,10 @@ public class CubicPlacementHandler implements IPlacementHandler
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
-        BlockPos posPlaced = onBlock.isReplaceable(worldIn, posOn) ? posOn : posOn.offset(facing);
+        BlockPos posPlaced = (onBlock != ModBlocks.virtual_block && onBlock.isReplaceable(worldIn, posOn)) ? posOn : posOn.offset(facing);
         
         // abort if target space is occupied
-        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced))
+        if(!WorldHelper.isBlockReplaceable(worldIn, posPlaced, stackBlock != ModBlocks.virtual_block))
         {
             return Collections.emptyList();
         }

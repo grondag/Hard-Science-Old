@@ -206,6 +206,9 @@ public class Configurator
             CONTROL,
             ALT
         }
+        
+        @Comment("If true, virtual blocks will always be rendered, even if not holding an item that enables it.")
+        public boolean alwaysRenderVirtualBlocks = false;
     }
     
     ////////////////////////////////////////////////////        

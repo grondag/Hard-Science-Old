@@ -64,8 +64,6 @@ public class SuperModelBlock extends SuperBlockPlus
                 boolean isHyperMatter, boolean isGeometryFullCube)
     {
         super(blockName, defaultMaterial, new ModelState(), blockRenderMode);
-        //all superblocks have same display name
-        this.setUnlocalizedName("super_model_block");
         this.isHyperMatter = isHyperMatter;
         this.fullBlock = isGeometryFullCube;
         this.worldLightOpacity = worldLightOpacity;

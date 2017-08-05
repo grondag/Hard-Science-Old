@@ -27,22 +27,26 @@ public class ModSuperModelBlocks
             {
                 // mundane non-cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][0]
-                        = new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, false, false);
+                        = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, false, false)
+                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][0]);
                 
                 // mundane cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][1]
-                        = new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, false, true);
+                        = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, false, true)
+                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][0][1]);
                 
                 // hypermatter non-cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][0]
-                        = new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, true, false);
+                        = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, true, false)
+                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][0]);
                 
                 // hypermatter cube
                 superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][1]
-                        = new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, true, true);
+                        = (SuperModelBlock) new SuperModelBlock("supermodel" + superModelIndex++, Material.ROCK, blockRenderMode, opacity, true, true)
+                            .setUnlocalizedName("super_model_block"); //all superblocks have same display name
                 event.getRegistry().register(superModelBlocks[blockRenderMode.ordinal()][opacity.ordinal()][1][1]);
                 
             }

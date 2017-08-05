@@ -8,6 +8,7 @@ import grondag.hard_science.init.ModRecipes;
 import grondag.hard_science.init.ModTileEntities;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.simulator.Simulator;
+import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -57,5 +58,14 @@ public class CommonProxy
         Simulator.INSTANCE.stop();
     }
 
+    /**
+     * Can ray trace collide with virtual blocks?
+     * Used for block placement, one probe info, etc. 
+     * Always false on server 
+     */
+    public boolean allowCollisionWithVirtualBlocks(World world)
+    {
+        return false;
+    }
 
 }

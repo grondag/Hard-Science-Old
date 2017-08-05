@@ -17,8 +17,6 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
-import grondag.hard_science.virtualblock.VirtualBlock;
-import grondag.hard_science.virtualblock.VirtualBlockBakedModel;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -50,8 +48,6 @@ public class ModModels
 {
     public static final SuperDispatcher MODEL_DISPATCH = new SuperDispatcher();
 
-    public static final VirtualBlockBakedModel VIRTUAL_BAKED_MODEL =  new VirtualBlockBakedModel();
-    public static final String VIRTUAL_BLOCK_LOCATION = HardScience.MODID + ":" + VirtualBlock.VIRTUAL_BLOCK_NAME;
     
     @SubscribeEvent()
     public static void onModelBakeEvent(ModelBakeEvent event) throws IOException

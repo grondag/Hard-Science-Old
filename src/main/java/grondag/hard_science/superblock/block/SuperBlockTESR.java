@@ -2,6 +2,7 @@ package grondag.hard_science.superblock.block;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.PerQuadModelRenderer;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -34,62 +35,51 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
     
     private final DispatchDelegate tesrDelegate = ModModels.MODEL_DISPATCH.delegates[BlockRenderMode.TESR.ordinal()];
     
+    private static boolean isVirtualBlockRenderingEnabled = false;
+    
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
-        GlStateManager.pushAttrib();
-        GlStateManager.pushMatrix();
-
-        GlStateManager.disableRescaleNormal();
-
-        if(te == null)
+        if(te != null)
         {
-//            renderItem()
+            
+            BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+            BlockPos pos = te.getPos();
+            buffer.setTranslation(x - pos.getX(), y - pos.getY(), z - pos.getZ());
+            renderBlock(te, buffer);
+            buffer.setTranslation(0, 0, 0);
         }
-        else
-        {
-            if(te != null)
-            {
-                
-                // Translate from player look point to the origin
-                // Translate from origin to TE coordinates if doing an in-world render
-                BlockPos blockpos = te.getPos();
-                GlStateManager.translate((float)(x - (double)blockpos.getX()), (float)(y - (double)blockpos.getY()), (float)(z - (double)blockpos.getZ()));
-
-                renderBlock(te);
-            }
-        }
-
-        GlStateManager.popMatrix();
-        GlStateManager.popAttrib();
     }
 
     
-    private void renderBlock(SuperTileEntity te)
+    private void renderBlock(SuperTileEntity te, BufferBuilder buffer)
     {
         SuperBlock block = (SuperBlock) te.getBlockType();
         if(block.blockRenderMode != BlockRenderMode.TESR) return;
         
+        if(block == ModBlocks.virtual_block && !isVirtualBlockRenderingEnabled) return;
+        
         if(MinecraftForgeClient.getRenderPass() == 0)
         {
             ForgeHooksClient.setRenderLayer(BlockRenderLayer.SOLID);
+            
+            // FIXME: only do this when texture demands it and use FastTESR other times
             GlStateManager.disableAlpha();
-            renderBlockInner(te, block, false);
+            renderBlockInner(te, block, false, buffer);
             GlStateManager.enableAlpha();
             ForgeHooksClient.setRenderLayer(null);
         }
         else if(MinecraftForgeClient.getRenderPass() == 1)
         {
             ForgeHooksClient.setRenderLayer(BlockRenderLayer.TRANSLUCENT);
-            renderBlockInner(te, block, true);
+            renderBlockInner(te, block, true, buffer);
             ForgeHooksClient.setRenderLayer(null);
         }
     }
     
-    private void renderBlockInner(SuperTileEntity te, SuperBlock block, boolean translucent)
+    private void renderBlockInner(SuperTileEntity te, SuperBlock block, boolean translucent, BufferBuilder buffer)
     {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuffer();
+      
         this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         RenderHelper.disableStandardItemLighting();
         
@@ -111,7 +101,7 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         ModelState modelState = te.getCachedModelState();
         IBlockState state = ((IExtendedBlockState)world.getBlockState(te.getPos())).withProperty(SuperBlock.MODEL_STATE,  modelState);
         
-        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
        
         
         if (translucent ) 
@@ -119,9 +109,10 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
             
             if(modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.TRANSLUCENT))
             {
-                PerQuadModelRenderer.INSTANCE.renderModel(world, this.tesrDelegate, state, te.getPos(), bufferBuilder, true, 0L);
+                PerQuadModelRenderer.INSTANCE.renderModel(world, this.tesrDelegate, state, te.getPos(), buffer, true, 0L);
 
-                bufferBuilder.sortVertexData((float) TileEntityRendererDispatcher.staticPlayerX,
+                // FIXME: do this if TESR?
+                buffer.sortVertexData((float) TileEntityRendererDispatcher.staticPlayerX,
                         (float) TileEntityRendererDispatcher.staticPlayerY, (float) TileEntityRendererDispatcher.staticPlayerZ);
             }
         }
@@ -129,12 +120,22 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         {
             if(modelState.getRenderPassSet().renderLayout.containsBlockRenderLayer(BlockRenderLayer.SOLID))
             {
-                PerQuadModelRenderer.INSTANCE.renderModel(world, this.tesrDelegate, state, te.getPos(), bufferBuilder, true, 0L);
+                PerQuadModelRenderer.INSTANCE.renderModel(world, this.tesrDelegate, state, te.getPos(), buffer, true, 0L);
             }
         }
         
-        tessellator.draw();
+        Tessellator.getInstance().draw();
 
         RenderHelper.enableStandardItemLighting();
+    }
+
+    public static boolean isVirtualBlockRenderingEnabled()
+    {
+        return isVirtualBlockRenderingEnabled;
+    }
+
+    public static void setVirtualBlockRenderingEnabled(boolean isVirtualBlockRenderingEnabled)
+    {
+        SuperBlockTESR.isVirtualBlockRenderingEnabled = isVirtualBlockRenderingEnabled;
     }
 }

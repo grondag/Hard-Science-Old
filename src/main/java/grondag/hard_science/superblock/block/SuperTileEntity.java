@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.block;
 
+import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
 import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
@@ -110,7 +111,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         // so we need to refresh render state once we have the server-side info.
         ModelState oldModelState = modelState;
         super.handleUpdateTag(tag);
-        if(!oldModelState.equals(modelState) && this.world.isRemote)
+        if((oldModelState == null || (!oldModelState.equals(modelState))) && this.world.isRemote)
         {
             this.updateClientRenderState();
         }
@@ -233,11 +234,26 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
     @Override
     public boolean shouldRenderInPass(int pass)
     {
-        if(this.modelState == null) return false;
+        if(this.modelState == null || this.isModelStateCacheDirty)
+        {
+            IBlockState myState = this.world.getBlockState(getPos());
+            
+            if(this.modelState == null) this.modelState = ((SuperBlock)myState.getBlock()).getDefaultModelState();
+            
+            this.modelState.refreshFromWorld(myState, world, pos);
+            this.isModelStateCacheDirty = false;
+            
+        }
         
         RenderPassSet rps = this.modelState.getRenderPassSet();
-        return !rps.canRenderAsNormalBlock() 
-                && rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
-      
+        if(this.getBlockType() == ModBlocks.virtual_block)
+        {
+            return rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
+        }
+        else
+        {
+            return !rps.canRenderAsNormalBlock() 
+                    && rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
+        }
     }
 }

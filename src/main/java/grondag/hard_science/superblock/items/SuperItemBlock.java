@@ -6,6 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
+import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
@@ -105,7 +107,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             stack.setTagCompound(tag);
         }
     }
- 
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
@@ -114,7 +116,10 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             BlockPos blockpos = Minecraft.getMinecraft().objectMouseOver.getBlockPos();
             //if trying to place a block but too close, is annoying to get GUI
             //so only display if clicking on air
-            if (blockpos != null && world.getBlockState(blockpos).getMaterial() == Material.AIR && ((SuperBlock)this.block).hasAppearanceGui())
+            if (blockpos != null 
+                    && world.getBlockState(blockpos).getBlock() != ModBlocks.virtual_block
+                    && world.getBlockState(blockpos).getMaterial() == Material.AIR 
+                    && ((SuperBlock)this.block).hasAppearanceGui())
             {
                 player.openGui(HardScience.INSTANCE, ModGuiHandler.GUI_SUPERMODEL_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
@@ -159,7 +164,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 {
                     didPlace = true;
                     worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    if(!playerIn.isCreative())
+                    if(!(playerIn.isCreative() || stackIn.getItem() == ModItems.virtual_block))
                     {
                         stackIn.shrink(1);
                         if(stackIn.isEmpty()) break;
