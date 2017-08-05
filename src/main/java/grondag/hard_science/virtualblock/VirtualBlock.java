@@ -14,12 +14,10 @@ import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -29,7 +27,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -42,12 +39,14 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class VirtualBlock extends SuperModelBlock
 {
+    
+//    public static final SoundType VIRTUAL_BLOCK_SOUND = new SoundType(6.0F, 2.0F, SoundEvents.BLOCK_CLOTH_BREAK, SoundEvents.BLOCK_CLOTH_STEP, SoundEvents.BLOCK_CLOTH_PLACE, SoundEvents.BLOCK_CLOTH_HIT, SoundEvents.BLOCK_CLOTH_FALL);
+
     public VirtualBlock(String blockName)
     {
         super(blockName, Material.AIR, BlockRenderMode.TESR, WorldLightOpacity.TRANSPARENT, false, false);
@@ -268,17 +267,17 @@ public class VirtualBlock extends SuperModelBlock
       return EnumBlockRenderType.INVISIBLE;
     }
 
-     @Override
-    public SoundType getSoundType()
-    {
-        return SoundType.CLOTH;
-    }
+//     @Override
+//    public SoundType getSoundType()
+//    {
+//        return VIRTUAL_BLOCK_SOUND;
+//    }
 
-    @Override
-    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, Entity entity)
-    {
-        return SoundType.CLOTH;
-    }
+//    @Override
+//    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, Entity entity)
+//    {
+//        return VIRTUAL_BLOCK_SOUND;
+//    }
 
     @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)

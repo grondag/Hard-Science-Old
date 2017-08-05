@@ -265,7 +265,8 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     
     private static SoundType getPlacementSound(ItemStack stack)
     {
-        return isVirtual(stack) ? SoundType.CLOTH : getStackSubstance(stack).soundType;
+        return getStackSubstance(stack).soundType;
+//        return isVirtual(stack) ? VirtualBlock.VIRTUAL_BLOCK_SOUND : getStackSubstance(stack).soundType;
     }
     
     public static boolean isVirtual(ItemStack stack)

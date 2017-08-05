@@ -1,2 +1,13 @@
 {
+	"virtual_place": {
+    	"category": "block",
+    	"subtitle": "hard_science.subtitle.virtual_place",
+    	"sounds": [ "hard_science.virtual_place" ]
+  	},
+  	
+	"virtual_break": {
+    	"category": "block",
+    	"subtitle": "hard_science.subtitle.virtual_break",
+    	"sounds": [ "hard_science.virtual_break" ]
+  	}
 }
