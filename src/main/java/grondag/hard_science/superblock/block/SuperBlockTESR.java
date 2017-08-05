@@ -2,7 +2,6 @@ package grondag.hard_science.superblock.block;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.PerQuadModelRenderer;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -35,8 +34,6 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
     
     private final DispatchDelegate tesrDelegate = ModModels.MODEL_DISPATCH.delegates[BlockRenderMode.TESR.ordinal()];
     
-    private static boolean isVirtualBlockRenderingEnabled = false;
-    
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
@@ -52,12 +49,10 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
     }
 
     
-    private void renderBlock(SuperTileEntity te, BufferBuilder buffer)
+    protected void renderBlock(SuperTileEntity te, BufferBuilder buffer)
     {
         SuperBlock block = (SuperBlock) te.getBlockType();
         if(block.blockRenderMode != BlockRenderMode.TESR) return;
-        
-        if(block == ModBlocks.virtual_block && !isVirtualBlockRenderingEnabled) return;
         
         if(MinecraftForgeClient.getRenderPass() == 0)
         {
@@ -77,7 +72,7 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         }
     }
     
-    private void renderBlockInner(SuperTileEntity te, SuperBlock block, boolean translucent, BufferBuilder buffer)
+    protected void renderBlockInner(SuperTileEntity te, SuperBlock block, boolean translucent, BufferBuilder buffer)
     {
       
         this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -127,15 +122,5 @@ public class SuperBlockTESR extends TileEntitySpecialRenderer<SuperTileEntity>
         Tessellator.getInstance().draw();
 
         RenderHelper.enableStandardItemLighting();
-    }
-
-    public static boolean isVirtualBlockRenderingEnabled()
-    {
-        return isVirtualBlockRenderingEnabled;
-    }
-
-    public static void setVirtualBlockRenderingEnabled(boolean isVirtualBlockRenderingEnabled)
-    {
-        SuperBlockTESR.isVirtualBlockRenderingEnabled = isVirtualBlockRenderingEnabled;
     }
 }

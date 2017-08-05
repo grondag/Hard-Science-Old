@@ -13,8 +13,11 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Configurator.BlockSettings.ProbeInfoLevel;
 import grondag.hard_science.Log;
 import grondag.hard_science.external.IWailaProvider;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
+import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.network.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -43,6 +46,7 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -838,7 +842,42 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         //which is then cached, leading to strange render problems for blocks just placed up updated.
         IBlockState goodState = world.getBlockState(pos);
 
-        return getStackFromBlock(goodState, world, pos);
+        ItemStack picked = getStackFromBlock(goodState, world, pos);
+        
+        // logic for TE blocks has to be in parent so that virtual blocks can take advantage of it
+        if(this.hasTileEntity(state))
+        {
+            TileEntity myTE = world.getTileEntity(pos);
+            if(myTE != null && myTE instanceof SuperModelTileEntity)
+            {
+                
+                SuperItemBlock.setStackLightValue(picked, ((SuperModelTileEntity)myTE).getLightValue());
+                SuperItemBlock.setStackSubstance(picked, ((SuperModelTileEntity)myTE).getSubstance());
+            }
+        }
+   
+        // for virtual blocks only, take appearance of picked virtual block
+        if(!player.capabilities.isCreativeMode && world.isRemote 
+                && Minecraft.getMinecraft().gameSettings.keyBindPickBlock.isKeyDown()) 
+        {
+            if(!picked.isEmpty())
+            {
+                ItemStack heldStack = player.getHeldItemMainhand();
+                
+                if(heldStack.getItem() == ModItems.virtual_block)
+                {
+                    SuperItemBlock.setModelState(heldStack, SuperItemBlock.getModelStateFromStack(picked));
+                    SuperItemBlock.setStackLightValue(heldStack, SuperItemBlock.getStackLightValue(picked));
+                    SuperItemBlock.setStackSubstance(heldStack, SuperItemBlock.getStackSubstance(picked));
+                    ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(heldStack));
+                }
+            }
+            return ItemStack.EMPTY;
+        }
+        else
+        {
+            return picked;
+        }
     }
    
     /**

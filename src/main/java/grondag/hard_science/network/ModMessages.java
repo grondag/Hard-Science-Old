@@ -16,7 +16,8 @@ public class ModMessages
         // Server side
         INSTANCE.registerMessage(PacketReplaceHeldItem.Handler.class, PacketReplaceHeldItem.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketUpdatePlacementKey.Handler.class, PacketUpdatePlacementKey.class, packetID++, Side.SERVER);
-
+        INSTANCE.registerMessage(PacketDestroyVirtualBlock.Handler.class, PacketDestroyVirtualBlock.class, packetID++, Side.SERVER);
+        
         // Client side        
 
     }

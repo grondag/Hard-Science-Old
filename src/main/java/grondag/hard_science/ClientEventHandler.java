@@ -9,7 +9,6 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
 import grondag.hard_science.network.PacketUpdatePlacementKey;
 import grondag.hard_science.player.ModPlayerCaps;
-import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
@@ -100,9 +99,9 @@ public class ClientEventHandler
                 }
             }
         }
-        if(renderVirtual != SuperBlockTESR.isVirtualBlockRenderingEnabled())
+        if(renderVirtual != ClientProxy.isVirtualBlockRenderingEnabled())
         {
-            SuperBlockTESR.setVirtualBlockRenderingEnabled(renderVirtual);
+            ClientProxy.setVirtualBlockRenderingEnabled(renderVirtual);
         }
         
         boolean newDown;

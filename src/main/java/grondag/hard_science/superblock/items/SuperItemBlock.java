@@ -54,6 +54,11 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     public SuperItemBlock(SuperBlock block) {
         super(block);
         setHasSubtypes(true);
+        if(this.block == ModBlocks.virtual_block)
+        {
+            this.setMaxDamage(0);
+            this.setMaxStackSize(1);
+        }
     }
     
     @Override
@@ -147,7 +152,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 
         if(placements.isEmpty()) return EnumActionResult.FAIL;
         
-        SoundType soundtype = SuperItemBlock.getStackSubstance(stackIn).soundType;
+        SoundType soundtype = getPlacementSound(stackIn);
         boolean didPlace = false;
         
         for(Pair<BlockPos, ItemStack> p : placements)
@@ -164,7 +169,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 {
                     didPlace = true;
                     worldIn.playSound(playerIn, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-                    if(!(playerIn.isCreative() || stackIn.getItem() == ModItems.virtual_block))
+                    if(!(playerIn.isCreative() || isVirtual(stackIn)))
                     {
                         stackIn.shrink(1);
                         if(stackIn.isEmpty()) break;
@@ -257,4 +262,15 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                 ? BlockSubstance.FLEXSTONE
                 : SuperBlockNBTHelper.readSubstance(tag);
     }
+    
+    private static SoundType getPlacementSound(ItemStack stack)
+    {
+        return isVirtual(stack) ? SoundType.CLOTH : getStackSubstance(stack).soundType;
+    }
+    
+    public static boolean isVirtual(ItemStack stack)
+    {
+        return stack.getItem() == ModItems.virtual_block;
+    }
+    
 }

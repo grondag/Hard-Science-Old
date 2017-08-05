@@ -17,6 +17,8 @@ import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePa
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
+import grondag.hard_science.virtualblock.VirtualBlockTESR;
+import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
 import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -188,11 +190,11 @@ public class ModModels
             }
         }
         
-//        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ModBlocks.virtual_block), 0, new ModelResourceLocation(ModBlocks.virtual_block.getRegistryName(), "inventory"));
-        // Bind our TESR to our tile entity
-//        ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
+        // Bind TESR to tile entity
         ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntity.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntity.class, SuperBlockTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
+
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

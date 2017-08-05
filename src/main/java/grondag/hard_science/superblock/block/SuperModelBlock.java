@@ -2,23 +2,23 @@ package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -112,6 +112,25 @@ public class SuperModelBlock extends SuperBlockPlus
         return BlockSubstance.values()[state.getValue(SUBSTANCE)].harvestTool;
     }
     
+   
+    @Override
+    public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos)
+    {
+        return this.getSubstance(blockState, worldIn, pos).hardness;
+    }
+
+    @Override
+    public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion)
+    {
+        return this.getSubstance(world, pos).resistance;
+    }
+
+    @Override
+    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, Entity entity)
+    {
+        return this.getSubstance(state, world, pos).soundType;
+    }
+
     /**
      * SuperModel blocks light emission level is stored in tile entity.
      * Is not part of model state because does not affect rendering.
@@ -131,19 +150,6 @@ public class SuperModelBlock extends SuperBlockPlus
                 : ((SuperModelTileEntity)myTE).getLightValue();
     }
     
-    @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
-    {
-        ItemStack stack = super.getPickBlock(state, target, world, pos, player);
-        TileEntity myTE = world.getTileEntity(pos);
-        if(myTE != null && myTE instanceof SuperModelTileEntity)
-        {
-            
-            SuperItemBlock.setStackLightValue(stack, ((SuperModelTileEntity)myTE).getLightValue());
-            SuperItemBlock.setStackSubstance(stack, ((SuperModelTileEntity)myTE).getSubstance());
-        }
-        return stack;
-    }
   
     @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)

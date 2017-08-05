@@ -1,6 +1,5 @@
 package grondag.hard_science.superblock.block;
 
-import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
 import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
@@ -173,10 +172,25 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         return this.modelState; 
     }
     
-    /** intended for use in TESR - should be up to date because getExtendedState called before this */
+    /**
+     * Use this version when you don't have world state handy
+     */
+    public ModelState getModelState()
+    {
+        if(!(this.modelState == null || this.isModelStateCacheDirty)) 
+        {
+            return this.modelState;
+        }
+        else
+        {
+            return this.getModelState(this.world.getBlockState(this.pos), world, pos, true); 
+        }
+    }
+    
+    /** intended for use in TESR - don't refresh unless missing because should be up to date from getExtendedState called before this */
     public ModelState getCachedModelState()
     {
-        return this.modelState;
+        return this.modelState == null ? this.getModelState(this.world.getBlockState(this.pos), world, pos, true) : this.modelState;
     }
     
     public void setModelState(ModelState modelState) 
@@ -246,14 +260,14 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
         }
         
         RenderPassSet rps = this.modelState.getRenderPassSet();
-        if(this.getBlockType() == ModBlocks.virtual_block)
-        {
-            return rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
-        }
-        else
-        {
-            return !rps.canRenderAsNormalBlock() 
+        return !rps.canRenderAsNormalBlock() 
                     && rps.renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
-        }
+        
     }
+    
+    /**
+     * Only true for virtual blocks.  Prevents "instanceof" checking.
+     */
+    public boolean isVirtual() { return false; }
+    
 }

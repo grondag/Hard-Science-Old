@@ -3,7 +3,6 @@ package grondag.hard_science;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -18,7 +17,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ClientProxy extends CommonProxy
 {
     
-	@Override
+	private static boolean isVirtualBlockRenderingEnabled = false;
+
+    @Override
 	public void preInit(FMLPreInitializationEvent event) 
 	{
 		super.preInit(event);
@@ -51,11 +52,21 @@ public class ClientProxy extends CommonProxy
         // uses client proxy when running local so still have to check world for side
 	    if(world == null)
 	    {
-	        return SuperBlockTESR.isVirtualBlockRenderingEnabled() && FMLCommonHandler.instance().getEffectiveSide() ==  Side.CLIENT;
+	        return isVirtualBlockRenderingEnabled && FMLCommonHandler.instance().getEffectiveSide() ==  Side.CLIENT;
 	    }
 	    else
 	    {
-	        return world.isRemote && SuperBlockTESR.isVirtualBlockRenderingEnabled();
+	        return world.isRemote && isVirtualBlockRenderingEnabled;
 	    }
+    }
+
+    public static void setVirtualBlockRenderingEnabled(boolean isEnabled)
+    {
+        isVirtualBlockRenderingEnabled = isEnabled;
+    }
+
+    public static boolean isVirtualBlockRenderingEnabled()
+    {
+        return isVirtualBlockRenderingEnabled;
     }
 }
