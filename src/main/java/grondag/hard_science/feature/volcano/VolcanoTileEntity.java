@@ -150,7 +150,7 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
             }
             else
             {
-                Log.info("Recovered Volcano Node @" + this.pos.toString());
+                Log.info("Found Volcano Node @" + this.pos.toString());
                 this.stage = node.isActive() ? VolcanoStage.CLEARING : VolcanoStage.DORMANT;
             }
 
@@ -489,8 +489,6 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
         tagCompound.setInteger("clearingLevel", this.clearingLevel);
         tagCompound.setInteger("lavaCounter", this.lavaCounter);
         tagCompound.setInteger("cooldownTicks", lavaCooldownTicks);
-
-        if(this.node != null) tagCompound.setInteger("nodeId", this.node.getID());
         return super.writeToNBT(tagCompound);
     }
 
