@@ -1,21 +1,12 @@
-package grondag.hard_science.simulator.scratch;
-
+package grondag.hard_science.simulator.wip;
 
 public abstract class AbstractResource<V extends StorageType> implements IResource<V>
 {
-    private final AbstractResourceBroker<V> broker;
-    
-    protected AbstractResource(AbstractResourceBroker<V> broker)
-    {
-        this.broker = broker;
-    }
-    
     @Override
     public int hashCode()
     {
         return this.computeResourceHashCode();
     }
-    
 
     @SuppressWarnings("unchecked")
     @Override
@@ -28,11 +19,5 @@ public abstract class AbstractResource<V extends StorageType> implements IResour
         } finally {}
        
         return result;
-    }
-    
-    @Override
-    public AbstractResourceBroker<V> resourceBroker()
-    {
-        return this.broker;
     }
 }

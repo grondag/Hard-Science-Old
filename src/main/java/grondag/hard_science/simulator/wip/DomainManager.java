@@ -13,6 +13,7 @@ import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.INBTSerializable;
 
 public class DomainManager implements IPersistenceNode
 {
@@ -56,9 +57,9 @@ public class DomainManager implements IPersistenceNode
         return result;
     }
     
-    public class Domain
+    public class Domain implements INBTSerializable<NBTTagCompound>
     {
-        private final int id;
+        private int id;
         private String name;
         private boolean isSecurityEnabled;
         
@@ -72,41 +73,7 @@ public class DomainManager implements IPersistenceNode
         
         private Domain (NBTTagCompound tag)
         {
-            this.id = tag.getInteger("id");
-            this.isSecurityEnabled = tag.getBoolean("securityOn");
-            this.name = tag.getString("name");
-            
-            NBTTagList nbtUsers = tag.getTagList("users", 10);
-            if( nbtUsers != null && !nbtUsers.hasNoTags())
-            {
-                for (int i = 0; i < nbtUsers.tagCount(); ++i)
-                {
-                    DomainUser user = new DomainUser(nbtUsers.getCompoundTagAt(i));
-                    this.users.put(user.userName, user);
-                }   
-            }
-        }
-        
-        private NBTTagCompound getNBT()
-        {
-            NBTTagCompound tag = new NBTTagCompound();
-            
-            tag.setInteger("id", this.id);
-            tag.setBoolean("securityOn", this.isSecurityEnabled);
-            tag.setString("name", this.name);
-            
-            NBTTagList nbtUsers = new NBTTagList();
-            
-            if(!this.users.isEmpty())
-            {
-                for (DomainUser user : this.users.values())
-                {
-                    nbtUsers.appendTag(user.getNBT());
-                }
-            }
-            tag.setTag("users", nbtUsers);
-            
-            return tag;
+            this.deserializeNBT(tag);
         }
         
         public List<DomainUser> getAllUsers()
@@ -176,10 +143,49 @@ public class DomainManager implements IPersistenceNode
             isDirty = true;
         }
 
-
-        public class DomainUser
+        @Override
+        public NBTTagCompound serializeNBT()
         {
-            public final String userName;
+            NBTTagCompound tag = new NBTTagCompound();
+            
+            tag.setInteger("id", this.id);
+            tag.setBoolean("securityOn", this.isSecurityEnabled);
+            tag.setString("name", this.name);
+            
+            NBTTagList nbtUsers = new NBTTagList();
+            
+            if(!this.users.isEmpty())
+            {
+                for (DomainUser user : this.users.values())
+                {
+                    nbtUsers.appendTag(user.serializeNBT());
+                }
+            }
+            tag.setTag("users", nbtUsers);
+            
+            return tag;
+        }
+
+        @Override
+        public void deserializeNBT(NBTTagCompound tag)
+        {
+            this.id = tag.getInteger("id");
+            this.isSecurityEnabled = tag.getBoolean("securityOn");
+            this.name = tag.getString("name");
+            
+            NBTTagList nbtUsers = tag.getTagList("users", 10);
+            if( nbtUsers != null && !nbtUsers.hasNoTags())
+            {
+                for (int i = 0; i < nbtUsers.tagCount(); ++i)
+                {
+                    DomainUser user = new DomainUser(nbtUsers.getCompoundTagAt(i));
+                    this.users.put(user.userName, user);
+                }   
+            }
+        }
+        public class DomainUser implements INBTSerializable<NBTTagCompound>
+        {
+            public String userName;
             
             private int priveledgeFlags;
             
@@ -190,18 +196,9 @@ public class DomainManager implements IPersistenceNode
             
             private DomainUser(NBTTagCompound tag)
             {
-                this.userName = tag.getString("name");
-                this.priveledgeFlags = tag.getInteger("flags");
+                this.deserializeNBT(tag);
             }
-            
-            private NBTTagCompound getNBT()
-            {
-                NBTTagCompound result = new NBTTagCompound();
-                result.setString("name", this.userName);
-                result.setInteger("flags", this.priveledgeFlags);
-                return result;
-            }
-
+          
             /**
              * Will return true for admin users, regardless of other Priveledge grants.
              * Will also return true if security is disabled for the domain.
@@ -223,6 +220,22 @@ public class DomainManager implements IPersistenceNode
             {
                 this.priveledgeFlags = PRIVLEDGE_FLAG_SET.getFlagsForIncludedValues(granted);
                 isDirty = true;
+            }
+
+            @Override
+            public NBTTagCompound serializeNBT()
+            {
+                NBTTagCompound result = new NBTTagCompound();
+                result.setString("name", this.userName);
+                result.setInteger("flags", this.priveledgeFlags);
+                return result;
+            }
+
+            @Override
+            public void deserializeNBT(NBTTagCompound nbt)
+            {
+                this.userName = nbt.getString("name");
+                this.priveledgeFlags = nbt.getInteger("flags");
             }
         }
     }
@@ -270,7 +283,7 @@ public class DomainManager implements IPersistenceNode
         {
             for (Domain domain : this.domains.valueCollection())
             {
-                nbtDomains.appendTag(domain.getNBT());
+                nbtDomains.appendTag(domain.serializeNBT());
             }
         }
         tag.setTag("domains", nbtDomains);

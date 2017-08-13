@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import grondag.hard_science.gui.control.TabBar;
+import grondag.hard_science.simulator.wip.IResourceStack;
 
 public class ResourceTests
 {

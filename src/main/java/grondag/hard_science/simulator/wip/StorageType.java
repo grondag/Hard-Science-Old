@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.scratch;
+package grondag.hard_science.simulator.wip;
 
 /**
  * Set up like an enum but using classes to enable generic-based type safety for resource classes.

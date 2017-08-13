@@ -1,10 +1,13 @@
-package grondag.hard_science.simulator.scratch;
+package grondag.hard_science.simulator.wip;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.INBTSerializable;
 
 /**
  * A specific instance of resource in the world.
  * Defines the amount and other characteristics of the resource.
  */
-public interface IResourceStack<V extends StorageType>
+public interface IResourceStack<V extends StorageType> extends INBTSerializable<NBTTagCompound>
 {
     public IResource<V> resource();
     public long getQuantity();

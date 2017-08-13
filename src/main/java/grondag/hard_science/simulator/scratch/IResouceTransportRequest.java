@@ -1,5 +1,9 @@
 package grondag.hard_science.simulator.scratch;
 
+import grondag.hard_science.simulator.wip.IResource;
+import grondag.hard_science.simulator.wip.IResourceLocation;
+import grondag.hard_science.simulator.wip.StorageType;
+
 public interface IResouceTransportRequest<V extends StorageType>
 {
     public IResource<V> getResource();
