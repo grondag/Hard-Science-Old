@@ -2,6 +2,8 @@ package grondag.hard_science.simulator.network;
 
 import org.junit.Test;
 
+import grondag.hard_science.simulator.scratch.AssignedNumber;
+import grondag.hard_science.simulator.scratch.AssignedNumbersAuthority;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthorityTest
