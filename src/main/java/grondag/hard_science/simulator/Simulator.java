@@ -268,7 +268,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                 {
                     try
                     {
-                            tickable.doOffTick();
+                        tickable.doOffTick();
                     }
                     catch(Exception e)
                     {

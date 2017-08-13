@@ -15,6 +15,7 @@ import java.io.IOException;
 
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
+ * FIXME: security
  */
 public class PacketReplaceHeldItem implements IMessage
 {
