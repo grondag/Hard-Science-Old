@@ -12,21 +12,27 @@ public interface IResourceStack<V extends StorageType> extends INBTSerializable<
     public IResource<V> resource();
     public long getQuantity();
     public boolean isEmpty();
-    public ILocatedResourceStack<V> withLocation(IResourceLocation<V> location);
 
     /**
-     * Takes up to limit from this stack and returns the result.  
-     * If simulate is false, this stack may be mutated.
+     * Takes up to limit from this stack and returns how many were actually taken.
+     * Intended to be thread-safe.
      */
-    public IResourceStack<V> takeUpTo(long limit, boolean simulate);
+    public long takeUpTo(long limit);
     
-   
     /**
-     * A resource stack at a specific location.
-     *
+     * Increases quantity and returns new quantity in stack.
+     * Intended to be thread-safe.
      */
-    public interface ILocatedResourceStack<V extends StorageType> extends IResourceStack<V>, IResourceLocation<V>
-    {
-        
-    }
+    public long add(long howMany);
+    
+//    public ILocatedResourceStack<V> withLocation(IResourceLocation<V> location);
+//   
+//    /**
+//     * A resource stack at a specific location.
+//     *
+//     */
+//    public interface ILocatedResourceStack<V extends StorageType> extends IResourceStack<V>, IResourceLocation<V>
+//    {
+//        
+//    }
 }
