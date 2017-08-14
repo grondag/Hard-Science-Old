@@ -1,5 +1,9 @@
 package grondag.hard_science.library.world;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -7,9 +11,39 @@ public class Location extends BlockPos
 {
     public static interface ILocated
     {
+        @Nullable
         public Location getLocation();
+        
+        public default boolean hasLocation()
+        {
+            return this.getLocation() != null;
+        }
     }
 
+    public static void saveToNBT(@Nullable Location loc, @Nonnull NBTTagCompound nbt)
+    {
+        if(loc != null)
+        {
+            nbt.setInteger("loc_dim", loc.dimensionID);
+            nbt.setLong("loc_pos", PackedBlockPos.pack(loc));
+        }
+    }
+    
+    @Nullable
+    public static Location fromNBT(@Nullable NBTTagCompound nbt)
+    {
+        if(nbt != null && nbt.hasKey("loc_pos"))
+        {
+            int dim = nbt.getInteger("loc_dim");
+            long pos = nbt.getLong("loc_pos");
+            return new Location(PackedBlockPos.getX(pos), PackedBlockPos.getY(pos), PackedBlockPos.getZ(pos), dim);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
     private final int dimensionID;
     
     public Location(int x, int y, int z, int dimensionID)
@@ -59,4 +93,6 @@ public class Location extends BlockPos
                     &&  this.dimensionID == loc.dimensionID;
         }
     }
+    
+    
 }

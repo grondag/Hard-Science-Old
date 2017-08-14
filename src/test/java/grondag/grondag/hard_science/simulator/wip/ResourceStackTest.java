@@ -15,7 +15,7 @@ public class ResourceStackTest
         
         ItemResource r1 = new ItemResource(i1, 0, null, null);
         
-        ResourceStack<StorageTypeStack> stack = ResourceStack.create(r1, 5);
+        ResourceWithQuantity<StorageTypeStack> stack = r1.withQuantity(5);
         
         assert stack.getQuantity() == 5;
         assert !stack.isEmpty();

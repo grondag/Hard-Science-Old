@@ -2,30 +2,26 @@ package grondag.hard_science.simulator.wip;
 
 import javax.annotation.Nonnull;
 
+import grondag.hard_science.simulator.persistence.IReadWriteNBT;
+import grondag.hard_science.simulator.wip.IStorage.StorageWithResourceAndQuantity;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class ResourceStack<V extends StorageType> implements IResourceStack<V>
+public class ResourceWithQuantity<V extends StorageType<V>> implements IReadWriteNBT
 {
     protected final IResource<V> resource;
     protected long quantity;
-    
-    public static <T extends StorageType> ResourceStack<T> create(IResource<T> resource, long quantity)
-    {
-        return new ResourceStack<T>(resource, quantity);
-    }
-    
-    public ResourceStack(@Nonnull IResource<V> resource, long quantity)
+     
+    public ResourceWithQuantity(@Nonnull IResource<V> resource, long quantity)
     {
         this.resource = resource;
         this.quantity = quantity;
     }
     
     @Override
-    public NBTTagCompound serializeNBT()
+    public void serializeNBT(NBTTagCompound tag)
     {
-        NBTTagCompound tag = this.resource.serializeNBT();
+        this.resource.serializeNBT(tag);
         tag.setLong("qty", this.quantity);
-        return tag;
     }
 
     @Override
@@ -35,25 +31,25 @@ public class ResourceStack<V extends StorageType> implements IResourceStack<V>
         this.resource.deserializeNBT(nbt);
     }
 
-    @Override
     public IResource<V> resource()
     {
         return this.resource;
     }
 
-    @Override
     public long getQuantity()
     {
         return this.quantity;
     }
 
-    @Override
     public boolean isEmpty()
     {
         return this.quantity == 0;
     }
 
-    @Override
+    /**
+     * Takes up to limit from this stack and returns how many were actually taken.
+     * Intended to be thread-safe.
+     */
     public synchronized long takeUpTo(long limit)
     {
         if(limit < 1) return 0;
@@ -63,14 +59,21 @@ public class ResourceStack<V extends StorageType> implements IResourceStack<V>
         return taken;
     }
 
-    @Override
+    /**
+     * Increases quantity and returns quantity actually added.
+     * Intended to be thread-safe.
+     */
     public synchronized long add(long howMany)
     {
-        if(howMany < 1) return this.quantity;
+        if(howMany < 1) return 0;
         
         this.quantity += howMany;
         
-        return this.quantity;
+        return howMany;
     }
 
+    public StorageWithResourceAndQuantity<V> withStorage(IStorage<V> storage)
+    {
+        return new StorageWithResourceAndQuantity<V>(storage, this.resource, this.quantity);
+    }
 }

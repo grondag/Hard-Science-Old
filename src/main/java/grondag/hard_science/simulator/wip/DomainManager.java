@@ -9,11 +9,12 @@ import com.google.common.collect.ImmutableList;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.library.varia.BinaryEnumSet;
+import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
+import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.common.util.INBTSerializable;
 
 public class DomainManager implements IPersistenceNode
 {
@@ -25,7 +26,7 @@ public class DomainManager implements IPersistenceNode
     
     public static interface IDomainMember
     {
-        public Domain domain();
+        public Domain getDomain();
     }
     
     public static enum Priveledge
@@ -57,11 +58,13 @@ public class DomainManager implements IPersistenceNode
         return result;
     }
     
-    public class Domain implements INBTSerializable<NBTTagCompound>
+    public class Domain implements IReadWriteNBT, IDirtListenerProvider
     {
         private int id;
         private String name;
         private boolean isSecurityEnabled;
+        
+        
         
         private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
         
@@ -144,10 +147,8 @@ public class DomainManager implements IPersistenceNode
         }
 
         @Override
-        public NBTTagCompound serializeNBT()
+        public void serializeNBT(NBTTagCompound tag)
         {
-            NBTTagCompound tag = new NBTTagCompound();
-            
             tag.setInteger("id", this.id);
             tag.setBoolean("securityOn", this.isSecurityEnabled);
             tag.setString("name", this.name);
@@ -162,8 +163,6 @@ public class DomainManager implements IPersistenceNode
                 }
             }
             tag.setTag("users", nbtUsers);
-            
-            return tag;
         }
 
         @Override
@@ -183,7 +182,7 @@ public class DomainManager implements IPersistenceNode
                 }   
             }
         }
-        public class DomainUser implements INBTSerializable<NBTTagCompound>
+        public class DomainUser implements IReadWriteNBT
         {
             public String userName;
             
@@ -223,12 +222,10 @@ public class DomainManager implements IPersistenceNode
             }
 
             @Override
-            public NBTTagCompound serializeNBT()
+            public void serializeNBT(NBTTagCompound nbt)
             {
-                NBTTagCompound result = new NBTTagCompound();
-                result.setString("name", this.userName);
-                result.setInteger("flags", this.priveledgeFlags);
-                return result;
+                nbt.setString("name", this.userName);
+                nbt.setInteger("flags", this.priveledgeFlags);
             }
 
             @Override
@@ -237,6 +234,11 @@ public class DomainManager implements IPersistenceNode
                 this.userName = nbt.getString("name");
                 this.priveledgeFlags = nbt.getInteger("flags");
             }
+        }
+        @Override
+        public IDirtListener getDirtListener()
+        {
+            return DomainManager.this;
         }
     }
 
@@ -253,7 +255,7 @@ public class DomainManager implements IPersistenceNode
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
+    public void deserializeNBT(NBTTagCompound tag)
     {
         this.nextID = 1;
         this.domains.clear();
@@ -273,7 +275,7 @@ public class DomainManager implements IPersistenceNode
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag)
+    public void serializeNBT(NBTTagCompound tag)
     {
         tag.setInteger("nextID", this.nextID);
         

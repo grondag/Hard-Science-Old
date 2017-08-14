@@ -44,7 +44,7 @@ public class PersistenceDelegate extends WorldSavedData
         }
         else 
         {
-            pnode.readFromNBT(nbt); 
+            pnode.deserializeNBT(nbt); 
         }
     }
     
@@ -52,7 +52,7 @@ public class PersistenceDelegate extends WorldSavedData
     {
         if(pnode != null && nbtCache != null)
         {
-            pnode.readFromNBT(this.nbtCache);
+            pnode.deserializeNBT(this.nbtCache);
             nbtCache = null;
         }
     }
@@ -60,7 +60,7 @@ public class PersistenceDelegate extends WorldSavedData
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     { 
-        if(pnode != null) pnode.writeToNBT(nbt);
+        if(pnode != null) pnode.serializeNBT(nbt);
         return nbt;
     }
 

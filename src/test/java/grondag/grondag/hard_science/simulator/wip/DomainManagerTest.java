@@ -38,10 +38,10 @@ public class DomainManagerTest
         NBTTagCompound tag = new NBTTagCompound();
         
         assert(dm.isSaveDirty());
-        dm.writeToNBT(tag);
+        dm.serializeNBT(tag);
         
         dm = new DomainManager();
-        dm.readFromNBT(tag);
+        dm.deserializeNBT(tag);
         
         d1 = dm.getDomain(1);
         assert(d1.getName() == "first");

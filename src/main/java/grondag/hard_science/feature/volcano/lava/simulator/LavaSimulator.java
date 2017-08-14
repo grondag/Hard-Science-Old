@@ -304,7 +304,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         if(state.getBlock() == ModBlocks.lava_dynamic_height)
         {
             this.lavaBlockPlacementEvents.addEvent(pos, -TerrainBlock.getFlowHeightFromState(state));
-            this.setSaveDirty();
+            this.setDirty();
         }
     }
     
@@ -331,7 +331,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
             // synchronize world buffer with world
             this.worldBuffer.clearBlockState(pos);
             
-            this.setSaveDirty();
+            this.setDirty();
         }
     }
     
@@ -350,7 +350,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     public void trackCoolingBlock(BlockPos pos)
     {
         this.basaltBlocks.add(new AgedBlockPos(pos, Simulator.INSTANCE.getTick()));
-        this.setSaveDirty();
+        this.setDirty();
     }
     
     /**
@@ -427,7 +427,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     }
     
     @Override
-    public void writeToNBT(NBTTagCompound nbt)
+    public void serializeNBT(NBTTagCompound nbt)
     {
         this.saveLavaNBT(nbt);
         this.worldBuffer.writeToNBT(nbt);
@@ -450,7 +450,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
     }
     
-    public void readFromNBT(NBTTagCompound nbt)
+    public void deserializeNBT(NBTTagCompound nbt)
     {
 
         basaltBlocks.clear();
@@ -576,7 +576,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         // After this could be post-tick
         this.worldBuffer.isMCWorldAccessAppropriate = false;
         
-        this.setSaveDirty();
+        this.setDirty();
 
         perfOnTick.endRun();
         perfOnTick.addCount(1);
@@ -655,7 +655,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         this.connections.removeDeletedItems();
         
-        this.setSaveDirty();
+        this.setDirty();
         
         if(Configurator.VOLCANO.enablePerformanceLogging)
         {

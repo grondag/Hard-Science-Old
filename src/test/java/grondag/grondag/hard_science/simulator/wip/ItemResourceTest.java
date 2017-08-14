@@ -12,8 +12,10 @@ public class ItemResourceTest
     @Test
     public void test()
     {
-        Item i1 = new Item();
-        Item i2 = new Item();
+        Item i1 = new Item().setRegistryName("one");
+        Item i2 = new Item().setRegistryName("two");
+        Item.REGISTRY.register(1, i1.getRegistryName(), i1);
+        Item.REGISTRY.register(2, i2.getRegistryName(), i2);
         
         ItemResource r1a = new ItemResource(i1, 0, null, null);
         ItemResource r1b = new ItemResource(i1, 0, null, null);
@@ -51,14 +53,13 @@ public class ItemResourceTest
         assert !r2a.equals(r2b);
         assert r2a.hashCode() != r2b.hashCode();
         
-        // won't work without MC runtime functional
-//        NBTTagCompound save = r2a.serializeNBT();
-//        
-//        // would not normally be used this way!
-//        r2b.deserializeNBT(save);
-//        
-//        assert r2a.equals(r2b);
-//        assert r2a.hashCode() == r2b.hashCode();
+        NBTTagCompound save = r2a.serializeNBT();
+        
+        // would not normally be used this way!
+        r2b.deserializeNBT(save);
+        
+        assert r2a.equals(r2b);
+        assert r2a.hashCode() == r2b.hashCode();
     }
 
 }

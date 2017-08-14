@@ -22,19 +22,19 @@ public class AssignedNumbersAuthorityTest
         
         NBTTagCompound tag = new NBTTagCompound();
         
-        subject.writeToNBT(tag);
+        subject.serializeNBT(tag);
         
         assert subject.generateNewNumber(AssignedNumber.DOMAIN) == 4;
         assert subject.generateNewNumber(AssignedNumber.NETWORK) == 3;
         assert subject.generateNewNumber(AssignedNumber.ENDPOINT) == 1;
         
-        subject.readFromNBT(tag);
+        subject.deserializeNBT(tag);
         
         assert subject.generateNewNumber(AssignedNumber.DOMAIN) == 4;
         assert subject.generateNewNumber(AssignedNumber.NETWORK) == 3;
         assert subject.generateNewNumber(AssignedNumber.ENDPOINT) == 1;
         
-        subject.readFromNBT(new NBTTagCompound()); 
+        subject.deserializeNBT(new NBTTagCompound()); 
         
         assert subject.generateNewNumber(AssignedNumber.DOMAIN) == 1;
         assert subject.generateNewNumber(AssignedNumber.NETWORK) == 1;

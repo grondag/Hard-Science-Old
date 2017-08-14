@@ -1,6 +1,6 @@
 package grondag.hard_science.simulator.wip;
 
-public abstract class AbstractResource<V extends StorageType> implements IResource<V>
+public abstract class AbstractResource<V extends StorageType<V>> implements IResource<V>
 {
     @Override
     public int hashCode()

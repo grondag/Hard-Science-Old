@@ -26,7 +26,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT
     }
     
     @Override
-    public synchronized void readFromNBT(NBTTagCompound tag)
+    public synchronized void deserializeNBT(NBTTagCompound tag)
     {
         int input[] = tag.getIntArray(NBT_TAG_NAME);
         if(input == null)
@@ -48,7 +48,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT
     }
     
     @Override
-    public synchronized void writeToNBT(NBTTagCompound tag)
+    public synchronized void serializeNBT(NBTTagCompound tag)
     {
         tag.setIntArray(NBT_TAG_NAME, Arrays.copyOf(lastID, lastID.length));
         this.isDirty = false;

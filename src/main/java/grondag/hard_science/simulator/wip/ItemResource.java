@@ -142,14 +142,12 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public void serializeNBT(NBTTagCompound nbt)
     {
-        NBTTagCompound nbt = new NBTTagCompound();
         nbt.setInteger("item", Item.getIdFromItem(this.item));
         nbt.setInteger("meta", this.meta);
         if(this.tag != null) nbt.setTag("nbt", this.tag);
         if(this.caps != null) nbt.setTag("caps", this.caps);
-        return nbt;
     }
 
     @Override

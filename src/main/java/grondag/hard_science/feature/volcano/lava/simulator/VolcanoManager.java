@@ -157,7 +157,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
      * Should only ever be called from server thread during server start up.
      */
     @Override
-    public void readFromNBT(NBTTagCompound nbt)
+    public void deserializeNBT(NBTTagCompound nbt)
     {
         this.activeNode = null;
         nodes = new HashMap<UniversalPos, VolcanoNode>();
@@ -170,7 +170,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
                 for (int i = 0; i < nbtSubNodes.tagCount(); ++i)
                 {
                     VolcanoNode node = new VolcanoNode(null);
-                    node.readFromNBT(nbtSubNodes.getCompoundTagAt(i));
+                    node.deserializeNBT(nbtSubNodes.getCompoundTagAt(i));
                     nodes.put(node.getUniversalPos(), node);
                     if(node.isActive) this.activeNode = node;
                 }   
@@ -179,7 +179,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt)
+    public void serializeNBT(NBTTagCompound nbt)
     {
         // Do first because any changes made after this point aren't guaranteed to be saved
         this.setSaveDirty(false);
@@ -191,7 +191,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
             for (VolcanoNode node : this.nodes.values())
             {
                 NBTTagCompound nodeTag = new NBTTagCompound();
-                node.writeToNBT(nodeTag);
+                node.serializeNBT(nodeTag);
                 nbtSubNodes.appendTag(nodeTag);
             }
         }
@@ -282,7 +282,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
             }
             this.keepAlive = Simulator.INSTANCE.getWorld().getTotalWorldTime();
             
-            if(isDirty) this.setSaveDirty();
+            if(isDirty) this.setDirty();
 //            HardScience.log.info("keepAlive=" + this.keepAlive);
         }
         
@@ -299,7 +299,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         }
         
         @Override
-        public void readFromNBT(NBTTagCompound nbt)
+        public void deserializeNBT(NBTTagCompound nbt)
         {
             this.weight = nbt.getInteger(TAG_WEIGHT);                  
             this.height = nbt.getInteger(TAG_HEIGHT);
@@ -314,7 +314,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt)
+        public void serializeNBT(NBTTagCompound nbt)
         {
             synchronized(this)
             {

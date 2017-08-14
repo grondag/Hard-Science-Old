@@ -2,15 +2,15 @@ package grondag.hard_science.player;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.INBTSerializable;
 
-public class ModPlayerCaps implements ICapabilityProvider, INBTSerializable<NBTTagCompound>
+public class ModPlayerCaps implements ICapabilityProvider, IReadWriteNBT
 {
     @CapabilityInject(ModPlayerCaps.class)
     public static Capability<ModPlayerCaps> CAP_INSTANCE = null;
@@ -35,11 +35,11 @@ public class ModPlayerCaps implements ICapabilityProvider, INBTSerializable<NBTT
     }
 
     @Override
-    public NBTTagCompound serializeNBT()
+    public void serializeNBT(NBTTagCompound tag)
     {
-        return new NBTTagCompound();
+        
     }
-
+    
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
@@ -81,4 +81,5 @@ public class ModPlayerCaps implements ICapabilityProvider, INBTSerializable<NBTT
         }
         
     }
+
 }

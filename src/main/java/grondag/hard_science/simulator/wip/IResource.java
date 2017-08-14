@@ -1,7 +1,6 @@
 package grondag.hard_science.simulator.wip;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.INBTSerializable;
+import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 
 /** 
  * A resource is something that can be produced and consumed.
@@ -9,10 +8,15 @@ import net.minecraftforge.common.util.INBTSerializable;
  * Resources with a storage type can also have a location.
  * Time is not a resource because it cannot be produced.
  */
-public interface IResource<V extends StorageType> extends INBTSerializable<NBTTagCompound>
+public interface IResource<V extends StorageType<V>> extends IReadWriteNBT
 {
     public V storageType();
     
     public int computeResourceHashCode();
     public boolean isResourceEqual(IResource<V> other);
+    
+    public default ResourceWithQuantity<V> withQuantity(long quantity)
+    {
+        return new ResourceWithQuantity<V>(this, quantity);
+    }
 }
