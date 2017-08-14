@@ -14,7 +14,6 @@ import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.PersistenceManager;
-import grondag.hard_science.simulator.wip.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.wip.DomainManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -243,7 +242,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         Log.info("Simulator read from NBT");
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
-        AssignedNumbersAuthority.INSTANCE.deserializeNBT(nbt);
+        DomainManager.INSTANCE.deserializeNBT(nbt);
     }
   
     @Override
@@ -252,7 +251,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         Log.info("saving simulation state");
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
-        AssignedNumbersAuthority.INSTANCE.serializeNBT(nbt);
+        DomainManager.INSTANCE.serializeNBT(nbt);
     }
     
     public World getWorld() { return this.world; }

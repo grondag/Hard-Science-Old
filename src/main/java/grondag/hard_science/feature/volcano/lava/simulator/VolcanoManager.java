@@ -12,7 +12,6 @@ import grondag.hard_science.feature.volcano.VolcanoTileEntity.VolcanoStage;
 import grondag.hard_science.library.world.UniversalPos;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.persistence.IDirtKeeper;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import net.minecraft.nbt.NBTTagCompound;

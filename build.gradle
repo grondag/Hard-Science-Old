@@ -27,9 +27,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "1.12-14.21.1.2406"
+    version = "1.12-14.21.1.2443"
     runDir = "run"
-    mappings = "snapshot_20170624"
+    mappings = "snapshot_20170810"
     useDepAts = true
 }
 
@@ -70,6 +70,11 @@ repositories {
         name = "CoFH Maven"
         url = "http://maven.covers1624.net"
     }
+    
+    maven {
+        name = "refinedstorage"
+        url = "https://dl.bintray.com/raoulvdberge/dev/"
+    }
 }
 
 artifacts {
@@ -95,12 +100,12 @@ dependencies {
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
-    deobfCompile "mezz.jei:jei_1.12:4.7.1.71"
+    deobfCompile "mezz.jei:jei_1.12:4.7.5.84"
     deobfCompile "mcp.mobius.waila:Hwyla:1.8.18-B32_1.12:api"
     deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.11-5"
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
     deobfCompile "MCMultiPart2:MCMultiPart:2.2.2"
-    
+    deobfCompile "refinedstorage:refinedstorage:1.5.16-1340"
     // deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.4"
      
     // for more info...
