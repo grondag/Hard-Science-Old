@@ -177,7 +177,7 @@ public class DomainManager implements IPersistenceNode
         @Override
         public void serializeNBT(NBTTagCompound tag)
         {
-            this.writeIdToNBT(tag);
+            this.serializeID(tag);
             tag.setBoolean("securityOn", this.isSecurityEnabled);
             tag.setString("name", this.name);
             
@@ -196,7 +196,7 @@ public class DomainManager implements IPersistenceNode
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
-            this.readIdFromNBT(tag);
+            this.deserializeID(tag);
             this.isSecurityEnabled = tag.getBoolean("securityOn");
             this.name = tag.getString("name");
             

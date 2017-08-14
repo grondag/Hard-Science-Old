@@ -19,7 +19,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
         /**
          * Use this in serializeNBT of implementing class.
          */
-        public default void writeIdToNBT(NBTTagCompound tag)
+        public default void serializeID(NBTTagCompound tag)
         {
             tag.setInteger("hs_id", this.getId());
         }
@@ -27,7 +27,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
         /**
          * Use this in deserializeNBT of implementing class.
          */
-        public default void readIdFromNBT(NBTTagCompound tag)
+        public default void deserializeID(NBTTagCompound tag)
         {
             this.setId(tag.getInteger("hs_id"));
         }

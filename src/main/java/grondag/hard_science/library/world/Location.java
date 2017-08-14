@@ -14,9 +14,21 @@ public class Location extends BlockPos
         @Nullable
         public Location getLocation();
         
+        public void setLocation(@Nullable Location loc);
+        
         public default boolean hasLocation()
         {
             return this.getLocation() != null;
+        }
+        
+        public default void serializeLocation(NBTTagCompound tag)
+        {
+            saveToNBT(this.getLocation(), tag);
+        }
+        
+        public default void deserializeLocation(NBTTagCompound tag)
+        {
+            this.setLocation(fromNBT(tag));
         }
     }
 
