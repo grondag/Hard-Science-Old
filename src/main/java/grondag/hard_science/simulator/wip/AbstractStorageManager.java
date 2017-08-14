@@ -65,6 +65,8 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
         }
         
         this.stores.add(store);
+        DomainManager.INSTANCE.STORAGE_INDEX.register(store);
+        
         this.capacity += store.getCapacity();
         
         for(ResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
@@ -88,6 +90,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
             this.notifyTaken(store, stack.resource, stack.quantity);
         }
         store.setOwner(null);
+        DomainManager.INSTANCE.STORAGE_INDEX.unregister(store);
         this.stores.remove(store);
         this.capacity -= store.getCapacity();
         this.setDirty();

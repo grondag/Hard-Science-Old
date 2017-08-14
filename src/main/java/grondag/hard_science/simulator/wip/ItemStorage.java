@@ -28,5 +28,4 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack>
     {
         return StorageType.ITEM;
     }
-
 }

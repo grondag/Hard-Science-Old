@@ -13,9 +13,8 @@ public class DomainManagerTest
     @Test
     public void test()
     {
-        DomainManager dm = new DomainManager();
         
-        Domain d1 = dm.createDomain();
+        Domain d1 = DomainManager.INSTANCE.createDomain();
         d1.setName("first");
         d1.setSecurityEnabled(true);
         
@@ -25,25 +24,25 @@ public class DomainManagerTest
         bob.grantPriveledge(Priveledge.REMOVE_NODE, false);
         
         DomainUser sally = d1.addUser("Sally");
-        dm.setSaveDirty(false);
+        DomainManager.INSTANCE.setSaveDirty(false);
         sally.grantPriveledge(Priveledge.ADMIN, true);
-        assert(dm.isSaveDirty());
+        assert(DomainManager.INSTANCE.isSaveDirty());
         
-        Domain d2 = dm.createDomain();
+        Domain d2 = DomainManager.INSTANCE.createDomain();
         d2.setName("second");
         d2.setSecurityEnabled(false);
         
         DomainUser pat = d2.addUser("pat");
         
-        NBTTagCompound tag = new NBTTagCompound();
+        assert(DomainManager.INSTANCE.isSaveDirty());
+        NBTTagCompound tag = DomainManager.INSTANCE.serializeNBT();
         
-        assert(dm.isSaveDirty());
-        dm.serializeNBT(tag);
+        DomainManager.INSTANCE.clear();
+        assert DomainManager.INSTANCE.getAllDomains().size() == 0;
         
-        dm = new DomainManager();
-        dm.deserializeNBT(tag);
+        DomainManager.INSTANCE.deserializeNBT(tag);
         
-        d1 = dm.getDomain(1);
+        d1 = DomainManager.INSTANCE.getDomain(1);
         assert(d1.getName() == "first");
         assert(d1.isSecurityEnabled());
         
@@ -59,7 +58,7 @@ public class DomainManagerTest
         assert(sally.hasPriveledge(Priveledge.REMOVE_NODE));
         assert(sally.hasPriveledge(Priveledge.ADMIN));
         
-        d2 = dm.getDomain(2);
+        d2 = DomainManager.INSTANCE.getDomain(2);
         assert(d2.getName() == "second");
         assert(!d2.isSecurityEnabled());
         
@@ -69,7 +68,7 @@ public class DomainManagerTest
         assert(pat.hasPriveledge(Priveledge.REMOVE_NODE));
         assert(pat.hasPriveledge(Priveledge.ADMIN));
         
-        
+        assert DomainManager.INSTANCE.createDomain().getId() == 3;
     }
 
 }

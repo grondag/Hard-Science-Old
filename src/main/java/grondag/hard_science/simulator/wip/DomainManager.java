@@ -7,22 +7,41 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.IReadWriteNBT;
+import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IIdentified;
+import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IdentifiedIndex;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
 public class DomainManager implements IPersistenceNode
 {
+    public static final DomainManager INSTANCE = new DomainManager();
+    public final AssignedNumbersAuthority ASSIGNED_NUMBERS_AUTHORITY = new AssignedNumbersAuthority();
+    
     private boolean isDirty;
     
-    private int nextID = 1;
+    private IdentifiedIndex<Domain> domains = this.ASSIGNED_NUMBERS_AUTHORITY.createIndex(AssignedNumber.DOMAIN);
     
-    private TIntObjectHashMap<Domain> domains = new TIntObjectHashMap<Domain>();
+    public final IdentifiedIndex<IStorage<?>> STORAGE_INDEX = this.ASSIGNED_NUMBERS_AUTHORITY.createIndex(AssignedNumber.STORAGE);
+    
+    /**
+     * alternatives to {@link #INSTANCE} should only be used for testing.
+     */
+    public DomainManager() 
+    {
+        this.ASSIGNED_NUMBERS_AUTHORITY.setDirtListener(this);
+    }
+   
+    public void clear()
+    {
+        this.domains.clear();
+        this.ASSIGNED_NUMBERS_AUTHORITY.clear();
+        this.STORAGE_INDEX.clear();
+    }
     
     public static interface IDomainMember
     {
@@ -51,28 +70,32 @@ public class DomainManager implements IPersistenceNode
     
     public synchronized Domain createDomain()
     {
-        Domain result = new Domain(this.nextID++);
+        Domain result = new Domain();
+        domains.register(result);
         result.name = "Domain " + result.id;
-        this.domains.put(result.id, result);
         this.isDirty = true;
         return result;
     }
     
-    public class Domain implements IReadWriteNBT, IDirtListenerProvider
+    /**
+     * Does NOT destroy any of the contained objects in the domain!
+     */
+    public synchronized void removeDomain(Domain domain)
+    {
+        domains.unregister(domain);
+        this.isDirty = true;
+    }
+    
+    public class Domain implements IReadWriteNBT, IDirtListenerProvider, IIdentified
     {
         private int id;
         private String name;
         private boolean isSecurityEnabled;
         
-        
-        
         private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
         
         // private constructor
-        private Domain (int id)
-        { 
-            this.id = id; 
-        }
+        private Domain () {}
         
         private Domain (NBTTagCompound tag)
         {
@@ -124,6 +147,11 @@ public class DomainManager implements IPersistenceNode
             return id;
         }
        
+        public void setId(int id)
+        {
+            this.id = id;
+        }
+        
         public String getName()
         {
             return name;
@@ -149,7 +177,7 @@ public class DomainManager implements IPersistenceNode
         @Override
         public void serializeNBT(NBTTagCompound tag)
         {
-            tag.setInteger("id", this.id);
+            this.writeIdToNBT(tag);
             tag.setBoolean("securityOn", this.isSecurityEnabled);
             tag.setString("name", this.name);
             
@@ -168,7 +196,7 @@ public class DomainManager implements IPersistenceNode
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
-            this.id = tag.getInteger("id");
+            this.readIdFromNBT(tag);
             this.isSecurityEnabled = tag.getBoolean("securityOn");
             this.name = tag.getString("name");
             
@@ -240,6 +268,7 @@ public class DomainManager implements IPersistenceNode
         {
             return DomainManager.this;
         }
+ 
     }
 
     @Override
@@ -257,7 +286,7 @@ public class DomainManager implements IPersistenceNode
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.nextID = 1;
+        this.ASSIGNED_NUMBERS_AUTHORITY.deserializeNBT(tag);
         this.domains.clear();
         
         if(tag != null)
@@ -277,7 +306,7 @@ public class DomainManager implements IPersistenceNode
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setInteger("nextID", this.nextID);
+        this.ASSIGNED_NUMBERS_AUTHORITY.serializeNBT(tag);
         
         NBTTagList nbtDomains = new NBTTagList();
         

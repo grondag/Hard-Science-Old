@@ -151,6 +151,7 @@ DomainManager dm = new DomainManager();
         assert ism.availableCapacity() == oldAvailable;
         assert ism.getQuantityStored(res1) == store1.getQuantityStored(res1) + store2.getQuantityStored(res1) + store3.getQuantityStored(res1);
         
+        // this will cause collisions in assigned number index - will not happen in game because won't clone storage managers this way
         ItemStorageManager ism2 = new ItemStorageManager(ism.serializeNBT());
         assert ism2.availableCapacity() == ism.availableCapacity();
         assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2);

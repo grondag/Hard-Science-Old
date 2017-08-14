@@ -5,13 +5,12 @@ import java.util.function.Predicate;
 
 import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.simulator.persistence.IReadWriteNBT;
+import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IIdentified;
 import grondag.hard_science.simulator.wip.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
 
-public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>
+public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>, IIdentified
 {
-    int getID();
-    
     long getQuantityStored(IResource<T> resource);
     
     void setOwner(AbstractStorageManager<T> owner);

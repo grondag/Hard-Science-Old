@@ -14,7 +14,7 @@ import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.PersistenceManager;
-import grondag.hard_science.simulator.scratch.AssignedNumbersAuthority;
+import grondag.hard_science.simulator.wip.AssignedNumbersAuthority;
 import grondag.hard_science.simulator.wip.DomainManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -55,8 +55,6 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     private VolcanoManager volcanoManager;
     
     private LavaSimulator lavaSimulator;
-    
-    private DomainManager domainManager;
     
 	public static ExecutorService executor;
 	private static ExecutorService controlThread;
@@ -112,12 +110,11 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
 	     
-	        
-	        this.domainManager = new DomainManager();
+	        DomainManager.INSTANCE.clear();
 	        
             if(PersistenceManager.loadNode(world, this))
             {
-                PersistenceManager.loadNode(world, domainManager);
+                PersistenceManager.loadNode(world, DomainManager.INSTANCE);
                 
                 if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -144,7 +141,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     	        this.lastSimTick = 0;
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
-    	        PersistenceManager.registerNode(world, domainManager);
+    	        PersistenceManager.registerNode(world, DomainManager.INSTANCE);
     	        
     	        if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -263,7 +260,6 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     
     public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
     public LavaSimulator getLavaSimulator() { return this.lavaSimulator; }
-    public DomainManager getDomainManager() { return this.domainManager; }
     
     // Frame execution logic
     Runnable offTickFrame = new Runnable()

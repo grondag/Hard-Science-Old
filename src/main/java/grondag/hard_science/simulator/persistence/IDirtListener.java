@@ -31,7 +31,7 @@ public interface IDirtListener
         
     }
     
-    public interface IDirtNotifier
+    public interface IDirtNotifier extends IDirtListener
     {
         public abstract void setDirtListener(IDirtKeeper listener);
     }

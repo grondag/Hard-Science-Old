@@ -116,7 +116,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
-        nbt.setInteger("id", this.id);
+        this.writeIdToNBT(nbt);
         nbt.setLong("cap", this.capacity);
         Location.saveToNBT(this.location, nbt);
         
@@ -140,7 +140,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
-        this.setID(nbt.getInteger("id"));
+        this.readIdFromNBT(nbt);
         this.setCapacity(nbt.getLong("cap"));
         this.setLocation(Location.fromNBT(nbt));
         
@@ -193,8 +193,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         return this.location;
     }
-    
-    protected void setID(int id)
+  
+    @Override
+    public void setId(int id)
     {
         this.id = id;
         // no bookkeeping change, but force world save
@@ -202,7 +203,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
     
     @Override
-    public int getID()
+    public int getId()
     {
         return this.id;
     }
