@@ -126,7 +126,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
                     && world.getBlockState(blockpos).getMaterial() == Material.AIR 
                     && ((SuperBlock)this.block).hasAppearanceGui())
             {
-                player.openGui(HardScience.INSTANCE, ModGuiHandler.GUI_SUPERMODEL_ITEM, player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
+                player.openGui(HardScience.INSTANCE, ModGuiHandler.ModGui.SUPERMODEL_ITEM.ordinal(), player.world, (int) player.posX, (int) player.posY, (int) player.posZ);
                 return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
             }
         }
