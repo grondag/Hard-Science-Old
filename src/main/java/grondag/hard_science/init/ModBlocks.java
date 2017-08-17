@@ -34,6 +34,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 @ObjectHolder(HardScience.MODID)
 public class ModBlocks
 {
+    public static final Block volcano_block = null;
     public static final Block basalt_cobble = null;
     public static final Block basalt_cool_dynamic_height = null;
     public static final Block basalt_cool_dynamic_filler = null;

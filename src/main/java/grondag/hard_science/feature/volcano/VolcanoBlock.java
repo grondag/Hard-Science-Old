@@ -19,7 +19,7 @@ public class VolcanoBlock extends Block implements ITileEntityProvider {
 		this.setResistance(2000.0F);
 		this.setSoundType(SoundType.STONE);
 		this.setBlockUnbreakable();
-        this.setRegistryName("block_volcano");
+        this.setRegistryName("volcano_block");
         this.setUnlocalizedName(this.getRegistryName().toString());
 	}
 

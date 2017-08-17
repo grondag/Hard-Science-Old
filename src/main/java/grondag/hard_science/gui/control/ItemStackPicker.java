@@ -5,8 +5,8 @@ import java.util.List;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
 import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.ItemResource;
-import grondag.hard_science.simulator.wip.ResourceWithQuantity;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -19,11 +19,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ItemStackPicker extends TabBar<ResourceWithQuantity<StorageTypeStack>>
+public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<StorageTypeStack>>
 {
     protected final FontRenderer fontRenderer;
     
-    public ItemStackPicker(List<ResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer)
+    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer)
     {
         super(items);
         this.fontRenderer = fontRenderer;
@@ -63,7 +63,7 @@ public class ItemStackPicker extends TabBar<ResourceWithQuantity<StorageTypeStac
 
 
     @Override
-    protected void drawItem(ResourceWithQuantity<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
+    protected void drawItem(AbstractResourceWithQuantity<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
     {
         int x = (int)left;
         int y = (int)top;

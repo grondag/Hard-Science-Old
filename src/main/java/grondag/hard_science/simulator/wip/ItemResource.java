@@ -1,14 +1,19 @@
 package grondag.hard_science.simulator.wip;
 
 
+import java.io.IOException;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Objects;
 
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
+import jline.internal.Log;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * Identifier for resources.
@@ -30,7 +35,6 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
      */
     public ItemResource(Item item, int meta, NBTTagCompound tag, NBTTagCompound caps)
     {
-        super();
         this.item = item;
         this.meta = meta;
         this.tag = tag;
@@ -41,10 +45,9 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     /**
      * Use this for resources saved via {@link #serializeNBT()}
      */
-    public ItemResource(NBTTagCompound nbt)
+    public ItemResource(@Nullable NBTTagCompound nbt)
     {
-        super();
-        this.deserializeNBT(nbt);
+        super(nbt);
     }
    
     /**
@@ -157,7 +160,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound nbt)
+    public void serializeNBT(@Nonnull NBTTagCompound nbt)
     {
         nbt.setInteger("item", Item.getIdFromItem(this.item));
         nbt.setInteger("meta", this.meta);
@@ -166,7 +169,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt)
+    public void deserializeNBT(@Nonnull NBTTagCompound nbt)
     {
         this.item = Item.getItemById(nbt.getInteger("item"));
         this.meta = nbt.getInteger("meta");
@@ -177,9 +180,52 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     }
 
     @Override
+    public void fromBytes(PacketBuffer buf)
+    {
+        this.item = Item.getItemById(buf.readInt());
+        this.meta = buf.readInt();
+        try
+        {
+            this.tag = buf.readCompoundTag();
+        }
+        catch (IOException e)
+        {
+            Log.warn("Error reading storage packet");
+            e.printStackTrace();
+            this.tag = null;
+        }
+        try
+        {
+            this.caps = buf.readCompoundTag();
+        }
+        catch (IOException e)
+        {
+            Log.warn("Error reading storage packet");
+            e.printStackTrace();
+            this.caps = null;
+        }
+        this.hash = -1;
+        this.stack = null;
+    }
+
+    @Override
+    public void toBytes(PacketBuffer buf)
+    {
+        buf.writeInt(Item.getIdFromItem(this.item));
+        buf.writeInt(this.meta);
+        buf.writeCompoundTag(this.tag);
+        buf.writeCompoundTag(this.caps);
+    }
+    
+    @Override
     public String displayName()
     {
         return this.sampleItemStack().getDisplayName();
     }
 
+    @Override
+    public ItemResourceWithQuantity withQuantity(long quantity)
+    {
+        return new ItemResourceWithQuantity(this, quantity);
+    }
 }

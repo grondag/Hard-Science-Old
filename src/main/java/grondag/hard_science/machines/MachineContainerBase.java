@@ -1,8 +1,12 @@
 package grondag.hard_science.machines;
 
 
+import grondag.hard_science.CommonEventHandler;
+import grondag.hard_science.simulator.wip.OpenContainerStorageListener;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -96,4 +100,16 @@ public class MachineContainerBase extends Container
     public boolean canInteractWith(EntityPlayer playerIn) {
         return te.canInteractWith(playerIn);
     }
+
+    @Override
+    public void addListener(IContainerListener listener)
+    {
+        super.addListener(listener);
+        if(listener instanceof EntityPlayerMP)
+        {
+            CommonEventHandler.TEST_STORE.addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
+        }
+    }
+    
+    
 }

@@ -115,6 +115,9 @@ public class SimpleUnorderedArrayList<T>
         this.items = Arrays.copyOf(this.items, newCapacity);
     }
     
+    /**
+     * Returns a copy of the underlying array for populated elements.
+     */
     public Object[] toArray()
     {
         return Arrays.copyOf(items, this.size);

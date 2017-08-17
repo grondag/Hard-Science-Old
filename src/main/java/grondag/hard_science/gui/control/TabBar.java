@@ -46,6 +46,8 @@ public abstract class TabBar<T> extends GuiControl
     private boolean focusOnSelection = false;
     
     private List<T> items;
+    /** used to detect changes to list */
+    private int lastListSize = -1;
     
     protected static enum MouseLocation
     {
@@ -82,6 +84,8 @@ public abstract class TabBar<T> extends GuiControl
     protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
     {
         if(items == null) return;
+        
+        this.handleListSizeUpdateIfNeeded();
         
         updateMouseLocation(mouseX, mouseY);
         
@@ -237,22 +241,33 @@ public abstract class TabBar<T> extends GuiControl
     {
         if(this.items != null)
         {
-            
             double horizontalSpaceRemaining = this.width - this.tabWidth;
             this.actualItemSize = horizontalSpaceRemaining / this.columnsPerRow - this.itemSpacing;
             this.actualItemPixels = (int)actualItemSize;
             this.rowsPerTab = (int) ((this.height + this.itemSpacing) / (actualItemSize + this.itemSpacing + this.captionHeight));
-            this.itemsPerTab = columnsPerRow * rowsPerTab;
-            this.tabCount = this.itemsPerTab > 0 ? (this.items.size() + this.itemsPerTab - 1) / this.itemsPerTab : 0;
             this.scrollHeight = this.height - (this.tabWidth + this.itemSpacing) * 2;
-            this.tabSize = tabCount <= 0 ? 0 : (this.scrollHeight - (this.tabMargin * (this.tabCount - 1))) / tabCount;
-            if(tabSize < this.tabMargin * 2) tabSize = 0;
+            this.itemsPerTab = columnsPerRow * rowsPerTab;
+            this.handleListSizeUpdateIfNeeded();
         }
         
         if(this.focusOnSelection && this.selectedItemIndex != NO_SELECTION)
         {
             if(this.itemsPerTab > 0) this.selectedTabIndex = this.selectedItemIndex / this.itemsPerTab;
             this.focusOnSelection = false;
+        }
+    }
+    
+    /**
+     * Does NOT check for null list.  Called expected to do so.
+     */
+    protected void handleListSizeUpdateIfNeeded()
+    {
+        if(items.size() != this.lastListSize)
+        {
+            this.tabCount = this.itemsPerTab > 0 ? (this.items.size() + this.itemsPerTab - 1) / this.itemsPerTab : 0;
+            this.tabSize = tabCount <= 0 ? 0 : (this.scrollHeight - (this.tabMargin * (this.tabCount - 1))) / tabCount;
+            if(tabSize < this.tabMargin * 2) tabSize = 0;
+            this.lastListSize = items.size();
         }
     }
 

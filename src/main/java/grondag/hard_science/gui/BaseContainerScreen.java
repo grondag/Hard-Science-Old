@@ -5,31 +5,15 @@ import java.io.IOException;
 
 import org.lwjgl.input.Mouse;
 
-import com.raoulvdberge.refinedstorage.RSItems;
-import com.raoulvdberge.refinedstorage.api.network.grid.GridType;
-import com.raoulvdberge.refinedstorage.api.network.grid.handler.IFluidGridHandler;
-import com.raoulvdberge.refinedstorage.api.network.grid.handler.IItemGridHandler;
-import com.raoulvdberge.refinedstorage.api.storage.IStorageDiskProvider;
-import com.raoulvdberge.refinedstorage.container.slot.SlotDisabled;
-import com.raoulvdberge.refinedstorage.container.slot.SlotFilter;
-import com.raoulvdberge.refinedstorage.container.slot.SlotFilterLegacy;
-import com.raoulvdberge.refinedstorage.container.slot.SlotGridCrafting;
-import com.raoulvdberge.refinedstorage.tile.grid.portable.IPortableGrid;
-import com.raoulvdberge.refinedstorage.tile.grid.portable.PortableGrid;
-
-import grondag.hard_science.ClientProxy;
 import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
 import grondag.hard_science.machines.ContainerLayout;
 import grondag.hard_science.machines.MachineContainerBase;
 import grondag.hard_science.machines.MachineContainerTEBase;
+import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -83,7 +67,7 @@ public class BaseContainerScreen extends GuiContainer
             this.guiLeft = ((this.width * 2 / 3) - this.xSize) / 2;
         }
         
-        this.stackPicker = new ItemStackPicker(ClientProxy.TEST_PROXY.LIST, this.fontRenderer);
+        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer);
         this.stackPicker.setItemsPerRow(9);
 
         this.stackPanel = new Panel(true);

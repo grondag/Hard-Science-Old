@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.wip.DomainManager.Domain;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
@@ -23,11 +24,13 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     protected Location location;
     protected int id;
     protected AbstractStorageManager<T> owner = null;
+    protected SimpleUnorderedArrayList<IStorageListener<T>> listeners = new SimpleUnorderedArrayList<IStorageListener<T>>();
     
-    public AbstractStorage()
+    public AbstractStorage(@Nullable NBTTagCompound tag)
     {
         this.map = new Object2LongOpenHashMap<IResource<T>>();
         this.map.defaultReturnValue(0);
+        if(tag != null) this.deserializeID(tag);
     }
     
     @Override
@@ -49,9 +52,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
     
     @Override
-    public List<ResourceWithQuantity<T>> find(Predicate<IResource<T>> predicate)
+    public List<AbstractResourceWithQuantity<T>> find(Predicate<IResource<T>> predicate)
     {
-        ImmutableList.Builder<ResourceWithQuantity<T>> builder = ImmutableList.builder();
+        ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
         for(Entry<IResource<T>> entry : map.object2LongEntrySet())
         {
@@ -88,6 +91,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             }
             
             if(this.owner != null) this.owner.notifyTaken(this, resource, taken);
+            this.updateListeners(resource.withQuantity(current));
         }
         
         return taken;
@@ -104,10 +108,11 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         
         if(!simulate)
         {
-            long current = this.map.getLong(resource);
-            this.map.put(resource, current + added);
+            long quantity = this.map.getLong(resource) + added;
+            this.map.put(resource, quantity);
             this.used += added;
             if(this.owner != null) this.owner.notifyAdded(this, resource, added);
+            this.updateListeners(resource.withQuantity(quantity));
         }
         
         return added;
@@ -133,9 +138,6 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             nbt.setTag("contents", nbtContents);
         }
     }
-
-    @Nullable
-    protected abstract IResource<T> makeResource(NBTTagCompound nbt);
     
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
@@ -147,6 +149,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         this.map.clear();
         this.used = 0;
         
+        T sType = this.storageType();
 
         NBTTagList nbtContents = nbt.getTagList("contents", 10);
         if( nbtContents != null && !nbtContents.hasNoTags())
@@ -156,11 +159,14 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 NBTTagCompound subTag = nbtContents.getCompoundTagAt(i);
                 if(subTag != null)
                 {
-                    IResource<T> resource = makeResource(subTag);
+                    IResource<T> resource = sType.makeResource(subTag);
                     this.add(resource, subTag.getLong("qty"), false);
                 }
             }   
         }
+        
+        /** highly unlikely we have any at this point, but... */
+        this.refreshAllListeners();
     }
 
     @Override
@@ -169,10 +175,11 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         return capacity;
     }
 
-    protected void setCapacity(long capacity)
+    public AbstractStorage<T> setCapacity(long capacity)
     {
-        if(this.owner != null) this.owner.natifyCapacityChanged(capacity - this.capacity);
+        if(this.owner != null) this.owner.notifyCapacityChanged(capacity - this.capacity);
         this.capacity = capacity;
+        return this;
     }
     
     @Override
@@ -208,4 +215,12 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         return this.id;
     }
+
+    @Override
+    public SimpleUnorderedArrayList<IStorageListener<T>> listeners()
+    {
+        return this.listeners;
+    }
+
+ 
 }

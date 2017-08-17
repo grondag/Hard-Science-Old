@@ -8,16 +8,11 @@ import grondag.hard_science.simulator.persistence.IReadWriteNBT;
  * Resources with a storage type can also have a location.
  * Time is not a resource because it cannot be produced.
  */
-public interface IResource<V extends StorageType<V>> extends IReadWriteNBT
+public interface IResource<V extends StorageType<V>> extends IReadWriteNBT, IMessagePlus
 {
     public V storageType();
-    
     public int computeResourceHashCode();
     public boolean isResourceEqual(IResource<V> other);
     public String displayName();
-    
-    public default ResourceWithQuantity<V> withQuantity(long quantity)
-    {
-        return new ResourceWithQuantity<V>(this, quantity);
-    }
+    public AbstractResourceWithQuantity<V> withQuantity(long quantity);       
 }

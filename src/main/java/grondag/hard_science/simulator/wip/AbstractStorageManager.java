@@ -21,7 +21,8 @@ import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class AbstractStorageManager<T extends StorageType<T>> implements IDirtNotifier, IDirtListener, IDomainMember, ISizedContainer, IReadWriteNBT, ITypedStorage<T>
+public abstract class AbstractStorageManager<T extends StorageType<T>> 
+    implements IDirtNotifier, IDirtListener, IDomainMember, ISizedContainer, IReadWriteNBT, ITypedStorage<T>
 {
     protected final HashMap<IResource<T>, StorageSummary> map = new HashMap<IResource<T>, StorageSummary>();
     protected final HashSet<IStorage<T>> stores = new HashSet<IStorage<T>>();
@@ -69,9 +70,9 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
         
         this.capacity += store.getCapacity();
         
-        for(ResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
+        for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
-            this.notifyAdded(store, stack.resource, stack.quantity);
+            this.notifyAdded(store, stack.resource(), stack.quantity);
         }
         store.setOwner(this);
         this.setDirty();
@@ -85,9 +86,9 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
             return;
         }
         
-        for(ResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
+        for(AbstractResourceWithQuantity<T> stack : store.find(this.storageType.MATCH_ANY))
         {
-            this.notifyTaken(store, stack.resource, stack.quantity);
+            this.notifyTaken(store, stack.resource(), stack.quantity);
         }
         store.setOwner(null);
         DomainManager.INSTANCE.STORAGE_INDEX.unregister(store);
@@ -102,9 +103,9 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
         return stored == null ? 0 : stored.quantity;
     }
     
-    public List<ResourceWithQuantity<T>> findQuantity(Predicate<IResource<T>> predicate)
+    public List<AbstractResourceWithQuantity<T>> findQuantity(Predicate<IResource<T>> predicate)
     {
-        ImmutableList.Builder<ResourceWithQuantity<T>> builder = ImmutableList.builder();
+        ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
         for(StorageSummary entry : map.values())
         {
@@ -315,7 +316,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
         this.setDirty();
     }
 
-    public synchronized void natifyCapacityChanged(long delta)
+    public synchronized void notifyCapacityChanged(long delta)
     {
         if(delta == 0) return;
         
@@ -327,5 +328,4 @@ public abstract class AbstractStorageManager<T extends StorageType<T>> implement
         }
         this.setDirty();
     }
-
 }

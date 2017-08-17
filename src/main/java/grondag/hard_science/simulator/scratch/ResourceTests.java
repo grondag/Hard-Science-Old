@@ -243,7 +243,7 @@
 //                Has to be Procurement, right? Because FabTask didn't know it wasn't available until
 //                it asked the procurement manager for the material.
 //                
-//            StorageManager - what is stored and where?
+//            StorageManagerImpl - what is stored and where?
 //                issues transport requests to put things in storage - where should it be stored?
 //                
 //            ProcurementManager - who gets to use what is stored?
