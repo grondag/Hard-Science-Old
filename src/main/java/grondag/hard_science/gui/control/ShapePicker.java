@@ -40,7 +40,7 @@ public class ShapePicker extends TabBar<ModelShape>
     }
 
     @Override
-    protected void drawItem(ModelShape item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
+    protected void drawItem(ModelShape item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
         GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, ITEMS[item.ordinal()], left, top, (int)this.actualItemSize());
     }

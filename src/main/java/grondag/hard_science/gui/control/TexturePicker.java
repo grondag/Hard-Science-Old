@@ -27,7 +27,7 @@ public class TexturePicker extends TabBar<TexturePallette>
     }
 
     @Override
-    protected void drawItem(TexturePallette item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
+    protected void drawItem(TexturePallette item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
 
         int size = this.actualItemPixels();

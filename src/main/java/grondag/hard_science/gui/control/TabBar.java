@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -58,8 +59,8 @@ public abstract class TabBar<T> extends GuiControl
         ITEM
     }
     
-    private MouseLocation currentMouseLocation;
-    private int currentMouseIndex;
+    protected MouseLocation currentMouseLocation;
+    protected int currentMouseIndex;
     
     public TabBar(List<T> items)
     {
@@ -91,14 +92,14 @@ public abstract class TabBar<T> extends GuiControl
         
         int column = 0;
         
-        int highlightIndex = this.currentMouseLocation == MouseLocation.ITEM ? this.currentMouseIndex : -1;
+        int itemHighlightIndex = this.currentMouseLocation == MouseLocation.ITEM ? this.currentMouseIndex : -1;
         
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
         
-        this.drawHighlightIfNeeded(highlightIndex, true);
+        this.drawHighlightIfNeeded(itemHighlightIndex, true);
         
-        if(this.selectedItemIndex != highlightIndex) this.drawHighlightIfNeeded(this.selectedItemIndex, false);
+        if(this.selectedItemIndex != itemHighlightIndex) this.drawHighlightIfNeeded(this.selectedItemIndex, false);
         
         // skip drawing tabs if there is only one
         if(this.tabCount > 1)
@@ -118,12 +119,12 @@ public abstract class TabBar<T> extends GuiControl
             }
             else
             {
-                highlightIndex = this.currentMouseLocation == MouseLocation.TAB ? this.currentMouseIndex : -1;
+                int tabHighlightIndex = this.currentMouseLocation == MouseLocation.TAB ? this.currentMouseIndex : -1;
                 
                 for(int i = 0; i < this.tabCount; i++)
                 {
                     GuiUtil.drawRect(this.right - this.tabWidth, tabStartY, this.right, tabStartY + this.tabSize,
-                            i == highlightIndex ? BUTTON_COLOR_FOCUS : i == this.selectedTabIndex ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR_INACTIVE);
+                            i == tabHighlightIndex ? BUTTON_COLOR_FOCUS : i == this.selectedTabIndex ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR_INACTIVE);
                     tabStartY += (this.tabSize + this.tabMargin);
                 }
             }
@@ -147,7 +148,7 @@ public abstract class TabBar<T> extends GuiControl
         for(int i = start; i < end; i++)
         {
             
-            this.drawItem(this.get(i), mc, itemRender, itemX, itemY, partialTicks);
+            this.drawItem(this.get(i), mc, itemRender, itemX, itemY, partialTicks, i == itemHighlightIndex);
             if(++column == this.columnsPerRow)
             {
                 column = 0;
@@ -195,11 +196,11 @@ public abstract class TabBar<T> extends GuiControl
                 y + this.actualItemSize + itemSelectionMargin, 1, 
                 isHighlight ? BUTTON_COLOR_FOCUS : BUTTON_COLOR_ACTIVE);
     }
-    
+     
     /** set (non-matrix) GL state needed for proper rending of this tab's items */
     protected abstract void setupItemRendering();
     
-    protected abstract void drawItem(T item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks);
+    protected abstract void drawItem(T item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted);
     
     private void updateMouseLocation(int mouseX, int mouseY)
     {

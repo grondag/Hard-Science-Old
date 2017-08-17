@@ -8,12 +8,14 @@ import org.lwjgl.input.Mouse;
 import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
+import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.machines.ContainerLayout;
 import grondag.hard_science.machines.MachineContainerBase;
 import grondag.hard_science.machines.MachineContainerTEBase;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -25,6 +27,8 @@ public class BaseContainerScreen extends GuiContainer
     
     protected ItemStackPicker stackPicker;
     protected Panel stackPanel;
+    
+    protected final Wrapper<ItemStack> hoverStack = new Wrapper<ItemStack>();
     
     public static final ContainerLayout LAYOUT;
     
@@ -67,7 +71,7 @@ public class BaseContainerScreen extends GuiContainer
             this.guiLeft = ((this.width * 2 / 3) - this.xSize) / 2;
         }
         
-        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer);
+        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer, this.hoverStack);
         this.stackPicker.setItemsPerRow(9);
 
         this.stackPanel = new Panel(true);
@@ -108,9 +112,14 @@ public class BaseContainerScreen extends GuiContainer
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) 
     {
+        this.hoverStack.setValue(null);
         super.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
         super.renderHoveredToolTip(mouseX, mouseY);
+        if(this.hoverStack.getValue() != null)
+        {
+            this.renderToolTip(this.hoverStack.getValue(), mouseX, mouseY);
+        }
     }
 
     @Override

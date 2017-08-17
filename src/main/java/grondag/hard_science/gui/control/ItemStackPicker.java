@@ -5,6 +5,8 @@ import java.util.List;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
 import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.gui.control.TabBar.MouseLocation;
+import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.ItemResource;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
@@ -23,10 +25,13 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
 {
     protected final FontRenderer fontRenderer;
     
-    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer)
+    protected final Wrapper<ItemStack> hoverStack;
+    
+    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer, Wrapper<ItemStack> hoverStack)
     {
         super(items);
         this.fontRenderer = fontRenderer;
+        this.hoverStack = hoverStack;
         this.setItemsPerRow(9);
         this.setItemSpacing(2);
         this.setItemSelectionMargin(1);
@@ -40,6 +45,7 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
     {
         super.drawContent(mc, itemRender, mouseX, mouseY, partialTicks);
     }
+   
 
     private String getQuantityLabel(long qty)
     {
@@ -63,7 +69,7 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
 
 
     @Override
-    protected void drawItem(AbstractResourceWithQuantity<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks)
+    protected void drawItem(AbstractResourceWithQuantity<StorageTypeStack> item, Minecraft mc, RenderItem itemRender, double left, double top, float partialTicks, boolean isHighlighted)
     {
         int x = (int)left;
         int y = (int)top;
@@ -75,6 +81,11 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
         
         // itemRender doesn't clean this up, messes up highlight boxes
         this.drawQuantity(item.getQuantity(), x, y);
+        
+        if(isHighlighted)
+        {
+            this.hoverStack.setValue(stack);
+        }
     }
     
     protected void drawQuantity(long qty, int left, int top)
