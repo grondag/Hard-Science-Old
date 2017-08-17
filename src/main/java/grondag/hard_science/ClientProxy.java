@@ -3,6 +3,8 @@ package grondag.hard_science;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.machines.RemoteStorageProxy;
+import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -18,6 +20,8 @@ public class ClientProxy extends CommonProxy
 {
     
 	private static boolean isVirtualBlockRenderingEnabled = false;
+	
+	public static RemoteStorageProxy<StorageTypeStack> TEST_PROXY = new RemoteStorageProxy<StorageTypeStack>();
 
     @Override
 	public void preInit(FMLPreInitializationEvent event) 

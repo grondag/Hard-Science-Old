@@ -7,6 +7,9 @@ import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.texture.TextureRotationType;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.fml.relauncher.Side;
@@ -40,5 +43,14 @@ public class TexturePicker extends TabBar<TexturePallette>
                 
         TextureAtlasSprite tex = mc.getTextureMapBlocks().getAtlasSprite(item.getSampleTextureName());
         GuiUtil.drawTexturedRectWithColor(left, top, this.zLevel, tex, size, size, this.borderColor, item.textureScale, rotation, renderAlpha);
+    }
+
+    @Override
+    protected void setupItemRendering()
+    {
+        GlStateManager.disableDepth();
+        GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);        
     }
 }

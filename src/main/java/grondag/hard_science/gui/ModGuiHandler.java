@@ -1,6 +1,5 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.machines.ContainerLayout;
 import grondag.hard_science.machines.MachineContainerBase;
 import grondag.hard_science.machines.MachineContainerTEBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +28,7 @@ public class ModGuiHandler implements IGuiHandler
             TileEntity te = world.getTileEntity(pos);
             if (te instanceof MachineContainerTEBase) 
             {
-                return new MachineContainerBase(player.inventory, (MachineContainerTEBase) te, ContainerLayout.DEFAULT);
+                return new MachineContainerBase(player.inventory, (MachineContainerTEBase) te, BaseContainerScreen.LAYOUT);
             }
         }
         return null;
@@ -52,7 +51,7 @@ public class ModGuiHandler implements IGuiHandler
                     if (te instanceof MachineContainerTEBase) 
                     {
                         MachineContainerTEBase containerTileEntity = (MachineContainerTEBase) te;
-                        return new ContainerGUI(containerTileEntity, new MachineContainerBase(player.inventory, containerTileEntity, ContainerLayout.DEFAULT));
+                        return new BaseContainerScreen(containerTileEntity, new MachineContainerBase(player.inventory, containerTileEntity, BaseContainerScreen.LAYOUT));
                     }
                     return null;
                 }

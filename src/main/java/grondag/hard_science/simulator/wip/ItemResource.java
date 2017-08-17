@@ -22,6 +22,9 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     private int meta;
     private int hash = -1;
     
+    // lazy instantiate and cache
+    private ItemStack stack;
+    
     /** 
      * This version is mainly for unit testing.
      */
@@ -32,6 +35,7 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.meta = meta;
         this.tag = tag;
         this.caps = caps;
+        this.stack = null;
     }
     
     /**
@@ -43,6 +47,9 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.deserializeNBT(nbt);
     }
    
+    /**
+     * Does NOT keep a reference to the given stack.
+     */
     public ItemResource (ItemStack stack)
     {
         this.item = stack.getItem();
@@ -58,15 +65,23 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
             NBTTagCompound lookForCaps = stack.serializeNBT();
             this.caps = lookForCaps.hasKey("ForgeCaps") ? lookForCaps.getCompoundTag("ForgeCaps") : null;
         }
+        
+        this.stack = null;
     }
     
     /**
      * Returns a new stack containing one of this item.
+     * For performance sake, may be the same instance returned by earlier calls.
      */
-    public ItemStack makeItemStack()
+    public ItemStack sampleItemStack()
     {
-        ItemStack stack = new ItemStack(this.item, 1, this.meta, this.caps);
-        if(this.tag != null) stack.setTagCompound(this.tag);
+        ItemStack stack = this.stack;
+        if(stack == null)
+        {
+            stack = new ItemStack(this.item, 1, this.meta, this.caps);
+            if(this.tag != null) stack.setTagCompound(this.tag);
+            this.stack = stack;
+        }
         return stack;
     }
     
@@ -158,6 +173,13 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
         this.tag = nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null;
         this.caps = nbt.hasKey("caps") ? nbt.getCompoundTag("caps") : null;
         this.hash = -1;
+        this.stack = null;
+    }
+
+    @Override
+    public String displayName()
+    {
+        return this.sampleItemStack().getDisplayName();
     }
 
 }

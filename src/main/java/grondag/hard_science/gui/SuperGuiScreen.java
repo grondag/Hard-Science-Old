@@ -518,11 +518,9 @@ public class SuperGuiScreen extends GuiScreen
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-
+        super.drawDefaultBackground();
         drawGradientRect(xStart, yStart, xStart + xSize, yStart + ySize, -1072689136, -804253680);
-
         mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
-
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

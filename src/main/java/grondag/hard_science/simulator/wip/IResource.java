@@ -14,6 +14,7 @@ public interface IResource<V extends StorageType<V>> extends IReadWriteNBT
     
     public int computeResourceHashCode();
     public boolean isResourceEqual(IResource<V> other);
+    public String displayName();
     
     public default ResourceWithQuantity<V> withQuantity(long quantity)
     {

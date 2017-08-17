@@ -1,5 +1,7 @@
 package grondag.hard_science;
 
+import java.util.Random;
+
 import grondag.hard_science.Configurator.Render.PreviewMode;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModKeys;
@@ -9,6 +11,7 @@ import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.PacketReplaceHeldItem;
 import grondag.hard_science.network.PacketUpdatePlacementKey;
 import grondag.hard_science.player.ModPlayerCaps;
+import grondag.hard_science.simulator.wip.ItemResource;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
@@ -17,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
@@ -129,6 +133,33 @@ public class ClientEventHandler
             ModPlayerCaps.setPlacementModifierOn(Minecraft.getMinecraft().player, newDown);
             ModMessages.INSTANCE.sendToServer(new PacketUpdatePlacementKey(newDown));
         }
+        
+        //FIXME: remove
+        Item item = Item.getItemById(rand.nextInt(512));
+        if(item != null) addItemToMap(item, rand.nextInt(1000));
+        if(tickCount++ > 20)
+        {
+            ClientProxy.TEST_PROXY.refreshList();
+            tickCount = 0;
+        }
+
+    }
+    
+    //FIXME: remove
+    private static int tickCount;
+    
+    private static Random rand = new Random();
+
+    
+    //FIXME: remove
+    private static void addItemToMap(Item i, long q)
+    {
+        ItemResource r = new ItemResource(i.getDefaultInstance());
+        if(ClientProxy.TEST_PROXY.MAP.containsKey(r))
+        {
+            q += ClientProxy.TEST_PROXY.MAP.get(r).getQuantity();
+        }
+        ClientProxy.TEST_PROXY.MAP.put(r, r.withQuantity(q));
     }
 
     @SubscribeEvent
