@@ -282,7 +282,7 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        mainPanel.mouseClick(mc, mouseX, mouseY);
+        mainPanel.mouseClick(mc, mouseX, mouseY, clickedMouseButton);
         //        colorPicker.mouseClick(this.mc, mouseX, mouseY);
         //        this.textureTabBar.mouseClick(this.mc, mouseX, mouseY);
         updateItemPreviewState();
@@ -292,7 +292,7 @@ public class SuperGuiScreen extends GuiScreen
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        mainPanel.mouseDrag(mc, mouseX, mouseY);
+        mainPanel.mouseDrag(mc, mouseX, mouseY, clickedMouseButton);
         //        colorPicker.mouseDrag(this.mc, mouseX, mouseY);
         //        this.textureTabBar.mouseDrag(this.mc, mouseX, mouseY);
         updateItemPreviewState();

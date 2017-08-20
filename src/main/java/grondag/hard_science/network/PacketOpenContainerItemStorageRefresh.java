@@ -24,6 +24,7 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
 {
     
     private List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items;
+    private long capacity;
 
     public PacketOpenContainerItemStorageRefresh() 
     {
@@ -31,15 +32,17 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
     
     public List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items() { return this.items; };
     
-    public PacketOpenContainerItemStorageRefresh(List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items) 
+    public PacketOpenContainerItemStorageRefresh(List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items, long capacity) 
     {
         this.items = items;
+        this.capacity = capacity;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) 
     {
         PacketBuffer pBuff = new PacketBuffer(buf);
+        this.capacity = pBuff.readLong();
         int count = pBuff.readInt();
         if(count == 0)
         {
@@ -61,6 +64,7 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
     public void toBytes(ByteBuf buf) 
     {
         PacketBuffer pBuff = new PacketBuffer(buf);
+        pBuff.writeLong(this.capacity);
         int count = items.size();
         pBuff.writeInt(count);
         if(count > 0)
@@ -83,7 +87,7 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
 
         private void handle(PacketOpenContainerItemStorageRefresh message, MessageContext ctx) 
         {
-            OpenContainerStorageProxy.ITEM_PROXY.handleStorageRefresh(null, message.items);
+            OpenContainerStorageProxy.ITEM_PROXY.handleStorageRefresh(null, message.items, message.capacity);
         }
     }
 }

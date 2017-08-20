@@ -133,7 +133,7 @@ public class ColorPicker extends GuiControl
     }
     
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         double distance = Math.sqrt((Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)));
 
@@ -171,9 +171,9 @@ public class ColorPicker extends GuiControl
     }
     
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        this.handleMouseClick(mc, mouseX, mouseY);
+        this.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
     }
     
     @Override

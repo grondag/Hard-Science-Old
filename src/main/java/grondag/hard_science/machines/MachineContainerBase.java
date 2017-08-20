@@ -1,8 +1,10 @@
 package grondag.hard_science.machines;
 
 
-import grondag.hard_science.CommonEventHandler;
+import grondag.hard_science.simulator.wip.IStorage;
+import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.wip.OpenContainerStorageListener;
+import grondag.hard_science.simulator.wip.StorageType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -17,6 +19,16 @@ public class MachineContainerBase extends Container
     
     public final ContainerLayout layout;
 
+    public static IStorage<StorageType.StorageTypeStack> getOpenContainerStackStorage(EntityPlayerMP player)
+    {
+        Container container = player.openContainer;
+
+        if (container == null ||  !(container instanceof MachineContainerBase)) return null;
+        
+        MachineContainerTEBase openTE = ((MachineContainerBase) container).tileEntity();
+        
+        return openTE == null ? null : openTE.storage();
+    }
 
     public MachineContainerBase(IInventory playerInventory, MachineContainerTEBase te, ContainerLayout layout) 
     {
@@ -70,30 +82,43 @@ public class MachineContainerBase extends Container
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemstack = ItemStack.EMPTY;
+    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
+    {
         Slot slot = this.inventorySlots.get(index);
 
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
-
-            if (index < MachineContainerTEBase.SIZE) {
-                if (!this.mergeItemStack(itemstack1, MachineContainerTEBase.SIZE, this.inventorySlots.size(), true)) {
-                    return ItemStack.EMPTY;
+        if (slot != null && slot.getHasStack())
+        {
+            ItemStack slotStack = slot.getStack();
+        
+            if(playerIn instanceof EntityPlayerMP)
+            {
+                IStorage<StorageType.StorageTypeStack> storage = this.te.storage();
+                if(storage == null) return ItemStack.EMPTY;
+                
+                int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false);
+                if(consumed > 0)
+                {
+                    slotStack.shrink(consumed);
+                    if (slotStack.isEmpty())
+                    {
+                        slot.putStack(ItemStack.EMPTY);
+                    } else
+                    {
+                        slot.onSlotChanged();
+                    }
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, MachineContainerTEBase.SIZE, false)) {
-                return ItemStack.EMPTY;
+                
+                // always update client, in case was unable to transfer all of stack for any reason
+                ((EntityPlayerMP)playerIn).sendSlotContents(this, slot.slotNumber, slot.getStack());
             }
-
-            if (itemstack1.isEmpty()) {
+            else
+            {
+                // on client, always assume entire stack was transfered
+                // server will send corrective update if that was not the case
                 slot.putStack(ItemStack.EMPTY);
-            } else {
-                slot.onSlotChanged();
             }
         }
-
-        return itemstack;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -105,11 +130,14 @@ public class MachineContainerBase extends Container
     public void addListener(IContainerListener listener)
     {
         super.addListener(listener);
-        if(listener instanceof EntityPlayerMP)
+        if(listener instanceof EntityPlayerMP && this.te != null && this.te.storage() != null)
         {
-            CommonEventHandler.TEST_STORE.addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
+            this.te.storage().addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
         }
     }
     
-    
+    public MachineContainerTEBase tileEntity()
+    {
+        return this.te;
+    }
 }

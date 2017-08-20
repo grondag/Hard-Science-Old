@@ -14,7 +14,7 @@ public interface IStorageListener<T extends StorageType<T>>
      * Sends entire contents of the storage.
      * Will be called after listener subscribes, or if there are mass updates afterwards.
      */
-    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceWithQuantity<T>> update);
+    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceWithQuantity<T>> update, long capacity);
 
     /**
      * Sends updates since last refresh. Quantity replaces whatever was before.

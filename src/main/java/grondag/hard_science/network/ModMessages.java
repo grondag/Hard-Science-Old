@@ -15,9 +15,11 @@ public class ModMessages
     {
 
         // Server side
-        INSTANCE.registerMessage(PacketReplaceHeldItem.Handler.class, PacketReplaceHeldItem.class, packetID++, Side.SERVER);
-        INSTANCE.registerMessage(PacketUpdatePlacementKey.Handler.class, PacketUpdatePlacementKey.class, packetID++, Side.SERVER);
-        INSTANCE.registerMessage(PacketDestroyVirtualBlock.Handler.class, PacketDestroyVirtualBlock.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketReplaceHeldItem.class, PacketReplaceHeldItem.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketUpdatePlacementKey.class, PacketUpdatePlacementKey.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketDestroyVirtualBlock.class, PacketDestroyVirtualBlock.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, packetID++, Side.SERVER);
+        
         
         // Client side        
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.Handler.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);

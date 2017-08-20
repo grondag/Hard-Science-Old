@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
@@ -19,30 +20,58 @@ import net.minecraft.nbt.NBTTagList;
 
 public class DomainManager implements IPersistenceNode
 {
-    public static final DomainManager INSTANCE = new DomainManager();
     public final AssignedNumbersAuthority ASSIGNED_NUMBERS_AUTHORITY = new AssignedNumbersAuthority();
     
     private boolean isDirty;
     
+    private boolean isLoaded = false;
+    
     private IdentifiedIndex<Domain> domains = this.ASSIGNED_NUMBERS_AUTHORITY.createIndex(AssignedNumber.DOMAIN);
     
-    public final IdentifiedIndex<IStorage<?>> STORAGE_INDEX = this.ASSIGNED_NUMBERS_AUTHORITY.createIndex(AssignedNumber.STORAGE);
+    private final IdentifiedIndex<IStorage<?>> storageIndex = this.ASSIGNED_NUMBERS_AUTHORITY.createIndex(AssignedNumber.STORAGE);
+
+    private Domain defaultDomain;
     
     /**
-     * alternatives to {@link #INSTANCE} should only be used for testing.
+     * If isNew=true then won't wait for a deserialize to become loaded.
      */
-    public DomainManager() 
+    public DomainManager(boolean isNew) 
     {
         this.ASSIGNED_NUMBERS_AUTHORITY.setDirtListener(this);
+        this.isLoaded = isNew;
     }
    
+    /**
+     * Domain for unmanaged objects.  
+     */
+    public Domain defaultDomain()
+    {
+        this.checkLoaded();
+        if(this.defaultDomain == null)
+        {
+            defaultDomain = domains.get(1);
+            if(defaultDomain == null)
+            {
+                this.defaultDomain = new Domain();
+                this.defaultDomain.setSecurityEnabled(false);
+                this.defaultDomain.setId(1);
+                this.defaultDomain.setName("Unmanaged");;
+                this.domains.register(defaultDomain);
+            }
+        }
+        return this.defaultDomain;
+    }
+    
     public void clear()
     {
         this.domains.clear();
         this.ASSIGNED_NUMBERS_AUTHORITY.clear();
-        this.STORAGE_INDEX.clear();
+        this.storageIndex().clear();
+        this.defaultDomain = null;
+        
     }
     
+   
     public static interface IDomainMember
     {
         public Domain getDomain();
@@ -60,16 +89,19 @@ public class DomainManager implements IPersistenceNode
     
     public List<Domain> getAllDomains()
     {
+        this.checkLoaded();
         return ImmutableList.copyOf(domains.valueCollection());
     }
 
     public Domain getDomain(int id)
     {
+        this.checkLoaded();
         return this.domains.get(id);
     }
     
     public synchronized Domain createDomain()
     {
+        this.checkLoaded();
         Domain result = new Domain();
         domains.register(result);
         result.name = "Domain " + result.id;
@@ -82,6 +114,7 @@ public class DomainManager implements IPersistenceNode
      */
     public synchronized void removeDomain(Domain domain)
     {
+        this.checkLoaded();
         domains.unregister(domain);
         this.isDirty = true;
     }
@@ -92,13 +125,19 @@ public class DomainManager implements IPersistenceNode
         private String name;
         private boolean isSecurityEnabled;
         
+        public final ItemStorageManager ITEM_STORAGE = new ItemStorageManager();
+        
         private HashMap<String, DomainUser> users = new HashMap<String, DomainUser>();
         
         // private constructor
-        private Domain () {}
+        private Domain ()
+        {
+            ITEM_STORAGE.setDomain(this);
+        }
         
         private Domain (NBTTagCompound tag)
         {
+            this();
             this.deserializeNBT(tag);
         }
         
@@ -191,6 +230,8 @@ public class DomainManager implements IPersistenceNode
                 }
             }
             tag.setTag("users", nbtUsers);
+            
+            tag.setTag("itemStorage", this.ITEM_STORAGE.serializeNBT());
         }
 
         @Override
@@ -209,7 +250,15 @@ public class DomainManager implements IPersistenceNode
                     this.users.put(user.userName, user);
                 }   
             }
+            
+            this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag("itemStorage"));
         }
+        
+        public DomainManager domainManager()
+        {
+            return DomainManager.this;
+        }
+        
         public class DomainUser implements IReadWriteNBT
         {
             public String userName;
@@ -254,6 +303,7 @@ public class DomainManager implements IPersistenceNode
             {
                 nbt.setString("name", this.userName);
                 nbt.setInteger("flags", this.priveledgeFlags);
+                ITEM_STORAGE.serializeNBT(nbt);
             }
 
             @Override
@@ -261,6 +311,7 @@ public class DomainManager implements IPersistenceNode
             {
                 this.userName = nbt.getString("name");
                 this.priveledgeFlags = nbt.getInteger("flags");
+                ITEM_STORAGE.deserializeNBT(nbt);
             }
         }
         @Override
@@ -289,6 +340,9 @@ public class DomainManager implements IPersistenceNode
         this.ASSIGNED_NUMBERS_AUTHORITY.deserializeNBT(tag);
         this.domains.clear();
         
+        // need to do this before loading domains, otherwise they will cause complaints
+        this.isLoaded = true;
+        
         if(tag != null)
         {
             NBTTagList nbtDomains = tag.getTagList("domains", 10);
@@ -301,6 +355,7 @@ public class DomainManager implements IPersistenceNode
                 }   
             }
         }
+        
     }
 
     @Override
@@ -323,6 +378,21 @@ public class DomainManager implements IPersistenceNode
     @Override
     public String tagName()
     {
-        return "HS_Domains";
+        return "HSDomains";
+    }
+
+    public IdentifiedIndex<IStorage<?>> storageIndex()
+    {
+        this.checkLoaded();
+        return storageIndex;
+    }
+    
+    private boolean checkLoaded()
+    {
+        if(!this.isLoaded)
+        {
+            Log.warn("Domain manager accessed before it was loaded.  This is a bug and probably means simulation state has been lost.");
+        }
+        return this.isLoaded;
     }
 }

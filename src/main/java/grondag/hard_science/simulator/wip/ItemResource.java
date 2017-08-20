@@ -53,23 +53,26 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     /**
      * Does NOT keep a reference to the given stack.
      */
-    public ItemResource (ItemStack stack)
+    public static ItemResource fromStack(ItemStack stack)
     {
-        this.item = stack.getItem();
-        this.meta = stack.getMetadata();
-        this.tag = stack.getTagCompound();
+        if(stack == null || stack.isEmpty()) return (ItemResource) StorageType.ITEM.emptyResource;
+        
+        Item item = stack.getItem();
+        int meta = stack.getMetadata();
+        NBTTagCompound tag = stack.getTagCompound();
 
+        NBTTagCompound caps;
         if(stack.areCapsCompatible(ItemStack.EMPTY))
         {
-            this.caps = null;
+            caps = null;
         }
         {
             // See what you make us do, Lex?
             NBTTagCompound lookForCaps = stack.serializeNBT();
-            this.caps = lookForCaps.hasKey("ForgeCaps") ? lookForCaps.getCompoundTag("ForgeCaps") : null;
+            caps = lookForCaps.hasKey("ForgeCaps") ? lookForCaps.getCompoundTag("ForgeCaps") : null;
         }
         
-        this.stack = null;
+        return new ItemResource(item, meta, tag, caps);
     }
     
     /**
@@ -227,5 +230,11 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     public ItemResourceWithQuantity withQuantity(long quantity)
     {
         return new ItemResourceWithQuantity(this, quantity);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return this.displayName();
     }
 }

@@ -6,18 +6,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumHand;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-
 import java.io.IOException;
 
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
  * FIXME: security
  */
-public class PacketReplaceHeldItem implements IMessage
+public class PacketReplaceHeldItem extends AbstractPlayerToServerPacket<PacketReplaceHeldItem>
 {
     
     private ItemStack stack;
@@ -51,20 +46,10 @@ public class PacketReplaceHeldItem implements IMessage
         PacketBuffer pBuff = new PacketBuffer(buf);
         pBuff.writeItemStack(this.stack);
     }
-
-    public static class Handler implements IMessageHandler<PacketReplaceHeldItem, IMessage> 
+   
+    @Override
+    protected void handle(PacketReplaceHeldItem message, EntityPlayerMP player)
     {
-        @Override
-        public IMessage onMessage(PacketReplaceHeldItem message, MessageContext ctx) 
-        {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(PacketReplaceHeldItem message, MessageContext ctx) 
-        {
-            EntityPlayerMP playerEntity = ctx.getServerHandler().player;
-            playerEntity.setHeldItem(EnumHand.MAIN_HAND, message.stack);
-        }
+        player.setHeldItem(EnumHand.MAIN_HAND, message.stack);
     }
 }

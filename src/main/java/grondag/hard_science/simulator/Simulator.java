@@ -55,6 +55,8 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     
     private LavaSimulator lavaSimulator;
     
+    private DomainManager domainManager;
+    
 	public static ExecutorService executor;
 	private static ExecutorService controlThread;
 	
@@ -109,11 +111,17 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
 	        // we're going to assume for now that all the dimensions we care about are using the overworld clock
 	        this.world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
 	     
-	        DomainManager.INSTANCE.clear();
 	        
             if(PersistenceManager.loadNode(world, this))
             {
-                PersistenceManager.loadNode(world, DomainManager.INSTANCE);
+                this.domainManager = new DomainManager(false);
+                if(!PersistenceManager.loadNode(world, this.domainManager))
+                {
+                    Log.warn("Domain manager data not found - recreating.  Some world state may be lost.");
+                    this.domainManager = new DomainManager(true);
+                    PersistenceManager.registerNode(world, this.volcanoManager);                   
+                }
+             
                 
                 if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -121,26 +129,28 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                     this.lavaSimulator = new LavaSimulator(this.world);
                     if(!PersistenceManager.loadNode(world, this.volcanoManager))
                     {
-                        Log.info("Volcano manager data not found - recreating.  Some world state may be lost.");
+                        Log.warn("Volcano manager data not found - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.volcanoManager);
                     }
                     
                     if(!PersistenceManager.loadNode(world, this.lavaSimulator))
                     {
-                        Log.info("Lava simulator data not found - recreating.  Some world state may be lost.");
+                        Log.warn("Lava simulator data not found - recreating.  Some world state may be lost.");
                         PersistenceManager.registerNode(world, this.lavaSimulator);
                     }
                 }
             }
             else
     	    {
-                Log.info("creating sim");
+                Log.info("Creating new simulation.");
                 // Not found, assume new game and new simulation
     	        this.worldTickOffset = -world.getWorldTime();
     	        this.lastSimTick = 0;
     	        this.setSaveDirty(true);
     	        PersistenceManager.registerNode(world, this);
-    	        PersistenceManager.registerNode(world, DomainManager.INSTANCE);
+    	        
+    	        this.domainManager = new DomainManager(true);
+    	        PersistenceManager.registerNode(world, this.domainManager);
     	        
     	        if(Configurator.VOLCANO.enableVolcano)
                 {
@@ -242,7 +252,6 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         Log.info("Simulator read from NBT");
         this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
         this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
-        DomainManager.INSTANCE.deserializeNBT(nbt);
     }
   
     @Override
@@ -251,14 +260,14 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
         Log.info("saving simulation state");
         nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
         nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
-        DomainManager.INSTANCE.serializeNBT(nbt);
     }
     
     public World getWorld() { return this.world; }
     public int getTick() { return this.lastSimTick; }
     
-    public VolcanoManager getVolcanoManager() { return this.volcanoManager; }
-    public LavaSimulator getLavaSimulator() { return this.lavaSimulator; }
+    public VolcanoManager volcanoManager() { return this.volcanoManager; }
+    public LavaSimulator lavaSimulator() { return this.lavaSimulator; }
+    public DomainManager domainManager() { return this.domainManager; }
     
     // Frame execution logic
     Runnable offTickFrame = new Runnable()

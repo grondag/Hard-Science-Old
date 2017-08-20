@@ -31,6 +31,12 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
      */
     long add(IResource<T> resource, long howMany, boolean simulate);
 
+    /** Alternative syntax for {@link #add(IResource, long, boolean)} */
+    default long add(AbstractResourceWithQuantity<T> resourceWithQuantity, boolean simulate)
+    {
+        return this.add(resourceWithQuantity.resource(), resourceWithQuantity.getQuantity(), simulate);
+    }
+    
     /**
      * Takes up to limit from this stack and returns how many were actually taken.
      * If simulate==true, will return forecasted result without making changes.
@@ -97,7 +103,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
         synchronized(this)
         {
             this.listeners().addIfNotPresent(listener);
-            listener.handleStorageRefresh(this, this.find(this.storageType().MATCH_ANY));
+            listener.handleStorageRefresh(this, this.find(this.storageType().MATCH_ANY), this.getCapacity());
         }
     }
 
@@ -131,15 +137,12 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
                 }
                 else
                 {
-                    l.handleStorageRefresh(this, refresh);
+                    l.handleStorageRefresh(this, refresh, this.getCapacity());
                 }
             }
         }
     }
     
-    /**
-     * Assumes caller already has the quantity because it knew we need an update...
-     */
     public default void updateListeners(AbstractResourceWithQuantity<T> update)
     {
         SimpleUnorderedArrayList<IStorageListener<T>> listeners = this.listeners();
@@ -147,6 +150,7 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
         if(listeners.isEmpty()) return;
         for(Object listener : listeners.toArray())
         {
+            @SuppressWarnings("unchecked")
             IStorageListener<T> l = (IStorageListener<T>)listener;
             if(l.isClosed())
             {

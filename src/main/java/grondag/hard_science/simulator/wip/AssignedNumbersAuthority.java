@@ -85,10 +85,12 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     public void clear()
     {
         lastID = new int[AssignedNumber.values().length];
+        Arrays.fill(lastID, 999);
     }
     
     /** 
-     * First ID returned for each type is 1 to distinguish between missing/unset ID of 0.
+     * First ID returned for each type is 1000 to allow room for system IDs.
+     * System ID's should start at 1 to distinguish from missing/unset ID.
      */
     public synchronized int newNumber(AssignedNumber numberType)
     {
@@ -102,7 +104,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
         int input[] = tag.getIntArray(NBT_TAG_NAME);
         if(input == null)
         {
-            lastID = new int[AssignedNumber.values().length];
+            this.clear();
         }
         {
             if(input.length == lastID.length)
@@ -111,8 +113,10 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
             }
             else
             {
-                Log.warn("Simulation assigned numbers save data corrupt.  World may be borked.");
-                lastID = new int[AssignedNumber.values().length];
+                Log.warn("Simulation assigned numbers save data appears to be corrupt.  World may be borked.");
+                this.clear();
+                int commonLength = Math.min(lastID.length, input.length);
+                System.arraycopy(input, 0, lastID, 0, commonLength);
             }
         }
     }

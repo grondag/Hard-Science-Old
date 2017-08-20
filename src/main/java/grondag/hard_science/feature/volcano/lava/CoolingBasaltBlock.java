@@ -129,7 +129,7 @@ public class CoolingBasaltBlock extends TerrainDynamicBlock
     public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
     {
         // Gather orphaned blocks
-        Simulator.INSTANCE.getLavaSimulator().registerCoolingBlock(worldIn, pos);
+        Simulator.INSTANCE.lavaSimulator().registerCoolingBlock(worldIn, pos);
     }
     
     

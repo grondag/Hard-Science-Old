@@ -1,6 +1,5 @@
 package grondag.hard_science;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.gson.Gson;
@@ -9,12 +8,9 @@ import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.wip.ItemResource;
-import grondag.hard_science.simulator.wip.ItemStorage;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
@@ -93,7 +89,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+            LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -104,7 +100,7 @@ public class CommonEventHandler
         // Lava blocks have their own handling
         if(!event.getWorld().isRemote && !(event.getState().getBlock() instanceof LavaBlock))
         {
-            LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+            LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
             if(sim != null) sim.notifyBlockChange(event.getWorld(), event.getPos());
         }
     }
@@ -114,7 +110,7 @@ public class CommonEventHandler
     {
         if(event.getWorld().isRemote) return;
         
-        LavaSimulator sim = Simulator.INSTANCE.getLavaSimulator();
+        LavaSimulator sim = Simulator.INSTANCE.lavaSimulator();
         if(sim != null)
         {
             for(BlockSnapshot snap : event.getReplacedBlockSnapshots())
@@ -131,19 +127,7 @@ public class CommonEventHandler
     public static void onServerTick(ServerTickEvent event) 
     {
         Simulator.INSTANCE.onServerTick(event);
-        
-        
-        //FIXME: remove
-        Item item = Item.getItemById(rand.nextInt(512));
-        if(item != null)
-        {
-            TEST_STORE.add(new ItemResource(item.getDefaultInstance()), rand.nextInt(100), false);
-        }
     }
-    
-    //FIXME: remove
-    public static ItemStorage TEST_STORE = (ItemStorage) new ItemStorage(null).setCapacity(1000000000);
-    private static Random rand = new Random();
     
     private static String lastTroubleMaker = null;
     private static BlockPos lastAttemptLocation = null;

@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.wip.DomainManager.Domain;
@@ -19,7 +20,7 @@ import net.minecraft.nbt.NBTTagList;
 public abstract class AbstractStorage<T extends StorageType<T>> implements IStorage<T>
 {
     protected final Object2LongOpenHashMap<IResource<T>> map;
-    protected long capacity = 1000;
+    protected long capacity = 2000;
     protected long used = 0;
     protected Location location;
     protected int id;
@@ -30,7 +31,10 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.map = new Object2LongOpenHashMap<IResource<T>>();
         this.map.defaultReturnValue(0);
-        if(tag != null) this.deserializeID(tag);
+        if(tag != null)
+        {
+            this.deserializeNBT(tag);
+        }
     }
     
     @Override
@@ -137,6 +141,8 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             }
             nbt.setTag("contents", nbtContents);
         }
+        //FIXME: remove
+        Log.info("saved storage, id = " + this.id + " used =" + this.used);
     }
     
     @Override
@@ -167,6 +173,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         
         /** highly unlikely we have any at this point, but... */
         this.refreshAllListeners();
+        
+        //FIXME: remove
+        Log.info("loaded storage, id = " + this.id + " used =" + this.used);
     }
 
     @Override

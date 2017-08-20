@@ -180,7 +180,7 @@ public class Slider extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(this.size == 0) return;
         
@@ -209,7 +209,7 @@ public class Slider extends GuiControl
     }
     
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(this.size == 0) return;
         

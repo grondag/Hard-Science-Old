@@ -667,22 +667,20 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
-        List<ItemStack> ret = new java.util.ArrayList<ItemStack>();
-
         if(this.dropItem == null)
         {
             ItemStack stack = getStackFromBlock(state, world, pos);
             if(stack != null)
             {
-                ret.add(stack);
+                return Collections.singletonList(stack);
             }
         }
         else
         {
             int count = quantityDropped(world, pos, state);
-            ret.add(new ItemStack(this.dropItem, count, 0));
+            return Collections.singletonList(new ItemStack(this.dropItem, count, 0));
         }
-        return ret;
+        return Collections.emptyList();
     }
 
      /**

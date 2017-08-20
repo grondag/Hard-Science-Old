@@ -83,16 +83,16 @@ public class GuiStackedPlates extends GuiShape
     }
     
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        super.handleMouseClick(mc, mouseX, mouseY);
+        super.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
         this.handleMouse();
     }
 
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        super.handleMouseDrag(mc, mouseX, mouseY);
+        super.handleMouseDrag(mc, mouseX, mouseY, clickedMouseButton);
         this.handleMouse();
     }
 

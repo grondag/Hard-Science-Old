@@ -1,5 +1,7 @@
 package grondag.hard_science.simulator.wip;
 
+import java.util.Comparator;
+
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.simulator.persistence.IReadWriteNBT;
@@ -98,4 +100,84 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     {
         return new StorageWithResourceAndQuantity<V>(storage, this.resource, this.quantity);
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%,d x ", this.getQuantity()) + this.resource.toString();
+    }
+    
+    /////////////////////////////////////////
+    // SORTING UTILITIES
+    /////////////////////////////////////////
+    
+    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_NAME_ASC = new Comparator<AbstractResourceWithQuantity<?>>()
+    {
+        @Override
+        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
+        {
+            if(o1 == null)
+            {
+                if(o2 == null) 
+                {
+                    return 0;
+                }
+                return 1;
+            }
+            else if(o2 == null) 
+            {
+                return -1;
+            }
+            
+            String s1 = o1.resource().displayName();
+            String s2 = o2.resource().displayName();
+            return s1.compareTo(s2);
+        }
+    };
+    
+    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_NAME_DESC = new Comparator<AbstractResourceWithQuantity<?>>()
+    {
+        @Override
+        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
+        {
+            return SORT_BY_NAME_ASC.compare(o2, o1);
+        }
+    };
+    
+    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_QTY_ASC = new Comparator<AbstractResourceWithQuantity<?>>()
+    {
+        @Override
+        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
+        {   
+            if(o1 == null)
+            {
+                if(o2 == null) 
+                {
+                    return 0;
+                }
+                return  1;
+            }
+            else if(o2 == null) 
+            {
+                return -1;
+            }
+            int result = Long.compare(o1.getQuantity(), o2.getQuantity());
+            return result == 0 ? SORT_BY_NAME_ASC.compare(o1, o2) : result;
+        }
+    };
+    
+    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_QTY_DESC = new Comparator<AbstractResourceWithQuantity<?>>()
+    {
+        @Override
+        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
+        {
+            return SORT_BY_QTY_ASC.compare(o2, o1);
+        }
+    };
+    
+    //FIXME: localize
+    public static final int SORT_COUNT = 4;
+    public static final String[] SORT_LABELS = {"A-Z", "Z-A", "1-2-3", "3-2-1" };
+    @SuppressWarnings("rawtypes")
+    public static final Comparator[] SORT = { SORT_BY_NAME_ASC, SORT_BY_NAME_DESC, SORT_BY_QTY_ASC, SORT_BY_QTY_DESC };
 }

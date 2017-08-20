@@ -9,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -92,7 +91,7 @@ public abstract class TabBar<T> extends GuiControl
         
         int column = 0;
         
-        int itemHighlightIndex = this.currentMouseLocation == MouseLocation.ITEM ? this.currentMouseIndex : -1;
+        int itemHighlightIndex = this.currentMouseLocation == MouseLocation.ITEM ? this.currentMouseIndex : NO_SELECTION;
         
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
@@ -119,7 +118,7 @@ public abstract class TabBar<T> extends GuiControl
             }
             else
             {
-                int tabHighlightIndex = this.currentMouseLocation == MouseLocation.TAB ? this.currentMouseIndex : -1;
+                int tabHighlightIndex = this.currentMouseLocation == MouseLocation.TAB ? this.currentMouseIndex : NO_SELECTION;
                 
                 for(int i = 0; i < this.tabCount; i++)
                 {
@@ -229,11 +228,12 @@ public abstract class TabBar<T> extends GuiControl
         }
         else
         {
+            this.currentMouseLocation = MouseLocation.ITEM;
+            
             int newIndex = this.getFirstDisplayedIndex() + (int)((mouseY - this.top - this.itemSpacing / 2) / (this.actualItemSize + this.itemSpacing + this.captionHeight)) * this.columnsPerRow
                     + Math.min((int)((mouseX - this.left - this.itemSpacing / 2) / (this.actualItemSize + this.itemSpacing)), this.columnsPerRow - 1);
             
-            this.currentMouseIndex = (newIndex < this.items.size()) ? newIndex : -1;
-            this.currentMouseLocation = currentMouseIndex >= 0 ? MouseLocation.ITEM : MouseLocation.NONE;
+            this.currentMouseIndex = (newIndex < this.items.size()) ? newIndex : NO_SELECTION;
         }
     }
     
@@ -273,7 +273,7 @@ public abstract class TabBar<T> extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(items == null) return;
         
@@ -306,7 +306,7 @@ public abstract class TabBar<T> extends GuiControl
     }
     
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(items == null) return;
         
@@ -431,7 +431,7 @@ public abstract class TabBar<T> extends GuiControl
         else
         {
             int i = this.items.indexOf(selectedItem);
-            if(i >= -1) this.setSelectedIndex(i);
+            if(i >= NO_SELECTION) this.setSelectedIndex(i);
         }
     }
     
@@ -444,7 +444,7 @@ public abstract class TabBar<T> extends GuiControl
     /** index of first item on selected tab */
     public int getFirstDisplayedIndex()
     {
-        if(items == null) return -1;
+        if(items == null) return NO_SELECTION;
         this.refreshContentCoordinatesIfNeeded();
         return this.selectedTabIndex * this.itemsPerTab;
     }
@@ -452,7 +452,7 @@ public abstract class TabBar<T> extends GuiControl
     /** index of first item on selected tab, EXCLUSIVE of the last item */
     public int getLastDisplayedIndex()
     {
-        if(items == null) return -1;
+        if(items == null) return NO_SELECTION;
         this.refreshContentCoordinatesIfNeeded();
         return Useful.min((this.selectedTabIndex + 1) * this.itemsPerTab, this.items.size());
     }
@@ -466,7 +466,7 @@ public abstract class TabBar<T> extends GuiControl
         if(items == null || this.selectedItemIndex == NO_SELECTION) return NO_SELECTION;
         this.refreshContentCoordinatesIfNeeded();
         int result = this.selectedItemIndex - this.getFirstDisplayedIndex();
-        return (result < 0 || result >= this.getItemsPerTab()) ? -1 : result;
+        return (result < 0 || result >= this.getItemsPerTab()) ? NO_SELECTION : result;
     }
     
     /** moves the tab selection to show the currently selected item */

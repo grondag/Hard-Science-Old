@@ -34,13 +34,13 @@ public class ItemPreview extends GuiControl
     }
 
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // nothing special
     }
     
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // nothing special
     }

@@ -53,13 +53,13 @@ public class Toggle extends GuiControl
     }
     
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(this.isMouseOver(mouseX, mouseY)) this.isOn = !this.isOn;
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // ignore
         

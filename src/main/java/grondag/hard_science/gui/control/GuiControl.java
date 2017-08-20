@@ -4,7 +4,6 @@ import grondag.hard_science.gui.Layout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -78,29 +77,29 @@ public abstract class GuiControl extends Gui
     /** called after any coordinate-related input changes */
     protected abstract void handleCoordinateUpdate();
     
-    protected abstract void handleMouseClick(Minecraft mc, int mouseX, int mouseY);
+    protected abstract void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton);
     
-    protected abstract void handleMouseDrag(Minecraft mc, int mouseX, int mouseY);
+    protected abstract void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton);
     
     protected abstract void handleMouseScroll(int mouseX, int mouseY, int scrollDelta);
     
-    public void mouseClick(Minecraft mc, int mouseX, int mouseY)
+    public void mouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(this.isVisible)
         {
             this.refreshContentCoordinatesIfNeeded();
             if(mouseX < this.left || mouseX > this.right || mouseY < this.top || mouseY > this.bottom) return;
-            this.handleMouseClick(mc, mouseX, mouseY);
+            this.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
         }
     }
     
-    public void mouseDrag(Minecraft mc, int mouseX, int mouseY)
+    public void mouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         if(this.isVisible)
         {
             this.refreshContentCoordinatesIfNeeded();
             if(mouseX < this.left || mouseX > this.right || mouseY < this.top || mouseY > this.bottom) return;
-            this.handleMouseDrag(mc, mouseX, mouseY);
+            this.handleMouseDrag(mc, mouseX, mouseY, clickedMouseButton);
         }
     }
     

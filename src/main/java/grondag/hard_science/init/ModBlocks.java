@@ -56,6 +56,7 @@ public class ModBlocks
     public static final Block hdpe_block = null;
     
     public static final Block virtual_block = null;
+    public static final Block smart_chest = null;
     
     
     @SubscribeEvent
@@ -173,7 +174,7 @@ public class ModBlocks
         // VIRTUAL BLOCKS
         event.getRegistry().register(new VirtualBlock("virtual_block"));
         
-        event.getRegistry().register(new MachineContainerBlock());
+        event.getRegistry().register(new MachineContainerBlock("smart_chest"));
     }
     
     private static Block makeCoolingBasalt(String name, TexturePallette tex, boolean  isFiller) 

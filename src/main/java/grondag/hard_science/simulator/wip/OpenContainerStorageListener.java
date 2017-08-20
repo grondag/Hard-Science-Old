@@ -29,7 +29,7 @@ public abstract class OpenContainerStorageListener<T extends StorageType<T>> imp
     @Override
     public void handleStorageDisconnect(IStorage<T> storage)
     {
-        ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(Collections.emptyList()), player);
+        ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(Collections.emptyList(), storage.getCapacity()), player);
     }
 
     @Override
@@ -47,9 +47,9 @@ public abstract class OpenContainerStorageListener<T extends StorageType<T>> imp
         }
 
         @Override
-        public void handleStorageRefresh(IStorage<StorageTypeStack> sender, List<AbstractResourceWithQuantity<StorageTypeStack>> update)
+        public void handleStorageRefresh(IStorage<StorageTypeStack> sender, List<AbstractResourceWithQuantity<StorageTypeStack>> update, long capacity)
         {
-            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(update), player);
+            ModMessages.INSTANCE.sendTo(new PacketOpenContainerItemStorageRefresh(update, capacity), player);
         }
 
         @Override

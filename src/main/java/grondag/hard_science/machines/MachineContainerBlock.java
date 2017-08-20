@@ -1,9 +1,7 @@
 package grondag.hard_science.machines;
 
 import grondag.hard_science.HardScience;
-import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,16 +15,14 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class MachineContainerBlock extends Block implements ITileEntityProvider 
+public class MachineContainerBlock extends MachineBlock implements ITileEntityProvider 
 {
 
     public static final int GUI_ID = 1;
 
-    public MachineContainerBlock() 
+    public MachineContainerBlock(String name) 
     {
-        super(Material.ROCK);
-        setUnlocalizedName(HardScience.MODID + ".containerblock");
-        setRegistryName("containerblock");
+        super(name);
     }
 
     @SideOnly(Side.CLIENT)
@@ -40,12 +36,14 @@ public class MachineContainerBlock extends Block implements ITileEntityProvider
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
+    {
         if (world.isRemote) {
             return true;
         }
         TileEntity te = world.getTileEntity(pos);
-        if (!(te instanceof MachineContainerTEBase)) {
+        if (!(te instanceof MachineContainerTEBase)) 
+        {
             return false;
         }
         player.openGui(HardScience.INSTANCE, GUI_ID, world, pos.getX(), pos.getY(), pos.getZ());

@@ -189,20 +189,20 @@ public class Panel extends GuiControl
     }
 
     @Override
-    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         for(GuiControl child : this.children)
         {
-            child.mouseClick(mc, mouseX, mouseY);
+            child.mouseClick(mc, mouseX, mouseY, clickedMouseButton);
         }
     }
 
     @Override
-    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    public void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         for(GuiControl child : this.children)
         {
-            child.mouseDrag(mc, mouseX, mouseY);
+            child.mouseDrag(mc, mouseX, mouseY, clickedMouseButton);
         }
     }
     
@@ -272,5 +272,4 @@ public class Panel extends GuiControl
         this.isDirty = true;
         return this;
     }
-
 }

@@ -22,15 +22,34 @@ public abstract class StorageType<T extends StorageType<T>>
         POWER
     }
     
-    public abstract EnumStorageType enumType();
+    public static StorageType<?> fromEnum(EnumStorageType e)
+    {
+        switch(e)
+        {
+        case FLUID:
+            return StorageType.FLUID;
+        case GAS:
+            return StorageType.GAS;
+        case ITEM:
+            return StorageType.ITEM;
+        case POWER:
+            return StorageType.POWER;
+        default:
+        case NONE:
+            return StorageType.NONE;
+        }
+    }
     
-    @Nullable
-    public abstract IResource<T> makeResource(NBTTagCompound nbt);
-    
+    public  final EnumStorageType enumType;
+    public final IResource<T> emptyResource;
+    public final int ordinal;
     public final Predicate<IResource<T>> MATCH_ANY;
     
-    private StorageType()
+    private StorageType(EnumStorageType enumType)
     {
+        this.enumType = enumType;
+        this.ordinal = enumType.ordinal();
+        this.emptyResource = this.makeResource(null);
         this.MATCH_ANY = new Predicate<IResource<T>>()
         {
             @Override
@@ -38,15 +57,17 @@ public abstract class StorageType<T extends StorageType<T>>
         };
     }
     
+    @Nullable
+    public abstract IResource<T> makeResource(NBTTagCompound nbt);
+    
     /** 
      * Resources that must be consumed as they are produced - storage is not possible.
      */    
     public static final StorageTypeNone NONE = new StorageTypeNone();
     public static class StorageTypeNone extends StorageType<StorageTypeNone> 
     { 
-        @Override
-        public EnumStorageType enumType() { return EnumStorageType.NONE; }
-
+        private StorageTypeNone() {super(EnumStorageType.NONE);}
+        
         @Override
         public IResource<StorageTypeNone> makeResource(NBTTagCompound nbt)
         {
@@ -62,23 +83,22 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeStack ITEM = new StorageTypeStack();
     public static class StorageTypeStack extends StorageType<StorageTypeStack> 
     { 
-        @Override
-        public EnumStorageType enumType() { return EnumStorageType.ITEM; }
-
+        private StorageTypeStack() {super(EnumStorageType.ITEM);}
+        
         @Override
         public IResource<StorageTypeStack> makeResource(NBTTagCompound nbt) 
         {
             return new ItemResource(nbt);
         }
     }
-    
+            
     /**
      * Has to be encapsulated or stored in a tank or basin.
      */
     public static final StorageTypeFluid FLUID = new StorageTypeFluid();
     public static class StorageTypeFluid extends StorageType<StorageTypeFluid>
     {
-        public EnumStorageType enumType() { return EnumStorageType.FLUID; }
+        private StorageTypeFluid() {super(EnumStorageType.FLUID);}
 
         @Override
         public IResource<StorageTypeFluid> makeResource(NBTTagCompound nbt)
@@ -94,8 +114,8 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypeGas GAS = new StorageTypeGas();
     public static class StorageTypeGas extends StorageType<StorageTypeGas>
     {
-        public EnumStorageType enumType() { return EnumStorageType.GAS; }
-
+        private StorageTypeGas() {super(EnumStorageType.GAS);}
+    
         @Override
         public IResource<StorageTypeGas> makeResource(NBTTagCompound nbt)
         {
@@ -111,7 +131,8 @@ public abstract class StorageType<T extends StorageType<T>>
     public static final StorageTypePower POWER = new StorageTypePower();
     public static class StorageTypePower extends StorageType<StorageTypePower>
     {
-        public EnumStorageType enumType() { return EnumStorageType.POWER; }
+        private StorageTypePower() {super(EnumStorageType.POWER);}
+       
 
         @Override
         public IResource<StorageTypePower> makeResource(NBTTagCompound nbt)

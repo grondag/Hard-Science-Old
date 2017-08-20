@@ -13,8 +13,9 @@ public class DomainManagerTest
     @Test
     public void test()
     {
+        DomainManager dm = new DomainManager(true);
         
-        Domain d1 = DomainManager.INSTANCE.createDomain();
+        Domain d1 = dm.createDomain();
         d1.setName("first");
         d1.setSecurityEnabled(true);
         
@@ -24,25 +25,25 @@ public class DomainManagerTest
         bob.grantPriveledge(Priveledge.REMOVE_NODE, false);
         
         DomainUser sally = d1.addUser("Sally");
-        DomainManager.INSTANCE.setSaveDirty(false);
+        dm.setSaveDirty(false);
         sally.grantPriveledge(Priveledge.ADMIN, true);
-        assert(DomainManager.INSTANCE.isSaveDirty());
+        assert(dm.isSaveDirty());
         
-        Domain d2 = DomainManager.INSTANCE.createDomain();
+        Domain d2 = dm.createDomain();
         d2.setName("second");
         d2.setSecurityEnabled(false);
         
         DomainUser pat = d2.addUser("pat");
         
-        assert(DomainManager.INSTANCE.isSaveDirty());
-        NBTTagCompound tag = DomainManager.INSTANCE.serializeNBT();
+        assert(dm.isSaveDirty());
+        NBTTagCompound tag = dm.serializeNBT();
         
-        DomainManager.INSTANCE.clear();
-        assert DomainManager.INSTANCE.getAllDomains().size() == 0;
+        dm.clear();
+        assert dm.getAllDomains().size() == 0;
         
-        DomainManager.INSTANCE.deserializeNBT(tag);
+        dm.deserializeNBT(tag);
         
-        d1 = DomainManager.INSTANCE.getDomain(1);
+        d1 = dm.getDomain(1);
         assert(d1.getName() == "first");
         assert(d1.isSecurityEnabled());
         
@@ -58,7 +59,7 @@ public class DomainManagerTest
         assert(sally.hasPriveledge(Priveledge.REMOVE_NODE));
         assert(sally.hasPriveledge(Priveledge.ADMIN));
         
-        d2 = DomainManager.INSTANCE.getDomain(2);
+        d2 = dm.getDomain(2);
         assert(d2.getName() == "second");
         assert(!d2.isSecurityEnabled());
         
@@ -68,7 +69,7 @@ public class DomainManagerTest
         assert(pat.hasPriveledge(Priveledge.REMOVE_NODE));
         assert(pat.hasPriveledge(Priveledge.ADMIN));
         
-        assert DomainManager.INSTANCE.createDomain().getId() == 3;
+        assert dm.createDomain().getId() == 3;
     }
 
 }

@@ -5,10 +5,10 @@ import java.util.List;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
 import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
-import grondag.hard_science.gui.control.TabBar.MouseLocation;
 import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.ItemResource;
+import grondag.hard_science.simulator.wip.StorageType;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -27,11 +27,15 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
     
     protected final Wrapper<ItemStack> hoverStack;
     
-    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer, Wrapper<ItemStack> hoverStack)
+    protected final IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler;
+    
+    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer, Wrapper<ItemStack> hoverStack, 
+                IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler)
     {
         super(items);
         this.fontRenderer = fontRenderer;
         this.hoverStack = hoverStack;
+        this.clickHandler = clickHandler;
         this.setItemsPerRow(9);
         this.setItemSpacing(2);
         this.setItemSelectionMargin(1);
@@ -90,6 +94,8 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
     
     protected void drawQuantity(long qty, int left, int top)
     {
+        if(qty < 2) return;
+        
         String qtyLabel = this.getQuantityLabel(qty);
         
         boolean wasUnicode = this.fontRenderer.getUnicodeFlag();
@@ -125,5 +131,33 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
         GlStateManager.enableRescaleNormal();
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);        
+    }
+
+
+    @Override
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
+    {
+        super.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
+        if(this.clickHandler != null && this.currentMouseLocation == MouseLocation.ITEM)
+        {
+            this.clickHandler.handleMouseClick(mc, clickedMouseButton, this.resourceForClickHandler());
+        }
+    }
+
+
+    @Override
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
+    {
+        super.handleMouseDrag(mc, mouseX, mouseY, clickedMouseButton);
+        if(this.clickHandler != null && this.currentMouseLocation == MouseLocation.ITEM)
+        {
+            this.clickHandler.handleMouseDrag(mc, clickedMouseButton, this.resourceForClickHandler());
+        }
+    }
+    
+    private AbstractResourceWithQuantity<StorageTypeStack> resourceForClickHandler()
+    {
+        AbstractResourceWithQuantity<StorageTypeStack> res = this.get(currentMouseIndex);
+        return res == null ? StorageType.ITEM.emptyResource.withQuantity(0) : res;
     }
 }

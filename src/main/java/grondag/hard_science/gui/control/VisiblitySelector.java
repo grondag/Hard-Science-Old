@@ -67,7 +67,7 @@ public class VisiblitySelector extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         int clickIndex = this.getButtonIndex(mouseX, mouseY);
         
@@ -78,7 +78,7 @@ public class VisiblitySelector extends GuiControl
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         // ignore
     }

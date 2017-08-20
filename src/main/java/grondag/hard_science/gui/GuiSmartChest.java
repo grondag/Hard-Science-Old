@@ -5,6 +5,9 @@ import java.io.IOException;
 
 import org.lwjgl.input.Mouse;
 
+import grondag.hard_science.gui.control.IClickHandler.StorageClickHandlerStack;
+import grondag.hard_science.gui.control.Button;
+import grondag.hard_science.gui.control.GuiControl;
 import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
@@ -12,7 +15,10 @@ import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.machines.ContainerLayout;
 import grondag.hard_science.machines.MachineContainerBase;
 import grondag.hard_science.machines.MachineContainerTEBase;
+import grondag.hard_science.machines.MachineItemBlock;
+import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -21,7 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class BaseContainerScreen extends GuiContainer 
+public class GuiSmartChest extends GuiContainer
 {
     protected final ContainerLayout layout;
     
@@ -32,6 +38,14 @@ public class BaseContainerScreen extends GuiContainer
     
     public static final ContainerLayout LAYOUT;
     
+    public static final int BUTTON_ID_SORT = 123;
+    
+    public static final int CAPACITY_BAR_WIDTH = 4;
+    
+    protected int capacityBarLeft;
+    protected int itemPickerTop;
+    protected int itemPickerHeight;
+    
     static
     {
         LAYOUT = new ContainerLayout();
@@ -41,18 +55,18 @@ public class BaseContainerScreen extends GuiContainer
         
         LAYOUT.expectedTextHeight = 12;
 
-        LAYOUT.dialogWidth = LAYOUT.externalMargin * 2 + LAYOUT.slotSpacing * 9 + TabBar.DEFAULT_TAB_WIDTH;
+        LAYOUT.dialogWidth = LAYOUT.externalMargin * 2 + LAYOUT.slotSpacing * 9 + TabBar.DEFAULT_TAB_WIDTH + CAPACITY_BAR_WIDTH + GuiControl.CONTROL_INTERNAL_MARGIN;
             
         LAYOUT.dialogHeight = LAYOUT.externalMargin * 3 + LAYOUT.slotSpacing * 10 + LAYOUT.expectedTextHeight * 2;
         
         /** distance from edge of dialog to start of player inventory area */
-        LAYOUT.playerInventoryLeft = LAYOUT.externalMargin;
+        LAYOUT.playerInventoryLeft = LAYOUT.externalMargin + CAPACITY_BAR_WIDTH + GuiControl.CONTROL_INTERNAL_MARGIN;
         
         /** distance from top of dialog to start of player inventory area */
         LAYOUT.playerInventoryTop = LAYOUT.dialogHeight - LAYOUT.externalMargin - LAYOUT.slotSpacing * 4;
     }
 
-    public BaseContainerScreen(MachineContainerTEBase tileEntity, MachineContainerBase container) 
+    public GuiSmartChest(MachineContainerTEBase tileEntity, MachineContainerBase container) 
     {
         super(container);
         this.layout = container.layout;
@@ -70,8 +84,12 @@ public class BaseContainerScreen extends GuiContainer
         {
             this.guiLeft = ((this.width * 2 / 3) - this.xSize) / 2;
         }
+
+        this.capacityBarLeft = this.guiLeft + layout.externalMargin;
+        this.itemPickerTop = this.guiTop + this.layout.externalMargin + this.layout.expectedTextHeight;
+        this.itemPickerHeight = this.layout.slotSpacing * 6;
         
-        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer, this.hoverStack);
+        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer, this.hoverStack, StorageClickHandlerStack.INSTANCE);
         this.stackPicker.setItemsPerRow(9);
 
         this.stackPanel = new Panel(true);
@@ -81,9 +99,18 @@ public class BaseContainerScreen extends GuiContainer
         this.stackPanel.setOuterMarginWidth((LAYOUT.slotSpacing - 16) / 2);
         this.stackPanel.setLeft(this.guiLeft + this.layout.playerInventoryLeft);
         this.stackPanel.setWidth(this.layout.slotSpacing * 9 + this.stackPicker.getTabWidth());
-        this.stackPanel.setTop(this.guiTop + this.layout.externalMargin + this.layout.expectedTextHeight);
-        this.stackPanel.setHeight(this.layout.slotSpacing * 6);
+        this.stackPanel.setTop(itemPickerTop);
+        this.stackPanel.setHeight(itemPickerHeight);
         this.stackPanel.add(this.stackPicker);
+        
+        Button butt = new Button(BUTTON_ID_SORT, 
+                this.guiLeft + this.xSize - 40 - this.layout.externalMargin, this.guiTop + this.layout.externalMargin - 2, 
+                40, this.fontRenderer.FONT_HEIGHT + 2,
+                AbstractResourceWithQuantity.SORT_LABELS[OpenContainerStorageProxy.ITEM_PROXY.getSortIndex()]);
+        butt.textColor = 0xFF444444;
+        this.addButton(butt);
+        
+
     }
     
     @Override
@@ -100,12 +127,21 @@ public class BaseContainerScreen extends GuiContainer
 //            drawRect(x, y, x + 16, y + 16, 0xFFA9A9A9);
         }
         
+        int barHeight = itemPickerHeight * OpenContainerStorageProxy.ITEM_PROXY.fillPercentage() / 100;
+        
+        // capacity bar
+        drawRect(this.capacityBarLeft, this.itemPickerTop, 
+                this.capacityBarLeft + CAPACITY_BAR_WIDTH, this.itemPickerTop + itemPickerHeight, 0xFF404040);
+        drawRect(this.capacityBarLeft, this.itemPickerTop + itemPickerHeight - barHeight, 
+                this.capacityBarLeft + CAPACITY_BAR_WIDTH, this.itemPickerTop + itemPickerHeight, MachineItemBlock.CAPACITY_COLOR);
+        
         // Draw controls here because foreground layer is translated to frame of the GUI
         // and our controls are designed to render in frame of the screen.
         // And can't draw after super.drawScreen() because would potentially render on top of things.
         this.stackPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
         
-        this.fontRenderer.drawString("Whatever Thingy", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.externalMargin, 0xFF444444);
+        //FIXME: localize
+        this.fontRenderer.drawString("Smart Chest", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.externalMargin, 0xFF444444);
         this.fontRenderer.drawString("Inventory", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.playerInventoryTop - this.layout.expectedTextHeight, 0xFF444444);
     }
 
@@ -145,13 +181,26 @@ public class BaseContainerScreen extends GuiContainer
     protected void mouseClicked(int mouseX, int mouseY, int clickedMouseButton) throws IOException
     {
         super.mouseClicked(mouseX, mouseY, clickedMouseButton);
-        this.stackPanel.mouseClick(mc, mouseX, mouseY);
+        this.stackPanel.mouseClick(mc, mouseX, mouseY, clickedMouseButton);
     }
 
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
     {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-        this.stackPanel.mouseDrag(mc, mouseX, mouseY);
+        this.stackPanel.mouseDrag(mc, mouseX, mouseY, clickedMouseButton);
+    }
+    
+    @Override
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if(button.id == BUTTON_ID_SORT)
+        {
+            int nextSortIndex = OpenContainerStorageProxy.ITEM_PROXY.getSortIndex() + 1;
+            if(nextSortIndex >= AbstractResourceWithQuantity.SORT_COUNT) nextSortIndex = 0;
+            button.displayString = AbstractResourceWithQuantity.SORT_LABELS[nextSortIndex];
+            OpenContainerStorageProxy.ITEM_PROXY.setSortIndex(nextSortIndex);
+            OpenContainerStorageProxy.ITEM_PROXY.refreshListIfNeeded();
+        }
     }
 }

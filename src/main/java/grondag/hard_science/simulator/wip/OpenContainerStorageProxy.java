@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.library.concurrency.ConcurrentForwardingList;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import net.minecraftforge.fml.relauncher.Side;
@@ -19,39 +18,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 @SideOnly(Side.CLIENT)
 public class OpenContainerStorageProxy<T extends StorageType<T>> implements IStorageListener<T>
-{
-    
-    public static final Comparator<AbstractResourceWithQuantity<?>> SORT_BY_NAME = new Comparator<AbstractResourceWithQuantity<?>>()
-    {
-        @Override
-        public int compare(AbstractResourceWithQuantity<?> o1, AbstractResourceWithQuantity<?> o2)
-        {
-            if(o1 == null)
-            {
-                //FIXME: remove
-                Log.warn("null resource in sort?");
-                if(o2 == null) 
-                {
-                    //FIXME: remove
-                    Log.warn("null resource in sort?");
-                    return 0;
-                }
-                return 1;
-            }
-            else if(o2 == null) 
-            {
-                //FIXME: remove
-                Log.warn("null resource in sort?");
-
-                return -1;
-            }
-            
-            String s1 = o1.resource().displayName();
-            String s2 = o2.resource().displayName();
-            return s1.compareTo(s2);
-        }
-    };
-    
+{    
     // needs to come *after* the sort declaration, dumbass...
     public static OpenContainerStorageProxy<StorageTypeStack> ITEM_PROXY = new OpenContainerStorageProxy<StorageTypeStack>();
     
@@ -63,40 +30,40 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     
     private boolean isDirty = false;
     
-    private Comparator<AbstractResourceWithQuantity<?>> sort = SORT_BY_NAME;
+    private int sortIndex = 0;
+    
+    private long capacity;
+    private long usedCapacity;
     
     /**
      * Incorporates changes and updates sort order.
      * Returns true if a refresh was performed.
      */
+
     public boolean refreshListIfNeeded()
     {
         if(!this.isDirty) return false;
         
-        LIST.setDelegate(ImmutableList.copyOf(MAP.values().stream().sorted(this.sort).collect(Collectors.toList())));
+        @SuppressWarnings("unchecked")
+        Comparator<AbstractResourceWithQuantity<?>> sort = AbstractResourceWithQuantity.SORT[this.sortIndex];
+        
+        LIST.setDelegate(ImmutableList.copyOf(MAP.values().stream().sorted(sort).collect(Collectors.toList())));
         
         this.isDirty = false;
         
         return true;
     }
     
-    public void setSort(Comparator<AbstractResourceWithQuantity<?>> sort)
-    {
-        if(sort != this.sort)
-        {
-            this.sort = sort;
-            this.isDirty = true;
-        }
-    }
-  
-
     @Override
-    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceWithQuantity<T>> update)
+    public void handleStorageRefresh(IStorage<T> sender, List<AbstractResourceWithQuantity<T>> update, long capacity)
     {
         this.MAP.clear();
+        this.capacity = capacity;
+        this.usedCapacity = 0;
         for(AbstractResourceWithQuantity<T> item : update )
         {
             this.MAP.put(item.resource(), item);
+            this.usedCapacity += item.quantity;
         }
         this.isDirty = true;
         this.refreshListIfNeeded();
@@ -105,6 +72,9 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     @Override
     public void handleStorageUpdate(IStorage<T> sender, AbstractResourceWithQuantity<T> update)
     {
+        AbstractResourceWithQuantity<T> prior = this.MAP.get(update.resource());
+        if(prior != null) this.usedCapacity -= prior.getQuantity();
+
         if(update.quantity == 0)
         {
             this.MAP.remove(update.resource());
@@ -112,6 +82,7 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
         else
         {
             this.MAP.put(update.resource(), update);
+            this.usedCapacity += update.getQuantity();
         }
         this.isDirty = true;
     }
@@ -128,5 +99,31 @@ public class OpenContainerStorageProxy<T extends StorageType<T>> implements ISto
     public boolean isClosed()
     {
         return false;
+    }
+
+    public int getSortIndex()
+    {
+        return this.sortIndex;
+    }
+
+    public void setSortIndex(int sortIndex)
+    {
+        this.sortIndex = sortIndex;
+        this.isDirty = true;
+    }
+
+    public long capacity()
+    {
+        return capacity;
+    }
+
+    public long usedCapacity()
+    {
+        return usedCapacity;
+    }
+    
+    public int fillPercentage()
+    {
+        return this.capacity == 0 ? 0 : (int) (this.usedCapacity * 100 / this.capacity);
     }
 }

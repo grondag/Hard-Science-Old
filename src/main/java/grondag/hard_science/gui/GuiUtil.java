@@ -24,6 +24,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class GuiUtil
 {
 
+    public static final int MOUSE_LEFT = 0;
+    public static final int MOUSE_MIDDLE = 2;
+    public static final int MOUSE_RIGHT = 1;
+    
     public static final double GOLDEN_RATIO = 1.618033988;
     /** 
      * Same as vanilla routine but accepts double values

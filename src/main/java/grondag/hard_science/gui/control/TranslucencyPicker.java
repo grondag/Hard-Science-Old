@@ -75,7 +75,7 @@ public class TranslucencyPicker extends GuiControl
     }
 
     @Override
-    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);
         if(mouseIndex != NO_SELECTION)
@@ -86,9 +86,9 @@ public class TranslucencyPicker extends GuiControl
     }
 
     @Override
-    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY)
+    protected void handleMouseDrag(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        this.handleMouseClick(mc, mouseX, mouseY);
+        this.handleMouseClick(mc, mouseX, mouseY, clickedMouseButton);
     }
 
     @Override

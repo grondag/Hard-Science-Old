@@ -28,7 +28,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     private HashMap<UniversalPos, VolcanoNode> nodes = new HashMap<UniversalPos, VolcanoNode>();
     
     private VolcanoNode activeNode = null; 
-    private boolean isDirty = false;
+    private boolean isDirty = true;
     
     private LinkedList<Ticket> tickets = new LinkedList<Ticket>();
     private  boolean isChunkloadingDirty = true;
@@ -180,6 +180,9 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
+        // always save *something* to prevent "not found" warning when there are no volcanos
+        nbt.setBoolean("created", true);
+        
         // Do first because any changes made after this point aren't guaranteed to be saved
         this.setSaveDirty(false);
 

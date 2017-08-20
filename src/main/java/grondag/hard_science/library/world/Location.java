@@ -16,6 +16,11 @@ public class Location extends BlockPos
         
         public void setLocation(@Nullable Location loc);
         
+        public default void setLocation(BlockPos pos, World world)
+        {
+            this.setLocation(new Location(pos, world));
+        }
+        
         public default boolean hasLocation()
         {
             return this.getLocation() != null;

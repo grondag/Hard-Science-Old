@@ -5,6 +5,8 @@ import java.util.Map;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.lava.LavaBlobItem;
+import grondag.hard_science.machines.MachineBlock;
+import grondag.hard_science.machines.MachineItemBlock;
 import grondag.hard_science.materials.PolyethyleneCube;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
@@ -86,6 +88,12 @@ public class ModItems
                     SuperBlock superBlock = (SuperBlock)block;
                     SuperItemBlock itemBlock = new SuperItemBlock(superBlock);
                     itemBlock.setRegistryName(superBlock.getRegistryName());
+                    itemReg.register(itemBlock);
+                }
+                else if(block instanceof MachineBlock)
+                {
+                    ItemBlock itemBlock = new MachineItemBlock(block);
+                    itemBlock.setRegistryName(block.getRegistryName());
                     itemReg.register(itemBlock);
                 }
                 else
