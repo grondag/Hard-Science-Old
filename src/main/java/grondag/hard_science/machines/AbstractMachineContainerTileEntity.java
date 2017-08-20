@@ -3,6 +3,9 @@ package grondag.hard_science.machines;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Hides the mechanics of storage access to ensure consistency of handling.
+ */
 import grondag.hard_science.Log;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
@@ -10,61 +13,93 @@ import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.ItemStorage;
 import grondag.hard_science.simulator.wip.StorageType;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
-public class MachineContainerTEBase extends MachineTileEntity
+public abstract class AbstractMachineContainerTileEntity extends MachineTileEntity
 {
     /** -1 signifies not loaded */
-    
     private int storageID = -1; 
+    
     private IStorage<StorageType.StorageTypeStack> storage;
 
-    private ItemStackHandler itemStackHandler = new ItemStackHandler(1)
+    protected AbstractMachineContainerTileEntity()
     {
-        @Override
-        protected void onContentsChanged(int slot) 
-        {
-            MachineContainerTEBase.this.markDirty();
-        }
-    };
-    
-    
-    public boolean canInteractWith(EntityPlayer playerIn)
-    {
-         return !isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D
-                 && this.storage() != null;
+        super();
     }
 
-    @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing)
+    private void setStorage(IStorage<StorageType.StorageTypeStack> storage)
     {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-        {
-            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
-        }
-        return super.getCapability(capability, facing);
-    }
-    
-    @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing)
-    {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-        {
-            return true;
-        }
-        return super.hasCapability(capability, facing);
+        this.storage = storage;
+        this.storageID = storage == null ? -1 : storage.getId();
+        this.markDirty();
     }
 
+    /**
+     * Retrieved lazily because simulator may not loaded/running when this TE is deserialized.
+     */
+    public IStorage<StorageType.StorageTypeStack> getStorage()
+    {
+        if(this.world.isRemote) return null;
+        
+        if(this.storage == null)
+        {
+            this.setStorage(this.retrieveOrCreateStorage());
+        }
+        return this.storage;
+    }
+
+    @SuppressWarnings("unchecked")
+    private IStorage<StorageTypeStack> retrieveOrCreateStorage()
+    {
+        IStorage<StorageTypeStack> result = null;
+        
+        if(this.storageID >= 0)
+        {
+            IStorage<?> s = (this.storageID == 0) ? null : Simulator.INSTANCE.domainManager().storageIndex().get(this.storageID);
+            
+            if(s == null)
+            {
+                Log.error("Unable to read storage info for tile entity @ " + this.pos.toString());
+                Log.error("Storage will be reinitialized and prior contents, if any, will be lost.");
+                Log.error("This may be bug or may be caused by world corruption.");
+            }
+            else
+            {
+                result = (IStorage<StorageTypeStack>) s;
+            }
+        }
+        
+        if(result == null)
+        {
+            result = new ItemStorage(null);
+            result.setLocation(pos, world);
+            Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(result);
+            this.markDirty();
+            
+            //FIXME: remove
+            Log.info("created new storge, id = " + this.storageID);
+        }
+        else
+        {
+            //FIXME: remove
+            Log.info("retrieved storage, id = " + this.storageID);
+        }
+        return result;
+    }
+
+    
+    @Override
+    public void onChunkUnload()
+    {
+        this.setStorage(null);
+        super.onChunkUnload();
+    }
+    
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
@@ -82,51 +117,6 @@ public class MachineContainerTEBase extends MachineTileEntity
         Log.info("TE NBT read id = " + this.storageID);
     }
 
-    /**
-     * Retrieved lazily because simulator may not loaded/running when this TE is deserialized.
-     */
-    @SuppressWarnings("unchecked")
-    public IStorage<StorageType.StorageTypeStack> storage()
-    {
-        if(this.world.isRemote) return null;
-        
-        if(this.storage == null)
-        {
-            if(this.storageID >= 0)
-            {
-                IStorage<?> s = (this.storageID == 0) ? null : Simulator.INSTANCE.domainManager().storageIndex().get(this.storageID);
-                
-                if(s == null)
-                {
-                    Log.error("Unable to read storage info for tile entity @ " + this.pos.toString());
-                    Log.error("Storage will be reinitialized and prior contents, if any, will be lost.");
-                    Log.error("This may be bug or may be caused by world corruption.");
-                }
-                else
-                {
-                    this.storage = (IStorage<StorageTypeStack>) s;
-                }
-            }
-            
-            if(this.storage == null)
-            {
-                this.storage = new ItemStorage(null);
-                this.storage.setLocation(pos, world);
-                Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(this.storage);
-                this.storageID = this.storage.getId();
-                this.markDirty();
-                //FIXME: remove
-                Log.info("created new storge, id = " + this.storageID);
-            }
-            else
-            {
-                //FIXME: remove
-                Log.info("retrieved storage, id = " + this.storageID);
-            }
-        }
-        return this.storage;
-    }
-
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
@@ -140,7 +130,6 @@ public class MachineContainerTEBase extends MachineTileEntity
         return compound;
     }
 
-
     @Override
     public void restoreStateFromStackAndReconnect(ItemStack stack)
     {
@@ -150,24 +139,24 @@ public class MachineContainerTEBase extends MachineTileEntity
        tag = tag.getCompoundTag(MachineItemBlock.NBT_SERVER_SIDE_TAG);
        if(!tag.hasNoTags())
        {
-           this.storage = new ItemStorage(tag);
-           this.storage.setLocation(this.pos, this.world);
+           IStorage<StorageType.StorageTypeStack> storage = new ItemStorage(tag);
+           storage.setLocation(this.pos, this.world);
            //force new ID
-           this.storage.setId(0);
-           Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(this.storage);
-           this.storageID = this.storage.getId();
+           storage.setId(0);
+           Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(storage);
+           
+           this.setStorage(storage);
            
            //FIXME: remove
            Log.info("restoreStateFromStackAndReconnect id=" + this.storageID);
-           this.markDirty();
        }
     }
-
+    
     @Override
     public void saveStateInStack(ItemStack stack)
     {
         if(this.world == null || this.world.isRemote) return;
-        IStorage<StorageTypeStack> store = this.storage();
+        IStorage<StorageTypeStack> store = this.getStorage();
         //FIXME: remove
         Log.info("saveStateInStack id=" + this.storageID);
         
@@ -202,10 +191,8 @@ public class MachineContainerTEBase extends MachineTileEntity
             stack.setItemDamage(Math.max(1, (int) (MachineItemBlock.MAX_DAMAGE * this.storage.availableCapacity() / this.storage.getCapacity())));
         }
         displayTag.setTag("Lore", loreTag);
-        
-        
     }
-
+    
     @Override
     public void disconnect()
     {
@@ -215,9 +202,6 @@ public class MachineContainerTEBase extends MachineTileEntity
         //FIXME: remove
         Log.info("disconnect id=" + this.storageID);
         
-        this.storage = null;
-        this.storageID = -1;
-        this.markDirty();
-        
+        this.setStorage(null);
     }
 }

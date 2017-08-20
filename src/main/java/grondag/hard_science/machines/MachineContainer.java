@@ -13,9 +13,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class MachineContainerBase extends Container
+public class MachineContainer extends Container
 {
-    private MachineContainerTEBase te;
+    private MachineContainerTileEntity te;
     
     public final ContainerLayout layout;
 
@@ -23,14 +23,14 @@ public class MachineContainerBase extends Container
     {
         Container container = player.openContainer;
 
-        if (container == null ||  !(container instanceof MachineContainerBase)) return null;
+        if (container == null ||  !(container instanceof MachineContainer)) return null;
         
-        MachineContainerTEBase openTE = ((MachineContainerBase) container).tileEntity();
+        MachineContainerTileEntity openTE = ((MachineContainer) container).tileEntity();
         
-        return openTE == null ? null : openTE.storage();
+        return openTE == null ? null : openTE.getStorage();
     }
 
-    public MachineContainerBase(IInventory playerInventory, MachineContainerTEBase te, ContainerLayout layout) 
+    public MachineContainer(IInventory playerInventory, MachineContainerTileEntity te, ContainerLayout layout) 
     {
         this.te = te;
         this.layout = layout;
@@ -92,7 +92,7 @@ public class MachineContainerBase extends Container
         
             if(playerIn instanceof EntityPlayerMP)
             {
-                IStorage<StorageType.StorageTypeStack> storage = this.te.storage();
+                IStorage<StorageType.StorageTypeStack> storage = this.te.getStorage();
                 if(storage == null) return ItemStack.EMPTY;
                 
                 int consumed = (int) storage.add(ItemResourceWithQuantity.fromStack(slotStack), false);
@@ -130,13 +130,13 @@ public class MachineContainerBase extends Container
     public void addListener(IContainerListener listener)
     {
         super.addListener(listener);
-        if(listener instanceof EntityPlayerMP && this.te != null && this.te.storage() != null)
+        if(listener instanceof EntityPlayerMP && this.te != null && this.te.getStorage() != null)
         {
-            this.te.storage().addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
+            this.te.getStorage().addListener(new OpenContainerStorageListener.ItemListener((EntityPlayerMP)listener));
         }
     }
     
-    public MachineContainerTEBase tileEntity()
+    public MachineContainerTileEntity tileEntity()
     {
         return this.te;
     }

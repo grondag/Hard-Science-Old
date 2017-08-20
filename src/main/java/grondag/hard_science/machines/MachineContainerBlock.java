@@ -32,7 +32,7 @@ public class MachineContainerBlock extends MachineBlock implements ITileEntityPr
 
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new MachineContainerTEBase();
+        return new MachineContainerTileEntity();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class MachineContainerBlock extends MachineBlock implements ITileEntityPr
             return true;
         }
         TileEntity te = world.getTileEntity(pos);
-        if (!(te instanceof MachineContainerTEBase)) 
+        if (!(te instanceof MachineContainerTileEntity)) 
         {
             return false;
         }

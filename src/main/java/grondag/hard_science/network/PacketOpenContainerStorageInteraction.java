@@ -2,7 +2,7 @@ package grondag.hard_science.network;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.machines.MachineContainerBase;
+import grondag.hard_science.machines.MachineContainer;
 import grondag.hard_science.simulator.wip.IResource;
 import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.ItemResource;
@@ -99,7 +99,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     @Override
     protected void handle(PacketOpenContainerStorageInteraction message, EntityPlayerMP player)
     {
-        IStorage<StorageTypeStack> storage =  MachineContainerBase.getOpenContainerStackStorage(player);
+        IStorage<StorageTypeStack> storage =  MachineContainer.getOpenContainerStackStorage(player);
         if(storage == null) return;
 
         if(storage.storageType() != StorageType.ITEM) return;

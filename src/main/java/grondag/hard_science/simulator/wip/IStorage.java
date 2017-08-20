@@ -9,6 +9,7 @@ import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IIdentified;
 import grondag.hard_science.simulator.wip.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
+import jline.internal.Log;
 
 public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>, IIdentified
 {
@@ -100,8 +101,14 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
      */
     public default void addListener(IStorageListener<T> listener)
     {
+        //FIXME: remove
+        Log.info("adding listener to storage " + this.getId());
+        
         synchronized(this)
         {
+            // doing this here prevents buildup of dead listeners if there are no storage changes
+            clearClosedListeners();
+            
             this.listeners().addIfNotPresent(listener);
             listener.handleStorageRefresh(this, this.find(this.storageType().MATCH_ANY), this.getCapacity());
         }
@@ -112,9 +119,32 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
      */
     public default void removeListener(IStorageListener<T> listener)
     {
+        //FIXME: remove
+        Log.info("removing listener from storage " + this.getId());
+        
         synchronized(this)
         {
             this.listeners().removeIfPresent(listener);
+        }
+    }
+    
+    public default void clearClosedListeners()
+    {
+        synchronized(this)
+        {
+            SimpleUnorderedArrayList<IStorageListener<T>> listeners = this.listeners();
+            
+            if(listeners.isEmpty()) return;
+            
+            for(Object listener : listeners.toArray())
+            {
+                @SuppressWarnings("unchecked")
+                IStorageListener<T> l = (IStorageListener<T>)listener;
+                if(l.isClosed())
+                {
+                    this.removeListener(l);
+                }
+            }
         }
     }
     
@@ -127,12 +157,18 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
             
             if(listeners.isEmpty()) return;
             
+            //FIXME: remove
+            Log.info(String.format("refreshing %d listeners for storage %d", listeners.size(), this.getId()));
+            
             List<AbstractResourceWithQuantity<T>> refresh = this.find(this.storageType().MATCH_ANY);
             for(Object listener : listeners.toArray())
             {
                 IStorageListener<T> l = (IStorageListener<T>)listener;
                 if(l.isClosed())
                 {
+                    //FIXME: remove
+                    Log.info("removing listener from storage " + this.getId());
+                    
                     this.removeListener(l);
                 }
                 else
@@ -145,15 +181,24 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
     
     public default void updateListeners(AbstractResourceWithQuantity<T> update)
     {
+        
+        
         SimpleUnorderedArrayList<IStorageListener<T>> listeners = this.listeners();
         
         if(listeners.isEmpty()) return;
+        
+        //FIXME: remove
+        Log.info(String.format("updating %d listeners for storage %d", listeners.size(), this.getId()));
+
         for(Object listener : listeners.toArray())
         {
             @SuppressWarnings("unchecked")
             IStorageListener<T> l = (IStorageListener<T>)listener;
             if(l.isClosed())
             {
+                //FIXME: remove
+                Log.info("removing listener from storage " + this.getId());
+
                 this.removeListener(l);
             }
             else

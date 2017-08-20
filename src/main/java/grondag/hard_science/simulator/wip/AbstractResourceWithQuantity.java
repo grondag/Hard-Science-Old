@@ -107,6 +107,12 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
         return String.format("%,d x ", this.getQuantity()) + this.resource.toString();
     }
     
+    @Override
+    public AbstractResourceWithQuantity<V> clone()
+    {
+        return this.resource.withQuantity(quantity);
+    }
+    
     /////////////////////////////////////////
     // SORTING UTILITIES
     /////////////////////////////////////////

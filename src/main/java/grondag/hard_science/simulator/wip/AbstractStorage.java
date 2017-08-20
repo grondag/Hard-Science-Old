@@ -11,15 +11,19 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
+import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.wip.DomainManager.Domain;
-import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class AbstractStorage<T extends StorageType<T>> implements IStorage<T>
+public abstract class AbstractStorage<T extends StorageType<T>> implements IStorage<T>, IDirtListener
 {
-    protected final Object2LongOpenHashMap<IResource<T>> map;
+    /**
+     * Map of all unique resources contained in this storage
+     */
+//    protected final Object2LongOpenHashMap<IResource<T>> map;
+    protected final SimpleUnorderedArrayList<AbstractResourceWithQuantity<T>> slots = new SimpleUnorderedArrayList<AbstractResourceWithQuantity<T>>();
+    
     protected long capacity = 2000;
     protected long used = 0;
     protected Location location;
@@ -29,8 +33,6 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     
     public AbstractStorage(@Nullable NBTTagCompound tag)
     {
-        this.map = new Object2LongOpenHashMap<IResource<T>>();
-        this.map.defaultReturnValue(0);
         if(tag != null)
         {
             this.deserializeNBT(tag);
@@ -52,7 +54,12 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public long getQuantityStored(IResource<T> resource)
     {
-        return map.getLong(resource);
+        for(int i = 0; i < slots.size(); i++)
+        {
+            AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
+            if(rwq.resource().equals(resource)) return rwq.quantity;
+        }
+        return 0;
     }
     
     @Override
@@ -60,11 +67,12 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         ImmutableList.Builder<AbstractResourceWithQuantity<T>> builder = ImmutableList.builder();
         
-        for(Entry<IResource<T>> entry : map.object2LongEntrySet())
+        for(int i = 0; i < slots.size(); i++)
         {
-            if(predicate.test(entry.getKey()))
+            AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
+            if(predicate.test(rwq.resource()))
             {
-                builder.add(entry.getKey().withQuantity(entry.getLongValue()));
+                builder.add(rwq.clone());
             }
         }
         
@@ -76,26 +84,36 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         if(limit < 1) return 0;
         
-        long current = map.getLong(resource);
+        AbstractResourceWithQuantity<T> rwq = null;
+        int foundIndex = -1;
+        
+        for(int i = 0; i < slots.size(); i++)
+        {
+            rwq = this.slots.get(i);
+            if(rwq.resource().equals(resource))
+            {
+                foundIndex = i;
+                break;
+            }
+        }
+        
+        long current = rwq == null ? 0 : rwq.quantity;
         
         long taken = Math.min(limit, current);
         
         if(taken > 0 && !simulate)
         {
-            current -= taken;
+            rwq.quantity -= taken;
             this.used -= taken;
             
-            if(current == 0)
+            if(rwq.quantity == 0)
             {
-                map.removeLong(resource);
-            }
-            else
-            {
-                map.put(resource, current);
+                slots.remove(foundIndex);
             }
             
             if(this.owner != null) this.owner.notifyTaken(this, resource, taken);
             this.updateListeners(resource.withQuantity(current));
+            this.setDirty();
         }
         
         return taken;
@@ -112,11 +130,29 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         
         if(!simulate)
         {
-            long quantity = this.map.getLong(resource) + added;
-            this.map.put(resource, quantity);
+            long newQuantity = -1;
+            for(int i = 0; i < slots.size(); i++)
+            {
+                AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
+                if(rwq.resource().equals(resource))
+                {
+                    rwq.quantity += added;
+                    newQuantity = rwq.quantity;
+                    break;
+                }
+            }
+            
+            if(newQuantity == -1)
+            {
+                this.slots.add(resource.withQuantity(added));
+                newQuantity = added;
+            }
+
+            
             this.used += added;
             if(this.owner != null) this.owner.notifyAdded(this, resource, added);
-            this.updateListeners(resource.withQuantity(quantity));
+            this.updateListeners(resource.withQuantity(newQuantity));
+            this.setDirty();
         }
         
         return added;
@@ -129,15 +165,14 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         this.serializeLocation(nbt);
         nbt.setLong("cap", this.capacity);
         
-        if(!this.map.isEmpty())
+        if(!this.slots.isEmpty())
         {
             NBTTagList nbtContents = new NBTTagList();
             
-            for(Entry<IResource<T>> entry : map.object2LongEntrySet())
+            for(int i = 0; i < slots.size(); i++)
             {
-                NBTTagCompound subTag = entry.getKey().serializeNBT();
-                subTag.setLong("qty", entry.getLongValue());
-                nbtContents.appendTag(subTag);
+                AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
+                nbtContents.appendTag(rwq.serializeNBT());
             }
             nbt.setTag("contents", nbtContents);
         }
@@ -152,7 +187,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
         this.deserializeLocation(nbt);
         this.setCapacity(nbt.getLong("cap"));
         
-        this.map.clear();
+        this.slots.clear();
         this.used = 0;
         
         T sType = this.storageType();
@@ -165,8 +200,9 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 NBTTagCompound subTag = nbtContents.getCompoundTagAt(i);
                 if(subTag != null)
                 {
-                    IResource<T> resource = sType.makeResource(subTag);
-                    this.add(resource, subTag.getLong("qty"), false);
+                    AbstractResourceWithQuantity<T> rwq = sType.makeResource(subTag).withQuantity(1);
+                    rwq.deserializeNBT(subTag);
+                    this.add(rwq, false);
                 }
             }   
         }
@@ -202,7 +238,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.location = location;
         // no bookkeeping change, but force world save
-        if(this.owner != null) this.owner.setDirty();
+        this.setDirty();
     }
     
     @Override
@@ -216,7 +252,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.id = id;
         // no bookkeeping change, but force world save
-        if(this.owner != null) this.owner.setDirty();
+        this.setDirty();
     }
     
     @Override
@@ -229,6 +265,12 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     public SimpleUnorderedArrayList<IStorageListener<T>> listeners()
     {
         return this.listeners;
+    }
+    
+    @Override
+    public void setDirty()
+    {
+        if(this.owner != null) this.owner.setDirty();
     }
 
  

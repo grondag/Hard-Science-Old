@@ -1,7 +1,7 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.machines.MachineContainerBase;
-import grondag.hard_science.machines.MachineContainerTEBase;
+import grondag.hard_science.machines.MachineContainer;
+import grondag.hard_science.machines.MachineContainerTileEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -26,9 +26,9 @@ public class ModGuiHandler implements IGuiHandler
         {
             BlockPos pos = new BlockPos(x, y, z);
             TileEntity te = world.getTileEntity(pos);
-            if (te instanceof MachineContainerTEBase) 
+            if (te instanceof MachineContainerTileEntity) 
             {
-                return new MachineContainerBase(player.inventory, (MachineContainerTEBase) te, GuiSmartChest.LAYOUT);
+                return new MachineContainer(player.inventory, (MachineContainerTileEntity) te, GuiSmartChest.LAYOUT);
             }
         }
         return null;
@@ -48,10 +48,10 @@ public class ModGuiHandler implements IGuiHandler
                 {
                     BlockPos pos = new BlockPos(x, y, z);
                     TileEntity te = world.getTileEntity(pos);
-                    if (te instanceof MachineContainerTEBase) 
+                    if (te instanceof MachineContainerTileEntity) 
                     {
-                        MachineContainerTEBase containerTileEntity = (MachineContainerTEBase) te;
-                        return new GuiSmartChest(containerTileEntity, new MachineContainerBase(player.inventory, containerTileEntity, GuiSmartChest.LAYOUT));
+                        MachineContainerTileEntity containerTileEntity = (MachineContainerTileEntity) te;
+                        return new GuiSmartChest(containerTileEntity, new MachineContainer(player.inventory, containerTileEntity, GuiSmartChest.LAYOUT));
                     }
                     return null;
                 }

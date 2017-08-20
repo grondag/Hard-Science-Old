@@ -157,6 +157,51 @@ public class ItemStorageTest
         assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2);
         store4.add(res2, 7, false);
         assert ism2.getQuantityStored(res2) == ism.getQuantityStored(res2) - 7;
+        
+        
+        // IItemHandler tests
+//        ItemStorage ihStore = new ItemStorage(null);
+//        ihStore.setCapacity(64);
+//        assert ihStore.getSlots() == 1;
+//        assert ihStore.getSlotLimit(0) == 64;
+//        assert ihStore.extractItem(0, 100, false) == null;
+//        
+//        ItemStack stack = i1.getDefaultInstance();
+//        stack.setCount(32);
+//        assert ihStore.insertItem(0, stack, true) == ItemStack.EMPTY;
+//        assert ihStore.insertItem(0, stack, false) == ItemStack.EMPTY;
+//        assert ihStore.usedCapacity() == 32;
+//        assert ihStore.getSlots() == 2;
+//        assert ihStore.getSlotLimit(0) == 64;
+//        assert ihStore.getSlotLimit(1) == 64 - 32;
+//        
+//        stack = i2.getDefaultInstance();
+//        stack.setCount(64);
+//        
+//        ItemStack returnStack = ihStore.insertItem(0, stack, false);
+//        assert returnStack.getCount() == 32;
+//        assert returnStack.getItem() == stack.getItem();
+//        assert ihStore.usedCapacity() == 64;
+//        assert ihStore.getSlots() == 2;
+//        assert ihStore.getSlotLimit(0) == 32;
+//        assert ihStore.getSlotLimit(1) == 32;
+//        
+//        stack = i1.getDefaultInstance();
+//        returnStack = ihStore.extractItem(0, 16, false);
+//        assert returnStack.getCount() == 16;
+//        assert returnStack.getItem() == stack.getItem();
+//        assert ihStore.usedCapacity() == 48;
+//        assert ihStore.getSlots() == 3;
+//        assert ihStore.getSlotLimit(0) == 32;
+//        assert ihStore.getSlotLimit(1) == 48;
+//        
+//        returnStack = ihStore.extractItem(0, 64, false);
+//        assert returnStack.getCount() == 16;
+//        assert returnStack.getItem() == stack.getItem();
+//        assert ihStore.usedCapacity() == 32;
+//        assert ihStore.getSlots() == 2;
+//        assert ihStore.getSlotLimit(0) == 64;
+//        assert ihStore.getSlotLimit(1) == 32;
     }
 
     private boolean confirmStoreAndQuantity(List<StorageWithQuantity<StorageTypeStack>> list, ItemStorage store, long quantity)
