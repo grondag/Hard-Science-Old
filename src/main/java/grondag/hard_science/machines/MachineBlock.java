@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -78,7 +79,9 @@ public abstract class MachineBlock extends Block
             TileEntity myTE = world.getTileEntity(pos);
             if(myTE != null && myTE instanceof MachineTileEntity && myTE.hasWorld() && !myTE.getWorld().isRemote) 
             {
-                ((MachineTileEntity)myTE).saveStateInStack(stack);
+                NBTTagCompound serverSideTag = new NBTTagCompound();
+                stack.setTagInfo(MachineItemBlock.NBT_SERVER_SIDE_TAG, serverSideTag);
+                ((MachineTileEntity)myTE).saveStateInStack(stack, serverSideTag);
             }
             return Collections.singletonList(stack);
         }
@@ -98,8 +101,19 @@ public abstract class MachineBlock extends Block
         }
         super.breakBlock(worldIn, pos, state);
     }
-
  
+    @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    {
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+        TileEntity myTE = worldIn.getTileEntity(pos);
+        if(myTE != null && myTE instanceof MachineTileEntity)
+        {
+            ((MachineTileEntity)myTE).updateRedstonePower();
+        }
+    }
+
+
     
     
 }

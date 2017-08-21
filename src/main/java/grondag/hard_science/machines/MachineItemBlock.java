@@ -53,7 +53,9 @@ public class MachineItemBlock extends ItemBlock
             MachineTileEntity blockTE = (MachineTileEntity)world.getTileEntity(pos);
             if (blockTE != null) 
             {
-                blockTE.restoreStateFromStackAndReconnect(stack);
+                NBTTagCompound serverSideTag = stack.hasTagCompound() ? stack.getSubCompound(MachineItemBlock.NBT_SERVER_SIDE_TAG) : null;
+                    
+                blockTE.restoreStateFromStackAndReconnect(stack, serverSideTag);
             }
         }
         

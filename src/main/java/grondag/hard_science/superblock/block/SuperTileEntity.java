@@ -34,13 +34,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
             return true;
         }
     }
-
-    @Override
-    public void onLoad() 
-    {
-        super.onLoad();
-    }
-
+ 
     public void updateClientRenderState()
     {
         this.isModelStateCacheDirty = true;

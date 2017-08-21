@@ -17,8 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 
 public abstract class AbstractMachineContainerTileEntity extends MachineTileEntity
 {
@@ -44,7 +42,7 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
      */
     public IStorage<StorageType.StorageTypeStack> getStorage()
     {
-        if(this.world.isRemote) return null;
+        if(this.isRemote()) return null;
         
         if(this.storage == null)
         {
@@ -96,6 +94,7 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
     @Override
     public void onChunkUnload()
     {
+        if(this.isRemote()) return;
         this.setStorage(null);
         super.onChunkUnload();
     }
@@ -104,12 +103,7 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
-                
-        if(this.world == null)
-        {
-            if(FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) return; ;
-        }
-        else if(world.isRemote) return;
+        if(this.isRemote()) return;
         
         this.storageID = compound.getInteger("storageID");
         
@@ -121,6 +115,7 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
+        if(this.isRemote()) return compound;
         
         //FIXME: remove
         Log.info("TE NBT write id = " + this.storageID);
@@ -131,38 +126,38 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
     }
 
     @Override
-    public void restoreStateFromStackAndReconnect(ItemStack stack)
+    public void restoreStateFromStackAndReconnect(ItemStack stack, NBTTagCompound serverSideTag)
     {
-       if(this.world == null || this.world.isRemote) return;
-       NBTTagCompound tag = stack.getTagCompound();
-       if(tag == null) return;
-       tag = tag.getCompoundTag(MachineItemBlock.NBT_SERVER_SIDE_TAG);
-       if(!tag.hasNoTags())
-       {
-           IStorage<StorageType.StorageTypeStack> storage = new ItemStorage(tag);
-           storage.setLocation(this.pos, this.world);
-           //force new ID
-           storage.setId(0);
-           Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(storage);
-           
-           this.setStorage(storage);
-           
-           //FIXME: remove
-           Log.info("restoreStateFromStackAndReconnect id=" + this.storageID);
-       }
+        if(this.isRemote()) return;
+       super.restoreStateFromStackAndReconnect(stack, serverSideTag);
+       if(serverSideTag == null || serverSideTag.hasNoTags()) return;
+     
+       IStorage<StorageType.StorageTypeStack> storage = new ItemStorage(serverSideTag);
+       storage.setLocation(this.pos, this.world);
+       //force new ID
+       storage.setId(0);
+       Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(storage);
+       
+       this.setStorage(storage);
+       
+       //FIXME: remove
+       Log.info("restoreStateFromStackAndReconnect id=" + this.storageID);
+       
     }
     
     @Override
-    public void saveStateInStack(ItemStack stack)
+    public void saveStateInStack(ItemStack stack, NBTTagCompound serverSideTag)
     {
-        if(this.world == null || this.world.isRemote) return;
+        if(this.isRemote()) return;
+        super.restoreStateFromStackAndReconnect(stack, serverSideTag);
+        
         IStorage<StorageTypeStack> store = this.getStorage();
         //FIXME: remove
         Log.info("saveStateInStack id=" + this.storageID);
         
         if(this.storage.usedCapacity() == 0) return;
         
-        if(store != null) stack.setTagInfo(MachineItemBlock.NBT_SERVER_SIDE_TAG, store.serializeNBT());
+        if(store != null) store.serializeNBT(serverSideTag);
         
         NBTTagCompound displayTag = stack.getOrCreateSubCompound("display");
             
@@ -196,7 +191,7 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
     @Override
     public void disconnect()
     {
-        if(this.world == null || this.world.isRemote) return;
+        if(this.isRemote()) return;
         Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.removeStore(this.storage);
         
         //FIXME: remove

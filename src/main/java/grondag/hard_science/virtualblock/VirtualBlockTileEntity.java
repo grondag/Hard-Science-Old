@@ -1,6 +1,7 @@
 package grondag.hard_science.virtualblock;
 
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
+import jline.internal.Log;
 import net.minecraft.util.BlockRenderLayer;
 
 public class VirtualBlockTileEntity extends SuperModelTileEntity
@@ -12,4 +13,16 @@ public class VirtualBlockTileEntity extends SuperModelTileEntity
     }
     
     public boolean isVirtual() { return true; }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
+        if(!this.world.isRemote)
+        {
+            VirtualBlockTracker.INSTANCE.get(world).enqueue(pos);
+            //FIXME: remove
+            Log.info("Enqueued virtual block @" + pos.toString());
+        }
+    }
 }

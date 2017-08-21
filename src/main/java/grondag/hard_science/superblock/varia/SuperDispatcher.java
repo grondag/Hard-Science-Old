@@ -325,7 +325,10 @@ public class SuperDispatcher
         public boolean isAmbientOcclusion()
         {
          
-            switch(MinecraftForgeClient.getRenderLayer())
+            BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
+            if(layer == null) return true;
+            
+            switch(layer)
             {
             case SOLID:
                 return !this.blockRenderMode.isSolidLayerFlatLighting;

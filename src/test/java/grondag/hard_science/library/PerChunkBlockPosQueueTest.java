@@ -19,19 +19,19 @@ public class PerChunkBlockPosQueueTest
         
         PerChunkBlockPosQueue subject = new PerChunkBlockPosQueue();
         
-        subject.queue(p1a);
+        subject.enqueue(p1a);
         
         assert subject.dequeue(p2a) == null;
         assert subject.dequeue(p1b).equals(p1a);
         assert subject.dequeue(p1b) == null;
         
-        subject.queue(p1a);
-        subject.queue(p1a);
-        subject.queue(p1b);
+        subject.enqueue(p1a);
+        subject.enqueue(p1a);
+        subject.enqueue(p1b);
         
-        subject.queue(p2b);
-        subject.queue(p2a);
-        subject.queue(p1b);
+        subject.enqueue(p2b);
+        subject.enqueue(p2a);
+        subject.enqueue(p1b);
         
         assert subject.dequeue(p1b).equals(p1a);
         assert subject.dequeue(p2a).equals(p2b);

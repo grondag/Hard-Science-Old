@@ -14,7 +14,7 @@ public class PerChunkBlockPosQueue
     
     
     
-    public void queue(BlockPos pos)
+    public void enqueue(BlockPos pos)
     {
         long packedChunkPos = PackedBlockPos.getPackedChunkPos(pos);
         

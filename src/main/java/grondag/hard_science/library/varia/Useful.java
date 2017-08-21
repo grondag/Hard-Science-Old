@@ -379,6 +379,19 @@ public class Useful
    }
    
    /**
+    * Returns first given default value if given ordinal is out of range.
+    */
+   @SuppressWarnings("unchecked")
+   public static <T extends Enum<?>> T safeEnumFromOrdinal(int ord, T defaultValue)
+   {
+       if(ord < 0 || ord >= defaultValue.getClass().getEnumConstants().length)
+       {
+           return defaultValue;
+       }
+       return (T) defaultValue.getClass().getEnumConstants()[ord];
+   }
+   
+   /**
     * Equivalent to offsetEnumValue(value, 1)
     * Probably slightly faster.
     */

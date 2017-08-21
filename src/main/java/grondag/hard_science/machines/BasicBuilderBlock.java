@@ -1,6 +1,5 @@
 package grondag.hard_science.machines;
 
-import grondag.hard_science.library.world.BasicBuilderTileEntity;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;

@@ -2,7 +2,7 @@ package grondag.hard_science.init;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.feature.volcano.VolcanoTileEntity;
-import grondag.hard_science.library.world.BasicBuilderTileEntity;
+import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.MachineContainerTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;

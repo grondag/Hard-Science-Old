@@ -437,4 +437,19 @@ public class Configurator
         @Comment("If true, hyper-dimensional blocks have a chance to lose durability due to damage from entities or explosions.")
         public boolean canBeDamaged;
      }
+    
+    ////////////////////////////////////////////////////        
+    // MACHINES
+    ////////////////////////////////////////////////////
+    @LangKey("hard_science.config.machines")
+    @Comment("Settings for machines.")
+    public static Machines MACHINES = new Machines();
+    
+    public static class Machines
+    {
+        @Comment({"Radius for basic builder to find & build virtual blocks - in chunks.",
+            "0 means can only build in chunk where machine is located."})
+        @RangeInt(min = 0, max = 8)
+        public int basicBuilderChunkRadius = 4;
+    }
 }
