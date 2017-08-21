@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.wip;
 
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -112,7 +113,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
             }
             
             if(this.owner != null) this.owner.notifyTaken(this, resource, taken);
-            this.updateListeners(resource.withQuantity(current));
+            this.updateListeners(resource.withQuantity(rwq.quantity));
             this.setDirty();
         }
         
@@ -122,7 +123,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     @Override
     public synchronized long add(IResource<T> resource, long howMany, boolean simulate)
     {
-        if(howMany < 1) return 0;
+        if(howMany < 1 || !this.isResourceAllowed(resource)) return 0;
         
         long added = Math.min(howMany, this.availableCapacity());
         

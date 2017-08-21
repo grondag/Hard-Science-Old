@@ -43,6 +43,7 @@ public class ModItems
     public static final Item basalt_cut = null;
     
     public static final Item virtual_block = null;
+    public static final Item smart_chest = null;
     
     // tools
 //    public static final Item obj_test_model = null;

@@ -119,7 +119,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             
             case QUICK_MOVE_HALF:
             {
-                int toMove = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource));
+                int toMove = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource) / 2));
                 this.doQuickMove(toMove, player, targetResource, storage);
                 return;
             }
@@ -141,7 +141,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
            
             case TAKE_HALF:
             {
-                int toTake = (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource));
+                int toTake = Math.max(1, (int) Math.min(targetResource.sampleItemStack().getMaxStackSize() / 2, storage.getQuantityStored(targetResource) / 2));
                 this.doTake(toTake, player, targetResource, storage);
                 return;
             }

@@ -1,5 +1,6 @@
 package grondag.hard_science.simulator.wip;
 
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -123,4 +124,13 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
         }
         return 0;
     }
+
+    @Override
+    public boolean isResourceAllowed(IResource<StorageTypeStack> resource)
+    {
+        ItemResource itemRes = (ItemResource)resource;
+        return !(itemRes.getItem() == ModItems.smart_chest && itemRes.hasTagCompound());
+    }
+    
+    
 }

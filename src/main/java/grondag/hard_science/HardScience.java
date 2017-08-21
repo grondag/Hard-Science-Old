@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -52,27 +53,39 @@ public class HardScience
     }
     
 	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
+	public void preInit(FMLPreInitializationEvent event)
+	{
 		proxy.preInit(event);
 	}
 
 	@EventHandler
-	public void init(FMLInitializationEvent event) {
+	public void init(FMLInitializationEvent event)
+	{
 		proxy.init(event);
 	}
 
 	@EventHandler
-	public void postInit(FMLPostInitializationEvent event) {
+	public void postInit(FMLPostInitializationEvent event)
+	{
 		proxy.postInit(event);
 	}
-
+	
+	
    @EventHandler
-    public void serverStarted(FMLServerStartedEvent event) {
+    public void serverAboutToStart(FMLServerAboutToStartEvent event) 
+   {
+       proxy.serverAboutToStart(event);
+    }
+   
+	@EventHandler
+    public void serverStarted(FMLServerStartedEvent event) 
+	{
        proxy.serverStarted(event);
     }
 
    @EventHandler
-   public void serverStopping(FMLServerStoppingEvent event) {
+   public void serverStopping(FMLServerStoppingEvent event)
+   {
        proxy.serverStopping(event);
    }
    

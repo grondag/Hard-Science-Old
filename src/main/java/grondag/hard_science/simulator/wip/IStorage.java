@@ -17,6 +17,8 @@ public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILoca
     
     void setOwner(AbstractStorageManager<T> owner);
     
+    default boolean isResourceAllowed(IResource<T> resource) { return true; }
+    
     /**
      * Override if this storage can hold only certain resources.
      */

@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
@@ -56,6 +57,11 @@ public class CommonProxy
     public void serverStopping(FMLServerStoppingEvent event)
     {
         Simulator.INSTANCE.stop();
+    }
+    
+    public void serverAboutToStart(FMLServerAboutToStartEvent event)
+    {
+        
     }
 
     /**
