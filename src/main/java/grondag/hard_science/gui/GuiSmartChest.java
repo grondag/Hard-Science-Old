@@ -12,10 +12,10 @@ import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
 import grondag.hard_science.library.varia.Wrapper;
-import grondag.hard_science.machines.ContainerLayout;
-import grondag.hard_science.machines.MachineContainer;
-import grondag.hard_science.machines.MachineContainerTileEntity;
-import grondag.hard_science.machines.MachineItemBlock;
+import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.support.ContainerLayout;
+import grondag.hard_science.machines.support.MachineItemBlock;
+import grondag.hard_science.machines.support.MachineStorageContainer;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import net.minecraft.client.gui.GuiButton;
@@ -66,7 +66,7 @@ public class GuiSmartChest extends GuiContainer
         LAYOUT.playerInventoryTop = LAYOUT.dialogHeight - LAYOUT.externalMargin - LAYOUT.slotSpacing * 4;
     }
 
-    public GuiSmartChest(MachineContainerTileEntity tileEntity, MachineContainer container) 
+    public GuiSmartChest(SmartChestTileEntity tileEntity, MachineStorageContainer container) 
     {
         super(container);
         this.layout = container.layout;

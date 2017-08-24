@@ -29,9 +29,16 @@ public enum RenderPassSet
     
     public final RenderLayout renderLayout;
     
+    /**
+     * Used by builder to know if needs to consume minimal glow ingredient.
+     */
+    public final boolean hasFlatRenderPass;
+    
     private RenderPassSet(RenderPass... passes)
     {
         this.renderLayout = new RenderLayout(passes);
+        
+        this.hasFlatRenderPass = this.renderLayout.containsRenderPass(SOLID_FLAT) || this.renderLayout.containsRenderPass(TRANSLUCENT_FLAT);
         
         // if no block render mode matches then must be rendered as TESR
         BlockRenderMode brm = BlockRenderMode.TESR;

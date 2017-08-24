@@ -1,7 +1,7 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.machines.MachineContainer;
-import grondag.hard_science.machines.MachineContainerTileEntity;
+import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.support.MachineStorageContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -16,19 +16,20 @@ public class ModGuiHandler implements IGuiHandler
     public static enum ModGui
     {
         SUPERMODEL_ITEM,
-        TEST_CONTAINER
+        SMART_CHEST,
+        BASIC_BUILDER;
     }
     
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) 
     {
-        if(id == ModGui.TEST_CONTAINER.ordinal())
+        if(id == ModGui.SMART_CHEST.ordinal())
         {
             BlockPos pos = new BlockPos(x, y, z);
             TileEntity te = world.getTileEntity(pos);
-            if (te instanceof MachineContainerTileEntity) 
+            if (te instanceof SmartChestTileEntity) 
             {
-                return new MachineContainer(player.inventory, (MachineContainerTileEntity) te, GuiSmartChest.LAYOUT);
+                return new MachineStorageContainer(player.inventory, (SmartChestTileEntity) te, GuiSmartChest.LAYOUT);
             }
         }
         return null;
@@ -44,14 +45,14 @@ public class ModGuiHandler implements IGuiHandler
                 case  SUPERMODEL_ITEM:
                     return new SuperGuiScreen();
                 
-                case TEST_CONTAINER:
+                case SMART_CHEST:
                 {
                     BlockPos pos = new BlockPos(x, y, z);
                     TileEntity te = world.getTileEntity(pos);
-                    if (te instanceof MachineContainerTileEntity) 
+                    if (te instanceof SmartChestTileEntity) 
                     {
-                        MachineContainerTileEntity containerTileEntity = (MachineContainerTileEntity) te;
-                        return new GuiSmartChest(containerTileEntity, new MachineContainer(player.inventory, containerTileEntity, GuiSmartChest.LAYOUT));
+                        SmartChestTileEntity containerTileEntity = (SmartChestTileEntity) te;
+                        return new GuiSmartChest(containerTileEntity, new MachineStorageContainer(player.inventory, containerTileEntity, GuiSmartChest.LAYOUT));
                     }
                     return null;
                 }

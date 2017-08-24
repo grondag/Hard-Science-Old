@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.library.render.QuadHelper;
 import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.render.Vertex;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.VoxelBitField;
 import grondag.hard_science.library.varia.VoxelBitField.VoxelBox;
 import net.minecraft.util.EnumFacing;
@@ -35,22 +36,12 @@ public class CollisionBoxGenerator
         List<AxisAlignedBB> retVal = makeBoxVoxelMethod(quads);
         List<AxisAlignedBB> simple = Collections.singletonList(makeBoxSimpleMethod(quads));
 
-        double simpleVolume = getListVolume(simple);
-        double voxelVolume = getListVolume(retVal);
+        double simpleVolume = Useful.volumeAABB(simple);
+        double voxelVolume = Useful.volumeAABB(retVal);
         //use simple volume if voxel gives empty box, or if simple is not much bigger
         if(voxelVolume == 0.0 || ((simpleVolume - voxelVolume) / voxelVolume) < 0.1)
         {
             retVal = simple;
-        }
-        return retVal;
-    }
-
-    private static double getListVolume(List<AxisAlignedBB> list)
-    {
-        double retVal = 0;
-        for(AxisAlignedBB box : list)
-        {
-            retVal += (box.maxX - box.minX) * (box.maxY - box.minY) * (box.maxZ - box.minZ);
         }
         return retVal;
     }
@@ -142,19 +133,9 @@ public class CollisionBoxGenerator
     private static boolean isVoxelPresent(double x, double y, double z, List<RawQuad> quads)
     {
         Vec3d point = new Vec3d((x+0.5)/8.0, (y+0.5)/8.0, (z+0.5)/8.0);
-        return isPointEnclosed(point, quads);
+        return Useful.isPointEnclosed(point, quads);
     }
     
-    private static final Vec3d VOXEL_TEST_RAY = new Vec3d(5525, 13123, 7435);
-    private static boolean isPointEnclosed(Vec3d point, List<RawQuad> quads)
-    {
-        int intersectionCount = 0;
-        for(RawQuad quad : quads)
-        {                  
-            if(quad.intersectsWithRay(point, VOXEL_TEST_RAY)) intersectionCount++;
-        }          
-        return (intersectionCount & 0x1) == 1;
-    }
     
     public static AxisAlignedBB makeBoxSimpleMethod(List<RawQuad> quads)
     {

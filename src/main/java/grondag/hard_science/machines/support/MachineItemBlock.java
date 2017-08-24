@@ -1,7 +1,9 @@
-package grondag.hard_science.machines;
+package grondag.hard_science.machines.support;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.machines.base.MachineBlock;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

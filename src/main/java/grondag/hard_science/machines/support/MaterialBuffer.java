@@ -1,6 +1,9 @@
-package grondag.hard_science.machines;
+package grondag.hard_science.machines.support;
+
+import javax.annotation.Nonnull;
 
 import grondag.hard_science.Log;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.items.IItemHandler;
@@ -24,7 +27,7 @@ public class MaterialBuffer
      * Units value of a normal stack. Some inputs may be worth more or less.
      * Buffer creation is specified in stacks, not units.
      */
-    static final int UNITS_PER_ITEM = 1024;
+    public static final int UNITS_PER_ITEM = 1024;
     
     public MaterialBuffer(WeightedIngredientList inputs, int maxStacks, String nbtTag)
     {
@@ -44,22 +47,30 @@ public class MaterialBuffer
     /**
      * Extracts needed items from the input stack if found
      * and increases buffer according to amount accepted. 
+     * Assumes caller checked for null / empty stack before calling.
      * Returns true if items were taken.
      */
-    public boolean extract(ItemStack stack, IItemHandler itemHandler, int slot)
+    public boolean extract(@Nonnull ItemStack stack, IItemHandler itemHandler, int slot)
     {
+        if(stack.isEmpty() || stack.getItem() == Items.AIR)
+            Log.warn("Material Buffer extract encountered invalid (empty) input ingredient.  This is a bug.");
+        
         int unitsPerItem = this.inputs.getUnits(stack);
         if(unitsPerItem == 0) return false;
         int requestedCount = Math.min(stack.getCount(), this.emptySpace() / unitsPerItem);
         
-        int foundCount = itemHandler.extractItem(slot, requestedCount, false).getCount();
-
+        ItemStack found = itemHandler.extractItem(slot, requestedCount, false);
+        if(found.isEmpty() || found.getItem() != stack.getItem()) 
+                return false;
+        
+        int foundCount = found.getCount();
+        
         if(foundCount > 0)
         {
             this.level += foundCount * unitsPerItem;
             
             //FIXME: remove
-            Log.info("Restocked %d %s for %d units", foundCount, stack.getDisplayName(), foundCount * unitsPerItem);
+            Log.info("Restocked %d %s for %d units", foundCount, found.getDisplayName(), foundCount * unitsPerItem);
             return true;
         }
         else

@@ -1,21 +1,15 @@
 package grondag.hard_science.machines;
 
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.IBlockState;
+import grondag.hard_science.gui.ModGuiHandler.ModGui;
+import grondag.hard_science.machines.base.MachineBlock;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-public class BasicBuilderBlock extends MachineBlock implements ITileEntityProvider
+public class BasicBuilderBlock extends MachineBlock
 {
-    @Override
-    public TileEntity createTileEntity(World world, IBlockState state)
-    {
-        return super.createTileEntity(world, state);
-    }
-
     public BasicBuilderBlock(String name)
     {
-        super(name);
+        super(name, ModGui.BASIC_BUILDER.ordinal());
     }
 
     @Override

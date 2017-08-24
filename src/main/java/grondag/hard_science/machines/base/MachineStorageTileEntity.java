@@ -1,4 +1,4 @@
-package grondag.hard_science.machines;
+package grondag.hard_science.machines.base;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,29 +7,31 @@ import java.util.stream.Collectors;
  * Hides the mechanics of storage access to ensure consistency of handling.
  */
 import grondag.hard_science.Log;
+import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.ItemStorage;
 import grondag.hard_science.simulator.wip.StorageType;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraftforge.items.IItemHandler;
 
-public abstract class AbstractMachineContainerTileEntity extends MachineTileEntity
+/**
+ * For containers with a persisted IStorage.
+ * Most of the IStorage stuff that should be needed is implemented in the base class.
+ */
+public abstract class MachineStorageTileEntity extends MachineContainerTileEntity
 {
     /** -1 signifies not loaded */
     private int storageID = -1; 
     
     private IStorage<StorageType.StorageTypeStack> storage;
-
-    protected AbstractMachineContainerTileEntity()
-    {
-        super();
-    }
-
+    
     private void setStorage(IStorage<StorageType.StorageTypeStack> storage)
     {
         this.storage = storage;
@@ -49,6 +51,12 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
             this.setStorage(this.retrieveOrCreateStorage());
         }
         return this.storage;
+    }
+    
+    @Override
+    public IItemHandler getItemHandler()
+    {
+        return (IItemHandler) this.getStorage();
     }
 
     @SuppressWarnings("unchecked")
@@ -94,9 +102,9 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
     @Override
     public void onChunkUnload()
     {
+        super.onChunkUnload();
         if(this.isRemote()) return;
         this.setStorage(null);
-        super.onChunkUnload();
     }
     
     @Override
@@ -198,5 +206,10 @@ public abstract class AbstractMachineContainerTileEntity extends MachineTileEnti
         Log.info("disconnect id=" + this.storageID);
         
         this.setStorage(null);
+    }
+
+    public boolean canInteractWith(EntityPlayer playerIn)
+    {
+         return super.canInteractWith(playerIn) && this.getStorage() != null;
     }
 }

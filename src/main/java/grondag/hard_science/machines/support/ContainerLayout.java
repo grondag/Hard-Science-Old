@@ -1,4 +1,4 @@
-package grondag.hard_science.machines;
+package grondag.hard_science.machines.support;
 
 public class ContainerLayout
 {

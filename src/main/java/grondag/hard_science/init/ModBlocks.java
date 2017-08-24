@@ -6,7 +6,7 @@ import grondag.hard_science.feature.volcano.VolcanoBlock;
 import grondag.hard_science.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.machines.BasicBuilderBlock;
-import grondag.hard_science.machines.MachineContainerBlock;
+import grondag.hard_science.machines.SmartChecstBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -14,14 +14,14 @@ import grondag.hard_science.superblock.color.Chroma;
 import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.PaintLayer;
 import grondag.hard_science.superblock.terrain.TerrainBlockRegistry;
 import grondag.hard_science.superblock.terrain.TerrainCubicBlock;
 import grondag.hard_science.superblock.terrain.TerrainDynamicBlock;
 import grondag.hard_science.superblock.terrain.TerrainStaticBlock;
-import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
@@ -176,7 +176,7 @@ public class ModBlocks
         // VIRTUAL BLOCKS
         event.getRegistry().register(new VirtualBlock("virtual_block"));
         
-        event.getRegistry().register(new MachineContainerBlock("smart_chest"));
+        event.getRegistry().register(new SmartChecstBlock("smart_chest"));
         event.getRegistry().register(new BasicBuilderBlock("basic_builder"));
     }
     

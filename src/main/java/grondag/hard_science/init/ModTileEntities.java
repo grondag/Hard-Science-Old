@@ -3,7 +3,7 @@ package grondag.hard_science.init;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.feature.volcano.VolcanoTileEntity;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
-import grondag.hard_science.machines.MachineContainerTileEntity;
+import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
@@ -25,7 +25,7 @@ public class ModTileEntities
         GameRegistry.registerTileEntity(SuperModelTileEntity.class, "SuperModelTileEntity");
         GameRegistry.registerTileEntity(VirtualBlockTileEntity.class, "VirtualBlockTileEntity");
         
-        GameRegistry.registerTileEntity(MachineContainerTileEntity.class, "MachineContainerTileEntity");
+        GameRegistry.registerTileEntity(SmartChestTileEntity.class, "SmartChestTileEntity");
         GameRegistry.registerTileEntity(BasicBuilderTileEntity.class, "BasicBuilderTileEntity");
         
         if(event.getSide() == Side.CLIENT)

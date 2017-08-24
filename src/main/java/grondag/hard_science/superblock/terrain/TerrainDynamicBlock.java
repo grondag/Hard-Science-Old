@@ -118,7 +118,7 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         ModelState modelState = this.getModelStateAssumeStateIsStale(state, world, pos, true);
         for(AxisAlignedBB box : modelState.getShape().meshFactory().collisionHandler().getCollisionBoxes(modelState))
         {
-            volume += Useful.AABBVolume(box);
+            volume += Useful.volumeAABB(box);
         }
 
         return (int) Math.min(9, volume * 9);

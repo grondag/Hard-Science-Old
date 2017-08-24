@@ -6,7 +6,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-
+/**
+ * FIXME: going to have problems with IItemHandler if storages are modified concurrently
+ * by simulation during world tick.  Tiles from other mods will expect item stack
+ * to be unchanged since time they called getStackInSlot(). Will need to detect
+ * when IStorage is being accessed this way, limit changes to server thread, etc.
+ */
 public class ItemStorage extends AbstractStorage<StorageTypeStack> implements IItemHandler
 {
     public ItemStorage(NBTTagCompound nbt) 
@@ -83,7 +88,6 @@ public class ItemStorage extends AbstractStorage<StorageTypeStack> implements II
             return result;
         }
     }
-
 
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate)

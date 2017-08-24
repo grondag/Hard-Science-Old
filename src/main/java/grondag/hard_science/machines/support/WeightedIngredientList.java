@@ -1,7 +1,9 @@
-package grondag.hard_science.machines;
+package grondag.hard_science.machines.support;
 
 import javax.annotation.Nullable;
 
+import grondag.hard_science.Log;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -61,6 +63,10 @@ public class WeightedIngredientList
         public WeightedIngredient(String ingredient, int units)
         {
             this.ingredient = CraftingHelper.getIngredient(ingredient);
+            
+            if(this.ingredient.apply(ItemStack.EMPTY) || this.ingredient.apply(Items.AIR.getDefaultInstance()))
+                Log.warn("WeightedIngredient encountered invalid (empty) input ingredient.  This is a bug.");
+            
             this.units = units;
         }
     }

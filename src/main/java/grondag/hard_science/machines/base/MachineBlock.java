@@ -1,4 +1,4 @@
-package grondag.hard_science.machines;
+package grondag.hard_science.machines.base;
 
 import java.util.Collections;
 import java.util.List;
@@ -6,7 +6,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.machines.support.MachineItemBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -17,11 +19,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public abstract class MachineBlock extends Block
+public abstract class MachineBlock extends Block implements ITileEntityProvider 
 {
     public static final Material MACHINE_MATERIAL = new Material(MapColor.SILVER_STAINED_HARDENED_CLAY) 
     {
@@ -32,9 +36,12 @@ public abstract class MachineBlock extends Block
         public EnumPushReaction getMobilityFlag() { return EnumPushReaction.BLOCK; }
     };
     
-    public MachineBlock(String name)
+    public final int guiID;
+    
+    public MachineBlock(String name, int guiID)
     {
         super(MACHINE_MATERIAL);
+        this.guiID = guiID;
         this.setUnlocalizedName(HardScience.MODID + "." + name);
         this.setRegistryName(name);
         this.setHarvestLevel(null, 0);
@@ -113,7 +120,20 @@ public abstract class MachineBlock extends Block
         }
     }
 
-
+    @Override
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
+    {
+        if (world.isRemote || this.guiID < 0) {
+            return true;
+        }
+        TileEntity te = world.getTileEntity(pos);
+        if (!(te instanceof MachineTileEntity)) 
+        {
+            return false;
+        }
+        player.openGui(HardScience.INSTANCE, this.guiID, world, pos.getX(), pos.getY(), pos.getZ());
+        return true;
+    }
     
     
 }
