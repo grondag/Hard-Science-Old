@@ -98,6 +98,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     @Override
     public void update()
     {
+        super.update();
         if(world.isRemote || !this.isOn()) return;
         
         if(checkPos == null) checkPos = this.pos;
@@ -313,7 +314,6 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     @Override
     public IItemHandler getItemHandler()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.bufferManager;
     }
 }

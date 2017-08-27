@@ -1,10 +1,10 @@
-package grondag.hard_science.network;
+package grondag.hard_science.network.client_to_server;
 
 
-import io.netty.buffer.ByteBuf;
+import grondag.hard_science.network.AbstractPlayerToServerPacket;
+import grondag.hard_science.player.ModPlayerCaps;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
-import grondag.hard_science.player.ModPlayerCaps;
 
 /**
  * Keeps server in synch with user keypress for placement modifier, if it is other than sneak.
@@ -24,16 +24,14 @@ public class PacketUpdatePlacementKey extends AbstractPlayerToServerPacket<Packe
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) 
+    public void fromBytes(PacketBuffer pBuff) 
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         this.isKeyPressed = pBuff.readBoolean();
     }
 
     @Override
-    public void toBytes(ByteBuf buf) 
+    public void toBytes(PacketBuffer pBuff) 
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         pBuff.writeBoolean(this.isKeyPressed);
     }
 

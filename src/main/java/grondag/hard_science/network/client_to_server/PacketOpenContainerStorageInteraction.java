@@ -1,10 +1,11 @@
-package grondag.hard_science.network;
+package grondag.hard_science.network.client_to_server;
 
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineContainerTileEntity;
 import grondag.hard_science.machines.base.MachineStorageTileEntity;
+import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import grondag.hard_science.simulator.wip.IResource;
 import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.ItemResource;
@@ -12,7 +13,6 @@ import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.wip.StorageType;
 import grondag.hard_science.simulator.wip.StorageType.EnumStorageType;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -65,9 +65,8 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     public PacketOpenContainerStorageInteraction() {}
     
     @Override
-    public void fromBytes(ByteBuf buf)
+    public void fromBytes(PacketBuffer pBuff)
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         this.action = Action.values()[pBuff.readByte()];
         this.storageType = StorageType.fromEnum(EnumStorageType.values()[pBuff.readByte()]);
         this.target = this.storageType.makeResource(null);
@@ -75,9 +74,8 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     }
 
     @Override
-    public void toBytes(ByteBuf buf)
+    public void toBytes(PacketBuffer pBuff)
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         pBuff.writeByte(this.action.ordinal());
         pBuff.writeByte(this.storageType.ordinal);
         this.target.toBytes(pBuff);
@@ -224,5 +222,4 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
             player.updateHeldItem();
         }
     }
-    
 }

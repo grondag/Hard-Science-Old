@@ -1,12 +1,13 @@
-package grondag.hard_science.network;
+package grondag.hard_science.network.client_to_server;
 
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumHand;
 import java.io.IOException;
+
+import grondag.hard_science.network.AbstractPlayerToServerPacket;
 
 /**
  * This is a packet that can be used to update the NBT on the held item of a player.
@@ -27,9 +28,8 @@ public class PacketReplaceHeldItem extends AbstractPlayerToServerPacket<PacketRe
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) 
+    public void fromBytes(PacketBuffer pBuff) 
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         try
         {
             this.stack = pBuff.readItemStack();
@@ -41,9 +41,8 @@ public class PacketReplaceHeldItem extends AbstractPlayerToServerPacket<PacketRe
     }
 
     @Override
-    public void toBytes(ByteBuf buf) 
+    public void toBytes(PacketBuffer pBuff) 
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         pBuff.writeItemStack(this.stack);
     }
    

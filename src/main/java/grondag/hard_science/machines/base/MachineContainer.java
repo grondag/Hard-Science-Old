@@ -61,7 +61,7 @@ public abstract class MachineContainer extends Container
     //            x += 18;
     //        }
 
-    protected abstract void addMachineSlots();
+    protected  void addMachineSlots() {};
     
 
     @Override

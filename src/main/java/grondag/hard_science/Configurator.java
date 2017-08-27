@@ -19,6 +19,7 @@ public class Configurator
     {
         Render.recalcDerived();
         Volcano.recalcDerived();
+        Machines.recalcDerived();
     }
     
     ////////////////////////////////////////////////////        
@@ -451,5 +452,30 @@ public class Configurator
             "0 means can only build in chunk where machine is located."})
         @RangeInt(min = 0, max = 8)
         public int basicBuilderChunkRadius = 4;
+        
+        @Comment({"Number of milliseconds server waits between sending non-urgent machine updates to clients.",
+            "Lower values will provide more responsive machine status feedback at the cost of more network traffic",
+            "Some specialized machines may not honor this value consistently."})
+        @RangeInt(min = 0, max = 5000)
+        public int machineUpdateIntervalMilliseconds = 500;
+        
+        @Comment({"Number of milliseconds between keepalive packets sent from client to server to notifiy ",
+            "server that machine is being rendered and needs status information for external display.",
+            "Values must match on both client and server for machine updates to work reliably!",
+            "Not recommended to change this unless you are trying to address a specific problem."})
+        @RangeInt(min = 1000, max = 30000)
+        public int machineKeepaliveIntervalMilliseconds = 5000;
+        
+        @Comment({"Number of milliseconds grace period gives before timing out listeners when no keepalive packet is received.",
+            "Lower values will sligntly reduce network traffice but are not recommended if any clients have high latency" })
+        @RangeInt(min = 100, max = 2000)
+        public int machineLatencyAllowanceMilliseconds = 1000;
+        
+        public static int machineKeepAlivePlusLatency;
+        
+        private static void recalcDerived()
+        {
+            machineKeepAlivePlusLatency = MACHINES.machineKeepaliveIntervalMilliseconds + MACHINES.machineLatencyAllowanceMilliseconds;
+        }
     }
 }

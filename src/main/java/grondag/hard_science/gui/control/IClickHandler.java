@@ -4,8 +4,8 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.PacketOpenContainerStorageInteraction;
-import grondag.hard_science.network.PacketOpenContainerStorageInteraction.Action;
+import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
+import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction.Action;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.ItemResource;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;

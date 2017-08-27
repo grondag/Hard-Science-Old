@@ -24,13 +24,6 @@ public class MachineStorageContainer extends MachineContainer
     {
         super(playerInventory, te, layout);
     }
-
-    @Override
-    protected void addMachineSlots()
-    {
-        // none for this one
-    }
-    
     
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)

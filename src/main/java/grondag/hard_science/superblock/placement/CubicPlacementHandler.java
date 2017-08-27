@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.world.BlockCorner;
 import grondag.hard_science.library.world.NeighborBlocks;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.WorldHelper;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
@@ -167,6 +168,10 @@ public class CubicPlacementHandler implements IPlacementHandler
             if(placementMode == PlacementMode.MATCH_CLOSEST && closestModelState != null)
             {
                 stackModelState.setAxisRotation(closestModelState.getAxisRotation());
+            }
+            else if(placementMode == PlacementMode.FACE)
+            {
+                stackModelState.setAxisRotation(Rotation.fromHorizontalFacing(playerIn.getHorizontalFacing().getOpposite()));
             }
             else
             {

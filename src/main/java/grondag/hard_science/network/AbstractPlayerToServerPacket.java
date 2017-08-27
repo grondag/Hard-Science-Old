@@ -1,11 +1,12 @@
 package grondag.hard_science.network;
 
+import grondag.hard_science.simulator.wip.IMessagePlus;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public abstract class AbstractPlayerToServerPacket<T extends IMessage> implements IMessageHandler<T, IMessage>, IMessage
+public abstract class AbstractPlayerToServerPacket<T extends IMessagePlus> implements IMessageHandler<T, IMessage>, IMessagePlus
 {
 
     @Override

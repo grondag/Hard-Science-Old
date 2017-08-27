@@ -17,7 +17,7 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.PacketReplaceHeldItem;
+import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.ColorMap;
@@ -1227,8 +1227,12 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis)
     {
-        IBlockState blockState = world.getBlockState(pos);
-        return this.getModelStateAssumeStateIsCurrent(blockState, world, pos, true).rotateBlock(blockState, world, pos, axis, this);
+        return false;
+        // Rotation currently not supported.  
+        // Code below does not work because need to refresh modelstate and send to client
+        
+//        IBlockState blockState = world.getBlockState(pos);
+//        return this.getModelStateAssumeStateIsCurrent(blockState, world, pos, true).rotateBlock(blockState, world, pos, axis, this);
     }
 
     public SuperBlock setAllowSilkHarvest(boolean allow)

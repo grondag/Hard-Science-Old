@@ -7,7 +7,7 @@ import java.util.Random;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.PacketDestroyVirtualBlock;
+import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;

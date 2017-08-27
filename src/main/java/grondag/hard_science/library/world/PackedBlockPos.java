@@ -4,6 +4,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 
+/**
+ * Serialization of BlockPos to long values with functionality beyond the vanilla serialization methods in the BlockPos class.
+ */
 public class PackedBlockPos
 {
     private static final int WORLD_BOUNDARY = 30000000;

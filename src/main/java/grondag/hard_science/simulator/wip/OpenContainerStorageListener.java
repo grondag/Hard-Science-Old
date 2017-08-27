@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.PacketOpenContainerItemStorageRefresh;
+import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;

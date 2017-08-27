@@ -1,36 +1,30 @@
-package grondag.hard_science.network;
+package grondag.hard_science.network.server_to_client;
 
-
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import grondag.hard_science.simulator.wip.StorageType;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * Sent by OpenContainerStorageListner to synch user inventory display for IStorage
  */
-public class PacketOpenContainerItemStorageRefresh implements IMessage
+public class PacketOpenContainerItemStorageRefresh extends AbstractServerToPlayerPacket<PacketOpenContainerItemStorageRefresh>
 {
     
     private List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items;
     private long capacity;
-
-    public PacketOpenContainerItemStorageRefresh() 
-    {
-    }
     
     public List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items() { return this.items; };
+    
+    public PacketOpenContainerItemStorageRefresh() {};
     
     public PacketOpenContainerItemStorageRefresh(List<AbstractResourceWithQuantity<StorageType.StorageTypeStack>> items, long capacity) 
     {
@@ -39,9 +33,8 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) 
+    public void fromBytes(PacketBuffer pBuff) 
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         this.capacity = pBuff.readLong();
         int count = pBuff.readInt();
         if(count == 0)
@@ -61,9 +54,8 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
     }
 
     @Override
-    public void toBytes(ByteBuf buf) 
+    public void toBytes(PacketBuffer pBuff) 
     {
-        PacketBuffer pBuff = new PacketBuffer(buf);
         pBuff.writeLong(this.capacity);
         int count = items.size();
         pBuff.writeInt(count);
@@ -76,18 +68,9 @@ public class PacketOpenContainerItemStorageRefresh implements IMessage
         }
     }
 
-    public static class Handler implements IMessageHandler<PacketOpenContainerItemStorageRefresh, IMessage> 
+    @Override
+    public void handle(PacketOpenContainerItemStorageRefresh message, MessageContext ctx) 
     {
-        @Override
-        public IMessage onMessage(PacketOpenContainerItemStorageRefresh message, MessageContext ctx) 
-        {
-            FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> handle(message, ctx));
-            return null;
-        }
-
-        private void handle(PacketOpenContainerItemStorageRefresh message, MessageContext ctx) 
-        {
-            OpenContainerStorageProxy.ITEM_PROXY.handleStorageRefresh(null, message.items, message.capacity);
-        }
+        OpenContainerStorageProxy.ITEM_PROXY.handleStorageRefresh(null, message.items, message.capacity);
     }
 }

@@ -80,6 +80,24 @@ public class MaterialBuffer
     }
     
     /**
+     * Returns number of items that can be accepted from the input stack. 
+     * DOES NOT UPDATE THE STACK.
+     * Updates internal buffer if simulate = false;
+     */
+    public int accept(@Nonnull ItemStack stack, boolean simulate)
+    {
+        int unitsPerItem = this.inputs.getUnits(stack);
+        if(unitsPerItem == 0) return 0;
+        int accepted = Math.min(stack.getCount(), this.emptySpace() / unitsPerItem);
+        
+        if(accepted > 0 && ! simulate)
+        {
+            this.level += accepted * unitsPerItem;
+        }     
+        return accepted;
+    }
+    
+    /**
      * Decreases buffer by given amount, return amount actually decreased.
      * Does not permit negatives.
      */

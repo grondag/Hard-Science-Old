@@ -3,8 +3,11 @@ package grondag.hard_science.init;
 import java.io.IOException;
 import java.util.Map;
 
-import grondag.hard_science.HardScience;
 import grondag.hard_science.Configurator;
+import grondag.hard_science.HardScience;
+import grondag.hard_science.machines.BasicBuilderTileEntity;
+import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
@@ -12,14 +15,14 @@ import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.texture.TextureLayout;
-import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.SuperDispatcher;
 import grondag.hard_science.superblock.varia.SuperDispatcher.DispatchDelegate;
+import grondag.hard_science.superblock.varia.SuperModelLoader;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
 import grondag.hard_science.virtualblock.VirtualBlockTESR;
 import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
-import grondag.hard_science.superblock.varia.SuperModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
@@ -40,9 +43,9 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.registries.IForgeRegistry;
 
 @SideOnly(Side.CLIENT)
 @Mod.EventBusSubscriber(Side.CLIENT)
@@ -194,7 +197,8 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntity.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntity.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
-
+        ClientRegistry.bindTileEntitySpecialRenderer(BasicBuilderTileEntity.class, MachineTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(SmartChestTileEntity.class, MachineTESR.INSTANCE);
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

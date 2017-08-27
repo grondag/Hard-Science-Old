@@ -28,7 +28,7 @@ import grondag.hard_science.gui.shape.GuiShapeFinder;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.network.ModMessages;
-import grondag.hard_science.network.PacketReplaceHeldItem;
+import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;

@@ -9,6 +9,7 @@ import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -118,4 +119,16 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
             ((SuperTileEntity)blockTE).setModelState(modelState);
         }
     }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        TileEntity blockTE = worldIn.getTileEntity(pos);
+        if (blockTE != null && blockTE instanceof SuperTileEntity) 
+        {
+            ((SuperTileEntity)blockTE).setModelState(SuperItemBlock.getModelStateFromStack(stack));
+        }
+    }
+    
 }

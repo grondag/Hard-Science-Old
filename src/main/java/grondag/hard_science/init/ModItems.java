@@ -83,26 +83,22 @@ public class ModItems
         {
             if(entry.getKey().getResourceDomain().equals(HardScience.MODID))
             {
+                ItemBlock itemBlock;
                 Block block = entry.getValue();
-                if(block instanceof SuperBlock)
+                if(block instanceof MachineBlock)
                 {
-                    SuperBlock superBlock = (SuperBlock)block;
-                    SuperItemBlock itemBlock = new SuperItemBlock(superBlock);
-                    itemBlock.setRegistryName(superBlock.getRegistryName());
-                    itemReg.register(itemBlock);
+                    itemBlock = new MachineItemBlock((MachineBlock)block);
                 }
-                else if(block instanceof MachineBlock)
+                else if(block instanceof SuperBlock)
                 {
-                    ItemBlock itemBlock = new MachineItemBlock(block);
-                    itemBlock.setRegistryName(block.getRegistryName());
-                    itemReg.register(itemBlock);
+                    itemBlock = new SuperItemBlock((SuperBlock)block);
                 }
                 else
                 {
-                    ItemBlock itemBlock = new ItemBlock(block);
-                    itemBlock.setRegistryName(block.getRegistryName());
-                    itemReg.register(itemBlock);
+                    itemBlock = new ItemBlock(block);
                 }
+                itemBlock.setRegistryName(block.getRegistryName());
+                itemReg.register(itemBlock);
             }
         }
     }

@@ -1,7 +1,7 @@
-package grondag.hard_science.network;
+package grondag.hard_science.network.client_to_server;
 
 import grondag.hard_science.init.ModBlocks;
-import io.netty.buffer.ByteBuf;
+import grondag.hard_science.network.AbstractPlayerToServerPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -23,21 +23,7 @@ public class PacketDestroyVirtualBlock extends AbstractPlayerToServerPacket<Pack
     {
         this.blockPos = pos;
     }
-
-    @Override
-    public void fromBytes(ByteBuf buf) 
-    {
-        PacketBuffer pBuff = new PacketBuffer(buf);
-        this.blockPos = pBuff.readBlockPos();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) 
-    {
-        PacketBuffer pBuff = new PacketBuffer(buf);
-        pBuff.writeBlockPos(this.blockPos);
-    }
-
+   
     @Override
     protected void handle(PacketDestroyVirtualBlock message, EntityPlayerMP player)
     {
@@ -46,6 +32,19 @@ public class PacketDestroyVirtualBlock extends AbstractPlayerToServerPacket<Pack
         {
             world.setBlockToAir(message.blockPos);
         }
+    }
+
+    @Override
+    public void fromBytes(PacketBuffer pBuff)
+    {
+        this.blockPos = pBuff.readBlockPos();
+        
+    }
+
+    @Override
+    public void toBytes(PacketBuffer pBuff)
+    {
+        pBuff.writeBlockPos(this.blockPos);
     }
 
 }

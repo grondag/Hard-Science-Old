@@ -1,31 +1,44 @@
 package grondag.hard_science.machines.base;
 
-import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.support.MachineItemBlock;
+import grondag.hard_science.superblock.block.SuperBlockPlus;
+import grondag.hard_science.superblock.color.BlockColorMapProvider;
+import grondag.hard_science.superblock.color.Chroma;
+import grondag.hard_science.superblock.color.Hue;
+import grondag.hard_science.superblock.color.Luminance;
+import grondag.hard_science.superblock.model.shape.ModelShape;
+import grondag.hard_science.superblock.model.state.BlockRenderMode;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.model.state.PaintLayer;
+import grondag.hard_science.superblock.model.state.WorldLightOpacity;
+import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.Textures;
+import grondag.hard_science.superblock.varia.BlockSubstance;
+import mcjty.theoneprobe.api.IProbeHitData;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public abstract class MachineBlock extends Block implements ITileEntityProvider 
+public abstract class MachineBlock extends SuperBlockPlus
 {
     public static final Material MACHINE_MATERIAL = new Material(MapColor.SILVER_STAINED_HARDENED_CLAY) 
     {
@@ -38,51 +51,42 @@ public abstract class MachineBlock extends Block implements ITileEntityProvider
     
     public final int guiID;
     
-    public MachineBlock(String name, int guiID)
+    public MachineBlock(String name, int guiID, ModelState modelState)
     {
-        super(MACHINE_MATERIAL);
+        super(name, MACHINE_MATERIAL, modelState, modelState.getRenderPassSet().blockRenderMode);
+        this.metaCount = 1;
         this.guiID = guiID;
-        this.setUnlocalizedName(HardScience.MODID + "." + name);
-        this.setRegistryName(name);
         this.setHarvestLevel(null, 0);
         this.setHardness(1);
     }
     
-    /**
-     * Need to destroy block here because did not do it during removedByPlayer.
-     */
-    @Override
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) 
+    protected static ModelState creatBasicMachineModelState(TexturePallette decalTex)
     {
-        super.harvestBlock(worldIn, player, pos, state, te, stack);
-        worldIn.setBlockToAir(pos);
+        ModelState modelState = new ModelState();
+        modelState.setShape(ModelShape.MACHINE);
+        modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
+        modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
+
+        modelState.setTexture(PaintLayer.MIDDLE, Textures.BORDER_SINGLE_PINSTRIPE);
+        modelState.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
+
+        modelState.setTexture(PaintLayer.OUTER, decalTex);
+        modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));
+
+        
+        modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
+        modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));
+        
+        return modelState;
     }
     
-    
-    /**
-     * {@inheritDoc} <br><br>
-     * 
-     * MachineBlock: Defer destruction of block until after drops when harvesting so can gather NBT from tile entity.
-     */
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) 
+    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        if (willHarvest) {
-            return true;
-        }
-        return super.removedByPlayer(state, world, pos, player, willHarvest);
-    }
-    
-    /**
-     * Main reason for override is that we have to add NBT to stack
-     */
-    @Override
-    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
-    {
-        Item item = Item.getItemFromBlock(this);
-        if (item != null && item != Items.AIR)
+        ItemStack stack = super.getStackFromBlock(state, world, pos);
+        
+        if(stack != null)
         {
-            ItemStack stack = new ItemStack(item, 1, this.damageDropped(state));
             TileEntity myTE = world.getTileEntity(pos);
             if(myTE != null && myTE instanceof MachineTileEntity && myTE.hasWorld() && !myTE.getWorld().isRemote) 
             {
@@ -90,14 +94,11 @@ public abstract class MachineBlock extends Block implements ITileEntityProvider
                 stack.setTagInfo(MachineItemBlock.NBT_SERVER_SIDE_TAG, serverSideTag);
                 ((MachineTileEntity)myTE).saveStateInStack(stack, serverSideTag);
             }
-            return Collections.singletonList(stack);
         }
-        else
-        {
-            return Collections.emptyList();
-        }
-    }
 
+        return stack;
+    }
+ 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
@@ -133,6 +134,61 @@ public abstract class MachineBlock extends Block implements ITileEntityProvider
         }
         player.openGui(HardScience.INSTANCE, this.guiID, world, pos.getX(), pos.getY(), pos.getZ());
         return true;
+    }
+    
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        if(worldIn.isRemote) return;
+        TileEntity blockTE = worldIn.getTileEntity(pos);
+        if (blockTE != null && blockTE instanceof MachineTileEntity) 
+        {
+            NBTTagCompound serverSideTag = stack.hasTagCompound() ? stack.getSubCompound(MachineItemBlock.NBT_SERVER_SIDE_TAG) : null;
+            ((MachineTileEntity)blockTE).restoreStateFromStackAndReconnect(stack, serverSideTag);
+        }
+    }
+
+    @Override
+    public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return BlockSubstance.DURASTONE;
+    }
+
+    @Override
+    public boolean isGeometryFullCube(IBlockState state)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isHypermatter()
+    {
+        return false;
+    }
+
+    @Override
+    protected WorldLightOpacity worldLightOpacity(IBlockState state)
+    {
+        return WorldLightOpacity.SOLID;
+    }
+    
+//    @Override
+//    public EnumBlockRenderType getRenderType(IBlockState iBlockState)
+//    {
+//      return EnumBlockRenderType.INVISIBLE;
+//    }
+
+    @Override
+    public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag advanced)
+    {
+        //NOOP for now on machines - don't want all the stuff we get for normal superblocks
+    }
+
+    @Override
+    public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data)
+    {
+        //NOOP for now on machines - don't want all the stuff we get for normal superblocks
     }
     
     

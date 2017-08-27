@@ -9,9 +9,6 @@ import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.superblock.block.SuperBlock;
-import grondag.hard_science.superblock.block.SuperBlockPlus;
-import grondag.hard_science.superblock.block.SuperModelTileEntity;
-import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.IPlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
@@ -200,22 +197,6 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             
         if(!wasUpdated) 
             return false;
-
-        if(newState.getBlock() instanceof SuperBlockPlus)
-        {
-            SuperTileEntity blockTE = (SuperTileEntity)world.getTileEntity(pos);
-            if (blockTE != null) 
-            {
-                if(blockTE instanceof SuperModelTileEntity)
-                {
-                    SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
-                    superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
-                    superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
-                }
-
-                blockTE.setModelState(getModelStateFromStack(stack));
-            }
-        }
         
         this.block.onBlockPlacedBy(world, pos, newState, player, stack);
         return true;

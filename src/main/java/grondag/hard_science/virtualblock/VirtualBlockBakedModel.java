@@ -35,7 +35,7 @@ public class VirtualBlockBakedModel implements IBakedModel
     {
 //        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 //        GlStateManager.enableRescaleNormal();
-//        SuperBlockTESR.INSTANCE.render(null, 0, 0, 0, 0, -1, 0.0F);
+//        MachineTESR.INSTANCE.render(null, 0, 0, 0, 0, -1, 0.0F);
         return false;
     }
 

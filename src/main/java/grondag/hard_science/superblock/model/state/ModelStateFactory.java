@@ -771,7 +771,9 @@ public class ModelStateFactory
             invalidateHashCode();
         }
 
-
+        /**
+         * For machines and other blocks with a special horizontal face, North is considered the zero rotation.
+         */
         public Rotation getAxisRotation()
         {
             if(Log.DEBUG_MODE)
@@ -783,6 +785,9 @@ public class ModelStateFactory
             return P3B_AXIS_ROTATION.getValue(bits3);
         }
 
+        /**
+         * For machines and other blocks with a special horizontal face, North is considered the zero rotation.
+         */
         public void setAxisRotation(Rotation rotation)
         {
             populateStateFlagsIfNeeded();
@@ -934,6 +939,10 @@ public class ModelStateFactory
             return (this.stateFlags & STATE_FLAG_NEEDS_TEXTURE_ROTATION) == STATE_FLAG_NEEDS_TEXTURE_ROTATION;
         }
 
+        /**
+         * Means that one or more elements (like a texture) uses species.
+         * Does not mean that the shape or block actually capture or generate species other than 0.
+         */
         public boolean hasSpecies()
         {
             this.populateStateFlagsIfNeeded();

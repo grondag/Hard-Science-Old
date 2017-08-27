@@ -6,7 +6,7 @@ import grondag.hard_science.feature.volcano.VolcanoBlock;
 import grondag.hard_science.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.feature.volcano.lava.LavaBlock;
 import grondag.hard_science.machines.BasicBuilderBlock;
-import grondag.hard_science.machines.SmartChecstBlock;
+import grondag.hard_science.machines.SmartChestBlock;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperSimpleBlock;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
@@ -176,7 +176,7 @@ public class ModBlocks
         // VIRTUAL BLOCKS
         event.getRegistry().register(new VirtualBlock("virtual_block"));
         
-        event.getRegistry().register(new SmartChecstBlock("smart_chest"));
+        event.getRegistry().register(new SmartChestBlock("smart_chest"));
         event.getRegistry().register(new BasicBuilderBlock("basic_builder"));
     }
     
