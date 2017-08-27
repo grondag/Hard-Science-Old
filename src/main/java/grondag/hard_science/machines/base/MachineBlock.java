@@ -26,6 +26,7 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -34,6 +35,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -54,7 +56,6 @@ public abstract class MachineBlock extends SuperBlockPlus
     public MachineBlock(String name, int guiID, ModelState modelState)
     {
         super(name, MACHINE_MATERIAL, modelState, modelState.getRenderPassSet().blockRenderMode);
-        this.metaCount = 1;
         this.guiID = guiID;
         this.setHarvestLevel(null, 0);
         this.setHardness(1);
@@ -111,6 +112,13 @@ public abstract class MachineBlock extends SuperBlockPlus
     }
  
     @Override
+    public int damageDropped(IBlockState state)
+    {
+        // don't want species to "stick" with machines - is purely cosmetic
+        return 0;
+    }
+    
+    @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
@@ -147,6 +155,15 @@ public abstract class MachineBlock extends SuperBlockPlus
             NBTTagCompound serverSideTag = stack.hasTagCompound() ? stack.getSubCompound(MachineItemBlock.NBT_SERVER_SIDE_TAG) : null;
             ((MachineTileEntity)blockTE).restoreStateFromStackAndReconnect(stack, serverSideTag);
         }
+    }
+    
+    @Override
+    public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)
+    {
+        // We allow metadata for machine blocks to support texturing
+        // but we only want to show one item in creative search / JEI
+        // No functional difference.
+        list.add(this.getSubItems().get(0));
     }
 
     @Override

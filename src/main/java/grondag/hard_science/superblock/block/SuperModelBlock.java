@@ -83,6 +83,14 @@ public class SuperModelBlock extends SuperBlockPlus
         return new ExtendedBlockState(this, new IProperty[] { META, SUBSTANCE }, new IUnlistedProperty[] { MODEL_STATE });
     }
     
+    @Override
+    public int damageDropped(IBlockState state)
+    {
+        // don't want species to "stick" with SuperModelblocks - so they can restack
+        // species will be set again on placement anyway
+        return 0;
+    }
+    
     @SuppressWarnings("deprecation")
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)

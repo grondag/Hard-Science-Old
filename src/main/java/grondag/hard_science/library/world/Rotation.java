@@ -18,6 +18,11 @@ public enum Rotation {
 	public final int degrees;
 
 	/**
+     * Opposite of degress - useful for GL transforms. 0 and 180 are same, 90 and 270 are flipped
+     */
+    public final int degreesInverse;
+	
+	/**
 	 * Horizontal face that corresponds to this rotation for SuperBlocks that have a single rotated face.
 	 */
 	public final EnumFacing horizontalFace;
@@ -37,6 +42,7 @@ public enum Rotation {
 	Rotation(int degrees, EnumFacing horizontalFace)
 	{
 		this.degrees = degrees;
+		this.degreesInverse = (360 - degrees) % 360;
 		this.horizontalFace = horizontalFace;
 
 	}
