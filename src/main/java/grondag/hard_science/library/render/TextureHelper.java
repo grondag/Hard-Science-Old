@@ -137,7 +137,7 @@ public class TextureHelper
     /**
      * Similar to vanilla version in TextureUtil
      */
-    private static void setTextureClamped(boolean isClamped)
+    public static void setTextureClamped(boolean isClamped)
     {
         if (isClamped)
         {

@@ -119,7 +119,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
                 {
                     Log.warn("Domain manager data not found - recreating.  Some world state may be lost.");
                     this.domainManager = new DomainManager(true);
-                    PersistenceManager.registerNode(world, this.volcanoManager);                   
+                    PersistenceManager.registerNode(world, this.domainManager);                   
                 }
              
                 

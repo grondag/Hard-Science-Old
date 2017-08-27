@@ -27,7 +27,11 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -125,6 +129,8 @@ public class ModModels
         }
     }
     
+    public static ITextureObject TEST_TEXTURE;
+
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
     {
@@ -142,6 +148,10 @@ public class ModModels
         }
         
         CompressedAnimatedSprite.tearDown();
+        
+        ResourceLocation loc = new ResourceLocation("hard_science:textures/blocks/test4x4.png");
+        TEST_TEXTURE = new SimpleTexture(loc);
+        Minecraft.getMinecraft().getTextureManager().loadTexture(loc, TEST_TEXTURE);
     }
 
     @SubscribeEvent

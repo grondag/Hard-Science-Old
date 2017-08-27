@@ -39,6 +39,7 @@ public class DomainManager implements IPersistenceNode
     {
         this.ASSIGNED_NUMBERS_AUTHORITY.setDirtListener(this);
         this.isLoaded = isNew;
+        this.isDirty = isNew;
     }
    
     /**
