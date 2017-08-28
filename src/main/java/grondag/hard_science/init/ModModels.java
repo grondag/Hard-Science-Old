@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL45;
-
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
@@ -34,9 +32,8 @@ import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -134,9 +131,11 @@ public class ModModels
         }
     }
     
-    public static ITextureObject TEX_MACHINE_ON;
-    public static ITextureObject TEX_MACHINE_OFF;
-
+    public static int TEX_MACHINE_ON;
+    public static int TEX_MACHINE_OFF;
+    public static int TEX_BLOCKS;
+    public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
+    
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
     {
@@ -156,12 +155,17 @@ public class ModModels
         CompressedAnimatedSprite.tearDown();
         
    
-        TEX_MACHINE_ON = loadNonBlockTexture("hard_science:textures/blocks/on_hd.png");
+        TEX_MACHINE_ON = loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png").getGlTextureId();
        
-        TEX_MACHINE_OFF = loadNonBlockTexture("hard_science:textures/blocks/off_hd.png");
+        TEX_MACHINE_OFF = loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png").getGlTextureId();
+        
+        TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
+        
+        SPRITE_REDSTONE_TORCH_LIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
       
     }
 
+    
     private static ITextureObject loadNonBlockTexture(String location)
     {
     

@@ -115,8 +115,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
         
         this.storageID = compound.getInteger("storageID");
         
-        //FIXME: remove
-        Log.info("TE NBT read id = " + this.storageID);
     }
 
     @Override
@@ -124,9 +122,6 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     {
         super.writeToNBT(compound);
         if(this.isRemote()) return compound;
-        
-        //FIXME: remove
-        Log.info("TE NBT write id = " + this.storageID);
         
         compound.setInteger("storageID", this.storageID);
         
@@ -140,7 +135,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
        super.restoreStateFromStackAndReconnect(stack, serverSideTag);
        if(serverSideTag == null || serverSideTag.hasNoTags()) return;
      
-       IStorage<StorageType.StorageTypeStack> storage = new ItemStorage(serverSideTag);
+       IStorage<StorageType.StorageTypeStack> storage = new ItemStorage(serverSideTag.getCompoundTag("storage"));
        storage.setLocation(this.pos, this.world);
        //force new ID
        storage.setId(0);
@@ -157,15 +152,14 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void saveStateInStack(ItemStack stack, NBTTagCompound serverSideTag)
     {
         if(this.isRemote()) return;
-        super.restoreStateFromStackAndReconnect(stack, serverSideTag);
+        super.saveStateInStack(stack, serverSideTag);
         
         IStorage<StorageTypeStack> store = this.getStorage();
-        //FIXME: remove
-        Log.info("saveStateInStack id=" + this.storageID);
+     
         
         if(this.storage.usedCapacity() == 0) return;
         
-        if(store != null) store.serializeNBT(serverSideTag);
+        if(store != null) serverSideTag.setTag("storage", store.serializeNBT());
         
         NBTTagCompound displayTag = stack.getOrCreateSubCompound("display");
             

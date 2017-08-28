@@ -10,6 +10,8 @@ import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
+import grondag.hard_science.simulator.wip.AssignedNumber;
+import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IIdentified;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.varia.KeyedTuple;
 import jline.internal.Log;
@@ -23,9 +25,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
-public abstract class MachineTileEntity extends SuperTileEntity
+public abstract class MachineTileEntity extends SuperTileEntity implements IIdentified
 {
     
     public static enum ControlMode
@@ -47,6 +48,8 @@ public abstract class MachineTileEntity extends SuperTileEntity
     private ControlMode controlMode = ControlMode.OFF_WITH_REDSTONE;
     private boolean hasRedstonePowerSignal = false;
     private RenderLevel renderLevel = RenderLevel.EXTENDED_WHEN_VISIBLE;
+    
+    private int machineID = -1;
     
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
     private double lastDistanceSquared;
@@ -290,6 +293,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
+        this.deserializeID(compound);
         if(this.isRemote()) return;
         this.setControlMode(Useful.safeEnumFromOrdinal(compound.getInteger("ControlMode"), ControlMode.OFF_WITH_REDSTONE));
     }
@@ -298,6 +302,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
+        this.serializeID(compound);
         if(this.isRemote()) return compound;
         compound.setInteger("ControlMode", this.controlMode.ordinal());
         return compound;
@@ -487,5 +492,22 @@ public abstract class MachineTileEntity extends SuperTileEntity
         if(this.materialBuffer() != null) this.materialBuffer().fromArray(packet.materialBufferData);
     }
 
+    @Override
+    public void setId(int id)
+    {
+        this.machineID = id;
+        this.markDirty();
+    }
 
+    @Override
+    public int getIdRaw()
+    {
+        return this.machineID;
+    }
+
+    @Override
+    public AssignedNumber idType()
+    {
+        return AssignedNumber.MACHINE;
+    }
 }

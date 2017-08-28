@@ -182,14 +182,22 @@ public class DomainManager implements IPersistenceNode
             return result;
         }
         
-        public int getId()
+        @Override
+        public int getIdRaw()
         {
             return id;
         }
        
+        @Override
         public void setId(int id)
         {
             this.id = id;
+        }
+        
+        @Override
+        public AssignedNumber idType()
+        {
+            return AssignedNumber.DOMAIN;
         }
         
         public String getName()
@@ -320,7 +328,6 @@ public class DomainManager implements IPersistenceNode
         {
             return DomainManager.this;
         }
- 
     }
 
     @Override

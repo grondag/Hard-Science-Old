@@ -256,11 +256,17 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     }
     
     @Override
-    public int getId()
+    public int getIdRaw()
     {
         return this.id;
     }
 
+    @Override
+    public AssignedNumber idType()
+    {
+        return AssignedNumber.STORAGE;
+    }
+    
     @Override
     public SimpleUnorderedArrayList<IStorageListener<T>> listeners()
     {

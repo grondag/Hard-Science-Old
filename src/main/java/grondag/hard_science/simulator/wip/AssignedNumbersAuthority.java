@@ -3,6 +3,7 @@ package grondag.hard_science.simulator.wip;
 import java.util.Arrays;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
 import grondag.hard_science.simulator.persistence.IReadWriteNBT;
@@ -13,8 +14,21 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
 {
     public static interface IIdentified
     {
-        public int getId();
+        public default int getId()
+        {
+            int result = this.getIdRaw();
+            if(result <= 0)
+            {
+                result = Simulator.INSTANCE.domainManager().ASSIGNED_NUMBERS_AUTHORITY.newNumber(this.idType());
+                this.setId(result);
+            }
+            return result;
+        }
+        
+        /** implement an int in class, return it here */
+        public int getIdRaw();
         public void setId(int id);
+        public AssignedNumber idType();
         
         /**
          * Use this in serializeNBT of implementing class.
@@ -81,6 +95,11 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     private int[] lastID = new int[AssignedNumber.values().length];
     
     private IDirtListener dirtListener = IDirtListener.NullDirtListener.INSTANCE;
+    
+    public AssignedNumbersAuthority()
+    {
+        this.clear();
+    }
     
     public void clear()
     {

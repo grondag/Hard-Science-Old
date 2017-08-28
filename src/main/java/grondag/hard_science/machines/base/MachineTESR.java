@@ -1,16 +1,19 @@
 package grondag.hard_science.machines.base;
 
+import javax.swing.colorchooser.ColorSelectionModel;
+
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -72,8 +75,10 @@ public class MachineTESR extends SuperBlockTESR
 //            GlStateManager.disableCull();
 
         // flat lighting
-        RenderHelper.disableStandardItemLighting();
-        GlStateManager.shadeModel(GL11.GL_FLAT);
+//        RenderHelper.disableStandardItemLighting();
+//        GlStateManager.shadeModel(GL11.GL_FLAT);
+        GlStateManager.disableLighting();
+        
         
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
@@ -118,10 +123,7 @@ public class MachineTESR extends SuperBlockTESR
 //        addVertexWithUV(buffer, 0, 1, 0, uMin, vMin, skyLight, blockLight);
 //        addVertexWithUV(buffer, 1, 1, 0, uMax, vMin, skyLight, blockLight);
         
-        ITextureObject tex = te.isOn() ? ModModels.TEX_MACHINE_ON : ModModels.TEX_MACHINE_OFF;
-        GlStateManager.bindTexture(tex.getGlTextureId());
         
-//                this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 //                TextureHelper.setTextureClamped(false);
         
         // fade in controls as player approaches
@@ -129,11 +131,34 @@ public class MachineTESR extends SuperBlockTESR
         int clampedDistance = Math.min(16, (int) Math.sqrt(te.getLastDistanceSquared()));
         int alpha = clampedDistance < 8 ? 0xFF : 0xFF * (16 - clampedDistance) / 8;
                 
+        GlStateManager.bindTexture(te.isOn() ? ModModels.TEX_MACHINE_ON : ModModels.TEX_MACHINE_OFF);
         renderControlQuad(buffer, 0.82, 0.82, 0.98, 0.98, 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
-
-//        buffer.setTranslation(0, 0, 0);
         Tessellator.getInstance().draw();
-
+        
+        if(te.hasRedstonePowerSignal())
+        {
+            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+            GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+            renderControlQuad(buffer, 0.82, 0.06, 0.98, 0.22, 
+                    ModModels.SPRITE_REDSTONE_TORCH_LIT.getMinU(), 
+                    ModModels.SPRITE_REDSTONE_TORCH_LIT.getMinV(), 
+                    ModModels.SPRITE_REDSTONE_TORCH_LIT.getMaxU(), 
+                    ModModels.SPRITE_REDSTONE_TORCH_LIT.getMaxV(), 
+                    alpha, 0xFF, 0xFF, 0xFF);
+            
+            //        buffer.setTranslation(0, 0, 0);
+            Tessellator.getInstance().draw();
+        }
+//
+        GlStateManager.translate(1F, 1F, 0F);
+//        float f3 = 0.0075F * 2;
+        GlStateManager.scale(-1F, -1F, 1F);
+//        GlStateManager.disableLighting();
+//        GL11.glNormal3f(1.0F, 1.0F, 1.0F);
+//        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        fontRenderer.drawString("BB-1047", 0, 0, 0xFFFFFFFF);
+        
 //        RenderHelper.enableStandardItemLighting();
     }
     
