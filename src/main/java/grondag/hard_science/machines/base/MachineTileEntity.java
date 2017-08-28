@@ -1,20 +1,28 @@
 package grondag.hard_science.machines.base;
 
+import javax.annotation.Nullable;
+
+import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.varia.KeyedTuple;
+import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
 public abstract class MachineTileEntity extends SuperTileEntity
@@ -28,8 +36,20 @@ public abstract class MachineTileEntity extends SuperTileEntity
         OFF_WITH_REDSTONE;
     }
     
+    public static enum RenderLevel
+    {
+        NONE,
+        MINIMAL,
+        EXTENDED_WHEN_LOOKING,
+        EXTENDED_WHEN_VISIBLE;
+    }
+    
     private ControlMode controlMode = ControlMode.OFF_WITH_REDSTONE;
     private boolean hasRedstonePowerSignal = false;
+    private RenderLevel renderLevel = RenderLevel.EXTENDED_WHEN_VISIBLE;
+    
+    /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
+    private double lastDistanceSquared;
     
     
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
@@ -43,7 +63,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
         private PlayerListener(EntityPlayerMP key, boolean isRequired)
         {
             super(key);
-            this.goodUntilMillis = FMLServerHandler.instance().getServer().getCurrentTime() + Configurator.Machines.machineKeepAlivePlusLatency;
+            this.goodUntilMillis = CommonProxy.currentTimeMillis() + Configurator.Machines.machineKeepAlivePlusLatency;
             this.isRequired = isRequired;
         }
         
@@ -68,9 +88,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
                     // but will downgrade unless player open container is this tile entity
                     
                     this.goodUntilMillis = currentTime + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
-                    if(this.key.openContainer == null 
-                            || !( this.key.openContainer instanceof MachineContainer
-                                    && ((MachineContainer)this.key.openContainer).tileEntity() == MachineTileEntity.this))
+                    if(!isOpenContainerForPlayer(this.key))
                     {
                         this.isRequired = false;
                         MachineTileEntity.this.requiredListenerCount--;
@@ -87,6 +105,17 @@ public abstract class MachineTileEntity extends SuperTileEntity
         }
     }
     
+    /**
+     * True if container currently open by player references this tile entity.
+     */
+    protected boolean isOpenContainerForPlayer(EntityPlayerMP player)
+    {
+        Container openContainer = player.openContainer;
+        return openContainer != null 
+                && openContainer instanceof MachineContainer
+                && ((MachineContainer)openContainer).tileEntity() == this;
+    }
+    
     /** players who are looking at this machine and need updates sent to client */
     private SimpleUnorderedArraySet<PlayerListener> listeningPlayers;
     
@@ -99,9 +128,10 @@ public abstract class MachineTileEntity extends SuperTileEntity
     private int requiredListenerCount = 0;
     
     /**
-     * Next time update should be sent to players.
+     * On server, next time update should be sent to players.
+     * On client, next time keepalive request should be sent to server.
      */
-    private int nextPlayerUpdateMilliseconds = 0;
+    private long nextPlayerUpdateMilliseconds = 0;
     
     /**
      * True if information has changed and players should receive an update.
@@ -110,6 +140,11 @@ public abstract class MachineTileEntity extends SuperTileEntity
      */
     private boolean isPlayerUpdateNeeded = false;
 
+    /** 
+     * If this tile has a material buffer, gives access.  Null if not.
+     * Used to serialize/deserialize on client.
+     */
+    public abstract @Nullable MaterialBufferManager materialBuffer();
     
     /**
      * Saves state to the stack.<br>
@@ -157,9 +192,35 @@ public abstract class MachineTileEntity extends SuperTileEntity
     @Override
     public boolean shouldRenderInPass(int pass)
     {
-        // machines always have both solid and translucent passes, even 
-        // though the model itself doesn't require it
-        return true;
+        // machines always render in translucent pass
+        return pass == 1 && this.renderLevel != RenderLevel.NONE;
+    }
+    
+    @SideOnly(Side.CLIENT)
+    @Override
+    public double getMaxRenderDistanceSquared()
+    {
+        return 1024.0D;
+    }
+    
+    @Override
+    public double getDistanceSq(double x, double y, double z)
+    {
+        if(this.world.isRemote)
+        {
+            double result = super.getDistanceSq(x, y, z);
+            this.lastDistanceSquared = result;
+            return result;
+        }
+        else
+        {
+            return super.getDistanceSq(x, y, z);
+        }
+    }
+    
+    public double getLastDistanceSquared()
+    {
+        return lastDistanceSquared;
     }
     
     public ControlMode getControlMode()
@@ -209,8 +270,12 @@ public abstract class MachineTileEntity extends SuperTileEntity
     public void updateRedstonePower()
     {
         if(this.isRemote()) return;
-        
-        this.hasRedstonePowerSignal = this.world.isBlockPowered(this.pos);
+        boolean shouldBePowered = this.world.isBlockPowered(this.pos);
+        if(shouldBePowered != this.hasRedstonePowerSignal)
+        {
+            this.hasRedstonePowerSignal = shouldBePowered;
+            this.markPlayerUpdateDirty(true);
+        }
     }
     
     /** true if tile entity operating on logical client */
@@ -248,43 +313,81 @@ public abstract class MachineTileEntity extends SuperTileEntity
     {
         if(world.isRemote) return;
         
+        if(Configurator.logMachineNetwork) Log.info("got keepalive packet");
         PlayerListener listener = new PlayerListener(player, isFocused);
         
         if(this.listeningPlayers == null)
         {
             this.listeningPlayers = new SimpleUnorderedArraySet<PlayerListener>();
             this.listeningPlayers.put(listener);
-            if(listener.isRequired)
-            {
-                // force immediate refresh for any new listener
-                this.markPlayerUpdateDirty(true);
-                this.requiredListenerCount++;
-            }
+            
+            if(Configurator.logMachineNetwork) Log.info("added new listener, required=" + isFocused);
+            
+            // send immediate refresh for any new listener
+            ModMessages.INSTANCE.sendTo(new PacketMachineStatusUpdateListener(this), player);
+            
+            if(listener.isRequired) this.requiredListenerCount++;
+            
         }
         else
         {
             PlayerListener previous = this.listeningPlayers.put(listener);
             
-            // increase focus count or prevent downgrade, whichever applies
-            boolean wasFocused = previous != null && previous.isRequired;
-            if(listener.isRequired)
+            if(previous == null)
             {
-                if(!wasFocused) this.requiredListenerCount++;
+                // send immediate refresh for any new listener
+                ModMessages.INSTANCE.sendTo(new PacketMachineStatusUpdateListener(this), player);
+                if(listener.isRequired) this.requiredListenerCount++;
+
+                if(Configurator.logMachineNetwork) Log.info("added new listener, required=" + isFocused);
+
             }
-            else if(wasFocused) listener.isRequired = true;
-            
-            // force immediate refresh for any new listener or for an upgrade to urgent
-            if(previous == null || (listener.isRequired && !wasFocused)) this.markPlayerUpdateDirty(true);
+            else
+            {
+                if(previous.isRequired)
+                {
+                    if(!listener.isRequired)
+                    {
+                        if(this.isOpenContainerForPlayer(player)) 
+                        {
+                            // prevent downgrade if open container
+                            listener.isRequired = true;
+                            
+                            if(Configurator.logMachineNetwork) Log.info("prevented downgrade on listener");
+
+                        }
+                        else
+                        {
+                            // downgrade
+                            this.requiredListenerCount--;
+                            
+                            if(Configurator.logMachineNetwork) Log.info("downgraded required listener");
+                        }
+                    }
+                }
+                else
+                {
+                    if(listener.isRequired)
+                    {
+                        // upgrade, increment count and send immediate refresh
+                        ModMessages.INSTANCE.sendTo(new PacketMachineStatusUpdateListener(this), player);
+                        this.requiredListenerCount++;
+                        
+                        if(Configurator.logMachineNetwork) Log.info("upgraded existing listener");
+                    }
+                }
+            }
         }
     }
     
-    public void removePlayerListener(EntityPlayerMP player)
-    {
-        if(world.isRemote || this.listeningPlayers == null) return;
-
-        PlayerListener removed = this.listeningPlayers.removeIfPresent(new PlayerListener(player, false));
-        if( removed != null && removed.isRequired) this.requiredListenerCount--;
-    }
+    // not used - just waits for them to time out
+//    public void removePlayerListener(EntityPlayerMP player)
+//    {
+//        if(world.isRemote || this.listeningPlayers == null) return;
+//
+//        PlayerListener removed = this.listeningPlayers.removeIfPresent(new PlayerListener(player, false));
+//        if( removed != null && removed.isRequired) this.requiredListenerCount--;
+//    }
     
     /**
      * Called to notify observing players of an update to machine status.
@@ -311,6 +414,20 @@ public abstract class MachineTileEntity extends SuperTileEntity
         }
     }
     
+    @SideOnly(Side.CLIENT)
+    public void notifyServerPlayerWatching()
+    {
+        long time = CommonProxy.currentTimeMillis();
+        if(time >= this.nextPlayerUpdateMilliseconds)
+        {
+            if(Configurator.logMachineNetwork) Log.info("sending keepalive packet");
+
+            //FIXME: use correct urgency based on render level
+            ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos, false));
+            this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
+        }
+    }
+    
     @Override
     public void markDirty()
     {
@@ -323,13 +440,13 @@ public abstract class MachineTileEntity extends SuperTileEntity
         if(world.isRemote || !this.isPlayerUpdateNeeded
                 || this.listeningPlayers == null || this.listeningPlayers.isEmpty()) return;
 
-        long time = FMLServerHandler.instance().getServer().getCurrentTime();
-        
+        long time = CommonProxy.currentTimeMillis();
         
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
-            PacketMachineStatusUpdateListener packet = new PacketMachineStatusUpdateListener();
-
+            
+            PacketMachineStatusUpdateListener packet = new PacketMachineStatusUpdateListener(this);
+            
             //FIXME: add stuff to packet, probably in subclasses via abstract method
             
             int i = 0;
@@ -341,9 +458,11 @@ public abstract class MachineTileEntity extends SuperTileEntity
                 {
                     this.listeningPlayers.remove(i);
                     if(listener.isRequired) this.requiredListenerCount--;
+                    if(Configurator.logMachineNetwork) Log.info("Removed timed out listener");
                 }
                 else
                 {
+                    if(Configurator.logMachineNetwork) Log.info("Sending update packet due to change");
                     ModMessages.INSTANCE.sendTo(packet, listener.key);
                     i++;
                 }
@@ -351,7 +470,7 @@ public abstract class MachineTileEntity extends SuperTileEntity
             
             // if we have focused listeners, updates are always 4X per second
             this.nextPlayerUpdateMilliseconds = time + this.requiredListenerCount > 0 ? 250 : Configurator.MACHINES.machineUpdateIntervalMilliseconds;
-
+            this.isPlayerUpdateNeeded = false;
         }
     }
     
@@ -363,6 +482,10 @@ public abstract class MachineTileEntity extends SuperTileEntity
         // should never be called on server
         if(!this.world.isRemote) return;
         
-        //FIXEM: handle the packet!
+        this.controlMode = packet.controlMode;
+        this.hasRedstonePowerSignal = packet.hasRedstoneSignal;
+        if(this.materialBuffer() != null) this.materialBuffer().fromArray(packet.materialBufferData);
     }
+
+
 }

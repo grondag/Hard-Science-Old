@@ -15,6 +15,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class Configurator
 {
     
+    @Comment("Enable for tracing machine packets and processing. Highly verbose. Intended for dev environment and troubleshooeting.")
+    public static boolean logMachineNetwork = true;
+    
     public static void recalcDerived()
     {
         Render.recalcDerived();

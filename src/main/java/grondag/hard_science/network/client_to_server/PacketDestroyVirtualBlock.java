@@ -28,7 +28,7 @@ public class PacketDestroyVirtualBlock extends AbstractPlayerToServerPacket<Pack
     protected void handle(PacketDestroyVirtualBlock message, EntityPlayerMP player)
     {
         World world = player.getEntityWorld();
-        if(world.getBlockState(message.blockPos).getBlock() == ModBlocks.virtual_block)
+        if(world.isBlockLoaded(message.blockPos) && world.getBlockState(message.blockPos).getBlock() == ModBlocks.virtual_block)
         {
             world.setBlockToAir(message.blockPos);
         }

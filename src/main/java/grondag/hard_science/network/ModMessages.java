@@ -6,6 +6,7 @@ import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListe
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.network.client_to_server.PacketUpdatePlacementKey;
+import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.network.server_to_client.PacketOpenContainerItemStorageRefresh;
 import grondag.hard_science.simulator.wip.ItemResourceWithQuantity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -31,10 +32,10 @@ public class ModMessages
         INSTANCE.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketMachineStatusAddListener.class, PacketMachineStatusAddListener.class, packetID++, Side.SERVER);
         
-        
         // Packets handled on Client side, sent from Server        
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);
         INSTANCE.registerMessage(ItemResourceWithQuantity.OpenContainerPacketHandler.class, ItemResourceWithQuantity.class, packetID++, Side.CLIENT);
+        INSTANCE.registerMessage(PacketMachineStatusUpdateListener.class, PacketMachineStatusUpdateListener.class, packetID++, Side.CLIENT);
     }
     
     /**

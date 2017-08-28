@@ -3,6 +3,10 @@ package grondag.hard_science.init;
 import java.io.IOException;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL45;
+
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
@@ -25,6 +29,7 @@ import grondag.hard_science.virtualblock.VirtualBlockTESR;
 import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.ITextureObject;
@@ -129,7 +134,8 @@ public class ModModels
         }
     }
     
-    public static ITextureObject TEST_TEXTURE;
+    public static ITextureObject TEX_MACHINE_ON;
+    public static ITextureObject TEX_MACHINE_OFF;
 
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -149,11 +155,28 @@ public class ModModels
         
         CompressedAnimatedSprite.tearDown();
         
-        ResourceLocation loc = new ResourceLocation("hard_science:textures/blocks/test4x4.png");
-        TEST_TEXTURE = new SimpleTexture(loc);
-        Minecraft.getMinecraft().getTextureManager().loadTexture(loc, TEST_TEXTURE);
+   
+        TEX_MACHINE_ON = loadNonBlockTexture("hard_science:textures/blocks/on_hd.png");
+       
+        TEX_MACHINE_OFF = loadNonBlockTexture("hard_science:textures/blocks/off_hd.png");
+      
     }
 
+    private static ITextureObject loadNonBlockTexture(String location)
+    {
+    
+        ResourceLocation loc = new ResourceLocation(location);
+        ITextureObject result = new SimpleTexture(loc);
+        Minecraft.getMinecraft().getTextureManager().loadTexture(loc, result);
+        GlStateManager.bindTexture(result.getGlTextureId());
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR );
+        //this one is "normal" setting for MC
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR );
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+        return result;
+    }
+    
     @SubscribeEvent
     public static void modelRegistryEvent(ModelRegistryEvent event)
     {

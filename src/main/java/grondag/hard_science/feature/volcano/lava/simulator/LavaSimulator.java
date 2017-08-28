@@ -3,6 +3,7 @@ package grondag.hard_science.feature.volcano.lava.simulator;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
+import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.AgedBlockPos;
@@ -710,7 +711,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     
     public void doStats()
     {
-        long now = System.currentTimeMillis();
+        long now = CommonProxy.currentTimeMillis();
 
         if(now >= this.nextStatTime)
         {

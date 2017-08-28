@@ -1,7 +1,7 @@
 package grondag.hard_science.network.server_to_client;
 
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MaterialBufferManager;
+import grondag.hard_science.machines.base.MachineTileEntity.ControlMode;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
@@ -12,16 +12,29 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPacket<PacketMachineStatusUpdateListener>
 {
     public BlockPos pos;
-    public MaterialBufferManager materialBuffers;
+    public ControlMode controlMode;
+    public boolean hasRedstoneSignal;
+    public int[] materialBufferData;
+    
+    public PacketMachineStatusUpdateListener() {}
+    
+    public PacketMachineStatusUpdateListener(MachineTileEntity mte)
+    {
+        this.pos = mte.getPos();
+        this.controlMode = mte.getControlMode();
+        this.hasRedstoneSignal = mte.hasRedstonePowerSignal();
+        this.materialBufferData = mte.materialBuffer() == null ? null : mte.materialBuffer().toArray();
+    }
     
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
         this.pos = pBuff.readBlockPos();
+        this.controlMode = pBuff.readEnumValue(ControlMode.class);
+        this.hasRedstoneSignal = pBuff.readBoolean();
         if(pBuff.readBoolean())
         {
-            this.materialBuffers = new MaterialBufferManager();
-            this.materialBuffers.fromBytes(pBuff);
+            this.materialBufferData = pBuff.readVarIntArray();
         }
     }
 
@@ -29,11 +42,16 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public void toBytes(PacketBuffer pBuff)
     {
         pBuff.writeBlockPos(pos);
-        if(this.materialBuffers == null) pBuff.writeBoolean(false);
+        pBuff.writeEnumValue(this.controlMode);
+        pBuff.writeBoolean(this.hasRedstoneSignal);
+        if(this.materialBufferData == null || this.materialBufferData.length == 0) 
+        {
+            pBuff.writeBoolean(false);
+        }
         else
         {
             pBuff.writeBoolean(true);
-            this.materialBuffers.toBytes(pBuff);
+            pBuff.writeVarIntArray(this.materialBufferData);
         }
     }
 

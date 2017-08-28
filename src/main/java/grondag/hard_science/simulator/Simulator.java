@@ -201,9 +201,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
 	
     public void onServerTick(ServerTickEvent event) 
     {
-        
-        // thought it might offer more determinism if we run after block/entity ticks
-        if(event.phase == TickEvent.Phase.END && this.isRunning)
+        if(this.isRunning)
         {
             if(lastTickFuture == null || lastTickFuture.isDone())
             {

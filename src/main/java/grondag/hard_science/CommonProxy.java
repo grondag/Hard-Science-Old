@@ -20,6 +20,24 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 public class CommonProxy 
 {
+    /**
+     * Updated by client and server tick events to avoid having calls 
+     * to System.currentTimeMillis() littered around the code
+     * and calling it more frequently than needed.
+     * 
+     * MC Server does same thing, but is not exposed on client side, plus
+     * we need current time in some client-side methods.
+     */
+    private static long currentTimeMillis;
+    
+    /**
+     * Current system time, as of the most recent client or server tick.
+     */
+    public static long currentTimeMillis() { return currentTimeMillis; }
+    
+    public static void updateCurrentTime() { currentTimeMillis = System.currentTimeMillis(); }
+    
+    
 	public void preInit(FMLPreInitializationEvent event) 
 	{
 		Log.setLog(event.getModLog());

@@ -31,6 +31,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -63,88 +64,96 @@ public class ClientEventHandler
     private static boolean isPlacementModifierPressed=false;
     
     private static int clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
+    
+    private static int cooldown = 0;
+    
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent event) 
     {
-        if (event.phase == TickEvent.Phase.END
-                && (Configurator.RENDER.enableQuadCacheStatistics || Configurator.RENDER.enableAnimationStatistics)
-                && --clientStatCounter == 0) 
+        if(event.phase == Phase.START) 
         {
-            clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
+            CommonProxy.updateCurrentTime();
             
-            if(Configurator.RENDER.enableQuadCacheStatistics)
+            // render virtual blocks only if player is holding item that enables it
+            boolean renderVirtual = Configurator.BLOCKS.alwaysRenderVirtualBlocks;
+            if(!renderVirtual)
             {
-                Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
-            }
-
-            if(Configurator.RENDER.enableAnimatedTextures && Configurator.RENDER.enableAnimationStatistics)
-            {
-                CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
-                CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
-            }
-        }
-
-        // render virtual blocks only if player is holding item that enables it
-        boolean renderVirtual = Configurator.BLOCKS.alwaysRenderVirtualBlocks;
-        if(!renderVirtual)
-        {
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            if(player != null)
-            {
-                ItemStack stack = player.getHeldItemMainhand();
-                if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
-                if(!renderVirtual)
+                EntityPlayer player = Minecraft.getMinecraft().player;
+                if(player != null)
                 {
-                    stack = player.getHeldItemOffhand();
+                    ItemStack stack = player.getHeldItemMainhand();
                     if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
+                    if(!renderVirtual)
+                    {
+                        stack = player.getHeldItemOffhand();
+                        if(stack != null && stack.getItem() == ModItems.virtual_block) renderVirtual = true;
+                    }
                 }
             }
-        }
-        if(renderVirtual != ClientProxy.isVirtualBlockRenderingEnabled())
-        {
-            ClientProxy.setVirtualBlockRenderingEnabled(renderVirtual);
-        }
-        
-        boolean newDown;
-        
-        switch(Configurator.BLOCKS.placementModifier)
-        {
-        case ALT:
-            newDown = GuiScreen.isAltKeyDown();
-            break;
+            if(renderVirtual != ClientProxy.isVirtualBlockRenderingEnabled())
+            {
+                ClientProxy.setVirtualBlockRenderingEnabled(renderVirtual);
+            }
             
-        case CONTROL:
-            newDown =  GuiScreen.isCtrlKeyDown();
-            break;
+            boolean newDown;
             
-        case SHIFT:
-        default:
-            newDown = GuiScreen.isShiftKeyDown();
-            break;
-        }
-        
-        
-        if(newDown != isPlacementModifierPressed)
-        {
-            isPlacementModifierPressed = newDown;
-            ModPlayerCaps.setPlacementModifierOn(Minecraft.getMinecraft().player, newDown);
-            ModMessages.INSTANCE.sendToServer(new PacketUpdatePlacementKey(newDown));
-        }
-        
-        //FIXME: remove or cleanup
-        if(cooldown == 0)
-        {
-            cooldown = OpenContainerStorageProxy.ITEM_PROXY.refreshListIfNeeded() ? 10 : 0;
+            switch(Configurator.BLOCKS.placementModifier)
+            {
+            case ALT:
+                newDown = GuiScreen.isAltKeyDown();
+                break;
+                
+            case CONTROL:
+                newDown =  GuiScreen.isCtrlKeyDown();
+                break;
+                
+            case SHIFT:
+            default:
+                newDown = GuiScreen.isShiftKeyDown();
+                break;
+            }
+            
+            
+            if(newDown != isPlacementModifierPressed)
+            {
+                isPlacementModifierPressed = newDown;
+                ModPlayerCaps.setPlacementModifierOn(Minecraft.getMinecraft().player, newDown);
+                ModMessages.INSTANCE.sendToServer(new PacketUpdatePlacementKey(newDown));
+            }
+            
+            //FIXME: remove or cleanup
+            if(cooldown == 0)
+            {
+                cooldown = OpenContainerStorageProxy.ITEM_PROXY.refreshListIfNeeded() ? 10 : 0;
+            }
+            else
+            {
+                cooldown--;
+            }
+
         }
         else
         {
-            cooldown--;
+            if ((Configurator.RENDER.enableQuadCacheStatistics || Configurator.RENDER.enableAnimationStatistics)
+                    && --clientStatCounter == 0) 
+            {
+                clientStatCounter = Configurator.RENDER.clientStatReportingInterval * 20;
+                
+                if(Configurator.RENDER.enableQuadCacheStatistics)
+                {
+                    Log.info("QuadCache stats = " + QuadCache.INSTANCE.cache.stats().toString());
+                }
+    
+                if(Configurator.RENDER.enableAnimatedTextures && Configurator.RENDER.enableAnimationStatistics)
+                {
+                    CompressedAnimatedSprite.perfCollectorUpdate.outputStats();
+                    CompressedAnimatedSprite.perfCollectorUpdate.clearStats();
+                }
+            }
+
         }
-
+   
     }
-
-    private static int cooldown = 0;
-  
 
     @SubscribeEvent
     public static void onKeyInput(InputEvent.KeyInputEvent event)

@@ -8,7 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.IItemHandler;
 
-public class MaterialBufferManager implements IReadWriteNBT, IItemHandler, IMessagePlus
+public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
 {
     private final MaterialBuffer[] buffers;
     
@@ -134,29 +134,36 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler, IMess
         return slot == 0 ? 64 : 0;
     }
 
-    @Override
-    public void fromBytes(PacketBuffer pBuff)
+    /**
+     * Restores state based on array from {@link #toArray()}
+     */
+    public void fromArray(int[] values)
     {
-        int count = pBuff.readInt();
-        if(count == 0) return;
-        for(int i = 0; i < count; i++)
+        int count = values.length;
+        if(count == this.buffers.length)
         {
-            int val = pBuff.readInt();
-            if(i < this.buffers.length) this.buffers[i].setLevel(val);
+            for(int i = 0; i < count; i++)
+            {
+                this.buffers[i].setLevel(values[i]);
+            }
+            
         }
     }
 
-    @Override
-    public void toBytes(PacketBuffer pBuff)
+    /** 
+     * Returns an array for packet serialization.
+     */
+    public int[] toArray()
     {
         int count = this.buffers.length;
-        pBuff.writeInt(count);
+        int[] result = new int[count];
         if(count > 0)
         {
             for(int i = 0; i < count; i++)
             {
-                pBuff.writeInt(this.buffers[i].getLevel());
+                result[i] = this.buffers[i].getLevel();
             }
-        }        
+        }
+        return result;
     }
 }

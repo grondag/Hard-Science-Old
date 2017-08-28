@@ -25,6 +25,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 @SuppressWarnings({ "deprecation"})
@@ -126,7 +127,15 @@ public class CommonEventHandler
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent event) 
     {
-        Simulator.INSTANCE.onServerTick(event);
+        if(event.phase == Phase.START) 
+        {
+            CommonProxy.updateCurrentTime();
+        }
+        else
+        {
+            // thought it might be more determinism if simulator runs after block/entity ticks
+            Simulator.INSTANCE.onServerTick(event);
+        }
     }
     
     private static String lastTroubleMaker = null;
@@ -142,7 +151,7 @@ public class CommonEventHandler
         
         if(player.getHeldItemMainhand().getItem() == Items.LAVA_BUCKET && event.getMessage().toLowerCase().contains("volcanos are awesome"))
         {
-            long time = System.currentTimeMillis();
+            long time = CommonProxy.currentTimeMillis();
 
             if(event.getUsername() == lastTroubleMaker
                     && player.getPosition().equals(lastAttemptLocation)

@@ -12,13 +12,24 @@ public class PacketMachineStatusAddListener extends AbstractPlayerToServerPacket
     public BlockPos pos;
     public boolean isRequired;
 
+    public PacketMachineStatusAddListener() {}
+    
+    public PacketMachineStatusAddListener(BlockPos pos, boolean isRequired)
+    {
+        this.pos = pos;
+        this.isRequired = isRequired;
+    }
+    
     @Override
     protected void handle(PacketMachineStatusAddListener message, EntityPlayerMP player)
     {
-        TileEntity te = player.world.getTileEntity(message.pos);
-        if(te != null && te instanceof MachineTileEntity)
+        if(player.world.isBlockLoaded(message.pos))
         {
-            ((MachineTileEntity)te).addPlayerListener(player, message.isRequired);
+            TileEntity te = player.world.getTileEntity(message.pos);
+            if(te != null && te instanceof MachineTileEntity)
+            {
+                ((MachineTileEntity)te).addPlayerListener(player, message.isRequired);
+            }
         }
     }
 

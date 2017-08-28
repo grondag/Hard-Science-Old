@@ -6,17 +6,12 @@ import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import grondag.hard_science.superblock.texture.Textures;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -28,63 +23,84 @@ public class MachineTESR extends SuperBlockTESR
     @Override
     public void render(SuperTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
-        if(te != null && MinecraftForgeClient.getRenderPass() == 1)
+        /**
+         * To see the control face, player has to be in front of it.
+         */
+        switch(te.getCachedModelState().getAxisRotation())
         {
-            GlStateManager.pushAttrib();
-            GlStateManager.pushMatrix();
+        case ROTATE_NONE:
+            if(z <= 0) return;
+            break;
+            
+        case ROTATE_90:
+            if(x >= 0) return;
+            break;
+            
+        case ROTATE_180:
+            if(z >= 0) return;
+            break;
+            
+        case ROTATE_270:
+            if(x <= 0) return;
+            break;
+            
+        default:
+            return;
+        }
 
-            // the .5 is to move origin to block center so that we can rotate to correct facing
-            GlStateManager.translate(x + .5f, y + .5f, z + .5f);
-            GlStateManager.rotate(te.getCachedModelState().getAxisRotation().degreesInverse, 0, 1, 0);
-            // move origin back to block corner
-            GlStateManager.translate(-.5f, -.5f, -.5f);
+        GlStateManager.pushAttrib();
+        GlStateManager.pushMatrix();
 
-            // not drawing anything with normals, shouldn't need this
-            //GlStateManager.disableRescaleNormal();
-            
-            // prevent z-fighting
-            GlStateManager.enablePolygonOffset();
-            GlStateManager.doPolygonOffset(-1, -1);
-            
-            // would expect MC/forget to already have this, but not taking chances
-            GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GlStateManager.enableBlend();
-            
-            // no need to disable culling because won't every see controls from the back
+        // the .5 is to move origin to block center so that we can rotate to correct facing
+        GlStateManager.translate(x + .5f, y + .5f, z + .5f);
+        GlStateManager.rotate(te.getCachedModelState().getAxisRotation().degreesInverse, 0, 1, 0);
+        // move origin back to block corner
+        GlStateManager.translate(-.5f, -.5f, -.5f);
+
+        // not drawing anything with normals, shouldn't need this
+        //GlStateManager.disableRescaleNormal();
+        
+        // prevent z-fighting
+        GlStateManager.enablePolygonOffset();
+        GlStateManager.doPolygonOffset(-1, -1);
+        
+        // would expect MC/forget to already have this, but not taking chances
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GlStateManager.enableBlend();
+        
+        // no need to disable culling because won't every see controls from the back
 //            GlStateManager.disableCull();
 
-            // flat lighting
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.shadeModel(GL11.GL_FLAT);
-            
+        // flat lighting
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.shadeModel(GL11.GL_FLAT);
+        
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-            
-            
-            GlStateManager.bindTexture(ModModels.TEST_TEXTURE.getGlTextureId());
-//            this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-            TextureHelper.setTextureClamped(false);
-            
-            BufferBuilder buffer = Tessellator.getInstance().getBuffer();
-            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-            
-            renderControlFace((MachineTileEntity)te, buffer);
-            
-            TextureHelper.setTextureClamped(true);
+        
+        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        
+        MachineTileEntity mte = (MachineTileEntity)te;
+        
+        // TE will send keepalive packets to server to get updated machine status for rendering
+        mte.notifyServerPlayerWatching();
+        
+        renderControlFace(mte, buffer);
+        
+        TextureHelper.setTextureClamped(true);
 
-            GlStateManager.disablePolygonOffset();
-            GlStateManager.popMatrix();
-            // FIXME: see if can avoid this
-            GlStateManager.popAttrib();
-        }
+        GlStateManager.disablePolygonOffset();
+        GlStateManager.popMatrix();
+        // FIXME: see if can avoid this
+        GlStateManager.popAttrib();
+        
     }
     
     private void renderControlFace(MachineTileEntity te, BufferBuilder buffer)
     {
      
-       
-        final int skyLight = 0x00f0;
-        final int blockLight = 0x00f0;
+      
 
 //        TextureAtlasSprite texture = Minecraft.getMinecraft().getTextureMapBlocks()
 //                .getAtlasSprite(Textures.DECAL_DIAGONAL_BARS.getTextureName(0));
@@ -94,22 +110,55 @@ public class MachineTESR extends SuperBlockTESR
 //        final double vMin = texture.getMinV();
 //        final double vMax = texture.getMaxV() * 2;
         
-        final double uMin = 0;
-        final double uMax = 2;
-        final double vMin = 0;
-        final double vMax = 2;
 
 //        BlockPos pos = te.getPos();
-//        buffer.setTranslation(pos.getX(), pos.getY(), pos.getZ());
-        addVertexWithUV(buffer, 1, 0, 0, uMax, vMax, skyLight, blockLight);
-        addVertexWithUV(buffer, 0, 0, 0, uMin, vMax, skyLight, blockLight);
-        addVertexWithUV(buffer, 0, 1, 0, uMin, vMin, skyLight, blockLight);
-        addVertexWithUV(buffer, 1, 1, 0, uMax, vMin, skyLight, blockLight);
+////        buffer.setTranslation(pos.getX(), pos.getY(), pos.getZ());
+//        addVertexWithUV(buffer, 1, 0, 0, uMax, vMax, skyLight, blockLight);
+//        addVertexWithUV(buffer, 0, 0, 0, uMin, vMax, skyLight, blockLight);
+//        addVertexWithUV(buffer, 0, 1, 0, uMin, vMin, skyLight, blockLight);
+//        addVertexWithUV(buffer, 1, 1, 0, uMax, vMin, skyLight, blockLight);
+        
+        ITextureObject tex = te.isOn() ? ModModels.TEX_MACHINE_ON : ModModels.TEX_MACHINE_OFF;
+        GlStateManager.bindTexture(tex.getGlTextureId());
+        
+//                this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+//                TextureHelper.setTextureClamped(false);
+        
+        // fade in controls as player approaches
+        // FIXME: make render distance configurable
+        int clampedDistance = Math.min(16, (int) Math.sqrt(te.getLastDistanceSquared()));
+        int alpha = clampedDistance < 8 ? 0xFF : 0xFF * (16 - clampedDistance) / 8;
+                
+        renderControlQuad(buffer, 0.82, 0.82, 0.98, 0.98, 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
 
 //        buffer.setTranslation(0, 0, 0);
         Tessellator.getInstance().draw();
 
-        RenderHelper.enableStandardItemLighting();
+//        RenderHelper.enableStandardItemLighting();
+    }
+    
+    /**
+     * Renders a textured quad on the face of the machine.
+     * x,y coordinates are 0-1 position on the face.  0,0 is lower left.
+     * u,v coordinate are also 0-1 within the currently bound texture.
+     * Always full brightness.
+     */
+    private void renderControlQuad
+    (
+            BufferBuilder buffer, 
+            double xMin, double yMin, double xMax, double yMax, 
+            double uMin, double vMin, double uMax, double vMax,
+            int alpha, int red, int green, int blue)
+    {
+        buffer.pos(1-xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(1-xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(1-xMin, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(1-xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+        
+//        addVertexWithUV(buffer, xMax, yMin, 0, uMax, vMax, skyLight, blockLight);
+//        addVertexWithUV(buffer, xMin, yMin, 0, uMin, vMax, skyLight, blockLight);
+//        addVertexWithUV(buffer, xMin, yMax, 0, uMin, vMin, skyLight, blockLight);
+//        addVertexWithUV(buffer, xMax, yMax, 0, uMax, vMin, skyLight, blockLight);
     }
   
 }

@@ -316,4 +316,10 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     {
         return this.bufferManager;
     }
+
+    @Override
+    public MaterialBufferManager materialBuffer()
+    {
+        return this.bufferManager;
+    }
 }
