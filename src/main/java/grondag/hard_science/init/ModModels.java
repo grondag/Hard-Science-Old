@@ -7,6 +7,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.library.font.FontLoader;
+import grondag.hard_science.library.font.TrueTypeFont;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.base.MachineTESR;
@@ -135,6 +137,7 @@ public class ModModels
     public static int TEX_MACHINE_OFF;
     public static int TEX_BLOCKS;
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
+    public static TrueTypeFont FONT_MONO;
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -162,6 +165,8 @@ public class ModModels
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         
         SPRITE_REDSTONE_TORCH_LIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
+        
+        FONT_MONO = FontLoader.loadSystemFont("Andale Mono", 48, true);
       
     }
 

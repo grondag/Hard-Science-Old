@@ -1,18 +1,13 @@
 package grondag.hard_science.machines.base;
 
-import javax.swing.colorchooser.ColorSelectionModel;
-
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.fml.relauncher.Side;
@@ -29,27 +24,28 @@ public class MachineTESR extends SuperBlockTESR
         /**
          * To see the control face, player has to be in front of it.
          */
-        switch(te.getCachedModelState().getAxisRotation())
-        {
-        case ROTATE_NONE:
-            if(z <= 0) return;
-            break;
-            
-        case ROTATE_90:
-            if(x >= 0) return;
-            break;
-            
-        case ROTATE_180:
-            if(z >= 0) return;
-            break;
-            
-        case ROTATE_270:
-            if(x <= 0) return;
-            break;
-            
-        default:
-            return;
-        }
+        //FIXME: put back
+//        switch(te.getCachedModelState().getAxisRotation())
+//        {
+//        case ROTATE_NONE:
+//            if(z <= 0) return;
+//            break;
+//            
+//        case ROTATE_90:
+//            if(x >= 0) return;
+//            break;
+//            
+//        case ROTATE_180:
+//            if(z >= 0) return;
+//            break;
+//            
+//        case ROTATE_270:
+//            if(x <= 0) return;
+//            break;
+//            
+//        default:
+//            return;
+//        }
 
         GlStateManager.pushAttrib();
         GlStateManager.pushMatrix();
@@ -131,6 +127,9 @@ public class MachineTESR extends SuperBlockTESR
         int clampedDistance = Math.min(16, (int) Math.sqrt(te.getLastDistanceSquared()));
         int alpha = clampedDistance < 8 ? 0xFF : 0xFF * (16 - clampedDistance) / 8;
                 
+        //FIXME: remove
+        GlStateManager.disableCull();
+
         GlStateManager.bindTexture(te.isOn() ? ModModels.TEX_MACHINE_ON : ModModels.TEX_MACHINE_OFF);
         renderControlQuad(buffer, 0.82, 0.82, 0.98, 0.98, 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
         Tessellator.getInstance().draw();
@@ -150,15 +149,17 @@ public class MachineTESR extends SuperBlockTESR
             Tessellator.getInstance().draw();
         }
 //
-        GlStateManager.translate(1F, 1F, 0F);
+//        GlStateManager.translate(1F, 1F, 0F);
 //        float f3 = 0.0075F * 2;
-        GlStateManager.scale(-1F, -1F, 1F);
+//        GlStateManager.scale(1F, 1F, -1F);
 //        GlStateManager.disableLighting();
 //        GL11.glNormal3f(1.0F, 1.0F, 1.0F);
 //        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-        fontRenderer.drawString("BB-1047", 0, 0, 0xFFFFFFFF);
-        
+  
+//        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+//        fontRenderer.drawString("BB-1047", 0, 0, 0xFFFFFFFF);
+//        GlStateManager.disableDepth();
+        ModModels.FONT_MONO.drawString(0,  0, "R", 1f, 1f, 0f, 0.5f, 0.5f, 0.5f, 1.0f);
 //        RenderHelper.enableStandardItemLighting();
     }
     
