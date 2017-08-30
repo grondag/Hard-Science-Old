@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
+import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MaterialBufferManager;
@@ -50,6 +51,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     private RenderLevel renderLevel = RenderLevel.EXTENDED_WHEN_VISIBLE;
     
     private int machineID = -1;
+    private String machineName = null;
     
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
     private double lastDistanceSquared;
@@ -505,6 +507,16 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         return this.machineID;
     }
 
+    public String machineName()
+    {
+        if(this.machineName == null)
+        {
+            long l = Useful.longHash(this.world.getSeed() ^ this.getId());
+            this.machineName = Base32Namer.makeName((int) l);
+        }
+        return this.machineName;
+    }
+    
     @Override
     public AssignedNumber idType()
     {

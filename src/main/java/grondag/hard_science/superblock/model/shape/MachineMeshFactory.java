@@ -77,26 +77,24 @@ public class MachineMeshFactory extends ShapeMeshGenerator
     
     private List<RawQuad> getCubeQuads(Rotation rotation)
     {
-        return Collections.emptyList();
+        CubeInputs result = new CubeInputs();
+        result.color = 0xFFFFFFFF;
+        result.textureRotation = Rotation.ROTATE_NONE;
+        result.isFullBrightness = false;
+        result.u0 = 0;
+        result.v0 = 0;
+        result.u1 = 16;
+        result.v1 = 16;
+        result.isOverlay = false;
         
-//        CubeInputs result = new CubeInputs();
-//        result.color = 0xFFFFFFFF;
-//        result.textureRotation = Rotation.ROTATE_NONE;
-//        result.isFullBrightness = false;
-//        result.u0 = 0;
-//        result.v0 = 0;
-//        result.u1 = 16;
-//        result.v1 = 16;
-//        result.isOverlay = false;
-//        
-//        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
-//       
-//        for(EnumFacing face : EnumFacing.VALUES)
-//        {
-//            result.surfaceInstance = face == rotation.horizontalFace  ? lampSurface.unitInstance.withAllowBorders(false) : mainSurface.unitInstance;
-//            builder.add(result.makeRawFace(face));
-//        }
-//        return builder.build();
+        ImmutableList.Builder<RawQuad> builder = new ImmutableList.Builder<RawQuad>();
+       
+        for(EnumFacing face : EnumFacing.VALUES)
+        {
+            result.surfaceInstance = face == rotation.horizontalFace  ? lampSurface.unitInstance.withAllowBorders(false) : mainSurface.unitInstance;
+            builder.add(result.makeRawFace(face));
+        }
+        return builder.build();
     }
 
 

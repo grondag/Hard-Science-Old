@@ -1,8 +1,8 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
-import grondag.hard_science.gui.GuiUtil.HorizontalAlignment;
-import grondag.hard_science.gui.GuiUtil.VerticalAlignment;
+import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.superblock.model.state.Translucency;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;

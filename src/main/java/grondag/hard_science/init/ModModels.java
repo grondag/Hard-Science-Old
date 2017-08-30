@@ -137,7 +137,7 @@ public class ModModels
     public static int TEX_MACHINE_OFF;
     public static int TEX_BLOCKS;
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
-    public static TrueTypeFont FONT_MONO;
+    public static TrueTypeFont FONT_ORBITRON;
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -166,7 +166,7 @@ public class ModModels
         
         SPRITE_REDSTONE_TORCH_LIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
         
-        FONT_MONO = FontLoader.loadSystemFont("Andale Mono", 48, true);
+        FONT_ORBITRON = FontLoader.createFont(new ResourceLocation(HardScience.MODID + ":fonts/orbitron_light.ttf"), 64, true);
       
     }
 
@@ -178,7 +178,7 @@ public class ModModels
         ITextureObject result = new SimpleTexture(loc);
         Minecraft.getMinecraft().getTextureManager().loadTexture(loc, result);
         GlStateManager.bindTexture(result.getGlTextureId());
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR );
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST );
         //this one is "normal" setting for MC
 //        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR );
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);

@@ -1,5 +1,7 @@
 package grondag.hard_science.gui;
 
+import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.texture.TextureScale;
 import net.minecraft.client.Minecraft;
@@ -312,20 +314,6 @@ public class GuiUtil
         return rc;
     }
     
-    public static enum HorizontalAlignment
-    {
-        LEFT,
-        CENTER,
-        RIGHT
-    }
-    
-    public static enum VerticalAlignment
-    {
-        TOP,
-        MIDDLE,
-        BOTTOM
-    }
-
     /**
      * Renders the specified text to the screen, center-aligned. Args : renderer, string, x, y, color
      */

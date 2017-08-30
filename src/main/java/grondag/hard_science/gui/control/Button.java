@@ -1,8 +1,8 @@
 package grondag.hard_science.gui.control;
 
-import static grondag.hard_science.gui.GuiUtil.HorizontalAlignment.*;
-import static grondag.hard_science.gui.GuiUtil.VerticalAlignment.*;
 import static grondag.hard_science.gui.control.GuiControl.*;
+import static grondag.hard_science.library.varia.HorizontalAlignment.*;
+import static grondag.hard_science.library.varia.VerticalAlignment.*;
 
 import grondag.hard_science.gui.GuiUtil;
 import net.minecraft.client.Minecraft;

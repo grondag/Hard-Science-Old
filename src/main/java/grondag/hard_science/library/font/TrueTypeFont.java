@@ -15,7 +15,10 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.EXTBgra;
+import org.lwjgl.opengl.EXTTextureCompressionS3TC;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -30,12 +33,12 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
  * Copyright (c) 2013 - Slick2D
  * <p/>
  * All rights reserved.
+ * 
+ * Grondag: note this has been heavily modified from original.
  */
 
 public class TrueTypeFont
 {
-    public final static int ALIGN_LEFT = 0, ALIGN_RIGHT = 1, ALIGN_CENTER = 2;
-
     /**
      * Array that holds necessary information about the font characters
      */
@@ -86,7 +89,6 @@ public class TrueTypeFont
      */
     private FontMetrics fontMetrics;
 
-    private int correctL = 9, correctR = 8;
 
     private class GlyphInfo
     {
@@ -94,40 +96,40 @@ public class TrueTypeFont
         /**
          * Character's width
          */
-        public final float width;
+        public final int width;
 
         /**
          * Character's height
          */
-        public final float height;
+        public final int height;
 
         /**
          * Character's x location within texture
          */
         @SuppressWarnings("unused")
-        public final float positionX;
+        public final int positionX;
 
         /**
          * Character's y position within texture
          */
         @SuppressWarnings("unused")
-        public final float positionY;
+        public final int positionY;
         
         public final float uMin;
         public final float vMin;
         public final float uMax;
         public final float vMax;
         
-        public GlyphInfo(float width, float height, float positionX, float positionY)
+        public GlyphInfo(int width, int height, int positionX, int positionY)
         {
             this.positionX = positionX;
             this.positionY = positionY;
             this.width = width;
             this.height = height;
-            this.uMin = positionX / textureWidth;
-            this.uMax = (positionX + width) / textureWidth;
-            this.vMin = positionY / textureHeight;
-            this.vMax = (positionY + height) / textureHeight;
+            this.uMin = (float) positionX / textureWidth;
+            this.uMax = (float) (positionX + width) / textureWidth;
+            this.vMin = (float) positionY / textureHeight;
+            this.vMax = (float) (positionY + height) / textureHeight;
         }
     }
 
@@ -147,20 +149,6 @@ public class TrueTypeFont
     public TrueTypeFont(Font font, boolean antiAlias)
     {
         this(font, antiAlias, null);
-    }
-
-    public void setCorrection(boolean on)
-    {
-        if (on)
-        {
-            correctL = 2;
-            correctR = 1;
-        }
-        else
-        {
-            correctL = 0;
-            correctR = 0;
-        }
     }
 
     private BufferedImage getFontImage(char ch)
@@ -226,9 +214,9 @@ public class TrueTypeFont
             g.setColor(new Color(0, 0, 0, 1));
             g.fillRect(0, 0, textureWidth, textureHeight);
 
-            float rowHeight = 0;
-            float positionX = 0;
-            float positionY = 0;
+            int rowHeight = 0;
+            int positionX = 0;
+            int positionY = 0;
 
             int customCharsLength = (customCharsArray != null) ? customCharsArray.length : 0;
 
@@ -242,8 +230,8 @@ public class TrueTypeFont
 
 
                 
-                float w = fontImage.getWidth();
-                float h = fontImage.getHeight();
+                int w = fontImage.getWidth();
+                int h = fontImage.getHeight();
 
                 if (positionX + w >= textureWidth)
                 {
@@ -265,7 +253,7 @@ public class TrueTypeFont
                 }
 
                 // Draw it here
-                g.drawImage(fontImage, (int) positionX, (int) positionY, null);
+                g.drawImage(fontImage, positionX, positionY, null);
 
                 positionX += glyph.width;
 
@@ -392,182 +380,47 @@ public class TrueTypeFont
         return stringbuilder.toString();
     }
 
-    public void drawString(float xLeft, float yTop, String text, float lineHeight, float zDepth, float... rgba)
+    /**
+     * Draws a single line of text at the given x, y coordinate, with z depth
+     * Rendering will start at x and y and extend right and down.
+     * GL matrix should be set to that +y is in the down direction for the viewer.
+     */
+    public void drawLine(float xLeft, float yTop, String text, float lineHeight, float zDepth, int red, int green, int blue, int alpha)
     {
-        drawString(xLeft, yTop, text, lineHeight, ALIGN_LEFT, zDepth, rgba);
-    }
-
-    public void drawString(final float xLeft, final float yTop, String text, final float lineHeight, final int format, final float zDepth, float... rgba)
-    {
-        if (rgba.length == 0) rgba = new float[] { 1f, 1f, 1f, 1f };
-//        GlStateManager.pushMatrix();
-//        GlStateManager.scale(0.05, 0.05, 1.0f);
-//        GlStateManager.scale(-scaleX, -scaleY, 1.0f);
-//        GlStateManager.rotate(180, 0, 1, 0);
-//        GlStateManager.translate(0, yoffset, 0);
 
         GlStateManager.bindTexture(fontTextureID);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
-        //FIXME: put back?
-//        int i = text.indexOf(167);
-//        while (i != -1 && i + 1 < text.length())
-//        {
-//            String left = text.substring(0, i);
-//            if (!left.isEmpty())
-//            {
-//                drawTextInternal(buffer, xLeft, yTop, left, xWidth, yHeight, format, rgba);
-//                xLeft += getWidth(left);
-//            }
-//            int colorCode = Minecraft.getMinecraft().fontRenderer.getColorCode(text.charAt(i + 1));
-//            if (colorCode != -1)
-//            {
-//                float r = (colorCode >> 16) / 255.0F;
-//                float g = (colorCode >> 8 & 255) / 255.0F;
-//                float b = (colorCode & 255) / 255.0F;
-//                rgba = new float[] { r, g, b, rgba[3] };
-//            }
-//            text = text.substring(i + 2);
-//            i = text.indexOf(167);
-//        }
-        drawTextInternal(buffer, xLeft, yTop, text, lineHeight, format, rgba);
-        
-        Tessellator.getInstance().draw();
-
-
-//        GlStateManager.popMatrix();
-    }
-
-    private void drawTextInternal(BufferBuilder buffer, final float xLeft, final float yTop, String text, final float lineHeight, final int format, final float[] rgba)
-    {
-        int currentIndex;
-        int endIndex = text.length() - 1;
-        
+        float x = xLeft;
         float scaleFactor = lineHeight / this.fontHeight;
         
-        float totalwidth = 0;
-        int i = 0, direction, widthIncrement;
-        int lineIndex = 0;
-
-        switch (format)
+        for(char c : text.toCharArray())
         {
-        //FIXME: put back
-//        case ALIGN_RIGHT:
-//        {
-//            d = -1;
-//            c = correctR;
-//
-//            while (i < endIndex)
-//            {
-//                if (text.charAt(i) == '\n')
-//                    startY -= fontHeight;
-//                i++;
-//            }
-//            break;
-//        }
-//        case ALIGN_CENTER:
-//        {
-//            for (int l = 0; l <= endIndex; l++)
-//            {
-//                charCurrent = text.charAt(l);
-//                if (charCurrent == '\n')
-//                    break;
-//                GlyphInfo floatObject;
-//                if (charCurrent < 256)
-//                {
-//                    floatObject = glyphArray[charCurrent];
-//                }
-//                else
-//                {
-//                    floatObject = (GlyphInfo) customGlyphs.get((char) charCurrent);
-//                }
-//                totalwidth += floatObject.width - correctL;
-//            }
-//            totalwidth /= -2;
-//        }
-        case ALIGN_LEFT:
-        default:
-        {
-            direction = 1;
-            widthIncrement = correctL;
-            break;
+            GlyphInfo g = getGlyph(c);
+            drawQuad(buffer, x, yTop, scaleFactor, g, red, green, blue, alpha);
+            x += g.width * scaleFactor;
         }
+        Tessellator.getInstance().draw();
 
-        }
-        
-        while (i >= 0 && i <= endIndex)
-        {
-
-            currentIndex = text.charAt(i);
-            GlyphInfo glyphInfo;
-            if (currentIndex < 256)
-            {
-                glyphInfo = glyphArray[currentIndex];
-            }
-            else
-            {
-                glyphInfo = customGlyphs.get(currentIndex);
-            }
-
-            if (glyphInfo != null)
-            {
-                //FIXME: think this logic is borked
-                if (direction < 0)
-                {
-                    totalwidth += (glyphInfo.width - widthIncrement) * direction;
-                }
-                
-                if (currentIndex == '\n')
-                {
-                    lineIndex++;
-                    totalwidth = 0;
-                    if (format == ALIGN_CENTER)
-                    {
-                        for (int l = i + 1; l <= endIndex; l++)
-                        {
-                            currentIndex = text.charAt(l);
-                            if (currentIndex == '\n')
-                                break;
-                            if (currentIndex < 256)
-                            {
-                                glyphInfo = glyphArray[currentIndex];
-                            }
-                            else
-                            {
-                                glyphInfo = customGlyphs.get(currentIndex);
-                            }
-                            totalwidth += glyphInfo.width - correctL;
-                        }
-                        totalwidth /= -2;
-                    }
-                    // if center get next lines total width/2;
-                }
-                else
-                {
-
-//                    drawQuad(buffer, (totalwidth + glyphInfo.width) + xLeft / xWidth, startY + yTop / yHeight, totalwidth + xLeft / xWidth,
-//                            (startY + glyphInfo.height) + yTop / yHeight, glyphInfo.storedX + glyphInfo.width, glyphInfo.storedY + glyphInfo.height,
-//                            glyphInfo.storedX, glyphInfo.storedY);
-                    if (direction > 0)
-                        totalwidth += (glyphInfo.width - widthIncrement) * direction;
-                }
-            }
-            i += direction;
-        }
     }
+
+    private GlyphInfo getGlyph(char c)
+    {
+        return c < 256 ? glyphArray[c] : customGlyphs.get(c);
+    }
+    
+   
 
     private void drawQuad(BufferBuilder buffer, float xLeft, float yTop, float scaleFactor, GlyphInfo glyph, int red, int green, int blue, int alpha)
     {
-        double xMin = xLeft;
-        double yMax = yTop;
-        double xMax = xLeft + glyph.width * scaleFactor;
-        double yMin = yTop - glyph.height * scaleFactor;
+        double xRight = xLeft + glyph.width * scaleFactor;
+        double yBottom = yTop + glyph.height * scaleFactor;
 
-        buffer.pos(1-xMax, yMin, 0).color(red, green, blue, alpha).tex(glyph.uMin, glyph.vMin).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(1-xMax, yMax, 0).color(red, green, blue, alpha).tex(glyph.uMin, glyph.vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(1-xMin, yMax, 0).color(red, green, blue, alpha).tex(glyph.uMax, glyph.vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(1-xMin, yMin, 0).color(red, green, blue, alpha).tex(glyph.uMax, glyph.vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xLeft, yTop, 0).color(red, green, blue, alpha).tex(glyph.uMin, glyph.vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xLeft, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uMin, glyph.vMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xRight, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uMax, glyph.vMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xRight, yTop, 0).color(red, green, blue, alpha).tex(glyph.uMax, glyph.vMin).lightmap(0x00f0, 0x00f0).endVertex();
     }
     
     public static int loadImage(BufferedImage bufferedImage)
@@ -613,16 +466,14 @@ public class TrueTypeFont
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
 
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-            // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-            // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
-
-            // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
-            // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
-            // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_NEAREST);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
 
             GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+
+            //GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+            
+//            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, width, 0, EXTBgra.GL_BGRA_EXT, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, DATA_BUFFER[lod]);
 
             GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, internalFormat, width, height, format, GL11.GL_UNSIGNED_BYTE, byteBuffer);
             return textureId.get(0);
