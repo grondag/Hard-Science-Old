@@ -50,7 +50,11 @@ public class MachineTESR extends SuperBlockTESR
             return;
         }
 
-        GlStateManager.pushAttrib();
+        MachineTileEntity mte = (MachineTileEntity)te;
+        
+        // TE will send keepalive packets to server to get updated machine status for rendering
+        mte.notifyServerPlayerWatching();
+        
         GlStateManager.pushMatrix();
 
         // the .5 is to move origin to block center so that we can rotate to correct facing
@@ -60,9 +64,6 @@ public class MachineTESR extends SuperBlockTESR
         GlStateManager.translate(0.5f, 0.5f, -.5f);
         GlStateManager.scale(-1.0f, -1.0f, 1.0f);
 
-        // not drawing anything with normals, shouldn't need this
-        //GlStateManager.disableRescaleNormal();
-        
         // prevent z-fighting
         GlStateManager.enablePolygonOffset();
         GlStateManager.doPolygonOffset(-1, -1);
@@ -71,33 +72,19 @@ public class MachineTESR extends SuperBlockTESR
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GlStateManager.enableBlend();
         
-        // no need to disable culling because won't every see controls from the back
-//            GlStateManager.disableCull();
-
-        // flat lighting
-//        RenderHelper.disableStandardItemLighting();
-//        GlStateManager.shadeModel(GL11.GL_FLAT);
-        GlStateManager.disableLighting();
-        
         
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
         
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         
-        MachineTileEntity mte = (MachineTileEntity)te;
-        
-        // TE will send keepalive packets to server to get updated machine status for rendering
-        mte.notifyServerPlayerWatching();
-        
         renderControlFace(mte, buffer);
         
-        TextureHelper.setTextureClamped(true);
+//        TextureHelper.setTextureClamped(true);
 
         GlStateManager.disablePolygonOffset();
         GlStateManager.popMatrix();
-        // FIXME: see if can avoid this
-        GlStateManager.popAttrib();
+
         
     }
     
@@ -109,9 +96,6 @@ public class MachineTESR extends SuperBlockTESR
         // FIXME: make render distance configurable
         int clampedDistance = Math.min(32, (int) Math.sqrt(te.getLastDistanceSquared()));
         int alpha = clampedDistance < 16 ? 0xFF : 0xFF * (32 - clampedDistance) / 16;
-                
-        //FIXME: remove
-        GlStateManager.disableCull();
 
         ModModels.FONT_ORBITRON.drawLine(0.2f, 0.06f, te.machineName(), 0.12f, 0f, 255, 255, 255, alpha);   
 
@@ -138,7 +122,7 @@ public class MachineTESR extends SuperBlockTESR
     
     /**
      * Renders a textured quad on the face of the machine.
-     * x,y coordinates are 0-1 position on the face.  0,0 is lower left.
+     * x,y coordinates are 0-1 position on the face.  0,0 is upper left.
      * u,v coordinate are also 0-1 within the currently bound texture.
      * Always full brightness.
      */
@@ -149,15 +133,10 @@ public class MachineTESR extends SuperBlockTESR
             double uMin, double vMin, double uMax, double vMax,
             int alpha, int red, int green, int blue)
     {
-        buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
         buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
         buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        
-//        addVertexWithUV(buffer, xMax, yMin, 0, uMax, vMax, skyLight, blockLight);
-//        addVertexWithUV(buffer, xMin, yMin, 0, uMin, vMax, skyLight, blockLight);
-//        addVertexWithUV(buffer, xMin, yMax, 0, uMin, vMin, skyLight, blockLight);
-//        addVertexWithUV(buffer, xMax, yMax, 0, uMax, vMin, skyLight, blockLight);
+        buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
     }
   
 }

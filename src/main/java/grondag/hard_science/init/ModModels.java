@@ -166,7 +166,7 @@ public class ModModels
         
         SPRITE_REDSTONE_TORCH_LIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
         
-        FONT_ORBITRON = FontLoader.createFont(new ResourceLocation(HardScience.MODID + ":fonts/orbitron_light.ttf"), 64, true);
+        FONT_ORBITRON = FontLoader.createFont(new ResourceLocation(HardScience.MODID + ":fonts/orbitron_medium.ttf"), 64, true);
       
     }
 
@@ -182,6 +182,7 @@ public class ModModels
         //this one is "normal" setting for MC
 //        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR );
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+
         GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
         return result;
     }

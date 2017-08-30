@@ -15,10 +15,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.EXTBgra;
-import org.lwjgl.opengl.EXTTextureCompressionS3TC;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -457,7 +454,6 @@ public class TrueTypeFont
             }
             byteBuffer.flip();
 
-            int internalFormat = GL11.GL_RGBA8, format = GL11.GL_RGBA;
             IntBuffer textureId = BufferUtils.createIntBuffer(1);
 
             GL11.glGenTextures(textureId);
@@ -469,13 +465,9 @@ public class TrueTypeFont
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
 
-            GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+//            GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 
-            //GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-            
-//            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, width, 0, EXTBgra.GL_BGRA_EXT, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, DATA_BUFFER[lod]);
-
-            GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, internalFormat, width, height, format, GL11.GL_UNSIGNED_BYTE, byteBuffer);
+            GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, byteBuffer);
             return textureId.get(0);
 
         }
