@@ -96,29 +96,49 @@ public abstract class QuadPainter
 
     public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
     {
-        if(inputQuad.surfaceInstance.surface() == this.surface)
+        if(inputQuad.surfaceInstance.surface() != this.surface) return;
+        
+        switch(this.paintLayer)
         {
-            RawQuad result = inputQuad.clone();
-            result.renderPass = this.renderPass;
-            result.isFullBrightness = this.isFullBrightnessIntended;
+        case BASE:
+            if(inputQuad.surfaceInstance.disableBase) return;
+            break;
+            
+        case MIDDLE:
+            if(inputQuad.surfaceInstance.disableMiddle) return;
+            break;
+            
+        case OUTER:
+            if(inputQuad.surfaceInstance.disableOuter) return;
+            break;
+            
+        case CUT:
+        case LAMP:
+        default:
+            break;
+        
+        }
+    
+        RawQuad result = inputQuad.clone();
+        result.renderPass = this.renderPass;
+        result.isFullBrightness = this.isFullBrightnessIntended;
 
-            recolorQuad(result);
-         
-            // TODO: Vary color slightly with species, as user-selected option
-            
-            result = this.paintQuad(result);
-            
-            if(result != null) 
+        recolorQuad(result);
+     
+        // TODO: Vary color slightly with species, as user-selected option
+        
+        result = this.paintQuad(result);
+        
+        if(result != null) 
+        {
+            if(result.lockUV)
             {
-                if(result.lockUV)
-                {
-                    // if lockUV is on, derive UV coords by projection
-                    // of vertex coordinates on the plane of the quad's face
-                    result.assignLockedUVCoordinates();;
-                }
-       
-                outputList.add(result);
+                // if lockUV is on, derive UV coords by projection
+                // of vertex coordinates on the plane of the quad's face
+                result.assignLockedUVCoordinates();;
             }
+   
+            outputList.add(result);
         }
     }
     

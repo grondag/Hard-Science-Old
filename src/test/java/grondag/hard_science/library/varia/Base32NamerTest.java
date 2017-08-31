@@ -4,8 +4,6 @@ package grondag.hard_science.library.varia;
 
 import org.junit.Test;
 
-import grondag.hard_science.Log;
-
 
 public class Base32NamerTest
 {

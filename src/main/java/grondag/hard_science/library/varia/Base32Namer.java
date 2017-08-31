@@ -1,7 +1,5 @@
 package grondag.hard_science.library.varia;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import com.google.gson.Gson;

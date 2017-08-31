@@ -7,18 +7,17 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.RawQuad;
-import grondag.hard_science.library.render.Vertex;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.CubeCollisionHandler;
 import grondag.hard_science.superblock.collision.ICollisionHandler;
 import grondag.hard_science.superblock.collision.SideShape;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.StateFormat;
 import grondag.hard_science.superblock.model.state.Surface;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
 import grondag.hard_science.superblock.model.state.SurfaceTopology;
 import grondag.hard_science.superblock.model.state.SurfaceType;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -46,17 +45,17 @@ public class MachineMeshFactory extends ShapeMeshGenerator
     private final List<RawQuad> quads270;
     
     private static final Surface mainSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+    private static final Surface symbolSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     private static final Surface lampSurface = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
     
-    private static final SurfaceInstance mainInstance = mainSurface.unitInstance.withDisableMiddle(true);
-    private static final SurfaceInstance symbolInstance = mainSurface.unitInstance.withDisableBase(true).withDisableOuter(true);
+    private static final SurfaceInstance mainInstance = mainSurface.unitInstance;
     private static final SurfaceInstance lampInstance = lampSurface.unitInstance.withAllowBorders(false);
     
     
     protected MachineMeshFactory()
     {
         super(StateFormat.BLOCK, ModelState.STATE_FLAG_HAS_AXIS_ROTATION, 
-                mainSurface, lampSurface); 
+                mainSurface, symbolSurface, lampSurface); 
         
         this.quads0 = getCubeQuads(Rotation.ROTATE_NONE);
         this.quads90 = getCubeQuads(Rotation.ROTATE_90);
@@ -109,13 +108,6 @@ public class MachineMeshFactory extends ShapeMeshGenerator
         {
             result.surfaceInstance = face == rotation.horizontalFace  ? lampInstance : mainInstance;
             builder.add(result.makeRawFace(face));
-            
-//            if(face != rotation.horizontalFace)
-//            {
-//                RawQuad quad = template.clone();
-////                quad.setupFaceQuad(vertexIn0, vertexIn1, vertexIn2, vertexIn3, topFace)
-//                quad.setVertex(0, new Vertex(defaultShapeStateBits, defaultShapeStateBits, defaultShapeStateBits, defaultShapeStateBits, defaultShapeStateBits, stateFlags));
-//            }
         }
         return builder.build();
     }

@@ -12,6 +12,7 @@ import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
+import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
@@ -69,12 +70,13 @@ public abstract class MachineBlock extends SuperBlockPlus
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
 
-        modelState.setTexture(PaintLayer.MIDDLE, Textures.BORDER_SINGLE_PINSTRIPE);
-        modelState.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
-
-        modelState.setTexture(PaintLayer.OUTER, decalTex);
-        modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));
-
+        modelState.setTexture(PaintLayer.MIDDLE, decalTex);
+        modelState.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
+        modelState.setTranslucent(PaintLayer.MIDDLE, true);
+        modelState.setTranslucency(Translucency.CLEAR);
+        
+        modelState.setTexture(PaintLayer.OUTER, Textures.BORDER_SINGLE_PINSTRIPE);
+        modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
         
         modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
         modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));

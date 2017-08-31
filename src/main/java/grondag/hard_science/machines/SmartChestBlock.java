@@ -10,7 +10,7 @@ public class SmartChestBlock extends MachineBlock
 {
     public SmartChestBlock(String name) 
     {
-        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(Textures.DECAL_MEDIUM_DOT));
+        super(name, ModGui.SMART_CHEST.ordinal(), MachineBlock.creatBasicMachineModelState(Textures.SYMBOL_CHEST));
     }
 
     @Override

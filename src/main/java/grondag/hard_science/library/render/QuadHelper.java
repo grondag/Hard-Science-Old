@@ -55,6 +55,11 @@ public class QuadHelper
 
     public static final List<BakedQuad> EMPTY_QUAD_LIST = new ImmutableList.Builder<BakedQuad>().build();
 
+    public static boolean epsilonEquals(double first, double second)
+    {
+        return Math.abs(first - second) < EPSILON;
+    }
+    
     public static float[] colorComponentsARGB(int colorARGB)
     {
         float[] result = new float[4];

@@ -33,8 +33,8 @@ public class MachineControlRenderer
         }
     }
     
-    public static final RenderBounds BOUNDS_ON_OFF = new RenderBounds(1.0-(0.14 + 0.02), 0.02, 0.14);
-    public static final RenderBounds BOUNDS_NAME = new RenderBounds(0.18, 0.024, 0.5, 0.12);
+    public static final RenderBounds BOUNDS_ON_OFF = new RenderBounds(1.0-(0.15), 0.02, 0.14);
+    public static final RenderBounds BOUNDS_NAME = new RenderBounds(0.18, 0.04, 0.5, 0.12);
     
     /**
      * Alpha is 0-255
