@@ -6,8 +6,10 @@ import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModEntities;
 import grondag.hard_science.init.ModRecipes;
 import grondag.hard_science.init.ModTileEntities;
+import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.simulator.Simulator;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.Loader;
@@ -60,6 +62,8 @@ public class CommonProxy
 	    Configurator.recalcDerived();
 		ModRecipes.init(event);
         ModBlocks.init(event);
+        
+        Base32Namer.loadBadNames(I18n.translateToLocal("misc.offensive"));
 	}
 
 	public void postInit(FMLPostInitializationEvent event) 

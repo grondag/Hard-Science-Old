@@ -382,15 +382,15 @@ public class TrueTypeFont
      * Rendering will start at x and y and extend right and down.
      * GL matrix should be set to that +y is in the down direction for the viewer.
      */
-    public void drawLine(float xLeft, float yTop, String text, float lineHeight, float zDepth, int red, int green, int blue, int alpha)
+    public void drawLine(double xLeft, double yTop, String text, double lineHeight, double zDepth, int red, int green, int blue, int alpha)
     {
 
         GlStateManager.bindTexture(fontTextureID);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
-        float x = xLeft;
-        float scaleFactor = lineHeight / this.fontHeight;
+        double x = xLeft;
+        double scaleFactor = lineHeight / this.fontHeight;
         
         for(char c : text.toCharArray())
         {
@@ -409,7 +409,7 @@ public class TrueTypeFont
     
    
 
-    private void drawQuad(BufferBuilder buffer, float xLeft, float yTop, float scaleFactor, GlyphInfo glyph, int red, int green, int blue, int alpha)
+    private void drawQuad(BufferBuilder buffer, double xLeft, double yTop, double scaleFactor, GlyphInfo glyph, int red, int green, int blue, int alpha)
     {
         double xRight = xLeft + glyph.width * scaleFactor;
         double yBottom = yTop + glyph.height * scaleFactor;

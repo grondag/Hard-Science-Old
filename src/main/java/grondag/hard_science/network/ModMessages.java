@@ -2,6 +2,7 @@ package grondag.hard_science.network;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.network.client_to_server.PacketDestroyVirtualBlock;
+import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.client_to_server.PacketOpenContainerStorageInteraction;
 import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
@@ -31,6 +32,7 @@ public class ModMessages
         INSTANCE.registerMessage(PacketDestroyVirtualBlock.class, PacketDestroyVirtualBlock.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketOpenContainerStorageInteraction.class, PacketOpenContainerStorageInteraction.class, packetID++, Side.SERVER);
         INSTANCE.registerMessage(PacketMachineStatusAddListener.class, PacketMachineStatusAddListener.class, packetID++, Side.SERVER);
+        INSTANCE.registerMessage(PacketMachineInteraction.class, PacketMachineInteraction.class, packetID++, Side.SERVER);
         
         // Packets handled on Client side, sent from Server        
         INSTANCE.registerMessage(PacketOpenContainerItemStorageRefresh.class, PacketOpenContainerItemStorageRefresh.class, packetID++, Side.CLIENT);

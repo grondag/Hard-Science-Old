@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TranslucencyPicker extends GuiControl
+public class TranslucencyPicker extends GuiControl<TranslucencyPicker>
 {
     private Translucency translucency = null;
     

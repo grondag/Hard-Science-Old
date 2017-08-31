@@ -451,6 +451,10 @@ public class Configurator
     
     public static class Machines
     {
+        @Comment({"Machines display four-character random names. ",
+            "What could possibly go wrong?"})
+        public boolean filterOffensiveMachineNames = true;
+        
         @Comment({"Radius for basic builder to find & build virtual blocks - in chunks.",
             "0 means can only build in chunk where machine is located."})
         @RangeInt(min = 0, max = 8)

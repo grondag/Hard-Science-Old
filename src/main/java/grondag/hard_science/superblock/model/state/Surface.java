@@ -98,7 +98,42 @@ public class Surface
          */
         public final boolean isLampGradient;
         
-        private SurfaceInstance(double uScale, double vScale, boolean ignoreDepthForRandomization, boolean allowBorders, int textureSalt, boolean isLampGradient)
+        /**
+         * If true, base layer painting will be disabled.
+         */
+        public final boolean disableBase;
+        
+        /**
+         * If true, middle layer painting (if applicable) will be disabled.
+         */
+        public final boolean disableMiddle;
+        
+        /**
+         * If true, outer layer painting (if applicable) will be disabled.
+         */
+        public final boolean disableOuter;
+        
+        private SurfaceInstance(
+                double uScale, 
+                double vScale, 
+                boolean ignoreDepthForRandomization, 
+                boolean allowBorders, 
+                int textureSalt, 
+                boolean isLampGradient)
+        {
+            this(uScale, vScale, ignoreDepthForRandomization, allowBorders, textureSalt, isLampGradient, false, false, false);
+        }
+        
+        private SurfaceInstance(
+                double uScale, 
+                double vScale, 
+                boolean ignoreDepthForRandomization, 
+                boolean allowBorders, 
+                int textureSalt, 
+                boolean isLampGradient,
+                boolean disableBase,
+                boolean disableMiddle,
+                boolean disableOuter)
         {
             this.uScale = uScale;
             this.vScale = vScale;
@@ -106,6 +141,9 @@ public class Surface
             this.allowBorders = allowBorders;
             this.textureSalt = textureSalt;
             this.isLampGradient = isLampGradient;
+            this.disableBase = disableBase;
+            this.disableMiddle = disableMiddle;
+            this.disableOuter = disableOuter;
         }
         
         public SurfaceInstance()
@@ -116,33 +154,59 @@ public class Surface
             this.allowBorders = false;
             this.textureSalt = 0;
             this.isLampGradient = false;
+            this.disableBase = false;
+            this.disableMiddle = false;
+            this.disableOuter = false;
         }
         
         public SurfaceInstance withScale(double uScale, double vScale)
         {
-            return new SurfaceInstance(uScale, vScale, this.ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient);
+            return new SurfaceInstance(uScale, vScale, this.ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient,
+                    this.disableBase, this.disableMiddle, this.disableOuter);
         }
         
         public SurfaceInstance withIgnoreDepthForRandomization(boolean ignoreDepthForRandomization)
         {
-            return new SurfaceInstance(this.uScale, this.vScale, ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient);
+            return new SurfaceInstance(this.uScale, this.vScale, ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient,
+                    this.disableBase, this.disableMiddle, this.disableOuter);
         }
         
         public SurfaceInstance withAllowBorders(boolean allowBorders)
         {
-            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, allowBorders, this.textureSalt, this.isLampGradient);
+            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, allowBorders, this.textureSalt, this.isLampGradient,
+                    this.disableBase, this.disableMiddle, this.disableOuter);
         }
         
         public SurfaceInstance withTextureSalt(int textureSalt)
         {
-            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, textureSalt, this.isLampGradient);
+            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, textureSalt, this.isLampGradient,
+                    this.disableBase, this.disableMiddle, this.disableOuter);
         }
         
         public SurfaceInstance withLampGradient(boolean isLampGradient)
         {
-            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, textureSalt, isLampGradient);
+            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, this.textureSalt, isLampGradient,
+                    this.disableBase, this.disableMiddle, this.disableOuter);
+        }
+        
+        public SurfaceInstance withDisableBase(boolean disableBase)
+        {
+            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient,
+                    disableBase, this.disableMiddle, this.disableOuter);
         }
 
+        public SurfaceInstance withDisableMiddle(boolean disableMiddle)
+        {
+            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient,
+                    this.disableBase, disableMiddle, this.disableOuter);
+        }
+        
+        public SurfaceInstance withDisableOuter(boolean disableOuter)
+        {
+            return new SurfaceInstance(this.uScale, this.vScale, this.ignoreDepthForRandomization, this.allowBorders, this.textureSalt, this.isLampGradient,
+                    this.disableBase, this.disableMiddle, disableOuter);
+        }
+        
         public Surface surface()
         {
             return Surface.this;

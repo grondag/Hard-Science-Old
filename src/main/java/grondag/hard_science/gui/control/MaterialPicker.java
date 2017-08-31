@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class MaterialPicker extends GuiControl
+public class MaterialPicker extends GuiControl<MaterialPicker>
 {
     /** dimensions are material and toughness */
     private static BlockSubstance[][]substances = new BlockSubstance[3][3];

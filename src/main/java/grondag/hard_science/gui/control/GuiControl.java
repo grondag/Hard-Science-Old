@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public abstract class GuiControl extends Gui
+public abstract class GuiControl<T extends GuiControl<T>> extends Gui
 {      
     public static final int BUTTON_COLOR_ACTIVE = 0x9AFFFFFF;
     public static final int BUTTON_COLOR_INACTIVE = 0x2AFFFFFF;
@@ -56,7 +56,7 @@ public abstract class GuiControl extends Gui
      */
     protected double aspectRatio = 1.0;
     
-    public GuiControl resize(double left, double top, double width, double height)
+    public GuiControl<T> resize(double left, double top, double width, double height)
     {
         this.left = left;
         this.top = top;
@@ -142,11 +142,12 @@ public abstract class GuiControl extends Gui
         return top;
     }
 
-    public GuiControl setTop(double top)
+    @SuppressWarnings("unchecked")
+    public T setTop(double top)
     {
         this.top = top;
         this.isDirty = true;
-        return this;
+        return (T) this;
     }
     
     public double getBottom()
@@ -159,12 +160,13 @@ public abstract class GuiControl extends Gui
     {
         return left;
     }
-
-    public GuiControl setLeft(double left)
+    
+    @SuppressWarnings("unchecked")
+    public T setLeft(double left)
     {
         this.left = left;
         this.isDirty = true;
-        return this;
+        return (T) this;
     }
 
     public double getRight()
@@ -177,12 +179,27 @@ public abstract class GuiControl extends Gui
     {
         return height;
     }
+    
+    /**
+     * Use when control needs to be a square size.
+     * Controls that require this generally don't enforce it.
+     * Sometimes life isn't fair.
+     */
+    @SuppressWarnings("unchecked")
+    public T setSquareSize(double size)
+    {
+        this.height = size;
+        this.width = size;
+        this.isDirty = true;
+        return (T) this;
+    }
 
-    public GuiControl setHeight(double height)
+    @SuppressWarnings("unchecked")
+    public T setHeight(double height)
     {
         this.height = height;
         this.isDirty = true;
-        return this;
+        return (T) this;
     }
 
     public double getWidth()
@@ -190,11 +207,12 @@ public abstract class GuiControl extends Gui
         return width;
     }
 
-    public GuiControl setWidth(double width)
+    @SuppressWarnings("unchecked")
+    public T setWidth(double width)
     {
         this.width = width;
         this.isDirty = true;
-        return this;
+        return (T) this;
     }
    
     public int getBackgroundColor()
@@ -202,10 +220,11 @@ public abstract class GuiControl extends Gui
         return backgroundColor;
     }
 
-    public GuiControl setBackgroundColor(int backgroundColor)
+    @SuppressWarnings("unchecked")
+    public T setBackgroundColor(int backgroundColor)
     {
         this.backgroundColor = backgroundColor;
-        return this;
+        return (T) this;
     }
 
     public double getAspectRatio()
@@ -213,10 +232,11 @@ public abstract class GuiControl extends Gui
         return aspectRatio;
     }
 
-    public GuiControl setAspectRatio(double aspectRatio)
+    @SuppressWarnings("unchecked")
+    public T setAspectRatio(double aspectRatio)
     {
         this.aspectRatio = aspectRatio;
-        return this;
+        return (T) this;
     }
 
     public int getHorizontalWeight()
@@ -224,10 +244,11 @@ public abstract class GuiControl extends Gui
         return horizontalWeight;
     }
 
-    public GuiControl setHorizontalWeight(int horizontalWeight)
+    @SuppressWarnings("unchecked")
+    public T setHorizontalWeight(int horizontalWeight)
     {
         this.horizontalWeight = horizontalWeight;
-        return this;
+        return (T) this;
     }
 
     public int getVerticalWeight()
@@ -235,10 +256,11 @@ public abstract class GuiControl extends Gui
         return verticalWeight;
     }
 
-    public GuiControl setVerticalWeight(int verticalWeight)
+    @SuppressWarnings("unchecked")
+    public T setVerticalWeight(int verticalWeight)
     {
         this.verticalWeight = verticalWeight;
-        return this;
+        return (T) this;
     }
 
     public Layout getHorizontalLayout()
@@ -246,10 +268,11 @@ public abstract class GuiControl extends Gui
         return horizontalLayout;
     }
 
-    public GuiControl setHorizontalLayout(Layout horizontalLayout)
+    @SuppressWarnings("unchecked")
+    public T setHorizontalLayout(Layout horizontalLayout)
     {
         this.horizontalLayout = horizontalLayout;
-        return this;
+        return (T) this;
     }
 
     public Layout getVerticalLayout()
@@ -257,12 +280,19 @@ public abstract class GuiControl extends Gui
         return verticalLayout;
     }
 
-    public GuiControl setVerticalLayout(Layout verticalLayout)
+    @SuppressWarnings("unchecked")
+    public T setVerticalLayout(Layout verticalLayout)
     {
         this.verticalLayout = verticalLayout;
-        return this;
+        return (T) this;
     }
 
+    protected boolean isMouseOver(int mouseX, int mouseY)
+    {
+        return !(mouseX < this.left || mouseX > this.right 
+                || mouseY < this.top || mouseY > this.bottom);
+    }
+    
     public boolean isVisible()
     {
         return isVisible;

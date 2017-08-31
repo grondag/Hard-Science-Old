@@ -13,7 +13,9 @@ public class ContainerLayout
     
     public int expectedTextHeight = 12;
 
-    public int dialogWidth = externalMargin * 2 + slotSpacing * 9;
+    public int playerInventoryWidth = slotSpacing * 9;
+    
+    public int dialogWidth = externalMargin * 2 + playerInventoryWidth;
         
     public int dialogHeight = externalMargin * 3 + slotSpacing * 10 + expectedTextHeight * 2;
     
@@ -22,6 +24,7 @@ public class ContainerLayout
     
     /** distance from top of dialog to start of player inventory area */
     public int playerInventoryTop = dialogHeight - externalMargin - slotSpacing * 4;
+    
     
     
 }

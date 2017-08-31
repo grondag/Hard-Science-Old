@@ -2,8 +2,8 @@ package grondag.hard_science.machines.base;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -77,7 +77,7 @@ public class MachineTESR extends SuperBlockTESR
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
         
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
-        
+
         renderControlFace(mte, buffer);
         
 //        TextureHelper.setTextureClamped(true);
@@ -97,12 +97,10 @@ public class MachineTESR extends SuperBlockTESR
         int clampedDistance = Math.min(32, (int) Math.sqrt(te.getLastDistanceSquared()));
         int alpha = clampedDistance < 16 ? 0xFF : 0xFF * (32 - clampedDistance) / 16;
 
-        ModModels.FONT_ORBITRON.drawLine(0.2f, 0.06f, te.machineName(), 0.12f, 0f, 255, 255, 255, alpha);   
+          
 
-        GlStateManager.bindTexture(te.isOn() ? ModModels.TEX_MACHINE_ON : ModModels.TEX_MACHINE_OFF);
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        renderControlQuad(buffer, 0.82, 0.02, 0.98, 0.18, 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
-        Tessellator.getInstance().draw();
+        MachineControlRenderer.renderOnOff(MachineControlRenderer.BOUNDS_ON_OFF, 0, te.isOn(), alpha);
+        MachineControlRenderer.renderMachineName(MachineControlRenderer.BOUNDS_NAME, te.machineName(), alpha);
         
         if(te.hasRedstonePowerSignal())
         {

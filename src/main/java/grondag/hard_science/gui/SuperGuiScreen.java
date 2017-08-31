@@ -404,9 +404,9 @@ public class SuperGuiScreen extends GuiScreen
                     .setBackgroundColor(GuiControl.CONTROL_BACKGROUND);
 
             group_base = rightPanel.createVisiblityGroup(PaintLayer.BASE.localizedName());
-            GuiControl tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
+            Panel tempV = new Panel(true).addAll(fullBrightToggle[PaintLayer.BASE.ordinal()], baseTranslucentToggle)
                     .setHorizontalWeight(2);
-            GuiControl tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
+            Panel tempH = new Panel(false).addAll(tempV, colorPicker[PaintLayer.BASE.ordinal()]).setVerticalWeight(2);
             rightPanel.addAll(group_base, tempH, textureTabBar[PaintLayer.BASE.ordinal()]);
             rightPanel.setVisiblityIndex(group_base);
 

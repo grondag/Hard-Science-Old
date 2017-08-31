@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class Slider extends GuiControl
+public class Slider extends GuiControl<Slider>
 {
     public static final int TAB_MARGIN = 2;
     public static final int TAB_WIDTH = 8;

@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class VisiblitySelector extends GuiControl
+public class VisiblitySelector extends GuiControl<VisiblitySelector>
 {
     private final VisibilityPanel target;
     

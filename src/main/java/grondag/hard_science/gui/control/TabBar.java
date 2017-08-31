@@ -13,7 +13,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public abstract class TabBar<T> extends GuiControl
+public abstract class TabBar<T> extends GuiControl<TabBar<T>>
 {
     public static final int NO_SELECTION = -1;
     

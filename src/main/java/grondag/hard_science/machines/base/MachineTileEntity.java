@@ -9,6 +9,8 @@ import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.ModMessages;
+import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
+import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.simulator.wip.AssignedNumber;
@@ -512,7 +514,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         if(this.machineName == null)
         {
             long l = Useful.longHash(this.world.getSeed() ^ this.getId());
-            this.machineName = Base32Namer.makeName((int) l);
+            this.machineName = Base32Namer.makeName(l, Configurator.MACHINES.filterOffensiveMachineNames);
         }
         return this.machineName;
     }
@@ -521,5 +523,50 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public AssignedNumber idType()
     {
         return AssignedNumber.MACHINE;
+    }
+
+    /**
+     * Handles packet from player to toggle power on or off.
+     */
+    public void togglePower(EntityPlayerMP player)
+    {
+        if(!this.hasWorld() || this.isInvalid()) return;
+        
+        if(this.world.isRemote)
+        {
+            // send to server
+            ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_POWER, this.pos));
+        }
+        else
+        {
+            //FIXME: check user permissions
+            
+            // called by packet handler on server side
+            switch(this.controlMode)
+            {
+            case OFF:
+                this.setControlMode(ControlMode.ON);
+                break;
+                
+            case OFF_WITH_REDSTONE:
+                this.setControlMode(ControlMode.ON_WITH_REDSTOWN);
+                break;
+                
+            case ON:
+                this.setControlMode(ControlMode.OFF);
+                break;
+                
+            case ON_WITH_REDSTOWN:
+                this.setControlMode(ControlMode.OFF_WITH_REDSTONE);
+                break;
+                
+            default:
+                break;
+                
+            }
+            
+        }
+        
+        
     }
 }

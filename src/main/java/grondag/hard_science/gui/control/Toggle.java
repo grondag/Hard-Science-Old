@@ -9,16 +9,16 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class Toggle extends GuiControl
+public class Toggle extends GuiControl<Toggle>
 {
 
-    private boolean isOn = false;
-    private String label  = "unlabedl toggle";
+    protected boolean isOn = false;
+    protected String label  = "unlabedl toggle";
     
-    private int targetAreaTop;
-    private int targetAreaBottom;
-    private int labelWidth;
-    private int labelHeight;
+    protected int targetAreaTop;
+    protected int targetAreaBottom;
+    protected int labelWidth;
+    protected int labelHeight;
     
     @Override
     protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
@@ -46,7 +46,7 @@ public class Toggle extends GuiControl
         this.labelWidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(this.label);
     }
 
-    private boolean isMouseOver(int mouseX, int mouseY)
+    protected boolean isMouseOver(int mouseX, int mouseY)
     {
         return !(mouseX < this.left || mouseX > this.left + this.labelHeight + CONTROL_INTERNAL_MARGIN + this.labelWidth
                 || mouseY < this.targetAreaTop || mouseY > this.targetAreaBottom);

@@ -385,6 +385,10 @@ public class Textures
     public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
     
+    public static final TexturePallette SYMBOL_CHEST = REGISTRY.addTexturePallette("symbol_chest", new TexturePalletteInfo()
+            .withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_DETAILS));
+    public static final TexturePallette SYMBOL_BUILDER = REGISTRY.addTexturePallette("symbol_builder", new TexturePalletteInfo(SYMBOL_CHEST));
     
     private static TexturePallette addBorderSingle(String textureName)
     {

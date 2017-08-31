@@ -67,7 +67,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
-        this.action = Action.values()[pBuff.readByte()];
+        this.action = pBuff.readEnumValue(Action.class);
         this.storageType = StorageType.fromEnum(EnumStorageType.values()[pBuff.readByte()]);
         this.target = this.storageType.makeResource(null);
         target.fromBytes(pBuff);
@@ -76,7 +76,7 @@ public class PacketOpenContainerStorageInteraction extends AbstractPlayerToServe
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
-        pBuff.writeByte(this.action.ordinal());
+        pBuff.writeEnumValue(this.action);
         pBuff.writeByte(this.storageType.ordinal);
         this.target.toBytes(pBuff);
     }

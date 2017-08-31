@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ColorPicker extends GuiControl
+public class ColorPicker extends GuiControl<ColorPicker>
 {
     private Hue selectedHue = Hue.AZURE;
     private Chroma selectedChroma = null;
@@ -226,7 +226,7 @@ public class ColorPicker extends GuiControl
     }
     
     @Override 
-    public GuiControl setWidth(double width)
+    public ColorPicker setWidth(double width)
     {
         // width is always derived from height, so have to work backwards to correct height value
         return this.setHeight(height(width));
