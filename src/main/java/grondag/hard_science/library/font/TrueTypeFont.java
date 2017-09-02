@@ -50,18 +50,23 @@ public class TrueTypeFont
     /**
      * Boolean flag on whether AntiAliasing is enabled or not
      */
-    protected boolean antiAlias;
+    public final boolean antiAlias;
 
     /**
      * Font's size
      */
-    private float fontSize = 0;
+    public final int fontSize;
 
     /**
-     * Font's height
+     * Font's height in pixels
      */
-    private float fontHeight = 0;
+    public final int fontHeight;
 
+    /**
+     * Pixels around each glyph in texture map to prevent bleeding
+     */
+    private static int GLYPH_MARGIN = 4;
+    
     /**
      * Texture used to cache the font 0-255 characters
      */
@@ -70,22 +75,22 @@ public class TrueTypeFont
     /**
      * Default font texture width
      */
-    private int textureWidth = 1024;
+    private static int textureWidth = 1024;
 
     /**
      * Default font texture height
      */
-    private int textureHeight = 1024;
+    private static int textureHeight = 1024;
 
     /**
      * A reference to Java's AWT Font that we create our font texture from
      */
-    protected Font font;
+    public final Font font;
 
     /**
      * The font metrics for our Java AWT font
      */
-    private FontMetrics fontMetrics;
+    public final FontMetrics fontMetrics;
 
 
     private class GlyphInfo
@@ -134,14 +139,23 @@ public class TrueTypeFont
     public TrueTypeFont(Font font, boolean antiAlias, char[] additionalChars)
     {
         this.font = font;
-        this.fontSize = font.getSize() + 3;
+        this.fontSize = font.getSize() ;
         this.antiAlias = antiAlias;
 
+        // Create a temporary image to extract the character's size
+        BufferedImage tempfontImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = (Graphics2D) tempfontImage.getGraphics();
+        if (antiAlias)
+        {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        g.setFont(font);
+        this.fontMetrics = g.getFontMetrics();
+        this.fontHeight = fontMetrics.getHeight();
+        
+        
         createSet(additionalChars);
         System.out.println("TrueTypeFont loaded: " + font + " - AntiAlias = " + antiAlias);
-        fontHeight -= 1;
-        if (fontHeight <= 0)
-            fontHeight = 1;
     }
 
     public TrueTypeFont(Font font, boolean antiAlias)
@@ -151,30 +165,14 @@ public class TrueTypeFont
 
     private BufferedImage getFontImage(char ch)
     {
-        // Create a temporary image to extract the character's size
-        BufferedImage tempfontImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = (Graphics2D) tempfontImage.getGraphics();
-        if (antiAlias)
-        {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        }
-        g.setFont(font);
-        fontMetrics = g.getFontMetrics();
-        float charwidth = fontMetrics.charWidth(ch) + 8;
-
-        if (charwidth <= 0)
-        {
-            charwidth = 7;
-        }
-        float charheight = fontMetrics.getHeight() + 3;
-        if (charheight <= 0)
-        {
-            charheight = fontSize;
-        }
+  
+        int w = fontMetrics.charWidth(ch) + GLYPH_MARGIN * 2;
+        int h = this.fontHeight + GLYPH_MARGIN * 2;
+       
 
         // Create another image holding the character we are creating
         BufferedImage fontImage;
-        fontImage = new BufferedImage((int) charwidth, (int) charheight, BufferedImage.TYPE_INT_ARGB);
+        fontImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D gt = (Graphics2D) fontImage.getGraphics();
         if (antiAlias)
         {
@@ -183,9 +181,7 @@ public class TrueTypeFont
         gt.setFont(font);
 
         gt.setColor(Color.WHITE);
-        int charx = 3;
-        int chary = 1;
-        gt.drawString(String.valueOf(ch), (charx), (chary) + fontMetrics.getAscent());
+        gt.drawString(String.valueOf(ch), GLYPH_MARGIN, GLYPH_MARGIN + fontMetrics.getAscent());
 
         return fontImage;
 
@@ -206,13 +202,12 @@ public class TrueTypeFont
         try
         {
 
-            BufferedImage imgTemp = new BufferedImage(textureWidth, textureHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = (Graphics2D) imgTemp.getGraphics();
+            BufferedImage glyphMap = new BufferedImage(textureWidth, textureHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = (Graphics2D) glyphMap.getGraphics();
 
             g.setColor(new Color(0, 0, 0, 1));
             g.fillRect(0, 0, textureWidth, textureHeight);
 
-            int rowHeight = 0;
             int positionX = 0;
             int positionY = 0;
 
@@ -227,33 +222,19 @@ public class TrueTypeFont
                 BufferedImage fontImage = getFontImage(ch);
 
 
-                
-                int w = fontImage.getWidth();
-                int h = fontImage.getHeight();
-
-                if (positionX + w >= textureWidth)
+                if (positionX + fontImage.getWidth() >= textureWidth)
                 {
                     positionX = 0;
-                    positionY += rowHeight;
-                    rowHeight = 0;
+                    positionY += this.fontHeight + GLYPH_MARGIN * 2;
                 }
                 
-                GlyphInfo glyph = new GlyphInfo(w, h, positionX, positionY);
+                GlyphInfo glyph = new GlyphInfo(fontImage.getWidth() - GLYPH_MARGIN * 2, this.fontHeight, positionX + GLYPH_MARGIN, positionY + GLYPH_MARGIN);
 
-                if (glyph.height > fontHeight)
-                {
-                    fontHeight = glyph.height;
-                }
-
-                if (glyph.height > rowHeight)
-                {
-                    rowHeight = glyph.height;
-                }
 
                 // Draw it here
                 g.drawImage(fontImage, positionX, positionY, null);
 
-                positionX += glyph.width;
+                positionX += fontImage.getWidth();
 
                 if (i < 256)
                 { // standard characters
@@ -267,9 +248,7 @@ public class TrueTypeFont
                 fontImage = null;
             }
 
-            fontTextureID = loadImage(imgTemp);
-
-            // .getTexture(font.toString(), imgTemp);
+            fontTextureID = loadImage(glyphMap);
 
         }
         catch (Exception e)
@@ -308,20 +287,6 @@ public class TrueTypeFont
         // return (totalwidth);
     }
 
-    public float getHeight()
-    {
-        return fontHeight;
-    }
-
-    public float getHeight(String HeightString)
-    {
-        return fontHeight;
-    }
-
-    public float getLineHeight()
-    {
-        return fontHeight;
-    }
 
     public String trimStringToWidth(String text, int width)
     {
