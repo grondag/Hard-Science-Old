@@ -4,6 +4,7 @@ import static grondag.hard_science.machines.support.MaterialBuffer.UNITS_PER_ITE
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModModels;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.varia.ColorHelper;
 import grondag.hard_science.library.varia.ColorHelper.CMYK;
@@ -30,6 +31,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -321,5 +324,12 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     public MaterialBufferManager materialBuffer()
     {
         return this.bufferManager;
+    }
+    
+    @SideOnly(Side.CLIENT)
+    @Override
+    public int getSymbolGlTextureId()
+    {
+        return ModModels.TEX_SYMBOL_BUILDER;
     }
 }

@@ -444,6 +444,15 @@ public class Useful
         return (intersectionCount & 0x1) == 1;
     }
 
+    public static double clamp(double min, double max, double val)
+    {
+        return val < min ? min : val > max ? max : val;
+    }
+
+    public static byte[] intToByteArray(int value)
+    {
+        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
+    }
 
     //   /**
     //    * Kept for possible future use.

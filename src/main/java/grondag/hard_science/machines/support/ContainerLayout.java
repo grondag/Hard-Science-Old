@@ -13,7 +13,7 @@ public class ContainerLayout
     
     public int expectedTextHeight = 12;
 
-    public int playerInventoryWidth = slotSpacing * 9;
+    public int playerInventoryWidth = slotSpacing * 8 + 16;
     
     public int dialogWidth = externalMargin * 2 + playerInventoryWidth;
         

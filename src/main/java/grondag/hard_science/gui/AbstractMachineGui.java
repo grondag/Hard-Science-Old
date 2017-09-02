@@ -3,31 +3,37 @@ package grondag.hard_science.gui;
 import java.io.IOException;
 
 import grondag.hard_science.gui.control.GuiControl;
+import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.machine.AbstractMachineControl;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBounds;
-import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.ContainerLayout;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 
-public abstract class AbstractMachineGui<T extends MachineTileEntity> extends GuiContainer
+public abstract class AbstractMachineGui<T extends MachineTileEntity> extends GuiContainer implements IGuiRenderContext
 {
   protected final ContainerLayout layout;
     
     protected Panel mainPanel;
     
-    protected final Wrapper<ItemStack> hoverStack = new Wrapper<ItemStack>();
+//    protected final Wrapper<ItemStack> hoverStack = new Wrapper<ItemStack>();
     
     public static final ContainerLayout LAYOUT;
     
     public static final int CAPACITY_BAR_WIDTH = 4;
     
     protected final T te;
+    
+    protected GuiControl<?> hoverControl;
     
     static
     {
@@ -63,8 +69,7 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         mainPanel.setLayoutDisabled(true);
         mainPanel.setLeft(this.guiLeft + this.layout.playerInventoryLeft);
         mainPanel.setTop(this.guiTop + this.layout.externalMargin);
-        mainPanel.setWidth(this.layout.playerInventoryWidth);
-        mainPanel.setHeight(this.layout.playerInventoryTop - this.layout.externalMargin * 2 - this.layout.expectedTextHeight);
+        mainPanel.setSquareSize(this.layout.playerInventoryWidth);
         mainPanel.setBackgroundColor(0xFF404040);
         this.mainPanel = mainPanel;
         
@@ -90,7 +95,7 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         // Draw controls here because foreground layer is translated to frame of the GUI
         // and our controls are designed to render in frame of the screen.
         // And can't draw after super.drawScreen() because would potentially render on top of things.
-        this.mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
+        this.mainPanel.drawControl(this, mouseX, mouseY, partialTicks);
         
 //        MachineControlRenderer.renderMachineName(MachineControlRenderer.LAYOUT_GUI, te.machineName(), 0xFF);
         
@@ -99,13 +104,13 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) 
     {
-        this.hoverStack.setValue(null);
+        this.hoverControl = null;
         super.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
         super.renderHoveredToolTip(mouseX, mouseY);
-        if(this.hoverStack.getValue() != null)
+        if(this.hoverControl != null)
         {
-            this.renderToolTip(this.hoverStack.getValue(), mouseX, mouseY);
+            hoverControl.drawToolTip(this, mouseX, mouseY, partialTicks);
         }
     }
 
@@ -130,5 +135,42 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         control.setWidth(mainPanel.getWidth() * bounds.width);
         control.setHeight(mainPanel.getHeight() * bounds.height);
         return control;
+    }
+
+    @Override
+    public Minecraft minecraft()
+    {
+        return this.mc;
+    }
+
+    @Override
+    public RenderItem renderItem()
+    {
+        return this.itemRender;
+    }
+
+    @Override
+    public GuiScreen screen()
+    {
+        return this;
+    }
+
+    @Override
+    public FontRenderer fontRenderer()
+    {
+        return this.fontRenderer;
+    }
+    
+    @Override
+    public void setHoverControl(GuiControl<?> control)
+    {
+        this.hoverControl = control;
+    }
+
+    @Override
+    public void drawToolTip(ItemStack hoverStack, int mouseX, int mouseY)
+    {
+        this.renderToolTip(hoverStack, mouseX, mouseY);
+        
     }
 }

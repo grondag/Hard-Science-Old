@@ -4,10 +4,10 @@ import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 
-public class MachineName extends AbstractMachineControl<MachineName>
+public class MachineSymbol extends AbstractMachineControl<MachineSymbol>
 {
 
-    public MachineName(MachineTileEntity tileEntity)
+    public MachineSymbol(MachineTileEntity tileEntity)
     {
         super(tileEntity);
     }

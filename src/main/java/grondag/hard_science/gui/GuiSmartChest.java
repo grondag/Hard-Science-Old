@@ -11,7 +11,6 @@ import grondag.hard_science.gui.control.GuiControl;
 import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
-import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.support.ContainerLayout;
 import grondag.hard_science.machines.support.MachineItemBlock;
@@ -19,22 +18,20 @@ import grondag.hard_science.machines.support.MachineStorageContainer;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class GuiSmartChest extends GuiContainer
+public class GuiSmartChest extends AbstractMachineGui<SmartChestTileEntity>
 {
     protected final ContainerLayout layout;
     
     protected ItemStackPicker stackPicker;
     protected Panel stackPanel;
     
-    protected final Wrapper<ItemStack> hoverStack = new Wrapper<ItemStack>();
+//    protected final Wrapper<ItemStack> hoverStack = new Wrapper<ItemStack>();
     
     public static final ContainerLayout LAYOUT;
     
@@ -68,7 +65,7 @@ public class GuiSmartChest extends GuiContainer
 
     public GuiSmartChest(SmartChestTileEntity tileEntity, MachineStorageContainer container) 
     {
-        super(container);
+        super(tileEntity, container);
         this.layout = container.layout;
         this.xSize = container.layout.dialogWidth;
         this.ySize = container.layout.dialogHeight;
@@ -89,7 +86,7 @@ public class GuiSmartChest extends GuiContainer
         this.itemPickerTop = this.guiTop + this.layout.externalMargin + this.layout.expectedTextHeight;
         this.itemPickerHeight = this.layout.slotSpacing * 6;
         
-        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer, this.hoverStack, StorageClickHandlerStack.INSTANCE);
+        this.stackPicker = new ItemStackPicker(OpenContainerStorageProxy.ITEM_PROXY.LIST, this.fontRenderer, StorageClickHandlerStack.INSTANCE);
         this.stackPicker.setItemsPerRow(9);
 
         this.stackPanel = new Panel(true);
@@ -138,27 +135,14 @@ public class GuiSmartChest extends GuiContainer
         // Draw controls here because foreground layer is translated to frame of the GUI
         // and our controls are designed to render in frame of the screen.
         // And can't draw after super.drawScreen() because would potentially render on top of things.
-        this.stackPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
+        this.stackPanel.drawControl(this, mouseX, mouseY, partialTicks);
         
         //FIXME: localize
         this.fontRenderer.drawString("Smart Chest", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.externalMargin, 0xFF444444);
         this.fontRenderer.drawString("Inventory", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.playerInventoryTop - this.layout.expectedTextHeight, 0xFF444444);
     }
 
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) 
-    {
-        this.hoverStack.setValue(null);
-        super.drawDefaultBackground();
-        super.drawScreen(mouseX, mouseY, partialTicks);
-        super.renderHoveredToolTip(mouseX, mouseY);
-        if(this.hoverStack.getValue() != null)
-        {
-            this.renderToolTip(this.hoverStack.getValue(), mouseX, mouseY);
-        }
-    }
-
-    @Override
+     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
         super.drawGuiContainerForegroundLayer(mouseX, mouseY);
@@ -202,5 +186,12 @@ public class GuiSmartChest extends GuiContainer
             OpenContainerStorageProxy.ITEM_PROXY.setSortIndex(nextSortIndex);
             OpenContainerStorageProxy.ITEM_PROXY.refreshListIfNeeded();
         }
+    }
+
+    @Override
+    public void addControls()
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

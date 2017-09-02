@@ -14,6 +14,7 @@ import grondag.hard_science.gui.control.BrightnessSlider;
 import grondag.hard_science.gui.control.Button;
 import grondag.hard_science.gui.control.ColorPicker;
 import grondag.hard_science.gui.control.GuiControl;
+import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.gui.control.ItemPreview;
 import grondag.hard_science.gui.control.MaterialPicker;
 import grondag.hard_science.gui.control.Panel;
@@ -38,9 +39,11 @@ import grondag.hard_science.superblock.model.state.Translucency;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -50,7 +53,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class SuperGuiScreen extends GuiScreen
+public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
 {
 
     private static final int BUTTON_ID_CANCEL = 0;
@@ -96,6 +99,8 @@ public class SuperGuiScreen extends GuiScreen
     private int group_shape;
     private int group_material;
     private VisibilityPanel rightPanel;
+    
+    private GuiControl<?> hoverControl;
 
     @Override
     public boolean doesGuiPauseGame()
@@ -518,10 +523,12 @@ public class SuperGuiScreen extends GuiScreen
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
+        this.hoverControl = null;
         super.drawDefaultBackground();
         drawGradientRect(xStart, yStart, xStart + xSize, yStart + ySize, -1072689136, -804253680);
-        mainPanel.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
+        mainPanel.drawControl(this, mouseX, mouseY, partialTicks);
         super.drawScreen(mouseX, mouseY, partialTicks);
+        if(this.hoverControl != null) hoverControl.drawToolTip(this, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -537,5 +544,41 @@ public class SuperGuiScreen extends GuiScreen
             updateItemPreviewState();
         }
 
+    }
+    
+    @Override
+    public Minecraft minecraft()
+    {
+        return this.mc;
+    }
+
+    @Override
+    public RenderItem renderItem()
+    {
+        return this.itemRender;
+    }
+
+    @Override
+    public GuiScreen screen()
+    {
+        return this;
+    }
+
+    @Override
+    public FontRenderer fontRenderer()
+    {
+        return this.fontRenderer;
+    }
+    
+    @Override
+    public void drawToolTip(ItemStack hoverStack, int mouseX, int mouseY)
+    {
+        this.renderToolTip(hoverStack, mouseX, mouseY);
+    }
+
+    @Override
+    public void setHoverControl(GuiControl<?> control)
+    {
+        this.hoverControl = control;
     }
 }

@@ -81,7 +81,7 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(items == null) return;
         
@@ -138,7 +138,6 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
         }
         
         this.setupItemRendering();
-        
         int start = this.getFirstDisplayedIndex();
         int end = this.getLastDisplayedIndex();
         double itemX = this.left;
@@ -147,7 +146,7 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
         for(int i = start; i < end; i++)
         {
             
-            this.drawItem(this.get(i), mc, itemRender, itemX, itemY, partialTicks, i == itemHighlightIndex);
+            this.drawItem(this.get(i), renderContext.minecraft(), renderContext.renderItem(), itemX, itemY, partialTicks, i == itemHighlightIndex);
             if(++column == this.columnsPerRow)
             {
                 column = 0;

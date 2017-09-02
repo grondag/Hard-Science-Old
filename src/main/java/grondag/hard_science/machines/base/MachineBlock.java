@@ -63,24 +63,28 @@ public abstract class MachineBlock extends SuperBlockPlus
         this.setHardness(1);
     }
     
-    protected static ModelState creatBasicMachineModelState(TexturePallette decalTex)
+    protected static ModelState creatBasicMachineModelState(TexturePallette decalTex, TexturePallette borderTex)
     {
         ModelState modelState = new ModelState();
         modelState.setShape(ModelShape.MACHINE);
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
 
-        modelState.setTexture(PaintLayer.MIDDLE, decalTex);
-        modelState.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
-        modelState.setTranslucent(PaintLayer.MIDDLE, true);
-        modelState.setTranslucency(Translucency.CLEAR);
+        if(decalTex != null)
+        {
+            modelState.setTexture(PaintLayer.MIDDLE, decalTex);
+            modelState.setColorMap(PaintLayer.MIDDLE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.PURE_NETURAL, Luminance.BRILLIANT));
+            modelState.setTranslucent(PaintLayer.MIDDLE, true);
+            modelState.setTranslucency(Translucency.CLEAR);
+        }
         
-        modelState.setTexture(PaintLayer.OUTER, Textures.BORDER_SINGLE_PINSTRIPE);
-        modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
-        
-        modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
-        modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));
-        
+        if(borderTex != null)
+        {
+            modelState.setTexture(PaintLayer.OUTER, borderTex);
+            modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
+            modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
+            modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));
+        }
         return modelState;
     }
     

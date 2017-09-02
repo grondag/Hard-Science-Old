@@ -45,7 +45,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator
     private final List<RawQuad> quads270;
     
     private static final Surface mainSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
-    private static final Surface symbolSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
+//    private static final Surface symbolSurface = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC);
     private static final Surface lampSurface = new Surface(SurfaceType.LAMP, SurfaceTopology.CUBIC);
     
     private static final SurfaceInstance mainInstance = mainSurface.unitInstance;
@@ -55,7 +55,7 @@ public class MachineMeshFactory extends ShapeMeshGenerator
     protected MachineMeshFactory()
     {
         super(StateFormat.BLOCK, ModelState.STATE_FLAG_HAS_AXIS_ROTATION, 
-                mainSurface, symbolSurface, lampSurface); 
+                mainSurface, lampSurface); 
         
         this.quads0 = getCubeQuads(Rotation.ROTATE_NONE);
         this.quads90 = getCubeQuads(Rotation.ROTATE_90);

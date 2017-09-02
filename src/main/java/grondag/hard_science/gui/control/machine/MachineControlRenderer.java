@@ -35,24 +35,76 @@ public class MachineControlRenderer
     
     public static final RenderBounds BOUNDS_ON_OFF = new RenderBounds(1.0-(0.15), 0.02, 0.14);
     public static final RenderBounds BOUNDS_NAME = new RenderBounds(0.18, 0.04, 0.5, 0.12);
+    public static final RenderBounds BOUNDS_SYMBOL = new RenderBounds(0.03, 0.03, 0.12, 0.12);
+    
+    public static class BinaryGlTexture 
+    {
+        public final int trueTextureID;
+        public final int falseTextureID;
+        
+        public BinaryGlTexture(int trueTextureID, int falseTextureID)
+        {
+            this.trueTextureID = trueTextureID;
+            this.falseTextureID = falseTextureID;
+        }
+        
+        public int apply(boolean selector)
+        {
+            return selector ? trueTextureID : falseTextureID;
+        }
+    }
     
     /**
      * Alpha is 0-255
      */
-    public static void renderOnOff(RenderBounds bounds, double depth, boolean isOn, int alpha)
+    public static void renderBinaryTexture(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, BinaryGlTexture texture, boolean selector, int alpha)
     {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        GlStateManager.bindTexture(isOn ? ModModels.TEX_MACHINE_ON : ModModels.TEX_MACHINE_OFF);
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        renderControlQuad(buffer, bounds.left, bounds.top, bounds.right(), bounds.bottom(), 
-                depth, 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
-        tessellator.draw();
+        renderTextureInBounds(tessellator, buffer, bounds, texture.apply(selector), alpha);
     }
     
-    public static void renderMachineName(RenderBounds bounds, String machineName, int alpha)
+    public static void renderBinaryTexture(RenderBounds bounds, BinaryGlTexture texture, boolean selector, int alpha)
     {
-        ModModels.FONT_ORBITRON.drawLine(bounds.left, bounds.top, machineName, bounds.height, 0f, 255, 255, 255, alpha); 
+        renderTextureInBounds(bounds, texture.apply(selector), alpha);
+    }
+    
+    /**
+     * Use {@link #renderMachineText(Tessellator, BufferBuilder, RenderBounds, String, int)}
+     * when you already have tessellator and buffer on the stack.
+     */
+    public static void renderMachineText(RenderBounds bounds, String text, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderMachineText(tes, tes.getBuffer(), bounds, text, alpha);
+    }
+    
+    /**
+     * Use this version when you already have tessellator/buffer references on the stack.
+     */
+    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, String text, int alpha)
+    {
+        ModModels.FONT_ORBITRON.drawLine(bounds.left, bounds.top, text, bounds.height, 0f, 255, 255, 255, alpha); 
+    }
+    
+    /**
+     * Use {@link #renderTextureInBounds(Tessellator, BufferBuilder, RenderBounds, int, int)}
+     * when you already have tessellator/buffer references on the stack.
+     */
+    public static void renderTextureInBounds(RenderBounds bounds, int glTextureID, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderTextureInBounds(tes, tes.getBuffer(), bounds, glTextureID, alpha);
+    }
+    
+    /**
+     * Use this version when you already have tessellator/buffer references on the stack.
+     */
+    public static void renderTextureInBounds(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int alpha)
+    {
+        GlStateManager.bindTexture(glTextureID);
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);        
+        bufferControlQuad(buffer, bounds.left, bounds.top, bounds.right(), bounds.bottom(), 
+                0, 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
+        tessellator.draw();
     }
     
     /**
@@ -61,7 +113,7 @@ public class MachineControlRenderer
      * u,v coordinate are also 0-1 within the currently bound texture.
      * Always full brightness.
      */
-    private static void renderControlQuad
+    public static void bufferControlQuad
     (
             BufferBuilder buffer, 
             double xMin, double yMin, double xMax, double yMax, 

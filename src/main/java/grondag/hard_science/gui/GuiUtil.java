@@ -1,5 +1,6 @@
 package grondag.hard_science.gui;
 
+import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.library.world.Rotation;
@@ -279,6 +280,11 @@ public class GuiUtil
     public static void playPressedSound(Minecraft mc)
     {
         mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    }
+    
+    public static boolean  renderItemAndEffectIntoGui(IGuiRenderContext renderContext, ItemStack itm, double x, double y, double contentSize) 
+    {
+        return renderItemAndEffectIntoGui(renderContext.minecraft(), renderContext.renderItem(), itm, x, y, contentSize);
     }
     
     /** 

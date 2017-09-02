@@ -153,6 +153,13 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      */
     public abstract @Nullable MaterialBufferManager materialBuffer();
     
+    
+    /**
+     * Used by GUI and TESR to draw machine's symbol.
+     */
+    @SideOnly(Side.CLIENT)
+    public abstract int getSymbolGlTextureId();
+    
     /**
      * Saves state to the stack.<br>
      * Data should be stored in the server-side tag defined in MachineItemBlock unless will sent to client.

@@ -55,4 +55,11 @@ public class ShapePicker extends TabBar<ModelShape>
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);        
     }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

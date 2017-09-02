@@ -18,6 +18,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
+import grondag.hard_science.library.varia.Useful;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -436,7 +437,7 @@ public class TrueTypeFont
                 byte newI[] = new byte[intI.length * 4];
                 for (int i = 0; i < intI.length; i++)
                 {
-                    byte b[] = intToByteArray(intI[i]);
+                    byte b[] = Useful.intToByteArray(intI[i]);
                     int newIndex = i * 4;
 
                     newI[newIndex] = b[1];
@@ -493,11 +494,6 @@ public class TrueTypeFont
     public static Font[] getFonts()
     {
         return GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
-    }
-
-    public static byte[] intToByteArray(int value)
-    {
-        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
     }
 
     public void destroy()

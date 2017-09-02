@@ -52,4 +52,11 @@ public class TexturePicker extends TabBar<TexturePallette>
         GlStateManager.enableBlend();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);        
     }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

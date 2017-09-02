@@ -5,7 +5,6 @@ import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -115,17 +114,17 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         double halfWidth = this.width / 2;
         double halfHeight = this.height / 2;
         double xMiddle = this.left + halfWidth;
         double yMiddle = this.top + halfHeight;
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, textMaterial, (float) this.left, (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), textMaterial, (float) this.left, (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, textToughness, (float) (xMiddle + spacing), (float) this.top, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), textToughness, (float) (xMiddle + spacing), (float) this.top, 
                 (float) (halfWidth - this.spacing), (float) halfHeight, TEXT_COLOR_LABEL, HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
         
         int mouseIndex = this.getMouseIndex(mouseX, mouseY);
@@ -148,28 +147,28 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
         }
 
         
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        renderContext.minecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         
         double x = this.left + 1;
         double y = yMiddle + 1;
         double size = this.boxSize - 2;
         
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Item.getItemFromBlock(Blocks.STONE)), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Item.getItemFromBlock(Blocks.STONE)), x , y, size);
         x += (this.boxSize + this.spacing);
         
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Item.getItemFromBlock(Blocks.GLASS)), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Item.getItemFromBlock(Blocks.GLASS)), x , y, size);
         x += (this.boxSize + this.spacing);
 
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Item.getItemFromBlock(Blocks.LOG)), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Item.getItemFromBlock(Blocks.LOG)), x , y, size);
         x += (this.boxSize + this.spacing + this.spacing);
 
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Items.STONE_PICKAXE), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Items.STONE_PICKAXE), x , y, size);
         x += (this.boxSize + this.spacing);
         
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Items.IRON_PICKAXE), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Items.IRON_PICKAXE), x , y, size);
         x += (this.boxSize + this.spacing);
 
-        GuiUtil.renderItemAndEffectIntoGui(mc, itemRender, new ItemStack(Items.DIAMOND_PICKAXE), x , y, size);
+        GuiUtil.renderItemAndEffectIntoGui(renderContext, new ItemStack(Items.DIAMOND_PICKAXE), x , y, size);
     }
 
     @Override
@@ -206,6 +205,13 @@ public class MaterialPicker extends GuiControl<MaterialPicker>
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
         // ignore
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

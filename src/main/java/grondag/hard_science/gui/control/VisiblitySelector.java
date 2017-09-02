@@ -5,8 +5,6 @@ import static grondag.hard_science.library.varia.VerticalAlignment.*;
 
 import grondag.hard_science.gui.GuiUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -23,9 +21,8 @@ public class VisiblitySelector extends GuiControl<VisiblitySelector>
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        FontRenderer fontrenderer = mc.fontRenderer;
         double y = this.top;
         
         int hoverIndex = this.getButtonIndex(mouseX, mouseY);
@@ -39,7 +36,7 @@ public class VisiblitySelector extends GuiControl<VisiblitySelector>
             GuiUtil.drawRect(this.left + 2 , y + 2, this.right - 2, y + this.buttonHeight - 2, buttonColor);
 
             int textColor = i == hoverIndex ? TEXT_COLOR_FOCUS : i == this.target.getVisiblityIndex() ? TEXT_COLOR_ACTIVE : TEXT_COLOR_INACTIVE;
-            GuiUtil.drawAlignedStringNoShadow(fontrenderer, label, (float)this.left, (float)y, (float)this.width, (float)this.buttonHeight, textColor, CENTER, MIDDLE);
+            GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), label, (float)this.left, (float)y, (float)this.width, (float)this.buttonHeight, textColor, CENTER, MIDDLE);
             
             y += this.buttonHeight;
         }
@@ -87,6 +84,13 @@ public class VisiblitySelector extends GuiControl<VisiblitySelector>
     protected void handleMouseScroll(int mouseX, int mouseY, int scrollDelta)
     {
         // ignore
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

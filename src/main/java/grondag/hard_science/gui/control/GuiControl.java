@@ -3,7 +3,6 @@ package grondag.hard_science.gui.control;
 import grondag.hard_science.gui.Layout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -66,13 +65,21 @@ public abstract class GuiControl<T extends GuiControl<T>> extends Gui
         return this;
     }
     
-    public void drawControl(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    public void drawControl(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         this.refreshContentCoordinatesIfNeeded();
-        if(this.isVisible) this.drawContent(mc, itemRender, mouseX, mouseY, partialTicks);
+        if(this.isVisible) 
+        {
+            // set hover first, so that controls further down the stack can overwrite
+            if(this.isMouseOver(mouseX, mouseY)) renderContext.setHoverControl(this);;
+            this.drawContent(renderContext, mouseX, mouseY, partialTicks);
+        }
     }
     
-    protected abstract void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks);
+    public abstract void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks);
+    
+
+    protected abstract void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks);
     
     /** called after any coordinate-related input changes */
     protected abstract void handleCoordinateUpdate();

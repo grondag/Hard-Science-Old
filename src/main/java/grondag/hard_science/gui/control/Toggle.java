@@ -4,7 +4,6 @@ import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -21,7 +20,7 @@ public class Toggle extends GuiControl<Toggle>
     protected int labelHeight;
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         float boxRight = (float) (this.left + this.labelHeight);
         
@@ -32,7 +31,7 @@ public class Toggle extends GuiControl<Toggle>
             GuiUtil.drawRect(this.left + 2, this.targetAreaTop + 2, boxRight - 2, this.targetAreaBottom - 2, BUTTON_COLOR_ACTIVE);
         }
         
-        GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, this.label, boxRight + CONTROL_INTERNAL_MARGIN, this.targetAreaTop, 
+        GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), this.label, boxRight + CONTROL_INTERNAL_MARGIN, this.targetAreaTop, 
                 this.labelWidth, this.labelHeight, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
     }
 
@@ -92,6 +91,13 @@ public class Toggle extends GuiControl<Toggle>
         this.label = label;
         this.isDirty = true;
         return this;
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

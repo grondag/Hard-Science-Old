@@ -10,7 +10,7 @@ public class BasicBuilderBlock extends MachineBlock
 {
     public BasicBuilderBlock(String name)
     {
-        super(name, ModGui.BASIC_BUILDER.ordinal(), MachineBlock.creatBasicMachineModelState(Textures.SYMBOL_BUILDER));
+        super(name, ModGui.BASIC_BUILDER.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
     }
 
     @Override

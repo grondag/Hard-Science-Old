@@ -32,6 +32,20 @@ label.position=Position
 label.model_rotation=Model Rotation
 label.full_block=Full Block
 
+
+#MACHINES
+machine.is_on=Machine is ON.
+machine.is_off=Machine is OFF.
+machine.name=Machine Identifier
+machine.integrated_builder=Integrated Builder
+machine.smart_chest=Smart Chest
+machine.redstone_enabled=Redstone control is ENABLED.
+machine.redstone_disabled=Redstone control is DISABLED.
+machine.redstone_live=Machine IS receiving redstone signal.
+machine.redstone_dead=Machine is NOT receiving redstone signal.
+
+
+
 #KEYS
 key.categories.hard_science=Hard Science
 key.placement_mode=Placement Mode

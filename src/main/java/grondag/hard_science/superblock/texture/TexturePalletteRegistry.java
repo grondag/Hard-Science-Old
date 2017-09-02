@@ -10,7 +10,11 @@ import grondag.hard_science.superblock.model.painter.CubicQuadPainterBorders;
 import grondag.hard_science.superblock.model.painter.CubicQuadPainterMasonry;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.TextureRotationType.TextureRotationSetting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry.TexturePallette>
 {
@@ -333,6 +337,27 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
             case BORDER_13:
                 return buildTextureName_X_8(4);
             }
+        }
+        
+        /**
+         * See {@link #getSampleSprite()}
+         */
+        @SideOnly(Side.CLIENT)
+        private TextureAtlasSprite sampleSprite;
+        
+        /**
+         * For use by TESR and GUI to conveniently and quickly access default sprite
+         */
+        @SideOnly(Side.CLIENT)
+        public TextureAtlasSprite getSampleSprite()
+        {
+            TextureAtlasSprite result = sampleSprite;
+            if(result == null)
+            {
+                result = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(this.getSampleTextureName());
+                sampleSprite = result;
+            }
+            return result;
         }
         
         public String getTextureName(int version)

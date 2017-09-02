@@ -1,14 +1,22 @@
 package grondag.hard_science.init;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.Map;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.util.glu.GLU;
+
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.gui.control.machine.MachineControlRenderer.BinaryGlTexture;
 import grondag.hard_science.library.font.FontLoader;
 import grondag.hard_science.library.font.TrueTypeFont;
+import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.base.MachineTESR;
@@ -27,15 +35,15 @@ import grondag.hard_science.superblock.varia.SuperModelLoader;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
 import grondag.hard_science.virtualblock.VirtualBlockTESR;
 import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
+import jline.internal.Log;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.IResource;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -133,11 +141,13 @@ public class ModModels
         }
     }
     
-    public static int TEX_MACHINE_ON;
-    public static int TEX_MACHINE_OFF;
+    public static BinaryGlTexture TEX_MACHINE_ON_OFF;
     public static int TEX_BLOCKS;
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
     public static TrueTypeFont FONT_ORBITRON;
+    //FIXME: remove
+    public static int TEX_SYMBOL_BUILDER;
+    public static int TEX_SYMBOL_CHEST;
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -157,11 +167,12 @@ public class ModModels
         
         CompressedAnimatedSprite.tearDown();
         
-   
-        TEX_MACHINE_ON = loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png").getGlTextureId();
-       
-        TEX_MACHINE_OFF = loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png").getGlTextureId();
+        TEX_MACHINE_ON_OFF = new BinaryGlTexture(
+                loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png"),
+                loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png"));
         
+        TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
+        TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         
         SPRITE_REDSTONE_TORCH_LIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
@@ -171,20 +182,48 @@ public class ModModels
     }
 
     
-    private static ITextureObject loadNonBlockTexture(String location)
+    private static int loadNonBlockTexture(String location)
     {
     
-        ResourceLocation loc = new ResourceLocation(location);
-        ITextureObject result = new SimpleTexture(loc);
-        Minecraft.getMinecraft().getTextureManager().loadTexture(loc, result);
-        GlStateManager.bindTexture(result.getGlTextureId());
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST );
-        //this one is "normal" setting for MC
-//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR );
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        IResource resource;
+        BufferedImage bufferedImage;
+        
+        try
+        {
+            resource = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(location));
+            bufferedImage = TextureUtil.readBufferedImage(resource.getInputStream());
+        }
+        catch (IOException e)
+        {
+            Log.error("Unable to load non-block texture", e);
+            return -1;
+        }
+        
+        int width = bufferedImage.getWidth() ;
+        int height = bufferedImage.getHeight();
+        
+        int aint[] = new int[width * height];
+        bufferedImage.getRGB(0, 0, width, height, aint, 0, width);
+        
+        ByteBuffer buff = TextureHelper.getBufferedTexture(aint);
+        
+        IntBuffer textureId = BufferUtils.createIntBuffer(1);
 
-        GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
-        return result;
+        GL11.glGenTextures(textureId);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId.get(0));
+
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
+
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
+
+//        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+
+//        GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
+        GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
+        
+        return textureId.get(0);
     }
     
     @SubscribeEvent

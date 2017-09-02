@@ -83,7 +83,7 @@ public class Slider extends GuiControl<Slider>
     }
 
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(size == 0) return;
         
@@ -92,13 +92,13 @@ public class Slider extends GuiControl<Slider>
         // draw label if there is one
         if(this.label != null && this.labelWidth > 0)
         {
-            GuiUtil.drawAlignedStringNoShadow(mc.fontRenderer, this.label, this.left, this.top, 
+            GuiUtil.drawAlignedStringNoShadow(renderContext.fontRenderer(), this.label, this.left, this.top, 
                     this.labelWidth, this.height, TEXT_COLOR_LABEL, HorizontalAlignment.LEFT, VerticalAlignment.MIDDLE);
         }
         
         if(this.choiceWidthFactor > 0)
         {
-            this.drawChoice(mc, itemRender, partialTicks);
+            this.drawChoice(renderContext.minecraft(), renderContext.renderItem(), partialTicks);
         }
         
         // skip drawing tabs if there is only one
@@ -240,6 +240,13 @@ public class Slider extends GuiControl<Slider>
     public int getSelectedIndex()
     {
         return this.size == 0 ? NO_SELECTION : this.selectedTabIndex;
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
  
 }

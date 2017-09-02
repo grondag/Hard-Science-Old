@@ -1,9 +1,10 @@
 package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.control.IGuiRenderContext;
+import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -17,20 +18,25 @@ public class MachineOnOff extends AbstractMachineControl<MachineOnOff>
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.isMouseOver(mouseX, mouseY))
         {
             GuiUtil.drawBoxRightBottom(this.getLeft(), this.getTop(), this.getRight(), this.getBottom(), 1, BUTTON_COLOR_FOCUS);
         }
-        MachineControlRenderer.renderOnOff(this.renderBounds, 0, this.tileEntity.isOn(), 255);
-     
+        MachineControlRenderer.renderBinaryTexture(this.renderBounds, ModModels.TEX_MACHINE_ON_OFF, this.tileEntity.isOn(), 255);
     }
 
     @Override
     protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
         this.tileEntity.togglePower(null);
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        renderContext.drawLocalizedToolTipBoolean(this.tileEntity.isOn(), "machine.is_on", "machine.is_off", mouseX, mouseY);
     }
     
 }

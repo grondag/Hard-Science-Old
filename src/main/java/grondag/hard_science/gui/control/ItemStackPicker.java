@@ -5,7 +5,6 @@ import java.util.List;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
-import grondag.hard_science.library.varia.Wrapper;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.ItemResource;
 import grondag.hard_science.simulator.wip.StorageType;
@@ -25,16 +24,16 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
 {
     protected final FontRenderer fontRenderer;
     
-    protected final Wrapper<ItemStack> hoverStack;
+    /** set during rendering for tooltip callback */
+    protected ItemStack hoverStack;
     
     protected final IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler;
     
-    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer, Wrapper<ItemStack> hoverStack, 
+    public ItemStackPicker(List<AbstractResourceWithQuantity<StorageTypeStack>> items, FontRenderer fontRenderer,  
                 IClickHandler<AbstractResourceWithQuantity<StorageTypeStack>> clickHandler)
     {
         super(items);
         this.fontRenderer = fontRenderer;
-        this.hoverStack = hoverStack;
         this.clickHandler = clickHandler;
         this.setItemsPerRow(9);
         this.setItemSpacing(2);
@@ -45,9 +44,10 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
     
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        super.drawContent(mc, itemRender, mouseX, mouseY, partialTicks);
+        this.hoverStack = null;
+        super.drawContent(renderContext, mouseX, mouseY, partialTicks);
     }
    
 
@@ -86,10 +86,8 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
         // itemRender doesn't clean this up, messes up highlight boxes
         this.drawQuantity(item.getQuantity(), x, y);
         
-        if(isHighlighted)
-        {
-            this.hoverStack.setValue(stack);
-        }
+        if(isHighlighted) this.hoverStack = stack;
+        
     }
     
     protected void drawQuantity(long qty, int left, int top)
@@ -159,5 +157,13 @@ public class ItemStackPicker extends TabBar<AbstractResourceWithQuantity<Storage
     {
         AbstractResourceWithQuantity<StorageTypeStack> res = this.get(currentMouseIndex);
         return res == null ? StorageType.ITEM.emptyResource.withQuantity(0) : res;
+    }
+
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        if(this.hoverStack != null) renderContext.drawToolTip(this.hoverStack, mouseX, mouseY);
+        
     }
 }

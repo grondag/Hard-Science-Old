@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -75,10 +76,10 @@ public class MachineTESR extends SuperBlockTESR
         
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
 //            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        
-        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
 
-        renderControlFace(mte, buffer);
+        renderControlFace(tessellator, buffer, mte);
         
 //        TextureHelper.setTextureClamped(true);
 
@@ -88,19 +89,23 @@ public class MachineTESR extends SuperBlockTESR
         
     }
     
-    private void renderControlFace(MachineTileEntity te, BufferBuilder buffer)
+    private void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te)
     {
  
         
         // fade in controls as player approaches
-        // FIXME: make render distance configurable
-        int clampedDistance = Math.min(32, (int) Math.sqrt(te.getLastDistanceSquared()));
-        int alpha = clampedDistance < 16 ? 0xFF : 0xFF * (32 - clampedDistance) / 16;
-
-          
-
-        MachineControlRenderer.renderOnOff(MachineControlRenderer.BOUNDS_ON_OFF, 0, te.isOn(), alpha);
-        MachineControlRenderer.renderMachineName(MachineControlRenderer.BOUNDS_NAME, te.machineName(), alpha);
+        // FIXME: make dropoff distance (8) and dropoff depth (2) configurable
+        int alpha = (int) (Useful.clamp(0.0, 1.0, 1 - (Math.sqrt(te.getLastDistanceSquared()) - 8) / 2) * 255);
+  
+        MachineControlRenderer.renderMachineText(tessellator, buffer, MachineControlRenderer.BOUNDS_NAME, te.machineName(), alpha);
+        MachineControlRenderer.renderBinaryTexture(tessellator, buffer, MachineControlRenderer.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, te.isOn(), alpha);
+        
+//        MachineControlRenderer.renderSymbolInBounds(tessellator, buffer, MachineControlRenderer.BOUNDS_SYMBOL, te.getSymbolSprite(), alpha);
+        
+//        MachineControlRenderer.renderSymbolInBounds(tessellator, buffer, new RenderBounds(0, 0, 1, 1), te.getSymbolSprite(), alpha);
+        
+        MachineControlRenderer.renderTextureInBounds(tessellator, buffer, MachineControlRenderer.BOUNDS_SYMBOL, te.getSymbolGlTextureId(), alpha);
+        
         
         if(te.hasRedstonePowerSignal())
         {

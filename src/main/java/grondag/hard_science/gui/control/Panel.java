@@ -6,7 +6,6 @@ import java.util.Arrays;
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.Layout;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -53,7 +52,7 @@ public class Panel extends GuiControl<Panel>
     }
     
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.getBackgroundColor() != 0)
         {
@@ -62,7 +61,7 @@ public class Panel extends GuiControl<Panel>
         
         for(GuiControl<?> control : this.children)
         {
-            control.drawControl(mc, itemRender, mouseX, mouseY, partialTicks);
+            control.drawControl(renderContext, mouseX, mouseY, partialTicks);
         }
     }
 
@@ -262,5 +261,12 @@ public class Panel extends GuiControl<Panel>
     public void setLayoutDisabled(boolean isLayoutDisabled)
     {
         this.isLayoutDisabled = isLayoutDisabled;
+    }
+
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

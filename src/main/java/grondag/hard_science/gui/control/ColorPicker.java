@@ -9,7 +9,6 @@ import grondag.hard_science.superblock.color.Hue;
 import grondag.hard_science.superblock.color.Luminance;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -52,7 +51,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
     }
 
     @Override
-    protected void drawContent(Minecraft mc, RenderItem itemRender, int mouseX, int mouseY, float partialTicks)
+    protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         for(int h = 0; h < Hue.values().length; h++)
         {
@@ -230,5 +229,11 @@ public class ColorPicker extends GuiControl<ColorPicker>
     {
         // width is always derived from height, so have to work backwards to correct height value
         return this.setHeight(height(width));
+    }
+    @Override
+    public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }
