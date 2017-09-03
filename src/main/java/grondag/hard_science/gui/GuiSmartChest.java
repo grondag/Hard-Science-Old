@@ -138,8 +138,8 @@ public class GuiSmartChest extends AbstractMachineGui<SmartChestTileEntity>
         this.stackPanel.drawControl(this, mouseX, mouseY, partialTicks);
         
         //FIXME: localize
-        this.fontRenderer.drawString("Smart Chest", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.externalMargin, 0xFF444444);
-        this.fontRenderer.drawString("Inventory", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.playerInventoryTop - this.layout.expectedTextHeight, 0xFF444444);
+//        this.fontRenderer.drawString("Smart Chest", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.externalMargin, 0xFF444444);
+//        this.fontRenderer.drawString("Inventory", guiLeft + this.layout.playerInventoryLeft, guiTop + this.layout.playerInventoryTop - this.layout.expectedTextHeight, 0xFF444444);
     }
 
      @Override

@@ -15,7 +15,7 @@ public class MachineSymbol extends AbstractMachineControl<MachineSymbol>
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderMachineText(this.renderBounds, this.tileEntity.machineName(), 255);
+        MachineControlRenderer.renderTextureInBounds(this.renderBounds, this.tileEntity.getSymbolGlTextureId(), 255);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class MachineSymbol extends AbstractMachineControl<MachineSymbol>
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        renderContext.drawLocalizedToolTip("machine.name", mouseX, mouseY);
+        renderContext.drawToolTip(this.tileEntity.getBlockType().getLocalizedName(), mouseX, mouseY);
     }
 
 }

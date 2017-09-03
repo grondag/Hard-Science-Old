@@ -500,7 +500,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         
         this.controlMode = packet.controlMode;
         this.hasRedstonePowerSignal = packet.hasRedstoneSignal;
-        if(this.materialBuffer() != null) this.materialBuffer().fromArray(packet.materialBufferData);
+        if(this.materialBuffer() != null) this.materialBuffer().deserializeFromArray(packet.materialBufferData);
     }
 
     @Override

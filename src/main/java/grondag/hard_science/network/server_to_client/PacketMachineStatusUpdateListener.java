@@ -23,7 +23,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         this.pos = mte.getPos();
         this.controlMode = mte.getControlMode();
         this.hasRedstoneSignal = mte.hasRedstonePowerSignal();
-        this.materialBufferData = mte.materialBuffer() == null ? null : mte.materialBuffer().toArray();
+        this.materialBufferData = mte.materialBuffer() == null ? null : mte.materialBuffer().serializeToArray();
     }
     
     @Override

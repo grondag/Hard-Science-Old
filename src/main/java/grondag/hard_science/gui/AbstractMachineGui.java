@@ -6,6 +6,9 @@ import grondag.hard_science.gui.control.GuiControl;
 import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.machine.AbstractMachineControl;
+import grondag.hard_science.gui.control.machine.MachineControlRenderer;
+import grondag.hard_science.gui.control.machine.MachineName;
+import grondag.hard_science.gui.control.machine.MachineSymbol;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBounds;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -14,6 +17,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -70,9 +75,11 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         mainPanel.setLeft(this.guiLeft + this.layout.playerInventoryLeft);
         mainPanel.setTop(this.guiTop + this.layout.externalMargin);
         mainPanel.setSquareSize(this.layout.playerInventoryWidth);
-        mainPanel.setBackgroundColor(0xFF404040);
+        mainPanel.setBackgroundColor(0xFF101010);
         this.mainPanel = mainPanel;
         
+        this.mainPanel.add(sizeControl(new MachineName(te), MachineControlRenderer.BOUNDS_NAME));
+        this.mainPanel.add(sizeControl(new MachineSymbol(te), MachineControlRenderer.BOUNDS_SYMBOL));
         this.addControls();
     }
     
@@ -95,9 +102,11 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         // Draw controls here because foreground layer is translated to frame of the GUI
         // and our controls are designed to render in frame of the screen.
         // And can't draw after super.drawScreen() because would potentially render on top of things.
-        this.mainPanel.drawControl(this, mouseX, mouseY, partialTicks);
         
-//        MachineControlRenderer.renderMachineName(MachineControlRenderer.LAYOUT_GUI, te.machineName(), 0xFF);
+        MachineControlRenderer.setupMachineRendering();
+        this.mainPanel.drawControl(this, mouseX, mouseY, partialTicks);
+        MachineControlRenderer.restoreGUIRendering();
+        
         
     }
 
@@ -130,13 +139,13 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
     
     protected AbstractMachineControl<?> sizeControl(AbstractMachineControl<?> control, RenderBounds bounds)
     {
-        control.setLeft(mainPanel.getLeft() + mainPanel.getWidth() * bounds.left);
-        control.setTop(mainPanel.getTop() + mainPanel.getHeight() * bounds.top);
-        control.setWidth(mainPanel.getWidth() * bounds.width);
-        control.setHeight(mainPanel.getHeight() * bounds.height);
+        control.setLeft(mainPanel.getLeft() + mainPanel.getWidth() * bounds.left());
+        control.setTop(mainPanel.getTop() + mainPanel.getHeight() * bounds.top());
+        control.setWidth(mainPanel.getWidth() * bounds.width());
+        control.setHeight(mainPanel.getHeight() * bounds.height());
         return control;
     }
-
+    
     @Override
     public Minecraft minecraft()
     {

@@ -258,33 +258,9 @@ public class TrueTypeFont
         }
     }
 
-    public float getWidth(String text)
+    public int getWidth(String text)
     {
-//        float totalwidth = 0;
-//        int currentChar = 0;
-//        float lastWidth = -10f;
-//        for (int i = 0; i < whatchars.length(); i++)
-//        {
-//            currentChar = whatchars.charAt(i);
-//            GlyphInfo floatObject;
-//            if (currentChar < 256)
-//            {
-//                floatObject = glyphArray[currentChar];
-//            }
-//            else
-//            {
-//                floatObject = customGlyphs.get(currentChar);
-//            }
-//
-//            if (floatObject != null)
-//            {
-//                totalwidth += floatObject.width / 2;
-//                lastWidth = floatObject.width;
-//            }
-//        }
-        // System.out.println("Size: "+totalwidth);
         return this.fontMetrics.stringWidth(text);
-        // return (totalwidth);
     }
 
 
@@ -361,7 +337,7 @@ public class TrueTypeFont
         for(char c : text.toCharArray())
         {
             GlyphInfo g = getGlyph(c);
-            drawQuad(buffer, x, yTop, scaleFactor, g, red, green, blue, alpha);
+            bufferQuad(buffer, x, yTop, scaleFactor, g, red, green, blue, alpha);
             x += g.width * scaleFactor;
         }
         Tessellator.getInstance().draw();
@@ -375,7 +351,7 @@ public class TrueTypeFont
     
    
 
-    private void drawQuad(BufferBuilder buffer, double xLeft, double yTop, double scaleFactor, GlyphInfo glyph, int red, int green, int blue, int alpha)
+    private void bufferQuad(BufferBuilder buffer, double xLeft, double yTop, double scaleFactor, GlyphInfo glyph, int red, int green, int blue, int alpha)
     {
         double xRight = xLeft + glyph.width * scaleFactor;
         double yBottom = yTop + glyph.height * scaleFactor;

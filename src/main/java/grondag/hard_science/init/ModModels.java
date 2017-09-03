@@ -13,11 +13,15 @@ import org.lwjgl.util.glu.GLU;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.BinaryGlTexture;
+import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
 import grondag.hard_science.library.font.FontLoader;
 import grondag.hard_science.library.font.TrueTypeFont;
 import grondag.hard_science.library.render.TextureHelper;
+import grondag.hard_science.machines.BasicBuilderTESR;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
+import grondag.hard_science.machines.SmartChestTESR;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -143,11 +147,28 @@ public class ModModels
     
     public static BinaryGlTexture TEX_MACHINE_ON_OFF;
     public static int TEX_BLOCKS;
+    
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
+    public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_UNLIT;
+    public static TextureAtlasSprite SPRITE_STONE;
+    public static TextureAtlasSprite SPRITE_GLASS;
+    public static TextureAtlasSprite SPRITE_WOOD;
+    public static TextureAtlasSprite SPRITE_GLOWSTONE;
+    public static TextureAtlasSprite SPRITE_CYAN_DYE;
+    public static TextureAtlasSprite SPRITE_MAGENTA_DYE;
+    public static TextureAtlasSprite SPRITE_YELLOW_DYE;
+    public static TextureAtlasSprite SPRITE_BLACK_DYE;
+    
     public static TrueTypeFont FONT_ORBITRON;
-    //FIXME: remove
+    
+    public static int TEX_GAUGE_OUTER;
+    public static int TEX_GAUGE_MAIN;
+    public static int TEX_GAUGE_BACKGROUND;
+
     public static int TEX_SYMBOL_BUILDER;
     public static int TEX_SYMBOL_CHEST;
+    
+    public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[8];
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -171,14 +192,37 @@ public class ModModels
                 loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png"),
                 loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png"));
         
+        TEX_GAUGE_OUTER = loadNonBlockTexture("hard_science:textures/blocks/gauge_outer_128.png");
+        TEX_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
+        TEX_GAUGE_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
+        
         TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
         TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
+        
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         
-        SPRITE_REDSTONE_TORCH_LIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
+        SPRITE_REDSTONE_TORCH_LIT   = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
+        SPRITE_REDSTONE_TORCH_UNLIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_off");
+        SPRITE_STONE                = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/stone");
+        SPRITE_GLASS                = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/glass");
+        SPRITE_WOOD                 = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/log_oak_top");
+        SPRITE_GLOWSTONE            = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/glowstone_dust");
+        SPRITE_CYAN_DYE             = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_cyan");
+        SPRITE_MAGENTA_DYE          = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_magenta");
+        SPRITE_YELLOW_DYE           = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_yellow");
+        SPRITE_BLACK_DYE            = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_black");
         
         FONT_ORBITRON = FontLoader.createFont(new ResourceLocation(HardScience.MODID + ":fonts/orbitron_medium.ttf"), 64, true);
-      
+        
+        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, MachineControlRenderer.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
+        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, MachineControlRenderer.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);
+        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(6, MachineControlRenderer.BOUNDS_GAUGE[6], 1.0, ModModels.SPRITE_YELLOW_DYE, 0xFFFF00);
+        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(7, MachineControlRenderer.BOUNDS_GAUGE[7], 1.0, ModModels.SPRITE_BLACK_DYE, 0x101010);
+    
+        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(1, MachineControlRenderer.BOUNDS_GAUGE[0], 0.75, ModModels.SPRITE_STONE, 0x7f7f7f);
+        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(0, MachineControlRenderer.BOUNDS_GAUGE[2], 0.75, ModModels.SPRITE_WOOD, 0xa78653);
+        BASIC_BUILDER_GAUGE_SPECS[6] = new RadialGaugeSpec(2, MachineControlRenderer.BOUNDS_GAUGE[1], 0.75, ModModels.SPRITE_GLASS, 0xaafcff);
+        BASIC_BUILDER_GAUGE_SPECS[7] = new RadialGaugeSpec(3, MachineControlRenderer.BOUNDS_GAUGE[3], 1.0, ModModels.SPRITE_GLOWSTONE, 0xffffd5);
     }
 
     
@@ -279,8 +323,9 @@ public class ModModels
         ClientRegistry.bindTileEntitySpecialRenderer(SuperTileEntity.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(SuperModelTileEntity.class, SuperBlockTESR.INSTANCE);
         ClientRegistry.bindTileEntitySpecialRenderer(VirtualBlockTileEntity.class, VirtualBlockTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(BasicBuilderTileEntity.class, MachineTESR.INSTANCE);
-        ClientRegistry.bindTileEntitySpecialRenderer(SmartChestTileEntity.class, MachineTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(BasicBuilderTileEntity.class, BasicBuilderTESR.INSTANCE);
+        ClientRegistry.bindTileEntitySpecialRenderer(SmartChestTileEntity.class, SmartChestTESR.INSTANCE);
+        
     }
     
     public static void preInit(FMLPreInitializationEvent event) 

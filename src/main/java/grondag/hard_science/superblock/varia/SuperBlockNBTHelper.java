@@ -10,14 +10,14 @@ public class SuperBlockNBTHelper
     private static final String LIGHT_VALUE_TAG = "ALV";
     private static final String SUBSTANCE_TAG = "ASB";
 
-    public static interface NBTReadHandler
+    public static interface ModelStateNBTReadHandler
     {
-        public void handleNBTRead(ModelState modelState);
+        public void handleModelStateNBTRead(ModelState modelState);
     }
     
     public static interface SuperModelNBTReadHandler
     {
-        public void handleNBTRead(byte lightValue, BlockSubstance substance);
+        public void handleSuperModelNBTRead(byte lightValue, BlockSubstance substance);
     }
 
     public static void writeModelState(NBTTagCompound compound, ModelState modelState)
@@ -74,15 +74,15 @@ public class SuperBlockNBTHelper
         return compound;
     }
     
-    public static void readFromNBT(NBTTagCompound compound, NBTReadHandler target)
+    public static void readFromNBT(NBTTagCompound compound, ModelStateNBTReadHandler target)
     {
-        target.handleNBTRead(
+        target.handleModelStateNBTRead(
                 readModelState(compound));
     }
     
     public static void superModelReadFromNBT(NBTTagCompound compound, SuperModelNBTReadHandler target)
     {
-        target.handleNBTRead(
+        target.handleSuperModelNBTRead(
                 compound.getByte(LIGHT_VALUE_TAG), 
                 readSubstance(compound));
     }

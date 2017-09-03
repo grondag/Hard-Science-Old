@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.NBTReadHandler
+public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.ModelStateNBTReadHandler
 {
     protected ModelState modelState;
 
@@ -232,7 +232,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.N
  
 
     @Override
-    public void handleNBTRead(ModelState modelState)
+    public void handleModelStateNBTRead(ModelState modelState)
     {
         this.modelState = (modelState == null)
                 ? ((SuperBlock)this.getBlockType()).getDefaultModelState()

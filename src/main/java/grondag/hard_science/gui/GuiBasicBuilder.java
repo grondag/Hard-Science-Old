@@ -1,8 +1,11 @@
 package grondag.hard_science.gui;
 
+import grondag.hard_science.gui.control.machine.MachineBufferGauge;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
-import grondag.hard_science.gui.control.machine.MachineName;
+import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.MachineOnOff;
+import grondag.hard_science.init.ModModels;
+import grondag.hard_science.machines.BasicBuilderTESR;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.base.MachineContainer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -19,7 +22,11 @@ public class GuiBasicBuilder extends AbstractMachineGui<BasicBuilderTileEntity>
     @Override
     public void addControls()
     {
-        this.mainPanel.add(sizeControl(new MachineName(te), MachineControlRenderer.BOUNDS_NAME));
         this.mainPanel.add(sizeControl(new MachineOnOff(te), MachineControlRenderer.BOUNDS_ON_OFF));
+        
+        for(RadialGaugeSpec spec : ModModels.BASIC_BUILDER_GAUGE_SPECS)
+        {
+            this.mainPanel.add(sizeControl(new MachineBufferGauge(te, spec), spec));
+        }
     } 
 }

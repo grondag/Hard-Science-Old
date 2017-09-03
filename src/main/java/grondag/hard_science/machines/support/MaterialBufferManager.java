@@ -133,9 +133,9 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     }
 
     /**
-     * Restores state based on array from {@link #toArray()}
+     * Restores state based on array from {@link #serializeToArray()}
      */
-    public void fromArray(int[] values)
+    public void deserializeFromArray(int[] values)
     {
         int count = values.length;
         if(count == this.buffers.length)
@@ -151,7 +151,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     /** 
      * Returns an array for packet serialization.
      */
-    public int[] toArray()
+    public int[] serializeToArray()
     {
         int count = this.buffers.length;
         int[] result = new int[count];
@@ -163,5 +163,16 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             }
         }
         return result;
+    }
+    
+    public int bufferCount()
+    {
+        return this.buffers.length;
+    }
+    
+    public MaterialBuffer getBuffer(int index)
+    {
+        if(index < 0 || index >= this.buffers.length) return null;
+        return this.buffers[index];
     }
 }

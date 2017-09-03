@@ -70,6 +70,9 @@ public abstract class MachineBlock extends SuperBlockPlus
         modelState.setTexture(PaintLayer.BASE, Textures.BLOCK_NOISE_MODERATE);
         modelState.setColorMap(PaintLayer.BASE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.MEDIUM_LIGHT));
 
+        modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
+        modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.PURE_NETURAL, Luminance.EXTRA_DARK));
+        
         if(decalTex != null)
         {
             modelState.setTexture(PaintLayer.MIDDLE, decalTex);
@@ -82,8 +85,6 @@ public abstract class MachineBlock extends SuperBlockPlus
         {
             modelState.setTexture(PaintLayer.OUTER, borderTex);
             modelState.setColorMap(PaintLayer.OUTER, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.GREY, Luminance.MEDIUM_DARK));
-            modelState.setTexture(PaintLayer.LAMP, Textures.BLOCK_NOISE_SUBTLE);
-            modelState.setColorMap(PaintLayer.LAMP, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.EXTRA_DARK));
         }
         return modelState;
     }

@@ -19,7 +19,7 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     }
 
     @Override
-    public void handleNBTRead(byte lightValue, BlockSubstance substance)
+    public void handleSuperModelNBTRead(byte lightValue, BlockSubstance substance)
     {
         this.lightValue = lightValue;
         this.substance = substance;
