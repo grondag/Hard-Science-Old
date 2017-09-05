@@ -2,6 +2,7 @@ package grondag.hard_science.library.serialization;
 
 import org.junit.Test;
 
+import grondag.hard_science.superblock.model.shape.ModelShape;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -128,11 +129,49 @@ public class SerializationHandlerTest
             }
         };
         
+        public static final EnumSerializer<TestSubject, ModelShape> COMMON_ENUM = new EnumSerializer<TestSubject, ModelShape>(false, "enumCommon", ModelShape.class) 
+        {
+
+            @Override
+            public ModelShape getValue(TestSubject target)
+            {
+                return target.shapeCommon;
+            }
+
+            @Override
+            public void setValue(TestSubject target, ModelShape value)
+            {
+                target.shapeCommon = value;
+                target.changeDetected = true;
+            }
+            
+        };
+        
+        public static final EnumSerializer<TestSubject, ModelShape> SERVER_ENUM = new EnumSerializer<TestSubject, ModelShape>(true, "enumServer", ModelShape.class) 
+        {
+
+            @Override
+            public ModelShape getValue(TestSubject target)
+            {
+                return target.shapeServer;
+            }
+
+            @Override
+            public void setValue(TestSubject target, ModelShape value)
+            {
+                target.shapeServer = value;
+                target.changeDetected = true;
+            }
+            
+        };
+        
         public static final SerializationManager<TestSubject> MANAGER = new SerializationManager<TestSubject>()
                 .addThen(COMMON_MEMBER)
                 .addThen(SERVER_MEMBER)
                 .addThen(COMMON_INTEGER)
-                .addThen(SERVER_INTEGER);
+                .addThen(SERVER_INTEGER)
+                .addThen(COMMON_ENUM)
+                .addThen(SERVER_ENUM);
         
        
         private TestValue commonMember = new TestValue("common");
@@ -140,6 +179,8 @@ public class SerializationHandlerTest
         
         private int intServer = -1;
         private int intCommon = -1;
+        private ModelShape shapeCommon = ModelShape.BOX;
+        private ModelShape shapeServer = ModelShape.BOX;
         private boolean changeDetected = false;
         
     }
@@ -152,10 +193,13 @@ public class SerializationHandlerTest
         subject.commonMember.number = 42;
         subject.commonMember.text = "common";
         subject.intCommon = 42;
+        subject.shapeCommon = ModelShape.DODECAHEDRON;
         
         subject.serverMember.number = 97;
         subject.serverMember.text = "server";
+        subject.shapeServer = null;
         subject.intServer = 97;
+        
         
         PacketBuffer buff = new PacketBuffer(UnpooledByteBufAllocator.DEFAULT.buffer());
         
@@ -170,10 +214,12 @@ public class SerializationHandlerTest
         assert target.commonMember.number == 42;
         assert target.commonMember.text.equals("common");
         assert target.intCommon == 42;
+        assert target.shapeCommon == ModelShape.DODECAHEDRON;
         
         assert target.serverMember.number == -1;
         assert target.serverMember.text.equals("new");
         assert target.intServer == -1;
+        assert target.shapeServer == ModelShape.BOX;
         
         assert target.changeDetected;
         
@@ -188,10 +234,12 @@ public class SerializationHandlerTest
         assert target.commonMember.number == 42;
         assert target.commonMember.text.equals("common");
         assert target.intCommon == 42;
+        assert target.shapeCommon == ModelShape.DODECAHEDRON;
         
         assert target.serverMember.number == 97;
         assert target.serverMember.text.equals("server");
         assert target.intServer == 97;
+        assert target.shapeServer == null;
         
         assert target.changeDetected;
         
@@ -203,11 +251,13 @@ public class SerializationHandlerTest
         assert target.commonMember.number == 42;
         assert target.commonMember.text.equals("common");
         assert target.intCommon == 42;
+        assert target.shapeCommon == ModelShape.DODECAHEDRON;
         
         // should not see server-only member change this time
         assert target.serverMember.number == -1;
         assert target.serverMember.text.equals("new");
         assert target.intServer == -1;
+        assert target.shapeServer == ModelShape.BOX;
         
         assert target.changeDetected;
         

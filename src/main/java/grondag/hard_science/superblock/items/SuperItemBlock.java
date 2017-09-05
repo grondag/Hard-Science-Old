@@ -243,7 +243,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        SuperModelTileEntity.SERIALIZER_SUBSTANCE.serializeNBT((byte) substance.ordinal(), tag);
+        SuperModelTileEntity.SERIALIZER_SUBSTANCE.serializeNBT(substance, tag);
         stack.setTagCompound(tag);
     }
     
@@ -252,7 +252,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         NBTTagCompound tag = stack.getTagCompound();
         return tag == null 
                 ? BlockSubstance.FLEXSTONE
-                : BlockSubstance.values()[SuperModelTileEntity.SERIALIZER_SUBSTANCE.deserializeNBT(tag)];
+                : SuperModelTileEntity.SERIALIZER_SUBSTANCE.deserializeNBT(tag);
     }
     
     private static SoundType getPlacementSound(ItemStack stack)

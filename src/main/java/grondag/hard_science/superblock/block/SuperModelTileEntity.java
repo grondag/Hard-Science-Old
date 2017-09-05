@@ -1,6 +1,7 @@
 package grondag.hard_science.superblock.block;
 
 import grondag.hard_science.library.serialization.ByteSerializer;
+import grondag.hard_science.library.serialization.EnumSerializer;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -9,18 +10,19 @@ public class SuperModelTileEntity extends SuperTileEntity
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
-    public static final ByteSerializer<SuperModelTileEntity> SERIALIZER_SUBSTANCE = new ByteSerializer<SuperModelTileEntity>(false, "HSSUB")
+    public static final EnumSerializer<SuperModelTileEntity, BlockSubstance> SERIALIZER_SUBSTANCE 
+            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>(false, "HSSUB", BlockSubstance.class)
     {
         @Override
-        public byte getValue(SuperModelTileEntity target)
+        public BlockSubstance getValue(SuperModelTileEntity target)
         {
-            return (byte) target.getSubstance().ordinal();
+            return target.getSubstance();
         }
 
         @Override
-        public void setValue(SuperModelTileEntity target, byte value)
+        public void setValue(SuperModelTileEntity target, BlockSubstance value)
         {
-            target.setSubstance(BlockSubstance.values()[value]);
+            target.setSubstance(value);
         } 
     };
     
