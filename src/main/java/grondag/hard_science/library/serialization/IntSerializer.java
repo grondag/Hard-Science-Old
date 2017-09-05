@@ -42,6 +42,11 @@ public abstract class IntSerializer<T> extends AbstractSerializer<T>
     @Override
     public final void serializeNBT(T target, NBTTagCompound tag)
     {
-        tag.setInteger(tagName, getValue(target));
+        this.serializeNBT(getValue(target), tag);
+    }
+    
+    public final void serializeNBT(int value, NBTTagCompound tag)
+    {
+        tag.setInteger(this.tagName, value);
     }
 }

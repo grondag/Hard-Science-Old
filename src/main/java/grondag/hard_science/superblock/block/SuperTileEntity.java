@@ -34,17 +34,10 @@ public class SuperTileEntity extends TileEntity
         } 
     };
     
-    /**
-     * Core serializers are included in MC packets but aren't expected to change frequently.
-     * They can and should be excluded from more frequently-changing values that need to be sent
-     * to clients more often. (Needed for machines, mostly, at time of writing.)
-     */
-    public static final SerializationManager<SuperTileEntity> CORE_SERIALIZERS = new SerializationManager<SuperTileEntity>()
-            .addThen(SERIALIZER_MODEL_STATE);
- 
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
+    
     protected ModelState modelState = new ModelState();
     
     //  public IExtendedBlockState exBlockState;
@@ -160,7 +153,7 @@ public class SuperTileEntity extends TileEntity
      */
     public void readModNBT(NBTTagCompound compound)
     {
-        CORE_SERIALIZERS.deserializeNBT(this, compound);
+        SERIALIZER_MODEL_STATE.deserializeNBT(this, compound);
     }
     
     /**
@@ -169,7 +162,7 @@ public class SuperTileEntity extends TileEntity
      */
     public void writeModNBT(NBTTagCompound compound)
     {
-        CORE_SERIALIZERS.serializeNBT(this, compound);
+        SERIALIZER_MODEL_STATE.serializeNBT(this, compound);
     }
     
 

@@ -37,12 +37,17 @@ public abstract class ByteSerializer<T> extends AbstractSerializer<T>
     @Override
     public void deserializeNBT(T target, NBTTagCompound tag)
     {
-        setValue(target, tag.getByte(tagName));
+        setValue(target, tag.getByte(this.tagName));
     }
     
     @Override
     public final void serializeNBT(T target, NBTTagCompound tag)
     {
-        tag.setByte(tagName, getValue(target));
+        this.serializeNBT(getValue(target), tag);
+    }
+    
+    public final void serializeNBT(byte value, NBTTagCompound tag)
+    {
+        tag.setByte(this.tagName, value);
     }
 }

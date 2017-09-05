@@ -12,12 +12,12 @@ import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;
 import grondag.hard_science.library.serialization.SerializationManager;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.IPlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.varia.BlockSubstance;
-import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -225,7 +225,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        SuperBlockNBTHelper.writeLightValue(tag, lightValue);
+        SuperModelTileEntity.SERIALIZER_LIGHT_VALUE.serializeNBT((byte)lightValue, tag);
         stack.setTagCompound(tag);
     }
     
@@ -234,7 +234,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         NBTTagCompound tag = stack.getTagCompound();
         return tag == null 
                 ? 0
-                : SuperBlockNBTHelper.readLightValue(tag);
+                : SuperModelTileEntity.SERIALIZER_LIGHT_VALUE.deserializeNBT(tag);
     }
 
     public static void setStackSubstance(ItemStack stack, BlockSubstance substance)
@@ -243,7 +243,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        SuperBlockNBTHelper.writeSubstance(tag, substance);
+        SuperModelTileEntity.SERIALIZER_SUBSTANCE.serializeNBT((byte) substance.ordinal(), tag);
         stack.setTagCompound(tag);
     }
     
@@ -252,7 +252,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         NBTTagCompound tag = stack.getTagCompound();
         return tag == null 
                 ? BlockSubstance.FLEXSTONE
-                : SuperBlockNBTHelper.readSubstance(tag);
+                : BlockSubstance.values()[SuperModelTileEntity.SERIALIZER_SUBSTANCE.deserializeNBT(tag)];
     }
     
     private static SoundType getPlacementSound(ItemStack stack)
