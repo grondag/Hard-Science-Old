@@ -14,14 +14,13 @@ import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Ac
 import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListener;
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.simulator.wip.AssignedNumber;
-import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IIdentified;
+import grondag.hard_science.simulator.wip.IIdentified;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.varia.KeyedTuple;
 import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -161,40 +160,17 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public abstract int getSymbolGlTextureId();
     
     /**
-     * Saves state to the stack.<br>
-     * Data should be stored in the server-side tag defined in MachineItemBlock unless will sent to client.
-     * Restored if stack is placed again using {@link #restoreStateFromStackAndReconnect(ItemStack)}.<br>
-     * Should only be called server side.
-     */
-    public void saveStateInStack(ItemStack stack, NBTTagCompound serverSideTag)
-    {
-        if(world.isRemote) return;
-        serverSideTag.setInteger("controlMode", this.controlMode.ordinal());
-    }
-    
-    
-    /**
      * Disconnects TE from simulation.<br>
-     * Call when block is broken.<br>
+     * Called when block is broken.<br>
      * Should only be called server side.
      */
-    public void disconnect() {};
+    public abstract void disconnect();
     
     /**
-     * Restores TE to state when was broken, reconnecting it to simulation if needed.<br>
-     * Should only be called server side.
-     * @param serverSideTag 
+     * Called after TE state has been restored.  Server-side only.<br>
+     * Use this to reconnect to simulation, or to reinitialize transient state. <br>
      */
-    public void restoreStateFromStackAndReconnect(ItemStack stack, NBTTagCompound serverSideTag)
-    {
-        if(this.world == null || this.world.isRemote) return;
-        
-        if(serverSideTag == null) return;
-
-        int controlOrdinal = serverSideTag.getInteger("controlMode");
-        
-        this.setControlMode(Useful.safeEnumFromOrdinal(controlOrdinal, ControlMode.OFF_WITH_REDSTONE));
-    }
+    public abstract void reconnect();
 
 
     @Override

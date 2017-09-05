@@ -291,7 +291,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         super.addInformation(stack, world, tooltip, advanced);
         tooltip.add(I18n.translateToLocal("label.meta") + ": " + stack.getMetadata());
         
-        ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
+        ModelState modelState = SuperItemBlock.getStackModelState(stack);
         
         if(modelState != null)
         {
@@ -864,7 +864,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 
                 if(heldStack.getItem() == ModItems.virtual_block)
                 {
-                    SuperItemBlock.setModelState(heldStack, SuperItemBlock.getModelStateFromStack(picked));
+                    SuperItemBlock.setStackModelState(heldStack, SuperItemBlock.getStackModelState(picked));
                     SuperItemBlock.setStackLightValue(heldStack, SuperItemBlock.getStackLightValue(picked));
                     SuperItemBlock.setStackSubstance(heldStack, SuperItemBlock.getStackSubstance(picked));
                     ModMessages.INSTANCE.sendToServer(new PacketReplaceHeldItem(heldStack));
@@ -930,7 +930,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
                 // model state will squawk is usage is NONE
                 modelState.setMetaData(i);
             }
-            SuperItemBlock.setModelState(stack, modelState);
+            SuperItemBlock.setStackModelState(stack, modelState);
             itemBuilder.add(stack);
         }
         return itemBuilder.build();

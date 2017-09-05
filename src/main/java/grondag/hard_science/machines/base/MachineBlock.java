@@ -3,7 +3,6 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
@@ -31,7 +30,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -89,25 +87,6 @@ public abstract class MachineBlock extends SuperBlockPlus
         return modelState;
     }
     
-    @Override
-    public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        ItemStack stack = super.getStackFromBlock(state, world, pos);
-        
-        if(stack != null)
-        {
-            TileEntity myTE = world.getTileEntity(pos);
-            if(myTE != null && myTE instanceof MachineTileEntity && myTE.hasWorld() && !myTE.getWorld().isRemote) 
-            {
-                NBTTagCompound serverSideTag = new NBTTagCompound();
-                stack.setTagInfo(MachineItemBlock.NBT_SERVER_SIDE_TAG, serverSideTag);
-                ((MachineTileEntity)myTE).saveStateInStack(stack, serverSideTag);
-            }
-        }
-
-        return stack;
-    }
- 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
@@ -175,12 +154,13 @@ public abstract class MachineBlock extends SuperBlockPlus
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        
+        // notify re-placed machines to reconnect to simulation or initialize transient state
         if(worldIn.isRemote) return;
         TileEntity blockTE = worldIn.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof MachineTileEntity) 
         {
-            NBTTagCompound serverSideTag = stack.hasTagCompound() ? stack.getSubCompound(MachineItemBlock.NBT_SERVER_SIDE_TAG) : null;
-            ((MachineTileEntity)blockTE).restoreStateFromStackAndReconnect(stack, serverSideTag);
+            ((MachineTileEntity)blockTE).reconnect();
         }
     }
     

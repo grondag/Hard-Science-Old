@@ -28,7 +28,7 @@ public class ShapePicker extends TabBar<ModelShape>
             ModelState modelState = new ModelState();
             modelState.setShape(shape);
             ItemStack stack = ModSuperModelBlocks.findAppropriateSuperModelBlock(BlockSubstance.FLEXSTONE, modelState).getSubItems().get(0);
-            SuperItemBlock.setModelState(stack, modelState);
+            SuperItemBlock.setStackModelState(stack, modelState);
             ITEMS[shape.ordinal()] = stack;
         }
     }

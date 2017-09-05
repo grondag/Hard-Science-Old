@@ -332,4 +332,18 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     {
         return ModModels.TEX_SYMBOL_BUILDER;
     }
+
+    @Override
+    public void disconnect()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void reconnect()
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

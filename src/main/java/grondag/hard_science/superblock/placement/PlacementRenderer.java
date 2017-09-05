@@ -28,7 +28,8 @@ public class PlacementRenderer
         // abort if turned off
         if(Configurator.RENDER.previewSetting == PreviewMode.NONE) return;
 
-        ModelState modelState = item.getModelState(stack);
+        ModelState modelState = SuperItemBlock.getStackModelState(stack);
+        
         if(modelState == null) return;
         
         Minecraft mc = Minecraft.getMinecraft();
@@ -59,7 +60,7 @@ public class PlacementRenderer
         
         for(Pair<BlockPos, ItemStack> placement : placements)
         {
-            ModelState placementModelState = SuperItemBlock.getModelStateFromStack(placement.getRight());
+            ModelState placementModelState = SuperItemBlock.getStackModelState(placement.getRight());
             
             if(placementModelState != null)
             {

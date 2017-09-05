@@ -3,50 +3,14 @@ package grondag.hard_science.simulator.wip;
 import java.util.Arrays;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import grondag.hard_science.simulator.Simulator;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
-import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import jline.internal.Log;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
 {
-    public static interface IIdentified
-    {
-        public default int getId()
-        {
-            int result = this.getIdRaw();
-            if(result <= 0)
-            {
-                result = Simulator.INSTANCE.domainManager().ASSIGNED_NUMBERS_AUTHORITY.newNumber(this.idType());
-                this.setId(result);
-            }
-            return result;
-        }
-        
-        /** implement an int in class, return it here */
-        public int getIdRaw();
-        public void setId(int id);
-        public AssignedNumber idType();
-        
-        /**
-         * Use this in serializeNBT of implementing class.
-         */
-        public default void serializeID(NBTTagCompound tag)
-        {
-            tag.setInteger("hs_id", this.getId());
-        }
-        
-        /**
-         * Use this in deserializeNBT of implementing class.
-         */
-        public default void deserializeID(NBTTagCompound tag)
-        {
-            this.setId(tag.getInteger("hs_id"));
-        }
-    }
-    
     public <T extends IIdentified> IdentifiedIndex<T> createIndex(AssignedNumber numberType)
     {
         return new IdentifiedIndex<T>(numberType);

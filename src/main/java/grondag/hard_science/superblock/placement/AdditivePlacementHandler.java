@@ -48,7 +48,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
             return CubicPlacementHandler.INSTANCE.getPlacementResults(playerIn, worldIn, posOn, hand, facing, hitX, hitY, hitZ, stack);
 
         final SuperBlock stackBlock = (SuperBlock) ((SuperItemBlock)stack.getItem()).getBlock();
-        final ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
+        final ModelState stackModelState = SuperItemBlock.getStackModelState(stack);
 
         final IBlockState onBlockState = worldIn.getBlockState(posOn);
 
@@ -117,7 +117,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
             ItemStack newStack = stack.copy();
             newStack.setItemDamage(targetMeta);
             modelState.setMetaData(targetMeta);
-            SuperItemBlock.setModelState(newStack, modelState);
+            SuperItemBlock.setStackModelState(newStack, modelState);
             result.add(Pair.of(posOn, newStack));
         }
 
@@ -148,7 +148,7 @@ public class AdditivePlacementHandler implements IPlacementHandler
                 ItemStack newStack = stack.copy();
                 newStack.setItemDamage(targetMeta);
                 modelState.setMetaData(targetMeta);
-                SuperItemBlock.setModelState(newStack, modelState);
+                SuperItemBlock.setStackModelState(newStack, modelState);
                 result.add(Pair.of(posOn.offset(addFace), newStack));
             }
         }

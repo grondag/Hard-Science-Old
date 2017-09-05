@@ -9,10 +9,10 @@ import java.util.function.Predicate;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
-import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import grondag.hard_science.simulator.wip.DomainManager.Domain;
 import grondag.hard_science.simulator.wip.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.wip.IStorage.StorageWithQuantity;

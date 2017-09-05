@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.wip;
+package grondag.hard_science.library.serialization;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;

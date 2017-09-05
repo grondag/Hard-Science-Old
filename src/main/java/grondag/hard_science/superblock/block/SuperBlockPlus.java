@@ -2,7 +2,6 @@ package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nullable;
 
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.MetaUsage;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -76,11 +75,19 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     @Override
     public ItemStack getStackFromBlock(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-        ItemStack stack = super.getStackFromBlock(state, world, pos);
+        IBlockState currentState = world.getBlockState(pos);
+        
+        ItemStack stack = super.getStackFromBlock(currentState, world, pos);
         
         if(stack != null)
         {
-            SuperItemBlock.setModelState(stack, this.getModelStateAssumeStateIsStale(state, world, pos, true));
+            TileEntity blockTE = world.getTileEntity(pos);
+            if (blockTE != null && blockTE instanceof SuperTileEntity) 
+            {
+                // force refresh of TE state before persisting in stack
+                ((SuperTileEntity)blockTE).getModelState(currentState, world, pos, true);
+                blockTE.readFromNBT(stack.getTagCompound());
+            }
         }
 
         return stack;
@@ -124,10 +131,13 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
         super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        
+        // restore TE state from stack
+        // on client side, stack state may not include all elements (like storage) 
         TileEntity blockTE = worldIn.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof SuperTileEntity) 
         {
-            ((SuperTileEntity)blockTE).setModelState(SuperItemBlock.getModelStateFromStack(stack));
+            blockTE.readFromNBT(stack.getTagCompound());
         }
     }
     

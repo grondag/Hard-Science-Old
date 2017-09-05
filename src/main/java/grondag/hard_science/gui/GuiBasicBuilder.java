@@ -5,7 +5,6 @@ import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.MachineOnOff;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.machines.BasicBuilderTESR;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.base.MachineContainer;
 import net.minecraftforge.fml.relauncher.Side;

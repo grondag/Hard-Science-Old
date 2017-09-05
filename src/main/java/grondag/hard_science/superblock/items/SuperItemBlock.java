@@ -72,30 +72,23 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 //    }
 
     /** static version */
-    public static ModelState getModelStateFromStack(ItemStack stack)
+    public static ModelState getStackModelState(ItemStack stack)
     {
         if(stack.getItem() instanceof SuperItemBlock)
         {
-            return ((SuperItemBlock)stack.getItem()).getModelState(stack);
+            NBTTagCompound tag = stack.getTagCompound();
+            //WAILA or other mods might create a stack with no NBT
+            if(tag != null)
+            {
+                ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
+                if(modelState != null) return modelState;
+            }
+            return ((SuperBlock)((SuperItemBlock)stack.getItem()).block).getDefaultModelState();
         }
         return null;
     }
     
-    /** instance version */
-    @Override
-    public ModelState getModelState(ItemStack stack)
-    {
-        NBTTagCompound tag = stack.getTagCompound();
-        //WAILA or other mods might create a stack with no NBT
-        if(tag != null)
-        {
-            ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
-            if(modelState != null) return modelState;
-        }
-        return ((SuperBlock)block).getDefaultModelState();
-    }
-    
-    public static void setModelState(ItemStack stack, ModelState modelState)
+    public static void setStackModelState(ItemStack stack, ModelState modelState)
     {
         if(stack.getItem() instanceof SuperItemBlock)
         {
@@ -139,7 +132,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
 
         if (stackIn.isEmpty()) return EnumActionResult.FAIL;
         
-        ModelState modelState = getModelStateFromStack(stackIn);
+        ModelState modelState = getStackModelState(stackIn);
         
         if(modelState == null) return EnumActionResult.FAIL;
         
@@ -155,7 +148,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
         for(Pair<BlockPos, ItemStack> p : placements)
         {
             ItemStack placedStack = p.getRight();
-            ModelState placedModelState = SuperItemBlock.getModelStateFromStack(placedStack);
+            ModelState placedModelState = SuperItemBlock.getStackModelState(placedStack);
             BlockPos placedPos = p.getLeft();
             AxisAlignedBB axisalignedbb = placedModelState.getShape().meshFactory().collisionHandler().getCollisionBoundingBox(placedModelState);
 

@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
+import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.simulator.wip.IMessagePlus;
 
 /**
  * For dispatching machine status updates to client for use in GUI or HUD.

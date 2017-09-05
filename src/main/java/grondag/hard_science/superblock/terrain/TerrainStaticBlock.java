@@ -86,12 +86,12 @@ public class TerrainStaticBlock extends SuperStaticBlock
         for(ItemStack stack : items)
         {
             int meta = stack.getMetadata();
-            ModelState modelState = SuperItemBlock.getModelStateFromStack(stack);
+            ModelState modelState = SuperItemBlock.getStackModelState(stack);
             int level = this.isFiller ? TerrainState.BLOCK_LEVELS_INT - 1 : TerrainState.BLOCK_LEVELS_INT - meta;
             int [] quadrants = new int[] {level, level, level, level};
             TerrainState flowState = new TerrainState(level, quadrants, quadrants, 0);
             modelState.setTerrainState(flowState);
-            SuperItemBlock.setModelState(stack, modelState);
+            SuperItemBlock.setStackModelState(stack, modelState);
         }
         return items;
     }

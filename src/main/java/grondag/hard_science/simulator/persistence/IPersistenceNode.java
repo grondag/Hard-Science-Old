@@ -1,5 +1,6 @@
 package grondag.hard_science.simulator.persistence;
 
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtKeeper;
 
 /**

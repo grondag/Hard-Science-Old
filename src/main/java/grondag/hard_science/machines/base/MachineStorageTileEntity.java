@@ -1,24 +1,16 @@
 package grondag.hard_science.machines.base;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Hides the mechanics of storage access to ensure consistency of handling.
  */
 import grondag.hard_science.Log;
-import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.simulator.Simulator;
-import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.ItemStorage;
 import grondag.hard_science.simulator.wip.StorageType;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.items.IItemHandler;
 
 /**
@@ -129,65 +121,20 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     }
 
     @Override
-    public void restoreStateFromStackAndReconnect(ItemStack stack, NBTTagCompound serverSideTag)
+    public void reconnect()
     {
         if(this.isRemote()) return;
-       super.restoreStateFromStackAndReconnect(stack, serverSideTag);
-       if(serverSideTag == null || serverSideTag.hasNoTags()) return;
      
-       IStorage<StorageType.StorageTypeStack> storage = new ItemStorage(serverSideTag.getCompoundTag("storage"));
-       storage.setLocation(this.pos, this.world);
-       //force new ID
-       storage.setId(0);
-       Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(storage);
-       
-       this.setStorage(storage);
-       
-       //FIXME: remove
-       Log.info("restoreStateFromStackAndReconnect id=" + this.storageID);
-       
-    }
-    
-    @Override
-    public void saveStateInStack(ItemStack stack, NBTTagCompound serverSideTag)
-    {
-        if(this.isRemote()) return;
-        super.saveStateInStack(stack, serverSideTag);
-        
         IStorage<StorageTypeStack> store = this.getStorage();
-     
         
-        if(this.storage.usedCapacity() == 0) return;
-        
-        if(store != null) serverSideTag.setTag("storage", store.serializeNBT());
-        
-        NBTTagCompound displayTag = stack.getOrCreateSubCompound("display");
-            
-        NBTTagList loreTag = new NBTTagList(); 
-
-        List<AbstractResourceWithQuantity<StorageTypeStack>> items = this.storage.find(storage.storageType().MATCH_ANY).stream()
-                .sorted(AbstractResourceWithQuantity.SORT_BY_QTY_DESC).collect(Collectors.toList());
-
-        if(!items.isEmpty())
+        //FIXME: handle duplication via pickblock in create mode
+        if(store != null)
         {
-            long printedQty = 0;
-            int printedCount = 0;
-            for(AbstractResourceWithQuantity<StorageTypeStack> item : items)
-            {
-                loreTag.appendTag(new NBTTagString(item.toString()));
-                printedQty += item.getQuantity();
-                if(++printedCount == 10)
-                {
-                    //FIXME: localize
-                    loreTag.appendTag(new NBTTagString(String.format("...plus %,d of %d other items", 
-                            this.storage.usedCapacity() - printedQty, items.size() - printedCount)));
-                    break;
-                }
-            }
-            
-            stack.setItemDamage(Math.max(1, (int) (MachineItemBlock.MAX_DAMAGE * this.storage.availableCapacity() / this.storage.getCapacity())));
+            Simulator.INSTANCE.domainManager().defaultDomain().ITEM_STORAGE.addStore(this.getStorage());
+
+            //FIXME: remove
+            Log.info("reconnect storage id=" + this.storageID);
         }
-        displayTag.setTag("Lore", loreTag);
     }
     
     @Override

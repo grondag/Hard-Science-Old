@@ -3,7 +3,6 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.superblock.model.state.WorldLightOpacity;
-import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.BlockRenderMode;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.BlockSubstance;
@@ -15,7 +14,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
@@ -223,19 +221,6 @@ public class SuperModelBlock extends SuperBlockPlus
     protected WorldLightOpacity worldLightOpacity(IBlockState state)
     {
         return this.worldLightOpacity;
-    }
-    
-    @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
-    {
-        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-        TileEntity blockTE = worldIn.getTileEntity(pos);
-        if (blockTE != null && blockTE instanceof SuperModelTileEntity) 
-        {
-            SuperModelTileEntity superTE = (SuperModelTileEntity)blockTE;
-            superTE.setLightValue(SuperItemBlock.getStackLightValue(stack));
-            superTE.setSubstance(SuperItemBlock.getStackSubstance(stack));
-        }
     }
 }
 

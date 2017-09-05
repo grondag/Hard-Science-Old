@@ -1,6 +1,6 @@
 package grondag.hard_science.network;
 
-import grondag.hard_science.simulator.wip.IMessagePlus;
+import grondag.hard_science.library.serialization.IMessagePlus;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;

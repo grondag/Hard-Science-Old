@@ -46,7 +46,7 @@ public class CubicPlacementHandler implements IPlacementHandler
         
         SuperBlock stackBlock = (SuperBlock) item.getBlock();
         
-        ModelState stackModelState = SuperItemBlock.getModelStateFromStack(stack);
+        ModelState stackModelState = SuperItemBlock.getStackModelState(stack);
         ItemStack result = stack.copy();
         IBlockState blockStateOn = worldIn.getBlockState(posOn);
         Block onBlock = blockStateOn.getBlock();
@@ -185,7 +185,7 @@ public class CubicPlacementHandler implements IPlacementHandler
             stackModelState.setSpecies(species);
             result.setItemDamage(stackModelState.getMetaData());
         }
-        SuperItemBlock.setModelState(result, stackModelState);
+        SuperItemBlock.setStackModelState(result, stackModelState);
  
         return ImmutableList.of(Pair.of(posPlaced, result));
     }

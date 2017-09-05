@@ -1,4 +1,4 @@
-package grondag.hard_science.simulator.persistence;
+package grondag.hard_science.library.serialization;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.INBTSerializable;

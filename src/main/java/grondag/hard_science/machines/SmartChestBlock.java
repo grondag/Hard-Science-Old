@@ -2,11 +2,12 @@ package grondag.hard_science.machines;
 
 import grondag.hard_science.gui.ModGuiHandler.ModGui;
 import grondag.hard_science.machines.base.MachineBlock;
+import grondag.hard_science.machines.base.MachineStorageBlock;
 import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-public class SmartChestBlock extends MachineBlock
+public class SmartChestBlock extends MachineStorageBlock
 {
     public SmartChestBlock(String name) 
     {

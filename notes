@@ -1,0 +1,63 @@
+Persistence Stuff
+
+In tile entity
+	deserializeNBT synonym for readFromNBT, AND ISN"T USED
+	serializeNBT calls writeToNBT, ALSO NOT USED
+	readFromNBT is called from create() static method
+	
+	Key takeaway is that support for ReadNBT / WriteNBT isn't going anywhere
+	and methods should continue to be synonymous
+	
+	private tag customTileData is saved with tag "ForgeData" and is accesible
+	via getTileData().  Is saved (if non-null) in writeInternal
+	
+	writeInternal is used by both writeToNBT/serializeNBT and getUpdateTag.  Only diff is that
+	getUpdateTag returns a new tag vs writing to the passed in tag.  In both cases,
+	there is no additional logic. writeInternal does not filter out anything for clients.
+	
+	getUpdateTag is used when chunk updates are sent - full or portial. 
+	Does not seem useful for sending individual tile updates.
+	
+	handleUpdateTag is used on client to read in the packet produced by getUpdateTag.
+	
+	getUpdatePacket is used to send update packets for some vanilla blocks
+	but comments in the code for the packet seem to indicate it should only
+	be used by vanilla.  Default implementation returns null.
+	
+	onDataPacket is the client-side handler for the packet from getUpdatePacket()
+	
+	In summary - places were we need to avoid sending large NBT value to client
+	that would break packets include:
+		getUpdateTag / handleUpdateTag
+		getUpdatePacket / onDataPacket (if used)
+		
+SuperTileEntity
+	
+	getUpdatePacket / onDataPacket
+	---------------------------------
+	implements getUpdatePacket / onDataPacket and sends entire tag
+	called when there is a blockUpdate - tracked y PlayerChunkMap
+	Note that only uses getUpdatePacket if there is a small number of 
+	changes - otherwise seems to handle using getUpdateTag.
+	Both use writeToNBT and so currently send full state. 
+	
+	In general is not efficient and could send overlarge packets if
+	TE has a large NBT value. 
+
+	But note also that modelState seldom changes unless the block state also changes,
+	so this arrangement is probably fine for SuperBlocks.
+	
+	getUpdateTag / handleUpdateTag
+	---------------------------------
+	Works the same way as getUpdatePacket / onDataPacket
+	Share the same handling routine on the client side, 
+	which updates modelState and refreshes the client render state if different.
+	
+	readFromNBT / writeToNBT
+	---------------------------------
+	only addition is use of SuperBlockNBTHelper to read/write modelState.
+	could instead make modelState implement IReadWriteNBT
+	
+	addInformation - change to use deserializers from stack NBT
+	
+	

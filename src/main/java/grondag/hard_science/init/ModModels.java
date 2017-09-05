@@ -23,7 +23,6 @@ import grondag.hard_science.machines.BasicBuilderTESR;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTESR;
 import grondag.hard_science.machines.SmartChestTileEntity;
-import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;

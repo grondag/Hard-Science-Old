@@ -1,7 +1,7 @@
 package grondag.hard_science.machines.support;
 
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
-import grondag.hard_science.simulator.persistence.IReadWriteNBT;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;

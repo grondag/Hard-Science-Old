@@ -2,7 +2,6 @@ package grondag.hard_science.superblock.placement;
 
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -12,8 +11,6 @@ public interface PlacementItem
     public static final String TAG_ROTATION = "adv_placement_rotation";
     public static final String TAG_FACE = "adv_placement_face";
     public static final String TAG_MODE = "adv_placement_mode";
-    
-    public abstract ModelState getModelState(ItemStack stack);
     
     /** Face corresponding with the orthogonalAxis and orientation for placement. Not the face on which it is placed. */
     public default void setFace(ItemStack stack, EnumFacing face)

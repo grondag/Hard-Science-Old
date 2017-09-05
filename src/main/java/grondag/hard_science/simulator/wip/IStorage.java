@@ -3,10 +3,9 @@ package grondag.hard_science.simulator.wip;
 import java.util.List;
 import java.util.function.Predicate;
 
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location.ILocated;
-import grondag.hard_science.simulator.persistence.IReadWriteNBT;
-import grondag.hard_science.simulator.wip.AssignedNumbersAuthority.IIdentified;
 import grondag.hard_science.simulator.wip.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
 import jline.internal.Log;

@@ -223,7 +223,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
         if(hasUpdates)
         {
             this.itemPreview.previewItem.setItemDamage(this.modelState.getMetaData());
-            SuperItemBlock.setModelState(itemPreview.previewItem, modelState);
+            SuperItemBlock.setStackModelState(itemPreview.previewItem, modelState);
         }
     }
 
@@ -362,7 +362,7 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
                 return;
             }
             //            this.meta = this.itemPreview.previewItem.getMetadata();
-            modelState = SuperItemBlock.getModelStateFromStack(itemPreview.previewItem);
+            modelState = SuperItemBlock.getStackModelState(itemPreview.previewItem);
         }
 
         // abort on strangeness

@@ -1,6 +1,7 @@
 package grondag.hard_science.simulator.wip;
 
-import grondag.hard_science.simulator.persistence.IReadWriteNBT;
+import grondag.hard_science.library.serialization.IMessagePlus;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 
 /** 
  * A resource is something that can be produced and consumed.

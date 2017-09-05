@@ -4,7 +4,8 @@ import java.util.Comparator;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.simulator.persistence.IReadWriteNBT;
+import grondag.hard_science.library.serialization.IMessagePlus;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.wip.IStorage.StorageWithResourceAndQuantity;
 import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
 import net.minecraft.nbt.NBTTagCompound;
