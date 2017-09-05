@@ -102,7 +102,7 @@ public class SerializationManager<T> extends SimpleUnorderedArrayList<AbstractSe
     }
     
     /**
-     * All server-side only serializers will be segregated to a separate
+     * All server-side only serializers are segregated to a 
      * sub tag that can be removed via {@link #withoutServerTag(NBTTagCompound)}.
      * The sub tag is not created if there are no server-side only serializers.
      */
