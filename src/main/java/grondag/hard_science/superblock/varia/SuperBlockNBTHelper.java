@@ -25,7 +25,7 @@ public class SuperBlockNBTHelper
         if(modelState == null) 
             compound.removeTag(MODEL_STATE_TAG);
         else
-            compound.setIntArray(MODEL_STATE_TAG, modelState.getBitsIntArray());
+            compound.setIntArray(MODEL_STATE_TAG, modelState.serializeToInts());
     }
     
     public static ModelState readModelState(NBTTagCompound compound)

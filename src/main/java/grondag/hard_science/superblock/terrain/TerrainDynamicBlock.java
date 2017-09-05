@@ -36,7 +36,7 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
         ModelState modelState = defaultModelState.clone();
         modelState.setShape(this.isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
         modelState.setStatic(false);
-        this.defaultModelStateBits = modelState.getBitsIntArray();
+        this.defaultModelStateBits = modelState.serializeToInts();
     }
     
     /** 

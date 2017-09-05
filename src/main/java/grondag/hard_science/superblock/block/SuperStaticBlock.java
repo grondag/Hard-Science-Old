@@ -20,7 +20,7 @@ public class SuperStaticBlock extends SuperBlockPlus
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
         modelState.setStatic(true);
-        this.defaultModelStateBits = modelState.getBitsIntArray();
+        this.defaultModelStateBits = modelState.serializeToInts();
         this.isGeometryFullCube = defaultModelState.isCube();
         this.worldLightOpacity = WorldLightOpacity.getClosest(substance, defaultModelState);
         

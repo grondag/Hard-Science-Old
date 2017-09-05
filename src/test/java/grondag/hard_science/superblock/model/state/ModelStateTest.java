@@ -8,6 +8,7 @@ import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.model.shape.ModelShape;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.texture.Textures;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
@@ -53,9 +54,10 @@ public class ModelStateTest
         state.setAxisInverted(true);
         state.setStaticShapeBits(879579585L);
         
-        int persistedState[] = state.getBitsIntArray();
+        NBTTagCompound persistedState = state.serializeNBT();
         
-        ModelState reloadedState = new ModelState(persistedState);
+        ModelState reloadedState = new ModelState();
+        reloadedState.deserializeNBT(persistedState);
         
         assert(state.equals(reloadedState));
         assert(state.hashCode() == reloadedState.hashCode());

@@ -140,7 +140,7 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         
         this.lightOpacity = 0;
 
-        this.defaultModelStateBits = defaultModelState.getBitsIntArray();
+        this.defaultModelStateBits = defaultModelState.serializeToInts();
         
         this.blockRenderMode = blockRenderMode == null
                 ? defaultModelState.getRenderPassSet().blockRenderMode

@@ -36,7 +36,7 @@ public class TerrainStaticBlock extends SuperStaticBlock
         // make sure proper shape is set
         ModelState modelState = defaultModelState.clone();
         modelState.setShape(this.isFiller ? ModelShape.TERRAIN_FILLER : ModelShape.TERRAIN_HEIGHT);
-        this.defaultModelStateBits = modelState.getBitsIntArray();
+        this.defaultModelStateBits = modelState.serializeToInts();
     }
     
     /** 

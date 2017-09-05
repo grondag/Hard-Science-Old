@@ -4,6 +4,7 @@ package grondag.hard_science.superblock.model.state;
 import java.util.List;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.IMultiSerializable.IMultiSerializableNotifying;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
@@ -21,11 +22,14 @@ import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.model.shape.ModelShape;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.terrain.TerrainState;
 import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -116,7 +120,7 @@ public class ModelStateFactory
         super();
     }
 
-    public static class ModelState
+    public static class ModelState implements IMultiSerializableNotifying
     {
         
         public static final BitPacker STATE_PACKER = new BitPacker();
@@ -229,15 +233,9 @@ public class ModelStateFactory
 
         public ModelState(int[] bits)
         {
-            // sign on third long word is used to store static indicator
-            this.isStatic = (INT_SIGN_BIT & bits[4]) == INT_SIGN_BIT;
-
-            bits0 = ((long)bits[0]) << 32 | (bits[1] & 0xffffffffL);
-            bits1 = ((long)bits[2]) << 32 | (bits[3] & 0xffffffffL);
-            bits2 = ((long)(INT_SIGN_BIT_INVERSE & bits[4])) << 32 | (bits[5] & 0xffffffffL);
-            bits3 = ((long)bits[6]) << 32 | (bits[7] & 0xffffffffL);
+            this.deserializeFromInts(bits);
         }
-
+        
         public ModelState(long b0, long b1, long b2, long b3)
         {
             bits0 = b0;
@@ -251,7 +249,7 @@ public class ModelStateFactory
             return new ModelState(bits0, bits1, bits2, bits3);
         }
 
-        public int[] getBitsIntArray() 
+        public int[] serializeToInts() 
         {
             int[] result = new int[8];
             result[0] = (int) (bits0 >> 32);
@@ -266,6 +264,20 @@ public class ModelStateFactory
             result[6] = (int) (bits3 >> 32);
             result[7] = (int) (bits3);
             return result;
+        }
+        
+        /**
+         * Note does not reset state flag - do that if calling on an existing instance.
+         */
+        private void deserializeFromInts(int [] bits)
+        {
+            // sign on third long word is used to store static indicator
+            this.isStatic = (INT_SIGN_BIT & bits[4]) == INT_SIGN_BIT;
+
+            this.bits0 = ((long)bits[0]) << 32 | (bits[1] & 0xffffffffL);
+            this.bits1 = ((long)bits[2]) << 32 | (bits[3] & 0xffffffffL);
+            this.bits2 = ((long)(INT_SIGN_BIT_INVERSE & bits[4])) << 32 | (bits[5] & 0xffffffffL);
+            this.bits3 = ((long)bits[6]) << 32 | (bits[7] & 0xffffffffL);    
         }
 
         public long getBits0() {return this.bits0;}
@@ -1104,6 +1116,61 @@ public class ModelStateFactory
         public List<AxisAlignedBB> collisionBoxes(BlockPos offset)
         {
             return this.getShape().meshFactory().collisionHandler().getCollisionBoxes(this, offset);
+        }
+
+        @Override
+        public void fromBytes(PacketBuffer pBuff)
+        {
+            this.deserializeFromInts(pBuff.readVarIntArray());
+        }
+
+        @Override
+        public void toBytes(PacketBuffer pBuff)
+        {
+            pBuff.writeVarIntArray(this.serializeToInts());
+        }
+
+        @Override
+        public void deserializeNBT(NBTTagCompound tag)
+        {
+            int[] stateBits = tag.getIntArray("HSMS");
+            if(stateBits == null || stateBits.length != 8)
+            {
+                Log.warn("Bad or missing data encounter during ModelState NBT deserialization.");
+                return;
+            }
+            this.deserializeFromInts(stateBits);
+            this.clearStateFlags();
+        }
+
+        @Override
+        public void serializeNBT(NBTTagCompound tag)
+        {
+            tag.setIntArray("HSMS", this.serializeToInts());
+        }
+
+        /**
+         * Model state is typically not updated after TE is loaded so going to 
+         * assume that it resulted in a change.  May be less  overhead
+         * than actually checking for differences.
+         */
+        @Override
+        public boolean fromBytesDetectChanges(PacketBuffer buf)
+        {
+            this.fromBytes(buf);
+            return true;
+        }
+        
+        /**
+         * Model state is typically not updated after TE is loaded so going to 
+         * assume that it resulted in a change.  May be less  overhead
+         * than actually checking for differences.
+         */
+        @Override
+        public boolean deserializeNBTDetectChanges(NBTTagCompound tag)
+        {
+            this.deserializeNBT(tag);
+            return true;
         }
     }
 }
