@@ -1,8 +1,9 @@
 package grondag.hard_science.superblock.block;
 
+import grondag.hard_science.library.serialization.ObjectSerializer;
+import grondag.hard_science.library.serialization.SerializationManager;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
-import grondag.hard_science.superblock.varia.SuperBlockNBTHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -13,13 +14,44 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.ModelStateNBTReadHandler
+public class SuperTileEntity extends TileEntity
 {
-    protected ModelState modelState;
+    ////////////////////////////////////////////////////////////////////////
+    //  STATIC MEMBERS
+    ////////////////////////////////////////////////////////////////////////
+    public static final ObjectSerializer<SuperTileEntity, ModelState> SERIALIZER_MODEL_STATE = new ObjectSerializer<SuperTileEntity, ModelState>(false, ModelState.class)
+    {
+        @Override
+        public ModelState getValue(SuperTileEntity target)
+        {
+            return target.modelState;
+        }
 
+        @Override
+        public void notifyChanged(SuperTileEntity target)
+        {
+            target.onModelStateChange(true);
+        } 
+    };
+    
+    /**
+     * Core serializers are included in MC packets but aren't expected to change frequently.
+     * They can and should be excluded from more frequently-changing values that need to be sent
+     * to clients more often. (Needed for machines, mostly, at time of writing.)
+     */
+    public static final SerializationManager<SuperTileEntity> CORE_SERIALIZERS = new SerializationManager<SuperTileEntity>()
+            .addThen(SERIALIZER_MODEL_STATE);
+ 
+    ////////////////////////////////////////////////////////////////////////
+    //  INSTANCE MEMBERS
+    ////////////////////////////////////////////////////////////////////////
+    protected ModelState modelState = new ModelState();
+    
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
- 
+
+    
+    
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
     {
@@ -86,38 +118,25 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.M
     /**
      * Generate tag sent to client when block/chunk first loads.
      * MUST include x, y, z tags so client knows which TE belong to.
+     * Super calls writeInternal() instead of {@link #writeToNBT(NBTTagCompound)}
+     * We call writeToNBT so that we include all info, but filter out
+     * server-side only tag to prevent wastefully large packets.
      */
     @Override
     public NBTTagCompound getUpdateTag()
     {
-        return writeToNBT(super.getUpdateTag());
-    }
-
-    /**
-     * Process tag sent to client when block/chunk first loads.
-     */
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag)
-    {
-        // The description packet often arrives after render state is first cached on client
-        // so we need to refresh render state once we have the server-side info.
-        ModelState oldModelState = modelState;
-        super.handleUpdateTag(tag);
-        if((oldModelState == null || (!oldModelState.equals(modelState))) && this.world.isRemote)
-        {
-            this.updateClientRenderState();
-        }
+        return SerializationManager.withoutServerTag(writeToNBT(super.getUpdateTag()));
     }
 
     /**
      * Generate packet sent to client for TE synch after block/chunk is loaded.
+     * Is inefficient that the information is serialized twice: first to NBT
+     * then to ByteBuffer but that is how MC does it and the packet only accepts NBT.
      */
     @Override
     public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbtTagCompound = writeToNBT(new NBTTagCompound());
-        int metadata = getBlockMetadata();
-        return new SPacketUpdateTileEntity(this.pos, metadata, nbtTagCompound);
+        return new SPacketUpdateTileEntity(this.pos, getBlockMetadata(), this.getUpdateTag());
     }
 
     /**
@@ -141,23 +160,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.M
      */
     public void readModNBT(NBTTagCompound compound)
     {
-        SuperBlockNBTHelper.readFromNBT(compound, this);
-        /**
-         * This can be called by onBlockPlaced after we've already been established.
-         * If that happens, need to treat it like an update, markDirty(), refresh client state, etc.
-         */
-        this.isModelStateCacheDirty = true;
-        if(this.world !=null)
-        {
-            if(this.world.isRemote)
-            {
-                this.updateClientRenderState();
-            }
-            else
-            {
-                this.markDirty();
-            }
-        }
+        CORE_SERIALIZERS.deserializeNBT(this, compound);
     }
     
     /**
@@ -166,7 +169,7 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.M
      */
     public void writeModNBT(NBTTagCompound compound)
     {
-        SuperBlockNBTHelper.writeToNBT(compound, this.modelState);
+        CORE_SERIALIZERS.serializeNBT(this, compound);
     }
     
 
@@ -221,54 +224,45 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.M
     
     public void setModelState(ModelState modelState) 
     { 
-        if(this.modelState == null)
-        {
-            this.setModelStateInner(modelState);
-        }
-        else if(this.modelState.equals(modelState))
-        {
-            if(this.modelState.isStatic() != modelState.isStatic())
+        // if making existing appearance static, don't need to refresh on client side
+        boolean needsClientRefresh = this.world != null
+                && this.world.isRemote
+                && !(
+                        this.modelState != null  
+                        && this.modelState.equals(modelState)
+                        && modelState.isStatic()
+                        && this.modelState.isStatic() != modelState.isStatic());
             {
-                if(modelState.isStatic())
-                {
-                    // if making existing appearance static, just mark to save if on server
-                    this.modelState = modelState;
-                    if(!this.world.isRemote) this.markDirty();
-                }
-                else
-                {
-                    // if going from static to dynamic, force refresh
-                    this.setModelStateInner(modelState);
-                }
+                this.modelState = modelState;
+                this.onModelStateChange(!modelState.isStatic());
+            }
+      
+        this.modelState = modelState;
+        this.onModelStateChange(needsClientRefresh);
+    }
+    
+    /** call whenever modelState changes (or at least probably did).
+     * Parameter should always be true except in case of changing
+     * dynamic blocks to static without altering appearance. 
+     */
+    private void onModelStateChange(boolean refreshClientRenderState)
+    {
+        /**
+         * This can be called by onBlockPlaced after we've already been established.
+         * If that happens, need to treat it like an update, markDirty(), refresh client state, etc.
+         */
+        this.isModelStateCacheDirty = true;
+        if(this.world !=null)
+        {
+            if(this.world.isRemote)
+            {
+                if(refreshClientRenderState) this.updateClientRenderState();
+            }
+            else
+            {
+                this.markDirty();
             }
         }
-        else
-        {
-            this.setModelStateInner(modelState);
-        }
-    }
-
-    private void setModelStateInner(ModelState modelState)
-    {
-        this.modelState = modelState;
-        this.isModelStateCacheDirty = true;
-        if(this.world.isRemote)
-        {
-            this.updateClientRenderState();
-        }
-        else
-        {
-            this.markDirty();
-        }
-    }
- 
-
-    @Override
-    public void handleModelStateNBTRead(ModelState modelState)
-    {
-        this.modelState = (modelState == null)
-                ? ((SuperBlock)this.getBlockType()).getDefaultModelState()
-                : modelState;   
     }
     
     @Override

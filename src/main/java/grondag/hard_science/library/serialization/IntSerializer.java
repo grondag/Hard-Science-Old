@@ -15,7 +15,7 @@ public abstract class IntSerializer<T> extends AbstractSerializer<T>
 
     public int deserializeNBT(NBTTagCompound tag)
     {
-        return this.getTargetTag(tag).getInteger(tagName);
+        return tag.getInteger(tagName);
     }
 
     public abstract int getValue(T target);
@@ -36,12 +36,12 @@ public abstract class IntSerializer<T> extends AbstractSerializer<T>
     @Override
     public void deserializeNBT(T target, NBTTagCompound tag)
     {
-        setValue(target, this.getTargetTag(tag).getInteger(tagName));
+        setValue(target, tag.getInteger(tagName));
     }
     
     @Override
     public final void serializeNBT(T target, NBTTagCompound tag)
     {
-        this.getTargetTag(tag).setInteger(tagName, getValue(target));
+        tag.setInteger(tagName, getValue(target));
     }
 }

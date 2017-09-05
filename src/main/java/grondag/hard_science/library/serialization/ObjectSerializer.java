@@ -3,10 +3,16 @@ package grondag.hard_science.library.serialization;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IMultiSerializable.IMultiSerializableNotifying;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 
+/**
+ * Base version is for objects that can be mutated.
+ * @author grondag
+ *
+ * @param <T> class that will hold reference to object being serialized
+ * @param <V> class of the object being serialized
+ */
 public abstract class ObjectSerializer<T, V extends IMultiSerializable> extends AbstractSerializer<T>
 {
     private final Class<V> clazz;
@@ -16,28 +22,50 @@ public abstract class ObjectSerializer<T, V extends IMultiSerializable> extends 
         super(isServerSideOnly);
         this.clazz = clazz;
     }
-
-    public V deserializeNBT(NBTTagCompound tag)
+    
+    public abstract @Nonnull V getValue(T target);
+  
+    
+    /**
+     * Will be called when value has been changed via a deserialization method.
+     */
+    public abstract void notifyChanged(T target);
+     
+    
+    protected V newInstance()
     {
         try
         {
             V result = clazz.newInstance();
-            result.deserializeNBT(this.getTargetTag(tag));
             return result;
         }
         catch (Exception e)
         {
-            Log.error("Unable to create new instance of serialized object. This is a probably a bug.", e);
+            Log.error("Unable to create new instance of serialized object. This is probably a bug.", e);
             return null;
         }
     }
     
-    public abstract @Nonnull V getValue(T target);
+    /**
+     * Instance to be used for deserialization. Default is to use result of getValue, 
+     * implying that the serialized object is mutable.
+     */
+    protected V deserializtionInstance(T target)
+    {
+        return getValue(target);
+    }
 
+    public V fromBytes(PacketBuffer pBuff)
+    {
+        V result = newInstance();
+        if(result != null) result.fromBytes(pBuff);
+        return result;
+    }
+    
     @Override
     public void fromBytes(T target, PacketBuffer pBuff)
     {
-        getValue(target).fromBytes(pBuff);
+        if(getValue(target).fromBytesDetectChanges(pBuff)) notifyChanged(target);
     }
 
     @Override
@@ -45,43 +73,28 @@ public abstract class ObjectSerializer<T, V extends IMultiSerializable> extends 
     {
         getValue(target).toBytes(pBuff);
     }
+    
+    public V deserializeNBT(NBTTagCompound tag)
+    {
+        V result = newInstance();
+        if(result != null) result.deserializeNBT(tag);
+        return result;
+    }
 
     @Override
     public void deserializeNBT(T target, NBTTagCompound tag)
     {
-        getValue(target).deserializeNBT(this.getTargetTag(tag));
+        if(getValue(target).deserializeNBTDetectChanges(tag)) notifyChanged(target);
     }
 
     @Override
     public final void serializeNBT(T target, NBTTagCompound tag)
     {
-        getValue(target).serializeNBT(this.getTargetTag(tag));
+        getValue(target).serializeNBT(tag);
     }
-
-    public static abstract class NotifyingObjectSerializer<T, V extends IMultiSerializableNotifying> extends ObjectSerializer<T, V>
+    
+    public final void serializeNBT(V value, NBTTagCompound tag)
     {
-
-        /**
-         * Called when deserialization via {@link #fromBytes(Object, PacketBuffer)} 
-         * or {@link #deserializeNBT(Object, NBTTagCompound)} results in a state change.
-         */
-        
-        public abstract void notifyChanged(T target);
-        public NotifyingObjectSerializer(boolean isServerSideOnly, Class<V> clazz)
-        {
-            super(isServerSideOnly, clazz);
-        }
-        
-        @Override
-        public final void fromBytes(T target, PacketBuffer pBuff)
-        {
-            if(getValue(target).fromBytesDetectChanges(pBuff)) notifyChanged(target);
-        }
-        
-        @Override
-        public final void deserializeNBT(T target, NBTTagCompound tag)
-        {
-            if(getValue(target).deserializeNBTDetectChanges(tag)) notifyChanged(target);
-        }
+        value.serializeNBT(tag);
     }
 }

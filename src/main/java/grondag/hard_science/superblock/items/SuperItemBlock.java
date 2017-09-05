@@ -2,13 +2,17 @@ package grondag.hard_science.superblock.items;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;
+import grondag.hard_science.library.serialization.SerializationManager;
 import grondag.hard_science.superblock.block.SuperBlock;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.placement.IPlacementHandler;
 import grondag.hard_science.superblock.placement.PlacementItem;
@@ -80,7 +84,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             //WAILA or other mods might create a stack with no NBT
             if(tag != null)
             {
-                ModelState modelState = SuperBlockNBTHelper.readModelState(tag);
+                ModelState modelState = SuperTileEntity.SERIALIZER_MODEL_STATE.deserializeNBT(tag);
                 if(modelState != null) return modelState;
             }
             return ((SuperBlock)((SuperItemBlock)stack.getItem()).block).getDefaultModelState();
@@ -98,11 +102,25 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             {
                 tag = new NBTTagCompound();
             }
-            SuperBlockNBTHelper.writeModelState(tag, modelState);
+            SuperTileEntity.SERIALIZER_MODEL_STATE.serializeNBT(modelState, tag);
             stack.setTagCompound(tag);
         }
     }
 
+    /**
+     * <i>Grondag: don't want to overflow size limits or burden 
+     * network by sending details of embedded storage that will 
+     * never be used on the client anyway.</i><br><br>
+     * 
+     * {@inheritDoc}
+     */
+    @Nullable
+    @Override
+    public final NBTTagCompound getNBTShareTag(ItemStack stack)
+    {
+        return SerializationManager.withoutServerTag(super.getNBTShareTag(stack));
+    }
+    
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {

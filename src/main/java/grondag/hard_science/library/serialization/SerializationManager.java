@@ -1,11 +1,46 @@
 package grondag.hard_science.library.serialization;
 
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 
 public class SerializationManager<T> extends SimpleUnorderedArrayList<AbstractSerializer<T>> implements ISerializer<T>
 {
+    
+    /**
+     * Anything stored in this tag will not be sent to clients.
+     */
+    public static final String NBT_SERVER_SIDE_TAG = "SrvData";
+    
+    /** Returns server-side tag if one is present, creating it if not. */
+    private static @Nonnull NBTTagCompound getServerTag(@Nonnull NBTTagCompound fromTag)
+    {
+        NBTBase result = fromTag.getTag(NBT_SERVER_SIDE_TAG);
+        if(result == null || result.getId() != 10)
+        {
+            result = new NBTTagCompound();
+            fromTag.setTag(NBT_SERVER_SIDE_TAG, result);
+        }
+        return (NBTTagCompound) result;
+    }
+    
+    /** Returns tag stripped of server-side tag if it is present. 
+     * If the tag must be stripped, returns a modified copy. Otherwise returns input tag.
+     * Will return null if a null tag is passed in.
+     */
+    public static NBTTagCompound withoutServerTag(NBTTagCompound inputTag)
+    {
+        if(inputTag != null && inputTag.hasKey(NBT_SERVER_SIDE_TAG))
+        {
+            inputTag = inputTag.copy();
+            inputTag.removeTag(NBT_SERVER_SIDE_TAG);
+        }
+        return inputTag;
+    }
+    
     /**
      * Always excludes server-only handlers.
      */
@@ -15,8 +50,8 @@ public class SerializationManager<T> extends SimpleUnorderedArrayList<AbstractSe
         if(this.isEmpty()) return;
         for(int i = 0; i < this.size; i++)
         {
-            AbstractSerializer<T> handler = this.get(i);
-            if(!handler.isServerSideOnly) handler.fromBytes(target, pBuff);
+            AbstractSerializer<T> serializer = this.get(i);
+            if(!serializer.isServerSideOnly) serializer.fromBytes(target, pBuff);
         }        
     }
 
@@ -29,13 +64,13 @@ public class SerializationManager<T> extends SimpleUnorderedArrayList<AbstractSe
         if(this.isEmpty()) return;
         for(int i = 0; i < this.size; i++)
         {
-            AbstractSerializer<T> handler = this.get(i);
-            if(!handler.isServerSideOnly) handler.toBytes(target, pBuff);
+            AbstractSerializer<T> serializer = this.get(i);
+            if(!serializer.isServerSideOnly) serializer.toBytes(target, pBuff);
         } 
     }
 
     /**
-     * Will skip server-only members if no server tag is present
+     * Will skip server-only serializers if no server tag is present
      * to avoid putting in bad values from read.
      */
     @Override
@@ -43,27 +78,48 @@ public class SerializationManager<T> extends SimpleUnorderedArrayList<AbstractSe
     {
         if(this.isEmpty()) return;
 
-        boolean hasServerTag = tag.hasKey(AbstractSerializer.NBT_SERVER_SIDE_TAG);
-        
-        for(int i = 0; i < this.size; i++)
+        if(tag.hasKey(NBT_SERVER_SIDE_TAG))
         {
-            AbstractSerializer<T> handler = this.get(i);
-            // if no server tag, skip server-only members
-            // getTargetTag routes to the base or server-side tag as appropriate
-            if(hasServerTag || !handler.isServerSideOnly) handler.deserializeNBT(target, tag);
-        } 
+            NBTTagCompound serverTag = getServerTag(tag);
+            for(int i = 0; i < this.size; i++)
+            {
+                AbstractSerializer<T> serializer = this.get(i);
+                serializer.deserializeNBT(target, serializer.isServerSideOnly ? serverTag : tag);
+            }
+        }
+        else
+        {
+            for(int i = 0; i < this.size; i++)
+            {
+                AbstractSerializer<T> serializer = this.get(i);
+                if(!serializer.isServerSideOnly)
+                {
+                    serializer.deserializeNBT(target, tag);
+                }
+            }
+        }
         
     }
-
+    
+    /**
+     * All server-side only serializers will be segregated to a separate
+     * sub tag that can be removed via {@link #withoutServerTag(NBTTagCompound)}.
+     * The sub tag is not created if there are no server-side only serializers.
+     */
     @Override
     public void serializeNBT(T target, NBTTagCompound tag)
     {
         if(this.isEmpty()) return;
+        NBTTagCompound serverTag = getServerTag(tag);
+        
         for(int i = 0; i < this.size; i++)
         {
-            AbstractSerializer<T> handler = this.get(i);
-            handler.serializeNBT(target, tag);
+            AbstractSerializer<T> serializer = this.get(i);
+            serializer.serializeNBT(target, serializer.isServerSideOnly ? serverTag : tag);
         } 
+        
+        //don't emit empty server-side tags
+        if(serverTag.hasNoTags()) tag.removeTag(NBT_SERVER_SIDE_TAG);
     }
 
     /** 

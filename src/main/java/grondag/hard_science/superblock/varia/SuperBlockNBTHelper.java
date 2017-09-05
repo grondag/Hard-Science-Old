@@ -1,40 +1,39 @@
 package grondag.hard_science.superblock.varia;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 
 public class SuperBlockNBTHelper
 {
-    private static final String MODEL_STATE_TAG = "AMK";
+//    private static final String MODEL_STATE_TAG = "AMK";
     private static final String LIGHT_VALUE_TAG = "ALV";
     private static final String SUBSTANCE_TAG = "ASB";
 
-    public static interface ModelStateNBTReadHandler
-    {
-        public void handleModelStateNBTRead(ModelState modelState);
-    }
+//    public static interface ModelStateNBTReadHandler
+//    {
+//        public void handleModelStateNBTRead(ModelState modelState);
+//    }
     
     public static interface SuperModelNBTReadHandler
     {
         public void handleSuperModelNBTRead(byte lightValue, BlockSubstance substance);
     }
 
-    public static void writeModelState(NBTTagCompound compound, ModelState modelState)
-    {
-        if(modelState == null) 
-            compound.removeTag(MODEL_STATE_TAG);
-        else
-            compound.setIntArray(MODEL_STATE_TAG, modelState.serializeToInts());
-    }
-    
-    public static ModelState readModelState(NBTTagCompound compound)
-    {
-        int[] stateBits = compound.getIntArray(MODEL_STATE_TAG);
-        return (stateBits == null || stateBits.length != 8)
-                ? null
-                : new ModelState(stateBits); 
-    }
+//    public static void writeModelState(NBTTagCompound compound, ModelState modelState)
+//    {
+//        if(modelState == null) 
+//            compound.removeTag(MODEL_STATE_TAG);
+//        else
+//            compound.setIntArray(MODEL_STATE_TAG, modelState.serializeToInts());
+//    }
+//    
+//    public static ModelState readModelState(NBTTagCompound compound)
+//    {
+//        int[] stateBits = compound.getIntArray(MODEL_STATE_TAG);
+//        return (stateBits == null || stateBits.length != 8)
+//                ? null
+//                : new ModelState(stateBits); 
+//    }
     
     /** Inputs are masked to 0-15 */
     public static void writeLightValue(NBTTagCompound compound, int lightValue)
@@ -68,17 +67,17 @@ public class SuperBlockNBTHelper
         return compound;
     }
     
-    public static NBTTagCompound writeToNBT(NBTTagCompound compound, ModelState modelState)
-    {
-        writeModelState(compound, modelState);
-        return compound;
-    }
-    
-    public static void readFromNBT(NBTTagCompound compound, ModelStateNBTReadHandler target)
-    {
-        target.handleModelStateNBTRead(
-                readModelState(compound));
-    }
+//    public static NBTTagCompound writeToNBT(NBTTagCompound compound, ModelState modelState)
+//    {
+//        writeModelState(compound, modelState);
+//        return compound;
+//    }
+//    
+//    public static void readFromNBT(NBTTagCompound compound, ModelStateNBTReadHandler target)
+//    {
+//        target.handleModelStateNBTRead(
+//                readModelState(compound));
+//    }
     
     public static void superModelReadFromNBT(NBTTagCompound compound, SuperModelNBTReadHandler target)
     {

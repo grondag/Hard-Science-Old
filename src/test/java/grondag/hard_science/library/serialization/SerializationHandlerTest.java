@@ -2,8 +2,6 @@ package grondag.hard_science.library.serialization;
 
 import org.junit.Test;
 
-import grondag.hard_science.library.serialization.IMultiSerializable.IMultiSerializableNotifying;
-import grondag.hard_science.library.serialization.ObjectSerializer.NotifyingObjectSerializer;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -11,7 +9,7 @@ import net.minecraft.network.PacketBuffer;
 public class SerializationHandlerTest
 {
     
-    private static class TestValue implements IMultiSerializableNotifying
+    private static class TestValue implements IMultiSerializable
     {
         private int number = -1;
         private String text = "new";
@@ -77,9 +75,15 @@ public class SerializationHandlerTest
             {
                 return target.serverMember;
             }
+          
+            @Override
+            public void notifyChanged(TestSubject target)
+            {
+                target.changeDetected = true;
+            }
         };
         
-        public static final NotifyingObjectSerializer<TestSubject, TestValue> COMMON_MEMBER = new NotifyingObjectSerializer<TestSubject, TestValue>(false, TestValue.class)
+        public static final ObjectSerializer<TestSubject, TestValue> COMMON_MEMBER = new ObjectSerializer<TestSubject, TestValue>(false, TestValue.class)
         {
             @Override
             public TestValue getValue(TestSubject target)
@@ -91,7 +95,7 @@ public class SerializationHandlerTest
             public void notifyChanged(TestSubject target)
             {
                 target.changeDetected = true;
-            } 
+            }
         };
         
         public static final IntSerializer<TestSubject> COMMON_INTEGER = new IntSerializer<TestSubject>(false, "intCommon") 
@@ -131,8 +135,8 @@ public class SerializationHandlerTest
                 .addThen(SERVER_INTEGER);
         
        
-        private final TestValue commonMember = new TestValue("common");
-        private final TestValue serverMember = new TestValue("server'");
+        private TestValue commonMember = new TestValue("common");
+        private TestValue serverMember = new TestValue("server'");
         
         private int intServer = -1;
         private int intCommon = -1;
@@ -194,7 +198,7 @@ public class SerializationHandlerTest
         // repeat but this time filter server-only tag
         target = new TestSubject();
         
-        TestSubject.MANAGER.deserializeNBT(target, AbstractSerializer.withoutServerTag(tag));
+        TestSubject.MANAGER.deserializeNBT(target, SerializationManager.withoutServerTag(tag));
         
         assert target.commonMember.number == 42;
         assert target.commonMember.text.equals("common");

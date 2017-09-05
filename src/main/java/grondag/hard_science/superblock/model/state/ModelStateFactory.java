@@ -4,28 +4,27 @@ package grondag.hard_science.superblock.model.state;
 import java.util.List;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IMultiSerializable.IMultiSerializableNotifying;
+import grondag.hard_science.library.serialization.IMultiSerializable;
 import grondag.hard_science.library.varia.BitPacker;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.IntElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.LongElement;
+import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.CornerJoinBlockState;
 import grondag.hard_science.library.world.CornerJoinBlockStateSelector;
 import grondag.hard_science.library.world.NeighborBlocks;
+import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.library.world.SimpleJoin;
-import grondag.hard_science.library.world.NeighborBlocks.NeighborTestResults;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.collision.SideShape;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.ColorMap;
 import grondag.hard_science.superblock.model.shape.ModelShape;
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.terrain.TerrainState;
-import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -120,7 +119,7 @@ public class ModelStateFactory
         super();
     }
 
-    public static class ModelState implements IMultiSerializableNotifying
+    public static class ModelState implements IMultiSerializable
     {
         
         public static final BitPacker STATE_PACKER = new BitPacker();
