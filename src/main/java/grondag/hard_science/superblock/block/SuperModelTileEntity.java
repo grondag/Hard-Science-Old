@@ -13,9 +13,10 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     private BlockSubstance substance = BlockSubstance.FLEXSTONE;
     
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    public void writeModNBT(NBTTagCompound compound)
     {
-        return SuperBlockNBTHelper.writeToNBT(super.writeToNBT(compound), this.lightValue, this.substance);
+        super.writeModNBT(compound);
+        SuperBlockNBTHelper.writeToNBT(compound, this.lightValue, this.substance);
     }
 
     @Override
@@ -41,11 +42,10 @@ public class SuperModelTileEntity extends SuperTileEntity implements SuperModelN
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound compound)
+    public void readModNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(compound);
+        super.readModNBT(compound);
         SuperBlockNBTHelper.superModelReadFromNBT(compound, this);
-        isLoaded = true;
     }
 
     public byte getLightValue()

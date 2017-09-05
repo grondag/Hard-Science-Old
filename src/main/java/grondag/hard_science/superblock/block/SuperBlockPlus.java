@@ -86,7 +86,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
             {
                 // force refresh of TE state before persisting in stack
                 ((SuperTileEntity)blockTE).getModelState(currentState, world, pos, true);
-                blockTE.readFromNBT(stack.getTagCompound());
+                blockTE.writeToNBT(stack.getTagCompound());
             }
         }
 
@@ -137,7 +137,7 @@ public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityPr
         TileEntity blockTE = worldIn.getTileEntity(pos);
         if (blockTE != null && blockTE instanceof SuperTileEntity) 
         {
-            blockTE.readFromNBT(stack.getTagCompound());
+            ((SuperTileEntity)blockTE).readModNBT(stack.getTagCompound());
         }
     }
     

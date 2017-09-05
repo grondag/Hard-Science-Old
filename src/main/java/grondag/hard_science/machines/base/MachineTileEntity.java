@@ -277,22 +277,21 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound compound)
+    public void readModNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(compound);
+        super.readModNBT(compound);
         this.deserializeID(compound);
         if(this.isRemote()) return;
         this.setControlMode(Useful.safeEnumFromOrdinal(compound.getInteger("ControlMode"), ControlMode.OFF_WITH_REDSTONE));
     }
     
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    public void writeModNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(compound);
+        super.writeModNBT(compound);
         this.serializeID(compound);
-        if(this.isRemote()) return compound;
+        if(this.isRemote()) return;
         compound.setInteger("ControlMode", this.controlMode.ordinal());
-        return compound;
     }
     
     /**

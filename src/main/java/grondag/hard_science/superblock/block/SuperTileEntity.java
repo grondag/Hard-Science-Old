@@ -19,7 +19,6 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.M
 
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
-    public boolean isLoaded = false;
  
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 
@@ -131,17 +130,50 @@ public class SuperTileEntity extends TileEntity implements SuperBlockNBTHelper.M
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound)
+    public final void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
-        SuperBlockNBTHelper.readFromNBT(compound, this);
-        isLoaded = true;
+        this.readModNBT(compound);
     }
-
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    
+    /**
+     * Restores all state previously serialized by {@link #writeModNBT(NBTTagCompound)}
+     */
+    public void readModNBT(NBTTagCompound compound)
+    {
+        SuperBlockNBTHelper.readFromNBT(compound, this);
+        /**
+         * This can be called by onBlockPlaced after we've already been established.
+         * If that happens, need to treat it like an update, markDirty(), refresh client state, etc.
+         */
+        this.isModelStateCacheDirty = true;
+        if(this.world !=null)
+        {
+            if(this.world.isRemote)
+            {
+                this.updateClientRenderState();
+            }
+            else
+            {
+                this.markDirty();
+            }
+        }
+    }
+    
+    /**
+     * Stores all state for this mod to the given tag.
+     * Used internally for serialization but can also be used to restore state from ItemStack
+     */
+    public void writeModNBT(NBTTagCompound compound)
     {
         SuperBlockNBTHelper.writeToNBT(compound, this.modelState);
+    }
+    
+
+    @Override
+    public final NBTTagCompound writeToNBT(NBTTagCompound compound)
+    {
+        this.writeModNBT(compound);
         return super.writeToNBT(compound);
     }
 

@@ -100,9 +100,9 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound compound)
+    public void readModNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(compound);
+        super.readModNBT(compound);
         if(this.isRemote()) return;
         
         this.storageID = compound.getInteger("storageID");
@@ -110,14 +110,12 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+    public void writeModNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(compound);
-        if(this.isRemote()) return compound;
+        super.writeModNBT(compound);
+        if(this.isRemote()) return;
         
         compound.setInteger("storageID", this.storageID);
-        
-        return compound;
     }
 
     @Override
