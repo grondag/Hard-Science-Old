@@ -19,10 +19,21 @@ import net.minecraftforge.items.IItemHandler;
  */
 public abstract class MachineStorageTileEntity extends MachineContainerTileEntity
 {
+    ////////////////////////////////////////////////////////////////////////
+    //  STATIC MEMBERS
+    ////////////////////////////////////////////////////////////////////////
+    
+   
+    
+    ////////////////////////////////////////////////////////////////////////
+    //  INSTANCE MEMBERS
+    ////////////////////////////////////////////////////////////////////////
     /** -1 signifies not loaded */
     private int storageID = -1; 
     
     private IStorage<StorageType.StorageTypeStack> storage;
+    
+    
     
     private void setStorage(IStorage<StorageType.StorageTypeStack> storage)
     {
@@ -103,9 +114,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        if(this.isRemote()) return;
-        
-        this.storageID = compound.getInteger("storageID");
+        this.storageID = getServerTag(compound).getInteger("HS_STRID");
         
     }
 
@@ -113,9 +122,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        if(this.isRemote()) return;
-        
-        compound.setInteger("storageID", this.storageID);
+        getServerTag(compound).setInteger("HS_STRID", this.storageID);
     }
 
     @Override

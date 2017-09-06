@@ -18,7 +18,7 @@ public class BasicBuilderTESR extends MachineTESR
     {
         for(RadialGaugeSpec spec : ModModels.BASIC_BUILDER_GAUGE_SPECS)
         {
-            MachineControlRenderer.renderGauge(spec,  te.materialBuffer().getBuffer(spec.bufferIndex).getLevel(), 1, alpha);
+            MachineControlRenderer.renderGauge(spec,  te.getBufferManager().getBuffer(spec.bufferIndex).getLevel(), 1, alpha);
         }
     }
  

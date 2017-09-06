@@ -18,7 +18,7 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     {
         super(tileEntity);
         this.spec = spec;
-        MaterialBufferManager mbm = tileEntity.materialBuffer();
+        MaterialBufferManager mbm = tileEntity.getBufferManager();
         if(mbm == null || spec.bufferIndex >= mbm.bufferCount()) 
         {
             Log.warn("Machine buffer gauge GUI could not be initialized.  Bad buffer of buffer index.");

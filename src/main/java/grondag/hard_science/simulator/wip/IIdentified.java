@@ -5,6 +5,13 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public interface IIdentified
 {
+    public static final int NO_ID = -1;
+    
+    /** implement an int in class, return it here */
+    public int getIdRaw();
+    public void setId(int id);
+    public AssignedNumber idType();
+
     public default int getId()
     {
         int result = this.getIdRaw();
@@ -16,17 +23,14 @@ public interface IIdentified
         return result;
     }
     
-    /** implement an int in class, return it here */
-    public int getIdRaw();
-    public void setId(int id);
-    public AssignedNumber idType();
-    
     /**
      * Use this in serializeNBT of implementing class.
+     * Will cause ID to be generated if it has not already been.
      */
     public default void serializeID(NBTTagCompound tag)
     {
-        tag.setInteger("hs_id", this.getId());
+        int id = this.getId();
+        if(id > 0) tag.setInteger("hs_id", id);
     }
     
     /**
@@ -34,6 +38,6 @@ public interface IIdentified
      */
     public default void deserializeID(NBTTagCompound tag)
     {
-        this.setId(tag.getInteger("hs_id"));
+        this.setId(tag.hasKey("hs_id") ? tag.getInteger("hs_id") : NO_ID);
     }
 }

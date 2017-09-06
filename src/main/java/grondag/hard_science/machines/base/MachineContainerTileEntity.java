@@ -11,6 +11,7 @@ import net.minecraftforge.items.IItemHandler;
  */
 public abstract class MachineContainerTileEntity extends MachineTileEntity
 {
+ 
     public abstract IItemHandler getItemHandler();
     
     public boolean canInteractWith(EntityPlayer playerIn)

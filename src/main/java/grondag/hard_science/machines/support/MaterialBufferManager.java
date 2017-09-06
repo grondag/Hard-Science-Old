@@ -137,6 +137,8 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
      */
     public void deserializeFromArray(int[] values)
     {
+        if(values == null) return;
+        
         int count = values.length;
         if(count == this.buffers.length)
         {

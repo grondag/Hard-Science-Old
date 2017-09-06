@@ -45,7 +45,17 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     private final MachineControlState controlState = new MachineControlState();
     
-    private int machineID = -1;
+    /** Levels of materials stored in this machine.  Is persisted to NBT. 
+     * Pass null to constructor to disable. 
+     */
+    @Nullable
+    private MaterialBufferManager bufferManager;
+    
+    /**
+     * Machine unique ID.  Is persisted if machine is picked and put back by player.
+     * Most logic is in IIdentified.
+     */
+    private int machineID = IIdentified.NO_ID;
     
     /**
      * Note this isn't serialized - it's always derived from machine ID.
@@ -55,6 +65,30 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
     private double lastDistanceSquared;
  
+    /** players who are looking at this machine and need updates sent to client */
+    private SimpleUnorderedArraySet<PlayerListener> listeningPlayers;
+    
+    /**
+     * Set to false to disable outbound status updates (and keepalive packets) except for urgent/focused updates.
+     */
+    protected boolean isOptionalPlayerUpdateEnabled = true;
+    
+    /** if > 0 then need to send client packets more frequently */
+    private int requiredListenerCount = 0;
+    
+    /**
+     * On server, next time update should be sent to players.
+     * On client, next time keepalive request should be sent to server.
+     */
+    private long nextPlayerUpdateMilliseconds = 0;
+    
+    /**
+     * True if information has changed and players should receive an update.
+     * Difference from {@link #playerUpdateTicks} is that {@link #playerUpdateTicks} controls
+     * <i>when</i> update occurs. {@link #isPlayerUpdateNeeded} contols <i>if</i> update occurs.
+     */
+    private boolean isPlayerUpdateNeeded = false;
+    
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
     {
         /** Listener is valid until this time*/
@@ -107,6 +141,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             return false;
         }
     }
+
     
     /**
      * True if container currently open by player references this tile entity.
@@ -119,36 +154,20 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                 && ((MachineContainer)openContainer).tileEntity() == this;
     }
     
-    /** players who are looking at this machine and need updates sent to client */
-    private SimpleUnorderedArraySet<PlayerListener> listeningPlayers;
-    
-    /**
-     * Set to false to disable outbound status updates (and keepalive packets) except for urgent/focused updates.
-     */
-    protected boolean isOptionalPlayerUpdateEnabled = true;
-    
-    /** if > 0 then need to send client packets more frequently */
-    private int requiredListenerCount = 0;
-    
-    /**
-     * On server, next time update should be sent to players.
-     * On client, next time keepalive request should be sent to server.
-     */
-    private long nextPlayerUpdateMilliseconds = 0;
-    
-    /**
-     * True if information has changed and players should receive an update.
-     * Difference from {@link #playerUpdateTicks} is that {@link #playerUpdateTicks} controls
-     * <i>when</i> update occurs. {@link #isPlayerUpdateNeeded} contols <i>if</i> update occurs.
-     */
-    private boolean isPlayerUpdateNeeded = false;
 
     /** 
      * If this tile has a material buffer, gives access.  Null if not.
      * Used to serialize/deserialize on client.
      */
-    public abstract @Nullable MaterialBufferManager materialBuffer();
+    public final @Nullable MaterialBufferManager getBufferManager()
+    {
+        return this.bufferManager;
+    }
     
+    protected final void setBufferManager(@Nullable MaterialBufferManager bufferManager)
+    {
+        this.bufferManager = bufferManager;
+    }
     
     /**
      * Used by GUI and TESR to draw machine's symbol.
@@ -268,6 +287,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         super.readModNBT(compound);
         this.deserializeID(compound);
         this.controlState.deserializeNBT(compound);
+        if(this.bufferManager != null) this.bufferManager.deserializeNBT(compound);
     }
     
     @Override
@@ -276,6 +296,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         super.writeModNBT(compound);
         this.serializeID(compound);
         this.controlState.serializeNBT(compound);
+        if(this.bufferManager != null) this.bufferManager.serializeNBT(compound);
     }
     
     /**
@@ -449,7 +470,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public PacketMachineStatusUpdateListener createMachineStatusUpdate()
     {
         return new PacketMachineStatusUpdateListener(this.pos, this.controlState, 
-                this.materialBuffer() == null ? null : this.materialBuffer().serializeToArray());
+                this.getBufferManager() == null ? null : this.getBufferManager().serializeToArray());
     }
     
     /**
@@ -460,13 +481,15 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         // should never be called on server
         if(!this.world.isRemote) return;
         this.controlState.deserializeFromBits(packet.controlStateBits);
-        if(this.materialBuffer() != null) this.materialBuffer().deserializeFromArray(packet.materialBufferData);
+        if(this.getBufferManager() != null) this.getBufferManager().deserializeFromArray(packet.materialBufferData);
     }
 
     @Override
     public void setId(int id)
     {
         this.machineID = id;
+        // force regeneration of name
+        this.machineName = null;
         this.markDirty();
     }
 
@@ -476,6 +499,13 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         return this.machineID;
     }
 
+    @Override
+    public int getId()
+    {
+        //disable ID generation on client
+        return (this.world == null || this.world.isRemote ? this.getIdRaw() : IIdentified.super.getId());
+    }
+    
     public String machineName()
     {
         if(this.machineName == null)

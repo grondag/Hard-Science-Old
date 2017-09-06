@@ -32,7 +32,18 @@ public class MachineControlState implements IReadWriteNBT
     private static EnumElement<RenderLevel> PACKED_RENDER_LEVEL = PACKER.createEnumElement(RenderLevel.class);
     private static BooleanElement PACKED_REDSTONE_POWER = PACKER.createBooleanElement();
 
-    private long bits;
+    private static final long DEFAULT_BITS;
+    
+    static
+    {
+        long bits = 0;
+        bits = PACKED_CONTROL_MODE.setValue(ControlMode.OFF, bits);
+        bits = PACKED_RENDER_LEVEL.setValue(RenderLevel.EXTENDED_WHEN_VISIBLE, bits);
+        DEFAULT_BITS = bits;
+    }
+    
+    private long bits = DEFAULT_BITS;
+    
     
     //////////////////////////////////////////////////////////////////////
     // ACCESS METHODS
@@ -55,7 +66,7 @@ public class MachineControlState implements IReadWriteNBT
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.bits = tag.getLong("HSMCS");
+        this.bits = (tag.hasKey("HSMCS")) ? tag.getLong("HSMCS") : DEFAULT_BITS;
     }
 
     @Override

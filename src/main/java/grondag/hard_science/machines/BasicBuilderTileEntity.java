@@ -39,21 +39,16 @@ import net.minecraftforge.items.IItemHandler;
 
 public class BasicBuilderTileEntity extends MachineContainerTileEntity implements ITickable
 {
-    private int xChunkOffset = 0;
-    private int zChunkOffset = 0;
-    private BlockPos checkPos;
 
-    private int tickCounter = 0;
-    
-    private LongOpenHashSet failuresThisChunk = new LongOpenHashSet();
-    
+    ////////////////////////////////////////////////////////////////////////
+    //  STATIC MEMBERS
+    ////////////////////////////////////////////////////////////////////////
     private static final WeightedIngredientList WOOD_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("logWood", UNITS_PER_ITEM * 4), 
             new WeightedIngredient("plankWood", UNITS_PER_ITEM), 
             new WeightedIngredient("slabWood", UNITS_PER_ITEM / 2),
             new WeightedIngredient("stairWood", UNITS_PER_ITEM * 6 / 4),
             new WeightedIngredient("stickWood", UNITS_PER_ITEM / 2));
-    private final MaterialBuffer WOOD_BUFFER = new MaterialBuffer(WOOD_INGREDIENTS, 64, "wood");
     
     private static final WeightedIngredientList STONE_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("stone", UNITS_PER_ITEM),
@@ -67,36 +62,57 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             new WeightedIngredient("stone", UNITS_PER_ITEM),
             new WeightedIngredient("stone", UNITS_PER_ITEM),
             new WeightedIngredient("stone", UNITS_PER_ITEM));
-    private final MaterialBuffer STONE_BUFFER = new MaterialBuffer(STONE_INGREDIENTS, 64, "stone");
     
     private static final WeightedIngredientList GLASS_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("blockGlass", UNITS_PER_ITEM), 
             new WeightedIngredient("paneGlass", UNITS_PER_ITEM * 3 / 8));
-    private final MaterialBuffer GLASS_BUFFER = new MaterialBuffer(GLASS_INGREDIENTS, 64, "glass");
     
     private static final WeightedIngredientList GLOWSTONE_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("dustGlowstone", UNITS_PER_ITEM), 
             new WeightedIngredient("glowstone", UNITS_PER_ITEM * 4));
-    private final MaterialBuffer GLOWSTONE_BUFFER = new MaterialBuffer(GLOWSTONE_INGREDIENTS, 64, "glowstone");
     
     private static final WeightedIngredientList CYAN_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("dyeCyan", UNITS_PER_ITEM));
-    private final MaterialBuffer CYAN_BUFFER = new MaterialBuffer(CYAN_INGREDIENTS, 64, "cyan");
     
     private static final WeightedIngredientList MAGENTA_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("dyeMagenta", UNITS_PER_ITEM));
-    private final MaterialBuffer MAGENTA_BUFFER = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "magenta");
     
     private static final WeightedIngredientList YELLOW_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("dyeYellow", UNITS_PER_ITEM));
-    private final MaterialBuffer YELLOW_BUFFER = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "yellow");
     
     private static final WeightedIngredientList BLACK_INGREDIENTS = new WeightedIngredientList(
             new WeightedIngredient("dyeBlack", UNITS_PER_ITEM));
-    private final MaterialBuffer BLACK_BUFFER = new MaterialBuffer(BLACK_INGREDIENTS, 64, "black");
     
+    
+    ////////////////////////////////////////////////////////////////////////
+    //  INSTANCE MEMBERS
+    ////////////////////////////////////////////////////////////////////////
+    
+    // All of these hold transient state for processing - none are persisted.
+    private int xChunkOffset = 0;
+    private int zChunkOffset = 0;
+    private BlockPos checkPos;
+    private int tickCounter = 0;    
+    private LongOpenHashSet failuresThisChunk = new LongOpenHashSet();
+    
+
+    // Buffer setup - all persisted
+    private final MaterialBuffer WOOD_BUFFER = new MaterialBuffer(WOOD_INGREDIENTS, 64, "mbl_wood");
+    private final MaterialBuffer STONE_BUFFER = new MaterialBuffer(STONE_INGREDIENTS, 64, "mbl_stone");
+    private final MaterialBuffer GLASS_BUFFER = new MaterialBuffer(GLASS_INGREDIENTS, 64, "mbl_glass");
+    private final MaterialBuffer GLOWSTONE_BUFFER = new MaterialBuffer(GLOWSTONE_INGREDIENTS, 64, "mbl_glowstone");
+    private final MaterialBuffer CYAN_BUFFER = new MaterialBuffer(CYAN_INGREDIENTS, 64, "mbl_cyan");
+    private final MaterialBuffer MAGENTA_BUFFER = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "mbl_magenta");
+    private final MaterialBuffer YELLOW_BUFFER = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "mbl_yellow");
+    private final MaterialBuffer BLACK_BUFFER = new MaterialBuffer(BLACK_INGREDIENTS, 64, "mbl_black");   
     private final MaterialBufferManager bufferManager = new MaterialBufferManager(WOOD_BUFFER, STONE_BUFFER, GLASS_BUFFER, GLOWSTONE_BUFFER,
             CYAN_BUFFER, MAGENTA_BUFFER, YELLOW_BUFFER, BLACK_BUFFER);
+    
+    public BasicBuilderTileEntity()
+    {
+        super();
+        this.setBufferManager(bufferManager);
+    }
     
     @Override
     public void update()
@@ -319,13 +335,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     {
         return this.bufferManager;
     }
-
-    @Override
-    public MaterialBufferManager materialBuffer()
-    {
-        return this.bufferManager;
-    }
-    
+   
     @SideOnly(Side.CLIENT)
     @Override
     public int getSymbolGlTextureId()
