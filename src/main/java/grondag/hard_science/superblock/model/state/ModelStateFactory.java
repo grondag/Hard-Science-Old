@@ -3,8 +3,10 @@ package grondag.hard_science.superblock.model.state;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IMultiSerializable;
+import grondag.hard_science.library.serialization.IFlexibleSerializer;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
@@ -119,7 +121,7 @@ public class ModelStateFactory
         super();
     }
 
-    public static class ModelState implements IMultiSerializable
+    public static class ModelState implements IFlexibleSerializer
     {
         
         public static final BitPacker STATE_PACKER = new BitPacker();
@@ -229,7 +231,7 @@ public class ModelStateFactory
         private int stateFlags;
 
         public ModelState() { }
-
+ 
         public ModelState(int[] bits)
         {
             this.deserializeFromInts(bits);
@@ -1128,11 +1130,24 @@ public class ModelStateFactory
         {
             pBuff.writeVarIntArray(this.serializeToInts());
         }
-
+        
+        private static final String NBT_TAG = "HSMS";
+        
+        public static @Nullable ModelState deserializeFromNBTIfPresent(NBTTagCompound tag)
+        {
+            if(tag != null && tag.hasKey(NBT_TAG))
+            {
+                ModelState result = new ModelState();
+                result.deserializeNBT(tag);
+                return result;
+            }
+            return null;
+        }
+        
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
-            int[] stateBits = tag.getIntArray("HSMS");
+            int[] stateBits = tag.getIntArray(NBT_TAG);
             if(stateBits == null || stateBits.length != 8)
             {
                 Log.warn("Bad or missing data encounter during ModelState NBT deserialization.");
@@ -1145,7 +1160,7 @@ public class ModelStateFactory
         @Override
         public void serializeNBT(NBTTagCompound tag)
         {
-            tag.setIntArray("HSMS", this.serializeToInts());
+            tag.setIntArray(NBT_TAG, this.serializeToInts());
         }
 
         /**

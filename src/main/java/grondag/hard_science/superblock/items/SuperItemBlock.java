@@ -10,7 +10,6 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModItems;
-import grondag.hard_science.library.serialization.SerializationManager;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -80,13 +79,9 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     {
         if(stack.getItem() instanceof SuperItemBlock)
         {
-            NBTTagCompound tag = stack.getTagCompound();
+            ModelState stackState = ModelState.deserializeFromNBTIfPresent(stack.getTagCompound());
             //WAILA or other mods might create a stack with no NBT
-            if(tag != null)
-            {
-                ModelState modelState = SuperTileEntity.SERIALIZER_MODEL_STATE.deserializeNBT(tag);
-                if(modelState != null) return modelState;
-            }
+            if(stackState != null) return stackState;
             return ((SuperBlock)((SuperItemBlock)stack.getItem()).block).getDefaultModelState();
         }
         return null;
@@ -102,7 +97,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
             {
                 tag = new NBTTagCompound();
             }
-            SuperTileEntity.SERIALIZER_MODEL_STATE.serializeNBT(modelState, tag);
+            modelState.serializeNBT(tag);
             stack.setTagCompound(tag);
         }
     }
@@ -118,7 +113,7 @@ public class SuperItemBlock extends ItemBlock implements PlacementItem
     @Override
     public final NBTTagCompound getNBTShareTag(ItemStack stack)
     {
-        return SerializationManager.withoutServerTag(super.getNBTShareTag(stack));
+        return SuperTileEntity.withoutServerTag(super.getNBTShareTag(stack));
     }
     
     @Override

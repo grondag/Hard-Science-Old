@@ -7,6 +7,8 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.base.MachineControlState.ControlMode;
+import grondag.hard_science.machines.base.MachineControlState.RenderLevel;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
@@ -30,34 +32,28 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class MachineTileEntity extends SuperTileEntity implements IIdentified
 {
+    ////////////////////////////////////////////////////////////////////////
+    //  STATIC MEMBERS
+    ////////////////////////////////////////////////////////////////////////
     
-    public static enum ControlMode
-    {
-        ON,
-        OFF,
-        ON_WITH_REDSTOWN,
-        OFF_WITH_REDSTONE;
-    }
+   
     
-    public static enum RenderLevel
-    {
-        NONE,
-        MINIMAL,
-        EXTENDED_WHEN_LOOKING,
-        EXTENDED_WHEN_VISIBLE;
-    }
+    ////////////////////////////////////////////////////////////////////////
+    //  INSTANCE MEMBERS
+    ////////////////////////////////////////////////////////////////////////
     
-    private ControlMode controlMode = ControlMode.OFF_WITH_REDSTONE;
-    private boolean hasRedstonePowerSignal = false;
-    private RenderLevel renderLevel = RenderLevel.EXTENDED_WHEN_VISIBLE;
+    private final MachineControlState controlState = new MachineControlState();
     
     private int machineID = -1;
+    
+    /**
+     * Note this isn't serialized - it's always derived from machine ID.
+     */
     private String machineName = null;
     
     /** on client, caches last result from {@link #getDistanceSq(double, double, double)} */
     private double lastDistanceSquared;
-    
-    
+ 
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
     {
         /** Listener is valid until this time*/
@@ -183,7 +179,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public boolean shouldRenderInPass(int pass)
     {
         // machines always render in translucent pass
-        return pass == 1 && this.renderLevel != RenderLevel.NONE;
+        return pass == 1 && this.controlState.getRenderLevel() != RenderLevel.NONE;
     }
     
     @SideOnly(Side.CLIENT)
@@ -213,29 +209,18 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         return lastDistanceSquared;
     }
     
-    public ControlMode getControlMode()
-    {
-        return controlMode;
-    }
-
-    public void setControlMode(ControlMode controlMode)
-    {
-        this.controlMode = controlMode == null ? ControlMode.ON : controlMode;
-        this.markDirty();
-    }
-    
     public boolean isOn()
     {
-        switch(this.controlMode)
+        switch(this.controlState.getControlMode())
         {
         case ON:
             return true;
             
         case OFF_WITH_REDSTONE:
-            return !this.hasRedstonePowerSignal;
+            return !this.hasRedstonePowerSignal();
             
         case ON_WITH_REDSTOWN:
-            return this.hasRedstonePowerSignal;
+            return this.hasRedstonePowerSignal();
             
         case OFF:
         default:
@@ -254,16 +239,16 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
 
     public boolean hasRedstonePowerSignal()
     {
-        return hasRedstonePowerSignal;
+        return this.controlState.hasRedstonePower();
     }
 
     public void updateRedstonePower()
     {
         if(this.isRemote()) return;
         boolean shouldBePowered = this.world.isBlockPowered(this.pos);
-        if(shouldBePowered != this.hasRedstonePowerSignal)
+        if(shouldBePowered != this.controlState.hasRedstonePower())
         {
-            this.hasRedstonePowerSignal = shouldBePowered;
+            this.controlState.setHasRestonePower(shouldBePowered);
             this.markPlayerUpdateDirty(true);
         }
     }
@@ -281,8 +266,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         super.readModNBT(compound);
         this.deserializeID(compound);
-        if(this.isRemote()) return;
-        this.setControlMode(Useful.safeEnumFromOrdinal(compound.getInteger("ControlMode"), ControlMode.OFF_WITH_REDSTONE));
+        this.controlState.deserializeNBT(compound);
     }
     
     @Override
@@ -290,8 +274,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         super.writeModNBT(compound);
         this.serializeID(compound);
-        if(this.isRemote()) return;
-        compound.setInteger("ControlMode", this.controlMode.ordinal());
+        this.controlState.serializeNBT(compound);
     }
     
     /**
@@ -315,7 +298,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             if(Configurator.logMachineNetwork) Log.info("added new listener, required=" + isFocused);
             
             // send immediate refresh for any new listener
-            ModMessages.INSTANCE.sendTo(new PacketMachineStatusUpdateListener(this), player);
+            ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
             
             if(listener.isRequired) this.requiredListenerCount++;
             
@@ -327,7 +310,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             if(previous == null)
             {
                 // send immediate refresh for any new listener
-                ModMessages.INSTANCE.sendTo(new PacketMachineStatusUpdateListener(this), player);
+                ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
                 if(listener.isRequired) this.requiredListenerCount++;
 
                 if(Configurator.logMachineNetwork) Log.info("added new listener, required=" + isFocused);
@@ -361,7 +344,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                     if(listener.isRequired)
                     {
                         // upgrade, increment count and send immediate refresh
-                        ModMessages.INSTANCE.sendTo(new PacketMachineStatusUpdateListener(this), player);
+                        ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
                         this.requiredListenerCount++;
                         
                         if(Configurator.logMachineNetwork) Log.info("upgraded existing listener");
@@ -435,10 +418,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
-            
-            PacketMachineStatusUpdateListener packet = new PacketMachineStatusUpdateListener(this);
-            
-            //FIXME: add stuff to packet, probably in subclasses via abstract method
+            PacketMachineStatusUpdateListener packet = this.createMachineStatusUpdate();
             
             int i = 0;
             while(i < listeningPlayers.size())
@@ -465,6 +445,12 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         }
     }
     
+    public PacketMachineStatusUpdateListener createMachineStatusUpdate()
+    {
+        return new PacketMachineStatusUpdateListener(this.pos, this.controlState, 
+                this.materialBuffer() == null ? null : this.materialBuffer().serializeToArray());
+    }
+    
     /**
      * Handles client status updates received from server.
      */
@@ -472,9 +458,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         // should never be called on server
         if(!this.world.isRemote) return;
-        
-        this.controlMode = packet.controlMode;
-        this.hasRedstonePowerSignal = packet.hasRedstoneSignal;
+        this.controlState.deserializeFromBits(packet.controlStateBits);
         if(this.materialBuffer() != null) this.materialBuffer().deserializeFromArray(packet.materialBufferData);
     }
 
@@ -524,22 +508,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             //FIXME: check user permissions
             
             // called by packet handler on server side
-            switch(this.controlMode)
+            switch(this.controlState.getControlMode())
             {
             case OFF:
-                this.setControlMode(ControlMode.ON);
+                this.controlState.setControlMode(ControlMode.ON);
                 break;
                 
             case OFF_WITH_REDSTONE:
-                this.setControlMode(ControlMode.ON_WITH_REDSTOWN);
+                this.controlState.setControlMode(ControlMode.ON_WITH_REDSTOWN);
                 break;
                 
             case ON:
-                this.setControlMode(ControlMode.OFF);
+                this.controlState.setControlMode(ControlMode.OFF);
                 break;
                 
             case ON_WITH_REDSTOWN:
-                this.setControlMode(ControlMode.OFF_WITH_REDSTONE);
+                this.controlState.setControlMode(ControlMode.OFF_WITH_REDSTONE);
                 break;
                 
             default:

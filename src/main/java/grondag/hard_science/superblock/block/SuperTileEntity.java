@@ -1,10 +1,12 @@
 package grondag.hard_science.superblock.block;
 
-import grondag.hard_science.library.serialization.ObjectSerializer;
-import grondag.hard_science.library.serialization.SerializationManager;
+
+import javax.annotation.Nonnull;
+
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -19,20 +21,37 @@ public class SuperTileEntity extends TileEntity
     ////////////////////////////////////////////////////////////////////////
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
-    public static final ObjectSerializer<SuperTileEntity, ModelState> SERIALIZER_MODEL_STATE = new ObjectSerializer<SuperTileEntity, ModelState>(false, ModelState.class)
+    
+    /**
+     * Anything stored in this tag will not be sent to clients.
+     */
+    public static final String NBT_SERVER_SIDE_TAG = "SrvData";
+    
+    /** Returns server-side tag if one is present, creating it if not. */
+    public static @Nonnull NBTTagCompound getServerTag(@Nonnull NBTTagCompound fromTag)
     {
-        @Override
-        public ModelState getValue(SuperTileEntity target)
+        NBTBase result = fromTag.getTag(NBT_SERVER_SIDE_TAG);
+        if(result == null || result.getId() != 10)
         {
-            return target.modelState;
+            result = new NBTTagCompound();
+            fromTag.setTag(NBT_SERVER_SIDE_TAG, result);
         }
-
-        @Override
-        public void notifyChanged(SuperTileEntity target)
+        return (NBTTagCompound) result;
+    }
+    
+    /** Returns tag stripped of server-side tag if it is present. 
+     * If the tag must be stripped, returns a modified copy. Otherwise returns input tag.
+     * Will return null if a null tag is passed in.
+     */
+    public static NBTTagCompound withoutServerTag(NBTTagCompound inputTag)
+    {
+        if(inputTag != null && inputTag.hasKey(NBT_SERVER_SIDE_TAG))
         {
-            target.onModelStateChange(true);
-        } 
-    };
+            inputTag = inputTag.copy();
+            inputTag.removeTag(NBT_SERVER_SIDE_TAG);
+        }
+        return inputTag;
+    }
     
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
@@ -118,7 +137,7 @@ public class SuperTileEntity extends TileEntity
     @Override
     public NBTTagCompound getUpdateTag()
     {
-        return SerializationManager.withoutServerTag(writeToNBT(super.getUpdateTag()));
+        return withoutServerTag(writeToNBT(super.getUpdateTag()));
     }
 
     /**
@@ -153,7 +172,8 @@ public class SuperTileEntity extends TileEntity
      */
     public void readModNBT(NBTTagCompound compound)
     {
-        SERIALIZER_MODEL_STATE.deserializeNBT(this, compound);
+        this.modelState.deserializeNBT(compound);
+        this.onModelStateChange(true);
     }
     
     /**
@@ -162,7 +182,7 @@ public class SuperTileEntity extends TileEntity
      */
     public void writeModNBT(NBTTagCompound compound)
     {
-        SERIALIZER_MODEL_STATE.serializeNBT(this, compound);
+        this.modelState.serializeNBT(compound);
     }
     
 
