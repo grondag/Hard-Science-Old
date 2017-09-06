@@ -10,16 +10,15 @@ import net.minecraft.network.PacketBuffer;
  * @author grondag
  *
  */
-public abstract class EnumSerializer<T, V extends Enum<?>> extends AbstractSerializer<T>
+public abstract class EnumSerializer<T, V extends Enum<?>> implements ISerializer<T>
 {
     public final String tagName;
     private final V[] enumValues;
     
    private final boolean useByte;
    
-    public EnumSerializer(boolean isServerSideOnly, String tagName, Class<V> clazz)
+    public EnumSerializer(String tagName, Class<V> clazz)
     {
-        super(isServerSideOnly);
         this.tagName = tagName;
         this.enumValues = clazz.getEnumConstants();
         useByte = this.enumValues.length < 128;

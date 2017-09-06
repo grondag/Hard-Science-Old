@@ -11,7 +11,7 @@ public class SuperModelTileEntity extends SuperTileEntity
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
     public static final EnumSerializer<SuperModelTileEntity, BlockSubstance> SERIALIZER_SUBSTANCE 
-            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>(false, "HSSUB", BlockSubstance.class)
+            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>("HSSUB", BlockSubstance.class)
     {
         @Override
         public BlockSubstance getValue(SuperModelTileEntity target)
@@ -26,7 +26,7 @@ public class SuperModelTileEntity extends SuperTileEntity
         } 
     };
     
-    public static final ByteSerializer<SuperModelTileEntity> SERIALIZER_LIGHT_VALUE = new ByteSerializer<SuperModelTileEntity>(false, "HSLV")
+    public static final ByteSerializer<SuperModelTileEntity> SERIALIZER_LIGHT_VALUE = new ByteSerializer<SuperModelTileEntity>( "HSLV")
     {
         @Override
         public byte getValue(SuperModelTileEntity target)

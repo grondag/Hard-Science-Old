@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.Log;
-import grondag.hard_science.library.serialization.IFlexibleSerializer;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
@@ -30,7 +30,6 @@ import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -121,7 +120,7 @@ public class ModelStateFactory
         super();
     }
 
-    public static class ModelState implements IFlexibleSerializer
+    public static class ModelState implements IReadWriteNBT
     {
         
         public static final BitPacker STATE_PACKER = new BitPacker();
@@ -1119,17 +1118,6 @@ public class ModelStateFactory
             return this.getShape().meshFactory().collisionHandler().getCollisionBoxes(this, offset);
         }
 
-        @Override
-        public void fromBytes(PacketBuffer pBuff)
-        {
-            this.deserializeFromInts(pBuff.readVarIntArray());
-        }
-
-        @Override
-        public void toBytes(PacketBuffer pBuff)
-        {
-            pBuff.writeVarIntArray(this.serializeToInts());
-        }
         
         private static final String NBT_TAG = "HSMS";
         
@@ -1163,28 +1151,5 @@ public class ModelStateFactory
             tag.setIntArray(NBT_TAG, this.serializeToInts());
         }
 
-        /**
-         * Model state is typically not updated after TE is loaded so going to 
-         * assume that it resulted in a change.  May be less  overhead
-         * than actually checking for differences.
-         */
-        @Override
-        public boolean fromBytesDetectChanges(PacketBuffer buf)
-        {
-            this.fromBytes(buf);
-            return true;
-        }
-        
-        /**
-         * Model state is typically not updated after TE is loaded so going to 
-         * assume that it resulted in a change.  May be less  overhead
-         * than actually checking for differences.
-         */
-        @Override
-        public boolean deserializeNBTDetectChanges(NBTTagCompound tag)
-        {
-            this.deserializeNBT(tag);
-            return true;
-        }
     }
 }

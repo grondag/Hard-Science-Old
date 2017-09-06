@@ -3,13 +3,12 @@ package grondag.hard_science.library.serialization;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 
-public abstract class IntSerializer<T> extends AbstractSerializer<T>
+public abstract class IntSerializer<T> implements ISerializer<T>
 {
     public final String tagName;
  
-    public IntSerializer(boolean isServerSideOnly, String tagName)
+    public IntSerializer(String tagName)
     {
-        super(isServerSideOnly);
         this.tagName = tagName;
     }
 

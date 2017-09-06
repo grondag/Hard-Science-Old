@@ -1,15 +1,14 @@
-package grondag.hard_science.machines.base;
+package grondag.hard_science.machines.support;
 
-import grondag.hard_science.library.serialization.IFlexibleSerializer;
+import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
 
 
 
-public class MachineControlState implements IFlexibleSerializer
+public class MachineControlState implements IReadWriteNBT
 {
     public static enum ControlMode
     {
@@ -49,19 +48,9 @@ public class MachineControlState implements IFlexibleSerializer
     public void setHasRestonePower(boolean value) { bits = PACKED_REDSTONE_POWER.setValue(value, bits); }
     
     //////////////////////////////////////////////////////////////////////
-    // IFlexibleSerializer implementation stuff
+    // Serialization stuff
     //////////////////////////////////////////////////////////////////////
-    @Override
-    public void fromBytes(PacketBuffer pBuff)
-    {
-        this.bits = pBuff.readVarLong();
-    }
 
-    @Override
-    public void toBytes(PacketBuffer pBuff)
-    {
-        pBuff.writeVarLong(this.bits);
-    }
 
     @Override
     public void deserializeNBT(NBTTagCompound tag)
@@ -75,21 +64,6 @@ public class MachineControlState implements IFlexibleSerializer
         tag.setLong("HSMCS", this.bits);
     }
 
-    @Override
-    public boolean fromBytesDetectChanges(PacketBuffer buf)
-    {
-        long oldBits = this.bits;
-        this.fromBytes(buf);
-        return oldBits != this.bits;
-    }
-
-    @Override
-    public boolean deserializeNBTDetectChanges(NBTTagCompound tag)
-    {
-        long oldBits = this.bits;
-        this.deserializeNBT(tag);
-        return oldBits != this.bits;
-    }
     
     /**
      * For packet updates

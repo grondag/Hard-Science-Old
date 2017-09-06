@@ -1,7 +1,7 @@
 package grondag.hard_science.network.server_to_client;
 
-import grondag.hard_science.machines.base.MachineControlState;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
