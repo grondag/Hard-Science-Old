@@ -1,6 +1,6 @@
 package grondag.hard_science.gui.control.machine;
 
-import grondag.hard_science.gui.control.IGuiRenderContext;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 

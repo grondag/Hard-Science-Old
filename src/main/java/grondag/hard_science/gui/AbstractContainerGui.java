@@ -3,13 +3,8 @@ package grondag.hard_science.gui;
 import java.io.IOException;
 
 import grondag.hard_science.gui.control.GuiControl;
-import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.gui.control.Panel;
-import grondag.hard_science.gui.control.machine.AbstractMachineControl;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
-import grondag.hard_science.gui.control.machine.MachineName;
-import grondag.hard_science.gui.control.machine.MachineSymbol;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBounds;
 import grondag.hard_science.machines.base.MachineContainer;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.ContainerLayout;
@@ -22,20 +17,15 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 
-public abstract class AbstractMachineGui<T extends MachineTileEntity> extends GuiContainer implements IGuiRenderContext
+public abstract class AbstractContainerGui<T extends MachineTileEntity> extends GuiContainer implements IGuiRenderContext
 {
-  protected final ContainerLayout layout;
-    
-    protected Panel mainPanel;
-    
-//    protected final Wrapper<ItemStack> hoverStack = new Wrapper<ItemStack>();
+    protected final ContainerLayout layout;
     
     public static final ContainerLayout LAYOUT;
     
-    public static final int CAPACITY_BAR_WIDTH = 4;
     
+    protected Panel mainPanel;
     protected final T te;
-    
     protected GuiControl<?> hoverControl;
     
     static
@@ -48,7 +38,7 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         LAYOUT.playerInventoryTop = LAYOUT.dialogHeight - LAYOUT.externalMargin - LAYOUT.slotSpacing * 4 - GuiControl.CONTROL_INTERNAL_MARGIN;
     }
 
-    public AbstractMachineGui(T containerTileEntity, MachineContainer machineContainer) 
+    public AbstractContainerGui(T containerTileEntity, MachineContainer machineContainer) 
     {
         super(machineContainer);
         this.te = containerTileEntity;
@@ -68,21 +58,15 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
             this.guiLeft = ((this.width * 2 / 3) - this.xSize) / 2;
         }
         
-        Panel mainPanel = new Panel(true);
-        mainPanel.setLayoutDisabled(true);
-        mainPanel.setLeft(this.guiLeft + this.layout.playerInventoryLeft);
-        mainPanel.setTop(this.guiTop + this.layout.externalMargin);
-        mainPanel.setSquareSize(this.layout.playerInventoryWidth);
-        mainPanel.setBackgroundColor(0xFF101010);
-        this.mainPanel = mainPanel;
-        
-        this.mainPanel.add(sizeControl(new MachineName(te), MachineControlRenderer.BOUNDS_NAME));
-        this.mainPanel.add(sizeControl(new MachineSymbol(te), MachineControlRenderer.BOUNDS_SYMBOL));
-        this.addControls();
+        this.mainPanel = this.initGuiContextAndCreateMainPanel(this.te);
+ 
     }
     
-    /** add controls to main panel here */
-    public abstract void addControls();
+    @Override
+    public boolean doesGuiPauseGame()
+    {
+        return false;
+    }
     
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) 
@@ -135,15 +119,6 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
         this.mainPanel.mouseDrag(mc, mouseX, mouseY, clickedMouseButton);
     }
     
-    protected AbstractMachineControl<?> sizeControl(AbstractMachineControl<?> control, RenderBounds bounds)
-    {
-        control.setLeft(mainPanel.getLeft() + mainPanel.getWidth() * bounds.left());
-        control.setTop(mainPanel.getTop() + mainPanel.getHeight() * bounds.top());
-        control.setWidth(mainPanel.getWidth() * bounds.width());
-        control.setHeight(mainPanel.getHeight() * bounds.height());
-        return control;
-    }
-    
     @Override
     public Minecraft minecraft()
     {
@@ -179,5 +154,23 @@ public abstract class AbstractMachineGui<T extends MachineTileEntity> extends Gu
     {
         this.renderToolTip(hoverStack, mouseX, mouseY);
         
+    }
+
+    @Override
+    public int mainPanelLeft()
+    {
+        return this.guiLeft + this.layout.playerInventoryLeft;
+    }
+
+    @Override
+    public int mainPanelTop()
+    {
+        return this.guiTop + this.layout.externalMargin;
+    }
+
+    @Override
+    public int mainPanelSize()
+    {
+        return this.layout.playerInventoryWidth;
     }
 }

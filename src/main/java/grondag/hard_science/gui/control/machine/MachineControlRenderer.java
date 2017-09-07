@@ -3,8 +3,10 @@ package grondag.hard_science.gui.control.machine;
 import java.util.function.DoubleUnaryOperator;
 import org.lwjgl.opengl.GL11;
 
+import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -43,6 +45,11 @@ public class MachineControlRenderer
         public RenderBounds offset(double x, double y)
         {
             return new RenderBounds(this.left + x, this.top + y, this.width, this.height);
+        }
+        
+        public boolean contains(double x, double y)
+        {
+            return !(x < this.left || x > this.right() || y < this.top || y > this.bottom());
         }
     }
     
@@ -495,11 +502,11 @@ public class MachineControlRenderer
             
             if(delta64K < 0)
             {
-                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength, deltaLength, ModModels.TEX_GAUGE_OUTER, (alpha << 24) | 0xFF2020);
+                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
             }
             else
             {
-                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength - deltaLength, deltaLength, ModModels.TEX_GAUGE_OUTER, (alpha << 24) | 0x20FF20);
+                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength - deltaLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
              
             }
         }
@@ -555,5 +562,17 @@ public class MachineControlRenderer
         GlStateManager.depthMask(false);
         GlStateManager.disablePolygonOffset();
 
+    }
+
+    public static void renderRedstoneControl(MachineTileEntity mte, Tessellator tessellator, BufferBuilder buffer, RenderBounds boundsRedstone,
+            int displayAlpha)
+    {
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, boundsRedstone, 
+                mte.hasRedstonePowerSignal() ? ModModels.SPRITE_REDSTONE_TORCH_LIT : ModModels.SPRITE_REDSTONE_TORCH_UNLIT, displayAlpha);
+        
+        if(!mte.isRedstoneControlEnabled()) 
+        {
+            MachineControlRenderer.renderTextureInBounds(tessellator, buffer, boundsRedstone, ModModels.TEX_NO, displayAlpha);
+        }
     }
 }

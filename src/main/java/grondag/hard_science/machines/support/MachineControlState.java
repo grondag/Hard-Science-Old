@@ -14,7 +14,7 @@ public class MachineControlState implements IReadWriteNBT
     {
         ON,
         OFF,
-        ON_WITH_REDSTOWN,
+        ON_WITH_REDSTONE,
         OFF_WITH_REDSTONE;
     }
     
@@ -37,7 +37,7 @@ public class MachineControlState implements IReadWriteNBT
     static
     {
         long bits = 0;
-        bits = PACKED_CONTROL_MODE.setValue(ControlMode.OFF, bits);
+        bits = PACKED_CONTROL_MODE.setValue(ControlMode.ON, bits);
         bits = PACKED_RENDER_LEVEL.setValue(RenderLevel.EXTENDED_WHEN_VISIBLE, bits);
         DEFAULT_BITS = bits;
     }

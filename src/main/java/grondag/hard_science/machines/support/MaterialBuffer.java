@@ -21,6 +21,8 @@ public class MaterialBuffer
     
     public final String nbtTag;
     
+    public final String tooltipKey;
+    
     private int level;
     
     /**
@@ -29,14 +31,15 @@ public class MaterialBuffer
      */
     public static final int UNITS_PER_ITEM = 1024;
     
-    public MaterialBuffer(WeightedIngredientList inputs, int maxStacks, String nbtTag)
+    public MaterialBuffer(WeightedIngredientList inputs, int maxStacks, String key)
     {
         if(maxStacks < 1) maxStacks = 1;
         this.inputs = inputs;
         this.maxStacks = maxStacks;
         this.maxUnits = maxStacks * UNITS_PER_ITEM;
         this.mostlyFullUnits = this.maxUnits - inputs.minUnits + 1;
-        this.nbtTag = nbtTag;
+        this.nbtTag = "mbl_" + key;
+        this.tooltipKey = "machine.buffer_" + key;
     }
     
     public boolean canRestock()

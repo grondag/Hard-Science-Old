@@ -1,6 +1,5 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.library.world.Rotation;

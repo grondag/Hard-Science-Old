@@ -51,6 +51,8 @@ public abstract class MachineTESR extends SuperBlockTESR
         MachineTileEntity mte = (MachineTileEntity)te;
         
         // TE will send keepalive packets to server to get updated machine status for rendering
+        
+        //FIXME - don't call if not displaying anything than can change
         mte.notifyServerPlayerWatching();
         
         GlStateManager.pushMatrix();
@@ -74,12 +76,16 @@ public abstract class MachineTESR extends SuperBlockTESR
         int displayAlpha = (int)(alpha * (Useful.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - 8) / 2) * 255));
   
         MachineControlRenderer.renderMachineText(tessellator, buffer, MachineControlRenderer.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, displayAlpha);
-        MachineControlRenderer.renderBinaryTexture(tessellator, buffer, MachineControlRenderer.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), displayAlpha);
-        
         MachineControlRenderer.renderTextureInBounds(tessellator, buffer, MachineControlRenderer.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);
-        if(mte.hasRedstonePowerSignal())
+
+        if(mte.hasOnOff())
         {
-            MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, MachineControlRenderer.BOUNDS_REDSTONE, ModModels.SPRITE_REDSTONE_TORCH_LIT, displayAlpha);
+            MachineControlRenderer.renderBinaryTexture(tessellator, buffer, MachineControlRenderer.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), displayAlpha);
+        }
+        
+        if(mte.hasRedstoneControl())
+        {
+            MachineControlRenderer.renderRedstoneControl(mte, tessellator, buffer, MachineControlRenderer.BOUNDS_REDSTONE, displayAlpha);
         }
         
         renderControlFace(tessellator, buffer, mte, displayAlpha);

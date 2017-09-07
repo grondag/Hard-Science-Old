@@ -3,6 +3,7 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 
 import grondag.hard_science.HardScience;
+import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
@@ -29,13 +30,17 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -119,18 +124,88 @@ public abstract class MachineBlock extends SuperBlockPlus
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) 
     {
-        if (world.isRemote || this.guiID < 0) {
+        // for simple blocks without a container, activation is client-only
+        if (!world.isRemote || this.guiID < 0) 
+        {
             return true;
         }
+        
         TileEntity te = world.getTileEntity(pos);
         if (!(te instanceof MachineTileEntity)) 
         {
             return false;
         }
+        
         player.openGui(HardScience.INSTANCE, this.guiID, world, pos.getX(), pos.getY(), pos.getZ());
         return true;
     }
+
+    protected float hitX (EnumFacing side, float hitX, float hitZ)
+    {
+        switch (side) 
+        {
+            case NORTH:
+                return 1 - hitX;
+                
+            case SOUTH:
+                return hitX;
+                
+            case WEST:
+                return hitZ;
+                
+            case EAST:
+                return 1 - hitZ;
+                
+            default:
+                return 0;
+        }
+    }
     
+    @Override
+    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
+    {
+        if (worldIn.isRemote) return;
+
+        MachineTileEntity machineTE = (MachineTileEntity) getTileEntityReliably(worldIn, pos);
+        
+        if(!machineTE.hasOnOff() && !machineTE.hasRedstoneControl()) return;
+
+        RayTraceResult rayResult = net.minecraftforge.common.ForgeHooks.rayTraceEyes(playerIn, 
+                ((EntityPlayerMP) playerIn).interactionManager.getBlockReachDistance() + 1);
+        
+        if (rayResult == null) return;
+
+
+
+        EnumFacing side = rayResult.sideHit;
+        if (machineTE.getCachedModelState().getAxisRotation().horizontalFace != side) return;
+
+        // translate to block frame of reference
+        float hitX = (float)(rayResult.hitVec.x - pos.getX());
+        float hitY = (float)(rayResult.hitVec.y - pos.getY());
+        float hitZ = (float)(rayResult.hitVec.z - pos.getZ());
+        
+        // translate to 2d face coordinates
+        float faceX = this.hitX(side, hitX, hitZ);
+        float faceY = 1f - hitY;
+
+        if(machineTE.hasOnOff() && MachineControlRenderer.BOUNDS_ON_OFF.contains(faceX, faceY))
+        {
+            if(machineTE.togglePower((EntityPlayerMP) playerIn))
+            {
+                worldIn.playSound(null, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, SoundEvents.UI_BUTTON_CLICK, SoundCategory.PLAYERS, .2f, ((worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * .7f + 1) * 2);
+            }
+        }
+        else if(machineTE.hasRedstoneControl() && MachineControlRenderer.BOUNDS_REDSTONE.contains(faceX, faceY))
+        {
+            if(machineTE.toggleRedstoneControl((EntityPlayerMP) playerIn))
+            {
+                worldIn.playSound(null, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, SoundEvents.UI_BUTTON_CLICK, SoundCategory.PLAYERS, .2f, ((worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * .7f + 1) * 2);
+            }
+        }
+      
+
+    }
     @Override
     public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager)
     {

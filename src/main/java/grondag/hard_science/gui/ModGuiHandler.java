@@ -1,6 +1,5 @@
 package grondag.hard_science.gui;
 
-import grondag.hard_science.machines.BasicBuilderContainer;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
@@ -34,15 +33,15 @@ public class ModGuiHandler implements IGuiHandler
                 return new MachineStorageContainer(player.inventory, (SmartChestTileEntity) te, GuiSmartChest.LAYOUT);
             }
         }
-        else if(id == ModGui.BASIC_BUILDER.ordinal())
-        {
-            BlockPos pos = new BlockPos(x, y, z);
-            TileEntity te = world.getTileEntity(pos);
-            if (te instanceof BasicBuilderTileEntity) 
-            {
-                return new BasicBuilderContainer(player.inventory, (BasicBuilderTileEntity) te, GuiBasicBuilder.LAYOUT);
-            }
-        }
+//        else if(id == ModGui.BASIC_BUILDER.ordinal())
+//        {
+//            BlockPos pos = new BlockPos(x, y, z);
+//            TileEntity te = world.getTileEntity(pos);
+//            if (te instanceof BasicBuilderTileEntity) 
+//            {
+//                return new BasicBuilderContainer(player.inventory, (BasicBuilderTileEntity) te, GuiBasicBuilder.LAYOUT);
+//            }
+//        }
         return null;
     }
 
@@ -75,7 +74,7 @@ public class ModGuiHandler implements IGuiHandler
                     if (te instanceof BasicBuilderTileEntity) 
                     {
                         BasicBuilderTileEntity containerTileEntity = (BasicBuilderTileEntity) te;
-                        return new GuiBasicBuilder(containerTileEntity, new BasicBuilderContainer(player.inventory, containerTileEntity, GuiBasicBuilder.LAYOUT));
+                        return new GuiBasicBuilder(containerTileEntity);
                     }
                     return null;
                 }

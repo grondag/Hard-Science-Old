@@ -154,23 +154,17 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         ModelState modelState = this.getModelState(worldIn, pos, true);
         ICollisionHandler collisionHandler = modelState.getShape().meshFactory().collisionHandler();
 
-        if (collisionHandler == null)
-        {
-            super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185477_7_);
-        }
-        else
-        {
-            AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
+        AxisAlignedBB localMask = entityBox.offset(-pos.getX(), -pos.getY(), -pos.getZ());
 
-            List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(modelState);
+        List<AxisAlignedBB> bounds = collisionHandler.getCollisionBoxes(modelState);
 
-            for (AxisAlignedBB aabb : bounds) {
-                if (localMask.intersects(aabb)) 
-                {
-                    collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
-                }
-            }        
-        }
+        for (AxisAlignedBB aabb : bounds) {
+            if (localMask.intersects(aabb)) 
+            {
+                collidingBoxes.add(aabb.offset(pos.getX(), pos.getY(), pos.getZ()));
+            }
+        }        
+        
     }
 
     @Override
@@ -513,38 +507,28 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
-        if (this.getModelStateAssumeStateIsStale(blockState, worldIn, pos, true).getShape().meshFactory().collisionHandler() == null)
-        {
-            // same as vanilla logic here, but avoiding call to rayTrace so can detected unsupported calls to it
-            Vec3d vec3d = start.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
-            Vec3d vec3d1 = end.subtract((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
-            RayTraceResult raytraceresult = this.getBoundingBox(blockState, worldIn, pos).calculateIntercept(vec3d, vec3d1);
-            return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.addVector((double)pos.getX(), (double)pos.getY(), (double)pos.getZ()), raytraceresult.sideHit, pos);
-        }
-        else
-        {
-            ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
+        ArrayList<AxisAlignedBB> bounds = new ArrayList<AxisAlignedBB>();
+        
+        this.addCollisionBoxToList(blockState, worldIn, pos, 
+                new AxisAlignedBB(start.x, start.y, start.z, end.x, end.y, end.z),
+                bounds, null, false);
 
-            this.addCollisionBoxToList(blockState, worldIn, pos, 
-                    new AxisAlignedBB(start.x, start.y, start.z, end.x, end.y, end.z),
-                    bounds, null, false);
+        RayTraceResult retval = null;
+        double shortestDistance = 1;
 
-            RayTraceResult retval = null;
-            double distance = 1;
-
-            for (AxisAlignedBB aabb : bounds) {
-                RayTraceResult candidate = aabb.calculateIntercept(start, end);
-                if (candidate != null) {
-                    double checkDist = candidate.hitVec.squareDistanceTo(start);
-                    if (retval == null || checkDist < distance) {
-                        retval = candidate;
-                        distance = checkDist;
-                    }
+        for (AxisAlignedBB aabb : bounds) {
+            RayTraceResult candidate = aabb.calculateIntercept(start, end);
+            if (candidate != null) {
+                double candidateDistance = candidate.hitVec.squareDistanceTo(start);
+                if (retval == null || candidateDistance < shortestDistance) 
+                {
+                    retval = candidate;
+                    shortestDistance = candidateDistance;
                 }
             }
-
-            return retval == null ? null : new RayTraceResult(retval.hitVec.addVector(pos.getX(), pos.getY(), pos.getZ()), retval.sideHit, pos);
         }
+
+        return retval == null ? null : new RayTraceResult(retval.hitVec, retval.sideHit, pos);
     }
 
     @Override
@@ -1125,6 +1109,11 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     public abstract boolean isGeometryFullCube(IBlockState state);
     
     public abstract boolean isHypermatter();
+    
+    /**
+     * Only true for virtual blocks.  Prevents "instanceof" checking.
+     */
+    public boolean isVirtual() { return false; }
    
     /**
      * {@inheritDoc} <br><br>
@@ -1263,7 +1252,8 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
             if(block instanceof SuperBlock)
             {
                 SuperBlock sBlock = (SuperBlock)block;
-                if(((SuperBlock) block).getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
+                // only match with blocks with same "virtuality" as this one
+                if(this.isVirtual() == sBlock.isVirtual() && sBlock.getSubstance(otherBlockState, blockAccess, otherPos).isTranslucent)
                 {
                     ModelState myModelState = this.getModelStateAssumeStateIsCurrent(blockState, blockAccess, pos, false);
                     ModelState otherModelState = sBlock.getModelStateAssumeStateIsCurrent(otherBlockState, blockAccess, otherPos, false);

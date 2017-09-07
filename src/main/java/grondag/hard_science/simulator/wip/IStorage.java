@@ -8,7 +8,7 @@ import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location.ILocated;
 import grondag.hard_science.simulator.wip.DomainManager.IDomainMember;
 import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
-import jline.internal.Log;
+import grondag.hard_science.Log;
 
 public interface IStorage<T extends StorageType<T>> extends IReadWriteNBT, ILocated, IDomainMember, ISizedContainer, ITypedStorage<T>, IIdentified
 {

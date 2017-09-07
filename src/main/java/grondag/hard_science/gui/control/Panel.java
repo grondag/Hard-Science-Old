@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.Layout;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;

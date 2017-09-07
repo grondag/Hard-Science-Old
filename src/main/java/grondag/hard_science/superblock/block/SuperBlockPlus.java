@@ -19,17 +19,40 @@ import net.minecraft.world.World;
 /** base class for tile entity blocks */
 public abstract class SuperBlockPlus extends SuperBlock implements ITileEntityProvider
 {
+    /**
+     * Prevent concurrency weirdness in {@link #getTileEntityReliably(World, BlockPos)}
+     */
+    private static final Object TILE_ENTITY_AD_HOCK_CREATION_LOCK = new Object();
+    
     public SuperBlockPlus(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
         super(blockName, defaultMaterial, defaultModelState, blockRenderMode);
     }
 
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
+    public TileEntity createNewTileEntity(World worldIn, int meta)
+    {
         return new SuperTileEntity();        
     }
 
-
+    public TileEntity getTileEntityReliably (World world, BlockPos pos)
+    {
+        TileEntity result = world.getTileEntity(pos);
+        if (result == null) 
+        {
+            synchronized(TILE_ENTITY_AD_HOCK_CREATION_LOCK)
+            {
+                result = world.getTileEntity(pos);
+                if (result == null) 
+                {
+                    result = createNewTileEntity(world, 0);
+                    world.setTileEntity(pos, result);
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public ModelState getModelStateAssumeStateIsStale(IBlockState state, IBlockAccess world, BlockPos pos, boolean refreshFromWorldIfNeeded)
     {

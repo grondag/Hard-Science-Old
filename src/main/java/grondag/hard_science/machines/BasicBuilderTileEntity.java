@@ -3,6 +3,7 @@ package grondag.hard_science.machines;
 import static grondag.hard_science.machines.support.MaterialBuffer.UNITS_PER_ITEM;
 
 import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.init.ModSuperModelBlocks;
@@ -25,7 +26,6 @@ import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import grondag.hard_science.virtualblock.VirtualBlockTracker;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -97,14 +97,14 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
 
     // Buffer setup - all persisted
-    private final MaterialBuffer WOOD_BUFFER = new MaterialBuffer(WOOD_INGREDIENTS, 64, "mbl_wood");
-    private final MaterialBuffer STONE_BUFFER = new MaterialBuffer(STONE_INGREDIENTS, 64, "mbl_stone");
-    private final MaterialBuffer GLASS_BUFFER = new MaterialBuffer(GLASS_INGREDIENTS, 64, "mbl_glass");
-    private final MaterialBuffer GLOWSTONE_BUFFER = new MaterialBuffer(GLOWSTONE_INGREDIENTS, 64, "mbl_glowstone");
-    private final MaterialBuffer CYAN_BUFFER = new MaterialBuffer(CYAN_INGREDIENTS, 64, "mbl_cyan");
-    private final MaterialBuffer MAGENTA_BUFFER = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "mbl_magenta");
-    private final MaterialBuffer YELLOW_BUFFER = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "mbl_yellow");
-    private final MaterialBuffer BLACK_BUFFER = new MaterialBuffer(BLACK_INGREDIENTS, 64, "mbl_black");   
+    private final MaterialBuffer WOOD_BUFFER = new MaterialBuffer(WOOD_INGREDIENTS, 64, "wood");
+    private final MaterialBuffer STONE_BUFFER = new MaterialBuffer(STONE_INGREDIENTS, 64, "stone");
+    private final MaterialBuffer GLASS_BUFFER = new MaterialBuffer(GLASS_INGREDIENTS, 64, "glass");
+    private final MaterialBuffer GLOWSTONE_BUFFER = new MaterialBuffer(GLOWSTONE_INGREDIENTS, 64, "glowstone");
+    private final MaterialBuffer CYAN_BUFFER = new MaterialBuffer(CYAN_INGREDIENTS, 64, "cyan");
+    private final MaterialBuffer MAGENTA_BUFFER = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "magenta");
+    private final MaterialBuffer YELLOW_BUFFER = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "yellow");
+    private final MaterialBuffer BLACK_BUFFER = new MaterialBuffer(BLACK_INGREDIENTS, 64, "black");   
     private final MaterialBufferManager bufferManager = new MaterialBufferManager(WOOD_BUFFER, STONE_BUFFER, GLASS_BUFFER, GLOWSTONE_BUFFER,
             CYAN_BUFFER, MAGENTA_BUFFER, YELLOW_BUFFER, BLACK_BUFFER);
     

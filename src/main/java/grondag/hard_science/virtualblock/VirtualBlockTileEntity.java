@@ -1,7 +1,7 @@
 package grondag.hard_science.virtualblock;
 
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
-import jline.internal.Log;
+import grondag.hard_science.Log;
 import net.minecraft.util.BlockRenderLayer;
 
 public class VirtualBlockTileEntity extends SuperModelTileEntity
@@ -12,6 +12,7 @@ public class VirtualBlockTileEntity extends SuperModelTileEntity
         return this.getCachedModelState().getRenderPassSet().renderLayout.containsBlockRenderLayer(pass == 0 ? BlockRenderLayer.SOLID : BlockRenderLayer.TRANSLUCENT);
     }
     
+    @Override
     public boolean isVirtual() { return true; }
 
     @Override

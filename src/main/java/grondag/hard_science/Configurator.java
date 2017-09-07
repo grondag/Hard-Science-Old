@@ -460,11 +460,11 @@ public class Configurator
         @RangeInt(min = 0, max = 8)
         public int basicBuilderChunkRadius = 4;
         
-        @Comment({"Number of milliseconds server waits between sending non-urgent machine updates to clients.",
+        @Comment({"Number of milliseconds server waits between sending machine updates to clients.",
             "Lower values will provide more responsive machine status feedback at the cost of more network traffic",
             "Some specialized machines may not honor this value consistently."})
         @RangeInt(min = 0, max = 5000)
-        public int machineUpdateIntervalMilliseconds = 500;
+        public int machineUpdateIntervalMilliseconds = 200;
         
         @Comment({"Number of milliseconds between keepalive packets sent from client to server to notifiy ",
             "server that machine is being rendered and needs status information for external display.",

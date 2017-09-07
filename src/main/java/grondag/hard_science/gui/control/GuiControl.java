@@ -1,5 +1,6 @@
 package grondag.hard_science.gui.control;
 
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.Layout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;

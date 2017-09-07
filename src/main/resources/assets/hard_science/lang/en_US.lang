@@ -43,6 +43,14 @@ machine.redstone_enabled=Redstone control is ENABLED.
 machine.redstone_disabled=Redstone control is DISABLED.
 machine.redstone_live=Machine IS receiving redstone signal.
 machine.redstone_dead=Machine is NOT receiving redstone signal.
+machine.buffer_glowstone=Glowstone Supply
+machine.buffer_black=Black Dye Supply
+machine.buffer_cyan=Cyan Dye Supply
+machine.buffer_magenta=Magenta Dye Supply
+machine.buffer_yellow=Yellow Dye Supply
+machine.buffer_stone=Stone Supply
+machine.buffer_wood=Wood Supply
+machine.buffer_glass=Glass Supply
 
 
 

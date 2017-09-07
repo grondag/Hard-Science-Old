@@ -12,6 +12,7 @@ import grondag.hard_science.gui.control.ItemStackPicker;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.TabBar;
 import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.ContainerLayout;
 import grondag.hard_science.machines.support.MachineItemBlock;
 import grondag.hard_science.machines.support.MachineStorageContainer;
@@ -24,7 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class GuiSmartChest extends AbstractMachineGui<SmartChestTileEntity>
+public class GuiSmartChest extends AbstractContainerGui<SmartChestTileEntity>
 {
     protected final ContainerLayout layout;
     
@@ -189,9 +190,9 @@ public class GuiSmartChest extends AbstractMachineGui<SmartChestTileEntity>
     }
 
     @Override
-    public void addControls()
+    public void addControls(Panel mainPanel, MachineTileEntity tileEntity)
     {
-        // TODO Auto-generated method stub
+        // nothing special
         
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.texture.TextureRotationType;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;

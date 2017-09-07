@@ -1,6 +1,7 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.shape.ModelShape;

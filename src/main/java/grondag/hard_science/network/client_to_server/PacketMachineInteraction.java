@@ -14,7 +14,8 @@ public class PacketMachineInteraction extends AbstractPlayerToServerPacket<Packe
 {
     public static enum Action
     {
-        TOGGLE_POWER
+        TOGGLE_POWER,
+        TOGGLE_REDSTONE_CONTROL
     }
     
     private BlockPos blockPos;
@@ -49,6 +50,10 @@ public class PacketMachineInteraction extends AbstractPlayerToServerPacket<Packe
             
             case TOGGLE_POWER:
                 mte.togglePower(player);
+                return;
+            
+            case TOGGLE_REDSTONE_CONTROL:
+                mte.toggleRedstoneControl(player);
                 return;
                 
             default:

@@ -10,14 +10,12 @@ import net.minecraft.util.math.BlockPos;
 public class PacketMachineStatusAddListener extends AbstractPlayerToServerPacket<PacketMachineStatusAddListener> 
 {
     public BlockPos pos;
-    public boolean isRequired;
 
     public PacketMachineStatusAddListener() {}
     
-    public PacketMachineStatusAddListener(BlockPos pos, boolean isRequired)
+    public PacketMachineStatusAddListener(BlockPos pos)
     {
         this.pos = pos;
-        this.isRequired = isRequired;
     }
     
     @Override
@@ -28,7 +26,7 @@ public class PacketMachineStatusAddListener extends AbstractPlayerToServerPacket
             TileEntity te = player.world.getTileEntity(message.pos);
             if(te != null && te instanceof MachineTileEntity)
             {
-                ((MachineTileEntity)te).addPlayerListener(player, message.isRequired);
+                ((MachineTileEntity)te).addPlayerListener(player);
             }
         }
     }
@@ -37,7 +35,6 @@ public class PacketMachineStatusAddListener extends AbstractPlayerToServerPacket
     public void fromBytes(PacketBuffer pBuff)
     {
         this.pos = pBuff.readBlockPos();
-        this.isRequired = pBuff.readBoolean();  
     }
 
 
@@ -45,7 +42,6 @@ public class PacketMachineStatusAddListener extends AbstractPlayerToServerPacket
     public void toBytes(PacketBuffer pBuff)
     {
         pBuff.writeBlockPos(pos);
-        pBuff.writeBoolean(isRequired);
     }
 
 }

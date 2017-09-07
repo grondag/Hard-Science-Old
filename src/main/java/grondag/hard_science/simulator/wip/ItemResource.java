@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Objects;
 
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
-import jline.internal.Log;
+import grondag.hard_science.Log;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

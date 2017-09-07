@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
+import grondag.hard_science.Log;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
@@ -20,7 +21,6 @@ import grondag.hard_science.simulator.wip.AssignedNumber;
 import grondag.hard_science.simulator.wip.IIdentified;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.varia.KeyedTuple;
-import jline.internal.Log;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -67,14 +67,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
  
     /** players who are looking at this machine and need updates sent to client */
     private SimpleUnorderedArraySet<PlayerListener> listeningPlayers;
-    
-    /**
-     * Set to false to disable outbound status updates (and keepalive packets) except for urgent/focused updates.
-     */
-    protected boolean isOptionalPlayerUpdateEnabled = true;
-    
-    /** if > 0 then need to send client packets more frequently */
-    private int requiredListenerCount = 0;
+      
     
     /**
      * On server, next time update should be sent to players.
@@ -94,54 +87,31 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         /** Listener is valid until this time*/
         private long goodUntilMillis;
         
-        /** if true, player is focused on this tile and needs frequent updates */
-        private boolean isRequired;
-        
-        private PlayerListener(EntityPlayerMP key, boolean isRequired)
+        private PlayerListener(EntityPlayerMP key)
         {
             super(key);
             this.goodUntilMillis = CommonProxy.currentTimeMillis() + Configurator.Machines.machineKeepAlivePlusLatency;
-            this.isRequired = isRequired;
         }
         
         /**
-         * Downgrades status from focused if appropriate and returns true
-         * if this listener should be removed because it has timed out or player has disconnected.
+         * Returns true if this listener should be removed because it has timed out or player has disconnected.
          */
         private boolean checkForRemoval(long currentTime)
         {
-            if(this.key.hasDisconnected())
-            {
-                if(this.isRequired) MachineTileEntity.this.requiredListenerCount--;
-                return true;
-            }
-            
-            if(currentTime > this.goodUntilMillis)
-            {
-                // timed out
-                if(this.isRequired)
-                {
-                    // will give a courtesy bump for required listeners
-                    // but will downgrade unless player open container is this tile entity
-                    
-                    this.goodUntilMillis = currentTime + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
-                    if(!isOpenContainerForPlayer(this.key))
-                    {
-                        this.isRequired = false;
-                        MachineTileEntity.this.requiredListenerCount--;
-                    }
-                    return false;
-                }
-                else
-                {
-                    // if was not required, can be removed
-                    return true;
-                }
-            }
-            return false;
+            return this.key.hasDisconnected()
+                    || (currentTime > this.goodUntilMillis && !isOpenContainerForPlayer(this.key));
         }
     }
 
+    /**
+     * Make false to disable on/off switch.
+     */
+    public boolean hasOnOff() { return true;}
+    
+    /**
+     * Make false to disable redstone control.
+     */
+    public boolean hasRedstoneControl() { return true; }
     
     /**
      * True if container currently open by player references this tile entity.
@@ -231,22 +201,42 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     public boolean isOn()
     {
+        if(!this.hasOnOff()) return false;
+        
+            switch(this.controlState.getControlMode())
+            {
+            case ON:
+                return true;
+                
+            case OFF_WITH_REDSTONE:
+                return !this.hasRedstonePowerSignal();
+                
+            case ON_WITH_REDSTONE:
+                return this.hasRedstonePowerSignal();
+                
+            case OFF:
+            default:
+                return false;
+            
+            }
+    }
+    
+    public boolean isRedstoneControlEnabled()
+    {
+        if(!this.hasRedstoneControl()) return false;
+        
         switch(this.controlState.getControlMode())
         {
-        case ON:
+        case OFF_WITH_REDSTONE:
+        case ON_WITH_REDSTONE:
             return true;
             
-        case OFF_WITH_REDSTONE:
-            return !this.hasRedstonePowerSignal();
-            
-        case ON_WITH_REDSTOWN:
-            return this.hasRedstonePowerSignal();
-            
+        case ON:
         case OFF:
         default:
             return false;
-        
         }
+        
     }
 
     @Override
@@ -305,24 +295,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * Will cause an immediate player refresh if the listener is new or
      * if existing listener goes from non-urgent to urgent.
      */
-    public void addPlayerListener(EntityPlayerMP player, boolean isFocused)
+    public void addPlayerListener(EntityPlayerMP player)
     {
         if(world.isRemote) return;
         
         if(Configurator.logMachineNetwork) Log.info("got keepalive packet");
-        PlayerListener listener = new PlayerListener(player, isFocused);
+        PlayerListener listener = new PlayerListener(player);
         
         if(this.listeningPlayers == null)
         {
             this.listeningPlayers = new SimpleUnorderedArraySet<PlayerListener>();
             this.listeningPlayers.put(listener);
             
-            if(Configurator.logMachineNetwork) Log.info("added new listener, required=" + isFocused);
+            if(Configurator.logMachineNetwork) Log.info("added new listener");
             
             // send immediate refresh for any new listener
             ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
-            
-            if(listener.isRequired) this.requiredListenerCount++;
             
         }
         else
@@ -333,46 +321,11 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             {
                 // send immediate refresh for any new listener
                 ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
-                if(listener.isRequired) this.requiredListenerCount++;
 
-                if(Configurator.logMachineNetwork) Log.info("added new listener, required=" + isFocused);
+                if(Configurator.logMachineNetwork) Log.info("added new listener");
 
             }
-            else
-            {
-                if(previous.isRequired)
-                {
-                    if(!listener.isRequired)
-                    {
-                        if(this.isOpenContainerForPlayer(player)) 
-                        {
-                            // prevent downgrade if open container
-                            listener.isRequired = true;
-                            
-                            if(Configurator.logMachineNetwork) Log.info("prevented downgrade on listener");
 
-                        }
-                        else
-                        {
-                            // downgrade
-                            this.requiredListenerCount--;
-                            
-                            if(Configurator.logMachineNetwork) Log.info("downgraded required listener");
-                        }
-                    }
-                }
-                else
-                {
-                    if(listener.isRequired)
-                    {
-                        // upgrade, increment count and send immediate refresh
-                        ModMessages.INSTANCE.sendTo(this.createMachineStatusUpdate(), player);
-                        this.requiredListenerCount++;
-                        
-                        if(Configurator.logMachineNetwork) Log.info("upgraded existing listener");
-                    }
-                }
-            }
         }
     }
     
@@ -387,39 +340,37 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     /**
      * Called to notify observing players of an update to machine status.
-     * If isRequired == true will send update on next tick, even if no listeners are urgent.
-     * isRequired should be used for big visible changes, like power on/off<br><br>
+     * If isUrgent == true will send update on next tick.
+     * isUrgent should be used for big visible changes, like power on/off<br><br>
      * 
      * If {@link #playerUpdateMilliseconds} has been set to a negative value, will have 
-     * no effect unless isRequired == true. <br><br>
+     * no effect unless isUrgent == true. <br><br>
      * 
      * Seldom called directly except with required updates because is 
      * called automatically by {@link #markDirty()}
      */
-    public void markPlayerUpdateDirty(boolean isRequired)
+    public void markPlayerUpdateDirty(boolean isUrgent)
     {
         if(world == null || world.isRemote || this.listeningPlayers == null || this.listeningPlayers.isEmpty()) return;
-        if(isRequired)
+        this.isPlayerUpdateNeeded = true;
+        if(isUrgent)
         {
-            this.isPlayerUpdateNeeded = true;
             this.nextPlayerUpdateMilliseconds = 0;
         }
-        else if(!this.isPlayerUpdateNeeded)
-        {
-            this.isPlayerUpdateNeeded = this.requiredListenerCount > 0 || this.isOptionalPlayerUpdateEnabled;
-        }
     }
+    
     
     @SideOnly(Side.CLIENT)
     public void notifyServerPlayerWatching()
     {
         long time = CommonProxy.currentTimeMillis();
+        
+        // don't send more frequently than needed, but send immediately if upgrading to urgent
         if(time >= this.nextPlayerUpdateMilliseconds)
         {
             if(Configurator.logMachineNetwork) Log.info("sending keepalive packet");
 
-            //FIXME: use correct urgency based on render level
-            ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos, false));
+            ModMessages.INSTANCE.sendToServer(new PacketMachineStatusAddListener(this.pos));
             this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineKeepaliveIntervalMilliseconds;
         }
     }
@@ -450,7 +401,6 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                 if(listener.checkForRemoval(time))
                 {
                     this.listeningPlayers.remove(i);
-                    if(listener.isRequired) this.requiredListenerCount--;
                     if(Configurator.logMachineNetwork) Log.info("Removed timed out listener");
                 }
                 else
@@ -461,8 +411,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                 }
             }
             
-            // if we have focused listeners, updates are always 4X per second
-            this.nextPlayerUpdateMilliseconds = time + this.requiredListenerCount > 0 ? 250 : Configurator.MACHINES.machineUpdateIntervalMilliseconds;
+            this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineUpdateIntervalMilliseconds;
             this.isPlayerUpdateNeeded = false;
         }
     }
@@ -524,15 +473,17 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
 
     /**
      * Handles packet from player to toggle power on or off.
+     * Returns false if denied.
      */
-    public void togglePower(EntityPlayerMP player)
+    public boolean togglePower(EntityPlayerMP player)
     {
-        if(!this.hasWorld() || this.isInvalid()) return;
+        if(!this.hasWorld() || this.isInvalid() || !this.hasOnOff()) return false;
         
         if(this.world.isRemote)
         {
             // send to server
             ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_POWER, this.pos));
+            return true;
         }
         else
         {
@@ -546,14 +497,14 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                 break;
                 
             case OFF_WITH_REDSTONE:
-                this.controlState.setControlMode(ControlMode.ON_WITH_REDSTOWN);
+                this.controlState.setControlMode(ControlMode.ON_WITH_REDSTONE);
                 break;
                 
             case ON:
                 this.controlState.setControlMode(ControlMode.OFF);
                 break;
                 
-            case ON_WITH_REDSTOWN:
+            case ON_WITH_REDSTONE:
                 this.controlState.setControlMode(ControlMode.OFF_WITH_REDSTONE);
                 break;
                 
@@ -561,9 +512,56 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                 break;
                 
             }
-            
+            this.markDirty();
+            this.markPlayerUpdateDirty(true);
+            return true;
         }
+    }
+    
+    /**
+     * Handles packet from player to toggle redstone control on or off.
+     * Returns false if denied.
+     */
+    public boolean toggleRedstoneControl(EntityPlayerMP player)
+    {
+        if(!this.hasWorld() || this.isInvalid() || !this.hasRedstoneControl()) return false;
         
-        
+        if(this.world.isRemote)
+        {
+            // send to server
+            ModMessages.INSTANCE.sendToServer(new PacketMachineInteraction(Action.TOGGLE_REDSTONE_CONTROL, this.pos));
+            return true;
+        }
+        else
+        {
+            //FIXME: check user permissions
+            
+            // called by packet handler on server side
+            switch(this.controlState.getControlMode())
+            {
+            case OFF:
+                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF_WITH_REDSTONE : ControlMode.ON_WITH_REDSTONE);
+                break;
+                
+            case OFF_WITH_REDSTONE:
+                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF : ControlMode.ON);
+                break;
+                
+            case ON:
+                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON_WITH_REDSTONE : ControlMode.OFF_WITH_REDSTONE);
+                break;
+                
+            case ON_WITH_REDSTONE:
+                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON : ControlMode.OFF);
+                break;
+                
+            default:
+                break;
+                
+            }
+            this.markDirty();
+            this.markPlayerUpdateDirty(true);
+            return true;
+        }
     }
 }

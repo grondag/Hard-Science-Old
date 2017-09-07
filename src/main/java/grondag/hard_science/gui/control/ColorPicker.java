@@ -1,6 +1,7 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;

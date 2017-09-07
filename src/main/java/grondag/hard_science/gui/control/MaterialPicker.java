@@ -1,6 +1,7 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import grondag.hard_science.superblock.varia.BlockSubstance;

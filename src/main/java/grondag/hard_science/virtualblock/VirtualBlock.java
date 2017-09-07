@@ -382,6 +382,9 @@ public class VirtualBlock extends SuperModelBlock
     }
 
     @Override
+    public boolean isVirtual() { return true; }
+    
+    @Override
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
         // nothing

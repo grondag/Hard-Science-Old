@@ -1,6 +1,7 @@
 package grondag.hard_science.gui.control;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.VerticalAlignment;
 import net.minecraft.client.Minecraft;
@@ -54,7 +55,11 @@ public class Toggle extends GuiControl<Toggle>
     @Override
     protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        if(this.isMouseOver(mouseX, mouseY)) this.isOn = !this.isOn;
+        if(this.isMouseOver(mouseX, mouseY))
+        {
+            this.isOn = !this.isOn;
+            GuiUtil.playPressedSound(mc);
+        }
     }
 
     @Override

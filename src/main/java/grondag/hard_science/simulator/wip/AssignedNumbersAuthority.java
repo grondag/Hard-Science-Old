@@ -3,10 +3,10 @@ package grondag.hard_science.simulator.wip;
 import java.util.Arrays;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
-import jline.internal.Log;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier

@@ -5,16 +5,22 @@ import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class MachineOnOff extends AbstractMachineControl<MachineOnOff>
+public class MachineRedstone extends AbstractMachineControl<MachineRedstone>
 {
+    private final Tessellator tesselator;
+    private final BufferBuilder buffer;
     
-    public MachineOnOff(MachineTileEntity te)
+    public MachineRedstone(MachineTileEntity te)
     {
         super(te);
+        this.tesselator = Tessellator.getInstance();
+        this.buffer = tesselator.getBuffer();
     }
     
     @Override
@@ -24,20 +30,22 @@ public class MachineOnOff extends AbstractMachineControl<MachineOnOff>
         {
             GuiUtil.drawBoxRightBottom(this.getLeft(), this.getTop(), this.getRight(), this.getBottom(), 1, BUTTON_COLOR_FOCUS);
         }
-        MachineControlRenderer.renderBinaryTexture(this.renderBounds, ModModels.TEX_MACHINE_ON_OFF, this.tileEntity.isOn(), 255);
+        MachineControlRenderer.renderRedstoneControl(this.tileEntity, this.tesselator, this.buffer, this.renderBounds, 255);
     }
 
     @Override
     protected void handleMouseClick(Minecraft mc, int mouseX, int mouseY, int clickedMouseButton)
     {
-        this.tileEntity.togglePower(null);
+        this.tileEntity.toggleRedstoneControl(null);
         GuiUtil.playPressedSound(mc);
     }
 
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        renderContext.drawLocalizedToolTipBoolean(this.tileEntity.isOn(), "machine.is_on", "machine.is_off", mouseX, mouseY);
+        renderContext.drawLocalizedToolTip(mouseX, mouseY,
+                this.tileEntity.isRedstoneControlEnabled() ? "machine.redstone_enabled" : "machine.redstone_disabled",
+                this.tileEntity.hasRedstonePowerSignal() ? "machine.redstone_live" : "machine.redstone_dead" );
     }
     
 }

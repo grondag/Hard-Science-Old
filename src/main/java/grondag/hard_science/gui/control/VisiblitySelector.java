@@ -4,6 +4,7 @@ import static grondag.hard_science.library.varia.HorizontalAlignment.*;
 import static grondag.hard_science.library.varia.VerticalAlignment.*;
 
 import grondag.hard_science.gui.GuiUtil;
+import grondag.hard_science.gui.IGuiRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -71,6 +72,7 @@ public class VisiblitySelector extends GuiControl<VisiblitySelector>
         if(clickIndex != NO_SELECTION && clickIndex != this.target.getVisiblityIndex())
         {
             this.target.setVisiblityIndex(clickIndex);
+            GuiUtil.playPressedSound(mc);
         }
     }
 

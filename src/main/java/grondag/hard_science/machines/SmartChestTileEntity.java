@@ -14,4 +14,10 @@ public class SmartChestTileEntity extends MachineStorageTileEntity
     {
         return ModModels.TEX_SYMBOL_CHEST;
     }
+    
+    @Override
+    public boolean hasOnOff() { return false;}
+    
+    @Override
+    public boolean hasRedstoneControl() { return false; }
 }

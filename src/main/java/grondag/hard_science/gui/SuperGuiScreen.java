@@ -14,7 +14,6 @@ import grondag.hard_science.gui.control.BrightnessSlider;
 import grondag.hard_science.gui.control.Button;
 import grondag.hard_science.gui.control.ColorPicker;
 import grondag.hard_science.gui.control.GuiControl;
-import grondag.hard_science.gui.control.IGuiRenderContext;
 import grondag.hard_science.gui.control.ItemPreview;
 import grondag.hard_science.gui.control.MaterialPicker;
 import grondag.hard_science.gui.control.Panel;
@@ -28,6 +27,7 @@ import grondag.hard_science.gui.shape.GuiShape;
 import grondag.hard_science.gui.shape.GuiShapeFinder;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModSuperModelBlocks;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -334,15 +334,13 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     {
         super.initGui();
 
-
         ySize = MathHelper.clamp(height * 4 / 5, fontRenderer.FONT_HEIGHT * 28, height);
         yStart = (height - ySize) / 2;
         xSize = (int) (ySize * GuiUtil.GOLDEN_RATIO);
         xStart = (width - xSize) / 2;
 
-        FontRenderer fr = mc.fontRenderer;
-        buttonWidth = Math.max(fr.getStringWidth(STR_ACCEPT), fr.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
-        buttonHeight = fr.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        buttonWidth = Math.max(fontRenderer.getStringWidth(STR_ACCEPT), fontRenderer.getStringWidth(STR_CANCEL)) + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
+        buttonHeight = fontRenderer.FONT_HEIGHT + CONTROL_INTERNAL_MARGIN + CONTROL_INTERNAL_MARGIN;
 
         int buttonTop = yStart + ySize - buttonHeight - CONTROL_EXTERNAL_MARGIN;
         int buttonLeft = xStart + xSize - CONTROL_EXTERNAL_MARGIN * 2 - buttonWidth * 2;
@@ -580,5 +578,32 @@ public class SuperGuiScreen extends GuiScreen implements IGuiRenderContext
     public void setHoverControl(GuiControl<?> control)
     {
         this.hoverControl = control;
+    }
+
+    @Override
+    public int mainPanelLeft()
+    {
+        // Not used for this one
+        return 0;
+    }
+
+    @Override
+    public int mainPanelTop()
+    {
+        // Not used for this one
+        return 0;
+    }
+
+    @Override
+    public int mainPanelSize()
+    {
+        // Not used for this one
+        return 0;
+    }
+
+    @Override
+    public void addControls(Panel mainPanel, MachineTileEntity tileEntity)
+    {
+        // Not used for this one
     }
 }

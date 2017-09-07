@@ -13,6 +13,7 @@ import org.lwjgl.util.glu.GLU;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.Log;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.BinaryGlTexture;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
@@ -38,7 +39,6 @@ import grondag.hard_science.superblock.varia.SuperModelLoader;
 import grondag.hard_science.superblock.varia.SuperStateMapper;
 import grondag.hard_science.virtualblock.VirtualBlockTESR;
 import grondag.hard_science.virtualblock.VirtualBlockTileEntity;
-import jline.internal.Log;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
@@ -145,6 +145,7 @@ public class ModModels
     }
     
     public static BinaryGlTexture TEX_MACHINE_ON_OFF;
+    
     public static int TEX_BLOCKS;
     
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
@@ -160,12 +161,14 @@ public class ModModels
     
     public static TrueTypeFont FONT_ORBITRON;
     
-    public static int TEX_GAUGE_OUTER;
+    public static int TEX_GAUGE_MINOR;
     public static int TEX_GAUGE_MAIN;
     public static int TEX_GAUGE_BACKGROUND;
 
     public static int TEX_SYMBOL_BUILDER;
     public static int TEX_SYMBOL_CHEST;
+    
+    public static int TEX_NO;
     
     public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[8];
     
@@ -191,12 +194,14 @@ public class ModModels
                 loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png"),
                 loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png"));
         
-        TEX_GAUGE_OUTER = loadNonBlockTexture("hard_science:textures/blocks/gauge_outer_128.png");
+        TEX_GAUGE_MINOR = loadNonBlockTexture("hard_science:textures/blocks/gauge_inner_256.png");
         TEX_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
         TEX_GAUGE_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
         
         TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
         TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
+        
+        TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
         
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         
@@ -216,7 +221,7 @@ public class ModModels
         BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, MachineControlRenderer.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
         BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, MachineControlRenderer.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);
         BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(6, MachineControlRenderer.BOUNDS_GAUGE[6], 1.0, ModModels.SPRITE_YELLOW_DYE, 0xFFFF00);
-        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(7, MachineControlRenderer.BOUNDS_GAUGE[7], 1.0, ModModels.SPRITE_BLACK_DYE, 0x101010);
+        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(7, MachineControlRenderer.BOUNDS_GAUGE[7], 1.0, ModModels.SPRITE_BLACK_DYE, 0x555555);
     
         BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(1, MachineControlRenderer.BOUNDS_GAUGE[0], 0.75, ModModels.SPRITE_STONE, 0x7f7f7f);
         BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(0, MachineControlRenderer.BOUNDS_GAUGE[2], 0.75, ModModels.SPRITE_WOOD, 0xa78653);
