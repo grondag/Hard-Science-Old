@@ -11,7 +11,9 @@ import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
+import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
+import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
@@ -42,8 +44,9 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
-    
-    private final MachineControlState controlState = new MachineControlState();
+
+    protected MachineControlState controlState = new MachineControlState();
+    protected MachineStatusState statusState = new MachineStatusState();
     
     /** Levels of materials stored in this machine.  Is persisted to NBT. 
      * Pass null to constructor to disable. 
@@ -81,6 +84,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * <i>when</i> update occurs. {@link #isPlayerUpdateNeeded} contols <i>if</i> update occurs.
      */
     private boolean isPlayerUpdateNeeded = false;
+
     
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
     {
@@ -239,6 +243,60 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         
     }
 
+    public boolean hasBacklog()
+    {
+        return this.statusState.hasBacklog();
+    }
+    
+    /**
+     * Max backlog depth since machine was last idle or power cycled.
+     * Automatically maintained y {@link #setCurrentBacklog(int)}
+     */
+    public int getMaxBacklog()
+    {
+        return this.hasBacklog() ? this.statusState.getMaxBacklog() : 0;
+    }
+    
+    public int getCurrentBacklog()
+    {
+        return this.hasBacklog() ? this.statusState.getCurrentBacklog() : 0;
+    }
+    
+    public void setCurrentBacklog(int value)
+    {
+        if(!this.hasBacklog()) return;
+        
+        if(value != this.statusState.getCurrentBacklog())
+        {
+            this.statusState.setCurrentBacklog(value);
+            this.markPlayerUpdateDirty(false);
+        }
+        
+        int maxVal = Math.max(value, this.getMaxBacklog());
+        if(value == 0) maxVal = 0;
+        
+        if(maxVal != this.getMaxBacklog())
+        {
+            this.statusState.setMaxBacklog(maxVal);
+            this.markPlayerUpdateDirty(false);
+        }        
+    }
+    
+    public int getJobDurationTicks()
+    {
+        return this.controlState.getJobDurationTicks();
+    }
+    
+    public int getJobRemainingTicks()
+    {
+        return this.controlState.getJobRemainingTicks();
+    }
+    
+    public MachineState getMachineState()
+    {
+        return this.controlState.getMachineState();
+    }
+    
     @Override
     public void onLoad()
     {
@@ -249,16 +307,16 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
 
     public boolean hasRedstonePowerSignal()
     {
-        return this.controlState.hasRedstonePower();
+        return this.statusState.hasRedstonePower();
     }
 
     public void updateRedstonePower()
     {
         if(this.isRemote()) return;
         boolean shouldBePowered = this.world.isBlockPowered(this.pos);
-        if(shouldBePowered != this.controlState.hasRedstonePower())
+        if(shouldBePowered != this.statusState.hasRedstonePower())
         {
-            this.controlState.setHasRestonePower(shouldBePowered);
+            this.statusState.setHasRestonePower(shouldBePowered);
             this.markPlayerUpdateDirty(true);
         }
     }
@@ -351,7 +409,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      */
     public void markPlayerUpdateDirty(boolean isUrgent)
     {
-        if(world == null || world.isRemote || this.listeningPlayers == null || this.listeningPlayers.isEmpty()) return;
+        if(this.listeningPlayers == null || this.listeningPlayers.isEmpty()) return;
+        
         this.isPlayerUpdateNeeded = true;
         if(isUrgent)
         {
@@ -419,7 +478,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public PacketMachineStatusUpdateListener createMachineStatusUpdate()
     {
         return new PacketMachineStatusUpdateListener(this.pos, this.controlState, 
-                this.getBufferManager() == null ? null : this.getBufferManager().serializeToArray());
+                this.getBufferManager() == null ? null : this.getBufferManager().serializeToArray(), this.statusState);
     }
     
     /**
@@ -429,8 +488,9 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         // should never be called on server
         if(!this.world.isRemote) return;
-        this.controlState.deserializeFromBits(packet.controlStateBits);
+        this.controlState = packet.controlState;
         if(this.getBufferManager() != null) this.getBufferManager().deserializeFromArray(packet.materialBufferData);
+        this.statusState = packet.statusState;
     }
 
     @Override
@@ -487,6 +547,9 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         }
         else
         {
+            // clear backlog on power cycle if we have one
+            this.setCurrentBacklog(0);
+            
             //FIXME: check user permissions
             
             // called by packet handler on server side

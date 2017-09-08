@@ -1,6 +1,9 @@
 package grondag.hard_science.library.varia;
 
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -25,6 +28,46 @@ import net.minecraft.world.World;
  */
 public class Useful 
 {
+    
+    private static final Vec3i DISTANCE_SORTED_CIRCULAR_OFFSETS[];
+    
+    static
+    {
+        // need to use a hash bc fill2dCircleInPlaneXZ does not guarantee uniqueness.
+        HashSet<Vec3i> offsets = new HashSet<Vec3i>();
+
+        
+        for(long packed : Useful.fill2dCircleInPlaneXZ(64).toArray())
+        {
+            int x = PackedBlockPos.getX(packed);
+            int z = PackedBlockPos.getZ(packed);
+            offsets.add(new Vec3i(x, Math.sqrt(x * x + z * z), z));
+        }
+        
+        ArrayList<Vec3i> offsetList = new ArrayList<Vec3i>(offsets);
+        offsetList.sort(new Comparator<Vec3i>() {
+
+            @Override
+            public int compare(Vec3i o1, Vec3i o2)
+            {
+                return Integer.compare(o1.getY(), o2.getY());
+            }});
+        
+        DISTANCE_SORTED_CIRCULAR_OFFSETS = offsetList.toArray(new Vec3i[offsetList.size()]);
+    }
+    
+    /**
+     * Returns values in a sequence of horizontal offsets from X=0, Z=0.<br>
+     * Y value is the euclidian distance from the origin.<br>
+     * Values are sorted by distance from 0,0,0. Value at index 0 is the origin.<br>
+     * Distance is up to 64 blocks from origin. Values outside that range return null.<br>
+     */
+    public static Vec3i getDistanceSortedCircularOffset(int index)
+    {
+        if(index < 0 || index >= DISTANCE_SORTED_CIRCULAR_OFFSETS.length) return null;
+        return DISTANCE_SORTED_CIRCULAR_OFFSETS[index];
+    }
+    
     public static int min(int... input)
     {
         int result = Integer.MAX_VALUE;
@@ -153,7 +196,7 @@ public class Useful
 
         return result;
     }
-
+    
     /** returns a list of packed block position x & z OFFSETS with the given radius */
     public static TLongList outline2dCircleInPlaneXZ(int radius) 
     {

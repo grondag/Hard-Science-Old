@@ -3,7 +3,6 @@ package grondag.hard_science.gui.control.machine;
 import java.util.function.DoubleUnaryOperator;
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;

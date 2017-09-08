@@ -2,6 +2,7 @@ package grondag.hard_science.network.server_to_client;
 
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineControlState;
+import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
@@ -12,35 +13,40 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPacket<PacketMachineStatusUpdateListener>
 {
     public BlockPos pos;
-    public long controlStateBits;
+    public MachineControlState controlState;
     public int[] materialBufferData;
+    public MachineStatusState statusState;
     
     public PacketMachineStatusUpdateListener() {}
    
     
-    public PacketMachineStatusUpdateListener(BlockPos pos, MachineControlState controlState, int[] materialBufferData)
+    public PacketMachineStatusUpdateListener(BlockPos pos, MachineControlState controlState, int[] materialBufferData, MachineStatusState statusState)
     {
         this.pos = pos;
-        this.controlStateBits = controlState.serializeToBits();
+        this.controlState = controlState;
         this.materialBufferData = materialBufferData;
+        this.statusState = statusState;
     }
 
     @Override
     public void fromBytes(PacketBuffer pBuff)
     {
         this.pos = pBuff.readBlockPos();
-        this.controlStateBits = pBuff.readVarLong();
+        this.controlState = new MachineControlState();
+        this.controlState.fromBytes(pBuff);
         if(pBuff.readBoolean())
         {
             this.materialBufferData = pBuff.readVarIntArray();
         }
+        this.statusState = new MachineStatusState();
+        this.statusState.fromBytes(pBuff);
     }
 
     @Override
     public void toBytes(PacketBuffer pBuff)
     {
         pBuff.writeBlockPos(pos);
-        pBuff.writeVarLong(this.controlStateBits);
+        this.controlState.toBytes(pBuff);
         if(this.materialBufferData == null || this.materialBufferData.length == 0) 
         {
             pBuff.writeBoolean(false);
@@ -50,6 +56,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
             pBuff.writeBoolean(true);
             pBuff.writeVarIntArray(this.materialBufferData);
         }
+        this.statusState.toBytes(pBuff);
     }
 
     @Override

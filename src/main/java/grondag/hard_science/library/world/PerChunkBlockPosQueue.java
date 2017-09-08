@@ -1,8 +1,10 @@
 package grondag.hard_science.library.world;
 
+import grondag.hard_science.library.varia.Useful;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 /**
  * Maintains a queue of block positions for each world chunk.
@@ -11,8 +13,6 @@ import net.minecraft.util.math.BlockPos;
 public class PerChunkBlockPosQueue
 {
     private Long2ObjectOpenHashMap<LongArrayFIFOQueue> chunks = new Long2ObjectOpenHashMap<LongArrayFIFOQueue>();
-    
-    
     
     public void enqueue(BlockPos pos)
     {
@@ -59,4 +59,32 @@ public class PerChunkBlockPosQueue
         this.chunks.clear();
     }
     
+    public int sizeInChunkAt(BlockPos pos)
+    {
+        long packedChunkPos = PackedBlockPos.getPackedChunkPos(pos);
+        
+        LongArrayFIFOQueue chunkQueue = chunks.get(packedChunkPos);
+        
+        if(chunkQueue == null) return 0;
+        
+        return chunkQueue.size();
+  
+    }
+    
+    public int sizeInChunksNear(BlockPos pos, int chunkRadius)
+    {
+        int result = 0;
+        
+        int i = 0;
+        Vec3i offset = Useful.getDistanceSortedCircularOffset(i);
+        
+        while(offset.getY() <= chunkRadius)
+        {
+            result += sizeInChunkAt(pos.add(offset.getX() * 16, 0, offset.getZ() * 16));
+            offset = Useful.getDistanceSortedCircularOffset(++i);
+            
+        }
+
+        return result;
+    }
 }

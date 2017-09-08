@@ -1,5 +1,7 @@
 package grondag.hard_science.library.varia;
 
+import grondag.hard_science.Log;
+
 public class BitPacker
 {
     private int totalBitLength;
@@ -13,7 +15,7 @@ public class BitPacker
         
         this.totalBitLength += element.bitLength;
         this.bitMask = Useful.longBitMask(totalBitLength);
-        assert(totalBitLength <= 64);
+        if(totalBitLength > 64) Log.warn("BitPacker length exceeded. This is definately a bug, and should be impossible in released code. Some things probably won't work correctly.");
     }
     
     public int bitLength() { return this.totalBitLength; }

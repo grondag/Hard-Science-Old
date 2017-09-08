@@ -11,7 +11,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
 
 public abstract class AbstractSimpleGui <T extends MachineTileEntity> extends GuiScreen implements IGuiRenderContext
 {

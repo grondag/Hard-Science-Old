@@ -14,7 +14,8 @@ import net.minecraft.util.text.translation.I18n;
  * Similar to Minecraft Material. Didn't want to tie to that implementation.
  * Determines Minecraft material and other physical properties.
  */
-public enum BlockSubstance {
+public enum BlockSubstance
+{
 	FLEXSTONE(Configurator.SUBSTANCES.flexstone, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.AZURE, Chroma.WHITE, Luminance.LIGHT).ordinal),
 	
 	DURASTONE(Configurator.SUBSTANCES.durastone, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.WHITE, Luminance.LIGHT).ordinal),
@@ -38,7 +39,29 @@ public enum BlockSubstance {
 	BASALT(Configurator.SUBSTANCES.basalt, Material.ROCK, SoundType.STONE, BlockColorMapProvider.INSTANCE.getColorMap(Hue.COBALT, Chroma.NEUTRAL, Luminance.MEDIUM_DARK).ordinal),
 	
 	//can't use lava as material here - confuses the lava fluid renderer
-    VOLCANIC_LAVA(Configurator.SUBSTANCES.volcanicLava, Material.ROCK, SoundType.STONE, 0);
+    VOLCANIC_LAVA(Configurator.SUBSTANCES.volcanicLava, Material.ROCK, SoundType.STONE, 0),
+    
+    // Reserved to pad enum serializer so don't break world saves if later add more substances.
+    RESERVED01(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED02(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED03(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED04(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED05(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED06(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED07(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED08(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED09(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED10(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED11(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED12(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED13(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED14(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED15(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED16(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED17(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED18(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED19(Configurator.SUBSTANCES.flexstone,  null, null, 0),
+    RESERVED20(Configurator.SUBSTANCES.flexstone,  null, null, 0);
     
 	public final Material material;
 	public final SoundType soundType;

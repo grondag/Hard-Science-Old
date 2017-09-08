@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
@@ -30,6 +31,7 @@ import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockTests;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -120,7 +122,7 @@ public class ModelStateFactory
         super();
     }
 
-    public static class ModelState implements IReadWriteNBT
+    public static class ModelState implements IReadWriteNBT, IMessagePlus
     {
         
         public static final BitPacker STATE_PACKER = new BitPacker();
@@ -1135,7 +1137,15 @@ public class ModelStateFactory
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
-            int[] stateBits = tag.getIntArray(NBT_TAG);
+            this.deserializeNBT(tag, NBT_TAG);
+        }
+        
+        /**
+         * Use when you need to avoid tag name conflicts / have more than one.
+         */
+        public void deserializeNBT(NBTTagCompound tag, String tagName)
+        {
+            int[] stateBits = tag.getIntArray(tagName);
             if(stateBits == null || stateBits.length != 8)
             {
                 Log.warn("Bad or missing data encounter during ModelState NBT deserialization.");
@@ -1148,8 +1158,33 @@ public class ModelStateFactory
         @Override
         public void serializeNBT(NBTTagCompound tag)
         {
-            tag.setIntArray(NBT_TAG, this.serializeToInts());
+            this.serializeNBT(tag, NBT_TAG);
         }
 
+        /**
+         * Use when you need to avoid tag name conflicts / have more than one.
+         */
+        public void serializeNBT(NBTTagCompound tag, String tagName)
+        {
+            tag.setIntArray(tagName, this.serializeToInts());
+        }
+
+        @Override
+        public void fromBytes(PacketBuffer pBuff)
+        {
+            this.bits0 = pBuff.readLong();
+            this.bits1 = pBuff.readLong();
+            this.bits2 = pBuff.readLong();
+            this.bits3 = pBuff.readLong();
+        }
+
+        @Override
+        public void toBytes(PacketBuffer pBuff)
+        {
+            pBuff.writeLong(this.bits0);
+            pBuff.writeLong(this.bits1);
+            pBuff.writeLong(this.bits2);
+            pBuff.writeLong(this.bits3);
+        }
     }
 }

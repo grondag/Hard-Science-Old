@@ -457,6 +457,7 @@ public class Configurator
         
         @Comment({"Radius for basic builder to find & build virtual blocks - in chunks.",
             "0 means can only build in chunk where machine is located."})
+        @RequiresMcRestart
         @RangeInt(min = 0, max = 8)
         public int basicBuilderChunkRadius = 4;
         
