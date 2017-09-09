@@ -119,7 +119,7 @@ public class TextureHelper
     /**
      * Similar to vanilla version in TextureUtil
      */
-    private static void setTextureBlurMipmap(final boolean enableBlur, final boolean isMoreThanOnePixel)
+    public static void setTextureBlurMipmap(final boolean enableBlur, final boolean isMoreThanOnePixel)
     {
         if (enableBlur)
         {

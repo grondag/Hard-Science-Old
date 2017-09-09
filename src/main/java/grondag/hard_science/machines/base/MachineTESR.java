@@ -99,33 +99,6 @@ public abstract class MachineTESR extends SuperBlockTESR
     }
     
     protected abstract void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha);
-    
-    
-    // maye I'll fix this later...
-//    private void stupidBadCrappyItemRenderHack()
-//    {
-//        {
-//            RenderHelper.enableStandardItemLighting();
-//            
-//            // important to do item rendering last, because it messes about with the lighting set by world render loop
-//            OpenGlHelper.setLightmapTextureCoords( OpenGlHelper.lightmapTexUnit, 240.f, 240.0f );
-//            
-//            GlStateManager.pushMatrix();
-//            
-//            // The Z-scaling by 0.0001 causes the model to be visually "flattened"
-//            // This cannot replace a proper projection, but it's cheap and gives the desired
-//            // effect at least from head-on
-//            GlStateManager.translate( 0.3, 0.3, -0.01 );
-//            GlStateManager.scale( 0.5f / 32.0f, 0.5f / 32.0f, 0.00001f );
-//            // Position the item
-//            
-//            RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-//            renderItem.renderItemAndEffectIntoGUI( ModItems.virtual_block.getDefaultInstance(), 0, 0 );
-//            
-//            GlStateManager.popMatrix();
-//        }
-//    }
-    
-    
+   
   
 }

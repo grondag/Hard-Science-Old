@@ -282,6 +282,11 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         }        
     }
     
+    public boolean hasJobTicks()
+    {
+        return this.controlState.hasJobTicks();
+    }
+    
     public int getJobDurationTicks()
     {
         return this.controlState.getJobDurationTicks();

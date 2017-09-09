@@ -43,7 +43,9 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
@@ -146,7 +148,10 @@ public class ModModels
     
     public static BinaryGlTexture TEX_MACHINE_ON_OFF;
     
+    public static TextureManager TEX_MANAGER;
+    
     public static int TEX_BLOCKS;
+    public static ITextureObject ITEX_BLOCKS;
     
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_UNLIT;
@@ -204,6 +209,8 @@ public class ModModels
         TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
         
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
+        
+        ITEX_BLOCKS = Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         
         SPRITE_REDSTONE_TORCH_LIT   = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
         SPRITE_REDSTONE_TORCH_UNLIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_off");
