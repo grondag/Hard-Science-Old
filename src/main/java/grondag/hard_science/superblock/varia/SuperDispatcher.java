@@ -71,7 +71,7 @@ public class SuperDispatcher
 		@Override
 		public SparseLayerMap load(ModelState key) {
 			
-		    Collection<RawQuad> paintedQuads = getFormattedQuads(key);
+		    Collection<RawQuad> paintedQuads = getFormattedQuads(key, false);
 		    
 		    @SuppressWarnings("unchecked")
             ArrayList<RawQuad>[] containers = new ArrayList[BlockRenderLayer.values().length];
@@ -108,8 +108,22 @@ public class SuperDispatcher
 		public SimpleItemBlockModel load(ModelState key) 
 		{
 	    	ImmutableList.Builder<BakedQuad> builder = new ImmutableList.Builder<BakedQuad>();
-	    	for(RawQuad quad : getFormattedQuads(key))
+	    	for(RawQuad quad : getFormattedQuads(key, true))
 	    	{
+	    	    switch(quad.surfaceInstance.surfaceType())
+	    	    {
+                case CUT:
+                    break;
+                case LAMP:
+                    break;
+                case MAIN:
+                    break;
+                default:
+                    break;
+	    	    
+	    	    
+	    	    }
+	    	    
 	    	    builder.add(QuadBakery.createBakedQuad(quad));
 	    	}
 			return new SimpleItemBlockModel(builder.build(), true);
@@ -187,7 +201,7 @@ public class SuperDispatcher
         return container.getOcclusionHash(face);
     }
     
-    private Collection<RawQuad> getFormattedQuads(ModelState modelState)
+    private Collection<RawQuad> getFormattedQuads(ModelState modelState, boolean isItem)
     {
         ArrayList<RawQuad> result = new ArrayList<RawQuad>();
          
@@ -232,7 +246,7 @@ public class SuperDispatcher
             Surface qSurface = shapeQuad.surfaceInstance.surface();
             for(QuadPainter p : painters)
             {
-                if(qSurface == p.surface) p.addPaintedQuadToList(shapeQuad, result);
+                if(qSurface == p.surface) p.addPaintedQuadToList(shapeQuad, result, isItem);
             }
         }
         return result;

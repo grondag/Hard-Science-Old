@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
+import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
@@ -21,11 +22,15 @@ import grondag.hard_science.network.client_to_server.PacketMachineStatusAddListe
 import grondag.hard_science.network.server_to_client.PacketMachineStatusUpdateListener;
 import grondag.hard_science.simulator.wip.AssignedNumber;
 import grondag.hard_science.simulator.wip.IIdentified;
+import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperTileEntity;
+import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.KeyedTuple;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -84,6 +89,12 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * <i>when</i> update occurs. {@link #isPlayerUpdateNeeded} contols <i>if</i> update occurs.
      */
     private boolean isPlayerUpdateNeeded = false;
+
+    
+    /**
+     * For use by TESR - cached items stack based on status info.
+     */
+    protected ItemStack statusStack;
 
     
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
@@ -301,6 +312,28 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         return this.controlState.getMachineState();
     }
+        
+    /**
+     * For use by TESR - cached items stack based on status info.
+     * Assumes that the target block is a superModel block.
+     */
+    public ItemStack getStatusStack()
+    {
+        ItemStack result = this.statusStack;
+        if(result == null && this.controlState.hasModelState())
+        {
+            ModelState modelState = this.controlState.getModelState();
+            if(modelState == null) return null;
+            
+            SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.controlState.getSubstance(), this.controlState.getModelState());
+            result = newBlock.getSubItems().get(0);
+            SuperItemBlock.setStackLightValue(result, this.controlState.getLightValue());
+            SuperItemBlock.setStackSubstance(result, this.controlState.getSubstance());
+            SuperItemBlock.setStackModelState(result, this.controlState.getModelState());
+            this.statusStack = result;
+        }
+        return result;
+    }
     
     @Override
     public void onLoad()
@@ -496,6 +529,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         this.controlState = packet.controlState;
         if(this.getBufferManager() != null) this.getBufferManager().deserializeFromArray(packet.materialBufferData);
         this.statusState = packet.statusState;
+        this.statusStack = null;
     }
 
     @Override

@@ -164,8 +164,12 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         this.updateTargetPosStatus();
     }
     
-    /** intended for block fabricators, but usage determined by machine. */
-    public BlockSubstance getSubstance() { return PACKED_SUBSTANCE.getValue(bits); }
+    /** 
+     * Intended for block fabricators, but usage determined by machine. 
+     * While values are always non-null, they are not always valid.  
+     * Check that a modelState or other related attribute also exists
+     */
+    public @Nonnull BlockSubstance getSubstance() { return PACKED_SUBSTANCE.getValue(bits); }
     public void setSubstance(@Nonnull BlockSubstance value) { bits = PACKED_SUBSTANCE.setValue(value, bits); }
     
     /** intended for block fabricators, but usage determined by machine. */

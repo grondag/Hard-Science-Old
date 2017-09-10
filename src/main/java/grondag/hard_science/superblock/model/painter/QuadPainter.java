@@ -94,7 +94,11 @@ public abstract class QuadPainter
         this.translucencyArgb = 0;
     }
 
-    public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
+    /**
+     * If isItem = true will bump out quads from block center to provide
+     * better depth rendering of layers in tiem rendering.
+     */
+    public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList, boolean isItem)
     {
         if(inputQuad.surfaceInstance.surface() != this.surface) return;
         
@@ -138,6 +142,22 @@ public abstract class QuadPainter
                 result.assignLockedUVCoordinates();;
             }
    
+            if(isItem)
+            {
+                switch(this.paintLayer)
+                {
+                case MIDDLE:
+                    result.scaleFromBlockCenter(1.01);
+                    break;
+                    
+                case OUTER:
+                    result.scaleFromBlockCenter(1.02);
+                    break;
+                    
+                default:
+                    break;
+                }
+            }
             outputList.add(result);
         }
     }
@@ -205,7 +225,7 @@ public abstract class QuadPainter
         };
         
         @Override
-        public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList)
+        public void addPaintedQuadToList(RawQuad inputQuad, List<RawQuad> outputList, boolean isItem)
         {
             // NOOP
         }

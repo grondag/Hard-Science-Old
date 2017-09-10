@@ -170,10 +170,14 @@ public class ModModels
     public static int TEX_GAUGE_MAIN;
     public static int TEX_GAUGE_BACKGROUND;
 
+    public static int TEX_GAUGE_LINEAR;
+    public static int TEX_GAUGE_LINEAR_BACKGROUND;
+    
     public static int TEX_SYMBOL_BUILDER;
     public static int TEX_SYMBOL_CHEST;
     
     public static int TEX_NO;
+    public static int TEX_MATERIAL_SHORTAGE;
     
     public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[8];
     
@@ -206,7 +210,11 @@ public class ModModels
         TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
         TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
         
+        TEX_GAUGE_LINEAR = loadNonBlockTexture("hard_science:textures/blocks/linear_level_64.png");
+        TEX_GAUGE_LINEAR_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/linear_level_background_64.png");
+        
         TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
+        TEX_MATERIAL_SHORTAGE = loadNonBlockTexture("hard_science:textures/blocks/material_shortage.png");
         
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         

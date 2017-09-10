@@ -10,6 +10,9 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
 {
     private final MaterialBuffer[] buffers;
     
+    /** populated on client side only, during deserialization */
+    private boolean hasMaterialFailure;
+    
     public MaterialBufferManager(MaterialBuffer... buffers)
     {
         this.buffers = buffers;
@@ -22,6 +25,31 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             if(buffer.canRestock()) return true;
         }
         return false;
+    }
+    
+    /**
+     * Populated during deserialization on client side.
+     * Must be maintained via {@link #blame()} on server side.
+     * Used to indicate material shortage to machine render.
+     */
+    public boolean hasFailureCauseClientSideOnly()
+    {
+        return this.hasMaterialFailure;
+    }
+    
+    public void forgiveAll()
+    {
+        for(MaterialBuffer buffer : buffers)
+        {
+            buffer.setFailureCause(false);
+        }
+        this.hasMaterialFailure = false;
+    }
+    
+    /** indicates a general failure, does not update individual buffers. */
+    public void blame()
+    {
+        this.hasMaterialFailure = true;
     }
     
     /**
@@ -138,20 +166,35 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     public void deserializeFromArray(int[] values)
     {
         if(values == null) return;
+        boolean hasFailure = false;
         
         int count = values.length;
         if(count == this.buffers.length)
         {
             for(int i = 0; i < count; i++)
             {
-                this.buffers[i].setLevel(values[i]);
+                int val = values[i];
+                if(val < 0)
+                {
+                    this.buffers[i].setLevel(-1 - val);
+                    this.buffers[i].setFailureCause(true);
+                    hasFailure = true;
+                }
+                else
+                {
+                    this.buffers[i].setLevel(val);
+                    this.buffers[i].setFailureCause(false);
+                }
             }
-            
         }
+        
+        this.hasMaterialFailure = hasFailure;
     }
 
     /** 
      * Returns an array for packet serialization.
+     * Sign is used for failure true/false.
+     * Because we need the sign, we subtract 1 from level when indicating failure so that we don't have zero values.
      */
     public int[] serializeToArray()
     {
@@ -161,7 +204,8 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         {
             for(int i = 0; i < count; i++)
             {
-                result[i] = this.buffers[i].getLevel();
+                MaterialBuffer buff = this.buffers[i];
+                result[i] = buff.isFailureCause() ? -1 - buff.getLevel() : buff.getLevel();
             }
         }
         return result;

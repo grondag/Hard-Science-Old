@@ -26,6 +26,13 @@ public class MaterialBuffer
     private int level;
     
     /**
+     * Set to true if this buffer's (low) level has recently caused a 
+     * processing failure.  Sent to clients for rendering to inform player
+     * but not saved to world because is transient information.
+     */
+    private boolean isFailureCause;
+    
+    /**
      * Units value of a normal stack. Some inputs may be worth more or less.
      * Buffer creation is specified in stacks, not units.
      */
@@ -132,5 +139,15 @@ public class MaterialBuffer
     public int emptySpace()
     {
         return this.maxUnits - this.level;
+    }
+
+    public boolean isFailureCause()
+    {
+        return isFailureCause;
+    }
+
+    public void setFailureCause(boolean isFailureCause)
+    {
+        this.isFailureCause = isFailureCause;
     }
 }

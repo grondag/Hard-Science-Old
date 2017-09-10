@@ -1,30 +1,33 @@
 package grondag.hard_science.gui.control.machine;
 
+import java.util.List;
 import java.util.function.DoubleUnaryOperator;
+
+import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.Log;
-import grondag.hard_science.init.ModItems;
+import grondag.hard_science.CommonProxy;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.support.MaterialBuffer;
+import grondag.hard_science.superblock.items.SuperItemBlock;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 
 public class MachineControlRenderer
 {
@@ -144,7 +147,9 @@ public class MachineControlRenderer
                 new RadialRenderBounds(0.66, 0.70, 0.08)
         };
 
-    public static final RadialRenderBounds BOUNDS_PROGRESS = new RadialRenderBounds(0.12, 0.22, 0.45);
+    public static final RadialRenderBounds BOUNDS_PROGRESS = new RadialRenderBounds(0.24, 0.38, 0.20);
+    public static final RadialRenderBounds BOUNDS_PROGRESS_INNER = new RadialRenderBounds(0.24, 0.38, 0.10);
+ 
 
     public static class BinaryGlTexture 
     {
@@ -274,12 +279,14 @@ public class MachineControlRenderer
         renderTextureInBounds(tes, tes.getBuffer(), bounds, glTextureID, alpha);
     }
 
+    
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
     public static void renderTextureInBounds(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int alpha)
     {
         GlStateManager.bindTexture(glTextureID);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);        
         bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
                 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
@@ -298,10 +305,78 @@ public class MachineControlRenderer
     public static void renderTextureInBoundsWithColor(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int colorARGB)
     {
         GlStateManager.bindTexture(glTextureID);
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);        
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
                 0, 0, 1, 1, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
         tessellator.draw();
+    }
+    
+    /**
+     * maxLevel is the max number of bars to render and should be a power of 4.
+     * level is how many of the bars should be lit.
+     */
+    public static void renderLinearProgress(RenderBounds bounds, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderLinearProgress(tes, tes.getBuffer(), bounds, level, maxLevel, isHorizontal, colorARGB);
+    }
+
+    /**
+     * Use this version when you already have tessellator/buffer references on the stack.
+     */
+    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+    {
+        if(maxLevel == 0) return;
+        
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        
+        GlStateManager.bindTexture(ModModels.TEX_GAUGE_LINEAR_BACKGROUND);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+       
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+
+        double uvMax = maxLevel / 4.0;
+        double topFactor = (maxLevel - level) / (double) maxLevel;
+        
+        if(isHorizontal)
+        {
+            bufferRotatedControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
+                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090);
+        }
+        else
+        {
+            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
+                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090);
+        }
+        tessellator.draw();
+        
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+        
+        GlStateManager.bindTexture(ModModels.TEX_GAUGE_LINEAR);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        
+        if(isHorizontal)
+        {
+            bufferRotatedControlQuad(buffer, bounds.left(), bounds.top(), bounds.right() - bounds.width * topFactor, bounds.bottom(), 
+                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+        }
+        else
+        {
+            bufferControlQuad(buffer, bounds.left(), bounds.top() + bounds.height * topFactor, bounds.right(), bounds.bottom(), 
+                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+        }
+        
+        
+        tessellator.draw();
+        
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
+        
     }
 
     /**
@@ -313,6 +388,7 @@ public class MachineControlRenderer
         if(arcLengthDegrees <= 0) return;
 
         GlStateManager.bindTexture(glTextureID);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);  
 
         int endDegrees = arcStartDegrees + arcLengthDegrees;
@@ -360,14 +436,6 @@ public class MachineControlRenderer
                 }
             }
         }
-
-        //        bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
-        //                0, 0, 0, 1, 1, colorARGB);
-
-        //        buffer.pos(xMin, yMin, depth).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
-        //        buffer.pos(xMin, yMax, depth).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        //        buffer.pos(xMax, yMax, depth).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        //        buffer.pos(xMax, yMin, depth).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
 
         tessellator.draw();
     }
@@ -483,6 +551,40 @@ public class MachineControlRenderer
         buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
         buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
     }
+    
+    /**
+     * Just like {@link #bufferControlQuad(BufferBuilder, double, double, double, double, double, double, double, double, int)}
+     * except rotates UV coordinates 90 degrees clockwise.
+     */
+    public static void bufferRotatedControlQuad
+    (
+            BufferBuilder buffer, 
+            double xMin, double yMin, double xMax, double yMax, 
+            double uMin,
+            double vMin, double uMax, double vMax, int colorARGB)
+    {
+        bufferRotatedControlQuad(buffer, xMin, yMin, xMax, yMax, 
+                uMin, vMin, uMax, vMax, 
+                (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+    }
+
+    /**
+     * Just like {@link #bufferControlQuad(BufferBuilder, double, double, double, double, double, double, double, double, int, int, int, int)}
+     * except rotates UV coordinates 90 degrees clockwise.
+     */
+    public static void bufferRotatedControlQuad
+    (
+            BufferBuilder buffer, 
+            double xMin, double yMin, double xMax, double yMax, 
+            double uMin,
+            double vMin, double uMax, double vMax, int alpha,
+            int red, int green, int blue)
+    {
+        buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+    }
 
     public static void renderProgress(RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
@@ -512,28 +614,25 @@ public class MachineControlRenderer
 
     }
 
-
-
-    public static void renderGauge(RadialGaugeSpec spec, int level64K, int delta64K, int alpha)
+    public static boolean warningLightBlinkOn()
     {
-        Tessellator tes = Tessellator.getInstance();
-        renderGauge(tes, tes.getBuffer(), spec, level64K, delta64K, alpha);
+        return (CommonProxy.currentTimeMillis() & 0x400) == 0x400;
     }
 
+    public static void renderGauge(RadialGaugeSpec spec, MaterialBuffer materialBuffer, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderGauge(tes, tes.getBuffer(), spec, materialBuffer, alpha);
+    }
+    
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
-     * @param tessellator
-     * @param buffer
-     * @param radialRenderBounds
-     * @param resourceColor
-     * @param level64K
-     * @param delta64K
-     * @param alpha
      */
-    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, int level64K, int delta64K, int alpha)
+    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MaterialBuffer materialBuffer, int alpha)
     {
 
-
+        int level64K = materialBuffer.getLevel();
+        
         // render marks
         MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_GAUGE_BACKGROUND, (alpha << 24) | 0xFFFFFF);
 
@@ -541,20 +640,24 @@ public class MachineControlRenderer
         int arcLength = ((level64K * 270) >> 16);
         renderRadialTexture(tessellator, buffer, spec, 225, arcLength, ModModels.TEX_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
 
-        if(delta64K != 0)
+        if(materialBuffer.isFailureCause() && warningLightBlinkOn())
         {
-            int deltaLength =  ((delta64K * 270) >> 16);
-
-            if(delta64K < 0)
-            {
-                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
-            }
-            else
-            {
-                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength - deltaLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
-
-            }
+            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
         }
+//        if(delta64K != 0)
+//        {
+//            int deltaLength =  ((delta64K * 270) >> 16);
+//
+//            if(delta64K < 0)
+//            {
+//                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
+//            }
+//            else
+//            {
+//                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength - deltaLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
+//
+//            }
+//        }
 
         renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, alpha);
 
@@ -565,80 +668,116 @@ public class MachineControlRenderer
     }
 
     /** 
+     * Attempts to render an item on machine face without looking like turd candy
+     * and shitting all over the rendering state.<br><br>
+     * 
+     * For a ried time this method was named pleaseJustRenderTheDamnItemWithoutFuckingUpAllTheThingsIsThatTooMuchToAsk.<br><br>
+     * 
      * NOTE: Changes rendering state and restores it to machine rendering.
-     * If you call this from somewhere other than maching rendering, 
+     * If you call this from somewhere other than machine rendering, 
      * you'll probably need to do more clean up.
      */
-    public static void renderItem(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds spec, ItemStack stack, int alpha)
+    public static void renderItem(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds spec, @Nullable ItemStack stack, int alpha)
     {
+        if(stack == null || stack.isEmpty()) return;
+        
+        GlStateManager.pushMatrix();
+        
+        // Begin with reasonable defaults
+        restoreWorldRendering();
+
+        // Still don't know how lightmaps work.  My main interaction with them seems to be circumventing them.
+        OpenGlHelper.setLightmapTextureCoords( OpenGlHelper.lightmapTexUnit, 240.f, 240.0f );
+
+        // Position the item so it is centered in the bounding box
+        GlStateManager.translate( spec.centerX, spec.centerY, 0 );
+
+        // scale and flatten
+        GlStateManager.scale( spec.width(), spec.height(), 0.000001f );
+
+        // prevent z-fighting
+        GlStateManager.enablePolygonOffset();
+        GlStateManager.doPolygonOffset(-1, -1);
+        
+        // I don't know?
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        
+        // Position item so that the lights look okay
+        // The values used in enableGuiStandardLighting don't work well here
+        // These were arrived at via trial and error
+        GlStateManager.pushMatrix();
+        GlStateManager.rotate(350, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(188, 1.0F, 0.0F, 0.0F);
+        RenderHelper.enableStandardItemLighting();
+        GlStateManager.popMatrix();
+        
+        // prevent normals getting borked due to squished Z axis
+        // this is the primary reason we have a custom item rendering routine - the standard one turns this on
+        GlStateManager.disableRescaleNormal();
+        
+        // set up the stuff that block rendering would need/expect
+        IBakedModel bakedmodel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null);
+        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        ModModels.ITEX_BLOCKS.setBlurMipmap(false, false);
+        GlStateManager.enableAlpha();
+        GlStateManager.alphaFunc(516, 0.1F);
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
+        if (bakedmodel.isGui3d())
+        {
+            GlStateManager.enableLighting();
+        }
+        else
+        {
+            GlStateManager.disableLighting();
+        }
+        
+        // at last, render the effing item!
+        bakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(bakedmodel, ItemCameraTransforms.TransformType.GUI, false);
+        if(stack.getItem() instanceof SuperItemBlock)
         {
             GlStateManager.pushMatrix();
+            GlStateManager.translate(-0.5F, -0.5F, -0.5F);
             
-            // Begin with reasonable defaults
-            restoreWorldRendering();
-
-            // Still don't know how lightmaps work.  My main interaction with them seems to circumventing them.
-            OpenGlHelper.setLightmapTextureCoords( OpenGlHelper.lightmapTexUnit, 240.f, 240.0f );
-
-            // Position the item so it is centered in the bounding box
-            GlStateManager.translate( spec.centerX, spec.centerY, 0 );
-
-            // scale and flatten
-            GlStateManager.scale( spec.width() / 2, spec.height() / 2, 0.000001f );
-
-            // prevent z-fighting
-            GlStateManager.enablePolygonOffset();
-            GlStateManager.doPolygonOffset(-1, -1);
+            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
             
-//            GlStateManager.disableColorMaterial();
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            // super item models have only general quads
+            List<BakedQuad> quads = bakedmodel.getQuads((IBlockState)null, (EnumFacing)null, 0L);
             
-            // Position item so that the lights look okay
-            // The values used in enableGuiStandardLighting don't work well here
-            // These were arrived at via trial and error
-            GlStateManager.pushMatrix();
-            GlStateManager.rotate(350, 0.0F, 1.0F, 0.0F);
-            GlStateManager.rotate(188, 1.0F, 0.0F, 0.0F);
-            RenderHelper.enableStandardItemLighting();
-            GlStateManager.popMatrix();
             
-            // prevent normals getting borked due to squished Z axis
-            // this is the primary reason we have a custom item rendering routine - the standard one turns this on
-            GlStateManager.disableRescaleNormal();
-            
-            // set up the stuff that block rendering would need/expect
-            IBakedModel bakedmodel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null);
-            GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-            ModModels.ITEX_BLOCKS.setBlurMipmap(false, false);
-            GlStateManager.enableAlpha();
-            GlStateManager.alphaFunc(516, 0.1F);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-            if (bakedmodel.isGui3d())
+            int i = 0;
+            for (int j = quads.size(); i < j; ++i)
             {
-                GlStateManager.enableLighting();
-            }
-            else
-            {
-                GlStateManager.disableLighting();
+                BakedQuad bakedquad = quads.get(i);
+                net.minecraftforge.client.model.pipeline.LightUtil.renderQuadColor(buffer, bakedquad, 0xFFFFFFFF);
             }
             
-            // at last, render the effing item!
-            bakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(bakedmodel, ItemCameraTransforms.TransformType.GUI, false);
-            Minecraft.getMinecraft().getRenderItem().renderItem(stack, bakedmodel);
+            // for supermodelblocks with translucency, may need to sort quads for depth to get good results?
             
-            // clean up our mess
-            GlStateManager.disableAlpha();
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.disableLighting();
-            GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-            ModModels.ITEX_BLOCKS.restoreLastBlurMipmap();
-            GlStateManager.enableRescaleNormal();
+//            buffer.sortVertexData((float) TileEntityRendererDispatcher.staticPlayerX,
+//                    (float) TileEntityRendererDispatcher.staticPlayerY, (float) TileEntityRendererDispatcher.staticPlayerZ);
+            
+            tessellator.draw();
             
             GlStateManager.popMatrix();
-            setupMachineRendering();
         }
+        else
+        {
+            Minecraft.getMinecraft().getRenderItem().renderItem(stack, bakedmodel);
+        }
+        ;
+        
+        // clean up our mess
+        GlStateManager.disableAlpha();
+        GlStateManager.disableRescaleNormal();
+        GlStateManager.disableLighting();
+        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        ModModels.ITEX_BLOCKS.restoreLastBlurMipmap();
+        GlStateManager.enableRescaleNormal();
+        
+        GlStateManager.popMatrix();
+        setupMachineRendering();
     }
 
     public static void setupMachineRendering()
@@ -659,42 +798,7 @@ public class MachineControlRenderer
 
     }
 
-    public static void justRenderTheDamnItemWithoutFuckingUpAllTheThingsIsThatTooMuchToAsk(ItemStack stack, int x, int y)
-    {
-        IBakedModel bakedmodel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null);
-        GlStateManager.pushMatrix();
-        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        ModModels.ITEX_BLOCKS.setBlurMipmap(false, false);
-        GlStateManager.enableAlpha();
-        GlStateManager.alphaFunc(516, 0.1F);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        // need this?
-        GlStateManager.translate(x, y, 0);
-        GlStateManager.translate(8.0F, 8.0F, 0.0F);
-        GlStateManager.scale(1.0F, -1.0F, 1.0F);
-        GlStateManager.scale(16.0F, 16.0F, 16.0F);
-
-        if (bakedmodel.isGui3d())
-        {
-            GlStateManager.enableLighting();
-        }
-        else
-        {
-            GlStateManager.disableLighting();
-        }
-        
-        bakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(bakedmodel, ItemCameraTransforms.TransformType.GUI, false);
-        Minecraft.getMinecraft().getRenderItem().renderItem(stack, bakedmodel);
-        GlStateManager.disableAlpha();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.disableLighting();
-        GlStateManager.popMatrix();
-        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        ModModels.ITEX_BLOCKS.restoreLastBlurMipmap();
-    
-    }
+ 
     /** 
      * Call after {@link #setupMachineRendering()} to put things back to "normal" for GUI rendering.
      */

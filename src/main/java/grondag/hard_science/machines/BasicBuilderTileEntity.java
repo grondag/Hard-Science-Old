@@ -463,19 +463,38 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             if(cmyk.keyBlack != 0) this.blackNeeded += (int) (cmyk.keyBlack * UNITS_PER_ITEM / 32);
         }
         
-        this.isFabricationReady =
-                this.stoneNeeded <= this.STONE_BUFFER.getLevel()
-             && this.woodNeeded <= this.WOOD_BUFFER.getLevel()
-             && this.glassNeeded <= this.GLASS_BUFFER.getLevel()
-             && this.glowstoneNeeded <= this.GLOWSTONE_BUFFER.getLevel()
-             && this.cyanNeeded <= this.CYAN_BUFFER.getLevel()
-             && this.magentaNeeded <= this.MAGENTA_BUFFER.getLevel()
-             && this.yellowNeeded <= this.YELLOW_BUFFER.getLevel()
-             && this.blackNeeded <= this.BLACK_BUFFER.getLevel();
+        boolean isReady = checkBufferAndBlameForFailure(this.stoneNeeded, this.STONE_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.woodNeeded, this.WOOD_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.glassNeeded, this.GLASS_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.glowstoneNeeded, this.GLOWSTONE_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.cyanNeeded, this.CYAN_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.magentaNeeded, this.MAGENTA_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.yellowNeeded, this.YELLOW_BUFFER);
+        isReady = isReady && checkBufferAndBlameForFailure(this.blackNeeded, this.BLACK_BUFFER);
+        
+        this.isFabricationReady = isReady;
+        
+        // As soon as we are able to make any block, forget that we have material shortages.
+        // Maybe some other builder will handle.
+        if(isReady) this.bufferManager.forgiveAll();
         
         return this.isFabricationReady ? substance : null;
     }
     
+    private boolean checkBufferAndBlameForFailure(int levelNeeded, MaterialBuffer buffer)
+    {
+        if(levelNeeded > buffer.getLevel())
+        {
+            if(!buffer.isFailureCause())
+            {
+                buffer.setFailureCause(true);
+                this.markPlayerUpdateDirty(true);
+                this.bufferManager.blame();
+            }
+            return false;
+        }
+        return true;
+    }
     /**
      * Consumes the resources calculated during last call to prepareFabrication.
      */
