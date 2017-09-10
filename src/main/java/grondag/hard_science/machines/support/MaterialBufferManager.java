@@ -1,5 +1,6 @@
 package grondag.hard_science.machines.support;
 
+import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import net.minecraft.item.ItemStack;
@@ -174,6 +175,11 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             for(int i = 0; i < count; i++)
             {
                 int val = values[i];
+                
+                //FIXME remove
+                if(val != 0)
+                    Log.info("boop");
+
                 if(val < 0)
                 {
                     this.buffers[i].setLevel(-1 - val);

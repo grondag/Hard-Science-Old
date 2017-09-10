@@ -166,12 +166,17 @@ public class ModModels
     
     public static TrueTypeFont FONT_ORBITRON;
     
-    public static int TEX_GAUGE_MINOR;
-    public static int TEX_GAUGE_MAIN;
-    public static int TEX_GAUGE_BACKGROUND;
+    public static int TEX_RADIAL_GAUGE_MINOR;
+    public static int TEX_RADIAL_GAUGE_MAIN;
+    public static int TEX_RADIAL_GAUGE_MARKS;
 
-    public static int TEX_GAUGE_LINEAR;
-    public static int TEX_GAUGE_LINEAR_BACKGROUND;
+    public static int TEX_LINEAR_GAUGE_LEVEL;
+    public static int TEX_LINEAR_GAUGE_MARKS;
+    public static int TEX_LINEAR_POWER_LEVEL;
+    
+    public static int TEX_POWER_BACKGROUND;
+    public static int TEX_POWER_OUTER;
+    public static int TEX_POWER_INNER;
     
     public static int TEX_SYMBOL_BUILDER;
     public static int TEX_SYMBOL_CHEST;
@@ -203,15 +208,20 @@ public class ModModels
                 loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png"),
                 loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png"));
         
-        TEX_GAUGE_MINOR = loadNonBlockTexture("hard_science:textures/blocks/gauge_inner_256.png");
-        TEX_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
-        TEX_GAUGE_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
+        TEX_RADIAL_GAUGE_MINOR = loadNonBlockTexture("hard_science:textures/blocks/gauge_inner_256.png");
+        TEX_RADIAL_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
+        TEX_RADIAL_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
         
         TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
         TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
         
-        TEX_GAUGE_LINEAR = loadNonBlockTexture("hard_science:textures/blocks/linear_level_64.png");
-        TEX_GAUGE_LINEAR_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/linear_level_background_64.png");
+        TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
+        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");
+        TEX_LINEAR_POWER_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_power_128.png");
+        
+        TEX_POWER_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_background_256.png");
+        TEX_POWER_OUTER = loadNonBlockTexture("hard_science:textures/blocks/power_outer_256.png");
+        TEX_POWER_INNER = loadNonBlockTexture("hard_science:textures/blocks/power_inner_256.png");
         
         TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
         TEX_MATERIAL_SHORTAGE = loadNonBlockTexture("hard_science:textures/blocks/material_shortage.png");

@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.CommonProxy;
+import grondag.hard_science.Configurator;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -24,10 +25,10 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
 
 public class MachineControlRenderer
 {
@@ -316,22 +317,22 @@ public class MachineControlRenderer
      * maxLevel is the max number of bars to render and should be a power of 4.
      * level is how many of the bars should be lit.
      */
-    public static void renderLinearProgress(RenderBounds bounds, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+    public static void renderLinearProgress(RenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderLinearProgress(tes, tes.getBuffer(), bounds, level, maxLevel, isHorizontal, colorARGB);
+        renderLinearProgress(tes, tes.getBuffer(), bounds, glTextureID, level, maxLevel, isHorizontal, colorARGB);
     }
 
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
     {
         if(maxLevel == 0) return;
         
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
         
-        GlStateManager.bindTexture(ModModels.TEX_GAUGE_LINEAR_BACKGROUND);
+        GlStateManager.bindTexture(ModModels.TEX_LINEAR_GAUGE_MARKS);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
        
@@ -354,7 +355,7 @@ public class MachineControlRenderer
         
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
         
-        GlStateManager.bindTexture(ModModels.TEX_GAUGE_LINEAR);
+        GlStateManager.bindTexture(glTextureID);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
@@ -601,7 +602,7 @@ public class MachineControlRenderer
             duration = te.getMaxBacklog();
             remaining = te.getCurrentBacklog();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_GAUGE_MAIN, alpha << 24 | 0x40FF40);
+            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, alpha << 24 | 0x40FF40);
         }
 
         if(te.hasJobTicks())
@@ -609,7 +610,7 @@ public class MachineControlRenderer
             duration = te.getJobDurationTicks();
             remaining = te.getJobRemainingTicks();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_GAUGE_MINOR, alpha << 24 | 0x40FFFF);
+            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0x40FFFF);
         }
 
     }
@@ -631,34 +632,39 @@ public class MachineControlRenderer
     public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MaterialBuffer materialBuffer, int alpha)
     {
 
-        int level64K = materialBuffer.getLevel();
+        final int level64K = materialBuffer.getLevel();
         
         // render marks
-        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_GAUGE_BACKGROUND, (alpha << 24) | 0xFFFFFF);
+        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
 
         // render level
         int arcLength = ((level64K * 270) >> 16);
-        renderRadialTexture(tessellator, buffer, spec, 225, arcLength, ModModels.TEX_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
+        renderRadialTexture(tessellator, buffer, spec, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
 
         if(materialBuffer.isFailureCause() && warningLightBlinkOn())
         {
-            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
+            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
         }
-//        if(delta64K != 0)
-//        {
-//            int deltaLength =  ((delta64K * 270) >> 16);
-//
-//            if(delta64K < 0)
-//            {
-//                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
-//            }
-//            else
-//            {
-//                renderRadialTexture(tessellator, buffer, spec, 225 + arcLength - deltaLength, deltaLength, ModModels.TEX_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
-//
-//            }
-//        }
-
+        
+        if(Configurator.MACHINES.enableDeltaTracking)
+        {
+            // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
+            final float deltaPlus = materialBuffer.getAvgDeltaPlus();
+            if(deltaPlus > 0.012f)
+            {
+                int deltaLength = Math.round(deltaPlus * 135);
+                renderRadialTexture(tessellator, buffer, spec, 225, deltaLength, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
+            }
+            
+            // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
+            final float deltaMinus = materialBuffer.getAvgDeltaMinus();
+            if(deltaMinus > 0.012f)
+            {
+                int deltaLength =  Math.round(deltaMinus * 135);
+                renderRadialTexture(tessellator, buffer, spec, 135 - deltaLength, deltaLength, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
+            }
+        }
+        
         renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, alpha);
 
         renderMachineText(tessellator, buffer, 
