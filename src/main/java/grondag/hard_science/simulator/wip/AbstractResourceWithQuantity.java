@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.wip.IStorage.StorageWithResourceAndQuantity;
 import grondag.hard_science.simulator.wip.StorageType.ITypedStorage;
 import net.minecraft.nbt.NBTTagCompound;
@@ -32,13 +33,13 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     public void serializeNBT(NBTTagCompound tag)
     {
         this.resource.serializeNBT(tag);
-        tag.setLong("qty", this.quantity);
+        tag.setLong(ModNBTTag.RESOURCE_QUANTITY.tag, this.quantity);
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
-        this.quantity = nbt.getLong("qty");
+        this.quantity = nbt.getLong(ModNBTTag.RESOURCE_QUANTITY.tag);
         this.resource.deserializeNBT(nbt);
     }
 

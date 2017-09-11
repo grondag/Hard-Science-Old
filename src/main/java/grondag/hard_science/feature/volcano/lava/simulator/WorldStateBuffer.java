@@ -18,6 +18,7 @@ import grondag.hard_science.feature.volcano.lava.CoolingBasaltBlock;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.block.SuperBlock;
@@ -40,7 +41,6 @@ import net.minecraft.world.chunk.Chunk;
 @SuppressWarnings("unused")
 public class WorldStateBuffer implements IBlockAccess
 {
-    private final static String NBT_SAVE_DATA_TAG = "WrldBuff";
     private final static int NBT_SAVE_DATA_WIDTH = 5;
     
     /** use in debug to detect if calls to world are being made outside of server tick */
@@ -293,7 +293,7 @@ public class WorldStateBuffer implements IBlockAccess
         this.chunks.clear();
         this.usedBuffers.clear();
 
-        int[] saveData = nbt.getIntArray(NBT_SAVE_DATA_TAG);
+        int[] saveData = nbt.getIntArray(ModNBTTag.WORLD_STATE_BUFFER.tag);
 
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
@@ -338,7 +338,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        nbt.setIntArray(NBT_SAVE_DATA_TAG, saveData);
+        nbt.setIntArray(ModNBTTag.WORLD_STATE_BUFFER.tag, saveData);
 
     }
     

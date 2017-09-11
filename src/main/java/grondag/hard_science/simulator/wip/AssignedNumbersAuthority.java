@@ -5,6 +5,7 @@ import java.util.Arrays;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
 import net.minecraft.nbt.NBTTagCompound;
@@ -54,8 +55,6 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
         }
     }
     
-    private static final String NBT_TAG_NAME = "HSANA";
-    
     private int[] lastID = new int[AssignedNumber.values().length];
     
     private IDirtListener dirtListener = IDirtListener.NullDirtListener.INSTANCE;
@@ -84,7 +83,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     @Override
     public synchronized void deserializeNBT(NBTTagCompound tag)
     {
-        int input[] = tag.getIntArray(NBT_TAG_NAME);
+        int input[] = tag.getIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY.tag);
         if(input == null)
         {
             this.clear();
@@ -107,7 +106,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     @Override
     public synchronized void serializeNBT(NBTTagCompound tag)
     {
-        tag.setIntArray(NBT_TAG_NAME, Arrays.copyOf(lastID, lastID.length));
+        tag.setIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY.tag, Arrays.copyOf(lastID, lastID.length));
     }
     
     @Override

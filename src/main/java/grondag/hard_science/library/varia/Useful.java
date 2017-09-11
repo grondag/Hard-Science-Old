@@ -497,6 +497,10 @@ public class Useful
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
     }
 
+    /** sign bit is used to indicate static state */
+    public static final int INT_SIGN_BIT = 1 << 31;
+    public static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
+
     //   /**
     //    * Kept for possible future use.
     //    * Optimized sort for three element array

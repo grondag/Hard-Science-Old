@@ -10,6 +10,7 @@ import com.google.common.base.Objects;
 
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -165,19 +166,19 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     @Override
     public void serializeNBT(@Nonnull NBTTagCompound nbt)
     {
-        nbt.setInteger("item", Item.getIdFromItem(this.item));
-        nbt.setInteger("meta", this.meta);
-        if(this.tag != null) nbt.setTag("nbt", this.tag);
-        if(this.caps != null) nbt.setTag("caps", this.caps);
+        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_ITEM.tag, Item.getIdFromItem(this.item));
+        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_META.tag, this.meta);
+        if(this.tag != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG.tag, this.tag);
+        if(this.caps != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS.tag, this.caps);
     }
 
     @Override
     public void deserializeNBT(@Nonnull NBTTagCompound nbt)
     {
-        this.item = Item.getItemById(nbt.getInteger("item"));
-        this.meta = nbt.getInteger("meta");
-        this.tag = nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null;
-        this.caps = nbt.hasKey("caps") ? nbt.getCompoundTag("caps") : null;
+        this.item = Item.getItemById(nbt.getInteger(ModNBTTag.ITEM_RESOURCE_ITEM.tag));
+        this.meta = nbt.getInteger(ModNBTTag.ITEM_RESOURCE_META.tag);
+        this.tag = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_TAG.tag) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG.tag) : null;
+        this.caps = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_CAPS.tag) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS.tag) : null;
         this.hash = -1;
         this.stack = null;
     }

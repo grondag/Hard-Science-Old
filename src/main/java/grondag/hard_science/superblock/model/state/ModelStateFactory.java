@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
@@ -210,10 +211,6 @@ public class ModelStateFactory
         
         public static final EnumElement<RenderPassSet> STATE_ENUM_RENDER_PASS_SET = STATE_PACKER.createEnumElement(RenderPassSet.class);
         
-        /** sign bit is used to indicate static state */
-        private static final int INT_SIGN_BIT = 1 << 31;
-        private static final int INT_SIGN_BIT_INVERSE = ~INT_SIGN_BIT;
-
         /** use this to turn off flags that should not be used with non-block state formats */
         public static final int STATE_FLAG_DISABLE_BLOCK_ONLY = ~(
                 STATE_FLAG_NEEDS_CORNER_JOIN | STATE_FLAG_NEEDS_SIMPLE_JOIN | STATE_FLAG_NEEDS_MASONRY_JOIN
@@ -260,7 +257,7 @@ public class ModelStateFactory
             result[2] = (int) (bits1 >> 32);
             result[3] = (int) (bits1);
 
-            result[4] = (int) (this.isStatic ? (bits2 >> 32) | INT_SIGN_BIT : (bits2 >> 32));
+            result[4] = (int) (this.isStatic ? (bits2 >> 32) | Useful.INT_SIGN_BIT : (bits2 >> 32));
             result[5] = (int) (bits2);
 
             result[6] = (int) (bits3 >> 32);
@@ -274,11 +271,11 @@ public class ModelStateFactory
         private void deserializeFromInts(int [] bits)
         {
             // sign on third long word is used to store static indicator
-            this.isStatic = (INT_SIGN_BIT & bits[4]) == INT_SIGN_BIT;
+            this.isStatic = (Useful.INT_SIGN_BIT & bits[4]) == Useful.INT_SIGN_BIT;
 
             this.bits0 = ((long)bits[0]) << 32 | (bits[1] & 0xffffffffL);
             this.bits1 = ((long)bits[2]) << 32 | (bits[3] & 0xffffffffL);
-            this.bits2 = ((long)(INT_SIGN_BIT_INVERSE & bits[4])) << 32 | (bits[5] & 0xffffffffL);
+            this.bits2 = ((long)(Useful.INT_SIGN_BIT_INVERSE & bits[4])) << 32 | (bits[5] & 0xffffffffL);
             this.bits3 = ((long)bits[6]) << 32 | (bits[7] & 0xffffffffL);    
         }
 
@@ -1120,12 +1117,9 @@ public class ModelStateFactory
             return this.getShape().meshFactory().collisionHandler().getCollisionBoxes(this, offset);
         }
 
-        
-        private static final String NBT_TAG = "HSMS";
-        
         public static @Nullable ModelState deserializeFromNBTIfPresent(NBTTagCompound tag)
         {
-            if(tag != null && tag.hasKey(NBT_TAG))
+            if(tag != null && tag.hasKey(ModNBTTag.MODEL_STATE.tag))
             {
                 ModelState result = new ModelState();
                 result.deserializeNBT(tag);
@@ -1137,7 +1131,7 @@ public class ModelStateFactory
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
-            this.deserializeNBT(tag, NBT_TAG);
+            this.deserializeNBT(tag, ModNBTTag.MODEL_STATE.tag);
         }
         
         /**
@@ -1158,7 +1152,7 @@ public class ModelStateFactory
         @Override
         public void serializeNBT(NBTTagCompound tag)
         {
-            this.serializeNBT(tag, NBT_TAG);
+            this.serializeNBT(tag, ModNBTTag.MODEL_STATE.tag);
         }
 
         /**

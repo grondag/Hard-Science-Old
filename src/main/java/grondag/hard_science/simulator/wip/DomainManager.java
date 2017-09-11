@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BinaryEnumSet;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
@@ -225,8 +226,8 @@ public class DomainManager implements IPersistenceNode
         public void serializeNBT(NBTTagCompound tag)
         {
             this.serializeID(tag);
-            tag.setBoolean("securityOn", this.isSecurityEnabled);
-            tag.setString("name", this.name);
+            tag.setBoolean(ModNBTTag.DOMIAN_SECURITY_ENABLED.tag, this.isSecurityEnabled);
+            tag.setString(ModNBTTag.DOMIAN_NAME.tag, this.name);
             
             NBTTagList nbtUsers = new NBTTagList();
             
@@ -237,19 +238,19 @@ public class DomainManager implements IPersistenceNode
                     nbtUsers.appendTag(user.serializeNBT());
                 }
             }
-            tag.setTag("users", nbtUsers);
+            tag.setTag(ModNBTTag.DOMIAN_USERS.tag, nbtUsers);
             
-            tag.setTag("itemStorage", this.ITEM_STORAGE.serializeNBT());
+            tag.setTag(ModNBTTag.DOMIAN_ITEM_STORAGE.tag, this.ITEM_STORAGE.serializeNBT());
         }
 
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
             this.deserializeID(tag);
-            this.isSecurityEnabled = tag.getBoolean("securityOn");
-            this.name = tag.getString("name");
+            this.isSecurityEnabled = tag.getBoolean(ModNBTTag.DOMIAN_SECURITY_ENABLED.tag);
+            this.name = tag.getString(ModNBTTag.DOMIAN_NAME.tag);
             
-            NBTTagList nbtUsers = tag.getTagList("users", 10);
+            NBTTagList nbtUsers = tag.getTagList(ModNBTTag.DOMIAN_USERS.tag, 10);
             if( nbtUsers != null && !nbtUsers.hasNoTags())
             {
                 for (int i = 0; i < nbtUsers.tagCount(); ++i)
@@ -259,7 +260,7 @@ public class DomainManager implements IPersistenceNode
                 }   
             }
             
-            this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag("itemStorage"));
+            this.ITEM_STORAGE.deserializeNBT(tag.getCompoundTag(ModNBTTag.DOMIAN_ITEM_STORAGE.tag));
         }
         
         public DomainManager domainManager()
@@ -309,16 +310,16 @@ public class DomainManager implements IPersistenceNode
             @Override
             public void serializeNBT(NBTTagCompound nbt)
             {
-                nbt.setString("name", this.userName);
-                nbt.setInteger("flags", this.priveledgeFlags);
+                nbt.setString(ModNBTTag.DOMAIN_USER_NAME.tag, this.userName);
+                nbt.setInteger(ModNBTTag.DOMAIN_USER_FLAGS.tag, this.priveledgeFlags);
                 ITEM_STORAGE.serializeNBT(nbt);
             }
 
             @Override
             public void deserializeNBT(NBTTagCompound nbt)
             {
-                this.userName = nbt.getString("name");
-                this.priveledgeFlags = nbt.getInteger("flags");
+                this.userName = nbt.getString(ModNBTTag.DOMAIN_USER_NAME.tag);
+                this.priveledgeFlags = nbt.getInteger(ModNBTTag.DOMAIN_USER_FLAGS.tag);
                 ITEM_STORAGE.deserializeNBT(nbt);
             }
         }
@@ -352,7 +353,7 @@ public class DomainManager implements IPersistenceNode
         
         if(tag != null)
         {
-            NBTTagList nbtDomains = tag.getTagList("domains", 10);
+            NBTTagList nbtDomains = tag.getTagList(ModNBTTag.DOMIAN_MANAGER_DOMAINS.tag, 10);
             if( nbtDomains != null && !nbtDomains.hasNoTags())
             {
                 for (int i = 0; i < nbtDomains.tagCount(); ++i)
@@ -379,13 +380,13 @@ public class DomainManager implements IPersistenceNode
                 nbtDomains.appendTag(domain.serializeNBT());
             }
         }
-        tag.setTag("domains", nbtDomains);
+        tag.setTag(ModNBTTag.DOMIAN_MANAGER_DOMAINS.tag, nbtDomains);
     }
 
     @Override
     public String tagName()
     {
-        return "HSDomains";
+        return ModNBTTag.DOMIAN_MANAGER.tag;
     }
 
     public IdentifiedIndex<IStorage<?>> storageIndex()

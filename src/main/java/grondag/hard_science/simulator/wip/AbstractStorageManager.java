@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.simulator.persistence.IDirtListener;
 import grondag.hard_science.simulator.persistence.IDirtListener.IDirtNotifier;
@@ -188,7 +189,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
             {
                 nbtStores.appendTag(store.serializeNBT());
             }
-            nbt.setTag("stores", nbtStores);
+            nbt.setTag(ModNBTTag.STORAGE_MANAGER_STORES.tag, nbtStores);
         }
     }
 
@@ -200,7 +201,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         this.stores.clear();
         this.capacity = 0;
         this.used = 0;
-        NBTTagList nbtStores = nbt.getTagList("stores", 10);
+        NBTTagList nbtStores = nbt.getTagList(ModNBTTag.STORAGE_MANAGER_STORES.tag, 10);
         if( nbtStores != null && !nbtStores.hasNoTags())
         {
             for (int i = 0; i < nbtStores.tagCount(); ++i)

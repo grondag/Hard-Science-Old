@@ -1,6 +1,8 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * All stored energy is represented in Joules (aka Watt-seconds).<br>
@@ -43,13 +45,17 @@ public interface IMachinePowerProvider extends IReadWriteNBT
     public long maxPowerInOrOutWatts();
     
     /**
-     * Average recent energy input level - may be approximate and/or exponentially smoothed.
+     * Average recent energy input level over last period prior to client update.
+     * Because this is for client use, counters on server are be reset by {@link #serializeToArray()}.
      */
+    @SideOnly(Side.CLIENT)
     public long avgPowerInputWatts();
     
     /**
-     * Average recent energy output level - may be approximate and/or exponentially smoothed.
+     * Average recent energy output level over last period prior to client update.
+     * Because this is for client use, counters on server are be reset by {@link #serializeToArray()}.
      */
+    @SideOnly(Side.CLIENT)
     public long avgPowerOutputWatts();
     
     /**
@@ -104,6 +110,19 @@ public interface IMachinePowerProvider extends IReadWriteNBT
      long provideEnergy(long maxOutput, boolean allowPartial, boolean simulate);
      
      /**
+      * True if this provider's (low) level has recently caused a 
+      * processing failure.  Sent to clients for rendering to inform player
+      * but not saved to world because is transient information.
+      */
+     public boolean isFailureCause();
+     
+     /**
+      * See {@link #isFailureCause()}
+      */
+     public void setFailureCause(boolean isFailureCause);
+     
+     
+     /**
       * Restores state based on array from {@link #serializeToArray()}
       */
      public void deserializeFromArray(int[] values);
@@ -113,5 +132,10 @@ public interface IMachinePowerProvider extends IReadWriteNBT
       * Returns an array for packet serialization.
       */
      public int[] serializeToArray();
+
+     /**
+      * On server, regenerates power from PE. 
+      */
+     void tick(MaterialBuffer PEBuffer);
     
 }

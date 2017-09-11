@@ -5,6 +5,7 @@ import java.util.List;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.superblock.terrain.TerrainBlock;
 import grondag.hard_science.superblock.terrain.TerrainState;
@@ -37,8 +38,6 @@ public class EntityLavaBlob extends Entity
     private static int nextParticleID;
 
     public final int id;
-
-    private static final String TAG_AMOUNT = "amt";
 
     private float renderScale;
     
@@ -483,7 +482,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.cachedAmount = compound.getInteger(TAG_AMOUNT);
+        this.cachedAmount = compound.getInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT.tag);
         this.dataManager.set(FLUID_AMOUNT, cachedAmount);
         this.updateAmountDependentData();
     }
@@ -491,7 +490,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        compound.setInteger(TAG_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
+        compound.setInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT.tag, this.dataManager.get(FLUID_AMOUNT).intValue());
     }
 
     @Override

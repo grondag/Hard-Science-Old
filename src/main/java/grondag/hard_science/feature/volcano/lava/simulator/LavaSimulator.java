@@ -21,6 +21,7 @@ import grondag.hard_science.library.concurrency.Job;
 import grondag.hard_science.library.concurrency.PerformanceCollector;
 import grondag.hard_science.library.concurrency.PerformanceCounter;
 import grondag.hard_science.library.concurrency.SimpleConcurrentList;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.concurrency.CountedJob.CountedJobTask;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.simulator.ISimulationTickable;
@@ -78,7 +79,6 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     private int lastEligibleBasaltCoolingTick;
     private boolean isDirty;
     
-    private final static String BASALT_BLOCKS_NBT_TAG = "basaltblock"; 
     private static final int BASALT_BLOCKS_NBT_WIDTH = 3;
     
     private final CountedJobTask<AgedBlockPos> basaltCoolingTask =  new CountedJobTask<AgedBlockPos>() 
@@ -196,7 +196,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
     };
     
-    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, "lavaPlacementEvents", placementHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, ModNBTTag.LAVA_PLACEMENT_EVENTS.tag, placementHandler, this.perfCollectorOffTick);
     
     private final BlockEventHandler lavaAddEventHandler = new BlockEventHandler()
     {
@@ -218,7 +218,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
     };
     
-    private final BlockEventList lavaAddEvents = new BlockEventList(10, "lavaAddEvents", lavaAddEventHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaAddEvents = new BlockEventList(10, ModNBTTag.LAVA_ADD_EVENTS.tag, lavaAddEventHandler, this.perfCollectorOffTick);
     
             
     /** incremented each step, multiple times per tick */
@@ -447,7 +447,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
                 saveData[i++] = (int) ((apos.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = apos.getTick();
             }       
-            nbt.setIntArray(BASALT_BLOCKS_NBT_TAG, saveData);
+            nbt.setIntArray(ModNBTTag.BASALT_BLOCKS.tag, saveData);
         }
     }
     
@@ -464,7 +464,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         
         // LOAD BASALT BLOCKS
-        int[] saveData = nbt.getIntArray(BASALT_BLOCKS_NBT_TAG);
+        int[] saveData = nbt.getIntArray(ModNBTTag.BASALT_BLOCKS.tag);
 
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
@@ -837,7 +837,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     @Override
     public String tagName()
     {
-        return "HSLavaSim";
+        return ModNBTTag.LAVA_SIMULATOR.tag;
     }
 
 

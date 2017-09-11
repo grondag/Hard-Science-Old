@@ -1,5 +1,6 @@
 package grondag.hard_science.superblock.placement;
 
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.Rotation;
 import net.minecraft.item.ItemStack;
@@ -8,9 +9,7 @@ import net.minecraft.util.EnumFacing;
 
 public interface PlacementItem
 {
-    public static final String TAG_ROTATION = "adv_placement_rotation";
-    public static final String TAG_FACE = "adv_placement_face";
-    public static final String TAG_MODE = "adv_placement_mode";
+
     
     /** Face corresponding with the orthogonalAxis and orientation for placement. Not the face on which it is placed. */
     public default void setFace(ItemStack stack, EnumFacing face)
@@ -19,7 +18,7 @@ public interface PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        tag.setInteger(TAG_FACE, face.ordinal());
+        tag.setInteger(ModNBTTag.PLACEMENT_FACE.tag, face.ordinal());
         stack.setTagCompound(tag);
     }
     
@@ -27,7 +26,7 @@ public interface PlacementItem
     public default EnumFacing getFace(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? EnumFacing.UP : EnumFacing.values()[tag.getInteger(TAG_FACE)];
+        return (tag == null) ? EnumFacing.UP : EnumFacing.values()[tag.getInteger(ModNBTTag.PLACEMENT_FACE.tag)];
     }
     
     public default void cycleFace(ItemStack stack)
@@ -41,14 +40,14 @@ public interface PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        tag.setInteger(TAG_ROTATION, rotation.ordinal());
+        tag.setInteger(ModNBTTag.PLACEMENT_ROTATION.tag, rotation.ordinal());
         stack.setTagCompound(tag);
     }
 
     public default Rotation getRotation(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? Rotation.ROTATE_NONE : Rotation.values()[tag.getInteger(TAG_ROTATION)];
+        return (tag == null) ? Rotation.ROTATE_NONE : Rotation.values()[tag.getInteger(ModNBTTag.PLACEMENT_ROTATION.tag)];
     }
     
     public default void cycleRotation(ItemStack stack)
@@ -62,14 +61,14 @@ public interface PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        tag.setInteger(TAG_MODE, mode.ordinal());
+        tag.setInteger(ModNBTTag.PLACEMENT_MODE.tag, mode.ordinal());
         stack.setTagCompound(tag);
     }
     
     public default PlacementMode getMode(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? PlacementMode.STATIC : PlacementMode.values()[tag.getInteger(TAG_MODE)];       
+        return (tag == null) ? PlacementMode.STATIC : PlacementMode.values()[tag.getInteger(ModNBTTag.PLACEMENT_MODE.tag)];       
     }
     
     public default void cycleMode(ItemStack stack)

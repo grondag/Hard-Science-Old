@@ -3,6 +3,7 @@ package grondag.hard_science.library.world;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import grondag.hard_science.library.serialization.ModNBTTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -41,18 +42,18 @@ public class Location extends BlockPos
     {
         if(loc != null)
         {
-            nbt.setInteger("loc_dim", loc.dimensionID);
-            nbt.setLong("loc_pos", PackedBlockPos.pack(loc));
+            nbt.setInteger(ModNBTTag.LOCATION_DIMENSION.tag, loc.dimensionID);
+            nbt.setLong(ModNBTTag.LOCATION_POSITION.tag, PackedBlockPos.pack(loc));
         }
     }
     
     @Nullable
     public static Location fromNBT(@Nullable NBTTagCompound nbt)
     {
-        if(nbt != null && nbt.hasKey("loc_pos"))
+        if(nbt != null && nbt.hasKey(ModNBTTag.LOCATION_POSITION.tag))
         {
-            int dim = nbt.getInteger("loc_dim");
-            long pos = nbt.getLong("loc_pos");
+            int dim = nbt.getInteger(ModNBTTag.LOCATION_DIMENSION.tag);
+            long pos = nbt.getLong(ModNBTTag.LOCATION_POSITION.tag);
             return new Location(PackedBlockPos.getX(pos), PackedBlockPos.getY(pos), PackedBlockPos.getZ(pos), dim);
         }
         else

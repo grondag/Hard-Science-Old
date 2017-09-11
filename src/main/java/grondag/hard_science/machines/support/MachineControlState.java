@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.library.serialization.IMessagePlus;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.BitPacker;
 import grondag.hard_science.library.varia.BitPacker.BitElement.BooleanElement;
 import grondag.hard_science.library.varia.BitPacker.BitElement.EnumElement;
@@ -253,39 +254,39 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.bits = (tag.hasKey("HSMCS")) ? tag.getLong("HSMCS") : DEFAULT_BITS;
+        this.bits = (tag.hasKey(ModNBTTag.MACHINE_CONTROL_STATE.tag)) ? tag.getLong(ModNBTTag.MACHINE_CONTROL_STATE.tag) : DEFAULT_BITS;
         if(this.hasModelState())
         {
             if(this.modelState == null) this.modelState = new ModelState();
-            this.modelState.deserializeNBT(tag, "HSMCSMS");
+            this.modelState.deserializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE.tag);
         }
         if(this.hasTargetPos())
         {
-            this.targetPos = PackedBlockPos.unpack(tag.getLong("HSMCBP"));
+            this.targetPos = PackedBlockPos.unpack(tag.getLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS.tag));
         }
         if(this.hasJobTicks())
         {
-            this.jobDurationTicks = tag.getShort("HSMCJD");
-            this.jobRemainingTicks = tag.getShort("HSMCJR");
+            this.jobDurationTicks = tag.getShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS.tag);
+            this.jobRemainingTicks = tag.getShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS.tag);
         }
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setLong("HSMCS", this.bits);
+        tag.setLong(ModNBTTag.MACHINE_CONTROL_STATE.tag, this.bits);
         if(this.hasModelState())
         {
-            this.modelState.serializeNBT(tag, "HSMCSMS");
+            this.modelState.serializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE.tag);
         }
         if(this.hasTargetPos())
         {
-            tag.setLong("HSMCBP", PackedBlockPos.pack(this.targetPos));
+            tag.setLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS.tag, PackedBlockPos.pack(this.targetPos));
         }
         if(this.hasJobTicks())
         {
-            tag.setShort("HSMCJD", this.jobDurationTicks);
-            tag.setShort("HSMCJR", this.jobRemainingTicks);
+            tag.setShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS.tag, this.jobDurationTicks);
+            tag.setShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS.tag, this.jobRemainingTicks);
         }
     }   
     

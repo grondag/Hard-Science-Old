@@ -4,6 +4,7 @@ package grondag.hard_science.machines.base;
  * Hides the mechanics of storage access to ensure consistency of handling.
  */
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.Simulator;
 import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.ItemStorage;
@@ -114,7 +115,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        this.storageID = getServerTag(compound).getInteger("HS_STRID");
+        this.storageID = getServerTag(compound).getInteger(ModNBTTag.STORAGE_ID.tag);
         
     }
 
@@ -122,7 +123,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        getServerTag(compound).setInteger("HS_STRID", this.storageID);
+        getServerTag(compound).setInteger(ModNBTTag.STORAGE_ID.tag, this.storageID);
     }
 
     @Override

@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import grondag.hard_science.library.world.Location;
 import grondag.hard_science.simulator.persistence.IDirtListener;
@@ -163,7 +164,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.serializeID(nbt);
         this.serializeLocation(nbt);
-        nbt.setLong("cap", this.capacity);
+        nbt.setLong(ModNBTTag.STORAGE_CAPACITY.tag, this.capacity);
         
         if(!this.slots.isEmpty())
         {
@@ -174,7 +175,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
                 nbtContents.appendTag(rwq.serializeNBT());
             }
-            nbt.setTag("contents", nbtContents);
+            nbt.setTag(ModNBTTag.STORAGE_CONTENTS.tag, nbtContents);
         }
         //FIXME: remove
         Log.info("saved storage, id = " + this.id + " used =" + this.used);
@@ -185,14 +186,14 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.deserializeID(nbt);
         this.deserializeLocation(nbt);
-        this.setCapacity(nbt.getLong("cap"));
+        this.setCapacity(nbt.getLong(ModNBTTag.STORAGE_CAPACITY.tag));
         
         this.slots.clear();
         this.used = 0;
         
         T sType = this.storageType();
 
-        NBTTagList nbtContents = nbt.getTagList("contents", 10);
+        NBTTagList nbtContents = nbt.getTagList(ModNBTTag.STORAGE_CONTENTS.tag, 10);
         if( nbtContents != null && !nbtContents.hasNoTags())
         {
             for (int i = 0; i < nbtContents.tagCount(); ++i)

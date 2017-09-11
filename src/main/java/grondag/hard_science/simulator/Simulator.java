@@ -12,6 +12,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.lava.simulator.LavaSimulator;
 import grondag.hard_science.feature.volcano.lava.simulator.VolcanoManager;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.simulator.persistence.IPersistenceNode;
 import grondag.hard_science.simulator.persistence.PersistenceManager;
 import grondag.hard_science.simulator.wip.DomainManager;
@@ -83,13 +84,11 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
      * If equal to currentSimTick, means simulation is caught up with world ticks.
      */
     private volatile int lastSimTick = 0;
-    private static final String TAG_LAST_SIM_TICK = "lstk";
 
     /** worldTickOffset + lastWorldTick = max value of current simulation tick.
 	 * Updated on server post tick, *after* all world tick events should be submitted.
 	 */
 	private volatile long worldTickOffset = 0; 
-    private static final String TAG_WORLD_TICK_OFFSET= "wtos";
 
     static
     {
@@ -247,16 +246,16 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     public void deserializeNBT(NBTTagCompound nbt)
     {
         Log.info("Simulator read from NBT");
-        this.lastSimTick = nbt.getInteger(TAG_LAST_SIM_TICK);
-        this.worldTickOffset = nbt.getLong(TAG_WORLD_TICK_OFFSET);
+        this.lastSimTick = nbt.getInteger(ModNBTTag.SIMULATION_LAST_TICK.tag);
+        this.worldTickOffset = nbt.getLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET.tag);
     }
   
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
         Log.info("saving simulation state");
-        nbt.setInteger(TAG_LAST_SIM_TICK, lastSimTick);
-        nbt.setLong(TAG_WORLD_TICK_OFFSET, worldTickOffset);
+        nbt.setInteger(ModNBTTag.SIMULATION_LAST_TICK.tag, lastSimTick);
+        nbt.setLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET.tag, worldTickOffset);
     }
     
     public World getWorld() { return this.world; }
@@ -324,7 +323,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     @Override
     public String tagName()
     {
-        return "HSSimulator";
+        return ModNBTTag.SIMULATOR.tag;
     }
 
  

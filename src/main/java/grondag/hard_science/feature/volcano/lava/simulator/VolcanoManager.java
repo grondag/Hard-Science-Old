@@ -10,6 +10,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.feature.volcano.VolcanoTileEntity.VolcanoStage;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.world.UniversalPos;
 import grondag.hard_science.simulator.ISimulationTickable;
 import grondag.hard_science.simulator.Simulator;
@@ -149,8 +150,6 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         return result;
     }
     
-    
-    private final static String SUBNODES_TAG = "Volcanoes";
     /**
      * Not thread-safe.  
      * Should only ever be called from server thread during server start up.
@@ -163,7 +162,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         
         if(nbt != null)
         {
-            NBTTagList nbtSubNodes = nbt.getTagList(SUBNODES_TAG, 10);
+            NBTTagList nbtSubNodes = nbt.getTagList(ModNBTTag.VOLCANO_NODES.tag, 10);
             if( nbtSubNodes != null && !nbtSubNodes.hasNoTags())
             {
                 for (int i = 0; i < nbtSubNodes.tagCount(); ++i)
@@ -181,7 +180,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     public void serializeNBT(NBTTagCompound nbt)
     {
         // always save *something* to prevent "not found" warning when there are no volcanos
-        nbt.setBoolean("created", true);
+        nbt.setBoolean(ModNBTTag.VOLCANO_MANAGER_IS_CREATED.tag, true);
         
         // Do first because any changes made after this point aren't guaranteed to be saved
         this.setSaveDirty(false);
@@ -197,7 +196,7 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
                 nbtSubNodes.appendTag(nodeTag);
             }
         }
-        nbt.setTag(SUBNODES_TAG, nbtSubNodes);
+        nbt.setTag(ModNBTTag.VOLCANO_NODES.tag, nbtSubNodes);
     }
 
     public class VolcanoNode implements IReadWriteNBT, IDirtKeeper
@@ -209,21 +208,11 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
          * will only be updated by server tick thread.
          */
         private int weight = 0;
-        private static final String TAG_WEIGHT = "w";
-        
         private VolcanoStage stage;
-        private static final String TAG_STAGE = "s";
         
         private int height = 0;
-        private static final String TAG_HEIGHT = "h";
-        
-        private static final String TAG_X = "x";
-        private static final String TAG_Y = "y";
-        private static final String TAG_Z= "z";
-        private static final String TAG_DIMENSION = "d";
         
         private volatile boolean isActive = false;
-        private static final String TAG_ACTIVE = "a";
         
         /** stores total world time of last TE update */
         private volatile long keepAlive;
@@ -238,7 +227,6 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
          * If the volcano is active, can be used to calculate how long it has been so.
          */
         private volatile int lastActivationTick;
-        private static final String TAG_LAST_ACTIVATION_TICK = "t";
         
         public VolcanoNode(UniversalPos uPos)
         {
@@ -303,16 +291,16 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
         @Override
         public void deserializeNBT(NBTTagCompound nbt)
         {
-            this.weight = nbt.getInteger(TAG_WEIGHT);                  
-            this.height = nbt.getInteger(TAG_HEIGHT);
-            this.stage = VolcanoStage.values()[nbt.getInteger(TAG_STAGE)];
-            int x = nbt.getInteger(TAG_X);
-            int y = nbt.getInteger(TAG_Y);
-            int z = nbt.getInteger(TAG_Z);
-            int dimensionID = nbt.getInteger(TAG_DIMENSION);
+            this.weight = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_WEIGHT.tag);                  
+            this.height = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_HEIGHT.tag);
+            this.stage = VolcanoStage.values()[nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_STAGE.tag)];
+            int x = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_X.tag);
+            int y = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_Y.tag);
+            int z = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_Z.tag);
+            int dimensionID = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_DIMENSION.tag);
             this.setLocation(new BlockPos(x, y, z), dimensionID);
-            this.isActive = nbt.getBoolean(TAG_ACTIVE);
-            this.lastActivationTick = nbt.getInteger(TAG_LAST_ACTIVATION_TICK);
+            this.isActive = nbt.getBoolean(ModNBTTag.VOLCANO_NODE_TAG_ACTIVE.tag);
+            this.lastActivationTick = nbt.getInteger(ModNBTTag.VOLCANO_NODE_TAG_LAST_ACTIVATION_TICK.tag);
         }
 
         @Override
@@ -321,15 +309,15 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
             synchronized(this)
             {
                 this.setSaveDirty(false);
-                nbt.setInteger(TAG_WEIGHT, this.weight);
-                nbt.setInteger(TAG_HEIGHT, this.height);
-                nbt.setInteger(TAG_STAGE, this.stage.ordinal());
-                nbt.setInteger(TAG_X, this.getX());
-                nbt.setInteger(TAG_Y, this.getY());
-                nbt.setInteger(TAG_Z, this.getZ());
-                nbt.setInteger(TAG_DIMENSION, this.getDimension());
-                nbt.setBoolean(TAG_ACTIVE, this.isActive);
-                nbt.setInteger(TAG_LAST_ACTIVATION_TICK, this.lastActivationTick);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_WEIGHT.tag, this.weight);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_HEIGHT.tag, this.height);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_STAGE.tag, this.stage.ordinal());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_X.tag, this.getX());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_Y.tag, this.getY());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_Z.tag, this.getZ());
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_DIMENSION.tag, this.getDimension());
+                nbt.setBoolean(ModNBTTag.VOLCANO_NODE_TAG_ACTIVE.tag, this.isActive);
+                nbt.setInteger(ModNBTTag.VOLCANO_NODE_TAG_LAST_ACTIVATION_TICK.tag, this.lastActivationTick);
             }
         }
 
@@ -424,6 +412,6 @@ public class VolcanoManager implements ISimulationTickable, IPersistenceNode
     @Override
     public String tagName()
     {
-        return "HSVM";
+        return ModNBTTag.VOLCANO_MANAGER.tag;
     }
 }

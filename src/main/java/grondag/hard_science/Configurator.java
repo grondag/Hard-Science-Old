@@ -479,8 +479,9 @@ public class Configurator
         @RangeInt(min = 100, max = 2000)
         public int machineLatencyAllowanceMilliseconds = 1000;
 
-        @Comment({"Track and display exponential average change in machine material buffers.",
+        @Comment({"Track and display exponential average change in machine material & power buffers.",
                   "Disabling may slightly improve client performance. Has no effect on server."})
+        @RequiresMcRestart
         public boolean enableDeltaTracking = true;
 
         @Comment({"You have to be this close to machines for external displays to render.",

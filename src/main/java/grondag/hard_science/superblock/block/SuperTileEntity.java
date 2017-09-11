@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.Log;
+import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -27,7 +28,7 @@ public class SuperTileEntity extends TileEntity
     /**
      * Anything stored in this tag will not be sent to clients.
      */
-    public static final String NBT_SERVER_SIDE_TAG = "SrvData";
+    public static final String NBT_SERVER_SIDE_TAG = ModNBTTag.SERVER_SIDE_ONLY.tag;
     
     /** Returns server-side tag if one is present, creating it if not. */
     public static @Nonnull NBTTagCompound getServerTag(@Nonnull NBTTagCompound fromTag)

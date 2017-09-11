@@ -14,10 +14,12 @@ import grondag.hard_science.library.varia.ColorHelper.CMYK;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.machines.base.MachineContainerTileEntity;
+import grondag.hard_science.machines.support.MachineControlState.MachineState;
+import grondag.hard_science.machines.support.MachineFuelCell;
+import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MaterialBuffer;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.WeightedIngredientList;
-import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.WeightedIngredientList.WeightedIngredient;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
@@ -118,13 +120,15 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     private final MaterialBuffer MAGENTA_BUFFER = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "magenta");
     private final MaterialBuffer YELLOW_BUFFER = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "yellow");
     private final MaterialBuffer BLACK_BUFFER = new MaterialBuffer(BLACK_INGREDIENTS, 64, "black");   
-    private final MaterialBufferManager bufferManager = new MaterialBufferManager(WOOD_BUFFER, STONE_BUFFER, GLASS_BUFFER, GLOWSTONE_BUFFER,
-            CYAN_BUFFER, MAGENTA_BUFFER, YELLOW_BUFFER, BLACK_BUFFER);
     
     public BasicBuilderTileEntity()
     {
         super();
-        this.setBufferManager(bufferManager);
+        this.setBufferManager(new MaterialBufferManager(WOOD_BUFFER, STONE_BUFFER, GLASS_BUFFER, GLOWSTONE_BUFFER,
+                CYAN_BUFFER, MAGENTA_BUFFER, YELLOW_BUFFER, BLACK_BUFFER));
+        
+        this.setPowerProvider(new MachineFuelCell(MachinePower.FuelCellSpec.STANDARD_INTEGRATED));
+        
         this.statusState.setHasBacklog(true);
     }
     
@@ -476,7 +480,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         
         // As soon as we are able to make any block, forget that we have material shortages.
         // Maybe some other builder will handle.
-        if(isReady) this.bufferManager.forgiveAll();
+        if(isReady) this.getBufferManager().forgiveAll();
         
         return this.isFabricationReady ? substance : null;
     }
@@ -489,7 +493,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             {
                 buffer.setFailureCause(true);
                 this.markPlayerUpdateDirty(true);
-                this.bufferManager.blame();
+                this.getBufferManager().blame();
             }
             return false;
         }
@@ -515,6 +519,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
     private void pullResources()
     {
+        MaterialBufferManager bufferManager = this.getBufferManager();
         
         if(!bufferManager.canRestock()) return;
         
@@ -533,7 +538,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     @Override
     public IItemHandler getItemHandler()
     {
-        return this.bufferManager;
+        return this.getBufferManager();
     }
    
     @SideOnly(Side.CLIENT)
@@ -546,14 +551,12 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     @Override
     public void disconnect()
     {
-        // TODO Auto-generated method stub
-        
+        // Currently NOOP
     }
 
     @Override
     public void reconnect()
     {
-        // TODO Auto-generated method stub
-        
+        // Currently NOOP
     }
 }

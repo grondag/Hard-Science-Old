@@ -16,6 +16,7 @@ import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
 import grondag.hard_science.machines.support.MachineStatusState;
+import grondag.hard_science.machines.support.MaterialBuffer;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
@@ -109,6 +110,12 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      */
     @SideOnly(Side.CLIENT)
     public long lastInViewMillis;
+    
+    /**
+     * Set to PolyEthylene buffer in subclass constructor if this machine uses PE.  
+     * Sent to power provider during update if this machine has one.
+     */
+    protected MaterialBuffer peBuffer;
     
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
     {
@@ -512,35 +519,40 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     public void update()
     {
-        if(world.isRemote || !this.isPlayerUpdateNeeded
-                || this.listeningPlayers == null || this.listeningPlayers.isEmpty()) return;
-
-        long time = CommonProxy.currentTimeMillis();
+        if(world.isRemote) return;
         
-        if(time >= this.nextPlayerUpdateMilliseconds)
+        if(this.controlState.hasPowerProvider())
+            this.getPowerProvider().tick(this.peBuffer);
+        
+        if(this.isPlayerUpdateNeeded && this.listeningPlayers != null && !this.listeningPlayers.isEmpty())
         {
-            PacketMachineStatusUpdateListener packet = this.createMachineStatusUpdate();
-            
-            int i = 0;
-            while(i < listeningPlayers.size())
+            long time = CommonProxy.currentTimeMillis();
+        
+            if(time >= this.nextPlayerUpdateMilliseconds)
             {
-                PlayerListener listener = listeningPlayers.get(i);
+                PacketMachineStatusUpdateListener packet = this.createMachineStatusUpdate();
                 
-                if(listener.checkForRemoval(time))
+                int i = 0;
+                while(i < listeningPlayers.size())
                 {
-                    this.listeningPlayers.remove(i);
-                    if(Configurator.logMachineNetwork) Log.info("Removed timed out listener");
+                    PlayerListener listener = listeningPlayers.get(i);
+                    
+                    if(listener.checkForRemoval(time))
+                    {
+                        this.listeningPlayers.remove(i);
+                        if(Configurator.logMachineNetwork) Log.info("Removed timed out listener");
+                    }
+                    else
+                    {
+                        if(Configurator.logMachineNetwork) Log.info("Sending update packet due to change");
+                        ModMessages.INSTANCE.sendTo(packet, listener.key);
+                        i++;
+                    }
                 }
-                else
-                {
-                    if(Configurator.logMachineNetwork) Log.info("Sending update packet due to change");
-                    ModMessages.INSTANCE.sendTo(packet, listener.key);
-                    i++;
-                }
+                
+                this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineUpdateIntervalMilliseconds;
+                this.isPlayerUpdateNeeded = false;
             }
-            
-            this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineUpdateIntervalMilliseconds;
-            this.isPlayerUpdateNeeded = false;
         }
     }
     
