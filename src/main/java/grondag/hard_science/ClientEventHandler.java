@@ -5,6 +5,7 @@ import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.library.render.QuadCache;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.network.client_to_server.PacketUpdatePlacementKey;
@@ -17,15 +18,17 @@ import grondag.hard_science.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.config.Config.Type;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -59,6 +62,7 @@ public class ClientEventHandler
         BlockHighlighter.handleDrawBlockHighlightEvent(event);
     }
     
+    
     /** used to detect key down/up for modifier key */
     private static boolean isPlacementModifierPressed=false;
     
@@ -73,11 +77,23 @@ public class ClientEventHandler
         {
             CommonProxy.updateCurrentTime();
             
+            Minecraft mc = Minecraft.getMinecraft();
+            EntityPlayerSP player = mc.player;
+            
+            if(player != null && player.world != null)
+            {
+                RayTraceResult mouseOver = ForgeHooks.rayTraceEyes(player, Configurator.MACHINES.machineMaxRenderDistance + 5);
+                if(mouseOver != null && mouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+                {
+                    TileEntity te = mc.player.world.getTileEntity(mouseOver.getBlockPos());
+                    if(te != null && te instanceof MachineTileEntity) ((MachineTileEntity)te).notifyInView();
+                }
+            }
+           
             // render virtual blocks only if player is holding item that enables it
             boolean renderVirtual = Configurator.BLOCKS.alwaysRenderVirtualBlocks;
             if(!renderVirtual)
             {
-                EntityPlayer player = Minecraft.getMinecraft().player;
                 if(player != null)
                 {
                     ItemStack stack = player.getHeldItemMainhand();

@@ -51,6 +51,9 @@ machine.buffer_yellow=Yellow Dye Supply
 machine.buffer_stone=Stone Supply
 machine.buffer_wood=Wood Supply
 machine.buffer_glass=Glass Supply
+machine.fabrication_progress=Fabrication In Progress
+machine.fabrication_searching=Searching for Work
+machine.fabrication_shortage=Item(s) Not Fabricated Due to Material Shortage 
 
 
 

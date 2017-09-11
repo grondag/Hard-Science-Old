@@ -20,24 +20,14 @@ public class BasicBuilderTESR extends MachineTESR
     {
         for(RadialGaugeSpec spec : ModModels.BASIC_BUILDER_GAUGE_SPECS)
         {
-            MachineControlRenderer.renderGauge(spec,  te.getBufferManager().getBuffer(spec.bufferIndex), alpha);
+            MachineControlRenderer.renderGauge(spec, te, te.getBufferManager().getBuffer(spec.bufferIndex), alpha);
         }
         
-        MachineControlRenderer.renderProgress(MachineControlRenderer.BOUNDS_PROGRESS, te, alpha);
-        
-        if(te.getMachineState() == MachineState.FABRICATING)
-        {
-            MachineControlRenderer.renderItem(tessellator, buffer, MachineControlRenderer.BOUNDS_PROGRESS_INNER, te.getStatusStack(), alpha);
-        }
-        else if(te.getMachineState() == MachineState.THINKING && te.getBufferManager().hasFailureCauseClientSideOnly() && MachineControlRenderer.warningLightBlinkOn())
-        {
-            MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, MachineControlRenderer.BOUNDS_PROGRESS_INNER, ModModels.TEX_MATERIAL_SHORTAGE, alpha << 24 | 0xFFFF40);
-            MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, MachineControlRenderer.BOUNDS_PROGRESS, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0xFFFF40);
-        }
+        MachineControlRenderer.renderFabricationProgress(MachineControlRenderer.BOUNDS_PROGRESS, te, alpha);
         
         MachineControlRenderer.renderLinearProgress(tessellator, buffer, new RenderBounds(0.85, 0.2, 0.08, 0.5), ModModels.TEX_LINEAR_POWER_LEVEL, 8, 24, false, alpha << 24 | 0xFFFFFF);
         
-        MachineControlRenderer.renderLinearProgress(tessellator, buffer, new RenderBounds(0.2, 0.3, 0.5, 0.08),  ModModels.TEX_LINEAR_POWER_LEVEL,8, 24, true, alpha << 24 | 0xFFFFFF);
+//        MachineControlRenderer.renderLinearProgress(tessellator, buffer, new RenderBounds(0.2, 0.3, 0.5, 0.08),  ModModels.TEX_LINEAR_POWER_LEVEL,8, 24, true, alpha << 24 | 0xFFFFFF);
         
 //        int maxBacklog = te.getMaxBacklog();
 //        String msg = Integer.toString(maxBacklog - te.getCurrentBacklog()) + " / " + Integer.toString(maxBacklog);

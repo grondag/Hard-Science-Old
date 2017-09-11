@@ -1,5 +1,6 @@
 package grondag.hard_science.machines.base;
 
+import grondag.hard_science.Configurator;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
@@ -69,9 +70,8 @@ public abstract class MachineTESR extends SuperBlockTESR
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         
-        // fade in controls as player approaches
-        // FIXME: make dropoff distance (8) and dropoff depth (2) configurable
-        int displayAlpha = (int)(alpha * (Useful.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - 8) / 2) * 255));
+        // fade in controls as player approaches - over a 4-block distance
+        int displayAlpha = (int)(alpha * (Useful.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
   
         MachineControlRenderer.renderMachineText(tessellator, buffer, MachineControlRenderer.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, displayAlpha);
         MachineControlRenderer.renderTextureInBounds(tessellator, buffer, MachineControlRenderer.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);

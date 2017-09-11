@@ -482,6 +482,12 @@ public class Configurator
         @Comment({"Track and display exponential average change in machine material buffers.",
                   "Disabling may slightly improve client performance. Has no effect on server."})
         public boolean enableDeltaTracking = true;
+
+        @Comment({"You have to be this close to machines for external displays to render.",
+                  "Visibility starts at this distance and then becomes full at 4 blocks less.",
+                  "Lower values may improve performance in worlds with many machines."})
+        @RangeInt(min = 5, max = 16)
+        public int machineMaxRenderDistance = 8;
         
         public static int machineKeepAlivePlusLatency;
         

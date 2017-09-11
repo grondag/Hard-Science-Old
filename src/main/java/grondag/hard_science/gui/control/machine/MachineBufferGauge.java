@@ -50,8 +50,7 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.buffer == null) return;
-        MachineControlRenderer.renderGauge(this.spec,  this.buffer, 0xFF);
-        
+        MachineControlRenderer.renderGauge(this.spec, this.tileEntity, this.buffer, 0xFF);
     }
 
     @Override

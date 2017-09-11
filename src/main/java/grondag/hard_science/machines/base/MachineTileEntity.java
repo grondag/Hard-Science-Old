@@ -95,7 +95,12 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * For use by TESR - cached items stack based on status info.
      */
     protected ItemStack statusStack;
-
+    
+    /**
+     * For use by TESR - last time player looked at this machine within the machine rendering distance
+     */
+    @SideOnly(Side.CLIENT)
+    public long lastInViewMillis;
     
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
     {
@@ -665,5 +670,14 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             this.markPlayerUpdateDirty(true);
             return true;
         }
+    }
+
+    /**
+     * Called when player is looking directly at this machine, within machine rendering distance.
+     */
+    @SideOnly(Side.CLIENT)
+    public void notifyInView()
+    {
+        this.lastInViewMillis = CommonProxy.currentTimeMillis();
     }
 }

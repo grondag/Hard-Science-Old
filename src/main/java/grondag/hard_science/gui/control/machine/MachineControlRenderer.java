@@ -7,12 +7,14 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
+import grondag.hard_science.ClientEventHandler;
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MaterialBuffer;
+import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -75,6 +77,8 @@ public class MachineControlRenderer
         private final double centerX;
         private final double centerY;
         private final double radius;
+        
+        private RadialRenderBounds innerBounds;
 
         public RadialRenderBounds (double centerX, double centerY, double radius)
         {
@@ -87,6 +91,14 @@ public class MachineControlRenderer
         public double centerX() { return centerX; }
         public double centerY() { return centerY; }
         public double radius() { return radius; }
+        public RadialRenderBounds innerBounds()
+        {
+            if(this.innerBounds == null)
+            {
+                this.innerBounds = new RadialRenderBounds(this.centerX, this.centerY, this.radius / 2);
+            }
+            return this.innerBounds;
+        }
     }
 
     public static class RadialGaugeSpec extends RadialRenderBounds
@@ -149,7 +161,6 @@ public class MachineControlRenderer
         };
 
     public static final RadialRenderBounds BOUNDS_PROGRESS = new RadialRenderBounds(0.24, 0.38, 0.20);
-    public static final RadialRenderBounds BOUNDS_PROGRESS_INNER = new RadialRenderBounds(0.24, 0.38, 0.10);
  
 
     public static class BinaryGlTexture 
@@ -587,6 +598,34 @@ public class MachineControlRenderer
         buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
     }
 
+    public static void renderFabricationProgress(RadialRenderBounds bounds, MachineTileEntity te, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderFabricationProgress(tes, tes.getBuffer(), bounds, te, alpha);
+    }
+    
+    public static void renderFabricationProgress(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, MachineTileEntity te, int alpha)
+    {
+        renderProgress(bounds, te, alpha);
+        
+        if(te.getMachineState() == MachineState.FABRICATING)
+        {
+            MachineControlRenderer.renderItem(tessellator, buffer, bounds.innerBounds(), te.getStatusStack(), alpha);
+        }
+        else if(!te.isOn()) 
+            return;
+        else 
+        {
+            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, (int)(CommonProxy.currentTimeMillis() & 2047) * 360 / 2048, 30, ModModels.TEX_RADIAL_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
+
+            if(te.getMachineState() == MachineState.THINKING && te.getBufferManager().hasFailureCauseClientSideOnly() && MachineControlRenderer.warningLightBlinkOn())
+            {
+                MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_MATERIAL_SHORTAGE, alpha << 24 | 0xFFFF40);
+                MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0xFFFF40);
+            }
+        }
+    }
+    
     public static void renderProgress(RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -620,16 +659,16 @@ public class MachineControlRenderer
         return (CommonProxy.currentTimeMillis() & 0x400) == 0x400;
     }
 
-    public static void renderGauge(RadialGaugeSpec spec, MaterialBuffer materialBuffer, int alpha)
+    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, MaterialBuffer materialBuffer, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderGauge(tes, tes.getBuffer(), spec, materialBuffer, alpha);
+        renderGauge(tes, tes.getBuffer(), spec, te, materialBuffer, alpha);
     }
     
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MaterialBuffer materialBuffer, int alpha)
+    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBuffer materialBuffer, int alpha)
     {
 
         final int level64K = materialBuffer.getLevel();
@@ -646,7 +685,8 @@ public class MachineControlRenderer
             renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
         }
         
-        if(Configurator.MACHINES.enableDeltaTracking)
+        /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */
+        if(CommonProxy.currentTimeMillis() - te.lastInViewMillis < 5000)
         {
             // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
             final float deltaPlus = materialBuffer.getAvgDeltaPlus();
@@ -785,7 +825,7 @@ public class MachineControlRenderer
         GlStateManager.popMatrix();
         setupMachineRendering();
     }
-
+    
     public static void setupMachineRendering()
     {
         GlStateManager.disableLighting();

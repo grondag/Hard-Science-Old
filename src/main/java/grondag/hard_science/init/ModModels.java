@@ -169,6 +169,7 @@ public class ModModels
     public static int TEX_RADIAL_GAUGE_MINOR;
     public static int TEX_RADIAL_GAUGE_MAIN;
     public static int TEX_RADIAL_GAUGE_MARKS;
+    public static int TEX_RADIAL_GAUGE_FULL_MARKS;
 
     public static int TEX_LINEAR_GAUGE_LEVEL;
     public static int TEX_LINEAR_GAUGE_MARKS;
@@ -211,6 +212,7 @@ public class ModModels
         TEX_RADIAL_GAUGE_MINOR = loadNonBlockTexture("hard_science:textures/blocks/gauge_inner_256.png");
         TEX_RADIAL_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
         TEX_RADIAL_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
+        TEX_RADIAL_GAUGE_FULL_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_marks_256.png");
         
         TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
         TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");

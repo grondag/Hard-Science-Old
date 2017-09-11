@@ -30,22 +30,50 @@ public class MaterialBuffer
     
     private int level;
     
+    /**
+     * If true, client side delta tracking is turned on so can be displayed on machine face/GUI.
+     */
     private boolean isDeltaTrackingEnabled = Configurator.MACHINES.enableDeltaTracking && FMLCommonHandler.instance().getSide() == Side.CLIENT;
     
-    private int deltaPlus[] = isDeltaTrackingEnabled ? new int[16] : null;
+    /**
+     * Circular buffer with additions made in last 16 sample periods 
+     */
+    private int deltaIn[] = isDeltaTrackingEnabled ? new int[16] : null;
     
-    private int deltaMinus[] = isDeltaTrackingEnabled ? new int[16] : null;
+    /**
+     * Circular buffer with removals made in last 16 sample periods.
+     * Always positive values.
+     */
+    private int deltaOut[] = isDeltaTrackingEnabled ? new int[16] : null;
     
+    /**
+     * Current position of circular buffers {@link #deltaIn} and {@link #deltaOut}.
+     * All changes in current sample period applied at this position.
+     */
     private int sampleCounter = 0;
     
-    private int deltaTotalPlus = 0;
-    private int deltaTotalMinus = 0;
+    /**
+     * Total of all samples in {@link #deltaIn}.  Maintained incrementally.
+     */
+    private int deltaTotalIn = 0;
     
-    private float deltaAvgPlus = 0;
-    private float deltaAvgMinus = 0;
+    /**
+     * Total of all samples in {@link #deltaOut}.  Maintained incrementally.
+     */
+    private int deltaTotalOut = 0;
+    
+    /**
+     * Exponentially smoothed average {@link #deltaTotalIn}.
+     */
+    private float deltaAvgIn = 0;
+    
+    /**
+     * Exponentially smoothed average {@link #deltaTotalOut}.
+     */
+    private float deltaAvgOut = 0;
        
     /**
-     * Track timing for avgDelta
+     * End of last sample period / start of current sample period.
      */
     private long avgDeltaLastSampleMillis = 0;
     
@@ -102,9 +130,6 @@ public class MaterialBuffer
         if(foundCount > 0)
         {
             this.level += foundCount * unitsPerItem;
-            
-            //FIXME: remove
-            Log.info("Restocked %d %s for %d units", foundCount, found.getDisplayName(), foundCount * unitsPerItem);
             return true;
         }
         else
@@ -147,7 +172,6 @@ public class MaterialBuffer
         return result;
     }
     
-    /** resetValue is used as initial value if we have stale data. */
     @SideOnly(Side.CLIENT)
     private void updateAvgDelta()
     {
@@ -157,42 +181,43 @@ public class MaterialBuffer
         if(diff > 300)
         {
             /** if we miss a sample by much more than 1/5 second, start over. */
-            this.deltaTotalMinus = 0;
-            this.deltaTotalPlus = 0;
-            this.deltaAvgPlus = 0;
-            this.deltaAvgMinus = 0;
-            java.util.Arrays.fill(deltaMinus, 0);
-            java.util.Arrays.fill(deltaPlus, 0);
+            this.deltaTotalOut = 0;
+            this.deltaTotalIn = 0;
+            this.deltaAvgIn = 0;
+            this.deltaAvgOut = 0;
+            java.util.Arrays.fill(deltaOut, 0);
+            java.util.Arrays.fill(deltaIn, 0);
             this.sampleCounter = 0;
             this.avgDeltaLastSampleMillis = millis;
-            Log.info("restart");
         }
         else if(diff >= 200)
         {
             // expire oldest sample and advance counter
             this.sampleCounter = (this.sampleCounter + 1) & 0xF;
             
-            this.deltaTotalMinus -= this.deltaMinus[sampleCounter];
-            this.deltaMinus[sampleCounter] = 0;
+            this.deltaTotalOut -= this.deltaOut[sampleCounter];
+            this.deltaOut[sampleCounter] = 0;
             
-            this.deltaTotalPlus -= this.deltaPlus[sampleCounter];
-            this.deltaPlus[sampleCounter] = 0;
+            this.deltaTotalIn -= this.deltaIn[sampleCounter];
+            this.deltaIn[sampleCounter] = 0;
            
             this.avgDeltaLastSampleMillis = millis;
-                
         }
         
-        
         // exponential smoothing happens every tick
-        float newDeltaAvgMinus = this.deltaTotalMinus == 0 ? 0 : MathHelper.clamp(MathHelper.log2(this.deltaTotalMinus >> 8), 1, 8) / 8f;
-        this.deltaAvgMinus = this.deltaAvgMinus * 0.8f + newDeltaAvgMinus * 0.2f;
+        float newDeltaAvgMinus = this.deltaTotalOut == 0 ? 0 : MathHelper.clamp(MathHelper.log2(this.deltaTotalOut >> 8), 1, 8) / 8f;
+        this.deltaAvgOut = this.deltaAvgOut * 0.8f + newDeltaAvgMinus * 0.2f;
         
-        float newDeltaAvgPlus = this.deltaTotalPlus == 0 ? 0 : MathHelper.clamp(MathHelper.log2(this.deltaTotalPlus >> 8), 1, 8) / 8f;
-        this.deltaAvgPlus = this.deltaAvgPlus * 0.8f + newDeltaAvgPlus * 0.2f;
+        float newDeltaAvgPlus = this.deltaTotalIn == 0 ? 0 : MathHelper.clamp(MathHelper.log2(this.deltaTotalIn >> 8), 1, 8) / 8f;
+        this.deltaAvgIn = this.deltaAvgIn * 0.8f + newDeltaAvgPlus * 0.2f;
 
     }
     
     /**
+     * Exponentially smoothed total of additions to this buffer within the past 3.2 seconds,
+     * on a logarithmic scale normalized to values between 0 and 1.  Value of 1 represents a full stack
+     * and values of a single item are less have a value of ~ 1/8. <br><br>
+     * 
      * Note - this initiates the refresh and should be called before
      * {@link #getAvgDeltaMinus()}
      */
@@ -202,18 +227,22 @@ public class MaterialBuffer
         if(this.isDeltaTrackingEnabled)
         {
             this.updateAvgDelta();
-            return this.deltaAvgPlus;
+            return this.deltaAvgIn;
         }
         else return 0;
     }
     
     /** 
+     * Exponentially smoothed total of removals from this buffer within the past 3.2 seconds,
+     * on a logarithmic scale normalized to values between 0 and 1.  Value of 1 represents a full stack
+     * and values of a single item are less have a value of ~ 1/8. <br><br>
+     * 
      * Call {@link #getAvgDeltaPlus()} before calling this.
      */
     @SideOnly(Side.CLIENT)
     public float getAvgDeltaMinus()
     {
-        return this.isDeltaTrackingEnabled ? this.deltaAvgMinus : 0;
+        return this.isDeltaTrackingEnabled ? this.deltaAvgOut : 0;
     }
     
     public int getLevel()
@@ -230,13 +259,13 @@ public class MaterialBuffer
             int diff = newLevel - this.level;
             if(diff < 0)
             {
-                this.deltaMinus[this.sampleCounter] -= diff;
-                this.deltaTotalMinus -= diff;
+                this.deltaOut[this.sampleCounter] -= diff;
+                this.deltaTotalOut -= diff;
             }
             else
             {
-                this.deltaPlus[this.sampleCounter] += diff;
-                this.deltaTotalPlus += diff;
+                this.deltaIn[this.sampleCounter] += diff;
+                this.deltaTotalIn += diff;
             }
         }
         this.level = MathHelper.clamp(level, 0, this.maxUnits);

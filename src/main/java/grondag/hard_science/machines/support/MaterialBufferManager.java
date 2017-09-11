@@ -1,6 +1,5 @@
 package grondag.hard_science.machines.support;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.IReadWriteNBT;
 import grondag.hard_science.library.varia.SimpleUnorderedArrayList;
 import net.minecraft.item.ItemStack;
@@ -29,7 +28,6 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     }
     
     /**
-     * Populated during deserialization on client side.
      * Must be maintained via {@link #blame()} on server side.
      * Used to indicate material shortage to machine render.
      */
@@ -114,7 +112,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         for(MaterialBuffer b : this.buffers)
         {
             tag.setInteger(b.nbtTag, b.getLevel());
-        }    
+        }
     }
 
     @Override
@@ -176,10 +174,6 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             {
                 int val = values[i];
                 
-                //FIXME remove
-                if(val != 0)
-                    Log.info("boop");
-
                 if(val < 0)
                 {
                     this.buffers[i].setLevel(-1 - val);

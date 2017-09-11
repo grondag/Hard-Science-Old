@@ -148,6 +148,12 @@ public class SuperModelBlock extends SuperBlockPlus
      * Should not be a problem because render logic also checks
      * isAmbientOcclusion() on the baked model itself.
      * 
+     * 
+     * FIXME: in latest Forge, block renderer now checks the location-aware version
+     * of getLightValue which means it will use flat lighter even when we don't want it to.
+     * So we'll need to force this to zero depending on render layer.
+     * OTOH - if the block actually does emit light, maybe flat lighter is OK.
+     * 
      */
     @Override
     public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
