@@ -111,6 +111,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private static EnumElement<MachineState> PACKED_MACHINE_STATAE = PACKER.createEnumElement(MachineState.class);
     private static BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
     private static BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
+    private static BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
+    private static BooleanElement PACKED_HAS_POWER_PROVIDER= PACKER.createBooleanElement();
 
     private static final long DEFAULT_BITS;
     
@@ -237,6 +239,12 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
         this.jobRemainingTicks = 0;
         this.updateJobTicksStatus();
     }
+    
+    public boolean hasMaterialBuffer() { return PACKED_HAS_MATERIAL_BUFFER.getValue(bits); }
+    public void hasMaterialBuffer(boolean hasBuffer) { bits = PACKED_HAS_MATERIAL_BUFFER.setValue(hasBuffer, bits); }
+    
+    public boolean hasPowerProvider() { return PACKED_HAS_POWER_PROVIDER.getValue(bits); }
+    public void hasPowerProvider(boolean hasProvider) { bits = PACKED_HAS_POWER_PROVIDER.setValue(hasProvider, bits); }
     
     //////////////////////////////////////////////////////////////////////
     // Serialization Stuff                                              //

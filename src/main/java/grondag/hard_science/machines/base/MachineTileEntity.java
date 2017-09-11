@@ -9,6 +9,7 @@ import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.support.IMachinePowerProvider;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
@@ -50,7 +51,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
 
-    protected MachineControlState controlState = new MachineControlState();
+    private MachineControlState controlState = new MachineControlState();
     protected MachineStatusState statusState = new MachineStatusState();
     
     /** Levels of materials stored in this machine.  Is persisted to NBT. 
@@ -58,6 +59,13 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      */
     @Nullable
     private MaterialBufferManager bufferManager;
+    
+    
+    /**
+     * Power provider for this machine, if it has one.
+     */
+    @Nullable
+    private IMachinePowerProvider powerProvider;
     
     /**
      * Machine unique ID.  Is persisted if machine is picked and put back by player.
@@ -157,6 +165,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     protected final void setBufferManager(@Nullable MaterialBufferManager bufferManager)
     {
         this.bufferManager = bufferManager;
+        this.controlState.hasMaterialBuffer(bufferManager != null);
+    }
+    
+    /** 
+     * If this tile has a power provider, gives access.  Null if not.
+     * Used to serialize/deserialize on client.
+     */
+    public final @Nullable IMachinePowerProvider getPowerProvider()
+    {
+        return this.powerProvider;
+    }
+    
+    protected final void setPowerProvider(@Nullable IMachinePowerProvider powerProvider)
+    {
+        this.powerProvider = powerProvider;
+        this.controlState.hasPowerProvider(powerProvider != null);
     }
     
     /**
@@ -189,7 +213,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public boolean shouldRenderInPass(int pass)
     {
         // machines always render in translucent pass
-        return pass == 1 && this.controlState.getRenderLevel() != RenderLevel.NONE;
+        return pass == 1 && this.getControlState().getRenderLevel() != RenderLevel.NONE;
     }
     
     @SideOnly(Side.CLIENT)
@@ -223,7 +247,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         if(!this.hasOnOff()) return false;
         
-            switch(this.controlState.getControlMode())
+            switch(this.getControlState().getControlMode())
             {
             case ON:
                 return true;
@@ -245,7 +269,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         if(!this.hasRedstoneControl()) return false;
         
-        switch(this.controlState.getControlMode())
+        switch(this.getControlState().getControlMode())
         {
         case OFF_WITH_REDSTONE:
         case ON_WITH_REDSTONE:
@@ -300,22 +324,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     public boolean hasJobTicks()
     {
-        return this.controlState.hasJobTicks();
+        return this.getControlState().hasJobTicks();
     }
     
     public int getJobDurationTicks()
     {
-        return this.controlState.getJobDurationTicks();
+        return this.getControlState().getJobDurationTicks();
     }
     
     public int getJobRemainingTicks()
     {
-        return this.controlState.getJobRemainingTicks();
+        return this.getControlState().getJobRemainingTicks();
     }
     
     public MachineState getMachineState()
     {
-        return this.controlState.getMachineState();
+        return this.getControlState().getMachineState();
     }
         
     /**
@@ -325,16 +349,16 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public ItemStack getStatusStack()
     {
         ItemStack result = this.statusStack;
-        if(result == null && this.controlState.hasModelState())
+        if(result == null && this.getControlState().hasModelState())
         {
-            ModelState modelState = this.controlState.getModelState();
+            ModelState modelState = this.getControlState().getModelState();
             if(modelState == null) return null;
             
-            SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.controlState.getSubstance(), this.controlState.getModelState());
+            SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(this.getControlState().getSubstance(), this.getControlState().getModelState());
             result = newBlock.getSubItems().get(0);
-            SuperItemBlock.setStackLightValue(result, this.controlState.getLightValue());
-            SuperItemBlock.setStackSubstance(result, this.controlState.getSubstance());
-            SuperItemBlock.setStackModelState(result, this.controlState.getModelState());
+            SuperItemBlock.setStackLightValue(result, this.getControlState().getLightValue());
+            SuperItemBlock.setStackSubstance(result, this.getControlState().getSubstance());
+            SuperItemBlock.setStackModelState(result, this.getControlState().getModelState());
             this.statusStack = result;
         }
         return result;
@@ -377,7 +401,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         super.readModNBT(compound);
         this.deserializeID(compound);
-        this.controlState.deserializeNBT(compound);
+        this.getControlState().deserializeNBT(compound);
+        if(this.powerProvider != null) this.powerProvider.deserializeNBT(compound);
         if(this.bufferManager != null) this.bufferManager.deserializeNBT(compound);
     }
     
@@ -386,7 +411,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         super.writeModNBT(compound);
         this.serializeID(compound);
-        this.controlState.serializeNBT(compound);
+        this.getControlState().serializeNBT(compound);
+        if(this.powerProvider != null) this.powerProvider.serializeNBT(compound);
         if(this.bufferManager != null) this.bufferManager.serializeNBT(compound);
     }
     
@@ -520,8 +546,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     public PacketMachineStatusUpdateListener createMachineStatusUpdate()
     {
-        return new PacketMachineStatusUpdateListener(this.pos, this.controlState, 
-                this.getBufferManager() == null ? null : this.getBufferManager().serializeToArray(), this.statusState);
+        return new PacketMachineStatusUpdateListener(this);
     }
     
     /**
@@ -531,10 +556,16 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         // should never be called on server
         if(!this.world.isRemote) return;
-        this.controlState = packet.controlState;
-        if(this.getBufferManager() != null) this.getBufferManager().deserializeFromArray(packet.materialBufferData);
+        
+        this.setControlState(packet.controlState);
         this.statusState = packet.statusState;
         this.statusStack = null;
+
+        if(this.controlState.hasMaterialBuffer())
+            this.getBufferManager().deserializeFromArray(packet.materialBufferData);
+
+        if(this.controlState.hasPowerProvider())
+            this.getPowerProvider().deserializeFromArray(packet.powerProviderData);
     }
 
     @Override
@@ -597,22 +628,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             //FIXME: check user permissions
             
             // called by packet handler on server side
-            switch(this.controlState.getControlMode())
+            switch(this.getControlState().getControlMode())
             {
             case OFF:
-                this.controlState.setControlMode(ControlMode.ON);
+                this.getControlState().setControlMode(ControlMode.ON);
                 break;
                 
             case OFF_WITH_REDSTONE:
-                this.controlState.setControlMode(ControlMode.ON_WITH_REDSTONE);
+                this.getControlState().setControlMode(ControlMode.ON_WITH_REDSTONE);
                 break;
                 
             case ON:
-                this.controlState.setControlMode(ControlMode.OFF);
+                this.getControlState().setControlMode(ControlMode.OFF);
                 break;
                 
             case ON_WITH_REDSTONE:
-                this.controlState.setControlMode(ControlMode.OFF_WITH_REDSTONE);
+                this.getControlState().setControlMode(ControlMode.OFF_WITH_REDSTONE);
                 break;
                 
             default:
@@ -644,22 +675,22 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             //FIXME: check user permissions
             
             // called by packet handler on server side
-            switch(this.controlState.getControlMode())
+            switch(this.getControlState().getControlMode())
             {
             case OFF:
-                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF_WITH_REDSTONE : ControlMode.ON_WITH_REDSTONE);
+                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF_WITH_REDSTONE : ControlMode.ON_WITH_REDSTONE);
                 break;
                 
             case OFF_WITH_REDSTONE:
-                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF : ControlMode.ON);
+                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.OFF : ControlMode.ON);
                 break;
                 
             case ON:
-                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON_WITH_REDSTONE : ControlMode.OFF_WITH_REDSTONE);
+                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON_WITH_REDSTONE : ControlMode.OFF_WITH_REDSTONE);
                 break;
                 
             case ON_WITH_REDSTONE:
-                this.controlState.setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON : ControlMode.OFF);
+                this.getControlState().setControlMode(this.hasRedstonePowerSignal() ? ControlMode.ON : ControlMode.OFF);
                 break;
                 
             default:
@@ -679,5 +710,20 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public void notifyInView()
     {
         this.lastInViewMillis = CommonProxy.currentTimeMillis();
+    }
+
+    public MachineControlState getControlState()
+    {
+        return this.controlState;
+    }
+    
+    private void setControlState(MachineControlState controlState)
+    {
+        this.controlState = controlState;
+    }
+    
+    public MachineStatusState getStatusState()
+    {
+        return this.statusState;
     }
 }

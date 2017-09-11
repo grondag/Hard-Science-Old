@@ -11,12 +11,14 @@ import grondag.hard_science.network.client_to_server.PacketReplaceHeldItem;
 import grondag.hard_science.network.client_to_server.PacketUpdatePlacementKey;
 import grondag.hard_science.player.ModPlayerCaps;
 import grondag.hard_science.simulator.wip.OpenContainerStorageProxy;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.placement.PlacementItem;
 import grondag.hard_science.superblock.placement.PlacementRenderer;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
 import grondag.hard_science.superblock.varia.BlockHighlighter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiOptions;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -25,6 +27,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.config.Config.Type;
@@ -213,6 +216,15 @@ public class ClientEventHandler
                 String message = I18n.translateToLocalFormatted("placement.message.rotation",  I18n.translateToLocal("placement.rotation." + ((PlacementItem)stack.getItem()).getRotation(stack).toString().toLowerCase()));
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
             }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onActionPerformed(ActionPerformedEvent.Pre event)
+    {
+        if(event.getGui() != null && event.getGui() instanceof GuiOptions )
+        {
+            SuperTileEntity.updateRenderDistance();
         }
     }
     

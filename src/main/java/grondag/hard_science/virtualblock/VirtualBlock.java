@@ -514,9 +514,6 @@ public class VirtualBlock extends SuperModelBlock
         {
             return !blockAccess.getBlockState(pos.offset(side)).doesSideBlockRendering(blockAccess, pos.offset(side), side.getOpposite());
         }
-    }
-    
-    
-    
+    }    
 }
 

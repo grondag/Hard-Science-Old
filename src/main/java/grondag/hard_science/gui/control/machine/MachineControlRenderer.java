@@ -7,9 +7,7 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
-import grondag.hard_science.ClientEventHandler;
 import grondag.hard_science.CommonProxy;
-import grondag.hard_science.Configurator;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -30,7 +28,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.MathHelper;
 
 public class MachineControlRenderer
 {
@@ -682,7 +679,7 @@ public class MachineControlRenderer
 
         if(materialBuffer.isFailureCause() && warningLightBlinkOn())
         {
-            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
+            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFFFF20);
         }
         
         /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */

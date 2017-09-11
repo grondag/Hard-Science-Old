@@ -16,16 +16,22 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public MachineControlState controlState;
     public int[] materialBufferData;
     public MachineStatusState statusState;
+    public int[] powerProviderData;
     
     public PacketMachineStatusUpdateListener() {}
    
     
-    public PacketMachineStatusUpdateListener(BlockPos pos, MachineControlState controlState, int[] materialBufferData, MachineStatusState statusState)
+    public PacketMachineStatusUpdateListener(MachineTileEntity te)
     {
-        this.pos = pos;
-        this.controlState = controlState;
-        this.materialBufferData = materialBufferData;
-        this.statusState = statusState;
+        this.pos = te.getPos();
+        this.controlState = te.getControlState();
+        this.statusState = te.getStatusState();
+        
+        if(this.controlState.hasMaterialBuffer()) 
+            this.materialBufferData = te.getBufferManager().serializeToArray();
+        
+        if(this.controlState.hasPowerProvider()) 
+            this.powerProviderData = te.getPowerProvider().serializeToArray();
     }
 
     @Override
@@ -34,12 +40,15 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         this.pos = pBuff.readBlockPos();
         this.controlState = new MachineControlState();
         this.controlState.fromBytes(pBuff);
-        if(pBuff.readBoolean())
-        {
-            this.materialBufferData = pBuff.readVarIntArray();
-        }
         this.statusState = new MachineStatusState();
         this.statusState.fromBytes(pBuff);
+        
+        if(this.controlState.hasMaterialBuffer()) 
+            this.materialBufferData = pBuff.readVarIntArray();
+        
+        if(this.controlState.hasPowerProvider()) 
+            this.powerProviderData = pBuff.readVarIntArray();
+        
     }
 
     @Override
@@ -47,16 +56,13 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     {
         pBuff.writeBlockPos(pos);
         this.controlState.toBytes(pBuff);
-        if(this.materialBufferData == null || this.materialBufferData.length == 0) 
-        {
-            pBuff.writeBoolean(false);
-        }
-        else
-        {
-            pBuff.writeBoolean(true);
-            pBuff.writeVarIntArray(this.materialBufferData);
-        }
         this.statusState.toBytes(pBuff);
+
+        if(this.controlState.hasMaterialBuffer()) 
+            pBuff.writeVarIntArray(this.materialBufferData);
+
+        if(this.controlState.hasPowerProvider()) 
+            pBuff.writeVarIntArray(this.powerProviderData);
     }
 
     @Override

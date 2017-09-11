@@ -6,7 +6,6 @@ import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBou
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 

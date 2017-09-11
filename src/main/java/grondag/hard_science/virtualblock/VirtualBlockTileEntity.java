@@ -6,6 +6,7 @@ import net.minecraft.util.BlockRenderLayer;
 
 public class VirtualBlockTileEntity extends SuperModelTileEntity
 {
+
     @Override
     public boolean shouldRenderInPass(int pass)
     {

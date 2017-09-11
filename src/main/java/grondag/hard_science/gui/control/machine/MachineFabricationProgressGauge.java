@@ -1,13 +1,8 @@
 package grondag.hard_science.gui.control.machine;
 
-import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialRenderBounds;
-import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MaterialBuffer;
-import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import net.minecraft.client.Minecraft;
 

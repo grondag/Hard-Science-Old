@@ -4,8 +4,10 @@ package grondag.hard_science.superblock.block;
 import javax.annotation.Nonnull;
 
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.Log;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -53,6 +55,11 @@ public class SuperTileEntity extends TileEntity
         return inputTag;
     }
     
+    /**
+     * Will be updated to actual game render distance on client side.
+     */
+    private static int maxSuperBlockRenderDistanceSq = 4096;
+    
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
     ////////////////////////////////////////////////////////////////////////
@@ -62,7 +69,22 @@ public class SuperTileEntity extends TileEntity
     //  public IExtendedBlockState exBlockState;
     private boolean isModelStateCacheDirty = true;
 
+    /**
+     * Called client side at start up and when setting is changed.
+     */
+    public static void updateRenderDistance()
+    {
+        //FIXME: remove
+        int configuredDist = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16;
+        maxSuperBlockRenderDistanceSq = configuredDist * configuredDist;
+        Log.info("VB render distance sq change to " + maxSuperBlockRenderDistanceSq);
+    }
     
+    @Override
+    public double getMaxRenderDistanceSquared()
+    {
+        return maxSuperBlockRenderDistanceSq;
+    }
     
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) 

@@ -39,7 +39,6 @@ public class CommonProxy
     
     public static void updateCurrentTime() { currentTimeMillis = System.currentTimeMillis(); }
     
-    
 	public void preInit(FMLPreInitializationEvent event) 
 	{
 		Log.setLog(event.getModLog());

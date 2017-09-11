@@ -3,6 +3,7 @@ package grondag.hard_science;
 import grondag.hard_science.gui.ModGuiHandler;
 import grondag.hard_science.init.ModKeys;
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -44,6 +45,7 @@ public class ClientProxy extends CommonProxy
 	public void postInit(FMLPostInitializationEvent event) 
 	{
 		super.postInit(event);
+		SuperTileEntity.updateRenderDistance();
 	}
 	
 	@Override

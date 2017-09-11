@@ -152,9 +152,9 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         if(world.isRemote)
         {
             // approximate more granular job progress on client side
-            if(this.controlState.getMachineState() == MachineState.FABRICATING)
+            if(this.getControlState().getMachineState() == MachineState.FABRICATING)
             {
-                this.controlState.progressJob((short) 1);
+                this.getControlState().progressJob((short) 1);
             }
         }
         else
@@ -171,7 +171,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
                 }
             }
             
-            switch(this.controlState.getMachineState())
+            switch(this.getControlState().getMachineState())
             {
             case FABRICATING:
                 this.progressFabrication();
@@ -253,23 +253,23 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             this.beginFabrication();
 
             // save placement info
-            this.controlState.setModelState(modelState);
-            this.controlState.setTargetPos(targetPos);
-            this.controlState.setLightValue(oldTE.getLightValue());
-            this.controlState.setSubstance(substance);
-            this.controlState.setMeta(oldState.getValue(SuperBlock.META));
+            this.getControlState().setModelState(modelState);
+            this.getControlState().setTargetPos(targetPos);
+            this.getControlState().setLightValue(oldTE.getLightValue());
+            this.getControlState().setSubstance(substance);
+            this.getControlState().setMeta(oldState.getValue(SuperBlock.META));
             
             int totalUnits = this.stoneNeeded + this.woodNeeded + this.glassNeeded
                     + this.glowstoneNeeded + this.cyanNeeded + this.magentaNeeded 
                     + this.yellowNeeded + this.blackNeeded;
             
             // setup job duration
-            this.controlState.startJobTicks((short) (totalUnits * 40 / UNITS_PER_ITEM));
+            this.getControlState().startJobTicks((short) (totalUnits * 40 / UNITS_PER_ITEM));
             
             // indicate progress for work searching
             this.completionsThisChunk++;
             
-            this.controlState.setMachineState(MachineState.FABRICATING);
+            this.getControlState().setMachineState(MachineState.FABRICATING);
             
             this.markDirty();
             this.markPlayerUpdateDirty(true);
@@ -279,10 +279,10 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
     private void progressFabrication()
     {
-        if(this.controlState.progressJob((short) 1))
+        if(this.getControlState().progressJob((short) 1))
         {
-            this.controlState.clearJobTicks();
-            this.controlState.setMachineState(MachineState.TRANSPORTING);
+            this.getControlState().clearJobTicks();
+            this.getControlState().setMachineState(MachineState.TRANSPORTING);
         }
         this.markDirty();
     }
@@ -290,16 +290,16 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     private void placeFabricatedBlock()
     {
         
-        ModelState newModelState = this.controlState.getModelState();
-        int newLightValue = this.controlState.getLightValue();
-        int newMeta = this.controlState.getMeta();
-        BlockSubstance newSubstance = this.controlState.getSubstance();
-        BlockPos targetPos = this.controlState.getTargetPos();
+        ModelState newModelState = this.getControlState().getModelState();
+        int newLightValue = this.getControlState().getLightValue();
+        int newMeta = this.getControlState().getMeta();
+        BlockSubstance newSubstance = this.getControlState().getSubstance();
+        BlockPos targetPos = this.getControlState().getTargetPos();
         
         // this all needs to happen in any case
-        this.controlState.setModelState(null);
-        this.controlState.setTargetPos(null);
-        this.controlState.setMachineState(MachineState.THINKING);
+        this.getControlState().setModelState(null);
+        this.getControlState().setTargetPos(null);
+        this.getControlState().setMachineState(MachineState.THINKING);
         this.markDirty();
         
         // abort on strangeness
