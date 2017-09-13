@@ -1,12 +1,11 @@
 package grondag.hard_science.machines;
 
-import static grondag.hard_science.machines.support.MaterialBuffer.UNITS_PER_ITEM;
-
 import java.util.List;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
+import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.varia.ColorHelper;
@@ -19,8 +18,10 @@ import grondag.hard_science.machines.support.MachineFuelCell;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MaterialBuffer;
 import grondag.hard_science.machines.support.MaterialBufferManager;
-import grondag.hard_science.machines.support.WeightedIngredientList;
-import grondag.hard_science.machines.support.WeightedIngredientList.WeightedIngredient;
+import grondag.hard_science.machines.support.StandardUnits;
+import grondag.hard_science.machines.support.VolumeUnits;
+import grondag.hard_science.machines.support.VolumetricIngredientList;
+import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
@@ -55,46 +56,45 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
     
-    private static final WeightedIngredientList WOOD_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("logWood", UNITS_PER_ITEM * 4), 
-            new WeightedIngredient("plankWood", UNITS_PER_ITEM), 
-            new WeightedIngredient("slabWood", UNITS_PER_ITEM / 2),
-            new WeightedIngredient("stairWood", UNITS_PER_ITEM * 6 / 4),
-            new WeightedIngredient("stickWood", UNITS_PER_ITEM / 2));
+    private static final VolumetricIngredientList POLYETHYLENE_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient(ModItems.hdpe_cube_3.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_THREE),
+            new VolumetricIngredient(ModItems.hdpe_cube_4.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_FOUR),
+            new VolumetricIngredient(ModItems.hdpe_cube_5.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_FIVE),
+            new VolumetricIngredient(ModItems.hdpe_cube_6.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_SIX),
+            new VolumetricIngredient(ModItems.hdpe_wafer_6.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_SIX));
     
-    private static final WeightedIngredientList STONE_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("stone", UNITS_PER_ITEM),
-            new WeightedIngredient("cobblestone", UNITS_PER_ITEM),
-            new WeightedIngredient("stoneGranite", UNITS_PER_ITEM),
-            new WeightedIngredient("stoneGranitePolished", UNITS_PER_ITEM),
-            new WeightedIngredient("stoneDiorite", UNITS_PER_ITEM),
-            new WeightedIngredient("stoneDioritePolished", UNITS_PER_ITEM),
-            new WeightedIngredient("stoneAndesite", UNITS_PER_ITEM),
-            new WeightedIngredient("stoneAndesitePolished", UNITS_PER_ITEM),
-            new WeightedIngredient("stone", UNITS_PER_ITEM),
-            new WeightedIngredient("stone", UNITS_PER_ITEM),
-            new WeightedIngredient("stone", UNITS_PER_ITEM));
+    private static final VolumetricIngredientList FILLER_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("sand", StandardUnits.nL_ONE_BLOCK),
+            new VolumetricIngredient("red_sand", StandardUnits.nL_ONE_BLOCK));
     
-    private static final WeightedIngredientList GLASS_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("blockGlass", UNITS_PER_ITEM), 
-            new WeightedIngredient("paneGlass", UNITS_PER_ITEM * 3 / 8));
+    private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("slime_ball", StandardUnits.nL_HS_CUBE_ONE));
     
-    private static final WeightedIngredientList GLOWSTONE_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("dustGlowstone", UNITS_PER_ITEM), 
-            new WeightedIngredient("glowstone", UNITS_PER_ITEM * 4));
+    private static final VolumetricIngredientList RESIN_B_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("beef", StandardUnits.nL_HS_CUBE_ONE));
     
-    private static final WeightedIngredientList CYAN_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("dyeCyan", UNITS_PER_ITEM));
+    private static final VolumetricIngredientList NANOLIGHT_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("dustGlowstone", StandardUnits.nL_HS_CUBE_THREE));
     
-    private static final WeightedIngredientList MAGENTA_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("dyeMagenta", UNITS_PER_ITEM));
+    private static final VolumetricIngredientList CYAN_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("dyeCyan", StandardUnits.nL_HS_CUBE_TWO));
     
-    private static final WeightedIngredientList YELLOW_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("dyeYellow", UNITS_PER_ITEM));
+    private static final VolumetricIngredientList MAGENTA_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("dyeMagenta", StandardUnits.nL_HS_CUBE_TWO));
     
-    private static final WeightedIngredientList BLACK_INGREDIENTS = new WeightedIngredientList(
-            new WeightedIngredient("dyeBlack", UNITS_PER_ITEM));
+    private static final VolumetricIngredientList YELLOW_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("dyeYellow", StandardUnits.nL_HS_CUBE_TWO));
     
+    private static final VolumetricIngredientList WHITE_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("dyeWhite", StandardUnits.nL_HS_CUBE_TWO));
+    
+    private static final VolumetricIngredientList CARBON_INGREDIENTS = new VolumetricIngredientList(
+            new VolumetricIngredient("charcoal", StandardUnits.nL_HS_CUBE_TWO));
+    
+    private static final long DYE_USAGE_PER_SATURATED_FULL_BLOCK = StandardUnits.nL_LITER / 4;
+    private static final long DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY = DYE_USAGE_PER_SATURATED_FULL_BLOCK / 4;
+    private static final long TICKS_PER_FULL_BLOCK = 40;
+
     
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS
@@ -112,20 +112,32 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     private int completionsThisChunk = 0;
     
     // Buffer setup - all persisted
-    private final MaterialBuffer WOOD_BUFFER = new MaterialBuffer(WOOD_INGREDIENTS, 64, "wood");
-    private final MaterialBuffer STONE_BUFFER = new MaterialBuffer(STONE_INGREDIENTS, 64, "stone");
-    private final MaterialBuffer GLASS_BUFFER = new MaterialBuffer(GLASS_INGREDIENTS, 64, "glass");
-    private final MaterialBuffer GLOWSTONE_BUFFER = new MaterialBuffer(GLOWSTONE_INGREDIENTS, 64, "glowstone");
-    private final MaterialBuffer CYAN_BUFFER = new MaterialBuffer(CYAN_INGREDIENTS, 64, "cyan");
-    private final MaterialBuffer MAGENTA_BUFFER = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "magenta");
-    private final MaterialBuffer YELLOW_BUFFER = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "yellow");
-    private final MaterialBuffer BLACK_BUFFER = new MaterialBuffer(BLACK_INGREDIENTS, 64, "black");   
+    private final MaterialBuffer bufferPolyEthylene = new MaterialBuffer(POLYETHYLENE_INGREDIENTS, StandardUnits.nL_HS_CUBE_THREE, "HDPE");
+    private final MaterialBuffer bufferFiller = new MaterialBuffer(FILLER_INGREDIENTS, 64, "filler");
+    private final MaterialBuffer bufferResinA = new MaterialBuffer(RESIN_A_INGREDIENTS, 64, "resinA");
+    private final MaterialBuffer bufferResinB = new MaterialBuffer(RESIN_B_INGREDIENTS, 64, "resinB");
+    private final MaterialBuffer bufferNanoLights = new MaterialBuffer(NANOLIGHT_INGREDIENTS, 64, "lights");
+    private final MaterialBuffer bufferCyan = new MaterialBuffer(CYAN_INGREDIENTS, 64, "cyan");
+    private final MaterialBuffer bufferMagenta = new MaterialBuffer(MAGENTA_INGREDIENTS, 64, "magenta");
+    private final MaterialBuffer bufferYellow = new MaterialBuffer(YELLOW_INGREDIENTS, 64, "yellow");
+    private final MaterialBuffer bufferCarbon = new MaterialBuffer(CARBON_INGREDIENTS, 64, "carbon");
+    private final MaterialBuffer bufferTiO2 = new MaterialBuffer(CARBON_INGREDIENTS, 64, "TiO2");   
     
+    private long stoneNeeded;
+    private long woodNeeded;
+    private long glassNeeded;
+    private long glowstoneNeeded;
+    private long cyanNeeded;
+    private long magentaNeeded;
+    private long yellowNeeded;
+    private long blackNeeded;
+    private boolean isFabricationReady = false;
+   
     public BasicBuilderTileEntity()
     {
         super();
-        this.setBufferManager(new MaterialBufferManager(WOOD_BUFFER, STONE_BUFFER, GLASS_BUFFER, GLOWSTONE_BUFFER,
-                CYAN_BUFFER, MAGENTA_BUFFER, YELLOW_BUFFER, BLACK_BUFFER));
+        this.setBufferManager(new MaterialBufferManager(bufferPolyEthylene, bufferFiller, bufferResinA, bufferResinB, 
+                bufferNanoLights, bufferCyan, bufferMagenta, bufferYellow, bufferCarbon, bufferTiO2));
         
         this.setPowerProvider(new MachineFuelCell(MachinePower.FuelCellSpec.STANDARD_INTEGRATED));
         
@@ -276,12 +288,12 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             this.getControlState().setSubstance(substance);
             this.getControlState().setMeta(oldState.getValue(SuperBlock.META));
             
-            int totalUnits = this.stoneNeeded + this.woodNeeded + this.glassNeeded
+            long totalUnits = this.stoneNeeded + this.woodNeeded + this.glassNeeded
                     + this.glowstoneNeeded + this.cyanNeeded + this.magentaNeeded 
                     + this.yellowNeeded + this.blackNeeded;
             
             // setup job duration
-            this.getControlState().startJobTicks((short) (totalUnits * 40 / UNITS_PER_ITEM));
+            this.getControlState().startJobTicks((short) (totalUnits * TICKS_PER_FULL_BLOCK / VolumeUnits.KILOLITER.nL));
             
             // indicate progress for work searching
             this.completionsThisChunk++;
@@ -399,18 +411,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             Block.spawnAsEntity(this.world, targetPos, stack);
         }
     }
-    
-    private int stoneNeeded;
-    private int woodNeeded;
-    private int glassNeeded;
-    private int glowstoneNeeded;
-    private int cyanNeeded;
-    private int magentaNeeded;
-    private int yellowNeeded;
-    private int blackNeeded;
-    private boolean isFabricationReady = false;
    
-    
     /** returns substance that should be used to create the block in world if it can be successfully fabricated.  
      * Must be called prior to calling fabricate */
     private BlockSubstance prepareFabrication(ModelState modelState, SuperModelTileEntity oldTE)
@@ -424,7 +425,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         this.yellowNeeded = 0;
         this.blackNeeded = 0;
         
-        int volume = (int) (UNITS_PER_ITEM * Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)));
+        long volume = (long) (Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)) * StandardUnits.nL_ONE_BLOCK);
         BlockSubstance substance;
         switch(oldTE.getSubstance())
         {
@@ -448,53 +449,52 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
                 break;
         }
         
-        // one glowstone dust to make a block light area at full brightness, much less (1/16) if just want glow render
+
         int lightLevel = oldTE.getLightValue() + (modelState.getRenderPassSet().hasFlatRenderPass ? 1 : 0);
-        this.glowstoneNeeded = lightLevel  / 16;
+        this.glowstoneNeeded = lightLevel  / 16 * StandardUnits.nL_QUARTER_BLOCK_;
         
-        // dye usage is 1/8 of a dust per saturated, full-size block in base layer
         CMYK cmyk = ColorHelper.cmyk(modelState.getColorMap(PaintLayer.BASE).getColor(EnumColorMap.BASE));
-        if(cmyk.cyan != 0) this.cyanNeeded = (int) (cmyk.cyan * UNITS_PER_ITEM / 8);
-        if(cmyk.magenta != 0) this.magentaNeeded = (int) (cmyk.magenta * UNITS_PER_ITEM / 8);
-        if(cmyk.yellow != 0) this.yellowNeeded = (int) (cmyk.yellow * UNITS_PER_ITEM / 8);
-        if(cmyk.keyBlack != 0) this.blackNeeded = (int) (cmyk.keyBlack * UNITS_PER_ITEM / 8);
+        if(cmyk.cyan != 0) this.cyanNeeded = (long) (cmyk.cyan * DYE_USAGE_PER_SATURATED_FULL_BLOCK);
+        if(cmyk.magenta != 0) this.magentaNeeded = (long) (cmyk.magenta * DYE_USAGE_PER_SATURATED_FULL_BLOCK);
+        if(cmyk.yellow != 0) this.yellowNeeded = (long) (cmyk.yellow * DYE_USAGE_PER_SATURATED_FULL_BLOCK);
+        if(cmyk.keyBlack != 0) this.blackNeeded = (long) (cmyk.keyBlack * DYE_USAGE_PER_SATURATED_FULL_BLOCK);
         
-        // other layers count for 1/4 as much as base layer
+
         if(modelState.isMiddleLayerEnabled())
         {
             cmyk = ColorHelper.cmyk(modelState.getColorMap(PaintLayer.MIDDLE).getColor(EnumColorMap.BASE));
-            if(cmyk.cyan != 0) this.cyanNeeded += (int) (cmyk.cyan * UNITS_PER_ITEM / 32);
-            if(cmyk.magenta != 0) this.magentaNeeded += (int) (cmyk.magenta * UNITS_PER_ITEM / 32);
-            if(cmyk.yellow != 0) this.yellowNeeded += (int) (cmyk.yellow * UNITS_PER_ITEM / 32);
-            if(cmyk.keyBlack != 0) this.blackNeeded += (int) (cmyk.keyBlack * UNITS_PER_ITEM / 32);
+            if(cmyk.cyan != 0) this.cyanNeeded += (long) (cmyk.cyan * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.magenta != 0) this.magentaNeeded += (long) (cmyk.magenta * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.yellow != 0) this.yellowNeeded += (long) (cmyk.yellow * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.keyBlack != 0) this.blackNeeded += (long) (cmyk.keyBlack * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
         }
         
         if(modelState.isOuterLayerEnabled())
         {
             cmyk = ColorHelper.cmyk(modelState.getColorMap(PaintLayer.OUTER).getColor(EnumColorMap.BASE));
-            if(cmyk.cyan != 0) this.cyanNeeded += (int) (cmyk.cyan * UNITS_PER_ITEM / 32);
-            if(cmyk.magenta != 0) this.magentaNeeded += (int) (cmyk.magenta * UNITS_PER_ITEM / 32);
-            if(cmyk.yellow != 0) this.yellowNeeded += (int) (cmyk.yellow * UNITS_PER_ITEM / 32);
-            if(cmyk.keyBlack != 0) this.blackNeeded += (int) (cmyk.keyBlack * UNITS_PER_ITEM / 32);
+            if(cmyk.cyan != 0) this.cyanNeeded += (long) (cmyk.cyan * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.magenta != 0) this.magentaNeeded += (long) (cmyk.magenta * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.yellow != 0) this.yellowNeeded += (long) (cmyk.yellow * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.keyBlack != 0) this.blackNeeded += (long) (cmyk.keyBlack * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
         }
         
         if(modelState.hasLampSurface())
         {
             cmyk = ColorHelper.cmyk(modelState.getColorMap(PaintLayer.LAMP).getColor(EnumColorMap.BASE));
-            if(cmyk.cyan != 0) this.cyanNeeded += (int) (cmyk.cyan * UNITS_PER_ITEM / 32);
-            if(cmyk.magenta != 0) this.magentaNeeded += (int) (cmyk.magenta * UNITS_PER_ITEM / 32);
-            if(cmyk.yellow != 0) this.yellowNeeded += (int) (cmyk.yellow * UNITS_PER_ITEM / 32);
-            if(cmyk.keyBlack != 0) this.blackNeeded += (int) (cmyk.keyBlack * UNITS_PER_ITEM / 32);
+            if(cmyk.cyan != 0) this.cyanNeeded += (long) (cmyk.cyan * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.magenta != 0) this.magentaNeeded += (long) (cmyk.magenta * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.yellow != 0) this.yellowNeeded += (long) (cmyk.yellow * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
+            if(cmyk.keyBlack != 0) this.blackNeeded += (long) (cmyk.keyBlack * DYE_USAGE_PER_SATURATED_FULL_BLOCK_OVERLAY);
         }
         
-        boolean isReady = checkBufferAndBlameForFailure(this.stoneNeeded, this.STONE_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.woodNeeded, this.WOOD_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.glassNeeded, this.GLASS_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.glowstoneNeeded, this.GLOWSTONE_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.cyanNeeded, this.CYAN_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.magentaNeeded, this.MAGENTA_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.yellowNeeded, this.YELLOW_BUFFER);
-        isReady = isReady && checkBufferAndBlameForFailure(this.blackNeeded, this.BLACK_BUFFER);
+        boolean isReady = checkBufferAndBlameForFailure(this.stoneNeeded, this.bufferFiller);
+        isReady = isReady && checkBufferAndBlameForFailure(this.woodNeeded, this.bufferPolyEthylene);
+        isReady = isReady && checkBufferAndBlameForFailure(this.glassNeeded, this.bufferResinA);
+        isReady = isReady && checkBufferAndBlameForFailure(this.glowstoneNeeded, this.bufferNanoLights);
+        isReady = isReady && checkBufferAndBlameForFailure(this.cyanNeeded, this.bufferCyan);
+        isReady = isReady && checkBufferAndBlameForFailure(this.magentaNeeded, this.bufferMagenta);
+        isReady = isReady && checkBufferAndBlameForFailure(this.yellowNeeded, this.bufferYellow);
+        isReady = isReady && checkBufferAndBlameForFailure(this.blackNeeded, this.bufferCarbon);
         
         this.isFabricationReady = isReady;
         
@@ -505,7 +505,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         return this.isFabricationReady ? substance : null;
     }
     
-    private boolean checkBufferAndBlameForFailure(int levelNeeded, MaterialBuffer buffer)
+    private boolean checkBufferAndBlameForFailure(long levelNeeded, MaterialBuffer buffer)
     {
         if(levelNeeded > buffer.getLevel())
         {
@@ -526,14 +526,14 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     {
         if(!isFabricationReady) Log.warn("Basic Builder attempted fabrication without preparation.  This is a bug");
         
-        if(this.stoneNeeded > 0) this.STONE_BUFFER.use(stoneNeeded);
-        if(this.woodNeeded > 0) this.WOOD_BUFFER.use(woodNeeded);
-        if(this.glassNeeded > 0) this.GLASS_BUFFER.use(glassNeeded);
-        if(this.glowstoneNeeded > 0) this.GLOWSTONE_BUFFER.use(glowstoneNeeded);
-        if(this.cyanNeeded > 0) this.CYAN_BUFFER.use(cyanNeeded);
-        if(this.magentaNeeded > 0) this.MAGENTA_BUFFER.use(magentaNeeded);
-        if(this.yellowNeeded > 0) this.YELLOW_BUFFER.use(yellowNeeded);
-        if(this.blackNeeded > 0) this.BLACK_BUFFER.use(blackNeeded);
+        if(this.stoneNeeded > 0) this.bufferFiller.use(stoneNeeded);
+        if(this.woodNeeded > 0) this.bufferPolyEthylene.use(woodNeeded);
+        if(this.glassNeeded > 0) this.bufferResinA.use(glassNeeded);
+        if(this.glowstoneNeeded > 0) this.bufferNanoLights.use(glowstoneNeeded);
+        if(this.cyanNeeded > 0) this.bufferCyan.use(cyanNeeded);
+        if(this.magentaNeeded > 0) this.bufferMagenta.use(magentaNeeded);
+        if(this.yellowNeeded > 0) this.bufferYellow.use(yellowNeeded);
+        if(this.blackNeeded > 0) this.bufferCarbon.use(blackNeeded);
         this.isFabricationReady = false;
     }
     

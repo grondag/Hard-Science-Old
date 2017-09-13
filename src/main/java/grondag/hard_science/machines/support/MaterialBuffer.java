@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
+import grondag.hard_science.library.varia.Useful;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
@@ -15,20 +16,19 @@ import net.minecraftforge.items.IItemHandler;
 
 public class MaterialBuffer
 {
-    public final WeightedIngredientList inputs;
-    public final int maxStacks;
-    public final int maxUnits;
+    public final VolumetricIngredientList inputs;
+    public final long maxCapacityNanoLiters;
     
     /**
      * Level at which no more inputs can be accepted.
      */
-    public final int mostlyFullUnits;
+    public final long fillLineNanoLiters;
     
     public final String nbtTag;
     
     public final String tooltipKey;
     
-    private int level;
+    private long currentLevelNanoLiters;
     
     /**
      * If true, client side delta tracking is turned on so can be displayed on machine face/GUI.
@@ -78,32 +78,28 @@ public class MaterialBuffer
     private long avgDeltaLastSampleMillis = 0;
     
     /**
-     * Set to true if this buffer's (low) level has recently caused a 
+     * Set to true if this buffer's (low) currentLevelNanoLiters has recently caused a 
      * processing failure.  Sent to clients for rendering to inform player
      * but not saved to world because is transient information.
      */
     private boolean isFailureCause;
     
-    /**
-     * Units value of a normal stack. Some inputs may be worth more or less.
-     * Buffer creation is specified in stacks, not units.
-     */
-    public static final int UNITS_PER_ITEM = 1024;
-    
-    public MaterialBuffer(WeightedIngredientList inputs, int maxStacks, String key)
+   
+    public MaterialBuffer(VolumetricIngredientList inputs, long maxCapacityNanoLiters, String key)
     {
-        if(maxStacks < 1) maxStacks = 1;
+        // would be strange, but whatever...  sometime I do strange things.
+        if(maxCapacityNanoLiters < 1) maxCapacityNanoLiters = 1;
+        
         this.inputs = inputs;
-        this.maxStacks = maxStacks;
-        this.maxUnits = maxStacks * UNITS_PER_ITEM;
-        this.mostlyFullUnits = this.maxUnits - inputs.minUnits + 1;
+        this.maxCapacityNanoLiters = maxCapacityNanoLiters;
+        this.fillLineNanoLiters = this.maxCapacityNanoLiters - inputs.minNanoLitersPerItem + 1;
         this.nbtTag = "mbl_" + key;
         this.tooltipKey = "machine.buffer_" + key;
     }
     
     public boolean canRestock()
     {
-        return this.level < this.mostlyFullUnits;
+        return this.currentLevelNanoLiters < this.currentLevelNanoLiters;
     }
     
     /**
@@ -117,9 +113,9 @@ public class MaterialBuffer
         if(stack.isEmpty() || stack.getItem() == Items.AIR)
             Log.warn("Material Buffer extract encountered invalid (empty) input ingredient.  This is a bug.");
         
-        int unitsPerItem = this.inputs.getUnits(stack);
-        if(unitsPerItem == 0) return false;
-        int requestedCount = Math.min(stack.getCount(), this.emptySpace() / unitsPerItem);
+        long nLPerItem = this.inputs.getNanoLitersPerItem(stack);
+        if(nLPerItem == 0) return false;
+        int requestedCount = Math.min(stack.getCount(), (int)(this.emptySpace() / nLPerItem));
         
         ItemStack found = itemHandler.extractItem(slot, requestedCount, false);
         if(found.isEmpty() || found.getItem() != stack.getItem()) 
@@ -129,7 +125,7 @@ public class MaterialBuffer
         
         if(foundCount > 0)
         {
-            this.level += foundCount * unitsPerItem;
+            this.currentLevelNanoLiters += foundCount * nLPerItem;
             return true;
         }
         else
@@ -145,13 +141,13 @@ public class MaterialBuffer
      */
     public int accept(@Nonnull ItemStack stack, boolean simulate)
     {
-        int unitsPerItem = this.inputs.getUnits(stack);
-        if(unitsPerItem == 0) return 0;
-        int accepted = Math.min(stack.getCount(), this.emptySpace() / unitsPerItem);
+        long nLPerItem = this.inputs.getNanoLitersPerItem(stack);
+        if(nLPerItem == 0) return 0;
+        int accepted = Math.min(stack.getCount(), (int)(this.emptySpace() / nLPerItem));
         
         if(accepted > 0 && ! simulate)
         {
-            this.level += accepted * unitsPerItem;
+            this.currentLevelNanoLiters += accepted * nLPerItem;
         }     
         return accepted;
     }
@@ -160,14 +156,14 @@ public class MaterialBuffer
      * Decreases buffer by given amount, return amount actually decreased.
      * Does not permit negatives.
      */
-    public int use(int units)
+    public long use(long nanoLiters)
     {
-        int result = Math.min(units, this.level);
-        this.level -= result;
+        long result = Math.min(nanoLiters, this.currentLevelNanoLiters);
+        this.currentLevelNanoLiters -= result;
         
-        if(Log.DEBUG_MODE && units != result)
+        if(Log.DEBUG_MODE && nanoLiters != result)
         {
-            Log.warn("Machine material buffered received request higher than level. %d vs %d", units, this.level);
+            Log.warn("Machine material buffered received request higher than currentLevelNanoLiters. %d vs %d", nanoLiters, this.currentLevelNanoLiters);
         }
         return result;
     }
@@ -245,18 +241,18 @@ public class MaterialBuffer
         return this.isDeltaTrackingEnabled ? this.deltaAvgOut : 0;
     }
     
-    public int getLevel()
+    public long getLevel()
     {
-        return level;
+        return currentLevelNanoLiters;
     }
     
-    public void setLevel(int level)
+    public void setLevel(long level)
     {
-        int newLevel = MathHelper.clamp(level, 0, this.maxUnits);
+        long newLevel = Useful.clamp(level, 0L, this.maxCapacityNanoLiters);
         
-        if(this.isDeltaTrackingEnabled && newLevel != this.level)
+        if(this.isDeltaTrackingEnabled && newLevel != this.currentLevelNanoLiters)
         {
-            int diff = newLevel - this.level;
+            long diff = newLevel - this.currentLevelNanoLiters;
             if(diff < 0)
             {
                 this.deltaOut[this.sampleCounter] -= diff;
@@ -268,15 +264,31 @@ public class MaterialBuffer
                 this.deltaTotalIn += diff;
             }
         }
-        this.level = MathHelper.clamp(level, 0, this.maxUnits);
+        this.currentLevelNanoLiters = Useful.clamp(level, 0L, this.maxCapacityNanoLiters);
     }
     
     /**
      * Empty capacity, in units
      */
-    public int emptySpace()
+    public long emptySpace()
     {
-        return this.maxUnits - this.level;
+        return this.maxCapacityNanoLiters - this.currentLevelNanoLiters;
+    }
+    
+    /**
+     * Convenience.  Values 0-100.
+     */
+    public int fullnessPercent()
+    {
+        return (int) (this.currentLevelNanoLiters * 100 / this.maxCapacityNanoLiters);
+    }
+    
+    /**
+     * Convenience.  Values 0-1.
+     */
+    public float fullness()
+    {
+        return (float) this.currentLevelNanoLiters / this.maxCapacityNanoLiters;
     }
 
     public boolean isFailureCause()

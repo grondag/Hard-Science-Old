@@ -41,7 +41,7 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.buffer == null) return;
-        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey, String.format("%.2f", (float) buffer.getLevel() / MaterialBuffer.UNITS_PER_ITEM));
+        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey, String.format("%.2f", buffer.fullness()));
     }
 
     @Override

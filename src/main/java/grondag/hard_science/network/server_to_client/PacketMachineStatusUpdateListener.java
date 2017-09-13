@@ -14,7 +14,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
 {
     public BlockPos pos;
     public MachineControlState controlState;
-    public int[] materialBufferData;
+    public long[] materialBufferData;
     public MachineStatusState statusState;
     public int[] powerProviderData;
     
@@ -44,8 +44,14 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         this.statusState.fromBytes(pBuff);
         
         if(this.controlState.hasMaterialBuffer()) 
-            this.materialBufferData = pBuff.readVarIntArray();
-        
+        {
+            int count = pBuff.readByte();
+            this.materialBufferData = new long[count];
+            for(int i = 0; i < count; i++)
+            {
+                this.materialBufferData[i] = pBuff.readVarLong();
+            }
+        }
         if(this.controlState.hasPowerProvider()) 
             this.powerProviderData = pBuff.readVarIntArray();
         
@@ -59,7 +65,14 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         this.statusState.toBytes(pBuff);
 
         if(this.controlState.hasMaterialBuffer()) 
-            pBuff.writeVarIntArray(this.materialBufferData);
+        {
+            int count = this.materialBufferData.length;
+            pBuff.writeByte(count);
+            for(int i = 0; i < count; i++)
+            {
+                pBuff.writeVarLong(this.materialBufferData[i]);
+            }
+        }
 
         if(this.controlState.hasPowerProvider()) 
             pBuff.writeVarIntArray(this.powerProviderData);

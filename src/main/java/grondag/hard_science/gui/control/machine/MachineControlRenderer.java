@@ -588,13 +588,14 @@ public class MachineControlRenderer
     public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBuffer materialBuffer, int alpha)
     {
 
-        final int level64K = materialBuffer.getLevel();
+        final long currentLevel = materialBuffer.getLevel();
+        final long maxLevel = materialBuffer.maxCapacityNanoLiters;
         
         // render marks
         MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
 
         // render level
-        int arcLength = ((level64K * 270) >> 16);
+        int arcLength = (int)(currentLevel * 270 / maxLevel);
         renderRadialTexture(tessellator, buffer, spec, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
 
         if(materialBuffer.isFailureCause() && warningLightBlinkOn())
@@ -626,7 +627,7 @@ public class MachineControlRenderer
 
         renderMachineText(tessellator, buffer, 
                 new RectRenderBounds(spec.left(), spec.top() + spec.height() * 0.75, spec.width(), spec.height() * 0.3),
-                Integer.toString(level64K >> 10), HorizontalAlignment.CENTER, alpha);
+                Long.toString(currentLevel / maxLevel * 100), HorizontalAlignment.CENTER, alpha);
 
     }
 

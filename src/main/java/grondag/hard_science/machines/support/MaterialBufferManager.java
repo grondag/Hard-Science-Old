@@ -102,7 +102,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     {
         for(MaterialBuffer b : this.buffers)
         {
-            b.setLevel(tag.getInteger(b.nbtTag));
+            b.setLevel(tag.getLong(b.nbtTag));
         }
     }
 
@@ -111,7 +111,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     {
         for(MaterialBuffer b : this.buffers)
         {
-            tag.setInteger(b.nbtTag, b.getLevel());
+            tag.setLong(b.nbtTag, b.getLevel());
         }
     }
 
@@ -162,7 +162,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     /**
      * Restores state based on array from {@link #serializeToArray()}
      */
-    public void deserializeFromArray(int[] values)
+    public void deserializeFromArray(long[] values)
     {
         if(values == null) return;
         boolean hasFailure = false;
@@ -172,7 +172,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         {
             for(int i = 0; i < count; i++)
             {
-                int val = values[i];
+                long val = values[i];
                 
                 if(val < 0)
                 {
@@ -196,10 +196,10 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
      * Sign is used for failure true/false.
      * Because we need the sign, we subtract 1 from level when indicating failure so that we don't have zero values.
      */
-    public int[] serializeToArray()
+    public long[] serializeToArray()
     {
         int count = this.buffers.length;
-        int[] result = new int[count];
+        long[] result = new long[count];
         if(count > 0)
         {
             for(int i = 0; i < count; i++)

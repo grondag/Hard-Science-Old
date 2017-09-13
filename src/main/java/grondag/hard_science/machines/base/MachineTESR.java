@@ -5,12 +5,12 @@ import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
-import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -72,7 +72,7 @@ public abstract class MachineTESR extends SuperBlockTESR
         BufferBuilder buffer = tessellator.getBuffer();
         
         // fade in controls as player approaches - over a 4-block distance
-        int displayAlpha = (int)(alpha * (Useful.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
+        int displayAlpha = (int)(alpha * (MathHelper.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
   
         MachineControlRenderer.renderMachineText(tessellator, buffer, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, displayAlpha);
         MachineControlRenderer.renderTextureInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);

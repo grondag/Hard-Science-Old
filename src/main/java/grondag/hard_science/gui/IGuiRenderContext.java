@@ -12,7 +12,6 @@ import grondag.hard_science.gui.control.machine.MachineRedstone;
 import grondag.hard_science.gui.control.machine.MachineSymbol;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRectRenderBounds;
-import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
