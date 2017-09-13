@@ -254,39 +254,43 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     @Override
     public void deserializeNBT(NBTTagCompound tag)
     {
-        this.bits = (tag.hasKey(ModNBTTag.MACHINE_CONTROL_STATE.tag)) ? tag.getLong(ModNBTTag.MACHINE_CONTROL_STATE.tag) : DEFAULT_BITS;
-        if(this.hasModelState())
+        if(tag.hasKey(ModNBTTag.MACHINE_CONTROL_STATE))
         {
-            if(this.modelState == null) this.modelState = new ModelState();
-            this.modelState.deserializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE.tag);
-        }
-        if(this.hasTargetPos())
-        {
-            this.targetPos = PackedBlockPos.unpack(tag.getLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS.tag));
-        }
-        if(this.hasJobTicks())
-        {
-            this.jobDurationTicks = tag.getShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS.tag);
-            this.jobRemainingTicks = tag.getShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS.tag);
+            this.bits = tag.getLong(ModNBTTag.MACHINE_CONTROL_STATE);
+            
+            if(this.hasModelState())
+            {
+                if(this.modelState == null) this.modelState = new ModelState();
+                this.modelState.deserializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE);
+            }
+            if(this.hasTargetPos())
+            {
+                this.targetPos = PackedBlockPos.unpack(tag.getLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS));
+            }
+            if(this.hasJobTicks())
+            {
+                this.jobDurationTicks = tag.getShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS);
+                this.jobRemainingTicks = tag.getShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS);
+            }
         }
     }
 
     @Override
     public void serializeNBT(NBTTagCompound tag)
     {
-        tag.setLong(ModNBTTag.MACHINE_CONTROL_STATE.tag, this.bits);
+        tag.setLong(ModNBTTag.MACHINE_CONTROL_STATE, this.bits);
         if(this.hasModelState())
         {
-            this.modelState.serializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE.tag);
+            this.modelState.serializeNBT(tag, ModNBTTag.MACHINE_MODEL_STATE);
         }
         if(this.hasTargetPos())
         {
-            tag.setLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS.tag, PackedBlockPos.pack(this.targetPos));
+            tag.setLong(ModNBTTag.MACHINE_TARGET_BLOCKPOS, PackedBlockPos.pack(this.targetPos));
         }
         if(this.hasJobTicks())
         {
-            tag.setShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS.tag, this.jobDurationTicks);
-            tag.setShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS.tag, this.jobRemainingTicks);
+            tag.setShort(ModNBTTag.MACHINE_JOB_DURATION_TICKS, this.jobDurationTicks);
+            tag.setShort(ModNBTTag.MACHINE_JOB_REMAINING_TICKS, this.jobRemainingTicks);
         }
     }   
     

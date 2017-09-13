@@ -2,6 +2,7 @@ package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.GuiUtil;
 import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -10,14 +11,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class MachineRedstone extends AbstractMachineControl<MachineRedstone>
+public class MachineRedstone extends AbstractMachineControl<MachineRedstone, RadialRenderBounds>
 {
     private final Tessellator tesselator;
     private final BufferBuilder buffer;
     
-    public MachineRedstone(MachineTileEntity te)
+    public MachineRedstone(MachineTileEntity te, RadialRenderBounds bounds)
     {
-        super(te);
+        super(te, bounds);
         this.tesselator = Tessellator.getInstance();
         this.buffer = tesselator.getBuffer();
     }

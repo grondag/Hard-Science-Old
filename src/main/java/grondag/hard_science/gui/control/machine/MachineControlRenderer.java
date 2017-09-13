@@ -8,11 +8,17 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.CommonProxy;
+import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRectRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.PowerRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MaterialBuffer;
+import grondag.hard_science.machines.support.IMachinePowerProvider;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
+import grondag.hard_science.machines.support.MaterialBuffer;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -31,172 +37,26 @@ import net.minecraft.util.EnumFacing;
 
 public class MachineControlRenderer
 {
-    public static class RenderBounds
-    {
-        private final double left;
-        private final double top;
-        private final double width;
-        private final double height;
-
-
-        public RenderBounds (double left, double top, double width, double height)
-        {
-            this.left = left;
-            this.top = top;
-            this.height = height;
-            this.width = width;
-        }
-
-        public RenderBounds (double left, double top, double size)
-        {
-            this(left, top, size, size);
-        }
-        public double left() { return left; }
-        public double top() { return top; }
-        public double width() { return width; }
-        public double height() { return height; }
-        public double right() { return left + width; }
-        public double bottom() { return top + height; }
-
-        public RenderBounds offset(double x, double y)
-        {
-            return new RenderBounds(this.left + x, this.top + y, this.width, this.height);
-        }
-
-        public boolean contains(double x, double y)
-        {
-            return !(x < this.left || x > this.right() || y < this.top || y > this.bottom());
-        }
-    }
-
-    public static class RadialRenderBounds extends RenderBounds
-    {
-        private final double centerX;
-        private final double centerY;
-        private final double radius;
-        
-        private RadialRenderBounds innerBounds;
-
-        public RadialRenderBounds (double centerX, double centerY, double radius)
-        {
-            super(centerX - radius, centerY - radius, radius * 2);
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.radius = radius;
-        }
-
-        public double centerX() { return centerX; }
-        public double centerY() { return centerY; }
-        public double radius() { return radius; }
-        public RadialRenderBounds innerBounds()
-        {
-            if(this.innerBounds == null)
-            {
-                this.innerBounds = new RadialRenderBounds(this.centerX, this.centerY, this.radius / 2);
-            }
-            return this.innerBounds;
-        }
-    }
-
-    public static class RadialGaugeSpec extends RadialRenderBounds
-    {
-        /**
-         * Index of resource in TileEntity machine buffer manager
-         */
-        public final int bufferIndex;
-
-        /**
-         * Color for render of level gauge.
-         */
-        public final int color;
-
-        /**
-         * MC texture sprite for center of gauge
-         */
-        public final TextureAtlasSprite sprite;
-
-        public final double spriteScale;
-        public final double spriteLeft;
-        public final double spriteTop;
-        public final double spriteSize;
-
-        /** 
-         * SpriteScale is multiplied by radius to get size for rendering the sprite. 
-         * Value of 0.75 is normal rendering size for a square block texture.
-         * Some smaller item textures are easier to read if rendered a little bigger.
-         */
-        public RadialGaugeSpec(int bufferIndex, RadialRenderBounds bounds, double spriteScale, TextureAtlasSprite sprite, int color)
-        {
-            super(bounds.centerX, bounds.centerY, bounds.radius);
-            this.spriteScale = spriteScale;
-            this.spriteSize = this.radius() * spriteScale;
-            this.spriteLeft = this.centerX() - this.spriteSize / 2.0;
-            this.spriteTop = this.centerY() - this.spriteSize / 2.0;
-            this.bufferIndex = bufferIndex;
-            this.color = color;
-            this.sprite = sprite;
-        }
-
-    }
-
-
-    public static final RenderBounds BOUNDS_ON_OFF = new RenderBounds(1.0-(0.15), 0.02, 0.14);
-    public static final RenderBounds BOUNDS_NAME = new RenderBounds(0.25, 0.04, 0.5, 0.12);
-    public static final RenderBounds BOUNDS_SYMBOL = new RenderBounds(0.03, 0.03, 0.12, 0.12);
-    public static final RenderBounds BOUNDS_REDSTONE = new RenderBounds(0.82, 0.78, 0.12, 0.12);
-
-    public static final RadialRenderBounds BOUNDS_GAUGE[] = 
-        {
-                new RadialRenderBounds(0.12, 0.88, 0.08),
-                new RadialRenderBounds(0.30, 0.88, 0.08),
-                new RadialRenderBounds(0.48, 0.88, 0.08),
-                new RadialRenderBounds(0.66, 0.88, 0.08),
-                new RadialRenderBounds(0.12, 0.70, 0.08),
-                new RadialRenderBounds(0.30, 0.70, 0.08),
-                new RadialRenderBounds(0.48, 0.70, 0.08),
-                new RadialRenderBounds(0.66, 0.70, 0.08)
-        };
-
-    public static final RadialRenderBounds BOUNDS_PROGRESS = new RadialRenderBounds(0.24, 0.38, 0.20);
- 
-
-    public static class BinaryGlTexture 
-    {
-        public final int trueTextureID;
-        public final int falseTextureID;
-
-        public BinaryGlTexture(int trueTextureID, int falseTextureID)
-        {
-            this.trueTextureID = trueTextureID;
-            this.falseTextureID = falseTextureID;
-        }
-
-        public int apply(boolean selector)
-        {
-            return selector ? trueTextureID : falseTextureID;
-        }
-    }
-
     /**
      * Alpha is 0-255
      */
-    public static void renderBinaryTexture(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, BinaryGlTexture texture, boolean selector, int alpha)
+    public static void renderBinaryTexture(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, BinaryGlTexture texture, boolean selector, int alpha)
     {
         renderTextureInBounds(tessellator, buffer, bounds, texture.apply(selector), alpha);
     }
 
-    public static void renderBinaryTexture(RenderBounds bounds, BinaryGlTexture texture, boolean selector, int alpha)
+    public static void renderBinaryTexture(AbstractRectRenderBounds bounds, BinaryGlTexture texture, boolean selector, int alpha)
     {
         renderTextureInBounds(bounds, texture.apply(selector), alpha);
     }
 
-    public static void renderMachineText(RenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    public static void renderMachineText(RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderMachineText(tes, tes.getBuffer(), bounds, text, alignment, alpha);
     }
 
-    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
     {
         switch(alignment)
         {
@@ -225,10 +85,10 @@ public class MachineControlRenderer
     }
 
     /**
-     * Use {@link #renderMachineText(Tessellator, BufferBuilder, RenderBounds, String, int)}
+     * Use {@link #renderMachineText(Tessellator, BufferBuilder, RectRenderBounds, String, int)}
      * when you already have tessellator and buffer on the stack.
      */
-    public static void renderMachineText(RenderBounds bounds, String text, int alpha)
+    public static void renderMachineText(AbstractRectRenderBounds bounds, String text, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderMachineText(tes, tes.getBuffer(), bounds, text, alpha);
@@ -237,16 +97,16 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, String text, int alpha)
+    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
     {
         ModModels.FONT_ORBITRON.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
     }
 
     /**
-     * Use {@link #renderSpriteInBounds(Tessellator, BufferBuilder, RenderBounds, TextureAtlasSprite, int)}
+     * Use {@link #renderSpriteInBounds(Tessellator, BufferBuilder, RectRenderBounds, TextureAtlasSprite, int)}
      * when you already have tessellator/buffer references on the stack.
      */
-    public static void renderSpriteInBounds(RenderBounds bounds, TextureAtlasSprite sprite, int alpha)
+    public static void renderSpriteInBounds(AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderSpriteInBounds(tes, tes.getBuffer(), bounds, sprite, alpha);
@@ -258,7 +118,7 @@ public class MachineControlRenderer
      * u,v coordinate are also 0-1 within the currently bound texture.
      * Always full brightness.
      */
-    public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, TextureAtlasSprite sprite, int alpha)
+    public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int alpha)
     {
         renderSpriteInBounds(tessellator, buffer, bounds.left, bounds.top, bounds.width, bounds.height, sprite, alpha);
     }
@@ -279,10 +139,10 @@ public class MachineControlRenderer
     }
 
     /**
-     * Use {@link #renderTextureInBounds(Tessellator, BufferBuilder, RenderBounds, int, int)}
+     * Use {@link #renderTextureInBounds(Tessellator, BufferBuilder, RectRenderBounds, int, int)}
      * when you already have tessellator/buffer references on the stack.
      */
-    public static void renderTextureInBounds(RenderBounds bounds, int glTextureID, int alpha)
+    public static void renderTextureInBounds(AbstractRectRenderBounds bounds, int glTextureID, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderTextureInBounds(tes, tes.getBuffer(), bounds, glTextureID, alpha);
@@ -292,7 +152,7 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderTextureInBounds(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int alpha)
+    public static void renderTextureInBounds(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, int glTextureID, int alpha)
     {
         GlStateManager.bindTexture(glTextureID);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
@@ -302,7 +162,7 @@ public class MachineControlRenderer
         tessellator.draw();
     }
 
-    public static void renderTextureInBoundsWithColor(RenderBounds bounds, int glTextureID, int colorARGB)
+    public static void renderTextureInBoundsWithColor(AbstractRectRenderBounds bounds, int glTextureID, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
         renderTextureInBounds(tes, tes.getBuffer(), bounds, glTextureID, colorARGB);
@@ -311,7 +171,7 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderTextureInBoundsWithColor(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int colorARGB)
+    public static void renderTextureInBoundsWithColor(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, int glTextureID, int colorARGB)
     {
         GlStateManager.bindTexture(glTextureID);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
@@ -325,7 +185,7 @@ public class MachineControlRenderer
      * maxLevel is the max number of bars to render and should be a power of 4.
      * level is how many of the bars should be lit.
      */
-    public static void renderLinearProgress(RenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+    public static void renderLinearProgress(RectRenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
         renderLinearProgress(tes, tes.getBuffer(), bounds, glTextureID, level, maxLevel, isHorizontal, colorARGB);
@@ -334,7 +194,7 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
     {
         if(maxLevel == 0) return;
         
@@ -392,7 +252,7 @@ public class MachineControlRenderer
      * Use this version when you already have tessellator/buffer references on the stack.
      * Arc starts at top and degrees move clockwise.
      */
-    public static void renderRadialTexture(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, int arcStartDegrees, int arcLengthDegrees, int glTextureID, int colorARGB)
+    public static void renderRadialTexture(Tessellator tessellator, BufferBuilder buffer, AbstractRadialRenderBounds bounds, int arcStartDegrees, int arcLengthDegrees, int glTextureID, int colorARGB)
     {
         if(arcLengthDegrees <= 0) return;
 
@@ -490,7 +350,7 @@ public class MachineControlRenderer
 
     private static final int[] EDGE_START_DEGREES = { 315, 45, 135, 225 };
 
-    private static void bufferRadialMidPoint(BufferBuilder buffer, RadialRenderBounds bounds, int colorARGB)
+    private static void bufferRadialMidPoint(BufferBuilder buffer, AbstractRadialRenderBounds bounds, int colorARGB)
     {
         buffer.pos(bounds.centerX, bounds.centerY, 0)
         .color((colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, (colorARGB >> 24) & 0xFF)
@@ -500,7 +360,7 @@ public class MachineControlRenderer
     /**
      * Buffers starting point (int a clockwise rotation) of the given edge. 0 is top. 
      */
-    private static void bufferRadialCornerPoint(BufferBuilder buffer, RadialRenderBounds bounds, int edge, int colorARGB)
+    private static void bufferRadialCornerPoint(BufferBuilder buffer, AbstractRadialRenderBounds bounds, int edge, int colorARGB)
     {   
         edge &= 3;
         buffer.pos(bounds.left() + EDGE_START_X[edge] * bounds.width(), 
@@ -509,7 +369,7 @@ public class MachineControlRenderer
         .tex(EDGE_START_X[edge], EDGE_START_Y[edge]).lightmap(0x00f0, 0x00f0).endVertex();
     }
 
-    private static void bufferRadialEdgePoint(BufferBuilder buffer, RadialRenderBounds bounds, int degrees, int colorARGB)
+    private static void bufferRadialEdgePoint(BufferBuilder buffer, AbstractRadialRenderBounds bounds, int degrees, int colorARGB)
     {   
         int segment = (degrees / 45) & 7;
         int offset = segment * 45;
@@ -595,7 +455,7 @@ public class MachineControlRenderer
         buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
     }
 
-    public static void renderFabricationProgress(RadialRenderBounds bounds, MachineTileEntity te, int alpha)
+    public static void renderFabricationProgress(RectRenderBounds.RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderFabricationProgress(tes, tes.getBuffer(), bounds, te, alpha);
@@ -623,13 +483,73 @@ public class MachineControlRenderer
         }
     }
     
-    public static void renderProgress(RadialRenderBounds bounds, MachineTileEntity te, int alpha)
+    public static void renderPower(RectRenderBounds.PowerRenderBounds bounds, MachineTileEntity te, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderPower(tes, tes.getBuffer(), bounds, te, alpha);
+    }
+
+    public static void renderPower(Tessellator tessellator, BufferBuilder buffer, PowerRenderBounds bounds, MachineTileEntity mte, int alpha)
+    {
+        if(mte.getControlState().hasPowerProvider())
+        {
+            // render marks
+            MachineControlRenderer.renderTextureInBounds(tessellator, buffer, bounds, ModModels.TEX_POWER_BACKGROUND, alpha);
+            
+            IMachinePowerProvider mpp = mte.getPowerProvider();
+            
+            long current = mpp.availableEnergyJoules();
+
+            final int inArcLength = mpp.logAvgPowerInputDegrees();
+            if(inArcLength != 0)
+            {
+                MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 270, inArcLength, ModModels.TEX_POWER_INNER, alpha << 24 | 0x40FF40);
+            }
+
+            final int outArcLength = mpp.avgPowerOutputDegress();
+            if(outArcLength != 0)
+            {
+                MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 270, outArcLength, ModModels.TEX_POWER_OUTER, alpha << 24 | 0xFF4040);
+            }
+            
+            renderMachineText(tessellator, buffer, bounds.gainLossTextBounds, 
+                    mpp.formattedAvgNetPowerGainLoss(), HorizontalAlignment.CENTER, alpha);
+            
+            renderMachineText(tessellator, buffer, bounds.energyTextBounds, 
+                     mpp.formatedAvailableEnergyJoules(), HorizontalAlignment.RIGHT, alpha);
+            
+            int level = (int) (current * 24 / mpp.maxEnergyJoules());
+            renderLinearProgress(tessellator, buffer, bounds.energyLevelBounds, 
+                    ModModels.TEX_LINEAR_POWER_LEVEL, level, 24, true, alpha << 24 | 0xFFFFFF);
+        }
+        
+//        int duration, remaining, arcLength;
+//
+//        if(te.hasBacklog())
+//        {    
+//            duration = te.getMaxBacklog();
+//            remaining = te.getCurrentBacklog();
+//            arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
+//            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, alpha << 24 | 0x40FF40);
+//        }
+//
+//        if(te.hasJobTicks())
+//        {    
+//            duration = te.getJobDurationTicks();
+//            remaining = te.getJobRemainingTicks();
+//            arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
+//            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0x40FFFF);
+//        }
+
+    }
+    
+    public static void renderProgress(RectRenderBounds.RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderProgress(tes, tes.getBuffer(), bounds, te, alpha);
     }
 
-    public static void renderProgress(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, MachineTileEntity te, int alpha)
+    public static void renderProgress(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds.RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
         int duration, remaining, arcLength;
 
@@ -705,7 +625,7 @@ public class MachineControlRenderer
         renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, alpha);
 
         renderMachineText(tessellator, buffer, 
-                new RenderBounds(spec.left(), spec.top() + spec.height() * 0.75, spec.width(), spec.height() * 0.3),
+                new RectRenderBounds(spec.left(), spec.top() + spec.height() * 0.75, spec.width(), spec.height() * 0.3),
                 Integer.toString(level64K >> 10), HorizontalAlignment.CENTER, alpha);
 
     }
@@ -720,7 +640,7 @@ public class MachineControlRenderer
      * If you call this from somewhere other than machine rendering, 
      * you'll probably need to do more clean up.
      */
-    public static void renderItem(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds spec, @Nullable ItemStack stack, int alpha)
+    public static void renderItem(Tessellator tessellator, BufferBuilder buffer, AbstractRadialRenderBounds spec, @Nullable ItemStack stack, int alpha)
     {
         if(stack == null || stack.isEmpty()) return;
         
@@ -869,7 +789,7 @@ public class MachineControlRenderer
 
     }
 
-    public static void renderRedstoneControl(MachineTileEntity mte, Tessellator tessellator, BufferBuilder buffer, RenderBounds boundsRedstone,
+    public static void renderRedstoneControl(MachineTileEntity mte, Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds boundsRedstone,
             int displayAlpha)
     {
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, boundsRedstone, 

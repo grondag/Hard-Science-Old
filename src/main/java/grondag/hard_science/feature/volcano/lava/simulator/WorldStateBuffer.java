@@ -293,7 +293,7 @@ public class WorldStateBuffer implements IBlockAccess
         this.chunks.clear();
         this.usedBuffers.clear();
 
-        int[] saveData = nbt.getIntArray(ModNBTTag.WORLD_STATE_BUFFER.tag);
+        int[] saveData = nbt.getIntArray(ModNBTTag.WORLD_STATE_BUFFER);
 
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
@@ -338,7 +338,7 @@ public class WorldStateBuffer implements IBlockAccess
             }
         }
         
-        nbt.setIntArray(ModNBTTag.WORLD_STATE_BUFFER.tag, saveData);
+        nbt.setIntArray(ModNBTTag.WORLD_STATE_BUFFER, saveData);
 
     }
     

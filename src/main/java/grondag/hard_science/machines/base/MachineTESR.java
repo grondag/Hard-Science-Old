@@ -2,6 +2,7 @@ package grondag.hard_science.machines.base;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
+import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.varia.Useful;
@@ -73,23 +74,25 @@ public abstract class MachineTESR extends SuperBlockTESR
         // fade in controls as player approaches - over a 4-block distance
         int displayAlpha = (int)(alpha * (Useful.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
   
-        MachineControlRenderer.renderMachineText(tessellator, buffer, MachineControlRenderer.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, displayAlpha);
-        MachineControlRenderer.renderTextureInBounds(tessellator, buffer, MachineControlRenderer.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);
+        MachineControlRenderer.renderMachineText(tessellator, buffer, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, displayAlpha);
+        MachineControlRenderer.renderTextureInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);
 
         if(mte.hasOnOff())
         {
-            MachineControlRenderer.renderBinaryTexture(tessellator, buffer, MachineControlRenderer.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), displayAlpha);
+            MachineControlRenderer.renderBinaryTexture(tessellator, buffer, RenderBounds.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), displayAlpha);
         }
         
         if(mte.hasRedstoneControl())
         {
-            MachineControlRenderer.renderRedstoneControl(mte, tessellator, buffer, MachineControlRenderer.BOUNDS_REDSTONE, displayAlpha);
+            MachineControlRenderer.renderRedstoneControl(mte, tessellator, buffer, RenderBounds.BOUNDS_REDSTONE, displayAlpha);
         }
+        
+        MachineControlRenderer.renderPower(tessellator, buffer, RenderBounds.BOUNDS_POWER, mte, displayAlpha);
         
         renderControlFace(tessellator, buffer, mte, displayAlpha);
         
 //        TextureHelper.setTextureClamped(true);
-
+        
         MachineControlRenderer.restoreWorldRendering();
         GlStateManager.popMatrix();
 

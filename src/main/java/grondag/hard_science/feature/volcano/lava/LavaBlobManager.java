@@ -120,7 +120,7 @@ public class LavaBlobManager
     {
         this.map.clear();
     
-        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_PARTICLE_MANAGER.tag);
+        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_PARTICLE_MANAGER);
 
         //confirm correct size
         if(saveData == null || saveData.length % NBT_SAVE_DATA_WIDTH != 0)
@@ -161,7 +161,7 @@ public class LavaBlobManager
             saveData[i++] = p.fluidUnits;
         }       
 
-        nbt.setIntArray(ModNBTTag.LAVA_PARTICLE_MANAGER.tag, saveData);
+        nbt.setIntArray(ModNBTTag.LAVA_PARTICLE_MANAGER, saveData);
 
     }
 }

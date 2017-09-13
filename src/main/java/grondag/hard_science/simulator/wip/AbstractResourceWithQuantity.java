@@ -33,13 +33,13 @@ public abstract class AbstractResourceWithQuantity<V extends StorageType<V>> imp
     public void serializeNBT(NBTTagCompound tag)
     {
         this.resource.serializeNBT(tag);
-        tag.setLong(ModNBTTag.RESOURCE_QUANTITY.tag, this.quantity);
+        tag.setLong(ModNBTTag.RESOURCE_QUANTITY, this.quantity);
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt)
     {
-        this.quantity = nbt.getLong(ModNBTTag.RESOURCE_QUANTITY.tag);
+        this.quantity = nbt.getLong(ModNBTTag.RESOURCE_QUANTITY);
         this.resource.deserializeNBT(nbt);
     }
 

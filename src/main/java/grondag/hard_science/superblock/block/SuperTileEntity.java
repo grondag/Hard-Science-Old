@@ -28,7 +28,7 @@ public class SuperTileEntity extends TileEntity
     /**
      * Anything stored in this tag will not be sent to clients.
      */
-    public static final String NBT_SERVER_SIDE_TAG = ModNBTTag.SERVER_SIDE_ONLY.tag;
+    public static final String NBT_SERVER_SIDE_TAG = ModNBTTag.SERVER_SIDE_ONLY;
     
     /** Returns server-side tag if one is present, creating it if not. */
     public static @Nonnull NBTTagCompound getServerTag(@Nonnull NBTTagCompound fromTag)

@@ -14,9 +14,9 @@ import org.lwjgl.util.glu.GLU;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.BinaryGlTexture;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
+import grondag.hard_science.gui.control.machine.BinaryGlTexture;
+import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
+import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.font.FontLoader;
 import grondag.hard_science.library.font.TrueTypeFont;
 import grondag.hard_science.library.render.TextureHelper;
@@ -245,15 +245,15 @@ public class ModModels
         
         FONT_ORBITRON = FontLoader.createFont(new ResourceLocation(HardScience.MODID + ":fonts/orbitron_medium.ttf"), 64, true);
         
-        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, MachineControlRenderer.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
-        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, MachineControlRenderer.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);
-        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(6, MachineControlRenderer.BOUNDS_GAUGE[6], 1.0, ModModels.SPRITE_YELLOW_DYE, 0xFFFF00);
-        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(7, MachineControlRenderer.BOUNDS_GAUGE[7], 1.0, ModModels.SPRITE_BLACK_DYE, 0x555555);
+        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, RenderBounds.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
+        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, RenderBounds.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);
+        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(6, RenderBounds.BOUNDS_GAUGE[6], 1.0, ModModels.SPRITE_YELLOW_DYE, 0xFFFF00);
+        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(7, RenderBounds.BOUNDS_GAUGE[7], 1.0, ModModels.SPRITE_BLACK_DYE, 0x555555);
     
-        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(1, MachineControlRenderer.BOUNDS_GAUGE[0], 0.75, ModModels.SPRITE_STONE, 0x7f7f7f);
-        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(0, MachineControlRenderer.BOUNDS_GAUGE[2], 0.75, ModModels.SPRITE_WOOD, 0xa78653);
-        BASIC_BUILDER_GAUGE_SPECS[6] = new RadialGaugeSpec(2, MachineControlRenderer.BOUNDS_GAUGE[1], 0.75, ModModels.SPRITE_GLASS, 0xaafcff);
-        BASIC_BUILDER_GAUGE_SPECS[7] = new RadialGaugeSpec(3, MachineControlRenderer.BOUNDS_GAUGE[3], 1.0, ModModels.SPRITE_GLOWSTONE, 0xffffd5);
+        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(1, RenderBounds.BOUNDS_GAUGE[0], 0.75, ModModels.SPRITE_STONE, 0x7f7f7f);
+        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(0, RenderBounds.BOUNDS_GAUGE[2], 0.75, ModModels.SPRITE_WOOD, 0xa78653);
+        BASIC_BUILDER_GAUGE_SPECS[6] = new RadialGaugeSpec(2, RenderBounds.BOUNDS_GAUGE[1], 0.75, ModModels.SPRITE_GLASS, 0xaafcff);
+        BASIC_BUILDER_GAUGE_SPECS[7] = new RadialGaugeSpec(3, RenderBounds.BOUNDS_GAUGE[3], 1.0, ModModels.SPRITE_GLOWSTONE, 0xffffd5);
     }
 
     

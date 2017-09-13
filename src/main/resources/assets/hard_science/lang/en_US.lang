@@ -54,7 +54,9 @@ machine.buffer_glass=Glass Supply
 machine.fabrication_progress=Fabrication In Progress
 machine.fabrication_searching=Searching for Work
 machine.fabrication_shortage=Item(s) Not Fabricated Due to Material Shortage 
-
+machine.power_in=Power Production: %,d watts
+machine.power_out=Power Consumption: %,d watts
+machine.power_stored=Stored Energy %,d joules 
 
 
 #KEYS

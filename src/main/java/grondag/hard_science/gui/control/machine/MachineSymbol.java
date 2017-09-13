@@ -1,15 +1,16 @@
 package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 
-public class MachineSymbol extends AbstractMachineControl<MachineSymbol>
+public class MachineSymbol extends AbstractMachineControl<MachineSymbol, RadialRenderBounds>
 {
 
-    public MachineSymbol(MachineTileEntity tileEntity)
+    public MachineSymbol(MachineTileEntity tileEntity, RadialRenderBounds bounds)
     {
-        super(tileEntity);
+        super(tileEntity, bounds);
     }
 
     @Override

@@ -151,10 +151,11 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     public void update()
     {
         super.update();
-        if(!this.isOn()) return;
         
         if(world.isRemote)
         {
+            if(!this.isOn()) return;
+            
             // approximate more granular job progress on client side
             if(this.getControlState().getMachineState() == MachineState.FABRICATING)
             {
@@ -167,6 +168,14 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             
             if((tick & 0xF) == 0xF)
             {
+                if(this.getPowerProvider().provideEnergy(1, false, false) != 1)
+                {
+                    this.getPowerProvider().setFailureCause(true);
+                    return;
+                }
+                
+                if(!this.isOn()) return;
+                
                 this.pullResources();
                 
                 if((tick & 0x1F) == 0x1F)
@@ -174,6 +183,8 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
                     this.setCurrentBacklog(VirtualBlockTracker.INSTANCE.get(this.world).sizeInChunksNear(pos, Configurator.MACHINES.basicBuilderChunkRadius));
                 }
             }
+            
+            if(!this.isOn()) return;
             
             switch(this.getControlState().getMachineState())
             {
@@ -196,6 +207,8 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
 
     private void searchForWork()
     {
+        if(this.getPowerProvider().provideEnergy(2, false, false) != 2) return;
+        
         if(checkPos == null) checkPos = this.pos;
         
         // look for a virtual block in current target chunk
@@ -283,7 +296,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
     private void progressFabrication()
     {
-        if(this.getControlState().progressJob((short) 1))
+        if(this.getPowerProvider().provideEnergy(100, false, false) == 100 && this.getControlState().progressJob((short) 1))
         {
             this.getControlState().clearJobTicks();
             this.getControlState().setMachineState(MachineState.TRANSPORTING);
@@ -300,84 +313,91 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         BlockSubstance newSubstance = this.getControlState().getSubstance();
         BlockPos targetPos = this.getControlState().getTargetPos();
         
-        // this all needs to happen in any case
-        this.getControlState().setModelState(null);
-        this.getControlState().setTargetPos(null);
-        this.getControlState().setMachineState(MachineState.THINKING);
-        this.markDirty();
+        //FIXME: ensure fuel cell max output can support max configurable range
+        int powerNeeded = (int) (1 * this.pos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ()));
         
-        // abort on strangeness
-        if(newModelState == null)
+        if(this.getPowerProvider().provideEnergy(powerNeeded, false, false) == powerNeeded)
         {
-            Log.warn("Unable to retrieve model state for virtual block placement.  This is probably a bug.  Block was not placed.");
-            return;
-        }
         
-        SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(newSubstance, newModelState);
-        IBlockState newState = newBlock.getDefaultState().withProperty(SuperBlock.META, newMeta);
-        
-        IBlockState oldState = this.world.getBlockState(targetPos);
-        
-        // confirm virtual block matching our fabricated block still located at target position
-        if(oldState.getBlock() == ModBlocks.virtual_block && oldState.getValue(SuperBlock.META) == newMeta) 
-        {
-            TileEntity rawTE = world.getTileEntity(targetPos);
-            if(rawTE != null && rawTE instanceof SuperModelTileEntity)
+            // this all needs to happen in any case
+            this.getControlState().setModelState(null);
+            this.getControlState().setTargetPos(null);
+            this.getControlState().setMachineState(MachineState.THINKING);
+            this.markDirty();
+            
+            // abort on strangeness
+            if(newModelState == null)
             {
-                SuperModelTileEntity oldTE = (SuperModelTileEntity)rawTE;
-                
-                if(oldTE.getLightValue() == newLightValue && oldTE.getSubstance() == newSubstance)
-                {
-                    ModelState oldModelState = ((VirtualBlock)ModBlocks.virtual_block).getModelStateAssumeStateIsCurrent(oldState, world, targetPos, true);
-                    if(newModelState.equals(oldModelState))
-                    {
-                        // match!  place the block and exit, resume searching for work
-                        world.setBlockState(targetPos, newState);
-                        
-                        SuperModelTileEntity newTE = (SuperModelTileEntity)world.getTileEntity(targetPos);
-                        if (newTE == null) return;
-                        
-                        newTE.setLightValue((byte) newLightValue);
-                        newTE.setSubstance(newSubstance);
-                        newTE.setModelState(newModelState);
-                        
-                        return;
-                    }
-
-                }
+                Log.warn("Unable to retrieve model state for virtual block placement.  This is probably a bug.  Block was not placed.");
+                return;
             }
-        }
-        
-        // if we got to this point, we have a fabricated block with no place to be
-        // put it in an adjacent container if there is one with room
-        // otherwise eject it into the world
-        List<ItemStack> items = newBlock.getSubItems();
-        
-        ItemStack stack = newMeta < items.size() ? items.get(newMeta) : items.get(0);
-        stack.setItemDamage(newMeta);
-        SuperItemBlock.setStackLightValue(stack, newLightValue);
-        SuperItemBlock.setStackSubstance(stack, newSubstance);
-        SuperItemBlock.setStackModelState(stack, newModelState);
-        
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            TileEntity tileentity = this.world.getTileEntity(this.pos.offset(face));
-            if (tileentity != null)
+            
+            SuperModelBlock newBlock = ModSuperModelBlocks.findAppropriateSuperModelBlock(newSubstance, newModelState);
+            IBlockState newState = newBlock.getDefaultState().withProperty(SuperBlock.META, newMeta);
+            
+            IBlockState oldState = this.world.getBlockState(targetPos);
+            
+            // confirm virtual block matching our fabricated block still located at target position
+            if(oldState.getBlock() == ModBlocks.virtual_block && oldState.getValue(SuperBlock.META) == newMeta) 
             {
-                IItemHandler itemHandler = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                if(itemHandler != null)
+                TileEntity rawTE = world.getTileEntity(targetPos);
+                if(rawTE != null && rawTE instanceof SuperModelTileEntity)
                 {
-                    ItemStack remaining = ItemHandlerHelper.insertItem(itemHandler, stack, false);
-                    if(remaining.isEmpty())
+                    SuperModelTileEntity oldTE = (SuperModelTileEntity)rawTE;
+                    
+                    if(oldTE.getLightValue() == newLightValue && oldTE.getSubstance() == newSubstance)
                     {
-                        return;
+                        ModelState oldModelState = ((VirtualBlock)ModBlocks.virtual_block).getModelStateAssumeStateIsCurrent(oldState, world, targetPos, true);
+                        if(newModelState.equals(oldModelState))
+                        {
+                            // match!  place the block and exit, resume searching for work
+                            world.setBlockState(targetPos, newState);
+                            
+                            SuperModelTileEntity newTE = (SuperModelTileEntity)world.getTileEntity(targetPos);
+                            if (newTE == null) return;
+                            
+                            newTE.setLightValue((byte) newLightValue);
+                            newTE.setSubstance(newSubstance);
+                            newTE.setModelState(newModelState);
+                            
+                            return;
+                        }
+    
                     }
                 }
             }
+            
+            // if we got to this point, we have a fabricated block with no place to be
+            // put it in an adjacent container if there is one with room
+            // otherwise eject it into the world
+            List<ItemStack> items = newBlock.getSubItems();
+            
+            ItemStack stack = newMeta < items.size() ? items.get(newMeta) : items.get(0);
+            stack.setItemDamage(newMeta);
+            SuperItemBlock.setStackLightValue(stack, newLightValue);
+            SuperItemBlock.setStackSubstance(stack, newSubstance);
+            SuperItemBlock.setStackModelState(stack, newModelState);
+            
+            for(EnumFacing face : EnumFacing.VALUES)
+            {
+                TileEntity tileentity = this.world.getTileEntity(this.pos.offset(face));
+                if (tileentity != null)
+                {
+                    IItemHandler itemHandler = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
+                    if(itemHandler != null)
+                    {
+                        ItemStack remaining = ItemHandlerHelper.insertItem(itemHandler, stack, false);
+                        if(remaining.isEmpty())
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // no luck with containers - spawn in world
+            Block.spawnAsEntity(this.world, targetPos, stack);
         }
-        
-        // no luck with containers - spawn in world
-        Block.spawnAsEntity(this.world, targetPos, stack);
     }
     
     private int stoneNeeded;
@@ -529,7 +549,11 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             if (tileentity != null)
             {
                 IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                if(bufferManager.restock(capability)) this.markDirty();;
+                if(this.getPowerProvider().provideEnergy(2, false, true) == 2 && bufferManager.restock(capability))
+                {
+                    this.getPowerProvider().provideEnergy(2, false, false);
+                    this.markDirty();
+                }
                 if(!bufferManager.canRestock()) return;
             }
         }

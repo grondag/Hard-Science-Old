@@ -196,7 +196,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
     };
     
-    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, ModNBTTag.LAVA_PLACEMENT_EVENTS.tag, placementHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaBlockPlacementEvents = new BlockEventList(10, ModNBTTag.LAVA_PLACEMENT_EVENTS, placementHandler, this.perfCollectorOffTick);
     
     private final BlockEventHandler lavaAddEventHandler = new BlockEventHandler()
     {
@@ -218,7 +218,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         }
     };
     
-    private final BlockEventList lavaAddEvents = new BlockEventList(10, ModNBTTag.LAVA_ADD_EVENTS.tag, lavaAddEventHandler, this.perfCollectorOffTick);
+    private final BlockEventList lavaAddEvents = new BlockEventList(10, ModNBTTag.LAVA_ADD_EVENTS, lavaAddEventHandler, this.perfCollectorOffTick);
     
             
     /** incremented each step, multiple times per tick */
@@ -447,7 +447,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
                 saveData[i++] = (int) ((apos.packedBlockPos >> 32) & 0xFFFFFFFF);
                 saveData[i++] = apos.getTick();
             }       
-            nbt.setIntArray(ModNBTTag.BASALT_BLOCKS.tag, saveData);
+            nbt.setIntArray(ModNBTTag.BASALT_BLOCKS, saveData);
         }
     }
     
@@ -464,7 +464,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
         
         
         // LOAD BASALT BLOCKS
-        int[] saveData = nbt.getIntArray(ModNBTTag.BASALT_BLOCKS.tag);
+        int[] saveData = nbt.getIntArray(ModNBTTag.BASALT_BLOCKS);
 
         //confirm correct size
         if(saveData == null || saveData.length % BASALT_BLOCKS_NBT_WIDTH != 0)
@@ -837,7 +837,7 @@ public class LavaSimulator implements IPersistenceNode, ISimulationTickable
     @Override
     public String tagName()
     {
-        return ModNBTTag.LAVA_SIMULATOR.tag;
+        return ModNBTTag.LAVA_SIMULATOR;
     }
 
 

@@ -189,7 +189,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
             {
                 nbtStores.appendTag(store.serializeNBT());
             }
-            nbt.setTag(ModNBTTag.STORAGE_MANAGER_STORES.tag, nbtStores);
+            nbt.setTag(ModNBTTag.STORAGE_MANAGER_STORES, nbtStores);
         }
     }
 
@@ -201,7 +201,7 @@ public abstract class AbstractStorageManager<T extends StorageType<T>>
         this.stores.clear();
         this.capacity = 0;
         this.used = 0;
-        NBTTagList nbtStores = nbt.getTagList(ModNBTTag.STORAGE_MANAGER_STORES.tag, 10);
+        NBTTagList nbtStores = nbt.getTagList(ModNBTTag.STORAGE_MANAGER_STORES, 10);
         if( nbtStores != null && !nbtStores.hasNoTags())
         {
             for (int i = 0; i < nbtStores.tagCount(); ++i)

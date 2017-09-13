@@ -83,7 +83,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     @Override
     public synchronized void deserializeNBT(NBTTagCompound tag)
     {
-        int input[] = tag.getIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY.tag);
+        int input[] = tag.getIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY);
         if(input == null)
         {
             this.clear();
@@ -106,7 +106,7 @@ public class AssignedNumbersAuthority implements IReadWriteNBT, IDirtNotifier
     @Override
     public synchronized void serializeNBT(NBTTagCompound tag)
     {
-        tag.setIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY.tag, Arrays.copyOf(lastID, lastID.length));
+        tag.setIntArray(ModNBTTag.ASSIGNED_NUMBERS_AUTHORITY, Arrays.copyOf(lastID, lastID.length));
     }
     
     @Override

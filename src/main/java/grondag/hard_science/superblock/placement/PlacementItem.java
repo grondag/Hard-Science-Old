@@ -18,7 +18,7 @@ public interface PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        tag.setInteger(ModNBTTag.PLACEMENT_FACE.tag, face.ordinal());
+        tag.setInteger(ModNBTTag.PLACEMENT_FACE, face.ordinal());
         stack.setTagCompound(tag);
     }
     
@@ -26,7 +26,7 @@ public interface PlacementItem
     public default EnumFacing getFace(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? EnumFacing.UP : EnumFacing.values()[tag.getInteger(ModNBTTag.PLACEMENT_FACE.tag)];
+        return (tag == null) ? EnumFacing.UP : EnumFacing.values()[tag.getInteger(ModNBTTag.PLACEMENT_FACE)];
     }
     
     public default void cycleFace(ItemStack stack)
@@ -40,14 +40,14 @@ public interface PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        tag.setInteger(ModNBTTag.PLACEMENT_ROTATION.tag, rotation.ordinal());
+        tag.setInteger(ModNBTTag.PLACEMENT_ROTATION, rotation.ordinal());
         stack.setTagCompound(tag);
     }
 
     public default Rotation getRotation(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? Rotation.ROTATE_NONE : Rotation.values()[tag.getInteger(ModNBTTag.PLACEMENT_ROTATION.tag)];
+        return (tag == null) ? Rotation.ROTATE_NONE : Rotation.values()[tag.getInteger(ModNBTTag.PLACEMENT_ROTATION)];
     }
     
     public default void cycleRotation(ItemStack stack)
@@ -61,14 +61,14 @@ public interface PlacementItem
         if(tag == null){
             tag = new NBTTagCompound();
         }
-        tag.setInteger(ModNBTTag.PLACEMENT_MODE.tag, mode.ordinal());
+        tag.setInteger(ModNBTTag.PLACEMENT_MODE, mode.ordinal());
         stack.setTagCompound(tag);
     }
     
     public default PlacementMode getMode(ItemStack stack)
     {
         NBTTagCompound tag = stack.getTagCompound();
-        return (tag == null) ? PlacementMode.STATIC : PlacementMode.values()[tag.getInteger(ModNBTTag.PLACEMENT_MODE.tag)];       
+        return (tag == null) ? PlacementMode.STATIC : PlacementMode.values()[tag.getInteger(ModNBTTag.PLACEMENT_MODE)];       
     }
     
     public default void cycleMode(ItemStack stack)

@@ -164,7 +164,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.serializeID(nbt);
         this.serializeLocation(nbt);
-        nbt.setLong(ModNBTTag.STORAGE_CAPACITY.tag, this.capacity);
+        nbt.setLong(ModNBTTag.STORAGE_CAPACITY, this.capacity);
         
         if(!this.slots.isEmpty())
         {
@@ -175,7 +175,7 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
                 AbstractResourceWithQuantity<T> rwq = this.slots.get(i);
                 nbtContents.appendTag(rwq.serializeNBT());
             }
-            nbt.setTag(ModNBTTag.STORAGE_CONTENTS.tag, nbtContents);
+            nbt.setTag(ModNBTTag.STORAGE_CONTENTS, nbtContents);
         }
         //FIXME: remove
         Log.info("saved storage, id = " + this.id + " used =" + this.used);
@@ -186,14 +186,14 @@ public abstract class AbstractStorage<T extends StorageType<T>> implements IStor
     {
         this.deserializeID(nbt);
         this.deserializeLocation(nbt);
-        this.setCapacity(nbt.getLong(ModNBTTag.STORAGE_CAPACITY.tag));
+        this.setCapacity(nbt.getLong(ModNBTTag.STORAGE_CAPACITY));
         
         this.slots.clear();
         this.used = 0;
         
         T sType = this.storageType();
 
-        NBTTagList nbtContents = nbt.getTagList(ModNBTTag.STORAGE_CONTENTS.tag, 10);
+        NBTTagList nbtContents = nbt.getTagList(ModNBTTag.STORAGE_CONTENTS, 10);
         if( nbtContents != null && !nbtContents.hasNoTags())
         {
             for (int i = 0; i < nbtContents.tagCount(); ++i)

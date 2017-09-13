@@ -469,27 +469,27 @@ public class VolcanoTileEntity extends TileEntity implements ITickable
     {
         super.readFromNBT(tagCompound);
 
-        this.stage = VolcanoStage.values()[tagCompound.getInteger(ModNBTTag.VOLCANO_STAGE.tag)];
-        this.level = tagCompound.getInteger(ModNBTTag.VOLCANO_LEVEL.tag);
-        this.buildLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_BUILD_LEVEL.tag);
-        this.groundLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_GROUND_LEVEL.tag);
-        this.ticksActive = tagCompound.getInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE.tag);
-        this.clearingLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL.tag);
-        this.lavaCounter = tagCompound.getInteger(ModNBTTag.VOLCANO_LAVA_COUNTER.tag);
-        this.lavaCooldownTicks = tagCompound.getInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS.tag);
+        this.stage = VolcanoStage.values()[tagCompound.getInteger(ModNBTTag.VOLCANO_STAGE)];
+        this.level = tagCompound.getInteger(ModNBTTag.VOLCANO_LEVEL);
+        this.buildLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_BUILD_LEVEL);
+        this.groundLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_GROUND_LEVEL);
+        this.ticksActive = tagCompound.getInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE);
+        this.clearingLevel = tagCompound.getInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL);
+        this.lavaCounter = tagCompound.getInteger(ModNBTTag.VOLCANO_LAVA_COUNTER);
+        this.lavaCooldownTicks = tagCompound.getInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tagCompound) 
     {        
-        tagCompound.setInteger(ModNBTTag.VOLCANO_STAGE.tag, this.stage.ordinal());
-        tagCompound.setInteger(ModNBTTag.VOLCANO_LEVEL.tag, this.level);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_BUILD_LEVEL.tag, this.buildLevel);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_GROUND_LEVEL.tag, this.groundLevel);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE.tag, this.ticksActive);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL.tag, this.clearingLevel);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_LAVA_COUNTER.tag, this.lavaCounter);
-        tagCompound.setInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS.tag, lavaCooldownTicks);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_STAGE, this.stage.ordinal());
+        tagCompound.setInteger(ModNBTTag.VOLCANO_LEVEL, this.level);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_BUILD_LEVEL, this.buildLevel);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_GROUND_LEVEL, this.groundLevel);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_TICKS_ACTIVE, this.ticksActive);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_CLEARING_LEVEL, this.clearingLevel);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_LAVA_COUNTER, this.lavaCounter);
+        tagCompound.setInteger(ModNBTTag.VOLCANO_COOLDOWN_TICKS, lavaCooldownTicks);
         return super.writeToNBT(tagCompound);
     }
 

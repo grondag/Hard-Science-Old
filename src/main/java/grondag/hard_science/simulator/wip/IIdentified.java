@@ -31,7 +31,7 @@ public interface IIdentified
     public default void serializeID(NBTTagCompound tag)
     {
         int id = this.getId();
-        if(id > 0) tag.setInteger(ModNBTTag.ASSIGNED_IDENTIFER.tag, id);
+        if(id > 0) tag.setInteger(ModNBTTag.ASSIGNED_IDENTIFER, id);
     }
     
     /**
@@ -39,6 +39,6 @@ public interface IIdentified
      */
     public default void deserializeID(NBTTagCompound tag)
     {
-        this.setId(tag.hasKey(ModNBTTag.ASSIGNED_IDENTIFER.tag) ? tag.getInteger(ModNBTTag.ASSIGNED_IDENTIFER.tag) : NO_ID);
+        this.setId(tag.hasKey(ModNBTTag.ASSIGNED_IDENTIFER) ? tag.getInteger(ModNBTTag.ASSIGNED_IDENTIFER) : NO_ID);
     }
 }

@@ -22,21 +22,39 @@ public interface IMachinePowerProvider extends IReadWriteNBT
     public long availableEnergyJoules();
     
     /**
+     * Formated {@link #availableEnergyJoules()} cached on client for rendering.
+     */
+    @SideOnly(Side.CLIENT)
+    public String formatedAvailableEnergyJoules();
+    
+    /**
      * Maximum energy that can be stored in this provider.
      */
     public long maxEnergyJoules();
     
     /**
-     * Highest possible rate of power input for this provider. 
+     * Highest possible continuous rate of power input for this provider. 
      * For capacitors and batteries, this is max recharge rate from an outside power source.
      * For fuel cells, all of which include a battery, this is the max internal regenerative capacity.
      */
     public long maxPowerInputWatts();
     
     /**
-     * Highest possible rate of power draw from this provider.
+     * Max discrete energy input per tick implied by {@link #maxPowerInputWatts()}
+     * Effective limit for {@link #receiveEnergy(long, boolean, boolean)}.  In joules.
+     */
+    public long maxEnergyInputPerTick();
+    
+    /**
+     * Highest possible continuous rate of power draw from this provider. 
      */
     public long maxPowerOutputWatts();
+    
+    /**
+     * Max discrete energy output per tick implied by {@link #maxPowerOutputWatts()}
+     * Effective limit for {@link #provideEnergy(long, boolean, boolean)}.  In joules.
+     */
+    public long maxEnergyOutputPerTick();
     
     /**
      * Higher value of {@link #maxPowerInputWatts()} and {@link #maxPowerOutputWatts()}.
@@ -45,18 +63,36 @@ public interface IMachinePowerProvider extends IReadWriteNBT
     public long maxPowerInOrOutWatts();
     
     /**
-     * Average recent energy input level over last period prior to client update.
-     * Because this is for client use, counters on server are be reset by {@link #serializeToArray()}.
+     * Average recent energy input level. In watts.
      */
-    @SideOnly(Side.CLIENT)
     public long avgPowerInputWatts();
     
     /**
-     * Average recent energy output level over last period prior to client update.
-     * Because this is for client use, counters on server are be reset by {@link #serializeToArray()}.
+     * {@link #avgPowerInputWatts()} scaled from 0 to 180 for display. Only valid client-side.
+     */
+    public int logAvgPowerInputDegrees();
+
+    /**
+     * Average recent energy output level. In watts.
+     */
+    public long avgPowerOutputWatts();
+
+    /**
+     * {@link #avgPowerOutputWatts()} scaled from 0 to 180 for display. Only valid client-side.
+     */
+    public int avgPowerOutputDegress();
+
+    /**
+     * Average recent power net in/out. Will be negative if outflow exceeds inflow. '
+     * Computation is simply {@link #avgPowerInputWatts()} - {@link #avgPowerOutputWatts()}.
+     */
+    public long avgNetPowerGainLoss();
+    
+    /**
+     * Formated {@link #avgNetPowerGainLoss()} cached on client for rendering.
      */
     @SideOnly(Side.CLIENT)
-    public long avgPowerOutputWatts();
+    public String formattedAvgNetPowerGainLoss();
     
     /**
      * True if provider is actually able to provide power right now.
@@ -75,10 +111,11 @@ public interface IMachinePowerProvider extends IReadWriteNBT
      * Adds energy to this provider. 
      * 
      * While conceptually this is power, is handled as energy due to the
-     * quantized nature of time in Minecraft. <br><br>
+     * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
      *
      * @param maxInput
-     *            Maximum amount of energy to be inserted, in joules.
+     *            Maximum amount of energy to be inserted, in joules.<br>
+     *            Limited by {@link #maxEnergyInputPerTick()}.
      *            
      * @param allowPartial
      *            If false, no energy will be input unless the entire requested amount can be accepted.
@@ -94,10 +131,11 @@ public interface IMachinePowerProvider extends IReadWriteNBT
       * Consumes energy from this provider. 
       * 
       * While conceptually this is power, is handled as energy due to the
-      * quantized nature of time in Minecraft. <br><br>
+      * quantized nature of time in Minecraft. Intended to be called each tick.<br><br>
       *
       * @param maxOutput
-      *            Maximum amount of energy to be extracted, in joules.
+      *            Maximum amount of energy to be extracted, in joules.<br>
+     *            Limited by {@link #maxEnergyOutputPerTick()}.
       *            
       * @param allowPartial
       *            If false, no energy will be extracted unless the entire requested amount can be provided.
@@ -135,7 +173,9 @@ public interface IMachinePowerProvider extends IReadWriteNBT
 
      /**
       * On server, regenerates power from PE. 
+      * Returns true if internal state was modified and should be sent to client and/or persisted.
+     * @return 
       */
-     void tick(MaterialBuffer PEBuffer);
+     boolean tick(MaterialBuffer PEBuffer);
     
 }

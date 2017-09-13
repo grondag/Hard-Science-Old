@@ -521,8 +521,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         if(world.isRemote) return;
         
-        if(this.controlState.hasPowerProvider())
-            this.getPowerProvider().tick(this.peBuffer);
+        if(this.controlState.hasPowerProvider() && this.getPowerProvider().tick(this.peBuffer))
+                this.markDirty();
         
         if(this.isPlayerUpdateNeeded && this.listeningPlayers != null && !this.listeningPlayers.isEmpty())
         {

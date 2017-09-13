@@ -3,7 +3,7 @@ package grondag.hard_science.machines.base;
 import java.util.List;
 
 import grondag.hard_science.HardScience;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer;
+import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
@@ -188,14 +188,14 @@ public abstract class MachineBlock extends SuperBlockPlus
         float faceX = this.hitX(side, hitX, hitZ);
         float faceY = 1f - hitY;
 
-        if(machineTE.hasOnOff() && MachineControlRenderer.BOUNDS_ON_OFF.contains(faceX, faceY))
+        if(machineTE.hasOnOff() && RenderBounds.BOUNDS_ON_OFF.contains(faceX, faceY))
         {
             if(machineTE.togglePower((EntityPlayerMP) playerIn))
             {
                 worldIn.playSound(null, pos.getX() + .5f, pos.getY() + .5f, pos.getZ() + .5f, SoundEvents.UI_BUTTON_CLICK, SoundCategory.PLAYERS, .2f, ((worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * .7f + 1) * 2);
             }
         }
-        else if(machineTE.hasRedstoneControl() && MachineControlRenderer.BOUNDS_REDSTONE.contains(faceX, faceY))
+        else if(machineTE.hasRedstoneControl() && RenderBounds.BOUNDS_REDSTONE.contains(faceX, faceY))
         {
             if(machineTE.toggleRedstoneControl((EntityPlayerMP) playerIn))
             {

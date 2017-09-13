@@ -1119,7 +1119,7 @@ public class ModelStateFactory
 
         public static @Nullable ModelState deserializeFromNBTIfPresent(NBTTagCompound tag)
         {
-            if(tag != null && tag.hasKey(ModNBTTag.MODEL_STATE.tag))
+            if(tag != null && tag.hasKey(ModNBTTag.MODEL_STATE))
             {
                 ModelState result = new ModelState();
                 result.deserializeNBT(tag);
@@ -1131,7 +1131,7 @@ public class ModelStateFactory
         @Override
         public void deserializeNBT(NBTTagCompound tag)
         {
-            this.deserializeNBT(tag, ModNBTTag.MODEL_STATE.tag);
+            this.deserializeNBT(tag, ModNBTTag.MODEL_STATE);
         }
         
         /**
@@ -1152,7 +1152,7 @@ public class ModelStateFactory
         @Override
         public void serializeNBT(NBTTagCompound tag)
         {
-            this.serializeNBT(tag, ModNBTTag.MODEL_STATE.tag);
+            this.serializeNBT(tag, ModNBTTag.MODEL_STATE);
         }
 
         /**

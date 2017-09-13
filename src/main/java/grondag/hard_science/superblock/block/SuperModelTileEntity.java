@@ -12,7 +12,7 @@ public class SuperModelTileEntity extends SuperTileEntity
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
     public static final EnumSerializer<SuperModelTileEntity, BlockSubstance> SERIALIZER_SUBSTANCE 
-            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>(ModNBTTag.SUPER_MODEL_SUBSTANCE.tag, BlockSubstance.class)
+            = new EnumSerializer<SuperModelTileEntity, BlockSubstance>(ModNBTTag.SUPER_MODEL_SUBSTANCE, BlockSubstance.class)
     {
         @Override
         public BlockSubstance getValue(SuperModelTileEntity target)

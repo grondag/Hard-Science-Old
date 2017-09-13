@@ -2,21 +2,20 @@ package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MaterialBuffer;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import net.minecraft.client.Minecraft;
 
-public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGauge>
+public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGauge, RadialRenderBounds>
 {
     private RadialGaugeSpec spec;
     private final MaterialBuffer buffer;
     
     public MachineBufferGauge(MachineTileEntity tileEntity, RadialGaugeSpec spec)
     {
-        super(tileEntity);
+        super(tileEntity, spec);
         this.spec = spec;
         MaterialBufferManager mbm = tileEntity.getBufferManager();
         if(mbm == null || spec.bufferIndex >= mbm.bufferCount()) 
@@ -34,8 +33,7 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     protected void handleCoordinateUpdate()
     {
         super.handleCoordinateUpdate();
-        double radius = this.width / 2.0;
-        this.spec = new RadialGaugeSpec(this.spec.bufferIndex, new RadialRenderBounds(this.left + radius, this.top + radius, radius), 
+        this.spec = new RadialGaugeSpec(this.spec.bufferIndex, spec.scale(this.left, this.top, this.width, this.height),
                 this.spec.spriteScale, this.spec.sprite, this.spec.color);
     }
 

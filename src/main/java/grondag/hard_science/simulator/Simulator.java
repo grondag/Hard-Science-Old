@@ -246,16 +246,16 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     public void deserializeNBT(NBTTagCompound nbt)
     {
         Log.info("Simulator read from NBT");
-        this.lastSimTick = nbt.getInteger(ModNBTTag.SIMULATION_LAST_TICK.tag);
-        this.worldTickOffset = nbt.getLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET.tag);
+        this.lastSimTick = nbt.getInteger(ModNBTTag.SIMULATION_LAST_TICK);
+        this.worldTickOffset = nbt.getLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET);
     }
   
     @Override
     public void serializeNBT(NBTTagCompound nbt)
     {
         Log.info("saving simulation state");
-        nbt.setInteger(ModNBTTag.SIMULATION_LAST_TICK.tag, lastSimTick);
-        nbt.setLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET.tag, worldTickOffset);
+        nbt.setInteger(ModNBTTag.SIMULATION_LAST_TICK, lastSimTick);
+        nbt.setLong(ModNBTTag.SIMULATION_WORLD_TICK_OFFSET, worldTickOffset);
     }
     
     public World getWorld() { return this.world; }
@@ -323,7 +323,7 @@ public class Simulator  implements IPersistenceNode, ForgeChunkManager.OrderedLo
     @Override
     public String tagName()
     {
-        return ModNBTTag.SIMULATOR.tag;
+        return ModNBTTag.SIMULATOR;
     }
 
  

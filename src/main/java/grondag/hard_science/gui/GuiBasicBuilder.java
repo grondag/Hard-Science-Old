@@ -2,9 +2,10 @@ package grondag.hard_science.gui;
 
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.machine.MachineBufferGauge;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.MachineFabricationProgressGauge;
+import grondag.hard_science.gui.control.machine.MachinePower;
+import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
+import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
@@ -26,6 +27,8 @@ public class GuiBasicBuilder extends AbstractSimpleGui<BasicBuilderTileEntity>
         {
             mainPanel.add(sizeControl(mainPanel, new MachineBufferGauge(te, spec), spec));
         }
-        mainPanel.add(sizeControl(mainPanel, new MachineFabricationProgressGauge(te), MachineControlRenderer.BOUNDS_PROGRESS));
+        mainPanel.add(sizeControl(mainPanel, new MachineFabricationProgressGauge(te, RenderBounds.BOUNDS_PROGRESS), RenderBounds.BOUNDS_PROGRESS));
+        
+        mainPanel.add(sizeControl(mainPanel, new MachinePower(te, RenderBounds.BOUNDS_POWER), RenderBounds.BOUNDS_POWER));
     } 
 }

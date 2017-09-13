@@ -482,7 +482,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        this.cachedAmount = compound.getInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT.tag);
+        this.cachedAmount = compound.getInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT);
         this.dataManager.set(FLUID_AMOUNT, cachedAmount);
         this.updateAmountDependentData();
     }
@@ -490,7 +490,7 @@ public class EntityLavaBlob extends Entity
     @Override
     protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        compound.setInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT.tag, this.dataManager.get(FLUID_AMOUNT).intValue());
+        compound.setInteger(ModNBTTag.LAVA_PARTICLE_AMOUNT, this.dataManager.get(FLUID_AMOUNT).intValue());
     }
 
     @Override

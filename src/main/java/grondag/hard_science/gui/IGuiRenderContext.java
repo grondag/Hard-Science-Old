@@ -6,12 +6,13 @@ import java.util.List;
 import grondag.hard_science.gui.control.GuiControl;
 import grondag.hard_science.gui.control.Panel;
 import grondag.hard_science.gui.control.machine.AbstractMachineControl;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.MachineName;
 import grondag.hard_science.gui.control.machine.MachineOnOff;
 import grondag.hard_science.gui.control.machine.MachineRedstone;
 import grondag.hard_science.gui.control.machine.MachineSymbol;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRectRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -79,10 +80,10 @@ public interface IGuiRenderContext
     
     /** used by {@link #initGuiContext()} for layout.  For containers, set by container layout. For simple gui, is dynamic to screen size. */
     public int mainPanelSize();
+    
     /**
      * Call from initializer to set up main panel and other shared stuff
      */
-    
     public default Panel initGuiContextAndCreateMainPanel(MachineTileEntity tileEntity)
     {
         Panel mainPanel = new Panel(true);
@@ -93,18 +94,18 @@ public interface IGuiRenderContext
         mainPanel.setBackgroundColor(0xFF101010);
         
         
-        mainPanel.add(sizeControl(mainPanel, new MachineName(tileEntity), MachineControlRenderer.BOUNDS_NAME));
-        mainPanel.add(sizeControl(mainPanel,  new MachineSymbol(tileEntity), MachineControlRenderer.BOUNDS_SYMBOL));
-        mainPanel.add(sizeControl(mainPanel,  new MachineSymbol(tileEntity), MachineControlRenderer.BOUNDS_SYMBOL));
+        mainPanel.add(sizeControl(mainPanel, new MachineName(tileEntity, RenderBounds.BOUNDS_NAME), RenderBounds.BOUNDS_NAME));
+        mainPanel.add(sizeControl(mainPanel,  new MachineSymbol(tileEntity, RenderBounds.BOUNDS_SYMBOL), RenderBounds.BOUNDS_SYMBOL));
+
         
         if(tileEntity.hasOnOff()) 
         {
-            mainPanel.add(sizeControl(mainPanel, new MachineOnOff(tileEntity), MachineControlRenderer.BOUNDS_ON_OFF));
+            mainPanel.add(sizeControl(mainPanel, new MachineOnOff(tileEntity, RenderBounds.BOUNDS_ON_OFF), RenderBounds.BOUNDS_ON_OFF));
         }
 
         if(tileEntity.hasRedstoneControl())
         {
-            mainPanel.add(sizeControl(mainPanel, new MachineRedstone(tileEntity), MachineControlRenderer.BOUNDS_REDSTONE));
+            mainPanel.add(sizeControl(mainPanel, new MachineRedstone(tileEntity, RenderBounds.BOUNDS_REDSTONE), RenderBounds.BOUNDS_REDSTONE));
         }
         
         this.addControls(mainPanel, tileEntity);
@@ -112,12 +113,12 @@ public interface IGuiRenderContext
         return mainPanel;
     }
     
-    public default AbstractMachineControl<?> sizeControl(Panel mainPanel, AbstractMachineControl<?> control, RenderBounds bounds)
+    public default AbstractMachineControl<?, ?> sizeControl(Panel mainPanel, AbstractMachineControl<?, ?> control, AbstractRectRenderBounds bounds)
     {
-        control.setLeft(mainPanel.getLeft() + mainPanel.getWidth() * bounds.left());
-        control.setTop(mainPanel.getTop() + mainPanel.getHeight() * bounds.top());
-        control.setWidth(mainPanel.getWidth() * bounds.width());
-        control.setHeight(mainPanel.getHeight() * bounds.height());
+        control.setLeft(mainPanel.getLeft() + mainPanel.getWidth() * ((AbstractRectRenderBounds)bounds).left());
+        control.setTop(mainPanel.getTop() + mainPanel.getHeight() * ((AbstractRectRenderBounds)bounds).top());
+        control.setWidth(mainPanel.getWidth() * ((AbstractRectRenderBounds)bounds).width());
+        control.setHeight(mainPanel.getHeight() * ((AbstractRectRenderBounds)bounds).height());
         return control;
     }
     

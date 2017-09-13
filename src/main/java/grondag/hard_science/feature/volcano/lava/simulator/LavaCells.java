@@ -420,7 +420,7 @@ public class LavaCells
         if(Configurator.VOLCANO.enablePerformanceLogging)
             Log.info("Saving " + i / LavaCell.LAVA_CELL_NBT_WIDTH + " lava cells.");
         
-        nbt.setIntArray(ModNBTTag.LAVA_CELLS.tag, Arrays.copyOfRange(saveData, 0, i));
+        nbt.setIntArray(ModNBTTag.LAVA_CELLS, Arrays.copyOfRange(saveData, 0, i));
     }
     
     public void readNBT(LavaSimulator sim, NBTTagCompound nbt)
@@ -428,7 +428,7 @@ public class LavaCells
         this.cellChunks.clear();
         
         // LOAD LAVA CELLS
-        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_CELLS.tag);
+        int[] saveData = nbt.getIntArray(ModNBTTag.LAVA_CELLS);
         
         //confirm correct size
         if(saveData == null || saveData.length % LavaCell.LAVA_CELL_NBT_WIDTH != 0)

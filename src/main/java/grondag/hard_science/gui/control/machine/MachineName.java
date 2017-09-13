@@ -1,16 +1,17 @@
 package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.IGuiRenderContext;
+import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 
-public class MachineName extends AbstractMachineControl<MachineName>
+public class MachineName extends AbstractMachineControl<MachineName, RectRenderBounds>
 {
 
-    public MachineName(MachineTileEntity tileEntity)
+    public MachineName(MachineTileEntity tileEntity, RectRenderBounds bounds)
     {
-        super(tileEntity);
+        super(tileEntity, bounds);
     }
 
     @Override

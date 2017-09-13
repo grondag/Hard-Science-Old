@@ -1,29 +1,18 @@
 package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.IGuiRenderContext;
-import grondag.hard_science.gui.control.machine.MachineControlRenderer.RadialRenderBounds;
+import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import net.minecraft.client.Minecraft;
 
-public class MachineFabricationProgressGauge extends AbstractMachineControl<MachineFabricationProgressGauge>
+public class MachineFabricationProgressGauge extends AbstractMachineControl<MachineFabricationProgressGauge, RadialRenderBounds>
 {
-
     
-    public MachineFabricationProgressGauge(MachineTileEntity tileEntity)
+    public MachineFabricationProgressGauge(MachineTileEntity tileEntity, RadialRenderBounds bounds)
     {
-        super(tileEntity);
+        super(tileEntity, bounds);
     }
-    
- 
-    @Override
-    protected void handleCoordinateUpdate()
-    {
-        super.handleCoordinateUpdate();
-        double radius = this.renderBounds.height() / 2;
-        this.renderBounds = new RadialRenderBounds(this.renderBounds.left() + radius, this.renderBounds.top() + radius, radius);
-    }
-
 
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
@@ -48,7 +37,7 @@ public class MachineFabricationProgressGauge extends AbstractMachineControl<Mach
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderFabricationProgress((RadialRenderBounds)this.renderBounds, this.tileEntity, 0xFF);
+        MachineControlRenderer.renderFabricationProgress(this.renderBounds, this.tileEntity, 0xFF);
     }
 
     @Override

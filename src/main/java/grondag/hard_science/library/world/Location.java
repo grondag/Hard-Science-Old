@@ -42,18 +42,18 @@ public class Location extends BlockPos
     {
         if(loc != null)
         {
-            nbt.setInteger(ModNBTTag.LOCATION_DIMENSION.tag, loc.dimensionID);
-            nbt.setLong(ModNBTTag.LOCATION_POSITION.tag, PackedBlockPos.pack(loc));
+            nbt.setInteger(ModNBTTag.LOCATION_DIMENSION, loc.dimensionID);
+            nbt.setLong(ModNBTTag.LOCATION_POSITION, PackedBlockPos.pack(loc));
         }
     }
     
     @Nullable
     public static Location fromNBT(@Nullable NBTTagCompound nbt)
     {
-        if(nbt != null && nbt.hasKey(ModNBTTag.LOCATION_POSITION.tag))
+        if(nbt != null && nbt.hasKey(ModNBTTag.LOCATION_POSITION))
         {
-            int dim = nbt.getInteger(ModNBTTag.LOCATION_DIMENSION.tag);
-            long pos = nbt.getLong(ModNBTTag.LOCATION_POSITION.tag);
+            int dim = nbt.getInteger(ModNBTTag.LOCATION_DIMENSION);
+            long pos = nbt.getLong(ModNBTTag.LOCATION_POSITION);
             return new Location(PackedBlockPos.getX(pos), PackedBlockPos.getY(pos), PackedBlockPos.getZ(pos), dim);
         }
         else

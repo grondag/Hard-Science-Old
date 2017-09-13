@@ -115,7 +115,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void readModNBT(NBTTagCompound compound)
     {
         super.readModNBT(compound);
-        this.storageID = getServerTag(compound).getInteger(ModNBTTag.STORAGE_ID.tag);
+        this.storageID = getServerTag(compound).getInteger(ModNBTTag.STORAGE_ID);
         
     }
 
@@ -123,7 +123,7 @@ public abstract class MachineStorageTileEntity extends MachineContainerTileEntit
     public void writeModNBT(NBTTagCompound compound)
     {
         super.writeModNBT(compound);
-        getServerTag(compound).setInteger(ModNBTTag.STORAGE_ID.tag, this.storageID);
+        getServerTag(compound).setInteger(ModNBTTag.STORAGE_ID, this.storageID);
     }
 
     @Override

@@ -166,19 +166,19 @@ public class ItemResource extends AbstractResource<StorageType.StorageTypeStack>
     @Override
     public void serializeNBT(@Nonnull NBTTagCompound nbt)
     {
-        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_ITEM.tag, Item.getIdFromItem(this.item));
-        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_META.tag, this.meta);
-        if(this.tag != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG.tag, this.tag);
-        if(this.caps != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS.tag, this.caps);
+        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_ITEM, Item.getIdFromItem(this.item));
+        nbt.setInteger(ModNBTTag.ITEM_RESOURCE_META, this.meta);
+        if(this != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG, this.tag);
+        if(this.caps != null) nbt.setTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS, this.caps);
     }
 
     @Override
     public void deserializeNBT(@Nonnull NBTTagCompound nbt)
     {
-        this.item = Item.getItemById(nbt.getInteger(ModNBTTag.ITEM_RESOURCE_ITEM.tag));
-        this.meta = nbt.getInteger(ModNBTTag.ITEM_RESOURCE_META.tag);
-        this.tag = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_TAG.tag) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG.tag) : null;
-        this.caps = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_CAPS.tag) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS.tag) : null;
+        this.item = Item.getItemById(nbt.getInteger(ModNBTTag.ITEM_RESOURCE_ITEM));
+        this.meta = nbt.getInteger(ModNBTTag.ITEM_RESOURCE_META);
+        this.tag = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_TAG) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_TAG) : null;
+        this.caps = nbt.hasKey(ModNBTTag.ITEM_RESOURCE_STACK_CAPS) ? nbt.getCompoundTag(ModNBTTag.ITEM_RESOURCE_STACK_CAPS) : null;
         this.hash = -1;
         this.stack = null;
     }
