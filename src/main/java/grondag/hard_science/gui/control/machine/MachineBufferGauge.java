@@ -4,14 +4,14 @@ import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.MaterialBuffer;
 import grondag.hard_science.machines.support.MaterialBufferManager;
+import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import net.minecraft.client.Minecraft;
 
 public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGauge, RadialRenderBounds>
 {
     private RadialGaugeSpec spec;
-    private final MaterialBuffer buffer;
+    private final MaterialBufferDelegate buffer;
     
     public MachineBufferGauge(MachineTileEntity tileEntity, RadialGaugeSpec spec)
     {
@@ -41,7 +41,7 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.buffer == null) return;
-        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey, String.format("%.2f", buffer.fullness()));
+        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey(), String.format("%.2f", buffer.fullness()));
     }
 
     @Override

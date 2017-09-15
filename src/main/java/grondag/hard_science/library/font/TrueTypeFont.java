@@ -10,9 +10,15 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+
+import javax.imageio.stream.FileImageOutputStream;
+
+import com.sun.imageio.plugins.png.PNGImageWriterSpi;
+import com.sun.imageio.plugins.png.PNGImageWriter;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -73,14 +79,14 @@ public class TrueTypeFont
     private int fontTextureID;
 
     /**
-     * Default font texture width
+     * Default font texture pixelWidth
      */
-    private static int textureWidth = 1024;
+    private static int textureWidth = 512;
 
     /**
      * Default font texture height
      */
-    private static int textureHeight = 1024;
+    private static int textureHeight = 512;
 
     /**
      * A reference to Java's AWT Font that we create our font texture from
@@ -97,7 +103,7 @@ public class TrueTypeFont
     {
 
         /**
-         * Character's width
+         * Character's pixelWidth
          */
         public final int width;
 
@@ -248,7 +254,7 @@ public class TrueTypeFont
                 fontImage = null;
             }
 
-            fontTextureID = loadImage(glyphMap);
+             fontTextureID = loadImage(glyphMap);
 
         }
         catch (Exception e)

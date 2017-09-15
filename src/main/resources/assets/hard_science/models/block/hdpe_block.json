@@ -1,0 +1,7 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"all": "hard_science:blocks/noise_subtle_0_0",
+		"particle" : "hard_science:blocks/noise_subtle_0_0"
+	}
+}

@@ -221,13 +221,13 @@ public class Panel extends GuiControl<Panel>
         }       
     }
    
-    /** the width of the background from the edge of child controls */
+    /** the pixelWidth of the background from the edge of child controls */
     public int getOuterMarginWidth()
     {
         return outerMarginWidth;
     }
 
-    /** sets the width of the background from the edge of child controls */
+    /** sets the pixelWidth of the background from the edge of child controls */
     public Panel setOuterMarginWidth(int outerMarginWidth)
     {
         this.outerMarginWidth = outerMarginWidth;

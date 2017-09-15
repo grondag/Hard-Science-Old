@@ -32,6 +32,7 @@ public class ColorHelper
             this.keyBlack = keyBlack;
         }
     }
+    
     /**
      * Alpha components ignored but does no harm if you happen to have it.
      * Return value is on 0-255 scale.
@@ -47,6 +48,36 @@ public class ColorHelper
         float m = (1 - g - k) / (1 - k);
         float y = (1 - b - k) / (1 - k);
         return new CMYK(c, m, y, k);
+    }
+    
+    public static class CMY
+    {
+        public final float cyan;
+        public final float magenta;
+        public final float yellow;
+        
+        private CMY(float cyan, float magenta, float yellow)
+        {
+            this.cyan = cyan;
+            this.magenta = magenta;
+            this.yellow = yellow;
+        }
+    }
+    
+    /**
+     * Alpha components ignored but does no harm if you happen to have it.
+     * Return value is on 0-255 scale.
+     */
+    public static CMY cmy(int colorARGB)
+    {
+        float r = red(colorARGB);
+        float g = green(colorARGB);
+        float b = blue(colorARGB);
+        
+        float c = (1 - r / 255);
+        float m = (1 - g / 255);
+        float y = (1 - b / 255);
+        return new CMY(c, m, y);
     }
 }
     

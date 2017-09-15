@@ -104,7 +104,7 @@ public class BlockColorMapProvider
             buffer.write("}"); buffer.newLine();
             buffer.write("th, td {"); buffer.newLine();
             buffer.write("    height: 23px;"); buffer.newLine();
-            buffer.write("    width: 130px;"); buffer.newLine();
+            buffer.write("    pixelWidth: 130px;"); buffer.newLine();
             buffer.write("    vertical-align: center;");
             buffer.write("}"); buffer.newLine();
             buffer.write("th {"); buffer.newLine();

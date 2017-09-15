@@ -25,6 +25,7 @@ import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -55,6 +56,7 @@ public class ModBlocks
     public static final Block lava_dynamic_filler = null;
     
     public static final Block hdpe_block = null;
+    public static final Block tio2_block = null;
     
     public static final Block virtual_block = null;
     public static final Block smart_chest = null;
@@ -64,6 +66,8 @@ public class ModBlocks
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) 
     {
+        event.getRegistry().register(new Block(Material.CLAY).setRegistryName("tio2_block").setUnlocalizedName("tio2_block").setCreativeTab(HardScience.tabMod));
+        
         ModelState workingModel;
         
         workingModel = new ModelState();

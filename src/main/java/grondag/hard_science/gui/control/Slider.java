@@ -21,25 +21,25 @@ public class Slider extends GuiControl<Slider>
     protected int size;
     protected String label;
     
-    /** in range 0-1, how much of width to allow for label */
+    /** in range 0-1, how much of pixelWidth to allow for label */
     protected double labelWidthFactor = 0;
     
-    /** actual width of the label area */
+    /** actual pixelWidth of the label area */
     protected double labelWidth = 0;
     
     /** point to the right of label area */
     protected double labelRight;
     
-    /** in range 0-1,, how much width to allow for drawing selected option */
+    /** in range 0-1,, how much pixelWidth to allow for drawing selected option */
     protected double choiceWidthFactor = 0;
     
-    /** actual width of the selected option area */
+    /** actual pixelWidth of the selected option area */
     protected double choiceWidth = 0;
     
     /** size of each tab box, 0 if one continuous bar */
     protected double tabSize;
     
-    /** width of area between arrows */
+    /** pixelWidth of area between arrows */
     protected double scrollWidth;
     
     /** x point right of choice, left of arrows, tabs. Same as labelRight if no choice display. */
@@ -113,7 +113,7 @@ public class Slider extends GuiControl<Slider>
         {            
             GuiUtil.drawRect(tabStartX, tabTop, tabStartX + this.scrollWidth, tabBottom, BUTTON_COLOR_INACTIVE);
      
-            // box width is same as tab height, so need to have it be half that extra to the right so that we keep our margins with the arrows
+            // box pixelWidth is same as tab height, so need to have it be half that extra to the right so that we keep our margins with the arrows
             double selectionCenterX = tabStartX + TAB_WIDTH / 2.0 + (this.scrollWidth - TAB_WIDTH) * (double) this.selectedTabIndex / (this.size - 1);
             
             GuiUtil.drawRect(selectionCenterX -  TAB_WIDTH / 2.0, tabTop, selectionCenterX -  TAB_WIDTH / 2.0, tabBottom, BUTTON_COLOR_ACTIVE);

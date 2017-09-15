@@ -18,7 +18,7 @@ import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.IMachinePowerProvider;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.machines.support.MaterialBuffer;
+import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -62,16 +62,16 @@ public class MachineControlRenderer
         {
         case CENTER:
         {
-            // need to scale font width to height of the line
-            double diff = bounds.width - ModModels.FONT_ORBITRON.getWidth(text) * bounds.height / ModModels.FONT_ORBITRON.fontHeight;
+            // need to scale font pixelWidth to height of the line
+            double diff = bounds.width - ModModels.FONT_RENDERER.getWidth(text) * bounds.height / ModModels.FONT_RENDERER.fontHeight;
             renderMachineText(tessellator, buffer, bounds.offset(diff / 2, 0), text, alpha);
             break;
         }
 
         case RIGHT:
         {
-            // need to scale font width to height of the line
-            double diff = bounds.width - ModModels.FONT_ORBITRON.getWidth(text) * bounds.height / ModModels.FONT_ORBITRON.fontHeight;
+            // need to scale font pixelWidth to height of the line
+            double diff = bounds.width - ModModels.FONT_RENDERER.getWidth(text) * bounds.height / ModModels.FONT_RENDERER.fontHeight;
             renderMachineText(tessellator, buffer, bounds.offset(diff, 0), text, alpha);
             break;
         }
@@ -99,7 +99,60 @@ public class MachineControlRenderer
      */
     public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
     {
-        ModModels.FONT_ORBITRON.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
+        ModModels.FONT_RENDERER.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
+    }
+    
+    
+    public static void renderMachineTextMonospaced(RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderMachineTextMonospaced(tes, tes.getBuffer(), bounds, text, alignment, alpha);
+    }
+
+    public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    {
+        switch(alignment)
+        {
+        case CENTER:
+        {
+            // need to scale font pixelWidth to height of the line
+            double diff = bounds.width - ModModels.FONT_RENDERER.getMonospacedWidth(text) * bounds.height / ModModels.FONT_RENDERER.fontHeight;
+            renderMachineTextMonospaced(tessellator, buffer, bounds.offset(diff / 2, 0), text, alpha);
+            break;
+        }
+
+        case RIGHT:
+        {
+            // need to scale font pixelWidth to height of the line
+            double diff = bounds.width - ModModels.FONT_RENDERER.getMonospacedWidth(text) * bounds.height / ModModels.FONT_RENDERER.fontHeight;
+            renderMachineTextMonospaced(tessellator, buffer, bounds.offset(diff, 0), text, alpha);
+            break;
+        }
+
+        case LEFT:
+        default:
+            renderMachineTextMonospaced(tessellator, buffer, bounds, text, alpha);
+            break;
+
+        }
+    }
+
+    /**
+     * Use {@link #renderMachineText(Tessellator, BufferBuilder, RectRenderBounds, String, int)}
+     * when you already have tessellator and buffer on the stack.
+     */
+    public static void renderMachineTextMonospaced(AbstractRectRenderBounds bounds, String text, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderMachineText(tes, tes.getBuffer(), bounds, text, alpha);
+    }
+
+    /**
+     * Use this version when you already have tessellator/buffer references on the stack.
+     */
+    public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
+    {
+        ModModels.FONT_RENDERER.drawLineMonospaced(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
     }
 
     /**
@@ -512,10 +565,10 @@ public class MachineControlRenderer
                 MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 270, outArcLength, ModModels.TEX_POWER_OUTER, alpha << 24 | 0xFF4040);
             }
             
-            renderMachineText(tessellator, buffer, bounds.gainLossTextBounds, 
+            renderMachineTextMonospaced(tessellator, buffer, bounds.gainLossTextBounds, 
                     mpp.formattedAvgNetPowerGainLoss(), HorizontalAlignment.CENTER, alpha);
             
-            renderMachineText(tessellator, buffer, bounds.energyTextBounds, 
+            renderMachineTextMonospaced(tessellator, buffer, bounds.energyTextBounds, 
                      mpp.formatedAvailableEnergyJoules(), HorizontalAlignment.RIGHT, alpha);
             
             int level = (int) (current * 24 / mpp.maxEnergyJoules());
@@ -576,7 +629,7 @@ public class MachineControlRenderer
         return (CommonProxy.currentTimeMillis() & 0x400) == 0x400;
     }
 
-    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, MaterialBuffer materialBuffer, int alpha)
+    public static void renderGauge(RadialGaugeSpec spec, MachineTileEntity te, MaterialBufferDelegate materialBuffer, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
         renderGauge(tes, tes.getBuffer(), spec, te, materialBuffer, alpha);
@@ -585,11 +638,11 @@ public class MachineControlRenderer
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBuffer materialBuffer, int alpha)
+    public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBufferDelegate materialBuffer, int alpha)
     {
 
-        final long currentLevel = materialBuffer.getLevel();
-        final long maxLevel = materialBuffer.maxCapacityNanoLiters;
+        final long currentLevel = materialBuffer.getLevelNanoLiters();
+        final long maxLevel = materialBuffer.maxCapacityNanoLiters();
         
         // render marks
         MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
@@ -607,18 +660,18 @@ public class MachineControlRenderer
         if(CommonProxy.currentTimeMillis() - te.lastInViewMillis < 5000)
         {
             // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
-            final float deltaPlus = materialBuffer.getAvgDeltaPlus();
-            if(deltaPlus > 0.012f)
+            final float deltaIn = materialBuffer.getDeltaIn();
+            if(deltaIn > 0.012f)
             {
-                int deltaLength = Math.round(deltaPlus * 135);
+                int deltaLength = Math.round(deltaIn * 135);
                 renderRadialTexture(tessellator, buffer, spec, 225, deltaLength, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
             }
             
             // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
-            final float deltaMinus = materialBuffer.getAvgDeltaMinus();
-            if(deltaMinus > 0.012f)
+            final float deltaOut = materialBuffer.getDeltaOut();
+            if(deltaOut > 0.012f)
             {
-                int deltaLength =  Math.round(deltaMinus * 135);
+                int deltaLength =  Math.round(deltaOut * 135);
                 renderRadialTexture(tessellator, buffer, spec, 135 - deltaLength, deltaLength, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
             }
         }

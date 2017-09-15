@@ -75,4 +75,32 @@ public class FontLoader
         }
         return out;
     }
+    
+    // only needed when creating raster fonts
+//    public static RasterFont createRasterFont(ResourceLocation res, float defSize, boolean antialias)
+//    {
+//        return createRasterFont(res, defSize, antialias, Font.TRUETYPE_FONT);
+//    }
+//
+//    public static RasterFont createRasterFont(ResourceLocation res, float defSize, boolean antialias, int type)
+//    {
+//        return createRasterFont(res, defSize, antialias, type, null);
+//    }
+//
+//    public static RasterFont createRasterFont(ResourceLocation res, float defSize, boolean antialias, int type, char[] additionalChars)
+//    {
+//        Font font;
+//        RasterFont out = null;
+//        try
+//        {
+//            font = Font.createFont(type, Minecraft.getMinecraft().getResourceManager().getResource(res).getInputStream());
+//            font = font.deriveFont(defSize);
+//            out = new RasterFont(font, antialias, additionalChars);
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+//        return out;
+//    }
 }

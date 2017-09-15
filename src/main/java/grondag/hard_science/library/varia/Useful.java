@@ -384,6 +384,11 @@ public class Useful
     {
         return x * x;
     }
+    
+    public static double squared(double x) 
+    {
+        return x * x;
+    }
 
     /** 
      * Bit length needed to contain the given value.

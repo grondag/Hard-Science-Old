@@ -72,7 +72,7 @@ public class GuiUtil
     }
 
     /**
-     * Draws a horizontal of the given width between two points.
+     * Draws a horizontal of the given pixelWidth between two points.
      */
     public static void drawHorizontalLine(double startX, double endX, double y, double width, int color)
     {
@@ -89,7 +89,7 @@ public class GuiUtil
     }
 
     /**
-     * Draws a vertical of the given width between two points.
+     * Draws a vertical of the given pixelWidth between two points.
      */
     public static void drawVerticalLine(double x, double startY, double endY, double width, int color)
     {

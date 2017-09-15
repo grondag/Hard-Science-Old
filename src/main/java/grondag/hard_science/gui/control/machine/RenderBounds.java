@@ -142,8 +142,8 @@ public interface RenderBounds<T extends RenderBounds<T>>
         public PowerRenderBounds(double centerX, double centerY, double radius)
         {
             super(centerX, centerY, radius);
-            this.gainLossTextBounds = new RectRenderBounds(left(), centerY - radius / 4, width(), radius / 5);
-            this.energyTextBounds = new RectRenderBounds(left(), centerY + radius / 1.8, width(), radius / 2.8);
+            this.gainLossTextBounds = new RectRenderBounds(left(), centerY - radius * 0.34, radius * 2, radius * 0.36 );
+            this.energyTextBounds = new RectRenderBounds(left(), centerY + radius * 0.48, width(), radius * 0.48);
             this.energyLevelBounds = new RectRenderBounds(left(), centerY + radius / 10, width(), radius / 3);
         }
 

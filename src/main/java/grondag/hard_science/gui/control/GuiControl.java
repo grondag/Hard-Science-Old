@@ -50,9 +50,9 @@ public abstract class GuiControl<T extends GuiControl<T>> extends Gui
     protected int lastScrollIncrement = 0;
     
     /** 
-     * If a control has consistent shape, is height / width. 
-     * Multiply width by this number to get height. 
-     * Divide height by this number to get width.
+     * If a control has consistent shape, is height / pixelWidth. 
+     * Multiply pixelWidth by this number to get height. 
+     * Divide height by this number to get pixelWidth.
      */
     protected double aspectRatio = 1.0;
     

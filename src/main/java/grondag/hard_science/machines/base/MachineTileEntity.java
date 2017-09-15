@@ -11,12 +11,12 @@ import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.IMachinePowerProvider;
 import grondag.hard_science.machines.support.MachineControlState;
-import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
 import grondag.hard_science.machines.support.MachineStatusState;
-import grondag.hard_science.machines.support.MaterialBuffer;
+import grondag.hard_science.machines.support.MaterialBufferManager;
+import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.network.ModMessages;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction;
 import grondag.hard_science.network.client_to_server.PacketMachineInteraction.Action;
@@ -115,7 +115,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * Set to PolyEthylene buffer in subclass constructor if this machine uses PE.  
      * Sent to power provider during update if this machine has one.
      */
-    protected MaterialBuffer peBuffer;
+    protected MaterialBufferDelegate bufferHDPE;
     
     private class PlayerListener extends KeyedTuple<EntityPlayerMP>
     {
@@ -521,7 +521,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     {
         if(world.isRemote) return;
         
-        if(this.controlState.hasPowerProvider() && this.getPowerProvider().tick(this.peBuffer))
+        if(this.controlState.hasPowerProvider() && this.getPowerProvider().tick(this.bufferHDPE))
                 this.markDirty();
         
         if(this.isPlayerUpdateNeeded && this.listeningPlayers != null && !this.listeningPlayers.isEmpty())

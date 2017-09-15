@@ -7,7 +7,7 @@ import grondag.hard_science.HardScience;
 import grondag.hard_science.feature.volcano.lava.LavaBlobItem;
 import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.support.MachineItemBlock;
-import grondag.hard_science.materials.PolyethyleneCube;
+import grondag.hard_science.materials.ResourceCube;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.items.BlockAdjuster;
 import grondag.hard_science.superblock.items.SuperItemBlock;
@@ -38,6 +38,10 @@ public class ModItems
     public static final Item hdpe_cube_6 = null;
     public static final Item hdpe_wafer_6 = null;
     
+    public static final Item tio2_cube_1 = null;
+    public static final Item tio2_cube_2 = null;
+    public static final Item tio2_cube_3 = null;
+    
     // item blocks
     public static final Item basalt_cobble = null;
     public static final Item basalt_cut = null;
@@ -64,13 +68,17 @@ public class ModItems
         }
         
         itemReg.register(new BlockAdjuster().setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(1).setRegistryName("hdpe_cube_1").setUnlocalizedName("hdpe_cube_1").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(2).setRegistryName("hdpe_cube_2").setUnlocalizedName("hdpe_cube_2").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(3).setRegistryName("hdpe_cube_3").setUnlocalizedName("hdpe_cube_3").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(4).setRegistryName("hdpe_cube_4").setUnlocalizedName("hdpe_cube_4").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(5).setRegistryName("hdpe_cube_5").setUnlocalizedName("hdpe_cube_5").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(6).setRegistryName("hdpe_cube_6").setUnlocalizedName("hdpe_cube_6").setCreativeTab(HardScience.tabMod));
-        itemReg.register(new PolyethyleneCube(6).setRegistryName("hdpe_wafer_6").setUnlocalizedName("hdpe_wafer_6").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(1).setRegistryName("hdpe_cube_1").setUnlocalizedName("hdpe_cube_1").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(2).setRegistryName("hdpe_cube_2").setUnlocalizedName("hdpe_cube_2").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(3).setRegistryName("hdpe_cube_3").setUnlocalizedName("hdpe_cube_3").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(4).setRegistryName("hdpe_cube_4").setUnlocalizedName("hdpe_cube_4").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(5).setRegistryName("hdpe_cube_5").setUnlocalizedName("hdpe_cube_5").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(6).setRegistryName("hdpe_cube_6").setUnlocalizedName("hdpe_cube_6").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(6).setRegistryName("hdpe_wafer_6").setUnlocalizedName("hdpe_wafer_6").setCreativeTab(HardScience.tabMod));
+        
+        itemReg.register(new ResourceCube(1).setRegistryName("tio2_cube_1").setUnlocalizedName("tio2_cube_1").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(2).setRegistryName("tio2_cube_2").setUnlocalizedName("tio2_cube_2").setCreativeTab(HardScience.tabMod));
+        itemReg.register(new ResourceCube(3).setRegistryName("tio2_cube_3").setUnlocalizedName("tio2_cube_3").setCreativeTab(HardScience.tabMod));
         
 //        itemReg.register(new Item().setRegistryName("obj_test_model").setUnlocalizedName("obj_test_model").setCreativeTab(HardScience.tabMod));
     }

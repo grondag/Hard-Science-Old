@@ -208,7 +208,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
     private static double outerRadius(double height) { return height / 2.0; }
     private static double innerRadius(double height) { return outerRadius(height) * 0.85; }
 //    private static double gridIncrement(double height) { return innerRadius(height) * 2 / Luminance.values().length; }
-//    private static double width(double height) { return height + gridIncrement(height) * (Chroma.values().length + 1); }
+//    private static double pixelWidth(double height) { return height + gridIncrement(height) * (Chroma.values().length + 1); }
     
     private static double height(double width)
     {
@@ -228,7 +228,7 @@ public class ColorPicker extends GuiControl<ColorPicker>
     @Override 
     public ColorPicker setWidth(double width)
     {
-        // width is always derived from height, so have to work backwards to correct height value
+        // pixelWidth is always derived from height, so have to work backwards to correct height value
         return this.setHeight(height(width));
     }
     @Override

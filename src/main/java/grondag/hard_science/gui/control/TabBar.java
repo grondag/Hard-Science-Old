@@ -111,7 +111,7 @@ public abstract class TabBar<T> extends GuiControl<TabBar<T>>
                 
                 GuiUtil.drawRect(this.right - this.tabWidth, tabStartY, this.right, tabStartY + this.scrollHeight, BUTTON_COLOR_INACTIVE);
          
-                // box width is same as tab height, so need to have it be half that extra to the right so that we keep our margins with the arrows
+                // box pixelWidth is same as tab height, so need to have it be half that extra to the right so that we keep our margins with the arrows
                 double selectionCenterY = tabStartY + this.tabWidth / 2.0 + (this.scrollHeight - this.tabWidth) * (double) this.selectedTabIndex / (this.tabCount - 1);
                 
                 GuiUtil.drawRect(this.right - this.tabWidth, selectionCenterY -  this.tabWidth / 2.0, this.right, selectionCenterY +  this.tabWidth / 2.0, BUTTON_COLOR_ACTIVE);

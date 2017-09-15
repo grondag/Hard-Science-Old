@@ -4,6 +4,7 @@ import grondag.hard_science.CommonProxy;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.machines.support.MachinePower.FuelCellSpec;
+import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import jline.internal.Log;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
@@ -286,7 +287,7 @@ public class MachineFuelCell implements IMachinePowerProvider
     }
 
     @Override
-    public boolean tick(MaterialBuffer PEBuffer)
+    public boolean tick(MaterialBufferDelegate PEBuffer)
     {
         // TODO consume PE and limit if not available
         boolean didChange = false;
