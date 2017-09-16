@@ -274,7 +274,7 @@ public class QuadBakery
 //        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
 //        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
         
-        ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList("H2O", 0xFF000000, result);
+        ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList("TiO2", true, 0xFF000000, result);
         
         return result;
     }

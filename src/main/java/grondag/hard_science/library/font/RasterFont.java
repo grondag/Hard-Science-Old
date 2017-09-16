@@ -21,6 +21,7 @@ import com.sun.imageio.plugins.png.PNGImageWriterSpi;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
+import grondag.hard_science.Log;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.FaceVertex;
@@ -108,7 +109,7 @@ public class RasterFont extends TextureAtlasSprite
         public final int monoOffset;
 
         
-        private GlyphInfo(int width, int height, int positionX, int positionY, boolean enableMonospace)
+        private GlyphInfo(int width, int height, int positionX, int positionY, int monoWidth)
         {
             this.positionX = positionX;
             this.positionY = positionY;
@@ -128,7 +129,7 @@ public class RasterFont extends TextureAtlasSprite
             this.vMinMinecraft = 16f * vMinNormal;
             this.vMaxMinecraft = 16f * vMaxNormal;
 
-            this.monoOffset = enableMonospace ? (monoWidth - width) / 2 : 0;
+            this.monoOffset = monoWidth > 0 ? (monoWidth - width) / 2 : 0;
         }
         
         /** must be called after texture map creation */
@@ -144,7 +145,7 @@ public class RasterFont extends TextureAtlasSprite
     /**
      * Array that holds necessary information about the font characters
      */
-    private GlyphInfo[] glyphArray = new GlyphInfo[256];
+    private GlyphInfo[] glyphArray = new GlyphInfo[266];
 
     /** determined by first character - assumes all the same */
     public final int fontHeight;
@@ -169,125 +170,166 @@ public class RasterFont extends TextureAtlasSprite
      * Characters we support for in-world rendering. Limited to reduce texture map consumption.
      */
     private static final String CHARSET = "+-%.=?!/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final String SUBSCRIPTS = "";
     
     /**
      * Pixels around each glyph in texture map to prevent bleeding
      */
-    private static int GLYPH_MARGIN = 4;
+    private static int GLYPH_MARGIN = 2;
+    private static int GLYPH_MARGIN_X2 = GLYPH_MARGIN * 2;
     
     
     /**
      * Font name should include the extension.
      */
-    public RasterFont(String fontName, int size, int horizontalSpacing)
+    public RasterFont(String fontName, final int textureSize, int horizontalSpacing)
     {
-        super(getSpriteResourceName(fontName, size));
-        this.horizontalSpacing = horizontalSpacing;
-        
-        final Font font = getFont(new ResourceLocation(HardScience.MODID + ":fonts/" + fontName), size);
-        
-        // Create a temporary image to extract the character's size
-        
-        final BufferedImage sizeImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        final Graphics2D sizeGraphics = (Graphics2D) sizeImage.getGraphics();
-        sizeGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        sizeGraphics.setFont(font);
-        final FontMetrics fontMetrics = sizeGraphics.getFontMetrics();
-        this.fontHeight = fontMetrics.getHeight();
-
-        // compute width for monospacing numeric characters
-        int maxWidth = 0;
-        for(char c : CHARSET.toCharArray())
-        {
-            if(Character.isDigit(c))
-            {
-                int cWidth = fontMetrics.charWidth(c);
-                if(cWidth > maxWidth) maxWidth = cWidth;
-            }
-        }
-        this.monoWidth = maxWidth;
-        
-        // compute needed texture size
-        
-        final int totalWidth = fontMetrics.stringWidth(CHARSET);
-        final int area = totalWidth * this.fontHeight;
-        // add 20% to allow for wasted space - could be more sophisticated but this works most of the time
-        final int textureSize = MathHelper.smallestEncompassingPowerOfTwo((int) Math.sqrt(area * 1.2));
+        super(getSpriteResourceName(fontName, textureSize));
         this.height = textureSize;
         this.width = textureSize;
+        this.horizontalSpacing = horizontalSpacing;
         
-        try
+        // initial guess - shoot for too big
+        int fontSize = textureSize / 8;
+        int monoWidth = 0;
+        int fontHeight = 0;
+        boolean isSizeRight = false;
+        sizeloop:
+        while(!isSizeRight)
         {
-            final BufferedImage glyphMapImage = new BufferedImage(textureSize, textureSize, BufferedImage.TYPE_INT_ARGB);
-            final Graphics2D glyphGraphics = (Graphics2D) glyphMapImage.getGraphics();
+            Font font = getFont(new ResourceLocation(HardScience.MODID + ":fonts/" + fontName), fontSize);
+            
+            // Create a temporary image to extract the character's size
+            
+            final BufferedImage sizeImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D sizeGraphics = (Graphics2D) sizeImage.getGraphics();
+            sizeGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            sizeGraphics.setFont(font);
+            final FontMetrics fontMetrics = sizeGraphics.getFontMetrics();
+            fontHeight = fontMetrics.getHeight();
 
-            glyphGraphics.setColor(new Color(0, 0, 0, 1));
-            glyphGraphics.fillRect(0, 0, this.width, this.width);
-
-            int positionX = 0;
-            int positionY = 0;
-
-            for (char ch : CHARSET.toCharArray())
+            // compute width for monospacing numeric characters
+            int maxWidth = 0;
+            for(char c : CHARSET.toCharArray())
             {
-                BufferedImage fontImage = getFontImage(ch, font, fontMetrics);
-
-                if (positionX + fontImage.getWidth() >= textureSize)
+                if(Character.isDigit(c))
                 {
-                    positionX = 0;
-                    positionY += this.fontHeight;
+                    int cWidth = fontMetrics.charWidth(c);
+                    if(cWidth > maxWidth) maxWidth = cWidth;
+                }
+            }
+            monoWidth = maxWidth;
+
+            try
+            {
+                final BufferedImage glyphMapImage = new BufferedImage(textureSize, textureSize, BufferedImage.TYPE_INT_ARGB);
+                final Graphics2D glyphGraphics = (Graphics2D) glyphMapImage.getGraphics();
+    
+                glyphGraphics.setColor(new Color(0, 0, 0, 1));
+                glyphGraphics.fillRect(0, 0, textureSize, textureSize);
+    
+                int positionX = GLYPH_MARGIN;
+                int positionY = GLYPH_MARGIN;
+    
+                for (char ch : CHARSET.toCharArray())
+                {
+                    BufferedImage fontImage = getFontImage(ch, fontHeight, font, fontMetrics);
+    
+                    if (positionX + fontImage.getWidth() >= textureSize)
+                    {
+                        positionX = GLYPH_MARGIN;
+                        positionY += fontHeight + GLYPH_MARGIN_X2;
+                        
+                        if(positionY + fontHeight + GLYPH_MARGIN_X2 > textureSize)
+                        {
+                            // if overrun then retry with larger size
+                            fontSize--;
+                            continue sizeloop;
+                        }
+                    }
+                    
+                    GlyphInfo glyph = new GlyphInfo(fontImage.getWidth(), fontHeight, positionX, positionY, Character.isDigit(ch) ? monoWidth : 0);
+    
+                    // Draw it here
+                    glyphGraphics.drawImage(fontImage, positionX, positionY, null);
+    
+                    positionX += fontImage.getWidth() + GLYPH_MARGIN_X2;
+                    
+                    glyphArray[ch] = glyph;
+    
+                    fontImage = null;
+                }
+    
+                int i = 256;
+                for (char ch : SUBSCRIPTS.toCharArray())
+                {
+                    BufferedImage fontImage = getFontImage(ch, fontHeight, font, fontMetrics);
+    
+                    if (positionX + fontImage.getWidth() >= textureSize)
+                    {
+                        positionX = GLYPH_MARGIN;
+                        positionY += fontHeight + GLYPH_MARGIN_X2;
+                        
+                        if(positionY + fontHeight + GLYPH_MARGIN_X2 > textureSize)
+                        {
+                            // if overrun then retry with larger size
+                            fontSize--;
+                            continue sizeloop;
+                        }
+                    }
+                    
+                    GlyphInfo glyph = new GlyphInfo(fontImage.getWidth(), fontHeight, positionX, positionY, Character.isDigit(ch) ? monoWidth : 0);
+    
+                    // Draw it here
+                    glyphGraphics.drawImage(fontImage, positionX, positionY, null);
+    
+                    positionX += fontImage.getWidth() + GLYPH_MARGIN_X2;
+                    
+                    glyphArray[i++] = glyph;
+    
+                    fontImage = null;
                 }
                 
-                GlyphInfo glyph = new GlyphInfo(fontImage.getWidth() - GLYPH_MARGIN * 2, this.fontHeight, positionX + GLYPH_MARGIN, positionY, Character.isDigit(ch));
-
-                // Draw it here
-                glyphGraphics.drawImage(fontImage, positionX, positionY, null);
-
-                positionX += fontImage.getWidth();
+                // if we got to here, then size is correct
+                isSizeRight = true;
                 
-                glyphArray[ch] = glyph;
-
-                fontImage = null;
+                this.fontMap = glyphMapImage;
+                
+                //output font textures for troubleshooting - quick hack, not pretty
+                if(Configurator.RENDER.outputFontTexturesForDebugging)
+                {
+                    File file = new File(fontName + "-" + fontHeight + ".png");
+                    if(file.exists()) file.delete();
+                    file.createNewFile();
+                    FileImageOutputStream output = new FileImageOutputStream(file);
+                    PNGImageWriterSpi spiPNG = new PNGImageWriterSpi();
+                    PNGImageWriter writer = (PNGImageWriter) spiPNG.createWriterInstance();
+                    writer.setOutput(output);
+                    writer.write(glyphMapImage);
+                    output.close();
+                }
             }
-
-            this.fontMap = glyphMapImage;
-            
-            //output these for troubleshooting - quick hack, not pretty
-            if(Configurator.RENDER.outputFontTexturesForDebugging)
+            catch (Exception e)
             {
-                File file = new File(fontName + "-" + size + ".png");
-                if(file.exists()) file.delete();
-                file.createNewFile();
-                FileImageOutputStream output = new FileImageOutputStream(file);
-                PNGImageWriterSpi spiPNG = new PNGImageWriterSpi();
-                PNGImageWriter writer = (PNGImageWriter) spiPNG.createWriterInstance();
-                writer.setOutput(output);
-                writer.write(glyphMapImage);
-                output.close();
+                Log.error("Failed to create font. Stuff won't render correctly if it renders at all.", e);
             }
         }
-        catch (Exception e)
-        {
-            System.err.println("Failed to create font.");
-            e.printStackTrace();
-        }
-        
-        
+        this.fontHeight = fontHeight;
+        this.monoWidth = monoWidth;
     }
     
-    private BufferedImage getFontImage(char ch, Font font, FontMetrics fontMetrics)
+    private BufferedImage getFontImage(char ch, int fontHeight, Font font, FontMetrics fontMetrics)
     {
-        int w = fontMetrics.charWidth(ch) + GLYPH_MARGIN * 2;
-        int h = this.fontHeight + GLYPH_MARGIN * 2;
-
+    
         // Create another image holding the character we are creating
         BufferedImage fontImage;
-        fontImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        fontImage = new BufferedImage(fontMetrics.charWidth(ch), fontHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D gt = (Graphics2D) fontImage.getGraphics();
         gt.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         gt.setFont(font);
 
         gt.setColor(Color.WHITE);
-        gt.drawString(String.valueOf(ch), GLYPH_MARGIN, GLYPH_MARGIN + fontMetrics.getAscent());
+        gt.drawString(String.valueOf(ch), 0, fontMetrics.getAscent());
 
         return fontImage;
     }
@@ -322,6 +364,11 @@ public class RasterFont extends TextureAtlasSprite
         return this.glyphArray[c];
     }
     
+    public GlyphInfo getNumericSubscript(int i)
+    {
+        if(i < 0 || i > 9) return null;
+        return this.glyphArray[256 + i];
+    }
     public int getWidth(String text)
     {
         int result = 0;
@@ -332,7 +379,10 @@ public class RasterFont extends TextureAtlasSprite
         return result;
     }
     
-    public int getMonospacedWidth(String text)
+    /**
+     * Digits are given equal widths. Otherwise same as {@link #getWidth(String)}
+     */
+    public int getWidthMonospaced(String text)
     {
         int result = 0;
         for(char c : text.toCharArray())
@@ -342,61 +392,74 @@ public class RasterFont extends TextureAtlasSprite
         return result;
     }
 
-
-    public String trimStringToWidth(String text, int width)
+    /**
+     * Digits are given half their normal width. Otherwise same as {@link #getWidth(String)}
+     */
+    public int getWidthFormula(String text)
     {
-        StringBuilder stringbuilder = new StringBuilder();
-        int i = 0;
-        int j = 0;
-        int k = 1;
-        boolean flag = false;
-        boolean flag1 = false;
-
-        for (int l = j; l >= 0 && l < text.length() && i < width; l += k)
+        float result = 0;
+        for(char c : text.toCharArray())
         {
-            char c0 = text.charAt(l);
-            int i1 = (int) this.getWidth("" + c0);
-
-            if (flag)
-            {
-                flag = false;
-
-                if (c0 != 108 && c0 != 76)
-                {
-                    if (c0 == 114 || c0 == 82)
-                    {
-                        flag1 = false;
-                    }
-                }
-                else
-                {
-                    flag1 = true;
-                }
-            }
-            else if (i1 < 0)
-            {
-                flag = true;
-            }
-            else
-            {
-                i += i1;
-
-                if (flag1)
-                {
-                    ++i;
-                }
-            }
-
-            if (i > width)
-            {
-                break;
-            }
-
-            stringbuilder.append(c0);
+            if(this.glyphArray[c] != null) result += Character.isDigit(c) ? this.getNumericSubscript(Character.getNumericValue(c)).renderWidth / 2f : this.glyphArray[c].renderWidth;
         }
-
-        return stringbuilder.toString();
+        return (int) result;
     }
+
+    //not using this anywhere, was part of original TrueTypeFont code
+//    public String trimStringToWidth(String text, int width)
+//    {
+//        StringBuilder stringbuilder = new StringBuilder();
+//        int i = 0;
+//        int j = 0;
+//        int k = 1;
+//        boolean flag = false;
+//        boolean flag1 = false;
+//
+//        for (int l = j; l >= 0 && l < text.length() && i < width; l += k)
+//        {
+//            char c0 = text.charAt(l);
+//            int i1 = (int) this.getWidth("" + c0);
+//
+//            if (flag)
+//            {
+//                flag = false;
+//
+//                if (c0 != 108 && c0 != 76)
+//                {
+//                    if (c0 == 114 || c0 == 82)
+//                    {
+//                        flag1 = false;
+//                    }
+//                }
+//                else
+//                {
+//                    flag1 = true;
+//                }
+//            }
+//            else if (i1 < 0)
+//            {
+//                flag = true;
+//            }
+//            else
+//            {
+//                i += i1;
+//
+//                if (flag1)
+//                {
+//                    ++i;
+//                }
+//            }
+//
+//            if (i > width)
+//            {
+//                break;
+//            }
+//
+//            stringbuilder.append(c0);
+//        }
+//
+//        return stringbuilder.toString();
+//    }
 
     /**
      * Draws a single line of text at the given x, y coordinate, with z depth
@@ -464,35 +527,13 @@ public class RasterFont extends TextureAtlasSprite
         buffer.pos(xRight, yTop, 0).color(red, green, blue, alpha).tex(glyph.interpolatedMaxU, glyph.interpolatedMinV).lightmap(0x00f0, 0x00f0).endVertex();
     }
     
-    public List<BakedQuad> getBlockQuadsForText(String text)
-    {
-        CubeInputs cube = new CubeInputs();
-        cube.textureName = ModModels.FONT_RESOURCE_STRING_SMALL;
-        GlyphInfo g = this.glyphArray['A'];
-        cube.u0 = g.interpolatedMinU;
-        cube.u1 = g.interpolatedMaxU;
-        cube.v0 = g.interpolatedMinV;
-        cube.v1 = g.interpolatedMaxV;
-        cube.color = 0xFF808080;
-        
-        ArrayList<BakedQuad> result = new ArrayList<BakedQuad>();
-        
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.DOWN)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.UP)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.EAST)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.WEST)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
-        
-        return result;
-    }
-    
     /**
-     * Generates quads to render the given chemical formula on all faces of a block.  
+     * Generates quads to render the given text on all faces of a block.  
      * The quads are oriented to be readable and are positioned in the top half of the block.
      * Assumes the quds will be rendered on a typical 1x1 square block face. 
+     * If formatAsForumla then all number will be smaller and subscript. 
      */
-    public void formulaBlockQuadsToList(String formula, int color, List<BakedQuad> list)
+    public void formulaBlockQuadsToList(String text, boolean formatAsForumla, int color, List<BakedQuad> list)
     {
         RawQuad template = new RawQuad();
         template.textureName = ModModels.FONT_RESOURCE_STRING_SMALL;
@@ -500,10 +541,10 @@ public class RasterFont extends TextureAtlasSprite
         template.lockUV = false;
         template.shouldContractUVs = false;
         
-        int pixelWidth = this.getWidth(formula);
+        int pixelWidth = formatAsForumla ? this.getWidthFormula(text) : this.getWidth(text);
         
         // try fitting to height first
-        float height = 0.5f;
+        float height =  0.6f;
         float width = height * pixelWidth / this.fontHeight;
         
         if(width > 1.0f)
@@ -516,13 +557,15 @@ public class RasterFont extends TextureAtlasSprite
         float scaleFactor = height / this.fontHeight;
         float left = (1 - width) / 2;
 
-        for(char c : formula.toCharArray())
+        for(char c : text.toCharArray())
         {
-            GlyphInfo g = this.getGlyphInfo(c);
+            boolean isSubscript = formatAsForumla && Character.isDigit(c);
+            GlyphInfo g = isSubscript ? this.getNumericSubscript(Character.getNumericValue(c)) : this.getGlyphInfo(c);
             if(g != null)
             {
                 float glyphWidth = g.pixelWidth * scaleFactor;
-                FaceVertex[] fv = makeFaceVertices(g, left, 1, glyphWidth, height);
+                FaceVertex[] fv;
+                fv = makeFaceVertices(g, left, 1.05f, glyphWidth, height);
                 left += glyphWidth;
                 
                 for(EnumFacing face : EnumFacing.VALUES)

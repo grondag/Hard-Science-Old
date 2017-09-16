@@ -63,7 +63,7 @@ public class MachineControlRenderer
         case CENTER:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_BIG.getWidth(text) * bounds.height / ModModels.FONT_RENDERER_BIG.fontHeight;
+            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidth(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
             renderMachineText(tessellator, buffer, bounds.offset(diff / 2, 0), text, alpha);
             break;
         }
@@ -71,7 +71,7 @@ public class MachineControlRenderer
         case RIGHT:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_BIG.getWidth(text) * bounds.height / ModModels.FONT_RENDERER_BIG.fontHeight;
+            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidth(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
             renderMachineText(tessellator, buffer, bounds.offset(diff, 0), text, alpha);
             break;
         }
@@ -99,7 +99,7 @@ public class MachineControlRenderer
      */
     public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
     {
-        ModModels.FONT_RENDERER_BIG.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
+        ModModels.FONT_RENDERER_LARGE.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
     }
     
     
@@ -116,7 +116,7 @@ public class MachineControlRenderer
         case CENTER:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_BIG.getMonospacedWidth(text) * bounds.height / ModModels.FONT_RENDERER_BIG.fontHeight;
+            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidthMonospaced(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
             renderMachineTextMonospaced(tessellator, buffer, bounds.offset(diff / 2, 0), text, alpha);
             break;
         }
@@ -124,7 +124,7 @@ public class MachineControlRenderer
         case RIGHT:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_BIG.getMonospacedWidth(text) * bounds.height / ModModels.FONT_RENDERER_BIG.fontHeight;
+            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidthMonospaced(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
             renderMachineTextMonospaced(tessellator, buffer, bounds.offset(diff, 0), text, alpha);
             break;
         }
@@ -152,7 +152,7 @@ public class MachineControlRenderer
      */
     public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
     {
-        ModModels.FONT_RENDERER_BIG.drawLineMonospaced(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
+        ModModels.FONT_RENDERER_LARGE.drawLineMonospaced(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
     }
 
     /**

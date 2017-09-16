@@ -134,10 +134,10 @@ public class ModModels
     public static void stitcherEventPre(TextureStitchEvent.Pre event)
     {
         TextureMap map = event.getMap();
-        FONT_RENDERER_SMALL = new RasterFont(FONT_NAME, FONT_SIZE_SMALL, 2);
+        FONT_RENDERER_SMALL = new RasterFont(FONT_NAME_SMALL, FONT_SIZE_SMALL, 2);
         map.setTextureEntry(FONT_RENDERER_SMALL);
-        FONT_RENDERER_BIG = new RasterFont(FONT_NAME, FONT_SIZE_BIG, 2);
-        map.setTextureEntry(FONT_RENDERER_BIG);
+        FONT_RENDERER_LARGE = new RasterFont(FONT_NAME_LARGE, FONT_SIZE_LARGE, 2);
+        map.setTextureEntry(FONT_RENDERER_LARGE);
         
         
         for(TexturePallette p : Textures.REGISTRY)
@@ -179,87 +179,14 @@ public class ModModels
     public static TextureAtlasSprite SPRITE_YELLOW_DYE;
     public static TextureAtlasSprite SPRITE_BLACK_DYE;
     
-    public static String FONT_NAME = "league_gothic-regular.otf";
-    public static int FONT_SIZE_SMALL = 32;
-    public static int FONT_SIZE_BIG = 82;
+    public static String FONT_NAME_SMALL = "ubuntu-c.ttf";
+    public static String FONT_NAME_LARGE = "ubuntu-m.ttf";
+    public static int FONT_SIZE_SMALL = 512;
+    public static int FONT_SIZE_LARGE = 512;
     public static RasterFont FONT_RENDERER_SMALL;
-    public static RasterFont FONT_RENDERER_BIG;
-    public static String FONT_RESOURCE_STRING_SMALL = RasterFont.getSpriteResourceName(FONT_NAME, FONT_SIZE_SMALL);
-    public static String FONT_RESOURCE_STRING_BIG = RasterFont.getSpriteResourceName(FONT_NAME, FONT_SIZE_SMALL);
-    
-    // format is character code, pixelWidth, height, x, y
-    public static int[][] FONT_DATA = {
-            { 43, 43, 85, 4, 0 },
-            { 45, 18, 85, 55, 0 },
-            { 37, 41, 85, 81, 0 },
-            { 46, 13, 85, 130, 0 },
-            { 61, 43, 85, 151, 0 },
-            { 63, 27, 85, 202, 0 },
-            { 33, 16, 85, 237, 0 },
-            { 47, 29, 85, 261, 0 },
-            { 48, 30, 85, 298, 0 },
-            { 49, 19, 85, 336, 0 },
-            { 50, 30, 85, 363, 0 },
-            { 51, 29, 85, 401, 0 },
-            { 52, 28, 85, 438, 0 },
-            { 53, 29, 85, 474, 0 },
-            { 54, 29, 85, 4, 85 },
-            { 55, 24, 85, 41, 85 },
-            { 56, 29, 85, 73, 85 },
-            { 57, 29, 85, 110, 85 },
-            { 65, 31, 85, 147, 85 },
-            { 66, 30, 85, 186, 85 },
-            { 67, 30, 85, 224, 85 },
-            { 68, 31, 85, 262, 85 },
-            { 69, 26, 85, 301, 85 },
-            { 70, 25, 85, 335, 85 },
-            { 71, 30, 85, 368, 85 },
-            { 72, 31, 85, 406, 85 },
-            { 73, 15, 85, 445, 85 },
-            { 74, 17, 85, 468, 85 },
-            { 75, 32, 85, 4, 170 },
-            { 76, 24, 85, 44, 170 },
-            { 77, 41, 85, 76, 170 },
-            { 78, 34, 85, 125, 170 },
-            { 79, 30, 85, 167, 170 },
-            { 80, 30, 85, 205, 170 },
-            { 81, 30, 85, 243, 170 },
-            { 82, 30, 85, 281, 170 },
-            { 83, 28, 85, 319, 170 },
-            { 84, 26, 85, 355, 170 },
-            { 85, 30, 85, 389, 170 },
-            { 86, 29, 85, 427, 170 },
-            { 87, 42, 85, 464, 170 },
-            { 88, 31, 85, 4, 255 },
-            { 89, 29, 85, 43, 255 },
-            { 90, 26, 85, 80, 255 },
-            { 97, 27, 85, 114, 255 },
-            { 98, 29, 85, 149, 255 },
-            { 99, 27, 85, 186, 255 },
-            { 100, 28, 85, 221, 255 },
-            { 101, 27, 85, 257, 255 },
-            { 102, 20, 85, 292, 255 },
-            { 103, 29, 85, 320, 255 },
-            { 104, 29, 85, 357, 255 },
-            { 105, 15, 85, 394, 255 },
-            { 106, 14, 85, 417, 255 },
-            { 107, 26, 85, 439, 255 },
-            { 108, 15, 85, 473, 255 },
-            { 109, 42, 85, 4, 340 },
-            { 110, 29, 85, 54, 340 },
-            { 111, 28, 85, 91, 340 },
-            { 112, 29, 85, 127, 340 },
-            { 113, 28, 85, 164, 340 },
-            { 114, 20, 85, 200, 340 },
-            { 115, 26, 85, 228, 340 },
-            { 116, 21, 85, 262, 340 },
-            { 117, 29, 85, 291, 340 },
-            { 118, 25, 85, 328, 340 },
-            { 119, 38, 85, 361, 340 },
-            { 120, 26, 85, 407, 340 },
-            { 121, 26, 85, 441, 340 },
-            { 122, 22, 85, 475, 340 }};
-    
+    public static RasterFont FONT_RENDERER_LARGE;
+    public static String FONT_RESOURCE_STRING_SMALL = RasterFont.getSpriteResourceName(FONT_NAME_SMALL, FONT_SIZE_SMALL);
+    public static String FONT_RESOURCE_STRING_LARGE = RasterFont.getSpriteResourceName(FONT_NAME_LARGE, FONT_SIZE_LARGE);
  
     public static int TEX_RADIAL_GAUGE_MINOR;
     public static int TEX_RADIAL_GAUGE_MAIN;
@@ -339,7 +266,7 @@ public class ModModels
         SPRITE_BLACK_DYE            = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_black");
         
         FONT_RENDERER_SMALL.postLoad();
-        FONT_RENDERER_BIG.postLoad();
+        FONT_RENDERER_LARGE.postLoad();
         
         BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, RenderBounds.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
         BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, RenderBounds.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);
