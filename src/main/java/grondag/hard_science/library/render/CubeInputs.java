@@ -2,6 +2,7 @@ package grondag.hard_science.library.render;
 
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.superblock.model.state.Surface.SurfaceInstance;
+import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.util.EnumFacing;
 
 public class CubeInputs{
@@ -20,7 +21,10 @@ public class CubeInputs{
     
     public CubeInputs()
     {
-        //NOOP
+        //Minimum needed to prevent NPE
+        this.textureRotation = Rotation.ROTATE_NONE;
+        this.surfaceInstance = RawQuad.NO_SURFACE;
+        this.textureName = Textures.BLOCK_NOISE_SUBTLE.getSampleTextureName();
     }
     public CubeInputs(int color, Rotation textureRotation, String textureName, boolean flipU, boolean flipV, boolean isOverlay, boolean isItem)
     {
@@ -34,6 +38,7 @@ public class CubeInputs{
         this.u1 = flipU ? 0 : 16;
         this.v1 = flipV ? 0 : 16;
         this.rotateBottom = true;
+        this.surfaceInstance = RawQuad.NO_SURFACE;
     }
 
     public RawQuad makeRawFace(EnumFacing side){

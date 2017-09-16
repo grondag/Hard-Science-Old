@@ -24,7 +24,7 @@ import net.minecraft.util.math.Vec3i;
 
 public class RawQuad
 {
-    private static final SurfaceInstance NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance;
+    public static final SurfaceInstance NO_SURFACE = new Surface(SurfaceType.MAIN, SurfaceTopology.CUBIC).unitInstance;
     
     private Vertex[] vertices;
     private Vec3d faceNormal = null;

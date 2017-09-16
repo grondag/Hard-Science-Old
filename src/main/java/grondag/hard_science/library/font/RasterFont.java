@@ -1,13 +1,21 @@
 package grondag.hard_science.library.font;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.library.render.CubeInputs;
+import grondag.hard_science.library.render.QuadBakery;
+import grondag.hard_science.library.render.RawQuad;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.EnumFacing;
 
 /**
  * Static version of TrueTypeFont that uses the block texture map.
@@ -36,7 +44,7 @@ public class RasterFont
      */ 
     public final int monoWidth;
 
-    private class GlyphInfo
+    public class GlyphInfo
     {
 
         /**
@@ -72,12 +80,17 @@ public class RasterFont
         public final float uMax;
         public final float vMax;
         
+        public final float uInterpolatedMin;
+        public final float vInterpolatedMin;
+        public final float uInterpolatedMax;
+        public final float vInterpolatedMax;
+        
         /** 
          * Shift character this many pixels right if rendering monospace.
          */
         public final int monoOffset;
         
-        public GlyphInfo(int width, int height, int positionX, int positionY, boolean enableMonospace)
+        private GlyphInfo(int width, int height, int positionX, int positionY, boolean enableMonospace)
         {
             this.positionX = positionX;
             this.positionY = positionY;
@@ -85,10 +98,16 @@ public class RasterFont
             this.renderWidth = width + horizontalSpacing;
             this.height = height;
             int size = sprite.getIconWidth();
-            this.uMin = sprite.getInterpolatedU(16f * positionX / size);
-            this.uMax = sprite.getInterpolatedU(16f * (positionX + width) / size);
-            this.vMin = sprite.getInterpolatedV(16f * positionY / size);
-            this.vMax = sprite.getInterpolatedV(16f * (positionY + height) / size);
+            
+            this.uMin = 16f * positionX / size;
+            this.uMax = 16f * (positionX + width) / size;
+            this.vMin = 16f * positionY / size;
+            this.vMax = 16f * (positionY + height) / size;
+            
+            this.uInterpolatedMin = sprite.getInterpolatedU(this.uMin);
+            this.uInterpolatedMax = sprite.getInterpolatedU(this.uMax);
+            this.vInterpolatedMin = sprite.getInterpolatedV(this.vMin);
+            this.vInterpolatedMax = sprite.getInterpolatedV(this.vMax);
             this.monoOffset = enableMonospace ? (monoWidth - width) / 2 : 0;
         }
     }
@@ -195,6 +214,12 @@ public class RasterFont
 //        }
 //    }
 
+    public GlyphInfo getGlyphInfo(char c)
+    {
+        if(c < 0 || c > 255) return null;
+        return this.glyphArray[c];
+    }
+    
     public int getWidth(String text)
     {
         int result = 0;
@@ -331,9 +356,42 @@ public class RasterFont
         double xRight = xLeft + glyph.pixelWidth * scaleFactor;
         double yBottom = yTop + glyph.height * scaleFactor;
 
-        buffer.pos(xLeft, yTop, 0).color(red, green, blue, alpha).tex(glyph.uMin, glyph.vMin).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xLeft, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uMin, glyph.vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xRight, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uMax, glyph.vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xRight, yTop, 0).color(red, green, blue, alpha).tex(glyph.uMax, glyph.vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xLeft, yTop, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMin, glyph.vInterpolatedMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xLeft, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMin, glyph.vInterpolatedMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xRight, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMax, glyph.vInterpolatedMax).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xRight, yTop, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMax, glyph.vInterpolatedMin).lightmap(0x00f0, 0x00f0).endVertex();
+    }
+    
+    public List<BakedQuad> getBlockQuadsForText(String text)
+    {
+        CubeInputs cube = new CubeInputs();
+        cube.textureName = ModModels.FONT_RESOURCE_STRING;
+        GlyphInfo g = this.glyphArray['A'];
+        cube.u0 = g.uInterpolatedMin;
+        cube.u1 = g.uInterpolatedMax;
+        cube.v0 = g.vInterpolatedMin;
+        cube.v1 = g.vInterpolatedMax;
+        cube.color = 0xFF808080;
+        
+        ArrayList<BakedQuad> result = new ArrayList<BakedQuad>();
+        
+        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.DOWN)));
+        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.UP)));
+        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.EAST)));
+        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.WEST)));
+        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
+        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
+        
+        return result;
+    }
+    
+    /**
+     * Generates raw quads to render the given chemical formula on a block face.  
+     * The quads are oriented to be readable and are positioned in the top half of the block.
+     * Assumes the quds will be rendered on a typical 1x1 square block face. 
+     */
+    public void formulaBlockQuadsToList(String formula, List<RawQuad> list)
+    {
+        
     }
 }

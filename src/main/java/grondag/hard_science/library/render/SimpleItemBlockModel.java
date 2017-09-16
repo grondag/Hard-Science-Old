@@ -24,8 +24,10 @@ public class SimpleItemBlockModel implements IBakedModel
 {
     private final List<BakedQuad> quads;
     private final boolean isShaded;
+    private final boolean isisFlatInGUI;
 
     private static final ImmutableMap<TransformType, TRSRTransformation> BLOCK_TRANSFORMS;
+    private static final ImmutableMap<TransformType, TRSRTransformation> RESOURCE_TRANSFORMS;
 
     // below is borrowed from ForgeBlockStateV1
     private static TRSRTransformation getTransform(float tx, float ty, float tz, float ax, float ay, float az, float s)
@@ -43,7 +45,8 @@ public class SimpleItemBlockModel implements IBakedModel
     {
         return TRSRTransformation.blockCenterToCorner(flipX.compose(TRSRTransformation.blockCornerToCenter(transform)).compose(flipX));
     }
-    static {
+    static
+    {
         TRSRTransformation thirdperson = getTransform(0, 2.5f, 0, 75, 45, 0, 0.375f);
         ImmutableMap.Builder<TransformType, TRSRTransformation> builder = ImmutableMap.builder();
         builder.put(TransformType.GUI,                     getTransform(0, 0, 0, 30, 225, 0, 0.625f));
@@ -54,11 +57,23 @@ public class SimpleItemBlockModel implements IBakedModel
         builder.put(TransformType.FIRST_PERSON_RIGHT_HAND, getTransform(0, 0, 0, 0, 45, 0, 0.4f));
         builder.put(TransformType.FIRST_PERSON_LEFT_HAND,  getTransform(0, 0, 0, 0, 255, 0, 0.4f));
         BLOCK_TRANSFORMS = builder.build();
+        
+        // only diff is for GUI - show head on to improve text legibility
+        builder = ImmutableMap.builder();
+        builder.put(TransformType.GUI,                     getTransform(0, 0, 0, 0, 0, 0, 1.0f));
+        builder.put(TransformType.GROUND,                  getTransform(0, 3, 0, 0, 0, 0, 0.25f));
+        builder.put(TransformType.FIXED,                   getTransform(0, 0, 0, 0, 0, 0, 0.5f));
+        builder.put(TransformType.THIRD_PERSON_RIGHT_HAND, thirdperson);
+        builder.put(TransformType.THIRD_PERSON_LEFT_HAND,  leftify(thirdperson));
+        builder.put(TransformType.FIRST_PERSON_RIGHT_HAND, getTransform(0, 0, 0, 0, 45, 0, 0.4f));
+        builder.put(TransformType.FIRST_PERSON_LEFT_HAND,  getTransform(0, 0, 0, 0, 255, 0, 0.4f));
+        RESOURCE_TRANSFORMS = builder.build();
     }
-    public SimpleItemBlockModel(List<BakedQuad> quads, boolean isShaded)
+    public SimpleItemBlockModel(List<BakedQuad> quads, boolean isShaded, boolean isFlatInGUI)
     {
         this.quads = quads;
         this.isShaded = isShaded;
+        this.isisFlatInGUI = isFlatInGUI;
     }
 
     @Override
@@ -115,7 +130,7 @@ public class SimpleItemBlockModel implements IBakedModel
     
     @Override
     public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-        return handlePerspective(this, BLOCK_TRANSFORMS, cameraTransformType);
+        return handlePerspective(this, this.isisFlatInGUI ? RESOURCE_TRANSFORMS : BLOCK_TRANSFORMS, cameraTransformType);
 
     }
 }

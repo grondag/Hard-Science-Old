@@ -20,11 +20,14 @@ import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.font.FontLoader;
 import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.library.font.TrueTypeFont;
+import grondag.hard_science.library.render.QuadBakery;
+import grondag.hard_science.library.render.SimpleItemBlockModel;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.machines.BasicBuilderTESR;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTESR;
 import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.materials.ResourceCube;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
@@ -109,6 +112,11 @@ public class ModModels
                         event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName() + "." + stack.getMetadata(), "inventory"),
                                 ModModels.MODEL_DISPATCH.getDelegate(block));
                     }
+                }
+                else if(item instanceof ResourceCube)
+                {
+                    event.getModelRegistry().putObject(new ModelResourceLocation(item.getRegistryName(), "inventory"),
+                            new SimpleItemBlockModel(QuadBakery.createCubeWithTexture(Textures.BLOCK_NOISE_SUBTLE_ZOOM.getSampleTextureName(), 0xFFAAAAFF), true, true));
                 }
                 else
                 {
@@ -417,6 +425,11 @@ public class ModModels
                         ModelBakery.registerItemVariants(item, new ResourceLocation(variantName));
                         ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), new ModelResourceLocation(variantName, "inventory"));     
                     }
+                }
+                else if(item instanceof ResourceCube)
+                {
+                    ModelBakery.registerItemVariants(item, item.getRegistryName());
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));     
                 }
                 // Would not actually do it this way if start using OBJ models
 //                else if(item == ModItems.obj_test_model)
