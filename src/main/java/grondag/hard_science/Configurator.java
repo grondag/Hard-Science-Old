@@ -161,6 +161,9 @@ public class Configurator
         
         @Comment("Rendering for blocks about to be placed.")
         public PreviewMode previewSetting = PreviewMode.OUTLINE;
+
+        @Comment("Debug Feature: output generated font images that are uploaded to texture map.")
+        public boolean outputFontTexturesForDebugging = true;
         
         public static float normalLightFactor;
         

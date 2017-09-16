@@ -134,7 +134,11 @@ public class ModModels
     public static void stitcherEventPre(TextureStitchEvent.Pre event)
     {
         TextureMap map = event.getMap();
-        map.registerSprite(new ResourceLocation(FONT_RESOURCE_STRING));
+        FONT_RENDERER_SMALL = new RasterFont(FONT_NAME, FONT_SIZE_SMALL, 2);
+        map.setTextureEntry(FONT_RENDERER_SMALL);
+        FONT_RENDERER_BIG = new RasterFont(FONT_NAME, FONT_SIZE_BIG, 2);
+        map.setTextureEntry(FONT_RENDERER_BIG);
+        
         
         for(TexturePallette p : Textures.REGISTRY)
         {
@@ -175,8 +179,14 @@ public class ModModels
     public static TextureAtlasSprite SPRITE_YELLOW_DYE;
     public static TextureAtlasSprite SPRITE_BLACK_DYE;
     
-    public static RasterFont FONT_RENDERER;
-    public static String FONT_RESOURCE_STRING = "hard_science:blocks/league_gothic-regular_subset";
+    public static String FONT_NAME = "league_gothic-regular.otf";
+    public static int FONT_SIZE_SMALL = 32;
+    public static int FONT_SIZE_BIG = 82;
+    public static RasterFont FONT_RENDERER_SMALL;
+    public static RasterFont FONT_RENDERER_BIG;
+    public static String FONT_RESOURCE_STRING_SMALL = RasterFont.getSpriteResourceName(FONT_NAME, FONT_SIZE_SMALL);
+    public static String FONT_RESOURCE_STRING_BIG = RasterFont.getSpriteResourceName(FONT_NAME, FONT_SIZE_SMALL);
+    
     // format is character code, pixelWidth, height, x, y
     public static int[][] FONT_DATA = {
             { 43, 43, 85, 4, 0 },
@@ -250,8 +260,7 @@ public class ModModels
             { 121, 26, 85, 441, 340 },
             { 122, 22, 85, 475, 340 }};
     
-    public static TextureAtlasSprite FONT_SPRITE;
-    
+ 
     public static int TEX_RADIAL_GAUGE_MINOR;
     public static int TEX_RADIAL_GAUGE_MAIN;
     public static int TEX_RADIAL_GAUGE_MARKS;
@@ -329,9 +338,8 @@ public class ModModels
         SPRITE_YELLOW_DYE           = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_yellow");
         SPRITE_BLACK_DYE            = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_black");
         
-        FONT_SPRITE                 = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(FONT_RESOURCE_STRING);
-        
-        FONT_RENDERER = new RasterFont(FONT_SPRITE, 2, FONT_DATA);
+        FONT_RENDERER_SMALL.postLoad();
+        FONT_RENDERER_BIG.postLoad();
         
         BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, RenderBounds.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
         BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, RenderBounds.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);

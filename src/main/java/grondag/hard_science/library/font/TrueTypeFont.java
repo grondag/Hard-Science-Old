@@ -10,15 +10,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-
-import javax.imageio.stream.FileImageOutputStream;
-
-import com.sun.imageio.plugins.png.PNGImageWriterSpi;
-import com.sun.imageio.plugins.png.PNGImageWriter;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;

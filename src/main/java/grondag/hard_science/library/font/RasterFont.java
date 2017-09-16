@@ -1,50 +1,51 @@
 package grondag.hard_science.library.font;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+
+import javax.imageio.stream.FileImageOutputStream;
 
 import org.lwjgl.opengl.GL11;
 
+import com.sun.imageio.plugins.png.PNGImageWriter;
+import com.sun.imageio.plugins.png.PNGImageWriterSpi;
+
+import grondag.hard_science.Configurator;
+import grondag.hard_science.HardScience;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.RawQuad;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * Static version of TrueTypeFont that uses the block texture map.
  * Enables basic text rendering on blocks and items.
  */
 
-public class RasterFont
+public class RasterFont extends TextureAtlasSprite
 {
-    /**
-     * Array that holds necessary information about the font characters
-     */
-    private GlyphInfo[] glyphArray = new GlyphInfo[256];
-
-    private final TextureAtlasSprite sprite;
-
-    /** determined by first character - assumes all the same */
-    public final int fontHeight;
-    
-    /** 
-     * Adjust horizontal spacing if font needs it.
-     */
-    public final int horizontalSpacing;
-    
-    /**
-     * Pixel width to use for monospace rendering of numbers.
-     */ 
-    public final int monoWidth;
-
     public class GlyphInfo
     {
 
@@ -93,18 +94,19 @@ public class RasterFont
         public final float vMaxNormal;
 
         /** texture coordinate within OpenGL texture, scaled 0-1  */
-        public final float interpolatedMinU;
+        public float interpolatedMinU;
         /** texture coordinate within OpenGL texture, scaled 0-1  */
-        public final float interpolatedMinV;
+        public float interpolatedMinV;
         /** texture coordinate within OpenGL texture, scaled 0-1  */
-        public final float interpolatedMaxU;
+        public float interpolatedMaxU;
         /** texture coordinate within OpenGL texture, scaled 0-1  */
-        public final float interpolatedMaxV;
+        public float interpolatedMaxV;
         
         /** 
          * Shift character this many pixels right if rendering monospace.
          */
         public final int monoOffset;
+
         
         private GlyphInfo(int width, int height, int positionX, int positionY, boolean enableMonospace)
         {
@@ -113,7 +115,7 @@ public class RasterFont
             this.pixelWidth = width;
             this.renderWidth = width + horizontalSpacing;
             this.height = height;
-            int size = sprite.getIconWidth();
+            int size = RasterFont.this.getIconWidth();
             
             
             this.uMinNormal = (float) positionX / size;
@@ -125,117 +127,195 @@ public class RasterFont
             this.uMaxMinecraft = 16f * uMaxNormal;
             this.vMinMinecraft = 16f * vMinNormal;
             this.vMaxMinecraft = 16f * vMaxNormal;
-            
-            this.interpolatedMinU = sprite.getInterpolatedU(this.uMinMinecraft);
-            this.interpolatedMaxU = sprite.getInterpolatedU(this.uMaxMinecraft);
-            this.interpolatedMinV = sprite.getInterpolatedV(this.vMinMinecraft);
-            this.interpolatedMaxV = sprite.getInterpolatedV(this.vMaxMinecraft);
+
             this.monoOffset = enableMonospace ? (monoWidth - width) / 2 : 0;
+        }
+        
+        /** must be called after texture map creation */
+        private void updateInterpolated()
+        {
+            this.interpolatedMinU = RasterFont.this.getInterpolatedU(this.uMinMinecraft);
+            this.interpolatedMaxU = RasterFont.this.getInterpolatedU(this.uMaxMinecraft);
+            this.interpolatedMinV = RasterFont.this.getInterpolatedV(this.vMinMinecraft);
+            this.interpolatedMaxV = RasterFont.this.getInterpolatedV(this.vMaxMinecraft);
         }
     }
     
+    /**
+     * Array that holds necessary information about the font characters
+     */
+    private GlyphInfo[] glyphArray = new GlyphInfo[256];
+
+    /** determined by first character - assumes all the same */
+    public final int fontHeight;
+    
+    /** 
+     * Adjust horizontal spacing if font needs it.
+     */
+    public final int horizontalSpacing;
     
     /**
-     * Array order is character, pixelWidth, height, xLeft, yTop
+     * Pixel width to use for monospace rendering of numbers.
+     */ 
+    public final int monoWidth;
+    
+    
+    /**
+     * Created during init, loaded to texture map during load, null after that.
      */
-    public RasterFont(TextureAtlasSprite sprite, int horizontalSpacing, int[][] fontData)
+    private BufferedImage fontMap;
+
+    /**
+     * Characters we support for in-world rendering. Limited to reduce texture map consumption.
+     */
+    private static final String CHARSET = "+-%.=?!/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    
+    /**
+     * Pixels around each glyph in texture map to prevent bleeding
+     */
+    private static int GLYPH_MARGIN = 4;
+    
+    
+    /**
+     * Font name should include the extension.
+     */
+    public RasterFont(String fontName, int size, int horizontalSpacing)
     {
-        this.sprite = sprite;
+        super(getSpriteResourceName(fontName, size));
         this.horizontalSpacing = horizontalSpacing;
-        this.fontHeight = fontData[0][2];
         
+        final Font font = getFont(new ResourceLocation(HardScience.MODID + ":fonts/" + fontName), size);
+        
+        // Create a temporary image to extract the character's size
+        
+        final BufferedImage sizeImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D sizeGraphics = (Graphics2D) sizeImage.getGraphics();
+        sizeGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        sizeGraphics.setFont(font);
+        final FontMetrics fontMetrics = sizeGraphics.getFontMetrics();
+        this.fontHeight = fontMetrics.getHeight();
+
+        // compute width for monospacing numeric characters
         int maxWidth = 0;
-        for(int[] data : fontData)
+        for(char c : CHARSET.toCharArray())
         {
-            if(Character.isDigit(data[0]) && data[1] > maxWidth) maxWidth = data[1];
+            if(Character.isDigit(c))
+            {
+                int cWidth = fontMetrics.charWidth(c);
+                if(cWidth > maxWidth) maxWidth = cWidth;
+            }
         }
         this.monoWidth = maxWidth;
         
-        for(int[] data : fontData)
+        // compute needed texture size
+        
+        final int totalWidth = fontMetrics.stringWidth(CHARSET);
+        final int area = totalWidth * this.fontHeight;
+        // add 20% to allow for wasted space - could be more sophisticated but this works most of the time
+        final int textureSize = MathHelper.smallestEncompassingPowerOfTwo((int) Math.sqrt(area * 1.2));
+        this.height = textureSize;
+        this.width = textureSize;
+        
+        try
         {
-            this.glyphArray[data[0]] = new GlyphInfo(data[1], data[2], data[3], data[4], Character.isDigit(data[0]));
+            final BufferedImage glyphMapImage = new BufferedImage(textureSize, textureSize, BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D glyphGraphics = (Graphics2D) glyphMapImage.getGraphics();
+
+            glyphGraphics.setColor(new Color(0, 0, 0, 1));
+            glyphGraphics.fillRect(0, 0, this.width, this.width);
+
+            int positionX = 0;
+            int positionY = 0;
+
+            for (char ch : CHARSET.toCharArray())
+            {
+                BufferedImage fontImage = getFontImage(ch, font, fontMetrics);
+
+                if (positionX + fontImage.getWidth() >= textureSize)
+                {
+                    positionX = 0;
+                    positionY += this.fontHeight;
+                }
+                
+                GlyphInfo glyph = new GlyphInfo(fontImage.getWidth() - GLYPH_MARGIN * 2, this.fontHeight, positionX + GLYPH_MARGIN, positionY, Character.isDigit(ch));
+
+                // Draw it here
+                glyphGraphics.drawImage(fontImage, positionX, positionY, null);
+
+                positionX += fontImage.getWidth();
+                
+                glyphArray[ch] = glyph;
+
+                fontImage = null;
+            }
+
+            this.fontMap = glyphMapImage;
+            
+            //output these for troubleshooting - quick hack, not pretty
+            if(Configurator.RENDER.outputFontTexturesForDebugging)
+            {
+                File file = new File(fontName + "-" + size + ".png");
+                if(file.exists()) file.delete();
+                file.createNewFile();
+                FileImageOutputStream output = new FileImageOutputStream(file);
+                PNGImageWriterSpi spiPNG = new PNGImageWriterSpi();
+                PNGImageWriter writer = (PNGImageWriter) spiPNG.createWriterInstance();
+                writer.setOutput(output);
+                writer.write(glyphMapImage);
+                output.close();
+            }
         }
+        catch (Exception e)
+        {
+            System.err.println("Failed to create font.");
+            e.printStackTrace();
+        }
+        
+        
+    }
+    
+    private BufferedImage getFontImage(char ch, Font font, FontMetrics fontMetrics)
+    {
+        int w = fontMetrics.charWidth(ch) + GLYPH_MARGIN * 2;
+        int h = this.fontHeight + GLYPH_MARGIN * 2;
+
+        // Create another image holding the character we are creating
+        BufferedImage fontImage;
+        fontImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D gt = (Graphics2D) fontImage.getGraphics();
+        gt.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gt.setFont(font);
+
+        gt.setColor(Color.WHITE);
+        gt.drawString(String.valueOf(ch), GLYPH_MARGIN, GLYPH_MARGIN + fontMetrics.getAscent());
+
+        return fontImage;
     }
 
-    /**
-     * This has been hacked up to create the raster - has no use during run time.
-     */
-//    private void createSet(char[] customCharsArray)
-//    {
-//        // If there are custom chars then I expand the font texture twice
-//        if (customCharsArray != null && customCharsArray.length > 0)
-//        {
-//            textureWidth *= 2;
-//        }
-//
-//        // In any case this should be done in other way. Texture with size 512x512
-//        // can maintain only 256 characters with resolution of 32x32. The texture
-//        // size should be calculated dynamicaly by looking at character sizes.
-//
-//        try
-//        {
-//
-//            BufferedImage glyphMap = new BufferedImage(textureWidth, textureHeight, BufferedImage.TYPE_INT_ARGB);
-//            Graphics2D g = (Graphics2D) glyphMap.getGraphics();
-//
-//            g.setColor(new Color(0, 0, 0, 1));
-//            g.fillRect(0, 0, textureWidth, textureHeight);
-//
-//            int positionX = 0;
-//            int positionY = 0;
-//
-//            String usedChars = "+-%.=?!/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-//            for (char ch : usedChars.toCharArray())
-//            {
-//
-//                BufferedImage fontImage = getFontImage(ch);
-//
-//
-//                if (positionX + fontImage.getWidth() >= textureWidth)
-//                {
-//                    positionX = 0;
-//                    positionY += this.fontHeight;
-//                }
-//                
-//                GlyphInfo glyph = new GlyphInfo(fontImage.getWidth() - GLYPH_MARGIN * 2, this.fontHeight, positionX + GLYPH_MARGIN, positionY);
-//
-//
-//                // Draw it here
-//                g.drawImage(fontImage, positionX, positionY, null);
-//
-//                positionX += fontImage.getWidth();
-//
-//                Log.info("{ %d, %d, %d, %d, %d },", (int)ch, glyph.width, glyph.height, glyph.positionX, glyph.positionY);
-//                
-//                glyphArray[ch] = glyph;
-//              
-//
-//                fontImage = null;
-//            }
-//
-//            //used when creating the raster - quick hack, not pretty
-//            File file = new File("font.png");
-//            if(file.exists()) file.delete();
-//            file.createNewFile();
-//            FileImageOutputStream output = new FileImageOutputStream(file);
-//            PNGImageWriterSpi spiPNG = new PNGImageWriterSpi();
-//            PNGImageWriter writer = (PNGImageWriter) spiPNG.createWriterInstance();
-//            writer.setOutput(output);
-//            writer.write(glyphMap);
-//            output.close();
-//
-//
-//            
-//            fontTextureID = loadImage(glyphMap);
-//
-//        }
-//        catch (Exception e)
-//        {
-//            System.err.println("Failed to create font.");
-//            e.printStackTrace();
-//        }
-//    }
-
+    private Font getFont(ResourceLocation res, float size)
+    {
+        Font font;
+        try
+        {
+            font = Font.createFont(Font.TRUETYPE_FONT, Minecraft.getMinecraft().getResourceManager().getResource(res).getInputStream());
+            return font.deriveFont(size);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /** must be called after texture map creation to set interpolated values */
+    public void postLoad()
+    {
+        for(GlyphInfo g : this.glyphArray)
+        {
+            if(g != null) g.updateInterpolated();
+        }
+    }
+    
     public GlyphInfo getGlyphInfo(char c)
     {
         if(c < 0 || c > 255) return null;
@@ -387,7 +467,7 @@ public class RasterFont
     public List<BakedQuad> getBlockQuadsForText(String text)
     {
         CubeInputs cube = new CubeInputs();
-        cube.textureName = ModModels.FONT_RESOURCE_STRING;
+        cube.textureName = ModModels.FONT_RESOURCE_STRING_SMALL;
         GlyphInfo g = this.glyphArray['A'];
         cube.u0 = g.interpolatedMinU;
         cube.u1 = g.interpolatedMaxU;
@@ -415,7 +495,7 @@ public class RasterFont
     public void formulaBlockQuadsToList(String formula, int color, List<BakedQuad> list)
     {
         RawQuad template = new RawQuad();
-        template.textureName = ModModels.FONT_RESOURCE_STRING;
+        template.textureName = ModModels.FONT_RESOURCE_STRING_SMALL;
         template.color = color;
         template.lockUV = false;
         template.shouldContractUVs = false;
@@ -472,6 +552,41 @@ public class RasterFont
         
         return result;
     }
-    
+ 
+    @Override
+    public boolean hasCustomLoader(IResourceManager manager, ResourceLocation location)
+    {
+        return true;
+    }
 
+    @Override
+    public boolean load(IResourceManager manager, ResourceLocation location, Function<ResourceLocation, TextureAtlasSprite> textureGetter)
+    {
+        BufferedImage bufferedimage = this.fontMap;
+        this.fontMap = null;
+        int mipmapLevels = Minecraft.getMinecraft().gameSettings.mipmapLevels;
+        
+        int[][] aint = new int[mipmapLevels + 1][];
+        aint[0] = new int[bufferedimage.getWidth() * bufferedimage.getHeight()];
+        bufferedimage.getRGB(0, 0, bufferedimage.getWidth(), bufferedimage.getHeight(), aint[0], 0, bufferedimage.getWidth());
+        this.framesTextureData.add(aint);
+        this.generateMipmaps(mipmapLevels);
+        
+        // Comments on super appear to be incorrect.
+        // False causes us to be included in map,
+        // which is what we want.
+        return false;
+    }
+
+    @Override
+    public void loadSpriteFrames(IResource resource, int mipmaplevels) throws IOException
+    {
+        //noop - all done in load
+    }
+  
+
+    public static String getSpriteResourceName(String fontName, int fontSize)
+    {
+        return "hard_science:blocks/" + fontName + "-" + fontSize;
+    }
 }

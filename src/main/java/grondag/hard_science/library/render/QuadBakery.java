@@ -260,7 +260,7 @@ public class QuadBakery
 //        //FIXME: remove
 //        cube = new CubeInputs();
 //        cube.textureName = ModModels.FONT_RESOURCE_STRING;
-//        GlyphInfo g = ModModels.FONT_RENDERER.getGlyphInfo('A');
+//        GlyphInfo g = ModModels.FONT_RENDERER_SMALL.getGlyphInfo('A');
 //        cube.u0 = g.uMinMinecraft;
 //        cube.u1 = g.uMaxMinecraft;
 //        cube.v0 = g.vMinMinecraft;
@@ -274,7 +274,7 @@ public class QuadBakery
 //        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
 //        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
         
-        ModModels.FONT_RENDERER.formulaBlockQuadsToList("H2O", 0xFF000000, result);
+        ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList("H2O", 0xFF000000, result);
         
         return result;
     }
