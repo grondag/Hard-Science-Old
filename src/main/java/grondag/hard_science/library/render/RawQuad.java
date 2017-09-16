@@ -49,8 +49,10 @@ public class RawQuad
     public boolean isFullBrightness = false;
     
     /** 
-     * If true then UV coordinates will be ignored and instead set
+     * If true then quad painters will ignore UV coordinates and instead set
      * based on projection of vertices onto the given nominal face.
+     * Note that FaceVertex does this by default even if lockUV is not specified.
+     * To get unlockedUV coordiates, specificy a face using FaceVertex.UV or FaceVertex.UVColored.
      */
     public boolean lockUV = false;
     
@@ -309,12 +311,11 @@ public class RawQuad
      * Ordering of vertices is maintained for future references.
      * (First vertex passed in will be vertex 0, for example.) <br><br>
      * 
-     * UV coordinates always based on where rotated vertices project onto the nominal 
-     * face for this quad. (Do not use this unless lockUV is on.)
+     * UV coordinates will be based on where rotated vertices project onto the nominal 
+     * face for this quad (effectively lockedUV) unless face vertexes have UV coordinates.
      */
     public RawQuad setupFaceQuad(FaceVertex vertexIn0, FaceVertex vertexIn1, FaceVertex vertexIn2, FaceVertex vertexIn3, EnumFacing topFace)
     {
-        if(!this.lockUV) Log.warn("RawQuad faceQuad used when lockUV is false. Quad semantics may be invalid.");
         
         EnumFacing defaultTop = QuadHelper.defaultTopOf(this.getNominalFace());
         FaceVertex rv0;
@@ -324,79 +325,76 @@ public class RawQuad
 
         if(topFace == defaultTop)
         {
-            rv0 = vertexIn0.clone();
-            rv1 = vertexIn1.clone();
-            rv2 = vertexIn2.clone();
-            rv3 = vertexIn3.clone();
+            rv0 = vertexIn0;
+            rv1 = vertexIn1;
+            rv2 = vertexIn2;
+            rv3 = vertexIn3;
         }
         else if(topFace == QuadHelper.rightOf(this.getNominalFace(), defaultTop))
         {
-            rv0 = new FaceVertex.Colored(vertexIn0.y, 1.0 - vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
-            rv1 = new FaceVertex.Colored(vertexIn1.y, 1.0 - vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
-            rv2 = new FaceVertex.Colored(vertexIn2.y, 1.0 - vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
-            rv3 = new FaceVertex.Colored(vertexIn3.y, 1.0 - vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
+            rv0 = vertexIn0.withXY(vertexIn0.y, 1.0 - vertexIn0.x);
+            rv1 = vertexIn1.withXY(vertexIn1.y, 1.0 - vertexIn1.x);
+            rv2 = vertexIn2.withXY(vertexIn2.y, 1.0 - vertexIn2.x);
+            rv3 = vertexIn3.withXY(vertexIn3.y, 1.0 - vertexIn3.x);
         }
         else if(topFace == QuadHelper.bottomOf(this.getNominalFace(), defaultTop))
         {
-            rv0 = new FaceVertex.Colored(1.0 - vertexIn0.x, 1.0 - vertexIn0.y, vertexIn0.depth, vertexIn0.getColor(this.color));
-            rv1 = new FaceVertex.Colored(1.0 - vertexIn1.x, 1.0 - vertexIn1.y, vertexIn1.depth, vertexIn1.getColor(this.color));
-            rv2 = new FaceVertex.Colored(1.0 - vertexIn2.x, 1.0 - vertexIn2.y, vertexIn2.depth, vertexIn2.getColor(this.color));
-            rv3 = new FaceVertex.Colored(1.0 - vertexIn3.x, 1.0 - vertexIn3.y, vertexIn3.depth, vertexIn3.getColor(this.color));
+            rv0 = vertexIn0.withXY(1.0 - vertexIn0.x, 1.0 - vertexIn0.y);
+            rv1 = vertexIn1.withXY(1.0 - vertexIn1.x, 1.0 - vertexIn1.y);
+            rv2 = vertexIn2.withXY(1.0 - vertexIn2.x, 1.0 - vertexIn2.y);
+            rv3 = vertexIn3.withXY(1.0 - vertexIn3.x, 1.0 - vertexIn3.y);
         }
         else // left of
         {
-            rv0 = new FaceVertex.Colored(1.0 - vertexIn0.y, vertexIn0.x, vertexIn0.depth, vertexIn0.getColor(this.color));
-            rv1 = new FaceVertex.Colored(1.0 - vertexIn1.y, vertexIn1.x, vertexIn1.depth, vertexIn1.getColor(this.color));
-            rv2 = new FaceVertex.Colored(1.0 - vertexIn2.y, vertexIn2.x, vertexIn2.depth, vertexIn2.getColor(this.color));
-            rv3 = new FaceVertex.Colored(1.0 - vertexIn3.y, vertexIn3.x, vertexIn3.depth, vertexIn3.getColor(this.color));
+            rv0 = vertexIn0.withXY(1.0 - vertexIn0.y, vertexIn0.x);
+            rv1 = vertexIn1.withXY(1.0 - vertexIn1.y, vertexIn1.x);
+            rv2 = vertexIn2.withXY(1.0 - vertexIn2.y, vertexIn2.x);
+            rv3 = vertexIn3.withXY(1.0 - vertexIn3.y, vertexIn3.x);
         }
 
-        // NOTE: the UVs that are populated here will be replaced at quad bake.
-        // They are leftover from a prior approach.
-        // Left in because we need to put in some value anyway and they do no harm.
         
         switch(this.getNominalFace())
         {
         case UP:
-            setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, 1-rv0.depth, 1-rv0.y, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.x, 1-rv1.depth, 1-rv1.y, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.x, 1-rv2.depth, 1-rv2.y, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.x, 1-rv3.depth, 1-rv3.y, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case DOWN:     
-            setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, (1.0-rv0.x) * 16.0, rv0.y * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, (1.0-rv1.x) * 16.0, rv1.y * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, (1.0-rv2.x) * 16.0, rv2.y * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, (1.0-rv3.x) * 16.0, rv3.y * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, rv0.depth, rv0.y, 16.0-rv0.u() * 16.0, 16.0-rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.x, rv1.depth, rv1.y, 16.0-rv1.u() * 16.0, 16.0-rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.x, rv2.depth, rv2.y, 16.0-rv2.u() * 16.0, 16.0-rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.x, rv3.depth, rv3.y, 16.0-rv3.u() * 16.0, 16.0-rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case EAST:
-            setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(1-rv0.depth, rv0.y, 1-rv0.x, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(1-rv1.depth, rv1.y, 1-rv1.x, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(1-rv2.depth, rv2.y, 1-rv2.x, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(1-rv3.depth, rv3.y, 1-rv3.x, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case WEST:
-            setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.depth, rv0.y, rv0.x, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.depth, rv1.y, rv1.x, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.depth, rv2.y, rv2.x, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.depth, rv3.y, rv3.x, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case NORTH:
-            setVertex(0, new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(1-rv0.x, rv0.y, rv0.depth, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(1-rv1.x, rv1.y, rv1.depth, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(1-rv2.x, rv2.y, rv2.depth, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(1-rv3.x, rv3.y, rv3.depth, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
 
         case SOUTH:
-            setVertex(0, new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.x * 16.0, (1-rv0.y) * 16.0, rv0.getColor(this.color)));
-            setVertex(1, new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.x * 16.0, (1-rv1.y) * 16.0, rv1.getColor(this.color)));
-            setVertex(2, new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.x * 16.0, (1-rv2.y) * 16.0, rv2.getColor(this.color)));
-            setVertex(3, new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.x * 16.0, (1-rv3.y) * 16.0, rv3.getColor(this.color)));
+            setVertex(0, new Vertex(rv0.x, rv0.y, 1-rv0.depth, rv0.u() * 16.0, rv0.v() * 16.0, rv0.color(this.color)));
+            setVertex(1, new Vertex(rv1.x, rv1.y, 1-rv1.depth, rv1.u() * 16.0, rv1.v() * 16.0, rv1.color(this.color)));
+            setVertex(2, new Vertex(rv2.x, rv2.y, 1-rv2.depth, rv2.u() * 16.0, rv2.v() * 16.0, rv2.color(this.color)));
+            setVertex(3, new Vertex(rv3.x, rv3.y, 1-rv3.depth, rv3.u() * 16.0, rv3.v() * 16.0, rv3.color(this.color)));
             break;
         }
 

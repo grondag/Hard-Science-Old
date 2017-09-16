@@ -144,8 +144,8 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
         for(HorizontalCorner corner : HorizontalCorner.values())
         {
 
-            fvMidCorner[corner.ordinal()].depth = 1.0 - flowState.getMidCornerVertexHeight(corner) + flowState.getYOffset();
-            fvFarCorner[corner.ordinal()].depth = 1.0 - flowState.getFarCornerVertexHeight(corner) + flowState.getYOffset();
+            fvMidCorner[corner.ordinal()] = fvMidCorner[corner.ordinal()].withDepth(1.0 - flowState.getMidCornerVertexHeight(corner) + flowState.getYOffset());
+            fvFarCorner[corner.ordinal()] = fvFarCorner[corner.ordinal()].withDepth(1.0 - flowState.getFarCornerVertexHeight(corner) + flowState.getYOffset());
 
             quadInputsCorner.add(new ArrayList<RawQuad>(8));            
         }
@@ -166,8 +166,8 @@ public class TerrainMeshFactory extends ShapeMeshGenerator implements ICollision
 
         for(HorizontalFace side : HorizontalFace.values())
         {
-            fvMidSide[side.ordinal()].depth = 1.0 - flowState.getMidSideVertexHeight(side) + flowState.getYOffset();
-            fvFarSide[side.ordinal()].depth = 1.0 - flowState.getFarSideVertexHeight(side) + flowState.getYOffset();
+            fvMidSide[side.ordinal()] = fvMidSide[side.ordinal()].withDepth(1.0 - flowState.getMidSideVertexHeight(side) + flowState.getYOffset());
+            fvFarSide[side.ordinal()] = fvFarSide[side.ordinal()].withDepth(1.0 - flowState.getFarSideVertexHeight(side) + flowState.getYOffset());
 
             quadInputsSide.add(new ArrayList<RawQuad>(8));   
 

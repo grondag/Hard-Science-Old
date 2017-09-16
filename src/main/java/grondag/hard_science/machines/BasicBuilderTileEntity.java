@@ -148,7 +148,7 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         this.bufferCyan = bufferManager.getBuffer(5);
         this.bufferMagenta = bufferManager.getBuffer(6);
         this.bufferYellow = bufferManager.getBuffer(7);
-        this.bufferTiO2 = bufferManager.getBuffer(9);
+        this.bufferTiO2 = bufferManager.getBuffer(8);
         
         this.setPowerProvider(new MachineFuelCell(MachinePower.FuelCellSpec.STANDARD_INTEGRATED));
         

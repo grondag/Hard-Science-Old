@@ -8,7 +8,6 @@ import org.lwjgl.opengl.GL11;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.QuadBakery;
-import grondag.hard_science.library.render.RawQuad;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -390,8 +389,11 @@ public class RasterFont
      * The quads are oriented to be readable and are positioned in the top half of the block.
      * Assumes the quds will be rendered on a typical 1x1 square block face. 
      */
-    public void formulaBlockQuadsToList(String formula, List<RawQuad> list)
+    public void formulaBlockQuadsToList(String formula, EnumFacing face, List<BakedQuad> list)
     {
-        
+    
+
     }
+    
+
 }
