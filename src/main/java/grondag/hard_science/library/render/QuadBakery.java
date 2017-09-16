@@ -193,8 +193,6 @@ public class QuadBakery
      */
     private static void contractUVs(RawQuad raw, TextureAtlasSprite textureSprite, float[][] uvData)
     {
-        if(!raw.shouldContractUVs) return;
-
         final float eps = 1f / 0x100;
 
         float tX = textureSprite.getOriginX() / textureSprite.getMinU();
@@ -259,22 +257,24 @@ public class QuadBakery
         result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
         
         
-        //FIXME: remove
-        cube = new CubeInputs();
-        cube.textureName = ModModels.FONT_RESOURCE_STRING;
-        GlyphInfo g = ModModels.FONT_RENDERER.getGlyphInfo('A');
-        cube.u0 = g.uMin;
-        cube.u1 = g.uMax;
-        cube.v0 = g.vMin;
-        cube.v1 = g.vMax;
-        cube.color = 0xFF000000;
+//        //FIXME: remove
+//        cube = new CubeInputs();
+//        cube.textureName = ModModels.FONT_RESOURCE_STRING;
+//        GlyphInfo g = ModModels.FONT_RENDERER.getGlyphInfo('A');
+//        cube.u0 = g.uMinMinecraft;
+//        cube.u1 = g.uMaxMinecraft;
+//        cube.v0 = g.vMinMinecraft;
+//        cube.v1 = g.vMaxMinecraft;
+//        cube.color = 0xFF000000;
+//        
+//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.DOWN)));
+//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.UP)));
+//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.EAST)));
+//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.WEST)));
+//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
+//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
         
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.DOWN)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.UP)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.EAST)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.WEST)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
+        ModModels.FONT_RENDERER.formulaBlockQuadsToList("H2O", 0xFF000000, result);
         
         return result;
     }

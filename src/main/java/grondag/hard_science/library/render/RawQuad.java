@@ -304,7 +304,7 @@ public class RawQuad
     /** 
      * Sets up a quad with human-friendly semantics. <br><br>
      * 
-     * topFace establishes a reference for "up" in these semantics.
+     * topFace establishes a reference for "up" in these semantics. If null, will use default.
      * Depth represents how far recessed into the surface of the face the quad should be. <br><br>
      * 
      * Vertices should be given counter-clockwise.
@@ -318,6 +318,8 @@ public class RawQuad
     {
         
         EnumFacing defaultTop = QuadHelper.defaultTopOf(this.getNominalFace());
+        if(topFace == null) topFace = defaultTop;
+        
         FaceVertex rv0;
         FaceVertex rv1;
         FaceVertex rv2;

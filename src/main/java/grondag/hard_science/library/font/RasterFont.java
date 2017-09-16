@@ -7,7 +7,9 @@ import org.lwjgl.opengl.GL11;
 
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.CubeInputs;
+import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.QuadBakery;
+import grondag.hard_science.library.render.RawQuad;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -65,24 +67,39 @@ public class RasterFont
         /**
          * Character's x location within texture
          */
-        @SuppressWarnings("unused")
         public final int positionX;
 
         /**
          * Character's y position within texture
          */
-        @SuppressWarnings("unused")
         public final int positionY;
         
-        public final float uMin;
-        public final float vMin;
-        public final float uMax;
-        public final float vMax;
+        /** texture coordinate relative to sprite, scaled 0-16 */
+        public final float uMinMinecraft;
+        /** texture coordinate relative to sprite, scaled 0-16 */
+        public final float vMinMinecraft;
+        /** texture coordinate relative to sprite, scaled 0-16 */
+        public final float uMaxMinecraft;
+        /** texture coordinate relative to sprite, scaled 0-16 */
+        public final float vMaxMinecraft;
         
-        public final float uInterpolatedMin;
-        public final float vInterpolatedMin;
-        public final float uInterpolatedMax;
-        public final float vInterpolatedMax;
+        /** texture coordinate relative to sprite, scaled 0-1 */
+        public final float uMinNormal;
+        /** texture coordinate relative to sprite, scaled 0-1 */
+        public final float vMinNormal;
+        /** texture coordinate relative to sprite, scaled 0-1 */
+        public final float uMaxNormal;
+        /** texture coordinate relative to sprite, scaled 0-1 */
+        public final float vMaxNormal;
+
+        /** texture coordinate within OpenGL texture, scaled 0-1  */
+        public final float interpolatedMinU;
+        /** texture coordinate within OpenGL texture, scaled 0-1  */
+        public final float interpolatedMinV;
+        /** texture coordinate within OpenGL texture, scaled 0-1  */
+        public final float interpolatedMaxU;
+        /** texture coordinate within OpenGL texture, scaled 0-1  */
+        public final float interpolatedMaxV;
         
         /** 
          * Shift character this many pixels right if rendering monospace.
@@ -98,15 +115,21 @@ public class RasterFont
             this.height = height;
             int size = sprite.getIconWidth();
             
-            this.uMin = 16f * positionX / size;
-            this.uMax = 16f * (positionX + width) / size;
-            this.vMin = 16f * positionY / size;
-            this.vMax = 16f * (positionY + height) / size;
             
-            this.uInterpolatedMin = sprite.getInterpolatedU(this.uMin);
-            this.uInterpolatedMax = sprite.getInterpolatedU(this.uMax);
-            this.vInterpolatedMin = sprite.getInterpolatedV(this.vMin);
-            this.vInterpolatedMax = sprite.getInterpolatedV(this.vMax);
+            this.uMinNormal = (float) positionX / size;
+            this.uMaxNormal = (float) (positionX + width) / size;
+            this.vMinNormal = (float) positionY / size;
+            this.vMaxNormal = (float) (positionY + height) / size;
+
+            this.uMinMinecraft = 16f * uMinNormal;
+            this.uMaxMinecraft = 16f * uMaxNormal;
+            this.vMinMinecraft = 16f * vMinNormal;
+            this.vMaxMinecraft = 16f * vMaxNormal;
+            
+            this.interpolatedMinU = sprite.getInterpolatedU(this.uMinMinecraft);
+            this.interpolatedMaxU = sprite.getInterpolatedU(this.uMaxMinecraft);
+            this.interpolatedMinV = sprite.getInterpolatedV(this.vMinMinecraft);
+            this.interpolatedMaxV = sprite.getInterpolatedV(this.vMaxMinecraft);
             this.monoOffset = enableMonospace ? (monoWidth - width) / 2 : 0;
         }
     }
@@ -355,10 +378,10 @@ public class RasterFont
         double xRight = xLeft + glyph.pixelWidth * scaleFactor;
         double yBottom = yTop + glyph.height * scaleFactor;
 
-        buffer.pos(xLeft, yTop, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMin, glyph.vInterpolatedMin).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xLeft, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMin, glyph.vInterpolatedMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xRight, yBottom, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMax, glyph.vInterpolatedMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xRight, yTop, 0).color(red, green, blue, alpha).tex(glyph.uInterpolatedMax, glyph.vInterpolatedMin).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xLeft, yTop, 0).color(red, green, blue, alpha).tex(glyph.interpolatedMinU, glyph.interpolatedMinV).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xLeft, yBottom, 0).color(red, green, blue, alpha).tex(glyph.interpolatedMinU, glyph.interpolatedMaxV).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xRight, yBottom, 0).color(red, green, blue, alpha).tex(glyph.interpolatedMaxU, glyph.interpolatedMaxV).lightmap(0x00f0, 0x00f0).endVertex();
+        buffer.pos(xRight, yTop, 0).color(red, green, blue, alpha).tex(glyph.interpolatedMaxU, glyph.interpolatedMinV).lightmap(0x00f0, 0x00f0).endVertex();
     }
     
     public List<BakedQuad> getBlockQuadsForText(String text)
@@ -366,10 +389,10 @@ public class RasterFont
         CubeInputs cube = new CubeInputs();
         cube.textureName = ModModels.FONT_RESOURCE_STRING;
         GlyphInfo g = this.glyphArray['A'];
-        cube.u0 = g.uInterpolatedMin;
-        cube.u1 = g.uInterpolatedMax;
-        cube.v0 = g.vInterpolatedMin;
-        cube.v1 = g.vInterpolatedMax;
+        cube.u0 = g.interpolatedMinU;
+        cube.u1 = g.interpolatedMaxU;
+        cube.v0 = g.interpolatedMinV;
+        cube.v1 = g.interpolatedMaxV;
         cube.color = 0xFF808080;
         
         ArrayList<BakedQuad> result = new ArrayList<BakedQuad>();
@@ -385,14 +408,69 @@ public class RasterFont
     }
     
     /**
-     * Generates raw quads to render the given chemical formula on a block face.  
+     * Generates quads to render the given chemical formula on all faces of a block.  
      * The quads are oriented to be readable and are positioned in the top half of the block.
      * Assumes the quds will be rendered on a typical 1x1 square block face. 
      */
-    public void formulaBlockQuadsToList(String formula, EnumFacing face, List<BakedQuad> list)
+    public void formulaBlockQuadsToList(String formula, int color, List<BakedQuad> list)
     {
-    
+        RawQuad template = new RawQuad();
+        template.textureName = ModModels.FONT_RESOURCE_STRING;
+        template.color = color;
+        template.lockUV = false;
+        template.shouldContractUVs = false;
+        
+        int pixelWidth = this.getWidth(formula);
+        
+        // try fitting to height first
+        float height = 0.5f;
+        float width = height * pixelWidth / this.fontHeight;
+        
+        if(width > 1.0f)
+        {
+            // too wide, so justify to width instead
+            width = 1.0f;
+            height = pixelWidth / this.fontHeight;
+        }
+                
+        float scaleFactor = height / this.fontHeight;
+        float left = (1 - width) / 2;
 
+        for(char c : formula.toCharArray())
+        {
+            GlyphInfo g = this.getGlyphInfo(c);
+            if(g != null)
+            {
+                float glyphWidth = g.pixelWidth * scaleFactor;
+                FaceVertex[] fv = makeFaceVertices(g, left, 1, glyphWidth, height);
+                left += glyphWidth;
+                
+                for(EnumFacing face : EnumFacing.VALUES)
+                {
+                    RawQuad quad = template.clone();
+                    quad.setupFaceQuad(face, fv[0], fv[1], fv[2], fv[3], null);
+                    quad.scaleFromBlockCenter(1.02);
+                    list.add(QuadBakery.createBakedQuad(quad));
+                }
+                
+            }
+        }
+
+    }
+    
+    private FaceVertex[] makeFaceVertices(GlyphInfo glyph, float left, float top, float width, float height)
+    {
+        float bottom = top - height;
+        float right = left + width;
+        
+        FaceVertex[] result = new FaceVertex[4];
+        
+        result[0] = new FaceVertex.UV(left, bottom, 0, glyph.uMinNormal, glyph.vMaxNormal);
+        result[1] = new FaceVertex.UV(right, bottom, 0, glyph.uMaxNormal, glyph.vMaxNormal);
+        result[2] = new FaceVertex.UV(right, top, 0, glyph.uMaxNormal, glyph.vMinNormal);
+        result[3] = new FaceVertex.UV(left, top, 0, glyph.uMinNormal, glyph.vMinNormal);
+        
+        return result;
     }
     
 
