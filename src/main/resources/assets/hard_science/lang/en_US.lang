@@ -96,7 +96,38 @@ item.terrain_wand.name=Terrain Wand
 item.volcano_wand.name=Volcano Wand
 item.basalt_rubble.name=Basalt Rubble
 item.lava_blob.name=Lava Ball
-item.hdpe_cube_1.name=Polyethylene #1 Cube
+
+#MATTER
+matter.tio2=Titanium Dioxide
+matter.hdpe=High Density Polyethylene
+matter.carbon_black=Carbon Black
+matter.carbon_graphite=Graphite
+matter.carbon_fiber=Carbon Fiber
+matter.raw_mineral_dust=Unprocessed Mineral Dust
+matter.depleted_mineral_dust=Depleted Mineral Dust
+matter.water=Pure Water
+matter.construction_resin_a=Construction Resin (Part A)
+matter.construction_resin_b=Construction Resin (Part B)
+matter.dye_cyan=Cyan Reactive Color
+matter.dye_magenta=Magenta Reactive Color
+matter.dye_yellow=Yellow Reactive Color
+matter.nano_lights=Nano Lights
+matter.urea=Urea: CO(NH2)2
+
+
+#CUBE SIZES
+cubesize.block=1000 liters (full block)
+cubesize.one=125 liters (1 block / 8)
+cubesize.two=15.6 liters (1 block / 64)
+cubesize.three=1.95 liters (1 block / 512)
+cubesize.four=244 mL (1 block / 4,096)
+cubesize.five=31 mL (1 block / 32,768)
+cubesize.six=3.8 mL (1 block / 262,144)
+
+#PACKAGE TYPES
+packagetype.naked=Unpackaged
+packagetype.ibc=Reinforced HDPE Bulk Container
+packagetype.vacpack=Vacuum Packed (HDPE Wrapper)
 
 #BLOCKS
 tile.super_model_block.name=SuperModel Block
@@ -363,6 +394,19 @@ texture.fluid_vortex=Vortex
 texture.clouds=Clouds
 texture.starfield=Starfield
 
-
-
-
+texture.big_triangle=Triangle
+texture.big_diamond=Diamond
+texture.big_pentagon=Pentagon
+texture.big_hexagon=Hexagon
+texture.star_16=Star with Sixteen Points
+texture.star_12=Star with Twelve Points
+texture.star_8=Star with Eight Points
+texture.star_5=Star with Five Points
+texture.star_4=Star with Four Points
+texture.two_dots=Two Dots
+texture.dust=Dust
+texture.mix=Mix
+texture.material_gradient=Material Gradient (System Texture)
+texture.drip=Drip
+texture.funnel=Funnel
+texture.arrow=Arrow

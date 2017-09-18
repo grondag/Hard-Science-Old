@@ -47,6 +47,7 @@ import net.minecraft.util.math.Vec3d;
 import com.google.common.collect.ImmutableList;
 
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.library.world.Rotation;
 
 public class QuadHelper
 {
@@ -486,5 +487,71 @@ public class QuadHelper
     //                Float.floatToRawIntBits(sprite.getInterpolatedU(u)), Float.floatToRawIntBits(sprite.getInterpolatedV(v)), 0 };
     //    }
 
+       /**
+        * Generates a raw quad that isn't uv-locked - originally for putting symbols on Matter Cubes.
+        * Bit of a mess, but thought might get some reuse out of it, so putting here.
+        * 
+        * @param rawTextureName should not have mod/blocks prefix
+        * @param top            using semantic coordinates here; 0,0 is lower right of face
+        * @param left 
+        * @param size           assuming square box
+        * @param scaleFactor    quads will be scaled out from center by this- use value > 1 to bump out overlays
+        * @param color          color of textures
+        * @param contractUVs    should be true for everything except fonts maybe
+        * @param list           your mutable list of quads
+        */
+       public static void addTextureToAllFaces(String rawTextureName, float left, float top, float size, float scaleFactor, int color, boolean contractUVs, Rotation texturRotation, List<RawQuad> list)
+       {
+           RawQuad template = new RawQuad();
+           template.textureName = "hard_science:blocks/" + rawTextureName;
+           template.color = color;
+           template.lockUV = false;
+           template.shouldContractUVs = contractUVs;
+           
+           float bottom = top - size;
+           float right = left + size;
+           
+           FaceVertex[] fv = new FaceVertex[4];
+           
+           switch(texturRotation)
+           {
+        case ROTATE_180:
+            fv[0] = new FaceVertex.UV(left, bottom, 0, 1, 0);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, 0, 0);
+            fv[2] = new FaceVertex.UV(right, top, 0, 0, 1);
+            fv[3] = new FaceVertex.UV(left, top, 0, 1, 1);
+            break;
 
+        case ROTATE_270:
+            fv[0] = new FaceVertex.UV(left, bottom, 0, 0, 0);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, 0, 1);
+            fv[2] = new FaceVertex.UV(right, top, 0, 1, 1);
+            fv[3] = new FaceVertex.UV(left, top, 0, 1, 0);
+            break;
+        
+        case ROTATE_90:
+            fv[0] = new FaceVertex.UV(left, bottom, 0, 1, 1);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, 1, 0);
+            fv[2] = new FaceVertex.UV(right, top, 0, 0, 0);
+            fv[3] = new FaceVertex.UV(left, top, 0, 0, 1);
+            break;
+        
+        case ROTATE_NONE:
+        default:
+            fv[0] = new FaceVertex.UV(left, bottom, 0, 0, 1);
+            fv[1] = new FaceVertex.UV(right, bottom, 0, 1, 1);
+            fv[2] = new FaceVertex.UV(right, top, 0, 1, 0);
+            fv[3] = new FaceVertex.UV(left, top, 0, 0, 0);
+            break;
+           
+           }
+           
+           for(EnumFacing face : EnumFacing.VALUES)
+           {
+               RawQuad quad = template.clone();
+               quad.setupFaceQuad(face, fv[0], fv[1], fv[2], fv[3], null);
+               quad.scaleFromBlockCenter(scaleFactor);
+               list.add(quad);
+           }
+       }
 }

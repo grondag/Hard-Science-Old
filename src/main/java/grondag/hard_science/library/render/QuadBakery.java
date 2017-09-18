@@ -1,16 +1,10 @@
 package grondag.hard_science.library.render;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import grondag.hard_science.Configurator;
-import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.font.RasterFont.GlyphInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.fml.relauncher.Side;
@@ -235,47 +229,5 @@ public class QuadBakery
                 uvData[v][i] = un;
             }
         }
-    }
-    
-    public static List<BakedQuad> createCubeWithTexture(String textureName, int color)
-    {
-        CubeInputs cube = new CubeInputs();
-        cube.textureName = textureName;
-        cube.u0 = 0;
-        cube.u1 = 16;
-        cube.v0 = 0;
-        cube.v1 = 16;
-        cube.color = color;
-        
-        ArrayList<BakedQuad> result = new ArrayList<BakedQuad>();
-        
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.DOWN)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.UP)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.EAST)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.WEST)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
-        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
-        
-        
-//        //FIXME: remove
-//        cube = new CubeInputs();
-//        cube.textureName = ModModels.FONT_RESOURCE_STRING;
-//        GlyphInfo g = ModModels.FONT_RENDERER_SMALL.getGlyphInfo('A');
-//        cube.u0 = g.uMinMinecraft;
-//        cube.u1 = g.uMaxMinecraft;
-//        cube.v0 = g.vMinMinecraft;
-//        cube.v1 = g.vMaxMinecraft;
-//        cube.color = 0xFF000000;
-//        
-//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.DOWN)));
-//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.UP)));
-//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.EAST)));
-//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.WEST)));
-//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.SOUTH)));
-//        result.add(QuadBakery.createBakedQuad(cube.makeRawFace(EnumFacing.NORTH)));
-        
-        ModModels.FONT_RENDERER_SMALL.formulaBlockQuadsToList("TiO2", true, 0xFF000000, result);
-        
-        return result;
     }
 }

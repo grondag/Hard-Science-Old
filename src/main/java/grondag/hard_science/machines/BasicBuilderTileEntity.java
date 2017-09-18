@@ -5,7 +5,6 @@ import java.util.List;
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModItems;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
@@ -23,6 +22,8 @@ import grondag.hard_science.machines.support.StandardUnits;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
+import grondag.hard_science.materials.CubeSize;
+import grondag.hard_science.materials.Matter;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
@@ -56,11 +57,10 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     ////////////////////////////////////////////////////////////////////////
     
     private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient(ModItems.hdpe_cube_3.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_THREE),
-            new VolumetricIngredient(ModItems.hdpe_cube_4.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_FOUR),
-            new VolumetricIngredient(ModItems.hdpe_cube_5.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_FIVE),
-            new VolumetricIngredient(ModItems.hdpe_cube_6.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_SIX),
-            new VolumetricIngredient(ModItems.hdpe_wafer_6.getRegistryName().getResourcePath(), StandardUnits.nL_HS_CUBE_SIX));
+            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.THREE).getRegistryName().getResourcePath(), CubeSize.THREE.nanoLiters),
+            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.FOUR).getRegistryName().getResourcePath(), CubeSize.FOUR.nanoLiters),
+            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.FIVE).getRegistryName().getResourcePath(), CubeSize.FIVE.nanoLiters),
+            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.SIX).getRegistryName().getResourcePath(), CubeSize.SIX.nanoLiters));
     
     private static final VolumetricIngredientList FILLER_INGREDIENTS = new VolumetricIngredientList(
             new VolumetricIngredient("sand", StandardUnits.nL_ONE_BLOCK),

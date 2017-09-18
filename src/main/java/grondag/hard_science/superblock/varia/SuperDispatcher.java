@@ -126,7 +126,7 @@ public class SuperDispatcher
 	    	    
 	    	    builder.add(QuadBakery.createBakedQuad(quad));
 	    	}
-			return new SimpleItemBlockModel(builder.build(), true, false);
+			return new SimpleItemBlockModel(builder.build(), true);
 		}       
     }
     

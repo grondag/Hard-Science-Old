@@ -1,6 +1,0 @@
-newmtl default
-map_Kd hard_science:blocks/noise_subtle_0_0
-
-newmtl Material
-map_Kd hard_science:blocks/asphalt
-

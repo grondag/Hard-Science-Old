@@ -8,7 +8,6 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -23,22 +22,18 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.render.CubeInputs;
 import grondag.hard_science.library.render.FaceVertex;
-import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.RawQuad;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 
 /**
  * Static version of TrueTypeFont that uses the block texture map.
@@ -531,9 +526,16 @@ public class RasterFont extends TextureAtlasSprite
      * Generates quads to render the given text on all faces of a block.  
      * The quads are oriented to be readable and are positioned in the top half of the block.
      * Assumes the quds will be rendered on a typical 1x1 square block face. 
-     * If formatAsForumla then all number will be smaller and subscript. 
+     * 
+     * 
+     * @param text
+     * @param formatAsForumla If true then all numbers will be rendered as subscript. 
+     * @param color
+     * @param bumpFactor  Use to scale face out to prevent z-fighting. Should be >= 1f.
+     * @param leftSide If false will be centered.
+     * @param list
      */
-    public void formulaBlockQuadsToList(String text, boolean formatAsForumla, int color, List<BakedQuad> list)
+    public void formulaBlockQuadsToList(String text, boolean formatAsForumla, int color, float bumpFactor, boolean leftSide, List<RawQuad> list)
     {
         RawQuad template = new RawQuad();
         template.textureName = ModModels.FONT_RESOURCE_STRING_SMALL;
@@ -544,18 +546,18 @@ public class RasterFont extends TextureAtlasSprite
         int pixelWidth = formatAsForumla ? this.getWidthFormula(text) : this.getWidth(text);
         
         // try fitting to height first
-        float height =  0.6f;
+        float height =  0.5f;
         float width = height * pixelWidth / this.fontHeight;
         
-        if(width > 1.0f)
+        if(width > 0.98f)
         {
             // too wide, so justify to width instead
-            width = 1.0f;
-            height = pixelWidth / this.fontHeight;
+            width = 0.98f;
+            height = width * this.fontHeight / pixelWidth;
         }
                 
         float scaleFactor = height / this.fontHeight;
-        float left = (1 - width) / 2;
+        float left = (1 - width) / (leftSide ? 4 : 2);
 
         for(char c : text.toCharArray())
         {
@@ -572,8 +574,8 @@ public class RasterFont extends TextureAtlasSprite
                 {
                     RawQuad quad = template.clone();
                     quad.setupFaceQuad(face, fv[0], fv[1], fv[2], fv[3], null);
-                    quad.scaleFromBlockCenter(1.02);
-                    list.add(QuadBakery.createBakedQuad(quad));
+                    quad.scaleFromBlockCenter(bumpFactor);
+                    list.add(quad);
                 }
                 
             }

@@ -1,7 +1,0 @@
-{
-	"parent": "block/cube_all",
-	"textures": {
-		"all": "hard_science:blocks/tech_box",
-		"particle" : "hard_science:blocks/tech_box"
-	}
-}

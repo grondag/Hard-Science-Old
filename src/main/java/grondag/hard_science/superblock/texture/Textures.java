@@ -385,6 +385,34 @@ public class Textures
     public static final TexturePallette DECAL_SOFT_FAT_DIAGONAL_BARS_RANDOM = REGISTRY.addTexturePallette("fat_diagonal_bars_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
     public static final TexturePallette DECAL_SOFT_DIAGONAL_RIDGES_RANDOM = REGISTRY.addTexturePallette("diagonal_ridges_seamless", new TexturePalletteInfo(DECAL_SOFT_SKINNY_DIAGONAL_RIDGES_RANDOM));
     
+    public static final TexturePallette DECAL_BIG_TRIANGLE = REGISTRY.addTexturePallette("big_triangle", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_BIG_DIAMOND = REGISTRY.addTexturePallette("big_diamond", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_BIG_PENTAGON = REGISTRY.addTexturePallette("big_pentagon", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_BIG_HEXAGON = REGISTRY.addTexturePallette("big_hexagon", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_16 = REGISTRY.addTexturePallette("star_16", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_12 = REGISTRY.addTexturePallette("star_12", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_8 = REGISTRY.addTexturePallette("star_8", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_5 = REGISTRY.addTexturePallette("star_5", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_STAR_4 = REGISTRY.addTexturePallette("star_4", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_TWO_DOTS = REGISTRY.addTexturePallette("two_dots", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_TWO_DOTS_RANDOM = REGISTRY.addTexturePallette("two_dots", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(RANDOM.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_DUST = REGISTRY.addTexturePallette("dust", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_MIX = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_MIX_90 = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette DECAL_MIX_180 = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette DECAL_MIX_270 = REGISTRY.addTexturePallette("mix", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
+    public static final TexturePallette DECAL_DRIP = REGISTRY.addTexturePallette("drip", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_FUNNEL = REGISTRY.addTexturePallette("funnel", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_ARROW = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_NONE)));
+    public static final TexturePallette DECAL_ARROW_90 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
+    public static final TexturePallette DECAL_ARROW_180 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
+    public static final TexturePallette DECAL_ARROW_270 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
+
+    
+    public static final TexturePallette MATERIAL_GRADIENT = REGISTRY.addTexturePallette("material_gradient", 
+            new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
+            .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
+
     
     private static TexturePallette addBorderSingle(String textureName)
     {
