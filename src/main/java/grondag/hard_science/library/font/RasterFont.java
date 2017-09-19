@@ -24,6 +24,7 @@ import grondag.hard_science.Log;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.RawQuad;
+import grondag.hard_science.library.render.TextureHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -464,7 +465,8 @@ public class RasterFont extends TextureAtlasSprite
     public void drawLine(double xLeft, double yTop, String text, double lineHeight, double zDepth, int red, int green, int blue, int alpha)
     {
         GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
@@ -491,7 +493,8 @@ public class RasterFont extends TextureAtlasSprite
     public void drawLineMonospaced(double xLeft, double yTop, String text, double lineHeight, double zDepth, int red, int green, int blue, int alpha)
     {
         GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 

@@ -3,7 +3,6 @@ package grondag.hard_science.machines;
 import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
-import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -17,9 +16,9 @@ public class BasicBuilderTESR extends MachineTESR
     @Override
     protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)
     {
-        for(RadialGaugeSpec spec : ModModels.BASIC_BUILDER_GAUGE_SPECS)
+        for(RadialGaugeSpec spec : BasicBuilderTileEntity.BASIC_BUILDER_GAUGE_SPECS)
         {
-            MachineControlRenderer.renderGauge(spec, te, te.getBufferManager().getBuffer(spec.bufferIndex), alpha);
+            MachineControlRenderer.renderGauge(tessellator,buffer, spec, te, te.getBufferManager().getBuffer(spec.bufferIndex), alpha);
         }
         
         MachineControlRenderer.renderFabricationProgress(RenderBounds.BOUNDS_PROGRESS, te, alpha);

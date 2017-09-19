@@ -4,6 +4,7 @@ import grondag.hard_science.library.varia.ColorHelper;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.ColorHelper.CMY;
 import grondag.hard_science.machines.support.StandardUnits;
+import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.PaintLayer;
@@ -107,9 +108,9 @@ public class SuperBlockMaterialCalculator
         
         // Dye consumption should by driven by surface area instead of volume.
         // We assume the shape is a cube for this purpose - some shapes could have higher surface areas
-        double surfaceArea_M2 = Useful.squared(Math.cbrt(volume)) * 6;
+        double surfaceArea_M2 = Useful.squared(Math.cbrt((double) volume / StandardUnits.nL_ONE_BLOCK)) * 6;
         
-        double pigmentVolume_nL =  surfaceArea_M2 / StandardUnits.M2_PIGMENT_COVERAGE_SQUARE_METERS_PER_LITER * StandardUnits.nL_LITER;
+        double pigmentVolume_nL =  surfaceArea_M2 / StandardUnits.M2_PIGMENT_COVERAGE_SQUARE_METERS_PER_LITER * VolumeUnits.LITER.nL;
         double pigmentVolumePerComponent_nL = pigmentVolume_nL / 3;
 
         
@@ -120,6 +121,6 @@ public class SuperBlockMaterialCalculator
         // Perfect white would be all TiO2 and black would be none
         // In real world would not use CMY pigments to get block, 
         // but in game assuming this is cost-effective.
-        this.TiO2_nL = (long) ((1 - (cyan + magenta + yellow) / 3) * pigmentVolume_nL);
+        this.TiO2_nL = (long) pigmentVolume_nL - this.cyan_nL - this.magenta_nL - this.yellow_nL;
     }
 }

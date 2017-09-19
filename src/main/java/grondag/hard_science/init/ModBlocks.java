@@ -25,7 +25,6 @@ import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

@@ -14,7 +14,11 @@ import grondag.hard_science.gui.control.machine.RenderBounds.PowerRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.library.render.FaceVertex;
+import grondag.hard_science.library.render.QuadBakery;
+import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.IMachinePowerProvider;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
@@ -159,10 +163,10 @@ public class MachineControlRenderer
      * Use {@link #renderSpriteInBounds(Tessellator, BufferBuilder, RectRenderBounds, TextureAtlasSprite, int)}
      * when you already have tessellator/buffer references on the stack.
      */
-    public static void renderSpriteInBounds(AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int alpha)
+    public static void renderSpriteInBounds(AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int color, Rotation rotation)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderSpriteInBounds(tes, tes.getBuffer(), bounds, sprite, alpha);
+        renderSpriteInBounds(tes, tes.getBuffer(), bounds, sprite, color, rotation);
     }
 
     /**
@@ -171,23 +175,28 @@ public class MachineControlRenderer
      * u,v coordinate are also 0-1 within the currently bound texture.
      * Always full brightness.
      */
-    public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int alpha)
+    public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int color, Rotation rotation)
     {
-        renderSpriteInBounds(tessellator, buffer, bounds.left, bounds.top, bounds.width, bounds.height, sprite, alpha);
+        renderSpriteInBounds(tessellator, buffer, bounds.left, bounds.top, bounds.width, bounds.height, sprite, color, rotation);
     }
 
     public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, 
             double left, double top, double width, double height, 
-            TextureAtlasSprite sprite, int alpha)
+            TextureAtlasSprite sprite, int color, Rotation rotation)
     {
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
         GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        TextureHelper.setTextureBlurMipmap(true, true);
+        final float margin = (sprite.getMaxU() - sprite.getMinU()) * QuadBakery.UV_EPS;
+
         bufferControlQuad(buffer, left, top, left + width, top + height, 
-                sprite.getMinU(), 
-                sprite.getMinV(), 
-                sprite.getMaxU(), 
-                sprite.getMaxV(), 
-                alpha, 0xFF, 0xFF, 0xFF);
+                sprite.getMinU() + margin, 
+                sprite.getMinV() + margin,
+                sprite.getMaxU() - margin,
+                sprite.getMaxV() - margin,
+                color, 
+                rotation);
+ 
         Tessellator.getInstance().draw();
     }
 
@@ -208,7 +217,8 @@ public class MachineControlRenderer
     public static void renderTextureInBounds(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, int glTextureID, int alpha)
     {
         GlStateManager.bindTexture(glTextureID);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+        //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);        
         bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
                 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
@@ -228,7 +238,8 @@ public class MachineControlRenderer
     {
         GlStateManager.bindTexture(glTextureID);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
                 0, 0, 1, 1, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
         tessellator.draw();
@@ -257,15 +268,17 @@ public class MachineControlRenderer
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
        
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 
         double uvMax = maxLevel / 4.0;
         double topFactor = (maxLevel - level) / (double) maxLevel;
         
         if(isHorizontal)
         {
-            bufferRotatedControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
-                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090);
+            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
+                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090,
+                    Rotation.ROTATE_90);
         }
         else
         {
@@ -279,12 +292,14 @@ public class MachineControlRenderer
         GlStateManager.bindTexture(glTextureID);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         
         if(isHorizontal)
         {
-            bufferRotatedControlQuad(buffer, bounds.left(), bounds.top(), bounds.right() - bounds.width * topFactor, bounds.bottom(), 
-                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right() - bounds.width * topFactor, bounds.bottom(), 
+                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF,
+                    Rotation.ROTATE_90);
         }
         else
         {
@@ -297,8 +312,6 @@ public class MachineControlRenderer
         
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
-        
     }
 
     /**
@@ -310,7 +323,8 @@ public class MachineControlRenderer
         if(arcLengthDegrees <= 0) return;
 
         GlStateManager.bindTexture(glTextureID);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);  
 
         int endDegrees = arcStartDegrees + arcLengthDegrees;
@@ -445,13 +459,19 @@ public class MachineControlRenderer
     public static void bufferControlQuad
     (
             BufferBuilder buffer, 
-            double xMin, double yMin, double xMax, double yMax, 
+            double xMin,
+            double yMin,
+            double xMax,
+            double yMax, 
             double uMin,
-            double vMin, double uMax, double vMax, int colorARGB)
+            double vMin,
+            double uMax,
+            double vMax,
+            int colorARGB)
     {
         bufferControlQuad(buffer, xMin, yMin, xMax, yMax, 
                 uMin, vMin, uMax, vMax, 
-                (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+                (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, Rotation.ROTATE_NONE);
     }
 
     /**
@@ -463,51 +483,104 @@ public class MachineControlRenderer
     public static void bufferControlQuad
     (
             BufferBuilder buffer, 
-            double xMin, double yMin, double xMax, double yMax, 
+            double xMin,
+            double yMin,
+            double xMax,
+            double yMax, 
             double uMin,
-            double vMin, double uMax, double vMax, int alpha,
-            int red, int green, int blue)
+            double vMin,
+            double uMax,
+            double vMax,
+            int colorARGB,
+            Rotation rotation)
     {
-        buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        bufferControlQuad(buffer, xMin, yMin, xMax, yMax, 
+                uMin, vMin, uMax, vMax, 
+                (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, rotation);
     }
     
     /**
-     * Just like {@link #bufferControlQuad(BufferBuilder, double, double, double, double, double, double, double, double, int)}
-     * except rotates UV coordinates 90 degrees clockwise.
+     * Renders a textured quad on the face of the machine.
+     * x,y coordinates are 0-1 position on the face.  0,0 is upper left.
+     * u,v coordinate are also 0-1 within the currently bound texture.
+     * Always full brightness.
      */
-    public static void bufferRotatedControlQuad
+    public static void bufferControlQuad
     (
             BufferBuilder buffer, 
-            double xMin, double yMin, double xMax, double yMax, 
+            double xMin, 
+            double yMin, 
+            double xMax, 
+            double yMax, 
             double uMin,
-            double vMin, double uMax, double vMax, int colorARGB)
+            double vMin, 
+            double uMax, 
+            double vMax, 
+            int alpha,
+            int red, 
+            int green, 
+            int blue)
     {
-        bufferRotatedControlQuad(buffer, xMin, yMin, xMax, yMax, 
-                uMin, vMin, uMax, vMax, 
-                (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+        bufferControlQuad(buffer, xMin, yMin, xMax, yMax, uMin, vMin, uMax, vMax, alpha, red, green, blue, Rotation.ROTATE_NONE);
     }
-
+    
     /**
-     * Just like {@link #bufferControlQuad(BufferBuilder, double, double, double, double, double, double, double, double, int, int, int, int)}
-     * except rotates UV coordinates 90 degrees clockwise.
+     * Renders a textured quad on the face of the machine.
+     * x,y coordinates are 0-1 position on the face.  0,0 is upper left.
+     * u,v coordinate are also 0-1 within the currently bound texture.
+     * Always full brightness.
      */
-    public static void bufferRotatedControlQuad
+    public static void bufferControlQuad
     (
             BufferBuilder buffer, 
-            double xMin, double yMin, double xMax, double yMax, 
+            double xMin, 
+            double yMin, 
+            double xMax, 
+            double yMax, 
             double uMin,
-            double vMin, double uMax, double vMax, int alpha,
-            int red, int green, int blue)
+            double vMin, 
+            double uMax, 
+            double vMax, 
+            int alpha,
+            int red, 
+            int green, 
+            int blue, 
+            Rotation rotation)
     {
-        buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
-        buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+        switch(rotation)
+        {
+            case ROTATE_NONE:
+            default:
+                buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                break;
+    
+            case ROTATE_90:
+                buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                break;
+    
+            case ROTATE_180:
+                buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                break;
+            
+            case ROTATE_270:
+                buffer.pos(xMin, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMin, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMin).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMax, 0).color(red, green, blue, alpha).tex(uMin, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                buffer.pos(xMax, yMin, 0).color(red, green, blue, alpha).tex(uMax, vMax).lightmap(0x00f0, 0x00f0).endVertex();
+                break;
+        }
+        
     }
-
+ 
     public static void renderFabricationProgress(RectRenderBounds.RadialRenderBounds bounds, MachineTileEntity te, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -676,12 +749,21 @@ public class MachineControlRenderer
             }
         }
         
-        renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, alpha);
+        renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, (alpha << 24) | (spec.color & 0xFFFFFF), 
+                spec.rotation);
 
         renderMachineText(tessellator, buffer, 
                 new RectRenderBounds(spec.left(), spec.top() + spec.height() * 0.75, spec.width(), spec.height() * 0.3),
-                Long.toString(currentLevel / maxLevel * 100), HorizontalAlignment.CENTER, alpha);
+                Long.toString(currentLevel * 100 / maxLevel), HorizontalAlignment.CENTER, alpha);
 
+        // draw text if provided
+        if(spec.formula != null)
+        {
+            // need to scale font pixelWidth to height of the line
+            double height = spec.spriteSize / 3;
+            double margin = (spec.spriteSize - ModModels.FONT_RENDERER_SMALL.getWidth(spec.formula) * height / ModModels.FONT_RENDERER_SMALL.fontHeight) / 2;
+            ModModels.FONT_RENDERER_SMALL.drawLine(spec.spriteLeft + margin, spec.spriteTop + height, spec.formula, height, 0f, (spec.formulaColor >> 16) & 0xFF, (spec.formulaColor >> 8) & 0xFF, spec.formulaColor& 0xFF, alpha);
+        }
     }
 
     /** 
@@ -803,7 +885,9 @@ public class MachineControlRenderer
         GlStateManager.enableBlend();
         GlStateManager.disableColorMaterial();
         GlStateManager.depthMask(false);
-
+        GlStateManager.enableAlpha();
+ 
+ 
         // prevent z-fighting
         GlStateManager.enablePolygonOffset();
         GlStateManager.doPolygonOffset(-1, -1);
@@ -811,8 +895,7 @@ public class MachineControlRenderer
         //        GlStateManager.enableAlpha();
         //        GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.DST_ALPHA);
-
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
     }
 
  
@@ -821,11 +904,14 @@ public class MachineControlRenderer
      */
     public static void restoreGUIRendering()
     {
+        TextureHelper.setTextureClamped(true);
+        TextureHelper.setTextureBlurMipmap(false, true);
         GlStateManager.disableLighting();
         GlStateManager.disableBlend();
         GlStateManager.disableColorMaterial();
         GlStateManager.depthMask(true);
         GlStateManager.disablePolygonOffset();
+
     }
 
     /** 
@@ -840,14 +926,14 @@ public class MachineControlRenderer
         GlStateManager.enableColorMaterial();
         GlStateManager.depthMask(false);
         GlStateManager.disablePolygonOffset();
-
     }
 
     public static void renderRedstoneControl(MachineTileEntity mte, Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds boundsRedstone,
             int displayAlpha)
     {
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, boundsRedstone, 
-                mte.hasRedstonePowerSignal() ? ModModels.SPRITE_REDSTONE_TORCH_LIT : ModModels.SPRITE_REDSTONE_TORCH_UNLIT, displayAlpha);
+                mte.hasRedstonePowerSignal() ? ModModels.SPRITE_REDSTONE_TORCH_LIT : ModModels.SPRITE_REDSTONE_TORCH_UNLIT, 
+                (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         if(!mte.isRedstoneControlEnabled()) 
         {

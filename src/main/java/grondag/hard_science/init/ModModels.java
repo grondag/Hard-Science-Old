@@ -15,8 +15,6 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.gui.control.machine.BinaryGlTexture;
-import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
-import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.machines.BasicBuilderTESR;
@@ -167,14 +165,7 @@ public class ModModels
     
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_UNLIT;
-    public static TextureAtlasSprite SPRITE_STONE;
-    public static TextureAtlasSprite SPRITE_GLASS;
-    public static TextureAtlasSprite SPRITE_WOOD;
-    public static TextureAtlasSprite SPRITE_GLOWSTONE;
-    public static TextureAtlasSprite SPRITE_CYAN_DYE;
-    public static TextureAtlasSprite SPRITE_MAGENTA_DYE;
-    public static TextureAtlasSprite SPRITE_YELLOW_DYE;
-    public static TextureAtlasSprite SPRITE_BLACK_DYE;
+
     
     public static String FONT_NAME_SMALL = "ubuntu-c.ttf";
     public static String FONT_NAME_LARGE = "ubuntu-m.ttf";
@@ -204,7 +195,6 @@ public class ModModels
     public static int TEX_NO;
     public static int TEX_MATERIAL_SHORTAGE;
     
-    public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[8];
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -253,28 +243,25 @@ public class ModModels
         
         SPRITE_REDSTONE_TORCH_LIT   = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_on");
         SPRITE_REDSTONE_TORCH_UNLIT = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/redstone_torch_off");
-        SPRITE_STONE                = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/stone");
-        SPRITE_GLASS                = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/glass");
-        SPRITE_WOOD                 = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/log_oak_top");
-        SPRITE_GLOWSTONE            = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/glowstone_dust");
-        SPRITE_CYAN_DYE             = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_cyan");
-        SPRITE_MAGENTA_DYE          = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_magenta");
-        SPRITE_YELLOW_DYE           = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_yellow");
-        SPRITE_BLACK_DYE            = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:items/dye_powder_black");
-        
+         
         FONT_RENDERER_SMALL.postLoad();
         FONT_RENDERER_LARGE.postLoad();
         
-        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(4, RenderBounds.BOUNDS_GAUGE[4], 1.0, ModModels.SPRITE_CYAN_DYE, 0x00FFFF);
-        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(5, RenderBounds.BOUNDS_GAUGE[5], 1.0, ModModels.SPRITE_MAGENTA_DYE, 0xFF00FF);
-        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(6, RenderBounds.BOUNDS_GAUGE[6], 1.0, ModModels.SPRITE_YELLOW_DYE, 0xFFFF00);
-        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(7, RenderBounds.BOUNDS_GAUGE[7], 1.0, ModModels.SPRITE_BLACK_DYE, 0x555555);
-    
-        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(1, RenderBounds.BOUNDS_GAUGE[0], 0.75, ModModels.SPRITE_STONE, 0x7f7f7f);
-        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(0, RenderBounds.BOUNDS_GAUGE[2], 0.75, ModModels.SPRITE_WOOD, 0xa78653);
-        BASIC_BUILDER_GAUGE_SPECS[6] = new RadialGaugeSpec(2, RenderBounds.BOUNDS_GAUGE[1], 0.75, ModModels.SPRITE_GLASS, 0xaafcff);
-        BASIC_BUILDER_GAUGE_SPECS[7] = new RadialGaugeSpec(3, RenderBounds.BOUNDS_GAUGE[3], 1.0, ModModels.SPRITE_GLOWSTONE, 0xffffd5);
+        BasicBuilderTileEntity.initRenderSpecs();
+
     }
+    
+//    new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE),
+    
+//    new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER),
+//    new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A),
+//    new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B),
+//    new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS),
+    
+//    new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN),
+//    new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA),
+//    new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW),
+//    new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2)
 
     
     private static int loadNonBlockTexture(String location)

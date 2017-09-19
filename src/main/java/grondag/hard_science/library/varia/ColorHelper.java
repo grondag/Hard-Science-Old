@@ -35,7 +35,6 @@ public class ColorHelper
     
     /**
      * Alpha components ignored but does no harm if you happen to have it.
-     * Return value is on 0-255 scale.
      */
     public static CMYK cmyk(int colorARGB)
     {
@@ -66,17 +65,16 @@ public class ColorHelper
     
     /**
      * Alpha components ignored but does no harm if you happen to have it.
-     * Return value is on 0-255 scale.
-     */
+     * Return value is on 0-255 scale.     */
     public static CMY cmy(int colorARGB)
     {
         float r = red(colorARGB);
         float g = green(colorARGB);
         float b = blue(colorARGB);
         
-        float c = (1 - r / 255);
-        float m = (1 - g / 255);
-        float y = (1 - b / 255);
+        float c = (1 - r);
+        float m = (1 - g);
+        float y = (1 - b);
         return new CMY(c, m, y);
     }
 }

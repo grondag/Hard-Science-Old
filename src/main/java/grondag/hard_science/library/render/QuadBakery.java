@@ -43,7 +43,7 @@ public class QuadBakery
 
         if(raw.shouldContractUVs)
         {
-            contractUVs(raw, textureSprite, uvData);
+            contractUVs(textureSprite, uvData);
         }
 
         int[] vertexData = new int[28];
@@ -179,16 +179,19 @@ public class QuadBakery
        }
     }
 
+    /**
+     * UV shrinkage amount to prevent visible seams
+     */
+    public static final float UV_EPS = 1f / 0x100;
+    
      /**
      * Prevents visible seams along quad boundaries due to slight overlap
      * with neighboring textures or empty texture buffer.
      * Borrowed from Forge as implemented by Fry in UnpackedBakedQuad.build().
      * Array dimensions are vertex 0-3, u/v 0-1
      */
-    private static void contractUVs(RawQuad raw, TextureAtlasSprite textureSprite, float[][] uvData)
+    public static void contractUVs(TextureAtlasSprite textureSprite, float[][] uvData)
     {
-        final float eps = 1f / 0x100;
-
         float tX = textureSprite.getOriginX() / textureSprite.getMinU();
         float tY = textureSprite.getOriginY() / textureSprite.getMinV();
         float tS = tX > tY ? tX : tY;
@@ -209,7 +212,7 @@ public class QuadBakery
             for (int i = 0; i < 2; i++)
             {
                 float uo = uvData[v][i];
-                float un = uo * (1 - eps) + center[i] * eps;
+                float un = uo * (1 - UV_EPS) + center[i] * UV_EPS;
                 float ud = uo - un;
                 float aud = ud;
                 if(aud < 0) aud = -aud;

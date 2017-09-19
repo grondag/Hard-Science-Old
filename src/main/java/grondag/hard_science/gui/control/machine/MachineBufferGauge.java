@@ -34,7 +34,7 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     {
         super.handleCoordinateUpdate();
         this.spec = new RadialGaugeSpec(this.spec.bufferIndex, spec.scale(this.left, this.top, this.width, this.height),
-                this.spec.spriteScale, this.spec.sprite, this.spec.color);
+                this.spec.spriteScale, this.spec.sprite, this.spec.color, this.spec.rotation);
     }
 
     @Override

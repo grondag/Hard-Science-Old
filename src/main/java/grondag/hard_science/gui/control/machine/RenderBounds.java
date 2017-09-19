@@ -22,6 +22,9 @@ public interface RenderBounds<T extends RenderBounds<T>>
             new RadialRenderBounds(0.66, 0.70, 0.08)
     };
     
+    public static final RadialRenderBounds BOUNDS_PE_BUFFER = new RadialRenderBounds(0.86, 0.70, 0.10);
+        
+    
     public abstract T offset(double x, double y);
 
     public abstract T scale(double left, double top, double width, double height);

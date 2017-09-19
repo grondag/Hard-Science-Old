@@ -4,10 +4,12 @@ public class StandardUnits
 {
     public static final long nL_LITER = VolumeUnits.LITER.nL;
     public static final long nL_ONE_BLOCK = VolumeUnits.KILOLITER.nL;
+    public static final long nL_TWO_BLOCKS = nL_ONE_BLOCK * 2;
+    public static final long nL_HALF_STACK_OF_BLOCKS_nL = nL_ONE_BLOCK * 32;
+    public static final long nL_FULL_STACK_OF_BLOCKS_nL = nL_ONE_BLOCK * 64;
     public static final long nL_HALF_BLOCK = nL_ONE_BLOCK / 2;
     public static final long nL_QUARTER_BLOCK_ = nL_ONE_BLOCK / 4;
     public static final long nL_EIGHTH_BLOCK = nL_ONE_BLOCK / 8;
-    public static final long nL_FULL_STACK_OF_BLOCKS_nL = nL_ONE_BLOCK * 64;
     public static final long nL_ONE_HUNDRED_BLOCKS_nL = nL_ONE_BLOCK * 100;
 
     public static final long nL_HS_CUBE_ZERO = nL_ONE_BLOCK;

@@ -503,7 +503,8 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
    
     public MaterialBufferDelegate getBuffer(int index)
     {
-        if(index < 0 || index >= this.specs.length) return null;
+        if(index < 0 || index >= this.specs.length) 
+            return null;
         return new MaterialBufferDelegate(index);
     }
     

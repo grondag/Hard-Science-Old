@@ -32,7 +32,9 @@ public class GuiUtil
     
     public static final double GOLDEN_RATIO = 1.618033988;
     /** 
-     * Same as vanilla routine but accepts double values
+     * Same as vanilla routine but accepts double values.  
+     * Does not alter blend state so if you need alpha rendering have to do that before calling.
+     * Doing it here causes problems because it doesn't know what to restore it to.
      */
     public static void drawRect(double left, double top, double right, double bottom, int color)
     {
@@ -56,9 +58,10 @@ public class GuiUtil
         float f2 = (float)(color & 255) / 255.0F;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexbuffer = tessellator.getBuffer();
-        GlStateManager.enableBlend();
+
+//        GlStateManager.enableBlend();
+//        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.disableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.color(f, f1, f2, f3);
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION);
         vertexbuffer.pos(left, bottom, 0.0D).endVertex();
@@ -68,7 +71,7 @@ public class GuiUtil
         tessellator.draw();
         GlStateManager.color(1, 1, 1, 1);
         GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
+//      GlStateManager.disableBlend();
     }
 
     /**

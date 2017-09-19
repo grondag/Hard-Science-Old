@@ -4,12 +4,15 @@ import java.util.List;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.Log;
+import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
+import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModBlocks;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.PackedBlockPos;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineContainerTileEntity;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineFuelCell;
@@ -22,13 +25,14 @@ import grondag.hard_science.machines.support.StandardUnits;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
-import grondag.hard_science.materials.CubeSize;
 import grondag.hard_science.materials.Matter;
+import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.block.SuperBlock;
 import grondag.hard_science.superblock.block.SuperModelBlock;
 import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
+import grondag.hard_science.superblock.texture.Textures;
 import grondag.hard_science.superblock.varia.BlockSubstance;
 import grondag.hard_science.virtualblock.VirtualBlock;
 import grondag.hard_science.virtualblock.VirtualBlockTracker;
@@ -56,55 +60,76 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
     
-    private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.THREE).getRegistryName().getResourcePath(), CubeSize.THREE.nanoLiters),
-            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.FOUR).getRegistryName().getResourcePath(), CubeSize.FOUR.nanoLiters),
-            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.FIVE).getRegistryName().getResourcePath(), CubeSize.FIVE.nanoLiters),
-            new VolumetricIngredient(Matter.HDPE.getCube(CubeSize.SIX).getRegistryName().getResourcePath(), CubeSize.SIX.nanoLiters));
+    private static final long TICKS_PER_FULL_BLOCK = 40;
+
+    private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(Matter.HDPE);
     
     private static final VolumetricIngredientList FILLER_INGREDIENTS = new VolumetricIngredientList(
+            Matter.RAW_MINERAL_DUST,
+            Matter.DEPLETED_MINERAL_DUST,
             new VolumetricIngredient("sand", StandardUnits.nL_ONE_BLOCK),
             new VolumetricIngredient("red_sand", StandardUnits.nL_ONE_BLOCK));
     
-    private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("slime_ball", StandardUnits.nL_HS_CUBE_ONE));
+    private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(Matter.CONSTRUCTION_RESIN_A);
     
-    private static final VolumetricIngredientList RESIN_B_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("beef", StandardUnits.nL_HS_CUBE_ONE));
+    private static final VolumetricIngredientList RESIN_B_INGREDIENTS = new VolumetricIngredientList(Matter.CONSTRUCTION_RESIN_B);
     
-    private static final VolumetricIngredientList NANOLIGHT_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("dustGlowstone", StandardUnits.nL_HS_CUBE_THREE));
+    private static final VolumetricIngredientList NANOLIGHT_INGREDIENTS = new VolumetricIngredientList(Matter.NANO_LIGHTS);
     
-    private static final VolumetricIngredientList CYAN_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("dyeCyan", StandardUnits.nL_HS_CUBE_TWO));
+    private static final VolumetricIngredientList CYAN_INGREDIENTS = new VolumetricIngredientList(Matter.DYE_CYAN);
     
-    private static final VolumetricIngredientList MAGENTA_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("dyeMagenta", StandardUnits.nL_HS_CUBE_TWO));
+    private static final VolumetricIngredientList MAGENTA_INGREDIENTS = new VolumetricIngredientList(Matter.DYE_MAGENTA);
     
-    private static final VolumetricIngredientList YELLOW_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("dyeYellow", StandardUnits.nL_HS_CUBE_TWO));
+    private static final VolumetricIngredientList YELLOW_INGREDIENTS = new VolumetricIngredientList(Matter.DYE_YELLOW);
     
-    private static final VolumetricIngredientList TiO2_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("dyeWhite", StandardUnits.nL_HS_CUBE_TWO));
+    private static final VolumetricIngredientList TiO2_INGREDIENTS = new VolumetricIngredientList(Matter.TIO2);
     
-    private static final VolumetricIngredientList CARBON_INGREDIENTS = new VolumetricIngredientList(
-            new VolumetricIngredient("charcoal", StandardUnits.nL_HS_CUBE_TWO));
-    
-    private static final VolumetricBufferSpec[] BUFFER_SPECS =
-        {
-            new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_HS_CUBE_THREE, ModNBTTag.MATERIAL_HDPE),
-            new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER),
-            new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_HS_CUBE_ONE, ModNBTTag.MATERIAL_RESIN_A),
-            new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_HS_CUBE_ONE, ModNBTTag.MATERIAL_RESIN_B),
-            new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_HS_CUBE_THREE, ModNBTTag.MATERIAL_NANO_LIGHTS),
-            new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_HS_CUBE_TWO, ModNBTTag.MATERIAL_DYE_CYAN),
-            new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_HS_CUBE_TWO, ModNBTTag.MATERIAL_DYE_MAGENTA),
-            new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_HS_CUBE_TWO, ModNBTTag.MATERIAL_DYE_YELLOW),
-            new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_HS_CUBE_ONE, ModNBTTag.MATERIAL_TiO2)
-        };
-    
-    private static final long TICKS_PER_FULL_BLOCK = 40;
+//    private static final VolumetricIngredientList CARBON_INGREDIENTS = new VolumetricIngredientList(Matter.CARBON_BLACK);
 
+    // so TESR knows which buffer to render for each gauge
+    public static final int BUFFER_INDEX_HDPE = 0;
+    public static final int BUFFER_INDEX_FILLER = BUFFER_INDEX_HDPE + 1;
+    public static final int BUFFER_INDEX_RESIN_A = BUFFER_INDEX_FILLER + 1;
+    public static final int BUFFER_INDEX_RESIN_B = BUFFER_INDEX_RESIN_A + 1;
+    public static final int BUFFER_INDEX_NANOLIGHT = BUFFER_INDEX_RESIN_B + 1;
+    public static final int BUFFER_INDEX_CYAN = BUFFER_INDEX_NANOLIGHT + 1;
+    public static final int BUFFER_INDEX_MAGENTA = BUFFER_INDEX_CYAN + 1;
+    public static final int BUFFER_INDEX_YELLOW = BUFFER_INDEX_MAGENTA + 1;
+    public static final int BUFFER_INDEX_TIO2 = BUFFER_INDEX_YELLOW + 1;
+    
+    public static final VolumetricBufferSpec[] BUFFER_SPECS = new VolumetricBufferSpec[BUFFER_INDEX_TIO2 + 1];
+    
+    static
+    {
+        BUFFER_SPECS[BUFFER_INDEX_HDPE] = new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE);
+        BUFFER_SPECS[BUFFER_INDEX_FILLER] = new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER);
+        BUFFER_SPECS[BUFFER_INDEX_RESIN_A] = new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A);
+        BUFFER_SPECS[BUFFER_INDEX_RESIN_B] = new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B);
+        BUFFER_SPECS[BUFFER_INDEX_NANOLIGHT] = new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS);
+        BUFFER_SPECS[BUFFER_INDEX_CYAN] = new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN);
+        BUFFER_SPECS[BUFFER_INDEX_MAGENTA] = new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA);
+        BUFFER_SPECS[BUFFER_INDEX_YELLOW] = new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW);
+        BUFFER_SPECS[BUFFER_INDEX_TIO2] = new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2);
+    }
+
+    @SideOnly(value = Side.CLIENT)
+    public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[9];
+
+    @SideOnly(value = Side.CLIENT)
+    public static void initRenderSpecs()
+    {
+        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(BUFFER_INDEX_CYAN, RenderBounds.BOUNDS_GAUGE[0], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.CYAN, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(BUFFER_INDEX_MAGENTA, RenderBounds.BOUNDS_GAUGE[1], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.MAGENTA, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(BUFFER_INDEX_YELLOW, RenderBounds.BOUNDS_GAUGE[2], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.YELLOW, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(BUFFER_INDEX_TIO2, RenderBounds.BOUNDS_GAUGE[3], 1.2, Textures.DECAL_DUST.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_A, RenderBounds.BOUNDS_GAUGE[5], 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_A, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_B, RenderBounds.BOUNDS_GAUGE[6], 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_B, Rotation.ROTATE_180);
+        BASIC_BUILDER_GAUGE_SPECS[6] = new RadialGaugeSpec(BUFFER_INDEX_FILLER, RenderBounds.BOUNDS_GAUGE[4], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.DEPLETED_MINERAL_DUST, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[7] = new RadialGaugeSpec(BUFFER_INDEX_NANOLIGHT, RenderBounds.BOUNDS_GAUGE[7], 1.2, Textures.DECAL_STAR_16.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[8] = new RadialGaugeSpec(BUFFER_INDEX_HDPE, RenderBounds.BOUNDS_PE_BUFFER, 0.82, 
+                Textures.DECAL_LARGE_SQUARE.getSampleSprite(), MatterColors.HDPE, Rotation.ROTATE_NONE,
+                "HDPE", 0xFF000000);
+    }
     
     ////////////////////////////////////////////////////////////////////////
     //  INSTANCE MEMBERS

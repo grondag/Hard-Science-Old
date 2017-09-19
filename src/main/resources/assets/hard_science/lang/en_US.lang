@@ -32,6 +32,8 @@ label.position=Position
 label.model_rotation=Model Rotation
 label.full_block=Full Block
 
+#JEI
+hard_science.jei.builder=Hard Science Builder
 
 #MACHINES
 machine.is_on=Machine is ON.

@@ -492,7 +492,7 @@ public class Useful
         return (intersectionCount & 0x1) == 1;
     }
 
-    public static long clamp(long min, long max, long val)
+    public static long clamp(long val, long min, long max)
     {
         return val < min ? min : val > max ? max : val;
     }
