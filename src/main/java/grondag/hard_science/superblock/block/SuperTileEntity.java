@@ -3,9 +3,9 @@ package grondag.hard_science.superblock.block;
 
 import javax.annotation.Nonnull;
 
-import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.Log;
 import grondag.hard_science.library.serialization.ModNBTTag;
+import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.model.state.RenderPassSet;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -18,6 +18,8 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class SuperTileEntity extends TileEntity
 {
@@ -325,5 +327,26 @@ public class SuperTileEntity extends TileEntity
      * Only true for virtual blocks.  Prevents "instanceof" checking.
      */
     public boolean isVirtual() { return false; }
+    
+    @SideOnly(Side.CLIENT)
+    private net.minecraft.util.math.AxisAlignedBB renderBB;
+    
+    /**
+     * Cache result. Gets called alot for TESR. <br><br>
+     * 
+     * {@inheritDoc}
+     */
+    @SideOnly(Side.CLIENT)
+    @Override
+    public net.minecraft.util.math.AxisAlignedBB getRenderBoundingBox()
+    {
+        net.minecraft.util.math.AxisAlignedBB result = this.renderBB;
+        if(result == null)
+        {
+            result = new net.minecraft.util.math.AxisAlignedBB(getPos().add(-1, 0, -1), getPos().add(1, 1, 1));
+            this.renderBB = result;
+        }
+        return result; 
+    }
     
 }
