@@ -101,15 +101,15 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
     static
     {
-        BUFFER_SPECS[BUFFER_INDEX_HDPE] = new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE);
-        BUFFER_SPECS[BUFFER_INDEX_FILLER] = new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER);
-        BUFFER_SPECS[BUFFER_INDEX_RESIN_A] = new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A);
-        BUFFER_SPECS[BUFFER_INDEX_RESIN_B] = new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B);
-        BUFFER_SPECS[BUFFER_INDEX_NANOLIGHT] = new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS);
-        BUFFER_SPECS[BUFFER_INDEX_CYAN] = new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN);
-        BUFFER_SPECS[BUFFER_INDEX_MAGENTA] = new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA);
-        BUFFER_SPECS[BUFFER_INDEX_YELLOW] = new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW);
-        BUFFER_SPECS[BUFFER_INDEX_TIO2] = new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2);
+        BUFFER_SPECS[BUFFER_INDEX_HDPE] = new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE, "hdpe");
+        BUFFER_SPECS[BUFFER_INDEX_FILLER] = new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER, "filler");
+        BUFFER_SPECS[BUFFER_INDEX_RESIN_A] = new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A, "resin_a");
+        BUFFER_SPECS[BUFFER_INDEX_RESIN_B] = new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B, "resin_b");
+        BUFFER_SPECS[BUFFER_INDEX_NANOLIGHT] = new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS, "nanolights");
+        BUFFER_SPECS[BUFFER_INDEX_CYAN] = new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN, "cyan");
+        BUFFER_SPECS[BUFFER_INDEX_MAGENTA] = new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA, "magenta");
+        BUFFER_SPECS[BUFFER_INDEX_YELLOW] = new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW, "yellow");
+        BUFFER_SPECS[BUFFER_INDEX_TIO2] = new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2, "tio2");
     }
 
     @SideOnly(value = Side.CLIENT)
@@ -195,9 +195,8 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     }
 
     @Override
-    public void update()
+    public void updateMachine(long tick)
     {
-        super.update();
         
         if(world.isRemote)
         {
@@ -211,27 +210,12 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         }
         else
         {
-            long tick = this.world.getTotalWorldTime();
-            
-            if((tick & 0xF) == 0xF)
-            {
-                if(this.getPowerProvider().provideEnergy(1, false, false) != 1)
-                {
-                    this.getPowerProvider().setFailureCause(true);
-                    return;
-                }
-                
-                if(!this.isOn()) return;
-                
-                this.pullResources();
-                
-                if((tick & 0x1F) == 0x1F)
-                {
-                    this.setCurrentBacklog(VirtualBlockTracker.INSTANCE.get(this.world).sizeInChunksNear(pos, Configurator.MACHINES.basicBuilderChunkRadius));
-                }
-            }
-            
             if(!this.isOn()) return;
+            
+            if((tick & 0x1F) == 0x1F)
+            {
+                this.setCurrentBacklog(VirtualBlockTracker.INSTANCE.get(this.world).sizeInChunksNear(pos, Configurator.MACHINES.basicBuilderChunkRadius));
+            }
             
             switch(this.getControlState().getMachineState())
             {
@@ -255,6 +239,10 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     private void searchForWork()
     {
         if(this.getPowerProvider().provideEnergy(2, false, false) != 2) return;
+        
+        // because we consumed power
+        this.markDirty();
+        this.markPlayerUpdateDirty(false);
         
         if(checkPos == null) checkPos = this.pos;
         
@@ -331,7 +319,6 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             
             this.getControlState().setMachineState(MachineState.FABRICATING);
             
-            this.markDirty();
             // we want to send an immediate update when job starts
             this.markPlayerUpdateDirty(true);
         }
@@ -473,28 +460,6 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         else
         {
             return null;
-        }
-    }
-    
-    private void pullResources()
-    {
-        MaterialBufferManager bufferManager = this.getBufferManager();
-        
-        if(!bufferManager.canRestockAny()) return;
-        
-        for(EnumFacing face : EnumFacing.VALUES)
-        {
-            TileEntity tileentity = this.world.getTileEntity(this.pos.offset(face));
-            if (tileentity != null)
-            {
-                IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                if(this.getPowerProvider().provideEnergy(2, false, true) == 2 && bufferManager.restock(capability))
-                {
-                    this.getPowerProvider().provideEnergy(2, false, false);
-                    this.markDirty();
-                }
-                if(!bufferManager.canRestockAny()) return;
-            }
         }
     }
 

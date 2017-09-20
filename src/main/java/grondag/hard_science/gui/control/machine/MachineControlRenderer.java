@@ -14,7 +14,6 @@ import grondag.hard_science.gui.control.machine.RenderBounds.PowerRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
-import grondag.hard_science.library.render.FaceVertex;
 import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;

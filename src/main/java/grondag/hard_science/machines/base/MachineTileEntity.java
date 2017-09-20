@@ -29,16 +29,21 @@ import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.KeyedTuple;
+import grondag.hard_science.virtualblock.VirtualBlockTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 public abstract class MachineTileEntity extends SuperTileEntity implements IIdentified
 {
@@ -517,12 +522,17 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         this.markPlayerUpdateDirty(false);
     }
     
-    public void update()
+    public final void update()
     {
         if(world.isRemote) return;
         
-        if(this.controlState.hasPowerProvider() && this.getPowerProvider().tick(this.bufferHDPE))
-                this.markDirty();
+        long tick = this.world.getTotalWorldTime();
+        
+        if(this.powerProvider != null && this.powerProvider.tick(this, this.bufferHDPE, tick)) this.markDirty();
+        
+        if((tick & 0xF) == 0 && this.isOn()) this.restock();
+        
+        this.updateMachine(tick);
         
         if(this.isPlayerUpdateNeeded && this.listeningPlayers != null && !this.listeningPlayers.isEmpty())
         {
@@ -552,6 +562,37 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
                 
                 this.nextPlayerUpdateMilliseconds = time + Configurator.MACHINES.machineUpdateIntervalMilliseconds;
                 this.isPlayerUpdateNeeded = false;
+            }
+        }
+    }
+    
+    /**
+     * Will be called after machine power and material buffers are updated (if applies).
+     * Will be called irrespective of power or on/off, so check those if needed.
+     * @param tick  current world tick, in case needed
+     */
+    protected void updateMachine(long tick){};
+
+    protected void restock()
+    {
+        MaterialBufferManager bufferManager = this.getBufferManager();
+        
+        if(!bufferManager.canRestockAny()) return;
+        
+        for(EnumFacing face : EnumFacing.VALUES)
+        {
+            TileEntity tileentity = this.world.getTileEntity(this.pos.offset(face));
+            if (tileentity != null)
+            {
+                IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
+                
+                //FIXME: make power cost to restock configurable
+                if(this.getPowerProvider().provideEnergy(2, false, true) == 2 && bufferManager.restock(capability))
+                {
+                    this.getPowerProvider().provideEnergy(2, false, false);
+                    this.markDirty();
+                }
+                if(!bufferManager.canRestockAny()) return;
             }
         }
     }

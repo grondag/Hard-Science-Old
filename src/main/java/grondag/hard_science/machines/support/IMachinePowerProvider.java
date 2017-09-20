@@ -1,6 +1,7 @@
 package grondag.hard_science.machines.support;
 
 import grondag.hard_science.library.serialization.IReadWriteNBT;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -175,8 +176,7 @@ public interface IMachinePowerProvider extends IReadWriteNBT
      /**
       * On server, regenerates power from PE. 
       * Returns true if internal state was modified and should be sent to client and/or persisted.
-     * @return 
       */
-     boolean tick(MaterialBufferDelegate PEBuffer);
+     boolean tick(MachineTileEntity machineTileEntity, MaterialBufferDelegate hdpeBuffer, long tick);
     
 }

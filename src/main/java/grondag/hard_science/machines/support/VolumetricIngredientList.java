@@ -34,13 +34,13 @@ public class VolumetricIngredientList
             else if(arg instanceof Matter)
             {
                 Matter m = (Matter) arg;
-                list.add(new VolumetricIngredient(m, CubeSize.BLOCK));
-                list.add(new VolumetricIngredient(m, CubeSize.ONE));
-                list.add(new VolumetricIngredient(m, CubeSize.TWO));
-                list.add(new VolumetricIngredient(m, CubeSize.THREE));
-                list.add(new VolumetricIngredient(m, CubeSize.FOUR));
-                list.add(new VolumetricIngredient(m, CubeSize.FIVE));
                 list.add(new VolumetricIngredient(m, CubeSize.SIX));
+                list.add(new VolumetricIngredient(m, CubeSize.FIVE));
+                list.add(new VolumetricIngredient(m, CubeSize.FOUR));
+                list.add(new VolumetricIngredient(m, CubeSize.THREE));
+                list.add(new VolumetricIngredient(m, CubeSize.TWO));
+                list.add(new VolumetricIngredient(m, CubeSize.ONE));
+                list.add(new VolumetricIngredient(m, CubeSize.BLOCK));
             }
         }
         

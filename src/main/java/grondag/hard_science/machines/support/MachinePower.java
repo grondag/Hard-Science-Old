@@ -10,7 +10,7 @@ public class MachinePower
     
     public static enum FuelCellSpec
     {
-        STANDARD_INTEGRATED(JOULES_PER_KWH, 1000, 2000, 80);
+        STANDARD_INTEGRATED(JOULES_PER_KWH, 1000, 2000, 800);
         
         public static final FuelCellSpec[] VALUES = FuelCellSpec.values();
         

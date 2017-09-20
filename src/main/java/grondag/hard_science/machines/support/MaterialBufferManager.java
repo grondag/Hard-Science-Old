@@ -160,14 +160,12 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         }
         
         /**
-         * Extracts needed items from the input stack if found
-         * and increases buffer according to amount accepted. 
-         * Assumes caller checked for null / empty stack before calling.
-         * Returns true if items were taken.
+         * Extracts needed items from the given inventory if possible.
+         * Returns true if any restocking happened.
          */
-        public boolean extract(@Nonnull ItemStack stack, IItemHandler itemHandler, int slot)
+        public boolean restock(IItemHandler itemHandler)
         {
-            return MaterialBufferManager.this.extract(this.index, stack, itemHandler, slot);
+            return MaterialBufferManager.this.restock(this.index, itemHandler);
         }
         
         /**
@@ -229,7 +227,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
 
         /**
          * Decreases buffer by given amount, return amount actually decreased.
-         * Does not permit negatives.
+         * Return value may be lower than input if amount requested was not available.
          */
         public long use(long nanoLiters)
         {
@@ -239,6 +237,11 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         public String tooltipKey()
         {
             return MaterialBufferManager.this.specs[this.index].tooltipKey;
+        }
+
+        public boolean isEmpty()
+        {
+            return MaterialBufferManager.this.getLevelNanoLiters(this.index) == 0;
         }
     }
     
@@ -256,7 +259,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         
         public final String tooltipKey;
         
-        public VolumetricBufferSpec(VolumetricIngredientList inputs, long maxCapacityNanoLiters, String key)
+        public VolumetricBufferSpec(VolumetricIngredientList inputs, long maxCapacityNanoLiters, String nbtKey, String tooltipKey)
         {
             // would be strange, but whatever...  sometime I do strange things.
             if(maxCapacityNanoLiters < 1) maxCapacityNanoLiters = 1;
@@ -264,8 +267,8 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             this.inputs = inputs;
             this.maxCapacityNanoLiters = maxCapacityNanoLiters;
             this.fillLineNanoLiters = this.maxCapacityNanoLiters - inputs.minNanoLitersPerItem + 1;
-            this.nbtTag = "mbl_" + key;
-            this.tooltipKey = "machine.buffer_" + key;
+            this.nbtTag = nbtKey;
+            this.tooltipKey = "machine.buffer_" + tooltipKey;
         }
     }
     
@@ -443,7 +446,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
      * Assumes caller checked for null / empty stack before calling.
      * Returns true if items were taken.
      */
-    public boolean extract(int bufferIndex, @Nonnull ItemStack stack, IItemHandler itemHandler, int slot)
+    public boolean receive(int bufferIndex, @Nonnull ItemStack stack, IItemHandler itemHandler, int slot)
     {
         if(stack.isEmpty() || stack.getItem() == Items.AIR)
             Log.warn("Material Buffer extract encountered invalid (empty) input ingredient.  This is a bug.");
@@ -644,7 +647,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             while(j < needs.size())
             {
                 int bufferIndex = needs.getInt(j);
-                if(extract(bufferIndex, stack, itemHandler, i)) 
+                if(receive(bufferIndex, stack, itemHandler, i)) 
                 {
                     didRestock = true;
                     if(canRestock(bufferIndex)) j++; 
@@ -654,6 +657,41 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             }
             
             if(needs.size() == 0) break;
+        }
+        
+        if(didRestock) this.setDirty(true);
+        
+        return didRestock;
+    }
+    
+    /**
+     * Restocks a single buffer identified by index.
+     * Useful for restocking fuel only.
+     * Returns true if any restocking happened.
+     */
+    public boolean restock(int bufferIndex, IItemHandler itemHandler)
+    {
+        if(itemHandler == null) return false;
+        
+        int slotCount = itemHandler.getSlots();
+        if(slotCount == 0) return false;
+
+        if(!canRestock(bufferIndex)) return false;
+        
+        boolean didRestock = false;
+        
+        for(int i = 0; i < slotCount; i++)
+        {
+            // important to make a copy here because stack may be modified by extract
+            // and then wouldn't be useful for comparisons
+            ItemStack stack = itemHandler.getStackInSlot(i).copy();
+            if(stack == null || stack.isEmpty()) continue;
+           
+            if(receive(bufferIndex, stack, itemHandler, i)) 
+            {
+                didRestock = true;
+                if(!canRestock(bufferIndex)) break; 
+            }
         }
         
         if(didRestock) this.setDirty(true);
@@ -766,7 +804,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
 
     /**
      * Decreases buffer by given amount, return amount actually decreased.
-     * Does not permit negatives.
+     * Return value may be lower than input if amount requested was not available.
      */
     public long use(int bufferIndex, long nanoLiters)
     {
@@ -774,12 +812,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         if(result > 0)
         {
             this.remove(bufferIndex, result);
-            
-            if(Log.DEBUG_MODE && nanoLiters != result)
-            {
-                Log.warn("Machine material buffered received request higher than currentLevelNanoLiters. %d vs %d", nanoLiters, this.levelsNanoLiters[bufferIndex]);
-            }
-        }
+         }
         return result;
     }
 }

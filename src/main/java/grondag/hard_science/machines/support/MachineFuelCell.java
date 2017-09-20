@@ -3,12 +3,19 @@ package grondag.hard_science.machines.support;
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
+import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachinePower.FuelCellSpec;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import jline.internal.Log;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 public class MachineFuelCell implements IMachinePowerProvider
 {
@@ -287,21 +294,56 @@ public class MachineFuelCell implements IMachinePowerProvider
     }
 
     @Override
-    public boolean tick(MaterialBufferDelegate PEBuffer)
+    public boolean tick(MachineTileEntity mte, MaterialBufferDelegate hdpeBuffer, long tick)
     {
-        // TODO consume PE and limit if not available
         boolean didChange = false;
+
+        // attempt to "prime the pump" if PE buffer is empty
+        // otherwise will be filled during normal restocking
+        if(this.storedEnergyJoules == 0 && (tick & 0xF) == 0xA && hdpeBuffer.isEmpty())
+        {
+            World world = mte.getWorld();
+            BlockPos pos = mte.getPos();
+            for(EnumFacing face : EnumFacing.VALUES)
+            {
+                TileEntity tileentity = world.getTileEntity(pos.offset(face));
+                if (tileentity != null)
+                {
+                    IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
+                    if(hdpeBuffer.restock(capability))
+                    {
+                        didChange = true;
+                        break;
+                    }
+                }
+            }
+        }
         
+
         long capacity = this.spec.maxEnergyJoules - this.storedEnergyJoules;
         if(capacity > 0)
         {
-            long input = Math.min(capacity, this.spec.maxPowerInputWatts / 20);
+            long generated = Math.min(capacity, this.spec.maxPowerInputWatts / 20);
             
-            if(input != 0)
+            if(generated != 0)
             {
-                this.storedEnergyJoules += input;
-                this.inputThisSamplePeriod += input;
-                didChange = true;
+                long nlFuelNeeded = generated * 1000 * VolumeUnits.LITER.nL / this.spec.conversionEfficiencyPerKilo / StandardUnits.J_ENERGY_PER_POLYETHYLENE_LITER;
+                
+                long nlFuelAvailable = hdpeBuffer.use(nlFuelNeeded);
+                
+
+                if(nlFuelAvailable < nlFuelNeeded) 
+                {
+                    hdpeBuffer.blame();
+                    generated = nlFuelAvailable * this.spec.conversionEfficiencyPerKilo * StandardUnits.J_ENERGY_PER_POLYETHYLENE_LITER / 1000 / VolumeUnits.LITER.nL;
+                }
+                
+                if(generated > 0)
+                {
+                    this.storedEnergyJoules += generated;
+                    this.inputThisSamplePeriod += generated;
+                    didChange = true;
+                }
             }
         }
         
