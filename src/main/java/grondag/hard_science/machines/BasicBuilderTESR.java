@@ -5,6 +5,7 @@ import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.machines.base.MachineTESR;
 import grondag.hard_science.machines.base.MachineTileEntity;
+import grondag.hard_science.machines.support.MaterialBufferManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 
@@ -16,12 +17,21 @@ public class BasicBuilderTESR extends MachineTESR
     @Override
     protected void renderControlFace(Tessellator tessellator, BufferBuilder buffer, MachineTileEntity te, int alpha)
     {
+        MaterialBufferManager mbm = te.getBufferManager();
+        
         for(RadialGaugeSpec spec : BasicBuilderTileEntity.BASIC_BUILDER_GAUGE_SPECS)
         {
-            MachineControlRenderer.renderGauge(tessellator,buffer, spec, te, te.getBufferManager().getBuffer(spec.bufferIndex), alpha);
+            MachineControlRenderer.renderGauge(tessellator,buffer, spec, te, mbm.getBuffer(spec.bufferIndex), alpha);
         }
         
         MachineControlRenderer.renderFabricationProgress(RenderBounds.BOUNDS_PROGRESS, te, alpha);
+        
+        MachineControlRenderer.renderCMY(tessellator, buffer, RenderBounds.BOUNDS_BOTTOM_0, 
+                mbm.getBuffer(BasicBuilderTileEntity.BUFFER_INDEX_CYAN),
+                mbm.getBuffer(BasicBuilderTileEntity.BUFFER_INDEX_MAGENTA), 
+                mbm.getBuffer(BasicBuilderTileEntity.BUFFER_INDEX_YELLOW), 
+                alpha);
+        
         
 //        MachineControlRenderer.renderLinearProgress(tessellator, buffer, new RectRenderBounds(0.2, 0.3, 0.5, 0.08),  ModModels.TEX_LINEAR_POWER_LEVEL,8, 24, true, alpha << 24 | 0xFFFFFF);
         

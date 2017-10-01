@@ -2,72 +2,114 @@ package grondag.hard_science.machines.support;
 
 import java.util.function.Function;
 
-import grondag.hard_science.machines.support.IMachinePowerProvider;
-
 public class MachinePower
 {
     public static final long JOULES_PER_KWH = 3600000;
+    public static final long JOULES_PER_POLYETHYLENE_LITER = 42600000;
+    public static final float JOULES_PER_POLYETHYLENE_NANOLITER = (float) JOULES_PER_POLYETHYLENE_LITER / VolumeUnits.LITER.nL;
     
-    public static enum FuelCellSpec
+    /**
+     * Efficiency of catalytic conversion plates for turning PE into electricity.
+     */
+    public static final float POLYETHYLENE_CONVERSION_EFFICIENCY = 0.7257f;
+    
+    /**
+     * Efficiency of thermoelectric generation plate in typical usage.
+     */
+    public static final float THERMOELECTRIC_CONVERSION_EFFICIENCY = 0.60f;
+    
+    /**
+     * Efficiency of PE conversion plates when paired with thermoelectic generation plates to capture waste heat.
+     */
+    public static final float POLYETHYLENE_BOOSTED_CONVERSION_EFFICIENCY 
+        = POLYETHYLENE_CONVERSION_EFFICIENCY + (1 - POLYETHYLENE_CONVERSION_EFFICIENCY) * THERMOELECTRIC_CONVERSION_EFFICIENCY;
+    
+    /**
+     * Efficiency of catalytic formation process turning atmospheric CO2 and Water into PE and O2.
+     */
+    public static final float POLYETHYLENE_FORMATION_EFFICIENCY = 0.90f;
+    
+    /**
+     * Max rate of PE consumption and conversion to electricity by catalytic conversion plate in linear microometers per simulated second.
+     * Volume will be surface area of plate x this number.
+     * This number is pure hand-waving because the technology doesn't exist yet.
+     */
+    public static final int POLYETHYLENE_MAX_CONVERSION_RATE_μM = 27;
+   
+//    public static enum FuelCellSpec
+//    {
+//        STANDARD_INTEGRATED(JOULES_PER_KWH, 1000, 2000, POLYETHYLENE_CONVERSION_EFFICIENCY_PER_MILLE);
+//        
+//        public static final FuelCellSpec[] VALUES = FuelCellSpec.values();
+//        
+//        /**
+//         * Corresponds to {@link IMachinePowerProvider#maxEnergyJoules}
+//         */
+//        public final long maxEnergyJoules;
+//        
+//        /**
+//         * Corresponds to {@link IMachinePowerProvider#maxPowerInputWatts().}
+//         */
+//        public final long maxPowerInputWatts;
+//        
+//        /**
+//         * Corresponds to {@link IMachinePowerProvider#maxEnergyInputPerTick()()}
+//         */
+//        public final long maxEnergyInputPerTick;
+//        
+//        /**
+//         * Corresponds to {@link IMachinePowerProvider#maxPowerOutputWatts()}
+//         */
+//        public final long maxPowerOutputWatts;
+//        
+//        /**
+//         * Corresponds to {@link IMachinePowerProvider#maxEnergyOutputPerTick()()}
+//         */
+//        public final long maxEnergyOutputPerTick;
+//        
+//        /**
+//         * Corresponds to {@link IMachinePowerProvider#maxPowerInOrOutWatts()}
+//         */
+//        public final long maxPowerInOrOutWatts;
+//
+//        /**
+//         * Natural log of {@link #maxPowerInOrOutWatts}
+//         */
+//        public final double logMaxInOrOut;
+//        
+//        /**
+//         * For fuel cells and generators, efficiency of power conversion for fuel consumed. As value 0 to 1000.
+//         */
+//        public final int conversionEfficiencyPerMille;
+//        
+//        
+//        private FuelCellSpec(long maxEnergyJoules, long maxPowerInputWatts, long maxPowerOutputWatts, int conversionEfficiencyPerKilo)
+//        {
+//            this.maxEnergyJoules = maxEnergyJoules;
+//            this.maxPowerInputWatts = maxPowerInputWatts;
+//            this.maxEnergyInputPerTick = maxPowerInputWatts / 20;
+//            this.maxPowerOutputWatts = maxPowerOutputWatts;
+//            this.maxEnergyOutputPerTick = maxPowerOutputWatts / 20;
+//            this.maxPowerInOrOutWatts = Math.max(maxPowerInputWatts, maxPowerOutputWatts);
+//            this.conversionEfficiencyPerMille = conversionEfficiencyPerKilo;
+//            this.logMaxInOrOut = Math.log(this.maxPowerInOrOutWatts);
+//        }
+//    }
+    
+    /**
+     * Here to remind me that I can't just multiply joules (watt seconds) by 20 to watts,
+     * because 20 ticks is a real-world second, not a simulated second. 
+     * Doing so will understate power consumption.
+     */
+    public static float joulesPerTickToWatts(long joules)
     {
-        STANDARD_INTEGRATED(JOULES_PER_KWH, 1000, 2000, 800);
-        
-        public static final FuelCellSpec[] VALUES = FuelCellSpec.values();
-        
-        /**
-         * Corresponds to {@link IMachinePowerProvider#maxEnergyJoules}
-         */
-        public final long maxEnergyJoules;
-        
-        /**
-         * Corresponds to {@link IMachinePowerProvider#maxPowerInputWatts().}
-         */
-        public final long maxPowerInputWatts;
-        
-        /**
-         * Corresponds to {@link IMachinePowerProvider#maxEnergyInputPerTick()()}
-         */
-        public final long maxEnergyInputPerTick;
-        
-        /**
-         * Corresponds to {@link IMachinePowerProvider#maxPowerOutputWatts()}
-         */
-        public final long maxPowerOutputWatts;
-        
-        /**
-         * Corresponds to {@link IMachinePowerProvider#maxEnergyOutputPerTick()()}
-         */
-        public final long maxEnergyOutputPerTick;
-        
-        /**
-         * Corresponds to {@link IMachinePowerProvider#maxPowerInOrOutWatts()}
-         */
-        public final long maxPowerInOrOutWatts;
-
-        /**
-         * Natural log of {@link #maxPowerInOrOutWatts}
-         */
-        public final double logMaxInOrOut;
-        
-        /**
-         * For fuel cells and generators, efficiency of power conversion for fuel consumed. As value 0 to 1000.
-         */
-        public final int conversionEfficiencyPerKilo;
-        
-        
-        private FuelCellSpec(long maxEnergyJoules, long maxPowerInputWatts, long maxPowerOutputWatts, int conversionEfficiencyPerKilo)
-        {
-            this.maxEnergyJoules = maxEnergyJoules;
-            this.maxPowerInputWatts = maxPowerInputWatts;
-            this.maxEnergyInputPerTick = maxPowerInputWatts / 20;
-            this.maxPowerOutputWatts = maxPowerOutputWatts;
-            this.maxEnergyOutputPerTick = maxPowerOutputWatts / 20;
-            this.maxPowerInOrOutWatts = Math.max(maxPowerInputWatts, maxPowerOutputWatts);
-            this.conversionEfficiencyPerKilo = conversionEfficiencyPerKilo;
-            this.logMaxInOrOut = Math.log(this.maxPowerInOrOutWatts);
-        }
+        return joules * TimeUnits.TICKS_PER_SIMULATED_SECOND;
     }
     
+    public static float wattsToJoulesPerTick(long watts)
+    {
+        return watts * TimeUnits.SIMULATED_SECONDS_PER_TICK;
+    }
     
     private static final Function<?, ?> FORMAT_JOULES[] = 
     {
@@ -255,7 +297,7 @@ public class MachinePower
     @SuppressWarnings("unchecked")
     public static String formatPower(long watts, boolean includePositiveSign)
     {
-        if(watts == 0) return "0J";
+        if(watts == 0) return "0W";
 
         String raw = Long.toString(watts);
         int len = raw.length();
@@ -270,4 +312,5 @@ public class MachinePower
             return "-" + ((Function<String, String>)FORMAT_WATTS[len - 1]).apply(raw.substring(1));
         }
     }
+
 }

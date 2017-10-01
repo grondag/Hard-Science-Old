@@ -2,32 +2,36 @@ package grondag.hard_science.gui.control.machine;
 
 public interface RenderBounds<T extends RenderBounds<T>>
 {
-    public static final RadialRenderBounds BOUNDS_SYMBOL = new RadialRenderBounds(0.10, 0.10, 0.07);
+    public static final RadialRenderBounds BOUNDS_SYMBOL = new RadialRenderBounds(0.1, 0.1, 0.07);
     public static final RectRenderBounds BOUNDS_NAME = new RectRenderBounds(0.25, 0.04, 0.5, 0.12);
-    public static final RadialRenderBounds BOUNDS_ON_OFF = new RadialRenderBounds(0.90, 0.10, 0.07);
+    public static final RadialRenderBounds BOUNDS_ON_OFF = new RadialRenderBounds(0.9, 0.1, 0.08);
 
-    public static final RadialRenderBounds BOUNDS_PROGRESS = new RadialRenderBounds(0.24, 0.38, 0.20);
-    public static final PowerRenderBounds BOUNDS_POWER = new PowerRenderBounds(0.76, 0.38, 0.20);
+    public static final RadialRenderBounds BOUNDS_PROGRESS = new RadialRenderBounds(0.5, 0.5, 0.285);
+    public static final RadialRenderBounds BOUNDS_POWER_0 = new RadialRenderBounds(0.9, 0.3, 0.085);
+    public static final RadialRenderBounds BOUNDS_POWER_1 = new RadialRenderBounds(0.9, 0.5, 0.085);
+    public static final RadialRenderBounds BOUNDS_POWER_2 = new RadialRenderBounds(0.9, 0.7, 0.085);
     
-    public static final RadialRenderBounds BOUNDS_REDSTONE = new RadialRenderBounds(0.90, 0.90, 0.06);
-    public static final RadialRenderBounds BOUNDS_GAUGE[] = 
-    {
-            new RadialRenderBounds(0.12, 0.88, 0.08),
-            new RadialRenderBounds(0.30, 0.88, 0.08),
-            new RadialRenderBounds(0.48, 0.88, 0.08),
-            new RadialRenderBounds(0.66, 0.88, 0.08),
-            new RadialRenderBounds(0.12, 0.70, 0.08),
-            new RadialRenderBounds(0.30, 0.70, 0.08),
-            new RadialRenderBounds(0.48, 0.70, 0.08),
-            new RadialRenderBounds(0.66, 0.70, 0.08)
-    };
+    public static final RadialRenderBounds BOUNDS_BOTTOM_0 = new RadialRenderBounds(0.1, 0.9, 0.085);
+    public static final RadialRenderBounds BOUNDS_BOTTOM_1 = new RadialRenderBounds(0.3, 0.9, 0.085);
+    public static final RadialRenderBounds BOUNDS_BOTTOM_2 = new RadialRenderBounds(0.5, 0.9, 0.085);
+    public static final RadialRenderBounds BOUNDS_BOTTOM_3 = new RadialRenderBounds(0.7, 0.9, 0.085);
+    public static final RadialRenderBounds BOUNDS_REDSTONE = new RadialRenderBounds(0.90, 0.90, 0.07);
     
-    public static final RadialRenderBounds BOUNDS_PE_BUFFER = new RadialRenderBounds(0.86, 0.70, 0.10);
+    public static final RadialRenderBounds BOUNDS_LEFT_UPPER = new RadialRenderBounds(0.1, 0.3, 0.085);
+    public static final RadialRenderBounds BOUNDS_LEFT_MIDDLE = new RadialRenderBounds(0.1, 0.5, 0.085);
+    public static final RadialRenderBounds BOUNDS_LEFT_LOWER = new RadialRenderBounds(0.1, 0.7, 0.085);
         
     
     public abstract T offset(double x, double y);
 
     public abstract T scale(double left, double top, double width, double height);
+    
+    public abstract double left();
+    public abstract double width();
+    public abstract double top();
+    public abstract double height();
+    public abstract double right();
+    public abstract double bottom();
     
     public static abstract class AbstractRectRenderBounds
     {
@@ -107,14 +111,14 @@ public interface RenderBounds<T extends RenderBounds<T>>
     
     public static class RadialRenderBounds extends AbstractRadialRenderBounds implements RenderBounds<RadialRenderBounds>
     {
-        private AbstractRadialRenderBounds innerBounds;
-
+        private RadialRenderBounds innerBounds;
+        
         public RadialRenderBounds(double centerX, double centerY, double radius)
         {
             super(centerX, centerY, radius);
         }
         
-        public AbstractRadialRenderBounds innerBounds()
+        public RadialRenderBounds innerBounds()
         {
             if(this.innerBounds == null)
             {
@@ -122,7 +126,7 @@ public interface RenderBounds<T extends RenderBounds<T>>
             }
             return this.innerBounds;
         }
-
+        
         @Override
         public RadialRenderBounds offset(double x, double y)
         {
@@ -136,30 +140,30 @@ public interface RenderBounds<T extends RenderBounds<T>>
         }
     }
     
-    public static class PowerRenderBounds extends AbstractRadialRenderBounds implements RenderBounds<PowerRenderBounds>
-    {
-        public final RectRenderBounds gainLossTextBounds;
-        public final RectRenderBounds energyTextBounds;
-        public final RectRenderBounds energyLevelBounds;
-        
-        public PowerRenderBounds(double centerX, double centerY, double radius)
-        {
-            super(centerX, centerY, radius);
-            this.gainLossTextBounds = new RectRenderBounds(left(), centerY - radius * 0.34, radius * 2, radius * 0.36 );
-            this.energyTextBounds = new RectRenderBounds(left(), centerY + radius * 0.48, width(), radius * 0.48);
-            this.energyLevelBounds = new RectRenderBounds(left(), centerY + radius / 10, width(), radius / 3);
-        }
-
-        @Override
-        public PowerRenderBounds offset(double x, double y)
-        {
-            return new PowerRenderBounds(this.centerX + x, this.centerY + y, this.radius);
-        }
-
-        @Override
-        public PowerRenderBounds scale(double left, double top, double width, double height)
-        {
-            return new PowerRenderBounds(left + width / 2, top + height / 2, width / 2);
-        }
-    }
+//    public static class PowerRenderBounds extends AbstractRadialRenderBounds implements RenderBounds<PowerRenderBounds>
+//    {
+//        public final RectRenderBounds gainLossTextBounds;
+//        public final RectRenderBounds energyTextBounds;
+//        public final RectRenderBounds energyLevelBounds;
+//        
+//        public PowerRenderBounds(double centerX, double centerY, double radius)
+//        {
+//            super(centerX, centerY, radius);
+//            this.gainLossTextBounds = new RectRenderBounds(left(), centerY - radius * 0.34, radius * 2, radius * 0.36 );
+//            this.energyTextBounds = new RectRenderBounds(left(), centerY + radius * 0.48, width(), radius * 0.48);
+//            this.energyLevelBounds = new RectRenderBounds(left(), centerY + radius / 10, width(), radius / 3);
+//        }
+//
+//        @Override
+//        public PowerRenderBounds offset(double x, double y)
+//        {
+//            return new PowerRenderBounds(this.centerX + x, this.centerY + y, this.radius);
+//        }
+//
+//        @Override
+//        public PowerRenderBounds scale(double left, double top, double width, double height)
+//        {
+//            return new PowerRenderBounds(left + width / 2, top + height / 2, width / 2);
+//        }
+//    }
 }

@@ -4,6 +4,8 @@ import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.network.AbstractServerToPlayerPacket;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
@@ -16,7 +18,7 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
     public MachineControlState controlState;
     public long[] materialBufferData;
     public MachineStatusState statusState;
-    public int[] powerProviderData;
+    public ByteBuf powerProviderData;
     
     public PacketMachineStatusUpdateListener() {}
    
@@ -30,8 +32,11 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
         if(this.controlState.hasMaterialBuffer()) 
             this.materialBufferData = te.getBufferManager().serializeToArray();
         
-        if(this.controlState.hasPowerProvider()) 
-            this.powerProviderData = te.getPowerProvider().serializeToArray();
+        if(this.controlState.hasPowerSupply())
+        {
+            this.powerProviderData = Unpooled.buffer();
+            te.getPowerSupply().toBytes(this.powerProviderData);
+        }
     }
 
     @Override
@@ -52,8 +57,15 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
                 this.materialBufferData[i] = pBuff.readVarLong();
             }
         }
-        if(this.controlState.hasPowerProvider()) 
-            this.powerProviderData = pBuff.readVarIntArray();
+        if(this.controlState.hasPowerSupply()) 
+        {
+            this.powerProviderData = Unpooled.buffer();
+            int byteCount = pBuff.readVarInt();
+            if(byteCount > 0)
+            {
+                pBuff.readBytes(this.powerProviderData, byteCount);
+            }
+        }
         
     }
 
@@ -74,8 +86,11 @@ public class PacketMachineStatusUpdateListener extends AbstractServerToPlayerPac
             }
         }
 
-        if(this.controlState.hasPowerProvider()) 
-            pBuff.writeVarIntArray(this.powerProviderData);
+        if(this.controlState.hasPowerSupply() && this.powerProviderData != null)
+        {
+            pBuff.writeVarInt(this.powerProviderData.readableBytes());
+            pBuff.writeBytes(this.powerProviderData);
+        }
     }
 
     @Override

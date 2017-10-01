@@ -4,6 +4,7 @@ import java.util.List;
 
 import grondag.hard_science.HardScience;
 import grondag.hard_science.gui.control.machine.RenderBounds;
+import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.superblock.block.SuperBlockPlus;
 import grondag.hard_science.superblock.color.BlockColorMapProvider;
 import grondag.hard_science.superblock.color.Chroma;
@@ -33,6 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -247,6 +249,30 @@ public abstract class MachineBlock extends SuperBlockPlus
         list.add(this.getSubItems().get(0));
     }
 
+    @Override
+    protected List<ItemStack> createSubItems()
+    {
+        List<ItemStack> items = super.createSubItems();
+        
+        MachinePowerSupply defaultPower = createDefaultPowerSupply();
+        if(defaultPower != null)
+        {
+            for(ItemStack stack : items)
+            {
+                NBTTagCompound tag = stack.getTagCompound();
+                if(tag == null)
+                {
+                    tag = new NBTTagCompound();
+                }
+                defaultPower.serializeNBT(tag);
+                stack.setTagCompound(tag);
+            }
+        }
+        return items;
+    }
+    
+    public abstract MachinePowerSupply createDefaultPowerSupply();
+    
     @Override
     public BlockSubstance getSubstance(IBlockState state, IBlockAccess world, BlockPos pos)
     {

@@ -2,6 +2,7 @@ package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
+import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,7 @@ public class MachineName extends AbstractMachineControl<MachineName, RectRenderB
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderMachineText(this.renderBounds, this.tileEntity.machineName(), HorizontalAlignment.CENTER, 255);
+        MachineControlRenderer.renderMachineText(ModModels.FONT_RENDERER_LARGE, this.renderBounds, this.tileEntity.machineName(), HorizontalAlignment.CENTER, 255);
     }
 
     @Override

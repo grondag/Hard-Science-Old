@@ -123,6 +123,11 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
     
     public final BlockRenderMode blockRenderMode;
     
+    /**
+     * Sub-items for the block. Initialized in {@link #createSubItems()}
+     */
+    private List<ItemStack> subItems;
+    
     public SuperBlock(String blockName, Material defaultMaterial, ModelState defaultModelState, BlockRenderMode blockRenderMode)
     {
         super(defaultMaterial);
@@ -897,12 +902,28 @@ public abstract class SuperBlock extends Block implements IWailaProvider, IProbe
         items.addAll(getSubItems());
     }
 
-    public List<ItemStack> getSubItems()
+    public final List<ItemStack> getSubItems()
     {
-        return this.getSubItemsBasic();
+        if(this.subItems == null)
+        {
+            this.subItems = this.createSubItems();
+        }
+        return this.subItems;
     }
     
-    protected List<ItemStack> getSubItemsBasic()
+    /**
+     * Override and alter the items in the list or replace with a different
+     * list to control sub items for this block. Only called once per block instance.
+     */
+    protected List<ItemStack> createSubItems()
+    {
+        return this.defaultSubItems();
+    }
+    
+    /**
+     * Default implementation for {@link #createSubItems()}
+     */
+    protected final List<ItemStack> defaultSubItems()
     {
         ImmutableList.Builder<ItemStack> itemBuilder = new ImmutableList.Builder<ItemStack>();
         for(int i = 0; i < this.metaCount; i++)

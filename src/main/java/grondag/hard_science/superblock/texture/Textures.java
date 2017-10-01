@@ -407,8 +407,8 @@ public class Textures
     public static final TexturePallette DECAL_ARROW_90 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
     public static final TexturePallette DECAL_ARROW_180 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette DECAL_ARROW_270 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
-
-    
+ 
+ 
     public static final TexturePallette MATERIAL_GRADIENT = REGISTRY.addTexturePallette("material_gradient", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_TILES));

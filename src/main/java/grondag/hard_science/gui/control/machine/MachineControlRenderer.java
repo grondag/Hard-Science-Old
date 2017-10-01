@@ -10,18 +10,22 @@ import org.lwjgl.opengl.GL11;
 import grondag.hard_science.CommonProxy;
 import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.AbstractRectRenderBounds;
-import grondag.hard_science.gui.control.machine.RenderBounds.PowerRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
 import grondag.hard_science.gui.control.machine.RenderBounds.RectRenderBounds;
 import grondag.hard_science.init.ModModels;
+import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.library.render.QuadBakery;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.library.varia.HorizontalAlignment;
 import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
-import grondag.hard_science.machines.support.IMachinePowerProvider;
+import grondag.hard_science.machines.support.Battery;
+import grondag.hard_science.machines.support.FuelCell;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
+import grondag.hard_science.machines.support.MachinePower;
+import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
+import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -53,35 +57,35 @@ public class MachineControlRenderer
         renderTextureInBounds(bounds, texture.apply(selector), alpha);
     }
 
-    public static void renderMachineText(RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    public static void renderMachineText(RasterFont font, RenderBounds<?> bounds, String text, HorizontalAlignment alignment, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderMachineText(tes, tes.getBuffer(), bounds, text, alignment, alpha);
+        renderMachineText(tes, tes.getBuffer(), font, bounds, text, alignment, colorARGB);
     }
 
-    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RasterFont font, RenderBounds<?> bounds, String text, HorizontalAlignment alignment, int colorARGB)
     {
         switch(alignment)
         {
         case CENTER:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidth(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
-            renderMachineText(tessellator, buffer, bounds.offset(diff / 2, 0), text, alpha);
+            double diff = bounds.width() - font.getWidth(text) * bounds.height() / font.fontHeight;
+            renderMachineText(tessellator, buffer, font, bounds.offset(diff / 2, 0), text, colorARGB);
             break;
         }
 
         case RIGHT:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidth(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
-            renderMachineText(tessellator, buffer, bounds.offset(diff, 0), text, alpha);
+            double diff = bounds.width() - font.getWidth(text) * bounds.height() / font.fontHeight;
+            renderMachineText(tessellator, buffer, font, bounds.offset(diff, 0), text, colorARGB);
             break;
         }
 
         case LEFT:
         default:
-            renderMachineText(tessellator, buffer, bounds, text, alpha);
+            renderMachineText(tessellator, buffer, font, bounds, text, colorARGB);
             break;
 
         }
@@ -91,50 +95,50 @@ public class MachineControlRenderer
      * Use {@link #renderMachineText(Tessellator, BufferBuilder, RectRenderBounds, String, int)}
      * when you already have tessellator and buffer on the stack.
      */
-    public static void renderMachineText(AbstractRectRenderBounds bounds, String text, int alpha)
+    public static void renderMachineText(RasterFont font, RenderBounds<?> bounds, String text, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderMachineText(tes, tes.getBuffer(), bounds, text, alpha);
+        renderMachineText(tes, tes.getBuffer(), font, bounds, text, colorARGB);
     }
 
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
+    public static void renderMachineText(Tessellator tessellator, BufferBuilder buffer, RasterFont font, RenderBounds<?> bounds, String text, int colorARGB)
     {
-        ModModels.FONT_RENDERER_LARGE.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
+        font.drawLine(bounds.left(), bounds.top(), text, bounds.height(), 0f, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, (colorARGB >> 24) & 0xFF);
     }
     
     
-    public static void renderMachineTextMonospaced(RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    public static void renderMachineTextMonospaced(RasterFont font, RenderBounds<?> bounds, String text, HorizontalAlignment alignment, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderMachineTextMonospaced(tes, tes.getBuffer(), bounds, text, alignment, alpha);
+        renderMachineTextMonospaced(tes, tes.getBuffer(), font, bounds, text, alignment, colorARGB);
     }
 
-    public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, String text, HorizontalAlignment alignment, int alpha)
+    public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, RasterFont font, RenderBounds<?> bounds, String text, HorizontalAlignment alignment, int color)
     {
         switch(alignment)
         {
         case CENTER:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidthMonospaced(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
-            renderMachineTextMonospaced(tessellator, buffer, bounds.offset(diff / 2, 0), text, alpha);
+            double diff = bounds.width() - font.getWidthMonospaced(text) * bounds.height() / font.fontHeight;
+            renderMachineTextMonospaced(tessellator, buffer, font, bounds.offset(diff / 2, 0), text, color);
             break;
         }
 
         case RIGHT:
         {
             // need to scale font pixelWidth to height of the line
-            double diff = bounds.width - ModModels.FONT_RENDERER_LARGE.getWidthMonospaced(text) * bounds.height / ModModels.FONT_RENDERER_LARGE.fontHeight;
-            renderMachineTextMonospaced(tessellator, buffer, bounds.offset(diff, 0), text, alpha);
+            double diff = bounds.width() - font.getWidthMonospaced(text) * bounds.height() / font.fontHeight;
+            renderMachineTextMonospaced(tessellator, buffer, font, bounds.offset(diff, 0), text, color);
             break;
         }
 
         case LEFT:
         default:
-            renderMachineTextMonospaced(tessellator, buffer, bounds, text, alpha);
+            renderMachineTextMonospaced(tessellator, buffer, font, bounds, text, color);
             break;
 
         }
@@ -144,18 +148,18 @@ public class MachineControlRenderer
      * Use {@link #renderMachineText(Tessellator, BufferBuilder, RectRenderBounds, String, int)}
      * when you already have tessellator and buffer on the stack.
      */
-    public static void renderMachineTextMonospaced(AbstractRectRenderBounds bounds, String text, int alpha)
+    public static void renderMachineTextMonospaced(RasterFont font, RenderBounds<?> bounds, String text, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderMachineText(tes, tes.getBuffer(), bounds, text, alpha);
+        renderMachineTextMonospaced(tes, tes.getBuffer(), font, bounds, text, colorARGB);
     }
 
     /**
      * Use this version when you already have tessellator/buffer references on the stack.
      */
-    public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, String text, int alpha)
+    public static void renderMachineTextMonospaced(Tessellator tessellator, BufferBuilder buffer, RasterFont font, RenderBounds<?> bounds, String text, int colorARGB)
     {
-        ModModels.FONT_RENDERER_LARGE.drawLineMonospaced(bounds.left(), bounds.top(), text, bounds.height(), 0f, 255, 255, 255, alpha); 
+        font.drawLineMonospaced(bounds.left(), bounds.top(), text, bounds.height(), 0f,  (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, (colorARGB >> 24) & 0xFF);
     }
 
     /**
@@ -223,7 +227,8 @@ public class MachineControlRenderer
                 0, 0, 1, 1, alpha, 0xFF, 0xFF, 0xFF);
         tessellator.draw();
     }
-
+    
+  
     public static void renderTextureInBoundsWithColor(AbstractRectRenderBounds bounds, int glTextureID, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -608,64 +613,140 @@ public class MachineControlRenderer
         }
     }
     
-    public static void renderPower(RectRenderBounds.PowerRenderBounds bounds, MachineTileEntity te, int alpha)
+    public static void renderPower(RadialRenderBounds bounds, MachinePowerSupply mps, MachineTileEntity mte, int alpha)
     {
         Tessellator tes = Tessellator.getInstance();
-        renderPower(tes, tes.getBuffer(), bounds, te, alpha);
+        renderPower(tes, tes.getBuffer(), bounds, mps, mte, alpha);
     }
 
-    public static void renderPower(Tessellator tessellator, BufferBuilder buffer, PowerRenderBounds bounds, MachineTileEntity mte, int alpha)
+    public static void renderPower(
+            Tessellator tessellator, 
+            BufferBuilder buffer, 
+            RadialRenderBounds bounds, 
+            MachinePowerSupply mps,
+            MachineTileEntity mte,
+            final int alpha)
     {
-        if(mte.getControlState().hasPowerProvider())
-        {
-            // render marks
-            MachineControlRenderer.renderTextureInBounds(tessellator, buffer, bounds, ModModels.TEX_POWER_BACKGROUND, alpha);
-            
-            IMachinePowerProvider mpp = mte.getPowerProvider();
-            
-            long current = mpp.availableEnergyJoules();
-
-            final int inArcLength = mpp.logAvgPowerInputDegrees();
-            if(inArcLength != 0)
-            {
-                MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 270, inArcLength, ModModels.TEX_POWER_INNER, alpha << 24 | 0x40FF40);
-            }
-
-            final int outArcLength = mpp.avgPowerOutputDegress();
-            if(outArcLength != 0)
-            {
-                MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 270, outArcLength, ModModels.TEX_POWER_OUTER, alpha << 24 | 0xFF4040);
-            }
-            
-            renderMachineTextMonospaced(tessellator, buffer, bounds.gainLossTextBounds, 
-                    mpp.formattedAvgNetPowerGainLoss(), HorizontalAlignment.CENTER, alpha);
-            
-            renderMachineTextMonospaced(tessellator, buffer, bounds.energyTextBounds, 
-                     mpp.formatedAvailableEnergyJoules(), HorizontalAlignment.RIGHT, alpha);
-            
-            int level = (int) (current * 24 / mpp.maxEnergyJoules());
-            renderLinearProgress(tessellator, buffer, bounds.energyLevelBounds, 
-                    ModModels.TEX_LINEAR_POWER_LEVEL, level, 24, true, alpha << 24 | 0xFFFFFF);
-        }
+     
+        if(mps == null) return;
         
-//        int duration, remaining, arcLength;
-//
-//        if(te.hasBacklog())
-//        {    
-//            duration = te.getMaxBacklog();
-//            remaining = te.getCurrentBacklog();
-//            arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-//            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, alpha << 24 | 0x40FF40);
-//        }
-//
-//        if(te.hasJobTicks())
-//        {    
-//            duration = te.getJobDurationTicks();
-//            remaining = te.getJobRemainingTicks();
-//            arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-//            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0x40FFFF);
-//        }
+        if(bounds != null)
+        {     
+            // render marks
+            MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
 
+            // render level
+            int arcLength = (int)(mps.powerOutputWatts() * 270 / mte.maxPowerConsumptionWatts());
+            renderRadialTexture(tessellator, buffer, bounds, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | 0xFFFFBF);
+
+            if(mps.isFailureCause() && warningLightBlinkOn())
+            {
+                renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | ModModels.COLOR_FAILURE);
+            }
+            
+            renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_ELECTRICITY, (alpha << 24) | ModModels.COLOR_POWER); 
+
+            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+                    new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
+                    MachinePower.formatPower((long) mps.powerOutputWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_POWER);
+        }
+    }
+    
+    public static void renderFuelCell(RadialRenderBounds bounds, @Nullable FuelCell cell, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderFuelCell(tes, tes.getBuffer(), bounds, cell, alpha);
+    }
+
+    public static void renderFuelCell(
+            Tessellator tessellator, 
+            BufferBuilder buffer, 
+            RadialRenderBounds bounds, 
+            @Nullable FuelCell cell,
+            final int alpha)
+    {
+     
+        if(cell == null) return;
+       
+        // render marks
+        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
+
+        float output = cell.powerOutputWatts();
+        
+        if(output > 0)
+        {
+            // render level
+            int arcLength = (int)(output * 270 / cell.maxPowerOutputWatts());
+            renderRadialTexture(tessellator, buffer, bounds, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_FUEL_CELL);
+        }
+        renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_FLAME, (alpha << 24) | ModModels.COLOR_FUEL_CELL); 
+
+        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+                new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
+                MachinePower.formatPower((long) output, false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_FUEL_CELL);
+        
+    }
+    
+    public static void renderBattery(RadialRenderBounds bounds, @Nullable Battery batt, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderBattery(tes, tes.getBuffer(), bounds, batt, alpha);
+    }
+
+    /** Where the battery texture starts 0-1 */
+    private static final double POWER_LEFT = 0.066;
+    /** Where the battery texture ends 0-1 */
+    private static final double POWER_RIGHT = 0.9;
+    private static final double POWER_WIDTH = POWER_RIGHT - POWER_LEFT;
+    
+    public static void renderBattery(
+            Tessellator tessellator, 
+            BufferBuilder buffer, 
+            RadialRenderBounds bounds, 
+            @Nullable Battery batt,
+            final int alpha)
+    {
+     
+        if(batt == null) return;
+        
+        // render background
+        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_POWER_BACKGROUND, (alpha << 24) | 0xFFFFFF);
+
+        // render in/out level
+        if(batt.powerInputWatts() > 0)
+        {
+            int arcLength = (int)(batt.powerInputWatts() * 180 / batt.maxPowerInputWatts());
+            renderRadialTexture(tessellator, buffer, bounds, 270, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
+            
+            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
+                    MachinePower.formatPower((long) batt.powerInputWatts(), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
+        }
+        else if(batt.powerOutputWatts() > 0)
+        {
+            int arcLength = (int)(batt.powerOutputWatts() * 180 / batt.maxPowerOutputWatts());
+            renderRadialTexture(tessellator, buffer, bounds, 450 - arcLength, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
+            
+            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
+                    MachinePower.formatPower((long) -batt.powerOutputWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
+        }
+
+        // render power storage
+        long j = batt.storedEnergyJoules();
+        if(j > 0)
+        {
+            GlStateManager.bindTexture(ModModels.TEX_POWER_FOREGROUND);
+            TextureHelper.setTextureBlurMipmap(true, true);
+            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);   
+            double right = POWER_LEFT + POWER_WIDTH * j / batt.maxStoredEnergyJoules();
+            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.left() + right * bounds.width(), bounds.bottom(), 
+                    0, 0, right, 1, alpha, 0xFF, 0xFF, 0xFF);
+            tessellator.draw();
+        }
+            
+        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+                new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
+                MachinePower.formatEnergy((long) batt.storedEnergyJoules(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
+        
     }
     
     public static void renderProgress(RectRenderBounds.RadialRenderBounds bounds, MachineTileEntity te, int alpha)
@@ -712,20 +793,16 @@ public class MachineControlRenderer
      */
     public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBufferDelegate materialBuffer, int alpha)
     {
-
-        final long currentLevel = materialBuffer.getLevelNanoLiters();
-        final long maxLevel = materialBuffer.maxCapacityNanoLiters();
-        
         // render marks
         MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
 
         // render level
-        int arcLength = (int)(currentLevel * 270 / maxLevel);
+        int arcLength = (int)(materialBuffer.fullness() * 270);
         renderRadialTexture(tessellator, buffer, spec, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
 
         if(materialBuffer.isFailureCause() && warningLightBlinkOn())
         {
-            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFFFF20);
+            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | ModModels.COLOR_FAILURE);
         }
         
         /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */
@@ -751,9 +828,9 @@ public class MachineControlRenderer
         renderSpriteInBounds(tessellator, buffer, spec.spriteLeft, spec.spriteTop, spec.spriteSize, spec.spriteSize, spec.sprite, (alpha << 24) | (spec.color & 0xFFFFFF), 
                 spec.rotation);
 
-        renderMachineText(tessellator, buffer, 
+        renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
                 new RectRenderBounds(spec.left(), spec.top() + spec.height() * 0.75, spec.width(), spec.height() * 0.3),
-                Long.toString(currentLevel * 100 / maxLevel), HorizontalAlignment.CENTER, alpha);
+                Long.toString(materialBuffer.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | 0xFFFFFF);
 
         // draw text if provided
         if(spec.formula != null)
@@ -764,6 +841,65 @@ public class MachineControlRenderer
             ModModels.FONT_RENDERER_SMALL.drawLine(spec.spriteLeft + margin, spec.spriteTop + height, spec.formula, height, 0f, (spec.formulaColor >> 16) & 0xFF, (spec.formulaColor >> 8) & 0xFF, spec.formulaColor& 0xFF, alpha);
         }
     }
+    
+    public static void renderCMY(RadialRenderBounds bounds, MaterialBufferDelegate cyan, MaterialBufferDelegate magenta, MaterialBufferDelegate yellow, int alpha)
+    {
+        Tessellator tes = Tessellator.getInstance();
+        renderCMY(tes, tes.getBuffer(), bounds, cyan, magenta, yellow, alpha);
+    }
+    
+    /**
+     * Use this version when you already have tessellator/buffer references on the stack.
+     */
+    public static void renderCMY(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, MaterialBufferDelegate cyan, MaterialBufferDelegate magenta, MaterialBufferDelegate yellow, int alpha)
+    {
+        // render marks
+        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
+
+        // render levels
+        int start = 225;
+        int arcLength = (int)(cyan.fullness() * 90);
+        renderRadialTexture(tessellator, buffer, bounds, start, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | MatterColors.CYAN);
+
+        start += arcLength;
+        arcLength = (int)(magenta.fullness() * 90);
+        renderRadialTexture(tessellator, buffer, bounds, start, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | MatterColors.MAGENTA);
+        
+        start += arcLength;
+        arcLength = (int)(yellow.fullness() * 90);
+        renderRadialTexture(tessellator, buffer, bounds, start, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | MatterColors.YELLOW);
+        
+        if(warningLightBlinkOn() && (cyan.isFailureCause() || magenta.isFailureCause() || yellow.isFailureCause()))
+        {
+            renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | ModModels.COLOR_FAILURE);
+        }
+        
+        renderTextureInBounds(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_CMY, alpha);
+
+        int timeCheck = (int) (CommonProxy.currentTimeMillis() >> 10) % 3;
+        
+        if(timeCheck == 0)
+        {
+            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
+                    Long.toString(cyan.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.CYAN);            
+        }
+        else if(timeCheck == 1)
+        {
+            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
+                    Long.toString(magenta.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.MAGENTA);            
+        }
+        else
+        {
+            renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
+                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
+                    Long.toString(yellow.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.YELLOW);     
+        }
+
+      
+    }
+    
 
     /** 
      * Attempts to render an item on machine face without looking like turd candy

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import grondag.hard_science.machines.support.MachineItemBlock;
+import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.simulator.wip.AbstractResourceWithQuantity;
 import grondag.hard_science.simulator.wip.IStorage;
 import grondag.hard_science.simulator.wip.StorageType.StorageTypeStack;
@@ -76,6 +77,12 @@ public class MachineStorageBlock extends MachineContainerBlock
             }
         }
         return result;
+    }
+
+    @Override
+    public MachinePowerSupply createDefaultPowerSupply()
+    {
+        return null;
     }
 
     

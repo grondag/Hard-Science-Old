@@ -9,11 +9,11 @@ import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.varia.Base32Namer;
 import grondag.hard_science.library.varia.SimpleUnorderedArraySet;
 import grondag.hard_science.library.varia.Useful;
-import grondag.hard_science.machines.support.IMachinePowerProvider;
 import grondag.hard_science.machines.support.MachineControlState;
 import grondag.hard_science.machines.support.MachineControlState.ControlMode;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachineControlState.RenderLevel;
+import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.machines.support.MachineStatusState;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
@@ -29,7 +29,6 @@ import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.KeyedTuple;
-import grondag.hard_science.virtualblock.VirtualBlockTracker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -71,7 +70,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * Power provider for this machine, if it has one.
      */
     @Nullable
-    private IMachinePowerProvider powerProvider;
+    private MachinePowerSupply powerSupply;
     
     /**
      * Machine unique ID.  Is persisted if machine is picked and put back by player.
@@ -184,15 +183,25 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * If this tile has a power provider, gives access.  Null if not.
      * Used to serialize/deserialize on client.
      */
-    public final @Nullable IMachinePowerProvider getPowerProvider()
+    public final @Nullable MachinePowerSupply getPowerSupply()
     {
-        return this.powerProvider;
+        return this.powerSupply;
     }
     
-    protected final void setPowerProvider(@Nullable IMachinePowerProvider powerProvider)
+    
+    /**
+     * Used for visual display.
+     * Defaults to max of power supply, or 1 (to help prevent /0) if there isn't one.
+     */
+    public float maxPowerConsumptionWatts()
     {
-        this.powerProvider = powerProvider;
-        this.controlState.hasPowerProvider(powerProvider != null);
+        return this.powerSupply == null ? 1 : this.powerSupply.maxPowerOutputWatts(); 
+    }
+    
+    protected final void setPowerProvider(@Nullable MachinePowerSupply powerSupply)
+    {
+        this.powerSupply = powerSupply;
+        this.controlState.hasPowerSupply(powerSupply != null);
     }
     
     /**
@@ -250,6 +259,12 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         }
     }
     
+    /**
+     * Returns cached value from {@link #getDistanceSq(double, double, double)}
+     * that is called each render pass by TE render dispatcher so that 
+     * we don't have to compute again when needed in TESR.
+     */
+    @SideOnly(Side.CLIENT)
     public double getLastDistanceSquared()
     {
         return lastDistanceSquared;
@@ -414,7 +429,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         super.readModNBT(compound);
         this.deserializeID(compound);
         this.getControlState().deserializeNBT(compound);
-        if(this.powerProvider != null) this.powerProvider.deserializeNBT(compound);
+        if(this.powerSupply != null) this.powerSupply.deserializeNBT(compound);
         if(this.bufferManager != null) this.bufferManager.deserializeNBT(compound);
     }
     
@@ -424,7 +439,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         super.writeModNBT(compound);
         this.serializeID(compound);
         this.getControlState().serializeNBT(compound);
-        if(this.powerProvider != null) this.powerProvider.serializeNBT(compound);
+        if(this.powerSupply != null) this.powerSupply.serializeNBT(compound);
         if(this.bufferManager != null) this.bufferManager.serializeNBT(compound);
     }
     
@@ -528,7 +543,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         
         long tick = this.world.getTotalWorldTime();
         
-        if(this.powerProvider != null && this.powerProvider.tick(this, this.bufferHDPE, tick)) this.markDirty();
+        if(this.powerSupply != null && this.powerSupply.tick(this, tick)) this.markDirty();
         
         if((tick & 0xF) == 0 && this.isOn()) this.restock();
         
@@ -584,15 +599,12 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
             TileEntity tileentity = this.world.getTileEntity(this.pos.offset(face));
             if (tileentity != null)
             {
+                // Currently no power cost for pulling in items - would complicate fuel loading for fuel cells.
+                // If want to add this will require special handling or machines must get 
+                // power some other way to load fuel - seems tedious.
+                // Assuming this is covered by the "emergency" power supply that uses ambient energy harvesters.
                 IItemHandler capability = tileentity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite());
-                
-                //FIXME: make power cost to restock configurable
-                if(this.getPowerProvider().provideEnergy(2, false, true) == 2 && bufferManager.restock(capability))
-                {
-                    this.getPowerProvider().provideEnergy(2, false, false);
-                    this.markDirty();
-                }
-                if(!bufferManager.canRestockAny()) return;
+                if(bufferManager.restock(capability)) this.markDirty();
             }
         }
     }
@@ -617,8 +629,8 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
         if(this.controlState.hasMaterialBuffer())
             this.getBufferManager().deserializeFromArray(packet.materialBufferData);
 
-        if(this.controlState.hasPowerProvider())
-            this.getPowerProvider().deserializeFromArray(packet.powerProviderData);
+        if(this.controlState.hasPowerSupply())
+            this.getPowerSupply().fromBytes(packet.powerProviderData);
     }
 
     @Override
@@ -778,5 +790,27 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     public MachineStatusState getStatusState()
     {
         return this.statusState;
+    }
+
+    /**
+     * Call when power stops production.
+     * Power supply will forgive itself when it successfully provides power.
+     */
+    protected void blamePowerSupply()
+    {
+        if(!this.getPowerSupply().isFailureCause())
+        {
+            this.getPowerSupply().setFailureCause(true);
+            this.markPlayerUpdateDirty(false);
+        }
+    }
+
+    /**
+     * Returns HDPE material buffer if this machine has one.
+     */
+    @Nullable
+    public MaterialBufferDelegate bufferHDPE()
+    {
+        return this.bufferHDPE;
     }
 }

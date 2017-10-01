@@ -13,15 +13,15 @@ import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.world.PackedBlockPos;
 import grondag.hard_science.library.world.Rotation;
+import grondag.hard_science.machines.base.MachineBlock;
 import grondag.hard_science.machines.base.MachineContainerTileEntity;
 import grondag.hard_science.machines.support.MachineControlState.MachineState;
-import grondag.hard_science.machines.support.MachineFuelCell;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.DemandManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
 import grondag.hard_science.machines.support.MaterialBufferManager.VolumetricBufferSpec;
-import grondag.hard_science.machines.support.StandardUnits;
+import grondag.hard_science.machines.support.MatterUnits;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.machines.support.VolumetricIngredientList;
 import grondag.hard_science.machines.support.VolumetricIngredientList.VolumetricIngredient;
@@ -60,6 +60,13 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     //  STATIC MEMBERS
     ////////////////////////////////////////////////////////////////////////
     
+    //FIXME: make configurable
+    private static final int WATTS_SEARCHING = 20;
+    private static final int WATTS_FABRICATION = 1200;
+    private static final int JOULES_PER_TICK_SEARCHING = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_SEARCHING));
+    private static final int JOULES_PER_TICK_FABRICATING = Math.round(MachinePower.wattsToJoulesPerTick(WATTS_FABRICATION));
+    private static final int JOULES_PER_METER_PLACEMENT = 1;
+    private static final int WATTS_MAX_CONSUMPTION = Math.max(WATTS_FABRICATION, JOULES_PER_METER_PLACEMENT * (Configurator.MACHINES.basicBuilderChunkRadius + 1) * 16);
     private static final long TICKS_PER_FULL_BLOCK = 40;
 
     private static final VolumetricIngredientList HDPE_INGREDIENTS = new VolumetricIngredientList(Matter.HDPE);
@@ -67,8 +74,8 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     private static final VolumetricIngredientList FILLER_INGREDIENTS = new VolumetricIngredientList(
             Matter.RAW_MINERAL_DUST,
             Matter.DEPLETED_MINERAL_DUST,
-            new VolumetricIngredient("sand", StandardUnits.nL_ONE_BLOCK),
-            new VolumetricIngredient("red_sand", StandardUnits.nL_ONE_BLOCK));
+            new VolumetricIngredient("sand", MatterUnits.nL_ONE_BLOCK),
+            new VolumetricIngredient("red_sand", MatterUnits.nL_ONE_BLOCK));
     
     private static final VolumetricIngredientList RESIN_A_INGREDIENTS = new VolumetricIngredientList(Matter.CONSTRUCTION_RESIN_A);
     
@@ -101,32 +108,29 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
     static
     {
-        BUFFER_SPECS[BUFFER_INDEX_HDPE] = new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE, "hdpe");
-        BUFFER_SPECS[BUFFER_INDEX_FILLER] = new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER, "filler");
-        BUFFER_SPECS[BUFFER_INDEX_RESIN_A] = new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A, "resin_a");
-        BUFFER_SPECS[BUFFER_INDEX_RESIN_B] = new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B, "resin_b");
-        BUFFER_SPECS[BUFFER_INDEX_NANOLIGHT] = new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS, "nanolights");
-        BUFFER_SPECS[BUFFER_INDEX_CYAN] = new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN, "cyan");
-        BUFFER_SPECS[BUFFER_INDEX_MAGENTA] = new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA, "magenta");
-        BUFFER_SPECS[BUFFER_INDEX_YELLOW] = new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW, "yellow");
-        BUFFER_SPECS[BUFFER_INDEX_TIO2] = new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2, "tio2");
+        BUFFER_SPECS[BUFFER_INDEX_HDPE] = new VolumetricBufferSpec(HDPE_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE, "hdpe");
+        BUFFER_SPECS[BUFFER_INDEX_FILLER] = new VolumetricBufferSpec(FILLER_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER, "filler");
+        BUFFER_SPECS[BUFFER_INDEX_RESIN_A] = new VolumetricBufferSpec(RESIN_A_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A, "resin_a");
+        BUFFER_SPECS[BUFFER_INDEX_RESIN_B] = new VolumetricBufferSpec(RESIN_B_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B, "resin_b");
+        BUFFER_SPECS[BUFFER_INDEX_NANOLIGHT] = new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS, "nanolights");
+        BUFFER_SPECS[BUFFER_INDEX_CYAN] = new VolumetricBufferSpec(CYAN_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN, "cyan");
+        BUFFER_SPECS[BUFFER_INDEX_MAGENTA] = new VolumetricBufferSpec(MAGENTA_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA, "magenta");
+        BUFFER_SPECS[BUFFER_INDEX_YELLOW] = new VolumetricBufferSpec(YELLOW_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW, "yellow");
+        BUFFER_SPECS[BUFFER_INDEX_TIO2] = new VolumetricBufferSpec(TiO2_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2, "tio2");
     }
 
     @SideOnly(value = Side.CLIENT)
-    public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[9];
+    public static final RadialGaugeSpec[] BASIC_BUILDER_GAUGE_SPECS = new RadialGaugeSpec[6];
 
     @SideOnly(value = Side.CLIENT)
     public static void initRenderSpecs()
     {
-        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(BUFFER_INDEX_CYAN, RenderBounds.BOUNDS_GAUGE[0], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.CYAN, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(BUFFER_INDEX_MAGENTA, RenderBounds.BOUNDS_GAUGE[1], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.MAGENTA, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(BUFFER_INDEX_YELLOW, RenderBounds.BOUNDS_GAUGE[2], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.YELLOW, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(BUFFER_INDEX_TIO2, RenderBounds.BOUNDS_GAUGE[3], 1.2, Textures.DECAL_DUST.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_A, RenderBounds.BOUNDS_GAUGE[5], 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_A, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_B, RenderBounds.BOUNDS_GAUGE[6], 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_B, Rotation.ROTATE_180);
-        BASIC_BUILDER_GAUGE_SPECS[6] = new RadialGaugeSpec(BUFFER_INDEX_FILLER, RenderBounds.BOUNDS_GAUGE[4], 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.DEPLETED_MINERAL_DUST, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[7] = new RadialGaugeSpec(BUFFER_INDEX_NANOLIGHT, RenderBounds.BOUNDS_GAUGE[7], 1.2, Textures.DECAL_STAR_16.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[8] = new RadialGaugeSpec(BUFFER_INDEX_HDPE, RenderBounds.BOUNDS_PE_BUFFER, 0.82, 
+        BASIC_BUILDER_GAUGE_SPECS[0] = new RadialGaugeSpec(BUFFER_INDEX_TIO2, RenderBounds.BOUNDS_BOTTOM_1, 1.2, Textures.DECAL_DUST.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[1] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_A, RenderBounds.BOUNDS_LEFT_UPPER, 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_A, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_B, RenderBounds.BOUNDS_LEFT_MIDDLE, 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_B, Rotation.ROTATE_180);
+        BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(BUFFER_INDEX_FILLER, RenderBounds.BOUNDS_LEFT_LOWER, 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.DEPLETED_MINERAL_DUST, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(BUFFER_INDEX_NANOLIGHT, RenderBounds.BOUNDS_BOTTOM_2, 1.2, Textures.DECAL_STAR_16.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
+        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(BUFFER_INDEX_HDPE, RenderBounds.BOUNDS_BOTTOM_3, 0.82, 
                 Textures.DECAL_LARGE_SQUARE.getSampleSprite(), MatterColors.HDPE, Rotation.ROTATE_NONE,
                 "HDPE", 0xFF000000);
     }
@@ -156,8 +160,6 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     private final MaterialBufferDelegate bufferYellow;
     private final MaterialBufferDelegate bufferTiO2;   
     
- 
-   
     public BasicBuilderTileEntity()
     {
         super();
@@ -165,18 +167,17 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         this.setBufferManager(bufferManager);
         
         // note that order has to match array declaration
-        this.bufferHDPE = bufferManager.getBuffer(0);
-        this.bufferFiller = bufferManager.getBuffer(1);
-        this.bufferResinA = bufferManager.getBuffer(2);
-        this.bufferResinB = bufferManager.getBuffer(3);
-        this.bufferNanoLights = bufferManager.getBuffer(4);
-        this.bufferCyan = bufferManager.getBuffer(5);
-        this.bufferMagenta = bufferManager.getBuffer(6);
-        this.bufferYellow = bufferManager.getBuffer(7);
-        this.bufferTiO2 = bufferManager.getBuffer(8);
+        this.bufferHDPE = bufferManager.getBuffer(BUFFER_INDEX_HDPE);
+        this.bufferFiller = bufferManager.getBuffer(BUFFER_INDEX_FILLER);
+        this.bufferResinA = bufferManager.getBuffer(BUFFER_INDEX_RESIN_A);
+        this.bufferResinB = bufferManager.getBuffer(BUFFER_INDEX_RESIN_B);
+        this.bufferNanoLights = bufferManager.getBuffer(BUFFER_INDEX_NANOLIGHT);
+        this.bufferCyan = bufferManager.getBuffer(BUFFER_INDEX_CYAN);
+        this.bufferMagenta = bufferManager.getBuffer(BUFFER_INDEX_MAGENTA);
+        this.bufferYellow = bufferManager.getBuffer(BUFFER_INDEX_YELLOW);
+        this.bufferTiO2 = bufferManager.getBuffer(BUFFER_INDEX_TIO2);
         
-        this.setPowerProvider(new MachineFuelCell(MachinePower.FuelCellSpec.STANDARD_INTEGRATED));
-        
+        this.setPowerProvider(((MachineBlock)ModBlocks.basic_builder).createDefaultPowerSupply());
         this.statusState.setHasBacklog(true);
     }
     
@@ -238,7 +239,11 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
 
     private void searchForWork()
     {
-        if(this.getPowerProvider().provideEnergy(2, false, false) != 2) return;
+        if(this.getPowerSupply().provideEnergy(this, JOULES_PER_TICK_SEARCHING, false, false) == 0)
+        {
+            this.blamePowerSupply();
+            return;
+        }
         
         // because we consumed power
         this.markDirty();
@@ -326,12 +331,19 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     
     private void progressFabrication()
     {
-        if(this.getPowerProvider().provideEnergy(100, false, false) == 100 && this.getControlState().progressJob((short) 1))
+        if(this.getPowerSupply().provideEnergy(this, JOULES_PER_TICK_FABRICATING, false, false) != 0)
         {
-            this.getControlState().clearJobTicks();
-            this.getControlState().setMachineState(MachineState.TRANSPORTING);
+            if(this.getControlState().progressJob((short) 1))
+            {
+                this.getControlState().clearJobTicks();
+                this.getControlState().setMachineState(MachineState.TRANSPORTING);
+            }
+            this.markDirty();
         }
-        this.markDirty();
+        else
+        {
+            this.blamePowerSupply();
+        }
     }
     
     private void placeFabricatedBlock()
@@ -343,10 +355,10 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         BlockSubstance newSubstance = this.getControlState().getSubstance();
         BlockPos targetPos = this.getControlState().getTargetPos();
         
-        //FIXME: ensure fuel cell max output can support max configurable range
-        int powerNeeded = (int) (1 * this.pos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+        //FIXME: ensure power supply max output can support max configurable range
+        int powerNeeded = (int) (JOULES_PER_METER_PLACEMENT * this.pos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ()));
         
-        if(this.getPowerProvider().provideEnergy(powerNeeded, false, false) == powerNeeded)
+        if(this.getPowerSupply().provideEnergy(this, powerNeeded, false, false) == powerNeeded)
         {
         
             // this all needs to happen in any case
@@ -428,6 +440,10 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
             // no luck with containers - spawn in world
             Block.spawnAsEntity(this.world, targetPos, stack);
         }
+        else
+        {
+            this.blamePowerSupply();
+        }
     }
    
     /** returns substance that should be used to create the block in world if it can be successfully fabricated.  
@@ -474,6 +490,12 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
     public int getSymbolGlTextureId()
     {
         return ModModels.TEX_SYMBOL_BUILDER;
+    }
+
+    @Override
+    public float maxPowerConsumptionWatts()
+    {
+        return WATTS_MAX_CONSUMPTION;
     }
 
     @Override

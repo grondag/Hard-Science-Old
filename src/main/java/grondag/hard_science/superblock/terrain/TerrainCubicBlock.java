@@ -33,10 +33,9 @@ public class TerrainCubicBlock extends TerrainDynamicBlock
         return new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(state));
     }
     
-    
-    public List<ItemStack> getSubItems()
+    protected List<ItemStack> createSubItems()
     {
-        return this.getSubItemsBasic();
+        return this.defaultSubItems();
     }
     
     public boolean isFlowFiller()

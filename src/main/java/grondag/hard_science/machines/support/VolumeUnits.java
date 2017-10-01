@@ -13,6 +13,8 @@ public enum VolumeUnits
     public final String symbol;
     public final long nL;
     
+    public static final int CUBIC_MICROMETERS_PER_NANOLITER = 1000000;
+    
     private VolumeUnits(String symbol, long nL)
     {
         this.symbol = symbol;

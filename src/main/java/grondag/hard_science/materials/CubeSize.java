@@ -10,7 +10,7 @@ import grondag.hard_science.library.render.RawQuad;
 import grondag.hard_science.library.varia.Color;
 import grondag.hard_science.library.varia.Color.EnumHCLFailureMode;
 import grondag.hard_science.library.world.Rotation;
-import grondag.hard_science.machines.support.StandardUnits;
+import grondag.hard_science.machines.support.VolumeUnits;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -18,13 +18,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public enum CubeSize
 {
-    BLOCK(StandardUnits.nL_HS_CUBE_ZERO, 1f, 0, "medium_square"),
-    ONE(StandardUnits.nL_HS_CUBE_ONE, 0.700f, 1, "medium_dot"),
-    TWO(StandardUnits.nL_HS_CUBE_TWO, 0.490f, 2, "two_dots"),
-    THREE(StandardUnits.nL_HS_CUBE_THREE, 0.343f, 3, "big_triangle"),
-    FOUR(StandardUnits.nL_HS_CUBE_FOUR, 0.240f, 4, "big_diamond"),
-    FIVE(StandardUnits.nL_HS_CUBE_FIVE, 0.168f, 5, "big_pentagon"),
-    SIX(StandardUnits.nL_HS_CUBE_SIX, 0.118f, 6, "big_hexagon");
+    BLOCK(0, 1f, "medium_square"),
+    ONE(1, 0.700f, "medium_dot"),
+    TWO(2, 0.490f, "two_dots"),
+    THREE(3, 0.343f, "big_triangle"),
+    FOUR(4, 0.240f, "big_diamond"),
+    FIVE(5, 0.168f, "big_pentagon"),
+    SIX(6, 0.118f, "big_hexagon");
     
     /**
      * Volume of the block, including any packaging.
@@ -54,14 +54,32 @@ public enum CubeSize
      */
     public final int symbolColor;
     
-    private CubeSize(long nanoLiters, float renderScale, int divisionLevel, String symbolTexture)
+    /**
+     * Length of cube edges, in mm
+     */
+    public final float edgeLength_mm;
+    
+    /*
+     * Surface area of cube face in square millimeters
+     */
+    public final float faceSurfaceArea_mm2;
+    
+    /*
+     * Surface area of cube face in square micrometers
+     */
+    public final long faceSurfaceArea_μm2;
+    
+    private CubeSize(int divisionLevel, float renderScale, String symbolTexture)
     {
-        this.nanoLiters = nanoLiters;
-        this.renderScale = renderScale;
         this.divisionLevel = divisionLevel;
+        this.renderScale = renderScale;
         this.symbolTexture = symbolTexture;
-        
-        // want colors that are visually separated, not too oversaturated or too bright
+        this.nanoLiters = VolumeUnits.KILOLITER.nL / (1 << (divisionLevel * 3));
+        this.edgeLength_mm = 1000f / (1 << divisionLevel);
+        this.faceSurfaceArea_mm2 = this.edgeLength_mm * this.edgeLength_mm;
+        this.faceSurfaceArea_μm2 = (long) (this.faceSurfaceArea_mm2 * 1000000);
+                
+        // want colors that are visually separated, not too oversaturated, not too bright
         this.symbolColor = Color.fromHCL(360f * divisionLevel / 7 , 60, 60, EnumHCLFailureMode.REDUCE_CHROMA).RGB_int | 0xFF000000;;
     }
     

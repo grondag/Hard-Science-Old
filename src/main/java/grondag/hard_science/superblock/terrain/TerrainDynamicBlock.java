@@ -79,9 +79,9 @@ public class TerrainDynamicBlock extends SuperSimpleBlock
     }
 
     @Override
-    public List<ItemStack> getSubItems()
+    protected List<ItemStack> createSubItems()
     {
-        List<ItemStack> items = super.getSubItems();
+        List<ItemStack> items = super.createSubItems();
         
         for(ItemStack stack : items)
         {

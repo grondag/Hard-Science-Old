@@ -183,18 +183,28 @@ public class ModModels
 
     public static int TEX_LINEAR_GAUGE_LEVEL;
     public static int TEX_LINEAR_GAUGE_MARKS;
-    public static int TEX_LINEAR_POWER_LEVEL;
+//    public static int TEX_LINEAR_POWER_LEVEL;
     
     public static int TEX_POWER_BACKGROUND;
-    public static int TEX_POWER_OUTER;
-    public static int TEX_POWER_INNER;
+    public static int TEX_POWER_FOREGROUND;
+//    public static int TEX_POWER_OUTER;
+//    public static int TEX_POWER_INNER;
     
     public static int TEX_SYMBOL_BUILDER;
     public static int TEX_SYMBOL_CHEST;
     
     public static int TEX_NO;
     public static int TEX_MATERIAL_SHORTAGE;
+    public static int TEX_ELECTRICITY;
+    public static int TEX_CURRENT_SOURCE;
+    public static int TEX_CMY;
+    public static int TEX_FLAME;
     
+    public static int COLOR_POWER = 0xFFFFBF;
+    public static int COLOR_BATTERY = 0x00B1FF;
+    public static int COLOR_BATTERY_DRAIN = 0xff4e00;
+    public static int COLOR_FUEL_CELL = 0xFC8D59;
+    public static int COLOR_FAILURE = 0xFFFF20;
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -228,14 +238,20 @@ public class ModModels
         
         TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
         TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");
-        TEX_LINEAR_POWER_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_power_128.png");
+//        TEX_LINEAR_POWER_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_power_128.png");
         
-        TEX_POWER_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_background_256.png");
-        TEX_POWER_OUTER = loadNonBlockTexture("hard_science:textures/blocks/power_outer_256.png");
-        TEX_POWER_INNER = loadNonBlockTexture("hard_science:textures/blocks/power_inner_256.png");
+        TEX_POWER_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_background_128.png");
+        TEX_POWER_FOREGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_foreground_128.png");
+//        TEX_POWER_OUTER = loadNonBlockTexture("hard_science:textures/blocks/power_outer_256.png");
+//        TEX_POWER_INNER = loadNonBlockTexture("hard_science:textures/blocks/power_inner_256.png");
         
         TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
         TEX_MATERIAL_SHORTAGE = loadNonBlockTexture("hard_science:textures/blocks/material_shortage.png");
+        
+        TEX_ELECTRICITY = loadNonBlockTexture("hard_science:textures/blocks/electricity_64.png");
+        TEX_CURRENT_SOURCE = loadNonBlockTexture("hard_science:textures/blocks/power_source_64.png");
+        TEX_CMY = loadNonBlockTexture("hard_science:textures/blocks/cmy.png");
+        TEX_FLAME = loadNonBlockTexture("hard_science:textures/blocks/flame_64.png");
         
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         
@@ -251,17 +267,17 @@ public class ModModels
 
     }
     
-//    new VolumetricBufferSpec(HDPE_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE),
+//    new VolumetricBufferSpec(HDPE_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_HDPE),
     
-//    new VolumetricBufferSpec(FILLER_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER),
-//    new VolumetricBufferSpec(RESIN_A_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A),
-//    new VolumetricBufferSpec(RESIN_B_INGREDIENTS, StandardUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B),
-//    new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS),
+//    new VolumetricBufferSpec(FILLER_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_MINERAL_FILLER),
+//    new VolumetricBufferSpec(RESIN_A_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_A),
+//    new VolumetricBufferSpec(RESIN_B_INGREDIENTS, MatterUnits.nL_FULL_STACK_OF_BLOCKS_nL, ModNBTTag.MATERIAL_RESIN_B),
+//    new VolumetricBufferSpec(NANOLIGHT_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_NANO_LIGHTS),
     
-//    new VolumetricBufferSpec(CYAN_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN),
-//    new VolumetricBufferSpec(MAGENTA_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA),
-//    new VolumetricBufferSpec(YELLOW_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW),
-//    new VolumetricBufferSpec(TiO2_INGREDIENTS, StandardUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2)
+//    new VolumetricBufferSpec(CYAN_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_CYAN),
+//    new VolumetricBufferSpec(MAGENTA_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_MAGENTA),
+//    new VolumetricBufferSpec(YELLOW_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW),
+//    new VolumetricBufferSpec(TiO2_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2)
 
     
     private static int loadNonBlockTexture(String location)

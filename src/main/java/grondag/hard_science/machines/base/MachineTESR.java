@@ -5,6 +5,7 @@ import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -75,7 +76,7 @@ public abstract class MachineTESR extends SuperBlockTESR
         int displayAlpha = (int)(alpha * (MathHelper.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
   
         MachineControlRenderer.renderTextureInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);
-        MachineControlRenderer.renderMachineText(tessellator, buffer, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, displayAlpha);
+        MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, (displayAlpha << 24) | 0xFFFFFF);
 
         if(mte.hasOnOff())
         {
@@ -87,7 +88,13 @@ public abstract class MachineTESR extends SuperBlockTESR
             MachineControlRenderer.renderRedstoneControl(mte, tessellator, buffer, RenderBounds.BOUNDS_REDSTONE, displayAlpha);
         }
         
-        MachineControlRenderer.renderPower(tessellator, buffer, RenderBounds.BOUNDS_POWER, mte, displayAlpha);
+        MachinePowerSupply mps = mte.getPowerSupply();
+        if(mps != null)
+        {
+            MachineControlRenderer.renderPower(tessellator, buffer, RenderBounds.BOUNDS_POWER_0, mps, mte, displayAlpha);
+            MachineControlRenderer.renderBattery(tessellator, buffer, RenderBounds.BOUNDS_POWER_1, mps.battery(), displayAlpha);
+            MachineControlRenderer.renderFuelCell(tessellator, buffer, RenderBounds.BOUNDS_POWER_2, mps.fuelCell(), displayAlpha);
+        }
         renderControlFace(tessellator, buffer, mte, displayAlpha);
         
         

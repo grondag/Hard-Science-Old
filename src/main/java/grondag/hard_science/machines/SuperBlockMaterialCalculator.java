@@ -3,7 +3,7 @@ package grondag.hard_science.machines;
 import grondag.hard_science.library.varia.ColorHelper;
 import grondag.hard_science.library.varia.Useful;
 import grondag.hard_science.library.varia.ColorHelper.CMY;
-import grondag.hard_science.machines.support.StandardUnits;
+import grondag.hard_science.machines.support.MatterUnits;
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.superblock.color.ColorMap.EnumColorMap;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
@@ -26,9 +26,9 @@ public class SuperBlockMaterialCalculator
     public SuperBlockMaterialCalculator(ModelState modelState, BlockSubstance requestedSubstance, int lightValue)
     {
 
-        this.nanoLights_nL = lightValue > 0 || modelState.getRenderPassSet().hasFlatRenderPass ? StandardUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
+        this.nanoLights_nL = lightValue > 0 || modelState.getRenderPassSet().hasFlatRenderPass ? MatterUnits.nL_NANO_LIGHTS_PER_BLOCK : 0;
         
-        final long volume = (long) (Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)) * StandardUnits.nL_ONE_BLOCK);
+        final long volume = (long) (Useful.volumeAABB(modelState.collisionBoxes(BlockPos.ORIGIN)) * MatterUnits.nL_ONE_BLOCK);
         
         switch(requestedSubstance)
         {
@@ -38,7 +38,7 @@ public class SuperBlockMaterialCalculator
             {
                 this.actualSubtance = BlockSubstance.FLEXWOOD;
                 this.filler_nL = 0;
-                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * StandardUnits.RESIN_WOOD_FRACTION_BY_VOLUME / 2);
+                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * MatterUnits.RESIN_WOOD_FRACTION_BY_VOLUME / 2);
                 this.resinA_nL = halfResinVolume;
                 this.resinB_nL = halfResinVolume;
                 break;
@@ -60,7 +60,7 @@ public class SuperBlockMaterialCalculator
             {
                 this.actualSubtance = BlockSubstance.FLEXSTONE;
                 this.filler_nL = volume;
-                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * StandardUnits.FILLER_VOID_RATIO / 2);
+                final long halfResinVolume = (long) ((volume - this.nanoLights_nL) * MatterUnits.FILLER_VOID_RATIO / 2);
                 this.resinA_nL = halfResinVolume;
                 this.resinB_nL = halfResinVolume;
                 break;
@@ -108,9 +108,9 @@ public class SuperBlockMaterialCalculator
         
         // Dye consumption should by driven by surface area instead of volume.
         // We assume the shape is a cube for this purpose - some shapes could have higher surface areas
-        double surfaceArea_M2 = Useful.squared(Math.cbrt((double) volume / StandardUnits.nL_ONE_BLOCK)) * 6;
+        double surfaceArea_M2 = Useful.squared(Math.cbrt((double) volume / MatterUnits.nL_ONE_BLOCK)) * 6;
         
-        double pigmentVolume_nL =  surfaceArea_M2 / StandardUnits.M2_PIGMENT_COVERAGE_SQUARE_METERS_PER_LITER * VolumeUnits.LITER.nL;
+        double pigmentVolume_nL =  surfaceArea_M2 / MatterUnits.M2_PIGMENT_COVERAGE_SQUARE_METERS_PER_LITER * VolumeUnits.LITER.nL;
         double pigmentVolumePerComponent_nL = pigmentVolume_nL / 3;
 
         

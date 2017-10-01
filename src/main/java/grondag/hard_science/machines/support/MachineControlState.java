@@ -113,7 +113,7 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     private static BooleanElement PACKED_HAS_JOB_TICKS = PACKER.createBooleanElement();
     private static BooleanElement PACKED_HAS_TARGET_POS = PACKER.createBooleanElement();
     private static BooleanElement PACKED_HAS_MATERIAL_BUFFER = PACKER.createBooleanElement();
-    private static BooleanElement PACKED_HAS_POWER_PROVIDER= PACKER.createBooleanElement();
+    private static BooleanElement PACKED_HAS_POWER_SUPPLY= PACKER.createBooleanElement();
 
     private static final long DEFAULT_BITS;
     
@@ -244,8 +244,8 @@ public class MachineControlState implements IReadWriteNBT, IMessagePlus
     public boolean hasMaterialBuffer() { return PACKED_HAS_MATERIAL_BUFFER.getValue(bits); }
     public void hasMaterialBuffer(boolean hasBuffer) { bits = PACKED_HAS_MATERIAL_BUFFER.setValue(hasBuffer, bits); }
     
-    public boolean hasPowerProvider() { return PACKED_HAS_POWER_PROVIDER.getValue(bits); }
-    public void hasPowerProvider(boolean hasProvider) { bits = PACKED_HAS_POWER_PROVIDER.setValue(hasProvider, bits); }
+    public boolean hasPowerSupply() { return PACKED_HAS_POWER_SUPPLY.getValue(bits); }
+    public void hasPowerSupply(boolean hasProvider) { bits = PACKED_HAS_POWER_SUPPLY.setValue(hasProvider, bits); }
     
     //////////////////////////////////////////////////////////////////////
     // Serialization Stuff                                              //

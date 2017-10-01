@@ -109,7 +109,7 @@ public class EntityLavaBlob extends Entity
          */
         this.renderScale = (float) (2 * Math.pow(unitAmout * 3 / (Math.PI * 4), 1F/3F));
 
-        //        HardScience.log.info("Particle @" + this.getPosition().toString() + " has edgeLength=" + edgeLength + "  and scale=" + renderScale);
+        //        HardScience.log.info("Particle @" + this.getPosition().toString() + " has edgeLength_mm=" + edgeLength_mm + "  and scale=" + renderScale);
     }
 
     @Override

@@ -38,7 +38,7 @@ public class ModNBTTag
     public final static String MACHINE_JOB_DURATION_TICKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_JOB_REMAINING_TICKS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_MODEL_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
-    public final static String MACHINE_POWER_BUFFER = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public final static String MACHINE_STORED_ENERGY_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MACHINE_TARGET_BLOCKPOS = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String MODEL_STATE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public final static String PLACEMENT_FACE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
@@ -86,4 +86,11 @@ public class ModNBTTag
     public static final String MATERIAL_DYE_YELLOW = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String MATERIAL_CARBON = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
     public static final String MATERIAL_TiO2 = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+
+    public static final String MACHINE_FUEL_CELL_PLATE_SIZE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String MACHINE_FUEL_CELL_PLATE_COUNT = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String MACHINE_FUEL_CELL_HAS_THERMAL_CAPTURE = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String MACHINE_BATTERY_MAX_STORED_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String MACHINE_BATTERY_CHEMISTRY = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
+    public static final String MACHINE_POWER_RECEIVER_MAX_JOULES = "hs" + Integer.toUnsignedString(++nextID, Character.MAX_RADIX);
 }

@@ -146,6 +146,11 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             MaterialBufferManager.this.blame(this.index);
         }
         
+        public void forgive()
+        {
+            MaterialBufferManager.this.forgive(this.index);
+        }
+        
         public boolean canRestock()
         {
             return MaterialBufferManager.this.canRestock(this.index);      
@@ -179,7 +184,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         /**
          * Convenience.  Values 0-100.
          */
-        public int fullnessPercent(int bufferIndex)
+        public int fullnessPercent()
         {
             return MaterialBufferManager.this.fullnessPercent(this.index);
         }
@@ -234,6 +239,14 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
             return MaterialBufferManager.this.use(this.index, nanoLiters);
         }
 
+        /**
+         * Same as {@link #use(long)} with additional options.
+         */
+        public long use(long nanoLiters, boolean allowPartial, boolean simulate)
+        {
+            return MaterialBufferManager.this.use(this.index, nanoLiters);
+        }
+        
         public String tooltipKey()
         {
             return MaterialBufferManager.this.specs[this.index].tooltipKey;
@@ -275,7 +288,7 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
     private final VolumetricBufferSpec[] specs;
     
     private final long[] levelsNanoLiters;
-
+    
     private BitSet failureBits = new BitSet();
 
     private boolean isDirty;
@@ -484,6 +497,15 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
         if(!this.failureBits.isEmpty())
         {
             this.failureBits.clear();
+            this.setDirty(true);
+        }
+    }
+    
+    public void forgive(int bufferIndex)
+    {
+        if(!this.failureBits.isEmpty())
+        {
+            this.failureBits.clear(bufferIndex);;
             this.setDirty(true);
         }
     }
@@ -808,11 +830,26 @@ public class MaterialBufferManager implements IReadWriteNBT, IItemHandler
      */
     public long use(int bufferIndex, long nanoLiters)
     {
+        return this.use(bufferIndex, nanoLiters, true, false);
+    }
+    
+    /**
+     * Same as {@link #use(int, long)} with additional options.
+     */
+    public long use(int bufferIndex, long nanoLiters, boolean allowPartial, boolean simulate)
+    {
         long result = Math.min(nanoLiters, this.levelsNanoLiters[bufferIndex]);
+        
         if(result > 0)
         {
-            this.remove(bufferIndex, result);
-         }
+            if(!allowPartial && result != nanoLiters) return 0;
+        
+            if(!simulate) 
+            {
+                this.remove(bufferIndex, result);
+                this.forgive(bufferIndex);
+            }
+        }
         return result;
     }
 }
