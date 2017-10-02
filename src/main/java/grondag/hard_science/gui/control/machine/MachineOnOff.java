@@ -25,7 +25,7 @@ public class MachineOnOff extends AbstractMachineControl<MachineOnOff, RadialRen
         {
             GuiUtil.drawBoxRightBottom(this.getLeft(), this.getTop(), this.getRight(), this.getBottom(), 1, BUTTON_COLOR_FOCUS);
         }
-        MachineControlRenderer.renderBinaryTexture(this.renderBounds, ModModels.TEX_MACHINE_ON_OFF, this.tileEntity.isOn(), 255);
+        MachineControlRenderer.renderBinarySprite(this.renderBounds, ModModels.TEX_MACHINE_ON_OFF, this.tileEntity.isOn(), 0xFFFFFFFF);
     }
 
     @Override

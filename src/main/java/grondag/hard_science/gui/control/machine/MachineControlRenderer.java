@@ -69,6 +69,17 @@ public class MachineControlRenderer
         renderTextureInBounds(bounds, texture.apply(selector), alpha);
     }
 
+
+    public static void renderBinarySprite(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, BinaryReference<TextureAtlasSprite> texture, boolean selector, int color)
+    {
+        renderSpriteInBounds(tessellator, buffer, bounds, texture.apply(selector), color, Rotation.ROTATE_NONE);
+    }
+
+    public static void renderBinarySprite(AbstractRectRenderBounds bounds,  BinaryReference<TextureAtlasSprite> texture, boolean selector, int color)
+    {
+        renderSpriteInBounds(bounds, texture.apply(selector), color, Rotation.ROTATE_NONE);
+    }
+        
     public static void renderMachineText(RasterFont font, RenderBounds<?> bounds, String text, HorizontalAlignment alignment, int colorARGB)
     {
         Tessellator tes = Tessellator.getInstance();
@@ -261,74 +272,76 @@ public class MachineControlRenderer
         tessellator.draw();
     }
     
-    /**
-     * maxLevel is the max number of bars to render and should be a power of 4.
-     * level is how many of the bars should be lit.
-     */
-    public static void renderLinearProgress(RectRenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
-    {
-        Tessellator tes = Tessellator.getInstance();
-        renderLinearProgress(tes, tes.getBuffer(), bounds, glTextureID, level, maxLevel, isHorizontal, colorARGB);
-    }
-
-    /**
-     * Use this version when you already have tessellator/buffer references on the stack.
-     */
-    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
-    {
-        if(maxLevel == 0) return;
-        
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        
-        GlStateManager.bindTexture(ModModels.TEX_LINEAR_GAUGE_MARKS);
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-       
-        TextureHelper.setTextureBlurMipmap(true, true);
-//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
-
-        double uvMax = maxLevel / 4.0;
-        double topFactor = (maxLevel - level) / (double) maxLevel;
-        
-        if(isHorizontal)
-        {
-            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
-                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090,
-                    Rotation.ROTATE_90);
-        }
-        else
-        {
-            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
-                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090);
-        }
-        tessellator.draw();
-        
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        
-        GlStateManager.bindTexture(glTextureID);
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        TextureHelper.setTextureBlurMipmap(true, true);
-//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
-        
-        if(isHorizontal)
-        {
-            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right() - bounds.width * topFactor, bounds.bottom(), 
-                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF,
-                    Rotation.ROTATE_90);
-        }
-        else
-        {
-            bufferControlQuad(buffer, bounds.left(), bounds.top() + bounds.height * topFactor, bounds.right(), bounds.bottom(), 
-                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
-        }
-        
-        
-        tessellator.draw();
-        
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
-        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
-    }
+    // Currently not used
+    // Would need to revise to use texture atlas if reviving
+//    /**
+//     * maxLevel is the max number of bars to render and should be a power of 4.
+//     * level is how many of the bars should be lit.
+//     */
+//    public static void renderLinearProgress(RectRenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+//    {
+//        Tessellator tes = Tessellator.getInstance();
+//        renderLinearProgress(tes, tes.getBuffer(), bounds, glTextureID, level, maxLevel, isHorizontal, colorARGB);
+//    }
+//
+//    /**
+//     * Use this version when you already have tessellator/buffer references on the stack.
+//     */
+//    public static void renderLinearProgress(Tessellator tessellator, BufferBuilder buffer, RectRenderBounds bounds, int glTextureID, int level, int maxLevel, boolean isHorizontal, int colorARGB)
+//    {
+//        if(maxLevel == 0) return;
+//        
+//        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+//        
+//        GlStateManager.bindTexture(ModModels.TEX_LINEAR_GAUGE_MARKS);
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+//       
+//        TextureHelper.setTextureBlurMipmap(true, true);
+////        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+//
+//        double uvMax = maxLevel / 4.0;
+//        double topFactor = (maxLevel - level) / (double) maxLevel;
+//        
+//        if(isHorizontal)
+//        {
+//            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
+//                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090,
+//                    Rotation.ROTATE_90);
+//        }
+//        else
+//        {
+//            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), 
+//                    0, 0, 1, uvMax, (colorARGB & 0xFF000000) | 0x909090);
+//        }
+//        tessellator.draw();
+//        
+//        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+//        
+//        GlStateManager.bindTexture(glTextureID);
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+//        TextureHelper.setTextureBlurMipmap(true, true);
+////        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+//        
+//        if(isHorizontal)
+//        {
+//            bufferControlQuad(buffer, bounds.left(), bounds.top(), bounds.right() - bounds.width * topFactor, bounds.bottom(), 
+//                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF,
+//                    Rotation.ROTATE_90);
+//        }
+//        else
+//        {
+//            bufferControlQuad(buffer, bounds.left(), bounds.top() + bounds.height * topFactor, bounds.right(), bounds.bottom(), 
+//                    0, topFactor * uvMax, 1, uvMax, (colorARGB >> 24) & 0xFF, (colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF);
+//        }
+//        
+//        
+//        tessellator.draw();
+//        
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+//        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
+//    }
 
     /**
      * Use this version when you already have tessellator/buffer references on the stack.

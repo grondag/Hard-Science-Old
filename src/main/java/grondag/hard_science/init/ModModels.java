@@ -15,6 +15,7 @@ import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
 import grondag.hard_science.Log;
 import grondag.hard_science.gui.control.machine.BinaryGlTexture;
+import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.font.RasterFont;
 import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.machines.BasicBuilderTESR;
@@ -156,16 +157,12 @@ public class ModModels
         }
     }
     
-    public static BinaryGlTexture TEX_MACHINE_ON_OFF;
-    
     public static TextureManager TEX_MANAGER;
-    
     public static int TEX_BLOCKS;
     public static ITextureObject ITEX_BLOCKS;
     
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_LIT;
     public static TextureAtlasSprite SPRITE_REDSTONE_TORCH_UNLIT;
-
     
     public static String FONT_NAME_SMALL = "ubuntu-c.ttf";
     public static String FONT_NAME_LARGE = "ubuntu-m.ttf";
@@ -176,27 +173,19 @@ public class ModModels
     public static String FONT_RESOURCE_STRING_SMALL = RasterFont.getSpriteResourceName(FONT_NAME_SMALL, FONT_SIZE_SMALL);
     public static String FONT_RESOURCE_STRING_LARGE = RasterFont.getSpriteResourceName(FONT_NAME_LARGE, FONT_SIZE_LARGE);
  
+    public static BinaryReference<TextureAtlasSprite> TEX_MACHINE_ON_OFF;
+    
     public static int TEX_RADIAL_GAUGE_MINOR;
     public static int TEX_RADIAL_GAUGE_MAIN;
     public static int TEX_RADIAL_GAUGE_MARKS;
     public static int TEX_RADIAL_GAUGE_FULL_MARKS;
-
-    public static int TEX_LINEAR_GAUGE_LEVEL;
-    public static int TEX_LINEAR_GAUGE_MARKS;
-//    public static int TEX_LINEAR_POWER_LEVEL;
     
     public static int TEX_POWER_BACKGROUND;
     public static int TEX_POWER_FOREGROUND;
-//    public static int TEX_POWER_OUTER;
-//    public static int TEX_POWER_INNER;
-    
-//    public static int TEX_SYMBOL_BUILDER;
-//    public static int TEX_SYMBOL_CHEST;
     
     public static int TEX_NO;
     public static int TEX_MATERIAL_SHORTAGE;
     public static int TEX_ELECTRICITY;
-    public static int TEX_CURRENT_SOURCE;
     public static int TEX_CMY;
     public static int TEX_FLAME;
     
@@ -224,32 +213,27 @@ public class ModModels
         
         CompressedAnimatedSprite.tearDown();
         
-        TEX_MACHINE_ON_OFF = new BinaryGlTexture(
-                loadNonBlockTexture("hard_science:textures/blocks/on_hd_256.png"),
-                loadNonBlockTexture("hard_science:textures/blocks/off_hd_256.png"));
+        TEX_MACHINE_ON_OFF = new BinaryReference<TextureAtlasSprite>(
+                Textures.MACHINE_POWER_ON.getSampleSprite(),
+                Textures.MACHINE_POWER_OFF.getSampleSprite());
         
         TEX_RADIAL_GAUGE_MINOR = loadNonBlockTexture("hard_science:textures/blocks/gauge_inner_256.png");
         TEX_RADIAL_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
         TEX_RADIAL_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
         TEX_RADIAL_GAUGE_FULL_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_marks_256.png");
         
-//        TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
-//        TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
         
-        TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
-        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");
+//        TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
+//        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");
 //        TEX_LINEAR_POWER_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_power_128.png");
         
         TEX_POWER_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_background_128.png");
         TEX_POWER_FOREGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_foreground_128.png");
-//        TEX_POWER_OUTER = loadNonBlockTexture("hard_science:textures/blocks/power_outer_256.png");
-//        TEX_POWER_INNER = loadNonBlockTexture("hard_science:textures/blocks/power_inner_256.png");
         
         TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
         TEX_MATERIAL_SHORTAGE = loadNonBlockTexture("hard_science:textures/blocks/material_shortage.png");
         
         TEX_ELECTRICITY = loadNonBlockTexture("hard_science:textures/blocks/electricity_64.png");
-        TEX_CURRENT_SOURCE = loadNonBlockTexture("hard_science:textures/blocks/power_source_64.png");
         TEX_CMY = loadNonBlockTexture("hard_science:textures/blocks/cmy.png");
         TEX_FLAME = loadNonBlockTexture("hard_science:textures/blocks/flame_64.png");
         

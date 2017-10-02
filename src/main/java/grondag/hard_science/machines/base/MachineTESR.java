@@ -73,15 +73,17 @@ public abstract class MachineTESR extends SuperBlockTESR
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         
+        
         // fade in controls as player approaches - over a 4-block distance
         int displayAlpha = (int)(alpha * (MathHelper.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
+        int white = (displayAlpha << 24) | 0xFFFFFF;
   
         MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolSprite(), (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
-        MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, (displayAlpha << 24) | 0xFFFFFF);
+        MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, white);
 
         if(mte.hasOnOff())
         {
-            MachineControlRenderer.renderBinaryTexture(tessellator, buffer, RenderBounds.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), displayAlpha);
+            MachineControlRenderer.renderBinarySprite(tessellator, buffer, RenderBounds.BOUNDS_ON_OFF, ModModels.TEX_MACHINE_ON_OFF, mte.isOn(), white);
         }
         
         if(mte.hasRedstoneControl())

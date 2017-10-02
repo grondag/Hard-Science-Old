@@ -408,14 +408,16 @@ public class Textures
     public static final TexturePallette DECAL_ARROW_180 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette DECAL_ARROW_270 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
     
-    public static final TexturePallette DECAL_BUILDER = REGISTRY.addTexturePallette("symbol_builder", new TexturePalletteInfo(DECAL_SMALL_DOT));
-    public static final TexturePallette DECAL_CHEST = REGISTRY.addTexturePallette("symbol_chest", new TexturePalletteInfo(DECAL_SMALL_DOT));
- 
- 
     public static final TexturePallette MATERIAL_GRADIENT = REGISTRY.addTexturePallette("material_gradient", 
             new TexturePalletteInfo().withVersionCount(1).withScale(TextureScale.SINGLE).withLayout(TextureLayout.BIGTEX)
             .withRotation(FIXED.with(ROTATE_NONE)).withRenderIntent(TextureRenderIntent.OVERLAY_ONLY).withGroups(TextureGroup.HIDDEN_TILES));
 
+    public static final TexturePallette DECAL_BUILDER = REGISTRY.addTexturePallette("symbol_builder", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_CHEST = REGISTRY.addTexturePallette("symbol_chest", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    
+    public static final TexturePallette MACHINE_POWER_ON = REGISTRY.addTexturePallette("on", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_POWER_OFF = REGISTRY.addTexturePallette("off", new TexturePalletteInfo(MATERIAL_GRADIENT));
+ 
     
     private static TexturePallette addBorderSingle(String textureName)
     {
