@@ -5,6 +5,7 @@ import grondag.hard_science.gui.control.machine.MachineControlRenderer;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModModels;
 import grondag.hard_science.library.varia.HorizontalAlignment;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.superblock.block.SuperBlockTESR;
 import grondag.hard_science.superblock.block.SuperTileEntity;
@@ -75,7 +76,7 @@ public abstract class MachineTESR extends SuperBlockTESR
         // fade in controls as player approaches - over a 4-block distance
         int displayAlpha = (int)(alpha * (MathHelper.clamp(0.0, 1.0, 1 - (Math.sqrt(mte.getLastDistanceSquared()) - Configurator.MACHINES.machineMaxRenderDistance) / 4) * 255));
   
-        MachineControlRenderer.renderTextureInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolGlTextureId(), displayAlpha);
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, RenderBounds.BOUNDS_SYMBOL, mte.getSymbolSprite(), (displayAlpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
         MachineControlRenderer.renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_LARGE, RenderBounds.BOUNDS_NAME, mte.machineName(), HorizontalAlignment.CENTER, (displayAlpha << 24) | 0xFFFFFF);
 
         if(mte.hasOnOff())

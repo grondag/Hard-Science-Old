@@ -265,12 +265,12 @@ public class MachinePower
                 new Function<String, String>() { public String apply(String t) { return "WOW"; }}
         };
     
-    private static String insertDecimal1_2Suffix(String inString, String withSuffix)
+    public static String insertDecimal1_2Suffix(String inString, String withSuffix)
     {
         return inString.substring(0, 1) + "." + inString.substring(1, 3) + withSuffix;
     }
     
-    private static String insertDecimal2_1Suffix(String inString, String withSuffix)
+    public static String insertDecimal2_1Suffix(String inString, String withSuffix)
     {
         return inString.substring(0, 2) + "." + inString.substring(2, 3) + withSuffix;
     }

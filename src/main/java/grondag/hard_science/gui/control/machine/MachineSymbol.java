@@ -2,6 +2,7 @@ package grondag.hard_science.gui.control.machine;
 
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
+import grondag.hard_science.library.world.Rotation;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import net.minecraft.client.Minecraft;
 
@@ -16,7 +17,7 @@ public class MachineSymbol extends AbstractMachineControl<MachineSymbol, RadialR
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderTextureInBounds(this.renderBounds, this.tileEntity.getSymbolGlTextureId(), 255);
+        MachineControlRenderer.renderSpriteInBounds(this.renderBounds, this.tileEntity.getSymbolSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
     }
 
     @Override

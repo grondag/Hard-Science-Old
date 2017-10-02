@@ -190,8 +190,8 @@ public class ModModels
 //    public static int TEX_POWER_OUTER;
 //    public static int TEX_POWER_INNER;
     
-    public static int TEX_SYMBOL_BUILDER;
-    public static int TEX_SYMBOL_CHEST;
+//    public static int TEX_SYMBOL_BUILDER;
+//    public static int TEX_SYMBOL_CHEST;
     
     public static int TEX_NO;
     public static int TEX_MATERIAL_SHORTAGE;
@@ -233,8 +233,8 @@ public class ModModels
         TEX_RADIAL_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
         TEX_RADIAL_GAUGE_FULL_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_marks_256.png");
         
-        TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
-        TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
+//        TEX_SYMBOL_BUILDER = loadNonBlockTexture("hard_science:textures/blocks/symbol_builder.png");
+//        TEX_SYMBOL_CHEST = loadNonBlockTexture("hard_science:textures/blocks/symbol_chest.png");
         
         TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
         TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");

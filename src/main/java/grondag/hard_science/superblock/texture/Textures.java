@@ -407,6 +407,9 @@ public class Textures
     public static final TexturePallette DECAL_ARROW_90 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_90)));
     public static final TexturePallette DECAL_ARROW_180 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_180)));
     public static final TexturePallette DECAL_ARROW_270 = REGISTRY.addTexturePallette("arrow", new TexturePalletteInfo(DECAL_SMALL_DOT).withRotation(FIXED.with(ROTATE_270)));
+    
+    public static final TexturePallette DECAL_BUILDER = REGISTRY.addTexturePallette("symbol_builder", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_CHEST = REGISTRY.addTexturePallette("symbol_chest", new TexturePalletteInfo(DECAL_SMALL_DOT));
  
  
     public static final TexturePallette MATERIAL_GRADIENT = REGISTRY.addTexturePallette("material_gradient", 

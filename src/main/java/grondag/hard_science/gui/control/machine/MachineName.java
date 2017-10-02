@@ -18,7 +18,7 @@ public class MachineName extends AbstractMachineControl<MachineName, RectRenderB
     @Override
     protected void drawContent(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
-        MachineControlRenderer.renderMachineText(ModModels.FONT_RENDERER_LARGE, this.renderBounds, this.tileEntity.machineName(), HorizontalAlignment.CENTER, 255);
+        MachineControlRenderer.renderMachineText(ModModels.FONT_RENDERER_LARGE, this.renderBounds, this.tileEntity.machineName(), HorizontalAlignment.CENTER, 0xFFFFFFFF);
     }
 
     @Override

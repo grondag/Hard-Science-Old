@@ -34,14 +34,14 @@ public class MachineBufferGauge extends AbstractMachineControl<MachineBufferGaug
     {
         super.handleCoordinateUpdate();
         this.spec = new RadialGaugeSpec(this.spec.bufferIndex, spec.scale(this.left, this.top, this.width, this.height),
-                this.spec.spriteScale, this.spec.sprite, this.spec.color, this.spec.rotation);
+                this.spec.spriteScale, this.spec.sprite, this.spec.color, this.spec.rotation, this.spec.formula, this.spec.formulaColor);
     }
 
     @Override
     public void drawToolTip(IGuiRenderContext renderContext, int mouseX, int mouseY, float partialTicks)
     {
         if(this.buffer == null) return;
-        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey(), String.format("%.2f", buffer.fullness()));
+        renderContext.drawLocalizedToolTip(mouseX, mouseY, buffer.tooltipKey(), String.format("%,.9fL", buffer.getLevelNanoLiters() / 1000000000.0));
     }
 
     @Override

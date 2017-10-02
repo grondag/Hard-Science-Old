@@ -21,6 +21,8 @@ public interface RenderBounds<T extends RenderBounds<T>>
     public static final RadialRenderBounds BOUNDS_LEFT_MIDDLE = new RadialRenderBounds(0.1, 0.5, 0.085);
     public static final RadialRenderBounds BOUNDS_LEFT_LOWER = new RadialRenderBounds(0.1, 0.7, 0.085);
         
+    public static final RadialRenderBounds BOUNDS_DUAL_MEDIUM_LEFT = new RadialRenderBounds(0.25, 0.5, 0.2);
+    public static final RadialRenderBounds BOUNDS_DUAL_MEDIUM_RIGHT = new RadialRenderBounds(0.75, 0.5, 0.2);
     
     public abstract T offset(double x, double y);
 

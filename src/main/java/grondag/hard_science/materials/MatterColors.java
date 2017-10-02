@@ -24,6 +24,7 @@ public class MatterColors
     public static final int HDPE = 0xFFDDDDDD;
     public static final int UREA = 0xFFCCCCCC;
     public static final int WATER = 0xFF00FDFF;
+    public static final int ETHANOL = 0xFF808080;
     public static final int RESIN_A = 0xFFa6e3e1;
     public static final int RESIN_B = 0xFFeceea8;
     public static final int RAW_MINERAL_DUST = 0xFF646973;

@@ -30,6 +30,7 @@ import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.model.state.ModelStateFactory.ModelState;
 import grondag.hard_science.superblock.varia.KeyedTuple;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -208,7 +209,7 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
      * Used by GUI and TESR to draw machine's symbol.
      */
     @SideOnly(Side.CLIENT)
-    public abstract int getSymbolGlTextureId();
+    public abstract TextureAtlasSprite getSymbolSprite();
     
     /**
      * Disconnects TE from simulation.<br>

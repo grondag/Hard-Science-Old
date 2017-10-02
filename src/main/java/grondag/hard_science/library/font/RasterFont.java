@@ -396,7 +396,7 @@ public class RasterFont extends TextureAtlasSprite
         float result = 0;
         for(char c : text.toCharArray())
         {
-            if(this.glyphArray[c] != null) result += Character.isDigit(c) ? this.getNumericSubscript(Character.getNumericValue(c)).renderWidth / 2f : this.glyphArray[c].renderWidth;
+            if(this.glyphArray[c] != null) result += Character.isDigit(c) ? this.getNumericSubscript(Character.getNumericValue(c)).renderWidth : this.glyphArray[c].renderWidth;
         }
         return (int) result;
     }
@@ -485,7 +485,34 @@ public class RasterFont extends TextureAtlasSprite
         Tessellator.getInstance().draw();
 
     }
+    
+    /**
+     * Like {@link #drawLine(double, double, String, double, double, int, int, int, int)}
+     * but renders all numbers as subscripts.
+     */
+    public void drawFormula(double xLeft, double yTop, String text, double lineHeight, double zDepth, int red, int green, int blue, int alpha)
+    {
+        GlStateManager.bindTexture(ModModels.TEX_BLOCKS);
+        TextureHelper.setTextureBlurMipmap(true, true);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
+        double x = xLeft;
+        double scaleFactor = lineHeight / this.fontHeight;
+        
+        for(char c : text.toCharArray())
+        {
+            GlyphInfo g = Character.isDigit(c) ? this.getNumericSubscript(Character.getNumericValue(c)) : this.glyphArray[c];
+            if(g != null)
+            {
+            bufferQuad(buffer, x, yTop, scaleFactor, g, red, green, blue, alpha);
+            x += (g.renderWidth) * scaleFactor;
+            }
+        }
+        Tessellator.getInstance().draw();
+
+    }
     /**
      * Just like {@link #drawLine(double, double, String, double, double, int, int, int, int)} but
      * with monospace character spacing for numbers. 

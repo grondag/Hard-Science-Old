@@ -7,7 +7,6 @@ import grondag.hard_science.Log;
 import grondag.hard_science.gui.control.machine.RadialGaugeSpec;
 import grondag.hard_science.gui.control.machine.RenderBounds;
 import grondag.hard_science.init.ModBlocks;
-import grondag.hard_science.init.ModModels;
 import grondag.hard_science.init.ModSuperModelBlocks;
 import grondag.hard_science.library.serialization.ModNBTTag;
 import grondag.hard_science.library.varia.Useful;
@@ -39,6 +38,7 @@ import grondag.hard_science.virtualblock.VirtualBlockTracker;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -130,9 +130,9 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
         BASIC_BUILDER_GAUGE_SPECS[2] = new RadialGaugeSpec(BUFFER_INDEX_RESIN_B, RenderBounds.BOUNDS_LEFT_MIDDLE, 1.2, Textures.DECAL_MIX.getSampleSprite(), MatterColors.RESIN_B, Rotation.ROTATE_180);
         BASIC_BUILDER_GAUGE_SPECS[3] = new RadialGaugeSpec(BUFFER_INDEX_FILLER, RenderBounds.BOUNDS_LEFT_LOWER, 1.2, Textures.DECAL_DUST.getSampleSprite(), MatterColors.DEPLETED_MINERAL_DUST, Rotation.ROTATE_NONE);
         BASIC_BUILDER_GAUGE_SPECS[4] = new RadialGaugeSpec(BUFFER_INDEX_NANOLIGHT, RenderBounds.BOUNDS_BOTTOM_2, 1.2, Textures.DECAL_STAR_16.getSampleSprite(), 0xFFFFFFFF, Rotation.ROTATE_NONE);
-        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(BUFFER_INDEX_HDPE, RenderBounds.BOUNDS_BOTTOM_3, 0.82, 
-                Textures.DECAL_LARGE_SQUARE.getSampleSprite(), MatterColors.HDPE, Rotation.ROTATE_NONE,
-                "HDPE", 0xFF000000);
+        BASIC_BUILDER_GAUGE_SPECS[5] = new RadialGaugeSpec(BUFFER_INDEX_HDPE, RenderBounds.BOUNDS_BOTTOM_3, 1.4, 
+                Textures.DECAL_LARGE_DOT.getSampleSprite(), MatterColors.HDPE, Rotation.ROTATE_NONE,
+                "C2H4", 0xFF000000);
     }
     
     ////////////////////////////////////////////////////////////////////////
@@ -487,9 +487,9 @@ public class BasicBuilderTileEntity extends MachineContainerTileEntity implement
    
     @SideOnly(Side.CLIENT)
     @Override
-    public int getSymbolGlTextureId()
+    public TextureAtlasSprite getSymbolSprite()
     {
-        return ModModels.TEX_SYMBOL_BUILDER;
+        return Textures.DECAL_BUILDER.getSampleSprite();
     }
 
     @Override

@@ -123,7 +123,7 @@ public interface IMachinePowerProvider extends IReadWriteNBT, IMessagePlus
 //    public int logAvgPowerInputDegrees();
 
     /**
-     * Recent energy output level. In watts.
+     * Recent energy consumption level. In watts. Does not include power used to charge the battery.
      */
     public float powerOutputWatts();
 

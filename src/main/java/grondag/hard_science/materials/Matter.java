@@ -18,7 +18,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 public enum Matter
 {
     TIO2(VACPACK, PACKAGE_STANDARD_VACPACK, new Formula("TiO2", 0xFFFFFFFF), new SymbolBottom("dust", 0xFFFFFFFF)),
-    HDPE(NAKED, new Naked("noise_subtle_0_0", MatterColors.HDPE),  new Formula("HDPE", 0xFF999999)),
+    HDPE(NAKED, new Naked("noise_subtle_0_0", MatterColors.HDPE),  new Formula("C2H4", 0xFF999999)),
     CARBON_BLACK(VACPACK, PACKAGE_STANDARD_VACPACK, new FormulaLeft("C", 0xFFFFFFFF), new SymbolRight("dust", 0xFF000000)),
     CARBON_GRAPHITE(VACPACK, PACKAGE_STANDARD_VACPACK, new FormulaLeft("C", 0xFFFFFFFF), new SymbolRight("big_hexagon", 0xFF000000)),
     

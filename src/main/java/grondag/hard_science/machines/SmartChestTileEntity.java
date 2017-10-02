@@ -1,7 +1,8 @@
 package grondag.hard_science.machines;
 
-import grondag.hard_science.init.ModModels;
 import grondag.hard_science.machines.base.MachineStorageTileEntity;
+import grondag.hard_science.superblock.texture.Textures;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -10,9 +11,9 @@ public class SmartChestTileEntity extends MachineStorageTileEntity
     
     @SideOnly(Side.CLIENT)
     @Override
-    public int getSymbolGlTextureId()
+    public TextureAtlasSprite getSymbolSprite()
     {
-        return ModModels.TEX_SYMBOL_CHEST;
+        return Textures.DECAL_CHEST.getSampleSprite();
     }
     
     @Override

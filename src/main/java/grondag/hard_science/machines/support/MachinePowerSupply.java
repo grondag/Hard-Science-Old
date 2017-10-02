@@ -292,6 +292,7 @@ public class MachinePowerSupply implements IMachinePowerProvider
             {
                 this.battery.advanceIOTracking();
                 powerLastTick += this.battery.powerOutputWatts();
+                powerLastTick -= this.battery.powerInputWatts();
             }
             
             if(this.fuelCell != null)

@@ -2,6 +2,7 @@ package grondag.hard_science.gui;
 
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTileEntity;
+import grondag.hard_science.machines.SolarAggregatorTileEntity;
 import grondag.hard_science.machines.support.MachineStorageContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -18,7 +19,8 @@ public class ModGuiHandler implements IGuiHandler
     {
         SUPERMODEL_ITEM,
         SMART_CHEST,
-        BASIC_BUILDER;
+        BASIC_BUILDER,
+        SOLAR_AGGREGATOR;
     }
     
     @Override
@@ -79,6 +81,18 @@ public class ModGuiHandler implements IGuiHandler
                     return null;
                 }
                     
+                case SOLAR_AGGREGATOR:
+                {
+                    BlockPos pos = new BlockPos(x, y, z);
+                    TileEntity te = world.getTileEntity(pos);
+                    if (te instanceof SolarAggregatorTileEntity) 
+                    {
+                        SolarAggregatorTileEntity mte = (SolarAggregatorTileEntity) te;
+                        return new GuiSolarAggregator(mte);
+                    }
+                    return null;
+                }
+                
                 default:
             }
         }

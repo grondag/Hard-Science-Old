@@ -25,6 +25,7 @@ import grondag.hard_science.machines.support.MachineControlState.MachineState;
 import grondag.hard_science.machines.support.MachinePower;
 import grondag.hard_science.machines.support.MachinePowerSupply;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
+import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import net.minecraft.block.state.IBlockState;
@@ -44,6 +45,17 @@ import net.minecraft.util.EnumFacing;
 
 public class MachineControlRenderer
 {
+    
+    /**
+     * Standard position for labels under radial gauges.
+     */
+    private static double GAUGE_LABEL_TOP = 0.78;
+    
+    /**
+     * Standard size for labels under radial gauges.
+     */
+    private static double GAUGE_LABEL_HEIGHT = 0.25;
+    
     /**
      * Alpha is 0-255
      */
@@ -648,7 +660,7 @@ public class MachineControlRenderer
 
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
                     new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
-                    MachinePower.formatPower((long) mps.powerOutputWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_POWER);
+                    MachinePower.formatPower(Math.round(mps.powerOutputWatts()), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_POWER);
         }
     }
     
@@ -682,8 +694,8 @@ public class MachineControlRenderer
         renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_FLAME, (alpha << 24) | ModModels.COLOR_FUEL_CELL); 
 
         renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.77, bounds.width(), bounds.height() * 0.25),
-                MachinePower.formatPower((long) output, false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_FUEL_CELL);
+                new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+                MachinePower.formatPower(Math.round(output), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_FUEL_CELL);
         
     }
     
@@ -719,7 +731,7 @@ public class MachineControlRenderer
             renderRadialTexture(tessellator, buffer, bounds, 270, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
-                    MachinePower.formatPower((long) batt.powerInputWatts(), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
+                    MachinePower.formatPower(Math.round(batt.powerInputWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
         }
         else if(batt.powerOutputWatts() > 0)
         {
@@ -829,16 +841,17 @@ public class MachineControlRenderer
                 spec.rotation);
 
         renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                new RectRenderBounds(spec.left(), spec.top() + spec.height() * 0.75, spec.width(), spec.height() * 0.3),
-                Long.toString(materialBuffer.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | 0xFFFFFF);
+                new RectRenderBounds(spec.left(), spec.top() + spec.height() * GAUGE_LABEL_TOP, spec.width(), spec.height() * GAUGE_LABEL_HEIGHT),
+                VolumeUnits.formatVolume(materialBuffer.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, (alpha << 24) | 0xFFFFFF);
 
         // draw text if provided
         if(spec.formula != null)
         {
+            RadialRenderBounds inner = spec.innerBounds();
             // need to scale font pixelWidth to height of the line
-            double height = spec.spriteSize / 3;
-            double margin = (spec.spriteSize - ModModels.FONT_RENDERER_SMALL.getWidth(spec.formula) * height / ModModels.FONT_RENDERER_SMALL.fontHeight) / 2;
-            ModModels.FONT_RENDERER_SMALL.drawLine(spec.spriteLeft + margin, spec.spriteTop + height, spec.formula, height, 0f, (spec.formulaColor >> 16) & 0xFF, (spec.formulaColor >> 8) & 0xFF, spec.formulaColor& 0xFF, alpha);
+            double height = inner.height * 0.6;
+            double margin = (inner.width - ModModels.FONT_RENDERER_SMALL.getWidthFormula(spec.formula) * height / ModModels.FONT_RENDERER_SMALL.fontHeight) * 0.5;
+            ModModels.FONT_RENDERER_SMALL.drawFormula(inner.left + margin, inner.top + inner.height * 0.15, spec.formula, height, 0.02f, (spec.formulaColor >> 16) & 0xFF, (spec.formulaColor >> 8) & 0xFF, spec.formulaColor & 0xFF, alpha);
         }
     }
     
@@ -881,20 +894,20 @@ public class MachineControlRenderer
         if(timeCheck == 0)
         {
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
-                    Long.toString(cyan.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.CYAN);            
+                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+                    VolumeUnits.formatVolume(cyan.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.CYAN);            
         }
         else if(timeCheck == 1)
         {
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
-                    Long.toString(magenta.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.MAGENTA);            
+                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+                    VolumeUnits.formatVolume(magenta.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.MAGENTA);            
         }
         else
         {
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL,
-                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * 0.75, bounds.width(), bounds.height() * 0.3),
-                    Long.toString(yellow.fullnessPercent()), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.YELLOW);     
+                    new RectRenderBounds(bounds.left(), bounds.top() +bounds.height() * GAUGE_LABEL_TOP, bounds.width(), bounds.height() * GAUGE_LABEL_HEIGHT),
+                    VolumeUnits.formatVolume(yellow.getLevelNanoLiters(), false), HorizontalAlignment.CENTER, (alpha << 24) | MatterColors.YELLOW);     
         }
 
       
