@@ -418,6 +418,11 @@ public class Textures
     public static final TexturePallette MACHINE_POWER_ON = REGISTRY.addTexturePallette("on", new TexturePalletteInfo(MATERIAL_GRADIENT));
     public static final TexturePallette MACHINE_POWER_OFF = REGISTRY.addTexturePallette("off", new TexturePalletteInfo(MATERIAL_GRADIENT));
  
+    public static final TexturePallette MACHINE_GAUGE_INNER = REGISTRY.addTexturePallette("gauge_inner_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_GAUGE_MAIN = REGISTRY.addTexturePallette("gauge_main_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_GAGUE_MARKS = REGISTRY.addTexturePallette("gauge_background_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_GAUGE_FULL_MARKS = REGISTRY.addTexturePallette("gauge_marks_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
+
     
     private static TexturePallette addBorderSingle(String textureName)
     {

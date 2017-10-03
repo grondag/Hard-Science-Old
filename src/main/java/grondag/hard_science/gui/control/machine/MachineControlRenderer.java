@@ -28,6 +28,9 @@ import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBuffe
 import grondag.hard_science.machines.support.VolumeUnits;
 import grondag.hard_science.materials.MatterColors;
 import grondag.hard_science.superblock.items.SuperItemBlock;
+import grondag.hard_science.superblock.texture.EnhancedSprite;
+import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
+import grondag.hard_science.superblock.texture.Textures;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -70,12 +73,12 @@ public class MachineControlRenderer
     }
 
 
-    public static void renderBinarySprite(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, BinaryReference<TextureAtlasSprite> texture, boolean selector, int color)
+    public static void renderBinarySprite(Tessellator tessellator, BufferBuilder buffer, RenderBounds<?> bounds, BinaryReference<TextureAtlasSprite> texture, boolean selector, int color)
     {
         renderSpriteInBounds(tessellator, buffer, bounds, texture.apply(selector), color, Rotation.ROTATE_NONE);
     }
 
-    public static void renderBinarySprite(AbstractRectRenderBounds bounds,  BinaryReference<TextureAtlasSprite> texture, boolean selector, int color)
+    public static void renderBinarySprite(RenderBounds<?> bounds,  BinaryReference<TextureAtlasSprite> texture, boolean selector, int color)
     {
         renderSpriteInBounds(bounds, texture.apply(selector), color, Rotation.ROTATE_NONE);
     }
@@ -189,7 +192,7 @@ public class MachineControlRenderer
      * Use {@link #renderSpriteInBounds(Tessellator, BufferBuilder, RectRenderBounds, TextureAtlasSprite, int)}
      * when you already have tessellator/buffer references on the stack.
      */
-    public static void renderSpriteInBounds(AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int color, Rotation rotation)
+    public static void renderSpriteInBounds(RenderBounds<?> bounds, TextureAtlasSprite sprite, int color, Rotation rotation)
     {
         Tessellator tes = Tessellator.getInstance();
         renderSpriteInBounds(tes, tes.getBuffer(), bounds, sprite, color, rotation);
@@ -201,9 +204,9 @@ public class MachineControlRenderer
      * u,v coordinate are also 0-1 within the currently bound texture.
      * Always full brightness.
      */
-    public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, AbstractRectRenderBounds bounds, TextureAtlasSprite sprite, int color, Rotation rotation)
+    public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, RenderBounds<?> bounds, TextureAtlasSprite sprite, int color, Rotation rotation)
     {
-        renderSpriteInBounds(tessellator, buffer, bounds.left, bounds.top, bounds.width, bounds.height, sprite, color, rotation);
+        renderSpriteInBounds(tessellator, buffer, bounds.left(), bounds.top(), bounds.width(), bounds.height(), sprite, color, rotation);
     }
 
     public static void renderSpriteInBounds(Tessellator tessellator, BufferBuilder buffer, 
@@ -343,10 +346,7 @@ public class MachineControlRenderer
 //        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
 //    }
 
-    /**
-     * Use this version when you already have tessellator/buffer references on the stack.
-     * Arc starts at top and degrees move clockwise.
-     */
+
     public static void renderRadialTexture(Tessellator tessellator, BufferBuilder buffer, AbstractRadialRenderBounds bounds, int arcStartDegrees, int arcLengthDegrees, int glTextureID, int colorARGB)
     {
         if(arcLengthDegrees <= 0) return;
@@ -405,6 +405,63 @@ public class MachineControlRenderer
         tessellator.draw();
     }
 
+    public static void renderRadialSprite(Tessellator tessellator, BufferBuilder buffer, AbstractRadialRenderBounds bounds, int arcStartDegrees, int arcLengthDegrees, TexturePallette texture, int colorARGB)
+    {
+        if(arcLengthDegrees <= 0) return;
+
+        EnhancedSprite sprite = texture.getSampleSprite();
+        
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);  
+
+        int endDegrees = arcStartDegrees + arcLengthDegrees;
+
+        int currentUnmaskedEdge = ((arcStartDegrees + 45) / 90);
+        // +44 instead of +45 so that we don't go past corner needlessly
+        // corners can be rendered as part of either edge
+        int endUnmaskedEdge = ((endDegrees + 44) / 90);
+
+        boolean isNotDone = true;
+
+        while(isNotDone)
+        {
+            // starting point
+            bufferRadialEdgePoint(buffer, bounds, sprite, arcStartDegrees, colorARGB);
+
+            bufferRadialMidPoint(buffer, bounds, sprite, colorARGB);
+
+            if(currentUnmaskedEdge == endUnmaskedEdge)
+            {
+                // single edge, buffer middle again, and then end point, then done!
+                bufferRadialMidPoint(buffer, bounds, sprite, colorARGB);
+                bufferRadialEdgePoint(buffer, bounds, sprite, endDegrees, colorARGB);
+                isNotDone = false;
+            }
+            else
+            {
+                // go to next edge
+
+                if(++currentUnmaskedEdge == endUnmaskedEdge)
+                {
+                    // at the last edge, buffer end point and then starting corner of this edge, then done
+                    bufferRadialEdgePoint(buffer, bounds, sprite, endDegrees, colorARGB);
+                    bufferRadialCornerPoint(buffer, bounds, sprite, currentUnmaskedEdge, colorARGB);
+                    isNotDone = false;
+                }
+                else
+                {
+                    // at least one more edge to go.
+                    // buffer start of next edge, start of current edge and start a new quad.
+                    bufferRadialCornerPoint(buffer, bounds, sprite, currentUnmaskedEdge + 1, colorARGB);
+                    bufferRadialCornerPoint(buffer, bounds, sprite, currentUnmaskedEdge, colorARGB);
+                    currentUnmaskedEdge++;
+                    arcStartDegrees = EDGE_START_DEGREES[currentUnmaskedEdge & 3];
+                }
+            }
+        }
+
+        tessellator.draw();
+    }
+    
     // segments start at top right and work around to top left
     private static final DoubleUnaryOperator[] SEGMENT_FUNC_X = 
         {
@@ -437,12 +494,12 @@ public class MachineControlRenderer
     /** 
      * X coordinate for the starting point of the ordinal edge.  Top is 0.
      */
-    private static final double[] EDGE_START_X = { 0.0, 1.0, 1.0, 0.0 }; 
+    private static final float[] EDGE_START_X = { 0.0f, 1.0f, 1.0f, 0.0f }; 
 
     /** 
      * Y coordinate for the starting point of the ordinal edge.  Top is 0.
      */
-    private static final double[] EDGE_START_Y = { 0.0, 0.0, 1.0, 1.0 }; 
+    private static final float[] EDGE_START_Y = { 0.0f, 0.0f, 1.0f, 1.0f }; 
 
     private static final int[] EDGE_START_DEGREES = { 315, 45, 135, 225 };
 
@@ -479,6 +536,41 @@ public class MachineControlRenderer
         .tex(xUnit, yUnit).lightmap(0x00f0, 0x00f0).endVertex();
     }
 
+    private static void bufferRadialMidPoint(BufferBuilder buffer, AbstractRadialRenderBounds bounds, EnhancedSprite sprite, int colorARGB)
+    {
+        buffer.pos(bounds.centerX, bounds.centerY, 0)
+        .color((colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, (colorARGB >> 24) & 0xFF)
+        .tex(sprite.safeInterpolatedU(0.5f), sprite.safeInterpolatedV(0.5f))
+        .lightmap(0x00f0, 0x00f0).endVertex();
+    }
+    
+    /**
+     * Buffers starting point (int a clockwise rotation) of the given edge. 0 is top. 
+     */
+    private static void bufferRadialCornerPoint(BufferBuilder buffer, AbstractRadialRenderBounds bounds, EnhancedSprite sprite, int edge, int colorARGB)
+    {   
+        edge &= 3;
+        buffer.pos(bounds.left() + EDGE_START_X[edge] * bounds.width(), 
+                bounds.top() + EDGE_START_Y[edge] * bounds.height(), 0)
+        .color((colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, (colorARGB >> 24) & 0xFF)
+        .tex(sprite.safeInterpolatedU(EDGE_START_X[edge]), sprite.safeInterpolatedV(EDGE_START_Y[edge]))
+        .lightmap(0x00f0, 0x00f0).endVertex();
+    }
+
+    private static void bufferRadialEdgePoint(BufferBuilder buffer, AbstractRadialRenderBounds bounds, EnhancedSprite sprite, int degrees, int colorARGB)
+    {   
+        int segment = (degrees / 45) & 7;
+        int offset = segment * 45;
+        double radians = Math.toRadians((degrees % 360) - offset);
+        double xUnit = SEGMENT_FUNC_X[segment].applyAsDouble(radians);
+        double yUnit = SEGMENT_FUNC_Y[segment].applyAsDouble(radians);
+        double xActual = bounds.left() + xUnit * bounds.width();
+        double yActual = bounds.top() + yUnit * bounds.height();
+        buffer.pos(xActual, yActual, 0)
+        .color((colorARGB >> 16) & 0xFF, (colorARGB >> 8) & 0xFF, colorARGB & 0xFF, (colorARGB >> 24) & 0xFF)
+        .tex(sprite.safeInterpolatedU(xUnit), sprite.safeInterpolatedV(yUnit))
+        .lightmap(0x00f0, 0x00f0).endVertex();
+    }
     /**
      * Renders a textured quad on the face of the machine.
      * x,y coordinates are 0-1 position on the face.  0,0 is upper left.
@@ -628,12 +720,13 @@ public class MachineControlRenderer
             return;
         else 
         {
-            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, (int)(CommonProxy.currentTimeMillis() & 2047) * 360 / 2048, 30, ModModels.TEX_RADIAL_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
+            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, (int)(CommonProxy.currentTimeMillis() & 2047) * 360 / 2048, 30, 
+                    Textures.MACHINE_GAUGE_FULL_MARKS, alpha << 24 | 0x40FF40);
 
             if(te.getMachineState() == MachineState.THINKING && te.getBufferManager().hasFailureCauseClientSideOnly() && MachineControlRenderer.warningLightBlinkOn())
             {
                 MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_MATERIAL_SHORTAGE, alpha << 24 | 0xFFFF40);
-                MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0xFFFF40);
+                MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), alpha << 24 | 0xFFFF40, Rotation.ROTATE_NONE);
             }
         }
     }
@@ -658,15 +751,15 @@ public class MachineControlRenderer
         if(bounds != null)
         {     
             // render marks
-            MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
+            MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
             // render level
             int arcLength = (int)(mps.powerOutputWatts() * 270 / mte.maxPowerConsumptionWatts());
-            renderRadialTexture(tessellator, buffer, bounds, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | 0xFFFFBF);
+            renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | 0xFFFFBF);
 
             if(mps.isFailureCause() && warningLightBlinkOn())
             {
-                renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | ModModels.COLOR_FAILURE);
+                renderSpriteInBounds(tessellator, buffer, bounds,Textures.MACHINE_GAUGE_INNER.getSampleSprite(), (alpha << 24) | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
             }
             
             renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_ELECTRICITY, (alpha << 24) | ModModels.COLOR_POWER); 
@@ -694,7 +787,7 @@ public class MachineControlRenderer
         if(cell == null) return;
        
         // render marks
-        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         float output = cell.powerOutputWatts();
         
@@ -702,7 +795,7 @@ public class MachineControlRenderer
         {
             // render level
             int arcLength = (int)(output * 270 / cell.maxPowerOutputWatts());
-            renderRadialTexture(tessellator, buffer, bounds, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_FUEL_CELL);
+            renderRadialSprite(tessellator, buffer, bounds, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_FUEL_CELL);
         }
         renderTextureInBoundsWithColor(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_FLAME, (alpha << 24) | ModModels.COLOR_FUEL_CELL); 
 
@@ -741,7 +834,7 @@ public class MachineControlRenderer
         if(batt.powerInputWatts() > 0)
         {
             int arcLength = (int)(batt.powerInputWatts() * 180 / batt.maxPowerInputWatts());
-            renderRadialTexture(tessellator, buffer, bounds, 270, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
+            renderRadialSprite(tessellator, buffer, bounds, 270, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower(Math.round(batt.powerInputWatts()), true), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY);
@@ -749,7 +842,7 @@ public class MachineControlRenderer
         else if(batt.powerOutputWatts() > 0)
         {
             int arcLength = (int)(batt.powerOutputWatts() * 180 / batt.maxPowerOutputWatts());
-            renderRadialTexture(tessellator, buffer, bounds, 450 - arcLength, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
+            renderRadialSprite(tessellator, buffer, bounds, 450 - arcLength, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
             
             renderMachineText(tessellator, buffer, ModModels.FONT_RENDERER_SMALL, new RectRenderBounds(bounds.left(), bounds.top() + bounds.height() * 0.3, bounds.width(), bounds.height() * 0.22),
                     MachinePower.formatPower((long) -batt.powerOutputWatts(), false), HorizontalAlignment.CENTER, (alpha << 24) | ModModels.COLOR_BATTERY_DRAIN);
@@ -789,7 +882,7 @@ public class MachineControlRenderer
             duration = te.getMaxBacklog();
             remaining = te.getCurrentBacklog();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, alpha << 24 | 0x40FF40);
+            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, Textures.MACHINE_GAUGE_MAIN, alpha << 24 | 0x40FF40);
         }
 
         if(te.hasJobTicks())
@@ -797,7 +890,7 @@ public class MachineControlRenderer
             duration = te.getJobDurationTicks();
             remaining = te.getJobRemainingTicks();
             arcLength = duration > 0 ? 360 * (duration - remaining) / duration : 0;
-            MachineControlRenderer.renderRadialTexture(tessellator, buffer, bounds, 0, arcLength, ModModels.TEX_RADIAL_GAUGE_MINOR, alpha << 24 | 0x40FFFF);
+            MachineControlRenderer.renderRadialSprite(tessellator, buffer, bounds, 0, arcLength, Textures.MACHINE_GAUGE_INNER, alpha << 24 | 0x40FFFF);
         }
 
     }
@@ -819,15 +912,15 @@ public class MachineControlRenderer
     public static void renderGauge(Tessellator tessellator, BufferBuilder buffer, RadialGaugeSpec spec, MachineTileEntity te, MaterialBufferDelegate materialBuffer, int alpha)
     {
         // render marks
-        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         // render level
         int arcLength = (int)(materialBuffer.fullness() * 270);
-        renderRadialTexture(tessellator, buffer, spec, 225, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
+        renderRadialSprite(tessellator, buffer, spec, 225, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | (spec.color & 0xFFFFFF));
 
         if(materialBuffer.isFailureCause() && warningLightBlinkOn())
         {
-            renderTextureInBoundsWithColor(tessellator, buffer, spec, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | ModModels.COLOR_FAILURE);
+            renderSpriteInBounds(tessellator, buffer, spec, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), (alpha << 24) | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
         }
         
         /** Can look away from a machine for five seconds before flow tracking turns off to save CPU */
@@ -838,7 +931,7 @@ public class MachineControlRenderer
             if(deltaIn > 0.012f)
             {
                 int deltaLength = Math.round(deltaIn * 135);
-                renderRadialTexture(tessellator, buffer, spec, 225, deltaLength, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0x20FF20);
+                renderRadialSprite(tessellator, buffer, spec, 225, deltaLength, Textures.MACHINE_GAUGE_INNER, (alpha << 24) | 0x20FF20);
             }
             
             // log scale, anything less than one item is 1/10 of quarter arc, 64+ items is quarter arc
@@ -846,7 +939,7 @@ public class MachineControlRenderer
             if(deltaOut > 0.012f)
             {
                 int deltaLength =  Math.round(deltaOut * 135);
-                renderRadialTexture(tessellator, buffer, spec, 135 - deltaLength, deltaLength, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | 0xFF2020);
+                renderRadialSprite(tessellator, buffer, spec, 135 - deltaLength, deltaLength, Textures.MACHINE_GAUGE_INNER, (alpha << 24) | 0xFF2020);
             }
         }
         
@@ -880,24 +973,24 @@ public class MachineControlRenderer
     public static void renderCMY(Tessellator tessellator, BufferBuilder buffer, RadialRenderBounds bounds, MaterialBufferDelegate cyan, MaterialBufferDelegate magenta, MaterialBufferDelegate yellow, int alpha)
     {
         // render marks
-        MachineControlRenderer.renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MARKS, (alpha << 24) | 0xFFFFFF);
+        MachineControlRenderer.renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAGUE_MARKS.getSampleSprite(), (alpha << 24) | 0xFFFFFF, Rotation.ROTATE_NONE);
 
         // render levels
         int start = 225;
         int arcLength = (int)(cyan.fullness() * 90);
-        renderRadialTexture(tessellator, buffer, bounds, start, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | MatterColors.CYAN);
+        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | MatterColors.CYAN);
 
         start += arcLength;
         arcLength = (int)(magenta.fullness() * 90);
-        renderRadialTexture(tessellator, buffer, bounds, start, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | MatterColors.MAGENTA);
+        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | MatterColors.MAGENTA);
         
         start += arcLength;
         arcLength = (int)(yellow.fullness() * 90);
-        renderRadialTexture(tessellator, buffer, bounds, start, arcLength, ModModels.TEX_RADIAL_GAUGE_MAIN, (alpha << 24) | MatterColors.YELLOW);
+        renderRadialSprite(tessellator, buffer, bounds, start, arcLength, Textures.MACHINE_GAUGE_MAIN, (alpha << 24) | MatterColors.YELLOW);
         
         if(warningLightBlinkOn() && (cyan.isFailureCause() || magenta.isFailureCause() || yellow.isFailureCause()))
         {
-            renderTextureInBoundsWithColor(tessellator, buffer, bounds, ModModels.TEX_RADIAL_GAUGE_MINOR, (alpha << 24) | ModModels.COLOR_FAILURE);
+            renderSpriteInBounds(tessellator, buffer, bounds, Textures.MACHINE_GAUGE_INNER.getSampleSprite(), (alpha << 24) | ModModels.COLOR_FAILURE, Rotation.ROTATE_NONE);
         }
         
         renderTextureInBounds(tessellator, buffer, bounds.innerBounds(), ModModels.TEX_CMY, alpha);

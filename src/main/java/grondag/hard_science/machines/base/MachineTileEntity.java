@@ -540,7 +540,14 @@ public abstract class MachineTileEntity extends SuperTileEntity implements IIden
     
     public final void update()
     {
-        if(world.isRemote) return;
+        if(world.isRemote) 
+        {
+            // estimate progress for any jobs in flight
+            // provides smoother user feedback on client
+            if(this.controlState != null && this.controlState.hasJobTicks() && this.controlState.getJobRemainingTicks() > 0)
+                this.controlState.progressJob((short) 1);
+            return;
+        }
         
         long tick = this.world.getTotalWorldTime();
         

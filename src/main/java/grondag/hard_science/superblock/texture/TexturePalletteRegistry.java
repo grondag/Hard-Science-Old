@@ -343,18 +343,18 @@ public class TexturePalletteRegistry implements Iterable<TexturePalletteRegistry
          * See {@link #getSampleSprite()}
          */
         @SideOnly(Side.CLIENT)
-        private TextureAtlasSprite sampleSprite;
+        private EnhancedSprite sampleSprite;
         
         /**
          * For use by TESR and GUI to conveniently and quickly access default sprite
          */
         @SideOnly(Side.CLIENT)
-        public TextureAtlasSprite getSampleSprite()
+        public EnhancedSprite getSampleSprite()
         {
-            TextureAtlasSprite result = sampleSprite;
+            EnhancedSprite result = sampleSprite;
             if(result == null)
             {
-                result = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(this.getSampleTextureName());
+                result = (EnhancedSprite)Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(this.getSampleTextureName());
                 sampleSprite = result;
             }
             return result;

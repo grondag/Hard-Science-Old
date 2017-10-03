@@ -36,7 +36,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class CompressedAnimatedSprite extends TextureAtlasSprite
+public class CompressedAnimatedSprite extends EnhancedSprite
 {
     /** DO NOT ACCESS DIRECTLY.  Use {@link #getLoaderPool()} */
     private static volatile ThreadPoolExecutor loaderThreadPool;

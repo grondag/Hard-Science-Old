@@ -30,6 +30,7 @@ import grondag.hard_science.superblock.block.SuperModelTileEntity;
 import grondag.hard_science.superblock.block.SuperTileEntity;
 import grondag.hard_science.superblock.items.SuperItemBlock;
 import grondag.hard_science.superblock.texture.CompressedAnimatedSprite;
+import grondag.hard_science.superblock.texture.EnhancedSprite;
 import grondag.hard_science.superblock.texture.TextureLayout;
 import grondag.hard_science.superblock.texture.TexturePalletteRegistry.TexturePallette;
 import grondag.hard_science.superblock.texture.Textures;
@@ -151,6 +152,10 @@ public class ModModels
                 }
                 else
                 {
+                    if(map.getTextureExtry(loc.toString()) == null)
+                    {
+                        map.setTextureEntry(new EnhancedSprite(loc.toString()));
+                    }
                     map.registerSprite(loc);
                 }
             }
@@ -174,11 +179,7 @@ public class ModModels
     public static String FONT_RESOURCE_STRING_LARGE = RasterFont.getSpriteResourceName(FONT_NAME_LARGE, FONT_SIZE_LARGE);
  
     public static BinaryReference<TextureAtlasSprite> TEX_MACHINE_ON_OFF;
-    
-    public static int TEX_RADIAL_GAUGE_MINOR;
-    public static int TEX_RADIAL_GAUGE_MAIN;
-    public static int TEX_RADIAL_GAUGE_MARKS;
-    public static int TEX_RADIAL_GAUGE_FULL_MARKS;
+ 
     
     public static int TEX_POWER_BACKGROUND;
     public static int TEX_POWER_FOREGROUND;
@@ -216,12 +217,6 @@ public class ModModels
         TEX_MACHINE_ON_OFF = new BinaryReference<TextureAtlasSprite>(
                 Textures.MACHINE_POWER_ON.getSampleSprite(),
                 Textures.MACHINE_POWER_OFF.getSampleSprite());
-        
-        TEX_RADIAL_GAUGE_MINOR = loadNonBlockTexture("hard_science:textures/blocks/gauge_inner_256.png");
-        TEX_RADIAL_GAUGE_MAIN = loadNonBlockTexture("hard_science:textures/blocks/gauge_main_256.png");
-        TEX_RADIAL_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_background_256.png");
-        TEX_RADIAL_GAUGE_FULL_MARKS = loadNonBlockTexture("hard_science:textures/blocks/gauge_marks_256.png");
-        
         
 //        TEX_LINEAR_GAUGE_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_level_128.png");
 //        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");
