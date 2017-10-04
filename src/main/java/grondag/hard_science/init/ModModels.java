@@ -1,23 +1,12 @@
 package grondag.hard_science.init;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.Map;
-
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.util.glu.GLU;
 
 import grondag.hard_science.Configurator;
 import grondag.hard_science.HardScience;
-import grondag.hard_science.Log;
-import grondag.hard_science.gui.control.machine.BinaryGlTexture;
 import grondag.hard_science.gui.control.machine.BinaryReference;
 import grondag.hard_science.library.font.RasterFont;
-import grondag.hard_science.library.render.TextureHelper;
 import grondag.hard_science.machines.BasicBuilderTESR;
 import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.SmartChestTESR;
@@ -48,8 +37,6 @@ import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.IResource;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -179,22 +166,13 @@ public class ModModels
     public static String FONT_RESOURCE_STRING_LARGE = RasterFont.getSpriteResourceName(FONT_NAME_LARGE, FONT_SIZE_LARGE);
  
     public static BinaryReference<TextureAtlasSprite> TEX_MACHINE_ON_OFF;
- 
     
-    public static int TEX_POWER_BACKGROUND;
-    public static int TEX_POWER_FOREGROUND;
-    
-    public static int TEX_NO;
-    public static int TEX_MATERIAL_SHORTAGE;
-    public static int TEX_ELECTRICITY;
-    public static int TEX_CMY;
-    public static int TEX_FLAME;
-    
-    public static int COLOR_POWER = 0xFFFFBF;
-    public static int COLOR_BATTERY = 0x00B1FF;
-    public static int COLOR_BATTERY_DRAIN = 0xff4e00;
-    public static int COLOR_FUEL_CELL = 0xFC8D59;
-    public static int COLOR_FAILURE = 0xFFFF20;
+    public static final int COLOR_POWER = 0xFFFFBF;
+    public static final int COLOR_BATTERY = 0x00B1FF;
+    public static final int COLOR_BATTERY_DRAIN = 0xff4e00;
+    public static final int COLOR_FUEL_CELL = 0xFC8D59;
+    public static final int COLOR_FAILURE = 0xFFFF20;
+    public static final int COLOR_NO = 0xB30000;
     
     @SubscribeEvent
     public static void stitcherEventPost(TextureStitchEvent.Post event)
@@ -222,16 +200,6 @@ public class ModModels
 //        TEX_LINEAR_GAUGE_MARKS = loadNonBlockTexture("hard_science:textures/blocks/linear_marks_128.png");
 //        TEX_LINEAR_POWER_LEVEL = loadNonBlockTexture("hard_science:textures/blocks/linear_power_128.png");
         
-        TEX_POWER_BACKGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_background_128.png");
-        TEX_POWER_FOREGROUND = loadNonBlockTexture("hard_science:textures/blocks/power_foreground_128.png");
-        
-        TEX_NO = loadNonBlockTexture("hard_science:textures/blocks/no_128.png");
-        TEX_MATERIAL_SHORTAGE = loadNonBlockTexture("hard_science:textures/blocks/material_shortage.png");
-        
-        TEX_ELECTRICITY = loadNonBlockTexture("hard_science:textures/blocks/electricity_64.png");
-        TEX_CMY = loadNonBlockTexture("hard_science:textures/blocks/cmy.png");
-        TEX_FLAME = loadNonBlockTexture("hard_science:textures/blocks/flame_64.png");
-        
         TEX_BLOCKS = Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId();
         
         ITEX_BLOCKS = Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -258,50 +226,50 @@ public class ModModels
 //    new VolumetricBufferSpec(YELLOW_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_DYE_YELLOW),
 //    new VolumetricBufferSpec(TiO2_INGREDIENTS, MatterUnits.nL_TWO_BLOCKS, ModNBTTag.MATERIAL_TiO2)
 
-    
-    private static int loadNonBlockTexture(String location)
-    {
-    
-        IResource resource;
-        BufferedImage bufferedImage;
-        
-        try
-        {
-            resource = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(location));
-            bufferedImage = TextureUtil.readBufferedImage(resource.getInputStream());
-        }
-        catch (IOException e)
-        {
-            Log.error("Unable to load non-block texture", e);
-            return -1;
-        }
-        
-        int width = bufferedImage.getWidth() ;
-        int height = bufferedImage.getHeight();
-        
-        int aint[] = new int[width * height];
-        bufferedImage.getRGB(0, 0, width, height, aint, 0, width);
-        
-        ByteBuffer buff = TextureHelper.getBufferedTexture(aint);
-        
-        IntBuffer textureId = BufferUtils.createIntBuffer(1);
-
-        GL11.glGenTextures(textureId);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId.get(0));
-
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
-
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
-
-//        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-
-//        GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, pixelWidth, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
-        GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
-        
-        return textureId.get(0);
-    }
+    // currently not used - prefer atlas sprite for performance
+//    private static int loadNonBlockTexture(String location)
+//    {
+//    
+//        IResource resource;
+//        BufferedImage bufferedImage;
+//        
+//        try
+//        {
+//            resource = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(location));
+//            bufferedImage = TextureUtil.readBufferedImage(resource.getInputStream());
+//        }
+//        catch (IOException e)
+//        {
+//            Log.error("Unable to load non-block texture", e);
+//            return -1;
+//        }
+//        
+//        int width = bufferedImage.getWidth() ;
+//        int height = bufferedImage.getHeight();
+//        
+//        int aint[] = new int[width * height];
+//        bufferedImage.getRGB(0, 0, width, height, aint, 0, width);
+//        
+//        ByteBuffer buff = TextureHelper.getBufferedTexture(aint);
+//        
+//        IntBuffer textureId = BufferUtils.createIntBuffer(1);
+//
+//        GL11.glGenTextures(textureId);
+//        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId.get(0));
+//
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
+//
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+//        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
+//
+////        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+//
+////        GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, pixelWidth, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
+//        GLU.gluBuild2DMipmaps(GL11.GL_TEXTURE_2D, GL11.GL_RGBA8, width, height, GL12.GL_BGRA, GL11.GL_UNSIGNED_BYTE, buff);
+//        
+//        return textureId.get(0);
+//    }
     
     @SubscribeEvent
     public static void modelRegistryEvent(ModelRegistryEvent event)

@@ -423,6 +423,14 @@ public class Textures
     public static final TexturePallette MACHINE_GAGUE_MARKS = REGISTRY.addTexturePallette("gauge_background_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
     public static final TexturePallette MACHINE_GAUGE_FULL_MARKS = REGISTRY.addTexturePallette("gauge_marks_256", new TexturePalletteInfo(MATERIAL_GRADIENT));
 
+    public static final TexturePallette MACHINE_POWER_BACKGROUND = REGISTRY.addTexturePallette("power_background_128", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette MACHINE_POWER_FOREGROUND = REGISTRY.addTexturePallette("power_foreground_128", new TexturePalletteInfo(MATERIAL_GRADIENT));
+    public static final TexturePallette DECAL_NO = REGISTRY.addTexturePallette("no_128", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_MATERIAL_SHORTAGE = REGISTRY.addTexturePallette("material_shortage", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_ELECTRICITY = REGISTRY.addTexturePallette("electricity_64", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_CMY = REGISTRY.addTexturePallette("cmy", new TexturePalletteInfo(DECAL_SMALL_DOT));
+    public static final TexturePallette DECAL_FLAME = REGISTRY.addTexturePallette("flame_64", new TexturePalletteInfo(DECAL_SMALL_DOT));
+
     
     private static TexturePallette addBorderSingle(String textureName)
     {

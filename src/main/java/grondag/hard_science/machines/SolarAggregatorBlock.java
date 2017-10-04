@@ -11,7 +11,7 @@ public class SolarAggregatorBlock extends MachineBlock
 {
     public SolarAggregatorBlock(String name)
     {
-        super(name, ModGui.BASIC_BUILDER.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_FILMSTRIP));
+        super(name, ModGui.SOLAR_AGGREGATOR.ordinal(), MachineBlock.creatBasicMachineModelState(null, Textures.BORDER_INVERSE_ZIGZAG));
     }
 
     @Override

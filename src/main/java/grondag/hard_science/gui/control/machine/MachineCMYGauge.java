@@ -3,7 +3,6 @@ package grondag.hard_science.gui.control.machine;
 import grondag.hard_science.Log;
 import grondag.hard_science.gui.IGuiRenderContext;
 import grondag.hard_science.gui.control.machine.RenderBounds.RadialRenderBounds;
-import grondag.hard_science.machines.BasicBuilderTileEntity;
 import grondag.hard_science.machines.base.MachineTileEntity;
 import grondag.hard_science.machines.support.MaterialBufferManager;
 import grondag.hard_science.machines.support.MaterialBufferManager.MaterialBufferDelegate;
